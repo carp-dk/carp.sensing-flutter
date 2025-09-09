@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:http/http.dart' as http;
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';

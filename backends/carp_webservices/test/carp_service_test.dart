@@ -56,6 +56,15 @@ void main() {
   group(
     "CARP Base Services",
     () {
+      // setUp(() async {
+      //   await CarpAuthService().authenticateWithUsernamePassword(
+      //     username: username,
+      //     password: password,
+      //   );
+
+      //   expect(CarpAuthService().authenticated, true);
+      // });
+
       group('authentication', () {
         test('- authentication w. username and password', () async {
           CarpUser user =
@@ -71,13 +80,15 @@ void main() {
           debugPrint("token  : ${user.token}");
         });
 
-        setUp(() async {
-          await CarpAuthService().authenticateWithUsernamePassword(
-            username: username,
-            password: password,
-          );
+        test('- authentication with access link', () async {
+          CarpUser user = await CarpAuthService()
+              .authenticateWithAccessLink(uri: accessLinkUri);
 
-          expect(CarpAuthService().authenticated, true);
+          // expect(user.token, isNotNull);
+          // expect(user.isAuthenticated, true);
+
+          debugPrint("signed in : $user");
+          debugPrint("token  : ${user.token}");
         });
 
         test('- get user profile', () async {

@@ -38,14 +38,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:retry/retry.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';
+import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 part 'carp_base_service.dart';

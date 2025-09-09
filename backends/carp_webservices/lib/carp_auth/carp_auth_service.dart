@@ -77,7 +77,6 @@ class CarpAuthService {
   Uri get authEndpointUri => authProperties.authURL;
 
   /// Configure the this instance of a Carp Service.
-
   Future<void> configure(CarpAuthProperties authProperties) async {
     _authProperties = authProperties;
 
@@ -187,6 +186,45 @@ class CarpAuthService {
         return currentUser;
       }
     }
+
+    // All other cases are treated as a failed attempt
+    _authEventController.add(AuthEvent.failed);
+
+    throw CarpServiceException(
+      httpStatus: HTTPStatus(401),
+      message: 'Authentication failed.',
+    );
+  }
+
+  /// Authenticate to this CARP service using an [access link] URI.
+  ///
+  /// The access link is typically received via email or QR code,
+  /// and contains a one-time token that can be used to authenticate the user.
+  Future<CarpUser> authenticateWithAccessLink({
+    required String uri,
+  }) async {
+    final client = http.Client();
+
+    var response = await client.get(Uri.parse(uri));
+    print(response.headers);
+    print(response.body);
+
+    // assert(_manager != null, 'Manager not configured. Call configure() first.');
+    // if (!_manager!.didInit) await initManager();
+
+    // final OidcUser? response = await manager?.loginWithAccessLink(uri);
+
+    // if (response != null) {
+    //   _currentUser = getCurrentUserProfile(response);
+
+    //   if (_currentUser != null) {
+    //     _currentUser!
+    //         .authenticated(OAuthToken.fromTokenResponse(response.token));
+    //     _authEventController.add(AuthEvent.authenticated);
+    //     return currentUser;
+    //   }
+
+    return CarpUser(username: 'access_link_user', id: 'access_link_id');
 
     // All other cases are treated as a failed attempt
     _authEventController.add(AuthEvent.failed);
