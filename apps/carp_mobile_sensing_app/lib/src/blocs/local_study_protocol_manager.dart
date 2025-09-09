@@ -121,9 +121,9 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     WeatherService weatherService = WeatherService(apiKey: openWeatherApiKey);
     protocol.addConnectedDevice(weatherService, phone);
 
-    // Add a background task that collects weather every 30 minutes.
+    // Add a background task that collects weather every 5 minutes.
     protocol.addTaskControl(
-        PeriodicTrigger(period: Duration(seconds: 30)),
+        PeriodicTrigger(period: Duration(minutes: 5)),
         BackgroundTask(
             measures: [Measure(type: ContextSamplingPackage.WEATHER)]),
         weatherService);
