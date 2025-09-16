@@ -1,3 +1,8 @@
+## 3.8.0
+
+* anonymous authentication 
+* upgrading some packages
+
 ## 3.7.0
 
 * fix of issues [#467](https://github.com/cph-cachet/carp.sensing-flutter/issues/467)
