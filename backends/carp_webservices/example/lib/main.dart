@@ -4,6 +4,7 @@ import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:oidc/oidc.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 
 void main() {
   CarpMobileSensing.ensureInitialized();

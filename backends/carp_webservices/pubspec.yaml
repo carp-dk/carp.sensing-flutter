@@ -25,8 +25,9 @@ dependencies:
   meta: ^1.7.0
   url_launcher: ^6.0.9
   jwt_decoder: ^2.0.1
-  oidc: ^0.9.0+1
-  oidc_default_store: ^0.2.0+8
+  oidc: ^0.12.0
+  oidc_default_store: ^0.4.0
+  flutter_appauth: ^9.0.1
   
 # Overriding carp libraries to use the local copy
 # Remove this before release of package

@@ -159,15 +159,42 @@ class CarpAuthService {
     );
   }
 
-  Future<CarpUser> authenticateAnonymous(
-    // required OidcToken token,
-  ) async {
-    assert(_manager != null, 'Manager not configured. Call configure() first.');
-    if (!_manager!.didInit) await initManager();
+  Future<CarpUser> authenticateWithMagicLink(String code) async {
+    final TokenResponse tokenResponse = await FlutterAppAuth().token(
+      TokenRequest(
+        'studies-app',
+        'carp-studies:/anonymous',
+        authorizationCode: code,
+        discoveryUrl:
+            'https://dev.carp.dk/auth/realms/Carp/.well-known/openid-configuration',
+        grantType: 'authorization_code',
+      ),
+    );
 
-    // OidcUser? user = await OidcUser.fromIdToken(token: token);
-    // return getCurrentUserProfile(user) ?? CarpUser.fromJWT({}, token);
-    return CarpUser(username: 'anonymous', id: 'id');
+    _currentUser = getCurrentUserProfileFromTokenResponse(tokenResponse);
+
+    final accessToken = tokenResponse.accessToken;
+    final refreshToken = tokenResponse.refreshToken;
+    final idToken = tokenResponse.idToken;
+    final scopeString = tokenResponse.tokenAdditionalParameters?['scope'] ??
+        tokenResponse.tokenType; // fallback if needed
+    final scope = (scopeString is String) ? scopeString.split(' ') : <String>[];
+    final expiresAt = tokenResponse.accessTokenExpirationDateTime ??
+        DateTime.now().add(const Duration(hours: 1));
+
+    if (_currentUser == null) {
+      _authEventController.add(AuthEvent.failed);
+      throw CarpServiceException(
+        httpStatus: HTTPStatus(401),
+        message: 'Authentication failed: could not build user profile.',
+      );
+    }
+
+    _currentUser!.authenticated(OAuthToken(accessToken ?? '',
+        refreshToken ?? '', idToken ?? '', expiresAt, scope, idToken ?? ''));
+
+    _authEventController.add(AuthEvent.authenticated);
+    return _currentUser!;
   }
 
   /// Authenticate to this CARP service using a [username] and [password].
@@ -281,6 +308,42 @@ class CarpAuthService {
 
     var jwt = JwtDecoder.decode(user.token.accessToken!);
     return CarpUser.fromJWT(jwt, user.token);
+  }
+
+  CarpUser? getCurrentUserProfileFromTokenResponse(
+      TokenResponse tokenResponse) {
+    final accessToken = tokenResponse.accessToken;
+    final refreshToken = tokenResponse.refreshToken;
+    final idToken = tokenResponse.idToken;
+    final tokenType =
+        'bearer'; // AppAuth always issues Bearer tokens for OAuth2
+    final scopeString = tokenResponse.tokenAdditionalParameters?['scope'] ??
+        tokenResponse.tokenType; // fallback if needed
+    final scope = (scopeString is String) ? scopeString.split(' ') : <String>[];
+
+    if (accessToken == null || accessToken.isEmpty) {
+      return null;
+    }
+
+    // Decode the JWT to extract user claims
+    final jwt = JwtDecoder.decode(accessToken);
+
+    // Compute expiry from AppAuth info (if not available, fallback to now + 1h)
+    final expiresAt = tokenResponse.accessTokenExpirationDateTime ??
+        DateTime.now().add(const Duration(hours: 1));
+
+    // Build the OAuthToken with proper field mapping
+    final oauthToken = OAuthToken(
+      accessToken,
+      refreshToken ?? '',
+      tokenType,
+      expiresAt,
+      scope,
+      idToken ?? '',
+    );
+
+    // Finally, construct CarpUser from the JWT and token
+    return CarpUser.fromJWTOAuth(jwt, oauthToken);
   }
 
   /// Makes sure that the [CarpApp] or [CarpUser] is configured, by throwing a
