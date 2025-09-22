@@ -203,11 +203,74 @@ class CarpAuthService {
   Future<CarpUser> authenticateWithAccessLink({
     required String uri,
   }) async {
-    final client = http.Client();
+    print('$runtimeType - uri: $uri');
 
-    var response = await client.get(Uri.parse(uri));
-    print(response.headers);
-    print(response.body);
+    // Open the web authentication
+    final result = await FlutterWebAuth2.authenticate(
+      url: uri,
+      callbackUrlScheme: 'carp-studies-auth',
+    );
+
+    print('$runtimeType - Access link result: $result');
+
+    // Extract code from resulting url
+    final code = Uri.parse(result).queryParameters['code'];
+
+    print('$runtimeType - Code: $code');
+
+    // Use this code to get an access token
+    final url = Uri.parse(
+        'https://dev.carp.dk/auth/realms/Carp/protocol/openid-connect/token');
+    String clientId = CarpAuthService().authProperties.clientId;
+
+    final response = await http.post(url, body: {
+      'grant_type': 'authorization_code',
+      "redirect_uri": CarpAuthService().authProperties.redirectURI.toString(),
+      'code': code,
+      'client_id': clientId,
+    });
+
+    // Get the access token from the response
+    final accessToken = jsonDecode(response.body)['access_token'] as String;
+
+    print('$runtimeType - Access token: $accessToken');
+
+    return CarpUser(username: 'access_link_user', id: 'access_link_id');
+  }
+
+  // // Use the token to get an access token from the identity server
+  // // This is typically done by making a POST request to the token endpoint
+  // // of the identity server with the token as a parameter.
+  // // The exact details of this process will depend on the identity server
+  // // being used.
+  // // Here is an example of how this might be done using the http package:
+  Future<CarpUser> authenticateFromUri({
+    required String uri,
+  }) async {
+    print('$runtimeType - uri: $uri');
+
+    String clientId = CarpAuthService().authProperties.clientId;
+
+    final headers = {"Content-Type": "application/x-www-form-urlencoded"};
+    final body = {"client_id": clientId, "scope": "openid profile email"};
+
+    final response = await http.post(
+      Uri.parse(uri),
+      headers: headers,
+      body: body,
+    );
+
+    print('REQUEST:\n');
+    print(' headers:\n${response.request?.headers}');
+    print(' request:\n${response.request}');
+    print(' body:\n${body}');
+
+    print('RESPONSE: ${response.statusCode} ${response.reasonPhrase}');
+    print('response.headers:\n${response.headers}');
+    print('response.body:\n${response.body}');
+
+    print('headers:\n${headers}');
+    print('body:\n${body}');
 
     // assert(_manager != null, 'Manager not configured. Call configure() first.');
     // if (!_manager!.didInit) await initManager();

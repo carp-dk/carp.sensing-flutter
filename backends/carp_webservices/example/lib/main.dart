@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'CARP Backend Demo',
+      title: 'CARP Web Services Demo',
       home: HomePage(),
     );
   }
@@ -55,7 +55,9 @@ class HomePageState extends State<HomePage> {
                 if (!event.hasData) {
                   return TextButton.icon(
                     onPressed: () async => bloc.currentUser =
-                        await CarpAuthService().authenticate(),
+                        await CarpAuthService().authenticateFromUri(
+                            uri:
+                                "https://dev.carp.dk/auth/realms/Carp/login-actions/action-token?key=eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIzMGIxYzg3Zi0xZWFmLTQ0NjMtYTdjYS0yODY3M2E0NTBjY2MifQ.eyJleHAiOjE3ODkwNDY5NDMsImlhdCI6MTc1NzQyNDU3MiwianRpIjoiNDA1MTk3ZjAtZTFkMi00YTc2LWIzMWYtMWI3NjM2ZmRiNjI5IiwiaXNzIjoiaHR0cHM6Ly9kZXYuY2FycC5kay9hdXRoL3JlYWxtcy9DYXJwIiwiYXVkIjoiaHR0cHM6Ly9kZXYuY2FycC5kay9hdXRoL3JlYWxtcy9DYXJwIiwic3ViIjoiZWIyODg0MGEtNTVlMi00MjQzLTlmM2EtMWNmNDVmNzA0YmNhIiwidHlwIjoiZXh0LW1hZ2ljLWxpbmsiLCJhenAiOiJjYXJwLXdzIiwibm9uY2UiOiI0MDUxOTdmMC1lMWQyLTRhNzYtYjMxZi0xYjc2MzZmZGI2MjkiLCJyZHUiOiJjYXJwLXN0dWRpZXM6Ly9hbm9ueW1vdXMiLCJybWUiOmZhbHNlLCJydSI6dHJ1ZX0.7vk2OzGh-NmLtCNPv4dCs-6tAtCgRQQseUW32a84SEamZuqnN3zLZfwBUwddzlwPxY4i9xlx9CFAWtHMKwYAwQ&client_id=carp-ws"),
                     icon: const Icon(Icons.login),
                     label: const Text(
                       'LOGIN',

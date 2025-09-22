@@ -25,16 +25,17 @@ dependencies:
   meta: ^1.7.0
   url_launcher: ^6.0.9
   jwt_decoder: ^2.0.1
-  oidc: ^0.9.0+1
-  oidc_default_store: ^0.2.0+8
-  
+  oidc: ^0.12.0
+  oidc_default_store: ^0.4.0
+  flutter_web_auth_2: ^4.1.0
+
 # Overriding carp libraries to use the local copy
 # Remove this before release of package
 dependency_overrides:
 #   carp_serializable:
 #     path: ../../carp_serializable/
-    carp_core:
-      path: ../../carp_core/
+    # carp_core:
+    #   path: ../../carp_core/
   # carp_mobile_sensing:
   #   path: ../../carp_mobile_sensing/
 

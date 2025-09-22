@@ -21,7 +21,7 @@ dependencies:
   carp_webservices:
     path: ../
 
-  oidc: ^0.9.0+1
+  # oidc: ^0.9.0+1
 
 dev_dependencies:
   test: any
