@@ -14,6 +14,9 @@ class CarpAuthProperties {
   /// Redirect URI for OAuth
   final Uri redirectURI;
 
+  /// Redirect URI for OAuth
+  Uri? anonymousRedirectURI;
+
   /// Redirect uri for OAuth after logout
   /// If not specified, the [redirectURI] is used.
   Uri? logoutRedirectURI;
@@ -39,6 +42,7 @@ class CarpAuthProperties {
     required this.clientId,
     this.clientSecret,
     required this.redirectURI,
+    this.anonymousRedirectURI,
     required this.discoveryURL,
     this.studyDeploymentId,
     this.studyId,

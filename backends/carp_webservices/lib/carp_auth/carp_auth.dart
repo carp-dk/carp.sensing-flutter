@@ -6,6 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:oidc/oidc.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 part 'oauth.dart';
 part 'carp_user.dart';
