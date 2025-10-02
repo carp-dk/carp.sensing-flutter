@@ -208,7 +208,8 @@ class CarpAuthService {
     // Open the web authentication
     final result = await FlutterWebAuth2.authenticate(
       url: uri,
-      callbackUrlScheme: 'carp-studies-auth',
+      // callbackUrlScheme: 'carp-studies-auth',
+      callbackUrlScheme: 'carp-studies',
     );
 
     print('$runtimeType - Access link result: $result');
@@ -252,7 +253,10 @@ class CarpAuthService {
     String clientId = CarpAuthService().authProperties.clientId;
 
     final headers = {"Content-Type": "application/x-www-form-urlencoded"};
-    final body = {"client_id": clientId, "scope": "openid profile email"};
+    final body = {
+      "client_id": clientId,
+      "scope": "openid profile email offline_access api"
+    };
 
     final response = await http.post(
       Uri.parse(uri),
