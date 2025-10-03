@@ -14,7 +14,7 @@ class CarpAuthProperties {
   /// Redirect URI for OAuth
   final Uri redirectURI;
 
-  /// Redirect URI for OAuth
+  /// Same as [redirectURI] but for anonymous authentication using qr code.
   Uri? anonymousRedirectURI;
 
   /// Redirect uri for OAuth after logout
