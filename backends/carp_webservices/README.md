@@ -162,7 +162,7 @@ CarpUser user = await CarpAuthService().authenticate();
 This [`CarpUser`](https://pub.dev/documentation/carp_webservices/latest/carp_auth/CarpUser-class.html) object contains the OAuth token in the `token` (of type [`OAuthToken`](https://pub.dev/documentation/carp_webservices/latest/carp_auth/OAuthToken-class.html)) parameter.
 Since the `CarpUser` object can be serialized to JSON, the user and the (valid) OAuth token can be stored on the phone.
 
-To refresh the OAuth token the client (Flutter) simply call:
+The OAuth token can be refreshed by calling the `refresh()` method:
 
 ```dart
 await CarpAuthService().refresh()
@@ -176,7 +176,7 @@ To authenticate using username and password without opening the web view, use th
 CarpUser user = await CarpAuthService().authenticateWithUsernamePassword('username', 'password');
 ```
 
-To authenticate using a magic link (usually in the form of a QR code) use the `authenticateWithMagicLink` method. This method takes the generated URL as a `String` parameter, authenticates the user and generates and returns a `CarpUser` object.
+To authenticate using a magic link (e.g., as read from a QR code) use the `authenticateWithMagicLink` method. This method takes the URL as a `String` parameter, authenticates the user, and generates and returns a `CarpUser` object.
 
 ```dart
 CarpUser user = await CarpAuthService().authenticateWithMagicLink(qrcode);
