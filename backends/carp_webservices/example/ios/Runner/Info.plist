@@ -53,8 +53,12 @@
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>dk.cachet.example</string>
+					<string>caws-example-app-auth</string>
+					<string>caws-example-app</string>
 				</array>
 			</dict>
 		</array>
+		<key>NSCameraUsageDescription</key>
+		<string>CARP uses the camera to take pictures and/or videos for some tasks</string>
 	</dict>
 </plist>

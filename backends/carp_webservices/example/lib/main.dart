@@ -1,9 +1,17 @@
-import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
+library;
+
+import 'dart:io';
 import 'package:flutter/material.dart';
+
+import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_core/carp_core.dart';
+
 import 'package:oidc/oidc.dart';
+import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart' as qr;
+
+part 'qr-scanner.dart';
 
 void main() {
   CarpMobileSensing.ensureInitialized();
@@ -53,14 +61,31 @@ class HomePageState extends State<HomePage> {
               stream: CarpAuthService().manager?.userChanges(),
               builder: (BuildContext context, AsyncSnapshot<OidcUser?> event) {
                 if (!event.hasData) {
-                  return TextButton.icon(
-                    onPressed: () async => bloc.currentUser =
-                        await CarpAuthService().authenticate(),
-                    icon: const Icon(Icons.login),
-                    label: const Text(
-                      'LOGIN',
-                      style: TextStyle(fontSize: 35),
-                    ),
+                  return Column(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (context) => QRViewExample(),
+                          );
+                        },
+                        icon: const Icon(Icons.login),
+                        label: const Text(
+                          'SCAN',
+                          style: TextStyle(fontSize: 35),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () async => bloc.currentUser =
+                            await CarpAuthService().authenticate(),
+                        icon: const Icon(Icons.login),
+                        label: const Text(
+                          'LOGIN',
+                          style: TextStyle(fontSize: 35),
+                        ),
+                      )
+                    ],
                   );
                 } else {
                   return TextButton.icon(
@@ -88,7 +113,7 @@ class HomePageState extends State<HomePage> {
               padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
               child: Text(
                 (CarpAuthService().authenticated)
-                    ? 'Authenticated as ${CarpAuthService().currentUser.firstName} ${CarpAuthService().currentUser.lastName}'
+                    ? 'Authenticated as ${CarpAuthService().currentUser.username} ${CarpAuthService().currentUser.firstName} ${CarpAuthService().currentUser.lastName}'
                     : 'Not authenticated',
                 textAlign: TextAlign.center,
               ),
@@ -117,8 +142,9 @@ class AppBLoC {
   // The authentication configuration
   late CarpAuthProperties authProperties = CarpAuthProperties(
     authURL: uri,
-    clientId: 'studies-app',
-    redirectURI: Uri.parse('carp-studies-auth://auth'),
+    clientId: 'caws-example-app',
+    redirectURI: Uri.parse('caws-example-app-auth://auth'),
+    anonymousRedirectURI: Uri.parse('caws-example-app:/anonymous'),
     // For authentication at CAWS the path is '/auth/realms/Carp'
     discoveryURL: uri.replace(pathSegments: [
       'auth',
