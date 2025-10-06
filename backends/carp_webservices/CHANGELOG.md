@@ -1,7 +1,7 @@
 ## 3.8.0
 
-* anonymous authentication 
-* upgrading some packages
+* anonymous authentication
+* upgrading packages
 
 ## 3.7.0
 
