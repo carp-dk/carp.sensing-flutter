@@ -20,7 +20,7 @@ dependencies:
   carp_mobile_sensing: ^1.10.0
  
   json_annotation: ^4.8.0
-  permission_handler: ^11.0.0  
+  permission_handler: '>=11.0.0 <13.0.0'
   weather: ^3.1.0
   air_quality: ^4.0.0
   flutter_activity_recognition: ^4.0.0

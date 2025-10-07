@@ -12,12 +12,12 @@ android {
 
     compileOptions {
         coreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '17'
     }
 
     defaultConfig {
@@ -44,6 +44,8 @@ dependencies {
     // Use to implement Health Connect. Requires SDK level 34.
     implementation "androidx.health.connect:connect-client:1.1.0-rc02"
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    // AppCompat library for Theme.AppCompat.NoActionBar
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 }
 
 flutter {

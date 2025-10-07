@@ -52,7 +52,7 @@ dev_dependencies:
   json_serializable: any
   test: any
   flutter_lints: any
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.5.3
 
 flutter:
   uses-material-design: true # need this since both RP and carp_webservices uses MD

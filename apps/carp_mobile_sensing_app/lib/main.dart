@@ -25,6 +25,7 @@ import 'package:carp_cortrium_package/carp_cortrium_package.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_backend/carp_backend.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'config.dart';
 

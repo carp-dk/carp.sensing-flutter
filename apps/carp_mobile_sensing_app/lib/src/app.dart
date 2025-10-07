@@ -20,11 +20,24 @@ class LoadingPage extends StatelessWidget {
   ///
   /// Returns true when successfully done.
   Future<bool> init(BuildContext context) async {
-    // Try to get location permissions as the first thing.
+    print('LoadingPage.init() - Starting initialization...');
+    
+    // Request all necessary permissions upfront
+    print('LoadingPage.init() - Requesting permissions...');
     await Permission.locationWhenInUse.request();
+    await Permission.locationAlways.request();
+    await Permission.activityRecognition.request();
+    await Permission.sensors.request();
+    
+    // For Android 14+, also request notification permission for foreground services
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      await Permission.notification.request();
+    }
+    print('LoadingPage.init() - Permissions requested.');
 
     // Initialize and use the CAWS backend if not in local deployment mode
     if (bloc.deploymentMode != DeploymentMode.local) {
+      print('LoadingPage.init() - Initializing CAWS backend...');
       await CarpBackend().initialize();
       await CarpBackend().authenticate();
 
@@ -39,8 +52,11 @@ class LoadingPage extends StatelessWidget {
       CarpService().study = bloc.study;
     }
 
+    print('LoadingPage.init() - Initializing sensing...');
     await bloc.sensing.initialize();
+    print('LoadingPage.init() - Sensing initialized.');
 
+    print('LoadingPage.init() - Initialization complete!');
     return true;
   }
 
