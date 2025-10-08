@@ -24,7 +24,7 @@ void main() {
       // collect every day at 13:30
       t = RecurrentScheduledTrigger(
         type: RecurrentType.daily,
-        time: const TimeOfDay(hour: 13, minute: 30),
+        time: const TimeOfDay(hour: 18, minute: 55),
       );
       //print(toJsonString(t));
       print('${t.firstOccurrence} - ${t.period}');
