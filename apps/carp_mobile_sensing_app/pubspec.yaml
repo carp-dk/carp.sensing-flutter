@@ -79,8 +79,8 @@ dependency_overrides:
     path: ../../backends/carp_webservices/
   carp_movesense_package:
     path: ../../packages/carp_movesense_package/
-  carp_cortrium_package:
-    path: ../../../carp_cortrium_package/
+  # carp_cortrium_package:
+  #   path: ../../../carp_cortrium_package/
 
   # research_package:
   #   path: ../../../../research.package/
@@ -104,13 +104,12 @@ dependency_overrides:
   #     url: https://github.com/Panosfunk/mdsflutter.git
   #     ref: master
 
-  # due to this issue https://github.com/cph-cachet/carp_studies_app/issues/427
-  # polar: 7.7.0
-  # load polar from https://github.com/iarata/polar
-  polar:
-    git:
-      url: https://github.com/iarata/polar.git
-      ref: master
+  polar: 7.7.1
+  # load polar from https://github.com/iarata/polar due to device_info_plus conflict
+  # polar:
+  #   git:
+  #     url: https://github.com/iarata/polar.git
+  #     ref: master
 
 dev_dependencies:
   flutter_test:

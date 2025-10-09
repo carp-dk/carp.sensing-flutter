@@ -245,11 +245,11 @@ class ProbeDescription {
         //   'Movesense Inertial Movement Unit (IMU).',
         //   Icon(Icons.moving, size: 50, color: CachetColors.CYAN),
         // ),
-        CortriumSamplingPackage.ECG: ProbeDescriptor(
-          'C3+ ECG',
-          'C3+ Electrocardiogram.',
-          Icon(Icons.monitor_heart_rounded, size: 50, color: CachetColors.BLUE),
-        ),
+        // CortriumSamplingPackage.ECG: ProbeDescriptor(
+        //   'C3+ ECG',
+        //   'C3+ Electrocardiogram.',
+        //   Icon(Icons.monitor_heart_rounded, size: 50, color: CachetColors.BLUE),
+        // ),
       };
 
   static Map<ExecutorState, String> get probeStateLabel => {

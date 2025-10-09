@@ -29,7 +29,7 @@ class Sensing {
     SamplingPackageRegistry().register(MovisensSamplingPackage());
     SamplingPackageRegistry().register(HealthSamplingPackage());
     // SamplingPackageRegistry().register(MovesenseSamplingPackage());
-    SamplingPackageRegistry().register(CortriumSamplingPackage());
+    // SamplingPackageRegistry().register(CortriumSamplingPackage());
 
     // Register the CARP data manager for uploading data back to CAWS.
     // This is needed in both LOCAL and CAWS deployments, since a local study
@@ -89,29 +89,24 @@ class Sensing {
   /// Initialize and set up sensing.
   Future<void> initialize() async {
     info('Initializing $runtimeType - mode: ${bloc.deploymentMode}');
-    print('Sensing.initialize() - Step 1: Starting...');
 
     switch (bloc.deploymentMode) {
       case DeploymentMode.local:
-        print('Sensing.initialize() - Step 2: Creating local deployment service...');
         // Use the local, phone-based deployment service.
         deploymentService = SmartphoneDeploymentService();
 
         // Get the protocol from the local study protocol manager.
         // Note that the study id is not used.
-        print('Sensing.initialize() - Step 3: Getting study protocol...');
         StudyProtocol protocol =
             await LocalStudyProtocolManager().getStudyProtocol('');
 
         // Deploy this protocol using the on-phone deployment service.
         // Reuse the study deployment id, if this is stored on the phone.
-        print('Sensing.initialize() - Step 4: Creating study deployment...');
         _status = await SmartphoneDeploymentService().createStudyDeployment(
           protocol,
         );
 
         // Save the study on the phone for later use.
-        print('Sensing.initialize() - Step 5: Saving study...');
         bloc.study = SmartphoneStudy(
           studyDeploymentId: _status!.studyDeploymentId,
           deviceRoleName: _status!.primaryDeviceStatus!.device.roleName,
@@ -130,19 +125,15 @@ class Sensing {
 
     // Configure the client manager with the deployment service selected above
     // (local or CAWS), add the study, and deploy it.
-    print('Sensing.initialize() - Step 6: Configuring client manager...');
     await SmartPhoneClientManager().configure(
       deploymentService: deploymentService,
       askForPermissions: true, // Allow the system to request permissions as needed
     );
 
-    print('Sensing.initialize() - Step 7: Adding study...');
     study = await SmartPhoneClientManager().addStudy(bloc.study!);
     
-    print('Sensing.initialize() - Step 8: Trying deployment...');
     await controller?.tryDeployment(useCached: bloc.useCachedStudyDeployment);
     
-    print('Sensing.initialize() - Step 9: Configuring controller...');
     try {
       await controller?.configure().timeout(
         Duration(seconds: 30),
@@ -153,16 +144,13 @@ class Sensing {
       );
     } catch (error) {
       print('Sensing.initialize() - ERROR during configure: $error');
-      print('Sensing.initialize() - Continuing anyway...');
     }
 
     // Listen on the measurements stream and print them as json.
-    print('Sensing.initialize() - Step 10: Setting up measurement listener...');
     SmartPhoneClientManager()
         .measurements
         .listen((measurement) => print(toJsonString(measurement)));
 
     info('$runtimeType initialized');
-    print('Sensing.initialize() - Complete!');
   }
 }

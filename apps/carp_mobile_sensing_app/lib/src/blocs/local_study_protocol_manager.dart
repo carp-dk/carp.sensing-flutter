@@ -315,23 +315,23 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //
     // Known DTU C3+ devices: ED:AD:D4:3D:3F:72
 
-    var c3 = CortriumDevice(
-      name: 'Cortrium C3+',
-      btleAddress: 'ED:AD:D4:3D:3F:72',
-    );
+    // var c3 = CortriumDevice(
+    //   name: 'Cortrium C3+',
+    //   btleAddress: 'ED:AD:D4:3D:3F:72',
+    // );
 
-    protocol.addConnectedDevice(c3, phone);
+    // protocol.addConnectedDevice(c3, phone);
 
-    protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
-          Measure(type: CortriumSamplingPackage.ECG),
-          // Measure(type: CortriumSamplingPackage.BUTTON),
-          Measure(type: CortriumSamplingPackage.BATTERY),
-          Measure(type: CortriumSamplingPackage.ACCELEROMETER),
-          Measure(type: CortriumSamplingPackage.HR),
-        ]),
-        c3);
+    // protocol.addTaskControl(
+    //     ImmediateTrigger(),
+    //     BackgroundTask(measures: [
+    //       Measure(type: CortriumSamplingPackage.ECG),
+    //       // Measure(type: CortriumSamplingPackage.BUTTON),
+    //       Measure(type: CortriumSamplingPackage.BATTERY),
+    //       Measure(type: CortriumSamplingPackage.ACCELEROMETER),
+    //       Measure(type: CortriumSamplingPackage.HR),
+    //     ]),
+    //     c3);
 
     //
     // --------- HEALTH PACKAGE EXAMPLES -------------
