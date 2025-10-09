@@ -44,10 +44,10 @@ class DeviceDescription {
         //     'Movesense',
         //     'Movesense ECG Sensor',
         //     Icon(Icons.watch, size: 50, color: CachetColors.CYAN)),
-        CortriumDevice.DEVICE_TYPE: DeviceTypeDescriptor(
-            'Cortrium',
-            'Cortrium ECG Holter Monitor',
-            Icon(Icons.monitor_heart, size: 50, color: CachetColors.CYAN)),
+        // CortriumDevice.DEVICE_TYPE: DeviceTypeDescriptor(
+        //     'Cortrium',
+        //     'Cortrium ECG Holter Monitor',
+        //     Icon(Icons.monitor_heart, size: 50, color: CachetColors.CYAN)),
       };
 
   static Map<DeviceStatus, Icon> get deviceStateIcon => {

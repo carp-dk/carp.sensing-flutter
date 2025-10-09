@@ -29,7 +29,7 @@ class Sensing {
     SamplingPackageRegistry().register(MovisensSamplingPackage());
     SamplingPackageRegistry().register(HealthSamplingPackage());
     // SamplingPackageRegistry().register(MovesenseSamplingPackage());
-    SamplingPackageRegistry().register(CortriumSamplingPackage());
+    // SamplingPackageRegistry().register(CortriumSamplingPackage());
 
     // Register the CARP data manager for uploading data back to CAWS.
     // This is needed in both LOCAL and CAWS deployments, since a local study
@@ -127,12 +127,24 @@ class Sensing {
     // (local or CAWS), add the study, and deploy it.
     await SmartPhoneClientManager().configure(
       deploymentService: deploymentService,
-      askForPermissions: true,
+      askForPermissions: true, // Allow the system to request permissions as needed
     );
 
     study = await SmartPhoneClientManager().addStudy(bloc.study!);
+    
     await controller?.tryDeployment(useCached: bloc.useCachedStudyDeployment);
-    await controller?.configure();
+    
+    try {
+      await controller?.configure().timeout(
+        Duration(seconds: 30),
+        onTimeout: () {
+          print('Sensing.initialize() - WARNING: Configure timed out after 30 seconds');
+          print('Sensing.initialize() - Continuing anyway...');
+        },
+      );
+    } catch (error) {
+      print('Sensing.initialize() - ERROR during configure: $error');
+    }
 
     // Listen on the measurements stream and print them as json.
     SmartPhoneClientManager()

@@ -20,11 +20,12 @@ import 'package:carp_movisens_package/carp_movisens_package.dart';
 import 'package:carp_health_package/health_package.dart';
 import 'package:health/health.dart';
 // import 'package:carp_movesense_package/carp_movesense_package.dart';
-import 'package:carp_cortrium_package/carp_cortrium_package.dart';
+// import 'package:carp_cortrium_package/carp_cortrium_package.dart';
 
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_backend/carp_backend.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'config.dart';
 

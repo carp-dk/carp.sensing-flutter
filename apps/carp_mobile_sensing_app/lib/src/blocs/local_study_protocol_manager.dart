@@ -118,15 +118,15 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //     locationService);
 
     // Define the online weather service and add it as a 'device'
-    WeatherService weatherService = WeatherService(apiKey: openWeatherApiKey);
-    protocol.addConnectedDevice(weatherService, phone);
+    // WeatherService weatherService = WeatherService(apiKey: openWeatherApiKey);
+    // protocol.addConnectedDevice(weatherService, phone);
 
-    // Add a background task that collects weather every 5 minutes.
-    protocol.addTaskControl(
-        PeriodicTrigger(period: Duration(minutes: 5)),
-        BackgroundTask(
-            measures: [Measure(type: ContextSamplingPackage.WEATHER)]),
-        weatherService);
+    // // Add a background task that collects weather every 5 minutes.
+    // protocol.addTaskControl(
+    //     PeriodicTrigger(period: Duration(minutes: 5)),
+    //     BackgroundTask(
+    //         measures: [Measure(type: ContextSamplingPackage.WEATHER)]),
+    //     weatherService);
 
     // // Define the online air quality service and add it as a 'device'
     // AirQualityService airQualityService =
@@ -315,22 +315,23 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //
     // Known DTU C3+ devices: ED:AD:D4:3D:3F:72
 
-    var c3 = CortriumDevice(
-      name: 'Cortrium C3+',
-      identifier: 'ED:AD:D4:3D:3F:72',
-    );
+    // var c3 = CortriumDevice(
+    //   name: 'Cortrium C3+',
+    //   btleAddress: 'ED:AD:D4:3D:3F:72',
+    // );
 
-    protocol.addConnectedDevice(c3, phone);
+    // protocol.addConnectedDevice(c3, phone);
 
-    protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
-          Measure(type: CortriumSamplingPackage.ECG),
-          // Measure(type: CortriumSamplingPackage.BUTTON),
-          Measure(type: CortriumSamplingPackage.BATTERY),
-          Measure(type: CortriumSamplingPackage.ACCELEROMETER),
-        ]),
-        c3);
+    // protocol.addTaskControl(
+    //     ImmediateTrigger(),
+    //     BackgroundTask(measures: [
+    //       Measure(type: CortriumSamplingPackage.ECG),
+    //       // Measure(type: CortriumSamplingPackage.BUTTON),
+    //       Measure(type: CortriumSamplingPackage.BATTERY),
+    //       Measure(type: CortriumSamplingPackage.ACCELEROMETER),
+    //       Measure(type: CortriumSamplingPackage.HR),
+    //     ]),
+    //     c3);
 
     //
     // --------- HEALTH PACKAGE EXAMPLES -------------
@@ -460,28 +461,28 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
         locationService);
 
     // define the online weather service and add it to the father's phone
-    WeatherService weatherService = WeatherService(apiKey: openWeatherApiKey);
-    protocol.addConnectedDevice(weatherService, fatherPhone);
+    // WeatherService weatherService = WeatherService(apiKey: openWeatherApiKey);
+    // protocol.addConnectedDevice(weatherService, fatherPhone);
 
-    // add a background task that collects weather every 30 minutes.
-    protocol.addTaskControl(
-        PeriodicTrigger(period: Duration(minutes: 30)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
-        weatherService);
+    // // add a background task that collects weather every 30 minutes.
+    // protocol.addTaskControl(
+    //     PeriodicTrigger(period: Duration(minutes: 30)),
+    //     BackgroundTask()
+    //       ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
+    //     weatherService);
 
-    // define the online air quality service and add it to the mother's phone
-    AirQualityService airQualityService =
-        AirQualityService(apiKey: airQualityApiKey);
-    protocol.addConnectedDevice(airQualityService, motherPhone);
+    // // define the online air quality service and add it to the mother's phone
+    // AirQualityService airQualityService =
+    //     AirQualityService(apiKey: airQualityApiKey);
+    // protocol.addConnectedDevice(airQualityService, motherPhone);
 
-    // add a background task that air quality every 30 minutes.
-    protocol.addTaskControl(
-        PeriodicTrigger(period: Duration(minutes: 30)),
-        BackgroundTask(measures: [
-          Measure(type: ContextSamplingPackage.AIR_QUALITY),
-        ]),
-        airQualityService);
+    // // add a background task that air quality every 30 minutes.
+    // protocol.addTaskControl(
+    //     PeriodicTrigger(period: Duration(minutes: 30)),
+    //     BackgroundTask(measures: [
+    //       Measure(type: ContextSamplingPackage.AIR_QUALITY),
+    //     ]),
+    //     airQualityService);
 
     // collect noise from the child's phone
     protocol.addTaskControl(

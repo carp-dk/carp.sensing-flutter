@@ -20,8 +20,16 @@ class LoadingPage extends StatelessWidget {
   ///
   /// Returns true when successfully done.
   Future<bool> init(BuildContext context) async {
-    // Try to get location permissions as the first thing.
+    // Request all necessary permissions upfront
     await Permission.locationWhenInUse.request();
+    await Permission.locationAlways.request();
+    await Permission.activityRecognition.request();
+    await Permission.sensors.request();
+    
+    // For Android 14+, also request notification permission for foreground services
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      await Permission.notification.request();
+    }
 
     // Initialize and use the CAWS backend if not in local deployment mode
     if (bloc.deploymentMode != DeploymentMode.local) {

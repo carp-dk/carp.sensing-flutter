@@ -13,10 +13,17 @@ platforms:
   ios:
 
 dependencies:
+  battery_plus: ^6.2.3
+  device_calendar: ^4.3.1
+  device_info_plus: ^12.1.0
   flutter:
     sdk: flutter
   flutter_launcher_icons: ^0.14.0
-  permission_handler: ^11.0.0  
+  flutter_local_notifications: ^19.4.2
+  location: ^8.0.1
+  mdsflutter: ^2.3.1
+  package_info_plus: ^8.3.1
+  permission_handler: '>=11.0.0 <13.0.0'
   
   #carp_serializable: ^1.1.0
   #carp_core: ^0.30.0
@@ -35,7 +42,10 @@ dependencies:
   # carp_movisens_package: ^0.32.0
 
   research_package: ^2.0.0
-  # health: ^8.1.0
+  shared_preferences: ^2.5.3
+  sqflite: ^2.4.2
+  health: ^13.2.0
+  flutter_blue_plus: ^1.36.8
 
 # Overriding carp libraries to use the local copy
 dependency_overrides:
@@ -69,8 +79,8 @@ dependency_overrides:
     path: ../../backends/carp_webservices/
   carp_movesense_package:
     path: ../../packages/carp_movesense_package/
-  carp_cortrium_package:
-    path: ../../../carp_cortrium_package/
+  # carp_cortrium_package:
+  #   path: ../../../carp_cortrium_package/
 
   # research_package:
   #   path: ../../../../research.package/
@@ -89,14 +99,17 @@ dependency_overrides:
     git: https://github.com/bardram/device_calendar
 
   # due to this issue https://github.com/petri-lipponen-movesense/mdsflutter/issues/36 
-  mdsflutter:
-    git:
-      url: https://github.com/Panosfunk/mdsflutter.git
-      ref: master
+  # mdsflutter:
+  #   git:
+  #     url: https://github.com/Panosfunk/mdsflutter.git
+  #     ref: master
 
-  # due to this issue https://github.com/cph-cachet/carp_studies_app/issues/427
-  polar: 7.5.1
-
+  polar: 7.7.1
+  # load polar from https://github.com/iarata/polar due to device_info_plus conflict
+  # polar:
+  #   git:
+  #     url: https://github.com/iarata/polar.git
+  #     ref: master
 
 dev_dependencies:
   flutter_test:

@@ -36,7 +36,7 @@ dependencies:
   flutter_timezone: ^4.0.0                # For getting local time zone for scheduling notifications
 
   # probe-dependent plugins
-  device_info_plus: '>=9.0.0 <12.0.0'
+  device_info_plus: ^12.1.0
   sensors_plus: ^6.0.0
   battery_plus: ^6.0.0
 
