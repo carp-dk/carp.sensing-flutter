@@ -91,6 +91,7 @@ class StudyDeployment {
     _protocol = protocol;
     _creationDate = DateTime.now();
     _status = StudyDeploymentStatus(studyDeploymentId: _studyDeploymentId);
+    _status.createdOn = _creationDate;
   }
 
   /// Get the status of this [StudyDeployment].
@@ -293,9 +294,7 @@ class StudyDeploymentStatus extends Serializable {
   StudyDeploymentStatus({
     required this.studyDeploymentId,
     this.deviceStatusList = const [],
-  }) : super() {
-    createdOn = DateTime.now();
-  }
+  }) : super();
 
   @override
   Function get fromJsonFunction => _$StudyDeploymentStatusFromJson;

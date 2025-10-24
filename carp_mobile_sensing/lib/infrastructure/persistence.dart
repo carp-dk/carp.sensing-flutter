@@ -6,8 +6,25 @@
 
 part of '../infrastructure.dart';
 
-/// A persistence layer that knows how to persistently store deployment and
-/// app task information across app restart.
+/// Stores meta data about the running [SmartphoneDeployment] and all
+/// [UserTask] json objects in an SQLite database on the device's
+/// local storage media. To be used across app restarts.
+///
+/// Deployments are stored in the `deployment` table and user tasks are stored
+/// in the `task_queue` table.
+///
+/// The path and filename format is
+///
+///   `~/carp.db`
+///
+/// where `~` is the folder where SQLite places it database files.
+///
+/// On iOS, this is the `NSDocumentsDirectory` and the files can be accessed via
+/// the MacOS Finder.
+///
+/// On Android, Flutter files are stored in the `databases` directory, which is
+/// located in the `data/data/<package_name>/databases/` folder.
+/// Files can be accessed via AndroidStudio.
 class Persistence {
   static const String DATABASE_NAME = 'carp';
   static const String DEPLOYMENT_TABLE_NAME = 'deployment';
