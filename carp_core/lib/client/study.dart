@@ -63,6 +63,10 @@ enum StudyStatus {
   /// Deployment can complete after all devices have been registered.
   RegisteringDevices,
 
+  /// Device deployment for this primary device has completed,
+  /// but awaiting deployment of other devices in this study deployment.
+  AwaitingOtherDeviceDeployments,
+
   /// Study runtime status when deployment has been successfully completed.
   /// The [PrimaryDeviceDeployment] has been retrieved and all necessary plugins
   /// to execute the study have been loaded.
