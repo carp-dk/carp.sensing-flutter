@@ -25,8 +25,10 @@ abstract class _MovesenseStreamProbe extends StreamProbe {
 
   @override
   Stream<Measurement>? get stream => deviceManager.isConnected
-      ? _streamController.stream.map((event) =>
-          Measurement.fromData(_converter.call(jsonDecode(event)) as Data))
+      ? _streamController.stream
+          .map((event) =>
+              Measurement.fromData(_converter.call(jsonDecode(event)) as Data))
+          .skip(10) // skip first 10 measurements to allow sensor to stabilize
       : null;
 
   @override
