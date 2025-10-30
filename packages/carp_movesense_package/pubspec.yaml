@@ -1,7 +1,7 @@
 name: carp_movesense_package
 description: The CARP Movesense sampling package. Samples sensor data from the Movesense MD and ACTIVE (HR+, HR2) devices.
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
-version: 1.7.5
+version: 1.7.6
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
