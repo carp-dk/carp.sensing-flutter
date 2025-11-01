@@ -56,17 +56,23 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
   ///      configuring this controller
   ///
   /// This is a broadcast stream and supports multiple subscribers.
-  Stream<Measurement> get measurements =>
-      _executor.measurements.distinct().map((measurement) => measurement
-        ..data = _transformer(DataTransformerSchemaRegistry()
+  Stream<Measurement> get measurements => _executor.measurements.distinct().map(
+    (measurement) => measurement
+      ..data = _transformer(
+        DataTransformerSchemaRegistry()
             .lookup(deployment?.dataEndPoint?.dataFormat ?? NameSpace.CARP)!
-            .transform(DataTransformerSchemaRegistry()
-                .lookup(privacySchemaName)!
-                .transform(measurement.data))));
+            .transform(
+              DataTransformerSchemaRegistry()
+                  .lookup(privacySchemaName)!
+                  .transform(measurement.data),
+            ),
+      ),
+  );
 
   /// A stream of all [measurements] of a specific data [type].
-  Stream<Measurement> measurementsByType(String type) => measurements
-      .where((measurement) => measurement.data.format.toString() == type);
+  Stream<Measurement> measurementsByType(String type) => measurements.where(
+    (measurement) => measurement.data.format.toString() == type,
+  );
 
   /// The sampling size of this [deployment] in terms of number of [Measurement]
   /// that has been collected since sampling was started.
@@ -98,10 +104,14 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
     DataEndPoint? dataEndPoint,
     DataTransformer? transformer,
   }) async {
-    assert(deployment != null,
-        'Cannot configure a StudyDeploymentController without a deployment.');
-    assert(deployment is SmartphoneDeployment,
-        'A StudyDeploymentController can only work with a SmartphoneDeployment device deployment');
+    assert(
+      deployment != null,
+      'Cannot configure a StudyDeploymentController without a deployment.',
+    );
+    assert(
+      deployment is SmartphoneDeployment,
+      'A StudyDeploymentController can only work with a SmartphoneDeployment device deployment',
+    );
     info('Configuring $runtimeType');
 
     // initialize all devices from the primary deployment, incl. this smartphone.
@@ -120,8 +130,9 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
 
     if (_dataManager == null) {
       warning(
-          "No data manager for the specified data endpoint found: '${deployment?.dataEndPoint}'. "
-          "Data sampling will still start, but no data will be saved.");
+        "No data manager for the specified data endpoint found: '${deployment?.dataEndPoint}'. "
+        "Data sampling will still start, but no data will be saved.",
+      );
     }
 
     // initialize the data manager, device registry, and study executor
@@ -171,13 +182,15 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
   Future<void> askForAllPermissions() async {
     if (Platform.isIOS) {
       warning(
-          '$runtimeType - Requesting all permissions at once is not feasible on iOS. Skipping this.');
+        '$runtimeType - Requesting all permissions at once is not feasible on iOS. Skipping this.',
+      );
       return;
     }
 
     if (deployment == null) {
       warning(
-          '$runtimeType - No deployment available. Skipping requesting permissions.');
+        '$runtimeType - No deployment available. Skipping requesting permissions.',
+      );
       return;
     }
 
@@ -186,13 +199,15 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
     for (var measure in deployment!.measures) {
       var schema = SamplingPackageRegistry().samplingSchemes[measure.type];
       if (schema != null && schema.dataType is CamsDataTypeMetaData) {
-        permissions
-            .addAll((schema.dataType as CamsDataTypeMetaData).permissions);
+        permissions.addAll(
+          (schema.dataType as CamsDataTypeMetaData).permissions,
+        );
       }
     }
 
     debug(
-        '$runtimeType - Required permissions for this deployment: $permissions');
+      '$runtimeType - Required permissions for this deployment: $permissions',
+    );
 
     if (permissions.isNotEmpty) {
       // Never ask for location permissions.
@@ -204,11 +219,15 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
 
       try {
         info(
-            '$runtimeType - Asking for permissions for all measures in this deployment - status:');
+          '$runtimeType - Asking for permissions for all measures in this deployment - status:',
+        );
         _permissions = await permissions.toList().request();
 
-        _permissions?.forEach((permission, status) => info(
-            ' - ${permission.toString().split('.').last} : ${status.name}'));
+        _permissions?.forEach(
+          (permission, status) => info(
+            ' - ${permission.toString().split('.').last} : ${status.name}',
+          ),
+        );
       } catch (error) {
         warning('$runtimeType - Error requesting permissions - error: $error');
       }
@@ -230,10 +249,11 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
       deviceRegistry.devices[configuration.type]?.initialize(configuration);
     } else {
       warning(
-          "A device of type '${configuration.type}' is not available on this device. "
-          "This may be because this device is not available on this operating system. "
-          "Or it may be because the sampling package containing this device has not been "
-          "registered in the SamplingPackageRegistry.");
+        "A device of type '${configuration.type}' is not available on this device. "
+        "This may be because this device is not available on this operating system. "
+        "Or it may be because the sampling package containing this device has not been "
+        "registered in the SamplingPackageRegistry.",
+      );
     }
   }
 
@@ -264,18 +284,23 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
   /// Verifies whether the primary device is ready for deployment and in case
   /// it is, deploy the [study] previously added.
   ///
-  /// If [useCached] is true (default), a previously cached [deployment] will be
-  /// retrieved from the phone locally.
-  /// If [useCached] is false, the [deployment] will be retrieved from the
-  /// [deploymentService], based on the [study].
+  /// If [useCached] is true (default), any previously cached [deployment] will be
+  /// retrieved from the local cache. Otherwise, the [deployment] will be retrieved
+  /// from the deployment service, based on the [study].
   ///
   /// In case already deployed, nothing happens and the current [status] is returned.
   @override
   Future<StudyStatus> tryDeployment({bool useCached = true}) async {
     assert(
-        study != null,
-        'Cannot deploy without a valid study deployment id and device role name. '
-        "Call 'addStudy()' or 'addStudyProtocol()' first.");
+      study != null,
+      'Cannot deploy without a valid study deployment id and device role name. '
+      "Call 'addStudy()' or 'addStudyProtocol()' first.",
+    );
+
+    if (deployment != null && status.index >= StudyStatus.Deployed.index) {
+      // already deployed
+      return status;
+    }
 
     info('$runtimeType - Trying to deploy study: $study');
     if (useCached) {
@@ -314,9 +339,10 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
   /// Restore the [deployment] from a local cache.
   /// Returns `true` if successful.
   Future<bool> restoreDeployment() async => (studyDeploymentId != null)
-      ? (deployment =
-              await Persistence().restoreDeployment(studyDeploymentId!)) !=
-          null
+      ? (deployment = await Persistence().restoreDeployment(
+              studyDeploymentId!,
+            )) !=
+            null
       : false;
 
   /// Erase study deployment information cached locally on this phone.
@@ -325,7 +351,8 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
 
     try {
       info(
-          "$runtimeType - Erasing deployment cache for deployment '$studyDeploymentId'.");
+        "$runtimeType - Erasing deployment cache for deployment '$studyDeploymentId'.",
+      );
       await Persistence().eraseDeployment(studyDeploymentId!);
 
       final name = await Settings().getDeploymentBasePath(studyDeploymentId!);
@@ -337,14 +364,15 @@ class SmartphoneDeploymentController extends StudyRuntime<DeviceRegistration> {
 
   /// Start this controller.
   ///
-  /// If [start] is true, immediately start data collection
-  /// according to the parameters specified in [configure].
+  /// If [start] is true, immediately start data collection according to the
+  /// parameters specified in [configure].
   ///
   /// [configure] must be called before starting sampling.
   @override
   Future<void> start([bool start = true]) async {
     info(
-        '$runtimeType - Starting data sampling for study deployment: ${deployment?.studyDeploymentId}');
+      '$runtimeType - Starting data sampling for study deployment: ${deployment?.studyDeploymentId}',
+    );
 
     // if this study has not yet been deployed, do this first.
     if (status.index < StudyStatus.Deployed.index) {

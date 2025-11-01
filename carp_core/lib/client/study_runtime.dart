@@ -13,41 +13,42 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
   final List<DeviceConfiguration> _remainingDevicesToRegister = [];
   Study? _study;
   TRegistration? _deviceRegistration;
+  final DeviceDataCollectorFactory _deviceRegistry;
   final StreamController<StudyStatus> _statusEventsController =
       StreamController();
-
-  /// The unique device registration for this device.
-  /// Set in the [addStudy] method.
-  TRegistration? get deviceRegistration => _deviceRegistration;
 
   /// The study for this study runtime. Set in the [addStudy] method.
   /// `null` if no study has been added yet.
   Study? get study => _study;
 
-  /// The study deployment id for the [study] of this controller.
-  String? get studyDeploymentId => study?.studyDeploymentId;
+  /// The unique device registration for this device.
+  /// Set in the [addStudy] method.
+  TRegistration? get deviceRegistration => _deviceRegistration;
 
-  /// The [PrimaryDeviceDeployment] for this study runtime.
+  /// The study deployment id for the [study] of this study runtime.
+  String? get studyDeploymentId => _study?.studyDeploymentId;
+
+  /// The primary device deployment for this study runtime.
   ///
   /// Is null if the deployment is not ready.
-  /// Use the [tryDeployment] method to retrieve the [deployment] from
-  /// the [deploymentService].
+  /// Use the [tryDeployment] method to retrieve the study deployment from
+  /// the deployment service.
   PrimaryDeviceDeployment? deployment;
 
   /// The device registry that handles the devices used in this runtime.
-  DeviceDataCollectorFactory deviceRegistry;
+  DeviceDataCollectorFactory get deviceRegistry => _deviceRegistry;
 
   /// The deployment service to use to retrieve and manage the study deployment.
-  DeploymentService deploymentService;
+  final DeploymentService _deploymentService;
 
-  /// The latest known deployment status retrieved from the [deploymentService].
+  /// The latest known deployment status retrieved from the deployment service.
   /// Null if not know.
   StudyDeploymentStatus? deploymentStatus;
 
-  /// The stream of [StudyStatus] events for this controller.
+  /// The stream of [StudyStatus] events for this study runtime.
   Stream<StudyStatus> get statusEvents => _statusEventsController.stream;
 
-  /// The status of the [study] running on this [StudyRuntime].
+  /// The status of the [study] running on this study runtime.
   StudyStatus get status => _study?.status ?? StudyStatus.DeploymentNotStarted;
   set status(StudyStatus newStatus) {
     _study?.status = newStatus;
@@ -58,7 +59,10 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
   bool get isInitialized => (study != null);
 
   /// Has the device deployment been completed successfully?
-  bool get isDeployed => (status == StudyStatus.Deployed);
+  bool get isDeployed => (status.index >= StudyStatus.Deployed.index);
+
+  /// Is the study and data collection running?
+  bool get isRunning => (status == StudyStatus.Running);
 
   /// Has the study and data collection been stopped?
   bool get isStopped => (status == StudyStatus.Stopped);
@@ -68,43 +72,66 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
   List<DeviceConfiguration> get remainingDevicesToRegister =>
       _remainingDevicesToRegister;
 
-  /// Create a new study runtime, specifying the [deploymentService] to use to
-  /// retrieve and manage the study deployment with [studyDeploymentId] and the
-  /// [deviceRegistry] to handle the devices used in this study deployment.
-  StudyRuntime(this.deploymentService, this.deviceRegistry);
-
-  /// Adds [study] this study runtime by specifying its [study] and
-  /// [deviceRegistration].
+  /// Create a new study runtime to manage a study deployment.
   ///
-  /// [deviceRegistration] is the device configuration for the device this study
-  /// runtime runs on, identified by [Study.deviceRoleName] in the study deployment
-  /// with [Study.studyDeploymentId].
+  /// This constructor requires a [DeploymentService] to use to retrieve a study
+  /// deployment and a [DeviceDataCollectorFactory] to use as device registry to
+  /// handle the devices used for data collection.
+  StudyRuntime(this._deploymentService, this._deviceRegistry);
+
+  /// Adds [study] to this study runtime.
+  /// The [deviceRegistration] is used in the [tryDeployment] method to register
+  /// the device for the study deployment in the deployment service.
   ///
   /// Call [tryDeployment] to subsequently deploy the study.
-  Future<void> addStudy(
-    Study study,
-    TRegistration deviceRegistration,
-  ) async {
+  Future<void> addStudy(Study study, TRegistration deviceRegistration) async {
     _study = study;
-    study.status = StudyStatus.DeploymentNotStarted;
+    status = StudyStatus.DeploymentNotStarted;
     _deviceRegistration = deviceRegistration;
   }
 
-  /// Get the status for a study deployment for the [study].
-  /// Returns null if [studyDeploymentId] is not found.
+  /// Get the deployment status for the [study] from the deployment service.
+  /// This updates the [deploymentStatus] and sets the study [status] accordingly.
+  ///
+  /// Returns null if no [study] has been added yet via the [addStudy] method,
+  /// or if the deployment status could not be retrieved from the
+  /// deployment service.
   Future<StudyDeploymentStatus?> getStudyDeploymentStatus() async {
+    if (study == null) return null;
+
+    // try to get the deployment status from the deployment service
     try {
-      deploymentStatus = await deploymentService
-          .getStudyDeploymentStatus(study!.studyDeploymentId);
+      deploymentStatus = await _deploymentService.getStudyDeploymentStatus(
+        study!.studyDeploymentId,
+      );
       status = StudyStatus.DeploymentStatusAvailable;
     } catch (error) {
-      deploymentStatus = null;
-    }
-    if (deploymentStatus == null) {
-      status = StudyStatus.DeploymentNotAvailable;
       print(
-          "$runtimeType - Could not get deployment with id '${study!.studyDeploymentId}' from the deployment service: $deploymentService");
+        "$runtimeType - Could not get deployment with id '${study!.studyDeploymentId}' "
+        "from the deployment service: $_deploymentService."
+        "\nError: $error",
+      );
+      status = StudyStatus.DeploymentNotAvailable;
+      return deploymentStatus = null;
     }
+
+    // update the status based on the deployment status
+    if (deploymentStatus != null) {
+      if (deploymentStatus!.isDeploying) {
+        status = StudyStatus.Deploying;
+      } else if (deploymentStatus!.isAwaitingDeviceRegistrations) {
+        status = StudyStatus.AwaitingOtherDeviceRegistrations;
+      } else if (deploymentStatus!.isAwaitingDeviceDeployment) {
+        status = StudyStatus.AwaitingDeviceDeployment;
+      } else if (deploymentStatus!.isRegisteringDevices) {
+        status = StudyStatus.RegisteringDevices;
+      } else if (deploymentStatus!.isAwaitingOtherDeviceDeployments) {
+        status = StudyStatus.AwaitingOtherDeviceDeployments;
+      } else if (deploymentStatus!.isDeployed) {
+        status = StudyStatus.Deployed;
+      }
+    }
+
     return deploymentStatus;
   }
 
@@ -112,15 +139,16 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
   /// the client device using [deviceRegistration] and verifying the study is
   /// supported on this device.
   ///
-  /// Deployment entails trying to retrieve the [deployment] from the [deploymentService],
+  /// Deployment entails trying to retrieve the [deployment] from the [_deploymentService],
   /// based on the [studyDeploymentId].
   ///
   /// In case already deployed, nothing happens.
   Future<StudyStatus> tryDeployment() async {
     assert(
-        study != null,
-        'Cannot deploy without a valid study deployment id and device role name. '
-        "Call 'configure()' first.");
+      study != null,
+      'Cannot deploy without a valid study deployment id and device role name. '
+      "Call 'configure()' first.",
+    );
 
     // early out if already deployed.
     if (status.index >= StudyStatus.Deployed.index) return status;
@@ -132,7 +160,7 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
 
     // register the primary device for the given study deployment
     try {
-      deploymentStatus = await deploymentService.registerDevice(
+      deploymentStatus = await _deploymentService.registerDevice(
         study!.studyDeploymentId,
         study!.deviceRoleName,
         deviceRegistration!,
@@ -140,16 +168,18 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
     } catch (error) {
       // we only print a warning - this device may already be registered
       print(
-          "$runtimeType - Error registering '${study!.deviceRoleName}' as primary device.\n$error");
+        "$runtimeType - Error registering '${study!.deviceRoleName}' as primary device.\n$error",
+      );
     }
 
     // get the deployment from the deployment service
-    deployment = await deploymentService.getDeviceDeploymentFor(
+    deployment = await _deploymentService.getDeviceDeploymentFor(
       study!.studyDeploymentId,
       study!.deviceRoleName,
     );
     status = StudyStatus.DeviceDeploymentReceived;
 
+    // check for devices that still need to be registered
     if (deploymentStatus != null) {
       for (var deviceStatus in deploymentStatus!.deviceStatusList) {
         if (deviceStatus.status == DeviceDeploymentStatusTypes.Unregistered) {
@@ -160,7 +190,7 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
 
     // mark this deployment as successful
     try {
-      await deploymentService.deviceDeployed(
+      await _deploymentService.deviceDeployed(
         study!.studyDeploymentId,
         study!.deviceRoleName,
         deployment?.lastUpdatedOn ?? DateTime.now(),
@@ -169,27 +199,32 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
       // we only print a warning
       // see issue #50 - there is a bug in CAWS
       print(
-          "$runtimeType - Error marking deployment '${study!.studyDeploymentId}' as deployed.\n$error");
+        "$runtimeType - Error marking deployment '${study!.studyDeploymentId}' as deployed.\n$error",
+      );
     }
     print(
-        "$runtimeType - Study deployment '${study!.studyDeploymentId}' successfully deployed.");
+      "$runtimeType - Study deployment '${study!.studyDeploymentId}' successfully deployed.",
+    );
 
     return status = StudyStatus.Deployed;
   }
 
-  /// Tries to register a connected device which is available
-  /// in this device's [deviceRegistry] in the [deploymentService]
+  /// Tries to register the connected [device] with the deployment service.
+  /// The [device] must be available in this device's device registry.
   Future<void> tryRegisterConnectedDevice(DeviceConfiguration device) async {
     assert(
-        study != null,
-        "Cannot register a device without a valid study deployment. "
-        "Call 'configure()' first.");
+      study != null,
+      "Cannot register a device without a valid study deployment. "
+      "Call 'configure()' first.",
+    );
 
     String deviceType = device.type;
     String? deviceRoleName = device.roleName;
 
-    if (deviceRegistry.hasDevice(deviceType)) {
-      DeviceDataCollector deviceManager = deviceRegistry.getDevice(deviceType)!;
+    if (_deviceRegistry.hasDevice(deviceType)) {
+      DeviceDataCollector deviceManager = _deviceRegistry.getDevice(
+        deviceType,
+      )!;
 
       // create a registration based on the device manager's unique id and name of the device
       var registration = deviceManager.configuration?.createRegistration(
@@ -199,24 +234,26 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
 
       if (registration != null) {
         try {
-          deploymentStatus = (await deploymentService.registerDevice(
+          deploymentStatus = (await _deploymentService.registerDevice(
             study!.studyDeploymentId,
             deviceRoleName,
             registration,
           ));
         } catch (error) {
-          print("$runtimeType - failed to register device with role name "
-              "'$deviceRoleName' for study deployment '${study!.studyDeploymentId}' "
-              "at deployment service '$deploymentService'.\n"
-              "Error: $error\n"
-              "Continuing without registration.");
+          print(
+            "$runtimeType - failed to register device with role name "
+            "'$deviceRoleName' for study deployment '${study!.studyDeploymentId}' "
+            "at deployment service '$_deploymentService'.\n"
+            "Error: $error\n"
+            "Continuing without registration.",
+          );
         }
       }
     }
   }
 
   /// Tries to register the connected devices which still need to be registered
-  /// in the [deploymentService].
+  /// in the [_deploymentService].
   ///
   /// This is a convenient method for synchronizing the devices needed for a
   /// deployment and the available devices on this phone.

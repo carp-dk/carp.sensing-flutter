@@ -30,8 +30,10 @@ class FlutterLocalNotificationController implements NotificationController {
   Future<void> initialize() async {
     tz.initializeTimeZones();
 
-    List<Permission> permissions =
-        List.from([Permission.notification, Permission.scheduleExactAlarm]);
+    List<Permission> permissions = List.from([
+      Permission.notification,
+      Permission.scheduleExactAlarm,
+    ]);
     var status = await permissions.request();
     debug('$runtimeType - permissions: $status');
 
@@ -50,16 +52,16 @@ class FlutterLocalNotificationController implements NotificationController {
 
   final NotificationDetails _platformChannelSpecifics =
       const NotificationDetails(
-    android: AndroidNotificationDetails(
-      NotificationController.CHANNEL_ID,
-      NotificationController.CHANNEL_NAME,
-      channelDescription: NotificationController.CHANNEL_DESCRIPTION,
-      importance: Importance.max,
-      priority: Priority.max,
-      ongoing: true,
-    ),
-    iOS: DarwinNotificationDetails(),
-  );
+        android: AndroidNotificationDetails(
+          NotificationController.CHANNEL_ID,
+          NotificationController.CHANNEL_NAME,
+          channelDescription: NotificationController.CHANNEL_DESCRIPTION,
+          importance: Importance.max,
+          priority: Priority.max,
+          ongoing: true,
+        ),
+        iOS: DarwinNotificationDetails(),
+      );
 
   @override
   Future<int> createNotification({
@@ -78,14 +80,17 @@ class FlutterLocalNotificationController implements NotificationController {
   }
 
   @override
-  Future<int> scheduleNotification(
-      {int? id,
-      required String title,
-      String? body,
-      required DateTime schedule}) async {
+  Future<int> scheduleNotification({
+    int? id,
+    required String title,
+    String? body,
+    required DateTime schedule,
+  }) async {
     id ??= _random.nextInt(1000);
-    final time =
-        tz.TZDateTime.from(schedule, tz.getLocation(Settings().timezone));
+    final time = tz.TZDateTime.from(
+      schedule,
+      tz.getLocation(Settings().timezoneLocation),
+    );
 
     await FlutterLocalNotificationsPlugin().zonedSchedule(
       id,
@@ -100,14 +105,17 @@ class FlutterLocalNotificationController implements NotificationController {
   }
 
   @override
-  Future<int> scheduleRecurrentNotifications(
-      {int? id,
-      required String title,
-      String? body,
-      required RecurrentScheduledTrigger schedule}) async {
+  Future<int> scheduleRecurrentNotifications({
+    int? id,
+    required String title,
+    String? body,
+    required RecurrentScheduledTrigger schedule,
+  }) async {
     id ??= _random.nextInt(1000);
     final time = tz.TZDateTime.from(
-        schedule.firstOccurrence, tz.getLocation(Settings().timezone));
+      schedule.firstOccurrence,
+      tz.getLocation(Settings().timezoneLocation),
+    );
 
     DateTimeComponents recurrence = switch (schedule.type) {
       RecurrentType.daily => DateTimeComponents.time,
@@ -153,7 +161,9 @@ class FlutterLocalNotificationController implements NotificationController {
 
     if (task.triggerTime.isAfter(DateTime.now())) {
       final time = tz.TZDateTime.from(
-          task.triggerTime, tz.getLocation(Settings().timezone));
+        task.triggerTime,
+        tz.getLocation(Settings().timezoneLocation),
+      );
 
       await FlutterLocalNotificationsPlugin().zonedSchedule(
         task.id.hashCode,
@@ -167,8 +177,10 @@ class FlutterLocalNotificationController implements NotificationController {
       task.hasNotificationBeenCreated = true;
       debug('$runtimeType - Notification scheduled for $task at $time');
     } else {
-      warning('$runtimeType - Can only schedule a notification in the future. '
-          'task trigger time: ${task.triggerTime}.');
+      warning(
+        '$runtimeType - Can only schedule a notification in the future. '
+        'task trigger time: ${task.triggerTime}.',
+      );
     }
   }
 
@@ -196,6 +208,7 @@ void onDidReceiveNotificationResponse(NotificationResponse response) {
     AppTaskController().onNotification(payload);
   } else {
     warning(
-        "NotificationController - Error in callback from notification - payload is '$payload'");
+      "NotificationController - Error in callback from notification - payload is '$payload'",
+    );
   }
 }

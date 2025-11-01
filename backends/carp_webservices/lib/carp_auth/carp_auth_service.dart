@@ -250,10 +250,19 @@ class CarpAuthService {
     assert(_manager != null, 'Manager not configured. Call configure() first.');
     if (!_manager!.didInit) await initManager();
 
-    final OidcUser? response = await manager?.loginPassword(
-      username: username,
-      password: password,
-    );
+    OidcUser? response;
+
+    try {
+      response = await manager?.loginPassword(
+        username: username,
+        password: password,
+      );
+    } catch (error) {
+      throw CarpServiceException(
+        httpStatus: HTTPStatus(401),
+        message: 'Authentication failed due to an error: $error',
+      );
+    }
 
     if (response != null) {
       _currentUser = getCurrentUserProfile(response);

@@ -35,7 +35,7 @@ class Persistence {
   static const String DEVICE_ROLE_NAME_COLUMN = 'device_role_name';
   static const String PARTICIPANT_ID_COLUMN = 'participant_id';
   static const String PARTICIPANT_ROLE_NAME_COLUMN = 'participant_role_name';
-  static const String DEPLOYMENT_STATUS_COLUMN = 'deployment_status';
+  static const String STUDY_STATUS_COLUMN = 'study_status';
   static const String UPDATED_AT_COLUMN = 'updated_at';
   static const String DEPLOYED_AT_COLUMN = 'deployed_at';
   static const String DEPLOYMENT_COLUMN = 'deployment';
@@ -70,22 +70,26 @@ class Persistence {
       singleInstance: true,
       onCreate: (Database db, int version) async {
         // when creating the database, create the tables
-        await db.execute('CREATE TABLE $DEPLOYMENT_TABLE_NAME ('
-            '$STUDY_ID_COLUMN TEXT, '
-            '$STUDY_DEPLOYMENT_ID_COLUMN TEXT PRIMARY KEY, '
-            '$DEVICE_ROLE_NAME_COLUMN TEXT, '
-            '$PARTICIPANT_ID_COLUMN TEXT, '
-            '$PARTICIPANT_ROLE_NAME_COLUMN TEXT, '
-            '$DEPLOYMENT_STATUS_COLUMN INTEGER, '
-            '$UPDATED_AT_COLUMN TEXT, '
-            '$DEPLOYED_AT_COLUMN TEXT, '
-            '$DEPLOYMENT_COLUMN TEXT)');
+        await db.execute(
+          'CREATE TABLE $DEPLOYMENT_TABLE_NAME ('
+          '$STUDY_ID_COLUMN TEXT, '
+          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT PRIMARY KEY, '
+          '$DEVICE_ROLE_NAME_COLUMN TEXT, '
+          '$PARTICIPANT_ID_COLUMN TEXT, '
+          '$PARTICIPANT_ROLE_NAME_COLUMN TEXT, '
+          '$STUDY_STATUS_COLUMN INTEGER, '
+          '$UPDATED_AT_COLUMN TEXT, '
+          '$DEPLOYED_AT_COLUMN TEXT, '
+          '$DEPLOYMENT_COLUMN TEXT)',
+        );
 
-        await db.execute('CREATE TABLE $TASK_QUEUE_TABLE_NAME ('
-            '$ID_COLUMN INTEGER PRIMARY KEY, '
-            '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
-            '$TASK_ID_COLUMN TEXT, '
-            '$TASK_COLUMN TEXT)');
+        await db.execute(
+          'CREATE TABLE $TASK_QUEUE_TABLE_NAME ('
+          '$ID_COLUMN INTEGER PRIMARY KEY, '
+          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
+          '$TASK_ID_COLUMN TEXT, '
+          '$TASK_COLUMN TEXT)',
+        );
 
         debug('$runtimeType - $databaseName DB created');
       },
@@ -111,7 +115,8 @@ class Persistence {
     info("$runtimeType - Getting all study deployments stored on this device.");
     List<SmartphoneStudy> list = [];
     try {
-      final List<Map<String, Object?>> maps = await database?.query(
+      final List<Map<String, Object?>> maps =
+          await database?.query(
             DEPLOYMENT_TABLE_NAME,
             columns: [
               STUDY_ID_COLUMN,
@@ -119,7 +124,7 @@ class Persistence {
               DEVICE_ROLE_NAME_COLUMN,
               PARTICIPANT_ID_COLUMN,
               PARTICIPANT_ROLE_NAME_COLUMN,
-              DEPLOYMENT_STATUS_COLUMN,
+              STUDY_STATUS_COLUMN,
             ],
           ) ??
           [];
@@ -132,7 +137,7 @@ class Persistence {
             participantId: map[PARTICIPANT_ID_COLUMN] as String,
             participantRoleName: map[PARTICIPANT_ROLE_NAME_COLUMN] as String,
           );
-          final status = map[DEPLOYMENT_STATUS_COLUMN] as int;
+          final status = map[STUDY_STATUS_COLUMN] as int;
           study.status = StudyStatus.values[status];
           list.add(study);
         }
@@ -156,7 +161,7 @@ class Persistence {
         DEVICE_ROLE_NAME_COLUMN: deployment.deviceRoleName,
         PARTICIPANT_ID_COLUMN: deployment.participantId,
         PARTICIPANT_ROLE_NAME_COLUMN: deployment.participantRoleName,
-        DEPLOYMENT_STATUS_COLUMN: deployment.status.index,
+        STUDY_STATUS_COLUMN: deployment.status.index,
         UPDATED_AT_COLUMN: DateTime.now().toUtc().toIso8601String(),
         DEPLOYED_AT_COLUMN: deployment.deployed?.toUtc().toIso8601String(),
         DEPLOYMENT_COLUMN: jsonEncode(deployment),
@@ -179,7 +184,8 @@ class Persistence {
     info("$runtimeType - Restoring deployment, deploymentId: $deploymentId");
     SmartphoneDeployment? deployment;
     try {
-      final List<Map<String, Object?>> maps = await database?.query(
+      final List<Map<String, Object?>> maps =
+          await database?.query(
             DEPLOYMENT_TABLE_NAME,
             columns: [DEPLOYMENT_COLUMN],
             where: '$STUDY_DEPLOYMENT_ID_COLUMN = ?',
@@ -190,7 +196,8 @@ class Persistence {
       if (maps.isNotEmpty) {
         final jsonString = maps[0][DEPLOYMENT_COLUMN] as String;
         deployment = SmartphoneDeployment.fromJson(
-            json.decode(jsonString) as Map<String, dynamic>);
+          json.decode(jsonString) as Map<String, dynamic>,
+        );
       }
     } catch (exception) {
       warning('$runtimeType - Failed to restore deployment - $exception');
@@ -232,7 +239,8 @@ class Persistence {
           TASK_ID_COLUMN: task.id,
           TASK_COLUMN: jsonEncode(snapshot),
         };
-        int count = await database?.update(
+        int count =
+            await database?.update(
               TASK_QUEUE_TABLE_NAME,
               map,
               where: '$TASK_ID_COLUMN = ?',
@@ -263,7 +271,8 @@ class Persistence {
   Future<List<UserTaskSnapshot>> getUserTasks() async {
     List<UserTaskSnapshot> result = [];
     try {
-      final List<Map<String, Object?>> list = await database?.query(
+      final List<Map<String, Object?>> list =
+          await database?.query(
             TASK_QUEUE_TABLE_NAME,
             columns: [TASK_COLUMN],
           ) ??
@@ -272,8 +281,11 @@ class Persistence {
       if (list.isNotEmpty) {
         for (var element in list) {
           final jsonString = element[TASK_COLUMN] as String;
-          result.add(UserTaskSnapshot.fromJson(
-              json.decode(jsonString) as Map<String, dynamic>));
+          result.add(
+            UserTaskSnapshot.fromJson(
+              json.decode(jsonString) as Map<String, dynamic>,
+            ),
+          );
         }
       }
     } catch (exception) {

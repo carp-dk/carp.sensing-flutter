@@ -23,18 +23,16 @@ UserTaskSnapshot _$UserTaskSnapshotFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UserTaskSnapshotToJson(UserTaskSnapshot instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'id': instance.id,
       'task': instance.task.toJson(),
       'state': _$UserTaskStateEnumMap[instance.state]!,
       'enqueued': instance.enqueued.toIso8601String(),
       'triggerTime': instance.triggerTime.toIso8601String(),
-      if (instance.doneTime?.toIso8601String() case final value?)
-        'doneTime': value,
+      'doneTime': ?instance.doneTime?.toIso8601String(),
       'hasNotificationBeenCreated': instance.hasNotificationBeenCreated,
-      if (instance.studyDeploymentId case final value?)
-        'studyDeploymentId': value,
-      if (instance.deviceRoleName case final value?) 'deviceRoleName': value,
+      'studyDeploymentId': ?instance.studyDeploymentId,
+      'deviceRoleName': ?instance.deviceRoleName,
     };
 
 const _$UserTaskStateEnumMap = {

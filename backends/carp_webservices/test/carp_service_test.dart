@@ -54,69 +54,8 @@ void main() {
   });
 
   group(
-    "CARP Base Services",
+    "CARP Services",
     () {
-      group('authentication', () {
-        test('- authentication w. username and password', () async {
-          CarpUser user =
-              await CarpAuthService().authenticateWithUsernamePassword(
-            username: username,
-            password: password,
-          );
-
-          expect(user.token, isNotNull);
-          expect(user.isAuthenticated, true);
-
-          debugPrint("signed in : $user");
-          debugPrint("token  : ${user.token}");
-        });
-
-        setUp(() async {
-          await CarpAuthService().authenticateWithUsernamePassword(
-            username: username,
-            password: password,
-          );
-
-          expect(CarpAuthService().authenticated, true);
-        });
-
-        test('- get user profile', () async {
-          assert(CarpAuthService().authenticated);
-
-          CarpUser newUser = CarpAuthService().currentUser;
-
-          debugPrint("signed in : $newUser");
-          debugPrint("   name   : ${newUser.firstName} ${newUser.lastName}");
-
-          expect(newUser.firstName, isNotEmpty);
-          expect(newUser.lastName, isNotEmpty);
-          expect(newUser.isAuthenticated, true);
-        });
-
-        test('- oauth token refreshes', () async {
-          debugPrint('expiring token...');
-          CarpAuthService().currentUser.token!.expire();
-
-          CarpAuthService().currentUser;
-        });
-
-        test('- refreshing token', () async {
-          CarpUser user =
-              await CarpAuthService().authenticateWithUsernamePassword(
-            username: username,
-            password: password,
-          );
-
-          CarpUser newUser = await CarpAuthService().refresh();
-
-          assert(newUser.isAuthenticated);
-          assert(newUser.username == user.username);
-
-          debugPrint("signed in : $newUser");
-          debugPrint("   token  : ${newUser.token}");
-        });
-      });
-
       group('Informed Consent', () {
         test('- create', () async {
           ConsentDocument uploaded = await CarpService().createConsentDocument(

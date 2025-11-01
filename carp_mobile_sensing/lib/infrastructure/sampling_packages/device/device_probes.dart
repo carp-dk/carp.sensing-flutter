@@ -19,9 +19,7 @@ class BatteryProbe extends StreamProbe {
       try {
         int level = await battery.Battery().batteryLevel;
         controller.add(
-          Measurement.fromData(
-            BatteryState.fromBatteryState(level, state),
-          ),
+          Measurement.fromData(BatteryState.fromBatteryState(level, state)),
         );
       } catch (error) {
         controller.addError(error);
@@ -29,16 +27,17 @@ class BatteryProbe extends StreamProbe {
     }
 
     controller = StreamController<Measurement>(
-        onListen: () => subscription.resume(),
-        onPause: () => subscription.pause(),
-        onResume: () => subscription.resume(),
-        onCancel: () => subscription.cancel());
+      onListen: () => subscription.resume(),
+      onPause: () => subscription.pause(),
+      onResume: () => subscription.resume(),
+      onCancel: () => subscription.cancel(),
+    );
 
     subscription = battery.Battery().onBatteryStateChanged.listen(
-          onData,
-          onError: (Object error) => controller.addError(error),
-          onDone: () => controller.close(),
-        );
+      onData,
+      onError: (Object error) => controller.addError(error),
+      onDone: () => controller.close(),
+    );
 
     return controller.stream.asBroadcastStream();
   }
@@ -56,7 +55,8 @@ class ScreenProbe extends StreamProbe {
 
   @override
   Stream<Measurement> get stream => screen.screenStateStream.map(
-      (event) => Measurement.fromData(ScreenEvent.fromScreenStateEvent(event)));
+    (event) => Measurement.fromData(ScreenEvent.fromScreenStateEvent(event)),
+  );
 }
 
 /// A probe that collects free virtual memory on a regular basis
@@ -72,11 +72,9 @@ class MemoryProbe extends IntervalProbe {
   }
 
   @override
-  Future<Measurement?> getMeasurement() async =>
-      Measurement.fromData(FreeMemory(
-        SysInfo.getFreePhysicalMemory(),
-        SysInfo.getFreeVirtualMemory(),
-      ));
+  Future<Measurement?> getMeasurement() async => Measurement.fromData(
+    FreeMemory(SysInfo.getFreePhysicalMemory(), SysInfo.getFreeVirtualMemory()),
+  );
 }
 
 /// A probe that collects the device info about this device.
@@ -85,22 +83,25 @@ class DeviceProbe extends MeasurementProbe {
   Future<Measurement?> getMeasurement() async {
     await DeviceInfo().init();
 
-    return Measurement.fromData(DeviceInformation(
-      deviceData: DeviceInfo().deviceData,
-      platform: DeviceInfo().platform,
-      deviceId: DeviceInfo().deviceID,
-      deviceName: DeviceInfo().deviceName,
-      deviceModel: DeviceInfo().deviceModel,
-      deviceManufacturer: DeviceInfo().deviceManufacturer,
-      operatingSystem: DeviceInfo().operatingSystemName,
-      hardware: DeviceInfo().hardware,
-    ));
+    return Measurement.fromData(
+      DeviceInformation(
+        deviceData: DeviceInfo().deviceData,
+        platform: DeviceInfo().platform,
+        deviceId: DeviceInfo().deviceID,
+        deviceName: DeviceInfo().deviceName,
+        deviceModel: DeviceInfo().deviceModel,
+        deviceManufacturer: DeviceInfo().deviceManufacturer,
+        operatingSystem: DeviceInfo().operatingSystemName,
+        hardware: DeviceInfo().hardware,
+      ),
+    );
   }
 }
 
 /// A probe that collects the device's current timezone.
 class TimezoneProbe extends MeasurementProbe {
   @override
-  Future<Measurement?> getMeasurement() async =>
-      Measurement.fromData(Timezone(await FlutterTimezone.getLocalTimezone()));
+  Future<Measurement?> getMeasurement() async => Measurement.fromData(
+    Timezone((await FlutterTimezone.getLocalTimezone()).identifier),
+  );
 }

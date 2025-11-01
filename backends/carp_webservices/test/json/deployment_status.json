@@ -1,0 +1,117 @@
+{
+  "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Running",
+  "createdOn": "2025-05-20T10:40:52.642107760Z",
+  "studyDeploymentId": "c7807220-2b60-46e8-8301-4c0c2ab18bbd",
+  "deviceStatusList": [
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+        "isPrimaryDevice": true,
+        "roleName": "Primary Phone"
+      }
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.LocationService",
+        "accuracy": "balanced",
+        "distance": 10,
+        "interval": 60000000,
+        "roleName": "Location Service",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {},
+        "notificationOnTapBringToFront": false
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [],
+      "remainingDevicesToRegisterBeforeDeployment": []
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.WeatherService",
+        "apiKey": "12b6e28582eb9298577c734a31ba9f4f",
+        "roleName": "Weather Service",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {}
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [],
+      "remainingDevicesToRegisterBeforeDeployment": []
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.AirQualityService",
+        "apiKey": "9e538456b2b85c92647d8b65090e29f957638c77",
+        "roleName": "Air Quality Service",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {}
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [],
+      "remainingDevicesToRegisterBeforeDeployment": []
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.HealthService",
+        "roleName": "Health Service",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {}
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [],
+      "remainingDevicesToRegisterBeforeDeployment": []
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.PolarDevice",
+        "roleName": "Polar HR Sensor",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {}
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [
+        "Polar HR Sensor"
+      ],
+      "remainingDevicesToRegisterBeforeDeployment": [
+        "Polar HR Sensor"
+      ]
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.MovesenseDevice",
+        "roleName": "Movesense ECG Device",
+        "deviceType": "UNKNOWN",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {}
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [
+        "Movesense ECG Device"
+      ],
+      "remainingDevicesToRegisterBeforeDeployment": [
+        "Movesense ECG Device"
+      ]
+    }
+  ],
+  "participantStatusList": [
+    {
+      "participantId": "bf0641a4-0a8e-4424-9e62-9e12bf0821d4",
+      "assignedParticipantRoles": {
+        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+        "roleNames": [
+          "Participant"
+        ]
+      },
+      "assignedPrimaryDeviceRoleNames": [
+        "Primary Phone"
+      ]
+    }
+  ],
+  "startedOn": "2025-05-20T10:50:17.323751372Z"
+}

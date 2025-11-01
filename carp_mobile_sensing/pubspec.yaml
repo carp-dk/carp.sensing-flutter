@@ -4,7 +4,7 @@ version: 1.13.1
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 # This package only supports iOS and Android
@@ -29,16 +29,16 @@ dependencies:
   archive: ^4.0.0
   permission_handler: '>=11.0.0 <13.0.0'  # For requesting permissions on Android and iOS
   shared_preferences: ^2.2.0
-  package_info_plus: '>=6.0.0 <9.0.0'
+  package_info_plus: '>=6.0.0 <10.0.0'
   flutter_local_notifications: ^19.0.0    # For sending notification on AppTask
   cron: ^0.6.0                            # For scheduling / triggering cron jobs
   timezone: ^0.10.0                       # For collecting time zone information
-  flutter_timezone: ^4.0.0                # For getting local time zone for scheduling notifications
+  flutter_timezone: ^5.0.0                # For getting local time zone for scheduling notifications
 
   # probe-dependent plugins
   device_info_plus: ^12.1.0
-  sensors_plus: ^6.0.0
-  battery_plus: ^6.0.0
+  sensors_plus: ^7.0.0
+  battery_plus: ^7.0.0
 
   # CARP plugins
   pedometer: ^4.0.0       # Step count from local OS
@@ -47,11 +47,11 @@ dependencies:
 
 # Overriding carp core libraries to use the local copy
 # Remove this before release of package
-# dependency_overrides:
+dependency_overrides:
 #   carp_serializable:
 #     path: ../carp_serializable/
-  # carp_core:
-  #   path: ../carp_core/
+  carp_core:
+    path: ../carp_core/
 
 dev_dependencies:
   build_runner: any

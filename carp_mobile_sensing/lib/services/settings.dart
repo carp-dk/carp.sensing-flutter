@@ -11,7 +11,7 @@ part of '../services.dart';
 ///  * getting shared preferences - see [preferences]
 ///  * getting app info - see [packageInfo]
 ///  * generating a unique and anonymous user id - see [userId]
-///  * getting the timezone of the app - see [timezone]
+///  * getting the timezone of the app - see [timezoneLocation]
 ///
 class Settings {
   static const String USER_ID_KEY = 'user_id';
@@ -118,21 +118,21 @@ class Settings {
   ///
   ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/cache`
   ///
-  Future<
-      String> getCacheBasePath(String studyDeploymentId) async => (await Directory(
-              '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_CACHE_FILE_PATH')
-          .create(recursive: true))
-      .path;
+  Future<String> getCacheBasePath(
+    String studyDeploymentId,
+  ) async => (await Directory(
+    '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_CACHE_FILE_PATH',
+  ).create(recursive: true)).path;
 
   /// The base path for storing all data (e.g. media files).
   ///
   ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/data`
   ///
-  Future<
-      String> getDataBasePath(String studyDeploymentId) async => (await Directory(
-              '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_DATA_FILE_PATH')
-          .create(recursive: true))
-      .path;
+  Future<String> getDataBasePath(
+    String studyDeploymentId,
+  ) async => (await Directory(
+    '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_DATA_FILE_PATH',
+  ).create(recursive: true)).path;
 
   // /// The base path for storing all cached data.
   // ///
@@ -167,8 +167,8 @@ class Settings {
   //   return dataPath;
   // }
 
-  /// The local time zone setting of this app.
-  String get timezone => _timezone;
+  /// The current time zone location of this app.
+  String get timezoneLocation => _timezone;
 
   /// Initialize settings. Must be called before using any settings.
   Future<void> init() async {
@@ -186,20 +186,21 @@ class Settings {
     await localApplicationPath.then((_) => carpBasePath);
 
     debug('$runtimeType - Shared Preferences:');
-    _preferences!
-        .getKeys()
-        .forEach((key) => debug('[$key] : ${_preferences!.get(key)}'));
+    _preferences!.getKeys().forEach(
+      (key) => debug('[$key] : ${_preferences!.get(key)}'),
+    );
 
     // setting up time zone settings
     tz.initializeTimeZones();
     try {
-      _timezone = await FlutterTimezone.getLocalTimezone();
+      _timezone = (await FlutterTimezone.getLocalTimezone()).identifier;
     } catch (_) {
       _timezone = tz.local.name;
       warning(
-          'Could not get the local timezone - setting timezone to $timezone');
+        'Could not get the local timezone - setting timezone to $timezoneLocation',
+      );
     }
-    info('Time zone set to $timezone');
+    info('Time zone set to $timezoneLocation');
     info('$runtimeType initialized');
   }
 
@@ -214,8 +215,10 @@ class Settings {
   /// on the phone in-between sessions, and will therefore be the same for
   /// the same app on the same phone.
   Future<String> get userId async {
-    assert(_preferences != null,
-        "Setting is not initialized. Call 'Setting().init()' first.");
+    assert(
+      _preferences != null,
+      "Setting is not initialized. Call 'Setting().init()' first.",
+    );
     if (_userId == null) {
       _userId = preferences!.get(USER_ID_KEY) as String?;
       if (_userId == null) {

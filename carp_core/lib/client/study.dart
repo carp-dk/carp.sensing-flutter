@@ -42,9 +42,12 @@ enum StudyStatus {
   /// The study deployment process hasn't been started yet.
   DeploymentNotStarted,
 
-  /// Once a deployment for this study has started, and [StudyRuntime.status] is
-  /// available, regardless of whether the deployment is now [Running] or [Stopped].
+  /// The study has been deployed in the deployment service and its status is
+  /// available.
   DeploymentStatusAvailable,
+
+  /// The study deployment is not available.
+  DeploymentNotAvailable,
 
   /// The study deployment process is ongoing, but not yet completed.
   Deploying,
@@ -53,7 +56,7 @@ enum StudyStatus {
   /// other primary devices in the study deployment need to be registered first.
   AwaitingOtherDeviceRegistrations,
 
-  /// The study deployment is ready to deliver the deployment information to
+  /// The deployment service is ready to deliver the deployment information to
   /// this primary device.
   AwaitingDeviceDeployment,
 
@@ -67,17 +70,15 @@ enum StudyStatus {
   /// but awaiting deployment of other devices in this study deployment.
   AwaitingOtherDeviceDeployments,
 
-  /// Study runtime status when deployment has been successfully completed.
+  /// Deployment has been successfully completed.
   /// The [PrimaryDeviceDeployment] has been retrieved and all necessary plugins
   /// to execute the study have been loaded.
   Deployed,
 
-  /// The study is resumed and is sampling data.
+  /// The study is started and is sampling data.
   Running,
 
-  /// The study has been stopped, either by this client or researcher.
+  /// The study has been stopped, either from this client or via the deployment
+  /// service.
   Stopped,
-
-  /// The study deployment is not available.
-  DeploymentNotAvailable,
 }

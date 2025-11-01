@@ -91,8 +91,9 @@ class OneTimeTriggerExecutor extends TriggerExecutor<OneTimeTrigger> {
       onTrigger();
     } else {
       warning(
-          "$runtimeType - one time trigger already occurred at: ${configuration?.triggerTimestamp}. "
-          'Will not trigger now.');
+        "$runtimeType - one time trigger already occurred at: ${configuration?.triggerTimestamp}. "
+        'Will not trigger now.',
+      );
       return false;
     }
     return true;
@@ -108,8 +109,10 @@ class PassiveTriggerExecutor extends TriggerExecutor<PassiveTrigger> {
   // Forward to the embedded trigger executor
   @override
   bool onInitialize() {
-    configuration!.executor
-        .initialize(configuration as TriggerConfiguration, deployment!);
+    configuration!.executor.initialize(
+      configuration as TriggerConfiguration,
+      deployment!,
+    );
     return true;
   }
 }
@@ -139,17 +142,20 @@ class ElapsedTimeTriggerExecutor
   Future<bool> onStart() async {
     if (deployment?.deployed == null) {
       warning(
-          '$runtimeType - This deployment does not have a start time. Cannot execute this trigger.');
+        '$runtimeType - This deployment does not have a start time. Cannot execute this trigger.',
+      );
       return false;
     }
 
     if (configuration?.elapsedTime == null) {
       warning(
-          '$runtimeType - This ElapsedTimeTrigger does not have a elapsedTime specified. Cannot execute this trigger.');
+        '$runtimeType - This ElapsedTimeTrigger does not have a elapsedTime specified. Cannot execute this trigger.',
+      );
       return false;
     }
 
-    int delay = configuration!.elapsedTime!.inMilliseconds -
+    int delay =
+        configuration!.elapsedTime!.inMilliseconds -
         (DateTime.now().millisecondsSinceEpoch -
             deployment!.deployed!.millisecondsSinceEpoch);
 
@@ -157,7 +163,8 @@ class ElapsedTimeTriggerExecutor
       timer = Timer(Duration(milliseconds: delay), () => onTrigger());
     } else {
       warning(
-          '$runtimeType - the trigger time is in the past and should have happened already.');
+        '$runtimeType - the trigger time is in the past and should have happened already.',
+      );
       return false;
     }
 
@@ -196,9 +203,9 @@ class DateTimeTriggerExecutor
   @override
   List<DateTime> getSchedule(DateTime from, DateTime to, [int? max]) =>
       (configuration!.schedule.isAfter(from) &&
-              configuration!.schedule.isBefore(to))
-          ? [configuration!.schedule]
-          : [];
+          configuration!.schedule.isBefore(to))
+      ? [configuration!.schedule]
+      : [];
 
   @override
   Future<bool> onStart() async {
@@ -255,9 +262,10 @@ class CronScheduledTriggerExecutor
   @override
   List<DateTime> getSchedule(DateTime from, DateTime to, [int max = 100]) {
     var cronIterator = Cron().parse(
-        configuration!.cronExpression,
-        Settings().timezone,
-        tz.TZDateTime.from(from, tz.getLocation(Settings().timezone)));
+      configuration!.cronExpression,
+      Settings().timezoneLocation,
+      tz.TZDateTime.from(from, tz.getLocation(Settings().timezoneLocation)),
+    );
     final List<DateTime> schedule = [];
     int count = 0;
 
@@ -299,15 +307,15 @@ class SamplingEventTriggerExecutor
         ?.measurementsByType(configuration!.measureType)
         .distinct()
         .listen((measurement) {
-      if (configuration?.triggerCondition == null) {
-        // always trigger if the condition is null
-        onTrigger();
-      } else
-      // check the trigger condition
-      if (measurement.data.equivalentTo(configuration!.triggerCondition!)) {
-        onTrigger();
-      }
-    });
+          if (configuration?.triggerCondition == null) {
+            // always trigger if the condition is null
+            onTrigger();
+          } else
+          // check the trigger condition
+          if (measurement.data.equivalentTo(configuration!.triggerCondition!)) {
+            onTrigger();
+          }
+        });
     return true;
   }
 
@@ -329,11 +337,11 @@ class ConditionalSamplingEventTriggerExecutor
         .getStudyRuntime(deployment!.studyDeploymentId)
         ?.measurementsByType(configuration!.measureType)
         .listen((measurement) {
-      if (configuration!.triggerCondition != null &&
-          configuration!.triggerCondition!(measurement)) {
-        onTrigger();
-      }
-    });
+          if (configuration!.triggerCondition != null &&
+              configuration!.triggerCondition!(measurement)) {
+            onTrigger();
+          }
+        });
     return true;
   }
 
@@ -390,7 +398,8 @@ class RandomRecurrentTriggerExecutor
   TimeOfDay get randomTime {
     TimeOfDay randomTime = const TimeOfDay();
     do {
-      int randomHour = startTime.hour +
+      int randomHour =
+          startTime.hour +
           ((endTime.hour - startTime.hour == 0)
               ? 0
               : Random().nextInt(endTime.hour - startTime.hour));
@@ -432,7 +441,13 @@ class RandomRecurrentTriggerExecutor
     while (day.isBefore(toDay) && count < max) {
       for (var time in samplingTimes) {
         final date = DateTime(
-            day.year, day.month, day.day, time.hour, time.minute, time.second);
+          day.year,
+          day.month,
+          day.day,
+          time.hour,
+          time.minute,
+          time.second,
+        );
         if (date.isAfter(from) && date.isBefore(to)) schedule.add(date);
       }
 
@@ -449,7 +464,8 @@ class RandomRecurrentTriggerExecutor
     if (TimeOfDay.now().isAfter(startTime)) {
       if (!hasBeenScheduledForToday) {
         debug(
-            '$runtimeType - timers has not been scheduled for today ($todayString) - scheduling now');
+          '$runtimeType - timers has not been scheduled for today ($todayString) - scheduling now',
+        );
         _scheduleTimers();
       }
     }
@@ -492,8 +508,9 @@ class UserTaskTriggerExecutor extends TriggerExecutor<UserTaskTrigger> {
   @override
   Future<bool> onStart() async {
     // listen for event of the specified type and trigger as needed
-    _subscription ??=
-        AppTaskController().userTaskEvents.listen((userTask) async {
+    _subscription ??= AppTaskController().userTaskEvents.listen((
+      userTask,
+    ) async {
       if (userTask.task.name == configuration!.taskName &&
           userTask.state == configuration!.triggerCondition) {
         onTrigger();
@@ -517,8 +534,7 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
   @override
   Future<bool> onStart() async {
     _timer = Timer.periodic(Duration(minutes: 1), (_) {
-      if (!AppTaskController()
-          .userTaskQueue
+      if (!AppTaskController().userTaskQueue
           .where((task) => task.state == UserTaskState.enqueued)
           .any((task) => task.name == configuration!.taskName)) {
         onTrigger();
