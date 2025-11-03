@@ -24,7 +24,11 @@ dependencies:
   mdsflutter: ^2.3.1
   package_info_plus: ^8.3.1
   permission_handler: '>=11.0.0 <13.0.0'
-  
+  shared_preferences: ^2.5.3
+  sqflite: ^2.4.2
+  health: ^13.2.0
+  flutter_blue_plus: '>=1.29.0 <3.0.0'
+
   #carp_serializable: ^1.1.0
   #carp_core: ^0.30.0
   #carp_mobile_sensing: ^0.30.6
@@ -42,10 +46,7 @@ dependencies:
   # carp_movisens_package: ^0.32.0
 
   research_package: ^2.0.0
-  shared_preferences: ^2.5.3
-  sqflite: ^2.4.2
-  health: ^13.2.0
-  flutter_blue_plus: ^1.36.8
+
 
 # Overriding carp libraries to use the local copy
 dependency_overrides:

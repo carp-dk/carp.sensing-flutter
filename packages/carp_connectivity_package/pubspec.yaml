@@ -19,7 +19,7 @@ dependencies:
   json_annotation: ^4.8.0
   connectivity_plus: ^7.0.0    # connectivity events
   network_info_plus: ^7.0.0    # wifi ssid name
-  flutter_blue_plus: ^2.0.0   # bluetooth scan
+  flutter_blue_plus: '>=1.29.0 <3.0.0'  # bluetooth scan
   dchs_flutter_beacon: ^0.6.4  # collecting nearby iBeacon devices
   crypto: ^3.0.0               # hashing sensitive data
   permission_handler: '>=11.0.0 <13.0.0'

@@ -16,7 +16,7 @@ dependencies:
     sdk: flutter
   meta: ^1.11.0
   json_annotation: ^4.8.0
-  connectivity_plus: ^6.0.0
+  connectivity_plus: '>=6.0.0 <8.0.0'
   sqflite: ^2.2.0
 
   carp_serializable: ^2.0.0
