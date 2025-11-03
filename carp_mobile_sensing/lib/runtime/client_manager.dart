@@ -7,13 +7,7 @@
 part of '../runtime.dart';
 
 /// The possible states of the [SmartPhoneClientManager].
-enum ClientManagerState {
-  created,
-  configured,
-  started,
-  stopped,
-  disposed,
-}
+enum ClientManagerState { created, configured, started, stopped, disposed }
 
 class SmartPhoneClientManager extends ClientManager
     with WidgetsBindingObserver {
@@ -128,8 +122,9 @@ class SmartPhoneClientManager extends ClientManager
     _askForPermissions = askForPermissions;
 
     // initialize the app task controller singleton
-    await AppTaskController()
-        .initialize(enableNotifications: enableNotifications);
+    await AppTaskController().initialize(
+      enableNotifications: enableNotifications,
+    );
 
     super.configure(
       deploymentService: deploymentService,
@@ -165,15 +160,14 @@ class SmartPhoneClientManager extends ClientManager
     await super.addStudy(study);
 
     // Always create a new controller
-    final controller =
-        SmartphoneDeploymentController(deploymentService!, deviceController);
+    final controller = SmartphoneDeploymentController(
+      deploymentService!,
+      deviceController,
+    );
     repository[study.studyDeploymentId] = controller;
     _group.add(controller.measurements);
 
-    await controller.addStudy(
-      study,
-      registration!,
-    );
+    await controller.addStudy(study, registration!);
     info('$runtimeType - Added study: $study');
 
     return study as SmartphoneStudy;
@@ -187,9 +181,12 @@ class SmartPhoneClientManager extends ClientManager
   ///
   /// Returns the newly added study.
   Future<SmartphoneStudy> addStudyFromInvitation(
-      ActiveParticipationInvitation invitation) async {
-    assert(deploymentService != null,
-        'Deployment Service has not been configured. Call configure() first.');
+    ActiveParticipationInvitation invitation,
+  ) async {
+    assert(
+      deploymentService != null,
+      'Deployment Service has not been configured. Call configure() first.',
+    );
 
     final study = SmartphoneStudy(
       studyId: invitation.studyId,
@@ -214,8 +211,10 @@ class SmartPhoneClientManager extends ClientManager
     StudyProtocol protocol, [
     String? studyDeploymentId,
   ]) async {
-    assert(deploymentService != null,
-        'Deployment Service has not been configured. Call configure() first.');
+    assert(
+      deploymentService != null,
+      'Deployment Service has not been configured. Call configure() first.',
+    );
 
     final status = await deploymentService!.createStudyDeployment(
       protocol,
@@ -228,11 +227,12 @@ class SmartPhoneClientManager extends ClientManager
 
     final study = SmartphoneStudy(
       studyDeploymentId: status.studyDeploymentId,
-      deviceRoleName: status.primaryDeviceStatus!.device.roleName,
+      deviceRoleName: protocol.primaryDevice.roleName,
       // we expect that this is a "local" protocol where we use the user id as
       // participant id and with just one participant
       participantId: userId,
-      participantRoleName: protocol.participantRoles == null ||
+      participantRoleName:
+          protocol.participantRoles == null ||
               protocol.participantRoles!.isEmpty
           ? 'Participant'
           : protocol.participantRoles?.first.role,

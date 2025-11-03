@@ -419,12 +419,6 @@ const _$StudyStatusEnumMap = {
   StudyStatus.DeploymentStatusAvailable: 'DeploymentStatusAvailable',
   StudyStatus.DeploymentNotAvailable: 'DeploymentNotAvailable',
   StudyStatus.Deploying: 'Deploying',
-  StudyStatus.AwaitingOtherDeviceRegistrations:
-      'AwaitingOtherDeviceRegistrations',
-  StudyStatus.AwaitingDeviceDeployment: 'AwaitingDeviceDeployment',
-  StudyStatus.DeviceDeploymentReceived: 'DeviceDeploymentReceived',
-  StudyStatus.RegisteringDevices: 'RegisteringDevices',
-  StudyStatus.AwaitingOtherDeviceDeployments: 'AwaitingOtherDeviceDeployments',
   StudyStatus.Deployed: 'Deployed',
   StudyStatus.Running: 'Running',
   StudyStatus.Stopped: 'Stopped',
