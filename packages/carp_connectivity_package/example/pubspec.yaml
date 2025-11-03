@@ -10,14 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  carp_core: ^1.8.0
-  carp_mobile_sensing: ^1.10.0
-  
-dependency_overrides:
-  carp_core:
-    path: ../../../carp_core/
-  carp_mobile_sensing:
-    path: ../../../carp_mobile_sensing
   carp_connectivity_package:
     path: ../
 

@@ -4,7 +4,7 @@ version: 1.8.0
 homepage: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/packages/carp_communication_package
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 platforms:
@@ -31,10 +31,10 @@ dependencies:
 dependency_overrides:
   # carp_serializable:
   #   path: ../../carp_serializable/
-  # carp_core:
-  #   path: ../../carp_core/
-  # carp_mobile_sensing:
-  #   path: ../../carp_mobile_sensing/
+  carp_core:
+    path: ../../carp_core/
+  carp_mobile_sensing:
+    path: ../../carp_mobile_sensing/
 
   # in order to publish the package, use "flutter pub publish --skip-validation"
   device_calendar:

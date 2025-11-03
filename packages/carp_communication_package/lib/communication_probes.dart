@@ -18,13 +18,17 @@ class PhoneLogProbe extends MeasurementProbe {
         ? m.lastTime!.millisecondsSinceEpoch
         : DateTime.now().subtract(m.past).millisecondsSinceEpoch;
     int now = DateTime.now().millisecondsSinceEpoch;
-    Iterable<CallLogEntry> entries =
-        await CallLog.query(dateFrom: from, dateTo: now);
-    return Measurement.fromData(PhoneLog(
-      m.lastTime!,
-      DateTime.now(),
-      entries.map((call) => PhoneCall.fromCallLogEntry(call)).toList(),
-    ));
+    Iterable<CallLogEntry> entries = await CallLog.query(
+      dateFrom: from,
+      dateTo: now,
+    );
+    return Measurement.fromData(
+      PhoneLog(
+        m.lastTime!,
+        DateTime.now(),
+        entries.map((call) => PhoneCall.fromCallLogEntry(call)).toList(),
+      ),
+    );
   }
 }
 
@@ -52,14 +56,19 @@ class TextMessageLogProbe extends MeasurementProbe {
   Future<Measurement> getMeasurement() async {
     List<SmsMessage> allSms = [];
     allSms
-      ..addAll(await Telephony.instance.getInboxSms(
-        columns: ALL_SMS_COLUMNS,
-      ))
-      ..addAll(await Telephony.instance.getSentSms(
-        columns: ALL_SMS_COLUMNS,
-      ));
-    return Measurement.fromData(TextMessageLog(
-        allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList()));
+      ..addAll(
+        await Telephony.backgroundInstance.getInboxSms(
+          columns: ALL_SMS_COLUMNS,
+        ),
+      )
+      ..addAll(
+        await Telephony.backgroundInstance.getSentSms(columns: ALL_SMS_COLUMNS),
+      );
+    return Measurement.fromData(
+      TextMessageLog(
+        allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList(),
+      ),
+    );
   }
 }
 
@@ -70,12 +79,13 @@ StreamController<Measurement> _textMessageProbeController =
 /// The top-level call-back method for handling in-coming SMS messages when
 /// the app is in the background.
 void backgroundMessageHandler(SmsMessage message) async {
-  _textMessageProbeController
-      .add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
+  _textMessageProbeController.add(
+    Measurement.fromData(TextMessage.fromSmsMessage(message)),
+  );
 }
 
 /// The [TextMessageProbe] listens to SMS messages and collects a
-/// [TextMessageDatum] every time a new SMS message is received.
+/// [TextMessage] every time a new SMS message is received.
 ///
 /// Only works on Android.
 class TextMessageProbe extends StreamProbe {
@@ -88,10 +98,11 @@ class TextMessageProbe extends StreamProbe {
       throw SensingException('TextMessageProbe only available on Android.');
     }
 
-    Telephony.instance.listenIncomingSms(
+    Telephony.backgroundInstance.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
-        _textMessageProbeController
-            .add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
+        _textMessageProbeController.add(
+          Measurement.fromData(TextMessage.fromSmsMessage(message)),
+        );
       },
       onBackgroundMessage: backgroundMessageHandler,
     );
@@ -139,8 +150,10 @@ class CalendarProbe extends MeasurementProbe {
     startDate = DateTime.now().subtract(samplingConfiguration.past);
     endDate = DateTime.now().add(samplingConfiguration.future);
 
-    var calendarEventsResult = await _deviceCalendar.retrieveEvents(calendar.id,
-        cal.RetrieveEventsParams(startDate: startDate, endDate: endDate));
+    var calendarEventsResult = await _deviceCalendar.retrieveEvents(
+      calendar.id,
+      cal.RetrieveEventsParams(startDate: startDate, endDate: endDate),
+    );
     List<cal.Event>? calendarEvents = calendarEventsResult.data;
     if (calendarEvents != null) {
       for (var event in calendarEvents) {
@@ -177,8 +190,9 @@ class CalendarProbe extends MeasurementProbe {
         data: Calendar(startDate!, endDate!)..calendarEvents = _events,
       );
     } else {
-      return Measurement.fromData(Error(
-          message: 'Permission to collect calendar entries not granted.'));
+      return Measurement.fromData(
+        Error(message: 'Permission to collect calendar entries not granted.'),
+      );
     }
   }
 }
