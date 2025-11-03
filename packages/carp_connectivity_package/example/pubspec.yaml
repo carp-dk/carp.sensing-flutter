@@ -4,8 +4,8 @@ version: 1.1.0
 publish_to: none
 
 environment:
-  sdk: ">=2.17.0 <4.0.0"
-  flutter: ">=3.0.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.19.0"
 
 dependencies:
   flutter:
@@ -13,10 +13,11 @@ dependencies:
   carp_core: ^1.8.0
   carp_mobile_sensing: ^1.10.0
   
-  # carp_core:
-  #   path: ../../../carp_core/
-  # carp_mobile_sensing:
-  #   path: ../../../carp_mobile_sensing
+dependency_overrides:
+  carp_core:
+    path: ../../../carp_core/
+  carp_mobile_sensing:
+    path: ../../../carp_mobile_sensing
   carp_connectivity_package:
     path: ../
 
