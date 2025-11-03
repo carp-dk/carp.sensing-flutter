@@ -122,8 +122,9 @@ void main() {
           .getStudyDeploymentStatus(testDeploymentId);
 
       final study = await CarpDeploymentService().getDeviceDeploymentFor(
-          status.studyDeploymentId,
-          status.primaryDeviceStatus!.device.roleName);
+        status.studyDeploymentId,
+        "Father's Phone",
+      );
       print(toJsonString(study));
     });
   });

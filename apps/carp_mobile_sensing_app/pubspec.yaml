@@ -13,7 +13,7 @@ platforms:
   ios:
 
 dependencies:
-  battery_plus: ^6.2.3
+  battery_plus: ^7.0.0
   device_calendar: ^4.3.1
   device_info_plus: ^12.1.0
   flutter:

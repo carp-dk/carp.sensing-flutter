@@ -48,7 +48,8 @@ abstract class CarpBaseService {
   CarpApp get app {
     if (_app == null) {
       throw CarpServiceException(
-          message: "CARP Service not configured. Call 'configure()' first.");
+        message: "CARP Service not configured. Call 'configure()' first.",
+      );
     } else {
       return _app!;
     }
@@ -86,7 +87,8 @@ abstract class CarpBaseService {
       return study!.studyId!;
     } else {
       throw CarpServiceException(
-          message: 'No study ID specified for CAWS endpoint.');
+        message: 'No study ID specified for CAWS endpoint.',
+      );
     }
   }
 
@@ -100,7 +102,22 @@ abstract class CarpBaseService {
     if (study != null) return study!.studyDeploymentId;
 
     throw CarpServiceException(
-        message: 'No study deployment ID specified for CAWS end point.');
+      message: 'No study deployment ID specified for CAWS end point.',
+    );
+  }
+
+  /// Resolve the primary device role name.
+  ///
+  /// Returns [deviceRoleName] if not null. Otherwise returns the device role
+  /// name specified in the [study], if available.
+  /// Throws an error if device role name cannot be resolved.
+  String getPrimaryDeviceRoleName([String? deviceRoleName]) {
+    if (deviceRoleName != null) return deviceRoleName;
+    if (study != null) return study!.deviceRoleName;
+
+    throw CarpServiceException(
+      message: 'No primary device role name specified for CAWS end point.',
+    );
   }
 
   /// The endpoint name for this service at CARP.
@@ -116,15 +133,16 @@ abstract class CarpBaseService {
   Map<String, String> get headers {
     if (CarpAuthService().currentUser.token == null) {
       throw CarpServiceException(
-          message:
-              "OAuth token is null. Call 'CarpAuthService().authenticate()' first.");
+        message:
+            "OAuth token is null. Call 'CarpAuthService().authenticate()' first.",
+      );
     }
 
     return {
       "Content-Type": "application/json",
       "Authorization":
           "bearer ${CarpAuthService().currentUser.token!.accessToken}",
-      "cache-control": "no-cache"
+      "cache-control": "no-cache",
     };
   }
 
@@ -270,18 +288,18 @@ abstract class CarpBaseService {
   /// See issue : https://github.com/cph-cachet/carp.sensing-flutter/issues/369
   http.Response _clean(http.Response response) =>
       response.body.startsWith('<html>')
-          ? http.Response(
-              '{'
-              '"statusCode": 502,'
-              '"message": "502 Bad Gateway.",'
-              '"path": "POST ${response.request?.url}"'
-              '}',
-              response.statusCode,
-              headers: response.headers,
-              isRedirect: response.isRedirect,
-              persistentConnection: response.persistentConnection,
-              reasonPhrase: response.reasonPhrase,
-              request: response.request,
-            )
-          : response;
+      ? http.Response(
+          '{'
+          '"statusCode": 502,'
+          '"message": "502 Bad Gateway.",'
+          '"path": "POST ${response.request?.url}"'
+          '}',
+          response.statusCode,
+          headers: response.headers,
+          isRedirect: response.isRedirect,
+          persistentConnection: response.persistentConnection,
+          reasonPhrase: response.reasonPhrase,
+          request: response.request,
+        )
+      : response;
 }

@@ -14,7 +14,7 @@ class CarpDeploymentService extends CarpBaseService
 
   CarpDeploymentService._();
 
-  /// Returns the singleton default instance of the [CarpDeploymentService].
+  /// Singleton default instance of the [CarpDeploymentService].
   /// Before this instance can be used, it must be configured using the
   /// [configure] method.
   factory CarpDeploymentService() => _instance;
@@ -22,11 +22,17 @@ class CarpDeploymentService extends CarpBaseService
   @override
   String get rpcEndpointName => "deployment-service";
 
-  /// Gets a [DeploymentReference] for a [studyDeploymentId].
-  /// [studyDeploymentId] can be omitted if specified as part of this
-  /// service's [study].
-  DeploymentReference deployment([String? studyDeploymentId]) =>
-      DeploymentReference._(this, getStudyDeploymentId(studyDeploymentId));
+  /// Gets a [DeploymentReference] for a [studyDeploymentId] and [primaryDeviceRoleName].
+  /// [studyDeploymentId] and [primaryDeviceRoleName] can be omitted if already
+  /// specified as part of this service's [study].
+  DeploymentReference deployment([
+    String? studyDeploymentId,
+    String? primaryDeviceRoleName,
+  ]) => DeploymentReference._(
+    this,
+    getStudyDeploymentId(studyDeploymentId),
+    getPrimaryDeviceRoleName(primaryDeviceRoleName),
+  );
 
   @override
   Future<StudyDeploymentStatus> createStudyDeployment(
@@ -34,37 +40,45 @@ class CarpDeploymentService extends CarpBaseService
     List<ParticipantInvitation> invitations = const [],
     String? id,
     Map<String, DeviceRegistration>? connectedDevicePreregistrations,
-  ]) async =>
-      StudyDeploymentStatus.fromJson(await _rpc(CreateStudyDeployment(
+  ]) async => StudyDeploymentStatus.fromJson(
+    await _rpc(
+      CreateStudyDeployment(
         protocol,
         invitations,
         connectedDevicePreregistrations,
-      )));
+      ),
+    ),
+  );
 
   @override
   Future<Set<String>> removeStudyDeployments(Set<String> studyDeploymentIds) =>
       throw CarpServiceException(
-          message:
-              'Removing study deployments is not supported from the client side.');
+        message:
+            'Removing study deployments is not supported from the client side.',
+      );
 
   @override
   Future<StudyDeploymentStatus> getStudyDeploymentStatus(
-          String studyDeploymentId) async =>
-      StudyDeploymentStatus.fromJson(
-          await _rpc(GetStudyDeploymentStatus(studyDeploymentId)));
+    String studyDeploymentId,
+  ) async => StudyDeploymentStatus.fromJson(
+    await _rpc(GetStudyDeploymentStatus(studyDeploymentId)),
+  );
 
   @override
   Future<List<StudyDeploymentStatus>> getStudyDeploymentStatusList(
-      List<String> studyDeploymentIds) async {
+    List<String> studyDeploymentIds,
+  ) async {
     // fast out if not ids specified
     if (studyDeploymentIds.isEmpty) return [];
 
-    Map<String, dynamic> responseJson =
-        await _rpc(GetStudyDeploymentStatusList(studyDeploymentIds));
+    Map<String, dynamic> responseJson = await _rpc(
+      GetStudyDeploymentStatusList(studyDeploymentIds),
+    );
 
     // we expect a list of 'items'
-    List<Map<String, dynamic>> items = json
-        .decode(responseJson['items'].toString()) as List<Map<String, dynamic>>;
+    List<Map<String, dynamic>> items =
+        json.decode(responseJson['items'].toString())
+            as List<Map<String, dynamic>>;
     List<StudyDeploymentStatus> statusList = [];
     for (var item in items) {
       statusList.add(StudyDeploymentStatus.fromJson(item));
@@ -78,18 +92,17 @@ class CarpDeploymentService extends CarpBaseService
     String studyDeploymentId,
     String deviceRoleName,
     DeviceRegistration registration,
-  ) async =>
-      StudyDeploymentStatus.fromJson(await _rpc(RegisterDevice(
-        studyDeploymentId,
-        deviceRoleName,
-        registration,
-      )));
+  ) async => StudyDeploymentStatus.fromJson(
+    await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration)),
+  );
 
   @override
   Future<StudyDeploymentStatus> unregisterDevice(
-          String studyDeploymentId, String deviceRoleName) async =>
-      StudyDeploymentStatus.fromJson(
-          await _rpc(UnregisterDevice(studyDeploymentId, deviceRoleName)));
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async => StudyDeploymentStatus.fromJson(
+    await _rpc(UnregisterDevice(studyDeploymentId, deviceRoleName)),
+  );
 
   @override
   Future<SmartphoneDeployment> getDeviceDeploymentFor(
@@ -97,8 +110,11 @@ class CarpDeploymentService extends CarpBaseService
     String primaryDeviceRoleName,
   ) async {
     // downloading a PrimaryDeviceDeployment
-    var deployment = PrimaryDeviceDeployment.fromJson(await _rpc(
-        GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName)));
+    var deployment = PrimaryDeviceDeployment.fromJson(
+      await _rpc(
+        GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName),
+      ),
+    );
     debug('$runtimeType - got deployment: $deployment');
 
     // converting it to a SmartphoneDeployment
@@ -113,12 +129,15 @@ class CarpDeploymentService extends CarpBaseService
     String studyDeploymentId,
     String masterDeviceRoleName,
     DateTime deviceDeploymentLastUpdatedOn,
-  ) async =>
-      StudyDeploymentStatus.fromJson(await _rpc(DeviceDeployed(
+  ) async => StudyDeploymentStatus.fromJson(
+    await _rpc(
+      DeviceDeployed(
         studyDeploymentId,
         masterDeviceRoleName,
         deviceDeploymentLastUpdatedOn,
-      )));
+      ),
+    ),
+  );
 
   @override
   Future<StudyDeploymentStatus> stop(String studyDeploymentId) async =>

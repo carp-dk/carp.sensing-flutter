@@ -52,7 +52,7 @@ class Sensing {
   StudyDeploymentStatus? get status => _status;
 
   /// The role name of this device in the deployed study
-  String? get deviceRoleName => _status?.primaryDeviceStatus?.device.roleName;
+  String? get deviceRoleName => study?.deviceRoleName;
 
   /// The study runtime controller for this deployment
   SmartphoneDeploymentController? get controller => (study != null)
@@ -109,7 +109,7 @@ class Sensing {
         // Save the study on the phone for later use.
         bloc.study = SmartphoneStudy(
           studyDeploymentId: _status!.studyDeploymentId,
-          deviceRoleName: _status!.primaryDeviceStatus!.device.roleName,
+          deviceRoleName: protocol.primaryDevice.roleName,
         );
 
         break;
@@ -127,18 +127,20 @@ class Sensing {
     // (local or CAWS), add the study, and deploy it.
     await SmartPhoneClientManager().configure(
       deploymentService: deploymentService,
-      askForPermissions: true, // Allow the system to request permissions as needed
+      askForPermissions:
+          true, // Allow the system to request permissions as needed
     );
 
     study = await SmartPhoneClientManager().addStudy(bloc.study!);
-    
+
     await controller?.tryDeployment(useCached: bloc.useCachedStudyDeployment);
-    
+
     try {
       await controller?.configure().timeout(
         Duration(seconds: 30),
         onTimeout: () {
-          print('Sensing.initialize() - WARNING: Configure timed out after 30 seconds');
+          print(
+              'Sensing.initialize() - WARNING: Configure timed out after 30 seconds');
           print('Sensing.initialize() - Continuing anyway...');
         },
       );

@@ -20,11 +20,11 @@ dependencies:
 
 # Overriding carp libraries to use the local copy
 # Remove this before release of package
-# dependency_overrides:
-  # carp_core:
-  #   path: ../../../carp_core
-  # carp_mobile_sensing:
-  #   path: ../../../carp_mobile_sensing
+dependency_overrides:
+  carp_core:
+    path: ../../../carp_core
+  carp_mobile_sensing:
+    path: ../../../carp_mobile_sensing
 
 flutter:
   uses-material-design: true
