@@ -25,7 +25,7 @@ class StudyDeployment {
   // the list of registered devices' configurations, mapped to their role names
   final Map<String, DeviceConfiguration> _registeredDeviceConfigurations = {};
   final Map<DeviceConfiguration, List<DeviceRegistration>>
-      _deviceRegistrationHistory = {};
+  _deviceRegistrationHistory = {};
 
   // the list of deployed devices, organized by role name
   final Set<String> _deployedDevices = {};
@@ -45,10 +45,12 @@ class StudyDeployment {
       for (var task in protocol.getTasksForDevice(device)) {
         if (task != null) {
           for (var type in task.getAllExpectedDataTypes()) {
-            streams.add(ExpectedDataStream(
-              dataType: type,
-              deviceRoleName: device.roleName,
-            ));
+            streams.add(
+              ExpectedDataStream(
+                dataType: type,
+                deviceRoleName: device.roleName,
+              ),
+            );
           }
         }
       }
@@ -62,13 +64,14 @@ class StudyDeployment {
 
   /// The set of devices which are currently registered for this study deployment.
   Map<DeviceConfiguration, DeviceRegistration> get registeredDevices =>
-      _registeredDevices.map((key, value) =>
-          MapEntry(_registeredDeviceConfigurations[key]!, value));
+      _registeredDevices.map(
+        (key, value) => MapEntry(_registeredDeviceConfigurations[key]!, value),
+      );
 
   /// Per device, a list of all device registrations (included old registrations)
   /// in the order they were registered.
   Map<DeviceConfiguration, List<DeviceRegistration>>
-      get deviceRegistrationHistory => _deviceRegistrationHistory;
+  get deviceRegistrationHistory => _deviceRegistrationHistory;
 
   /// The set of devices (role names) which have been deployed correctly.
   Set<String?> get deployedDevices => _deployedDevices;
@@ -111,8 +114,9 @@ class StudyDeployment {
 
   /// Get the status of a device in this [StudyDeployment].
   DeviceDeploymentStatus getDeviceStatus(DeviceConfiguration device) {
-    DeviceDeploymentStatus deviceStatus =
-        DeviceDeploymentStatus(device: device);
+    DeviceDeploymentStatus deviceStatus = DeviceDeploymentStatus(
+      device: device,
+    );
 
     deviceStatus.status = DeviceDeploymentStatusTypes.Unregistered;
     if (_registeredDevices.containsKey(device.roleName)) {
@@ -157,10 +161,14 @@ class StudyDeployment {
   ) {
     // Verify whether the specified device is part of the protocol of this
     // deployment and has been registered.
-    assert(_protocol.hasPrimaryDevice(device.roleName),
-        "The specified primary device with role name '${device.roleName}' is not part of the protocol of this deployment.");
-    assert(_registeredDevices.containsKey(device.roleName),
-        "The specified primary device with role name '${device.roleName}' has not been registered to this deployment.");
+    assert(
+      _protocol.hasPrimaryDevice(device.roleName),
+      "The specified primary device with role name '${device.roleName}' is not part of the protocol of this deployment.",
+    );
+    assert(
+      _registeredDevices.containsKey(device.roleName),
+      "The specified primary device with role name '${device.roleName}' has not been registered to this deployment.",
+    );
 
     // TODO - Verify whether the specified device is ready to be deployed.
 
@@ -199,13 +207,14 @@ class StudyDeployment {
     _status.status = StudyDeploymentStatusTypes.Running;
 
     return PrimaryDeviceDeployment(
-        deviceConfiguration: device,
-        registration: configuration,
-        connectedDevices: connectedDevices,
-        connectedDeviceRegistrations: connectedDeviceConfigurations,
-        tasks: tasks,
-        triggers: usedTriggers,
-        taskControls: triggeredTasks);
+      deviceConfiguration: device,
+      registration: configuration,
+      connectedDevices: connectedDevices,
+      connectedDeviceRegistrations: connectedDeviceConfigurations,
+      tasks: tasks,
+      triggers: usedTriggers,
+      taskControls: triggeredTasks,
+    );
   }
 
   /// Indicate that the specified primary [device] was deployed successfully using
@@ -280,16 +289,11 @@ class StudyDeploymentStatus extends Serializable {
   DeviceDeploymentStatus getDeviceStatus(DeviceConfiguration device) =>
       deviceStatusList.firstWhere((status) => status.device == device);
 
-  /// The [DeviceDeploymentStatus] for the primary device of this deployment,
-  /// which is typically this phone.
-  ///
-  /// Returns `null` if there is no primary device in the list of [deviceStatusList].
-  DeviceDeploymentStatus? get primaryDeviceStatus {
-    for (DeviceDeploymentStatus status in deviceStatusList) {
-      if (status.device is PrimaryDeviceConfiguration) return status;
-    }
-    return null;
-  }
+  /// Get the status of a device with the given [roleName] in this study deployment.
+  DeviceDeploymentStatus getDeviceStatusByRoleName(String roleName) =>
+      deviceStatusList.firstWhere(
+        (status) => status.device.roleName == roleName,
+      );
 
   StudyDeploymentStatus({
     required this.studyDeploymentId,
@@ -300,8 +304,8 @@ class StudyDeploymentStatus extends Serializable {
   Function get fromJsonFunction => _$StudyDeploymentStatusFromJson;
 
   factory StudyDeploymentStatus.fromJson(Map<String, dynamic> json) {
-    StudyDeploymentStatus status =
-        FromJsonFactory().fromJson<StudyDeploymentStatus>(json);
+    StudyDeploymentStatus status = FromJsonFactory()
+        .fromJson<StudyDeploymentStatus>(json);
 
     // when this object was create from json deserialization,
     // the last part of the $type reflects the status

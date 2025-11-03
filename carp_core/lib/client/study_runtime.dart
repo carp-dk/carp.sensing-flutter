@@ -10,9 +10,9 @@ part of 'carp_core_client.dart';
 /// Manage data collection for a specific primary device [deployment] on a
 /// client device.
 class StudyRuntime<TRegistration extends DeviceRegistration> {
-  final List<DeviceConfiguration> _remainingDevicesToRegister = [];
   Study? _study;
   TRegistration? _deviceRegistration;
+  StudyDeploymentStatus? _deploymentStatus;
   final DeviceDataCollectorFactory _deviceRegistry;
   final StreamController<StudyStatus> _statusEventsController =
       StreamController();
@@ -43,7 +43,19 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
 
   /// The latest known deployment status retrieved from the deployment service.
   /// Null if not know.
-  StudyDeploymentStatus? deploymentStatus;
+  StudyDeploymentStatus? get deploymentStatus => _deploymentStatus;
+  set deploymentStatus(StudyDeploymentStatus? deploymentStatus) {
+    _deploymentStatus = deploymentStatus;
+
+    // update the status based on the deployment status
+    status = switch (_deploymentStatus?.status) {
+      null => StudyStatus.DeploymentNotAvailable,
+      StudyDeploymentStatusTypes.Invited => StudyStatus.DeploymentNotStarted,
+      StudyDeploymentStatusTypes.DeployingDevices => StudyStatus.Deploying,
+      StudyDeploymentStatusTypes.Running => StudyStatus.Running,
+      StudyDeploymentStatusTypes.Stopped => StudyStatus.Stopped,
+    };
+  }
 
   /// The stream of [StudyStatus] events for this study runtime.
   Stream<StudyStatus> get statusEvents => _statusEventsController.stream;
@@ -67,10 +79,21 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
   /// Has the study and data collection been stopped?
   bool get isStopped => (status == StudyStatus.Stopped);
 
-  /// The list of devices that still remain to be registered before all devices
-  /// in this study runtime is registered.
-  List<DeviceConfiguration> get remainingDevicesToRegister =>
-      _remainingDevicesToRegister;
+  /// The list of all devices - both primary and connected devices - that remain
+  /// to be registered before all devices in this [study] are registered.
+  ///
+  /// Returns null if the deployment status is not available.
+  List<DeviceConfiguration>? get remainingDevicesToRegister =>
+      (deploymentStatus == null)
+      ? null
+      : deploymentStatus!.deviceStatusList
+            .where(
+              (deviceStatus) =>
+                  deviceStatus.status ==
+                  DeviceDeploymentStatusTypes.Unregistered,
+            )
+            .map((deviceStatus) => deviceStatus.device)
+            .toList();
 
   /// Create a new study runtime to manage a study deployment.
   ///
@@ -111,29 +134,21 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
         "from the deployment service: $_deploymentService."
         "\nError: $error",
       );
-      status = StudyStatus.DeploymentNotAvailable;
-      return deploymentStatus = null;
-    }
-
-    // update the status based on the deployment status
-    if (deploymentStatus != null) {
-      if (deploymentStatus!.isDeploying) {
-        status = StudyStatus.Deploying;
-      } else if (deploymentStatus!.isAwaitingDeviceRegistrations) {
-        status = StudyStatus.AwaitingOtherDeviceRegistrations;
-      } else if (deploymentStatus!.isAwaitingDeviceDeployment) {
-        status = StudyStatus.AwaitingDeviceDeployment;
-      } else if (deploymentStatus!.isRegisteringDevices) {
-        status = StudyStatus.RegisteringDevices;
-      } else if (deploymentStatus!.isAwaitingOtherDeviceDeployments) {
-        status = StudyStatus.AwaitingOtherDeviceDeployments;
-      } else if (deploymentStatus!.isDeployed) {
-        status = StudyStatus.Deployed;
-      }
+      deploymentStatus = null;
     }
 
     return deploymentStatus;
   }
+
+  /// The [DeviceDeploymentStatus] for the primary device of this [study]
+  /// (typically this phone).
+  ///
+  /// Returns null if no study has been added yet, or if no deployment status
+  /// is available yet. Call [getStudyDeploymentStatus] to retrieve the
+  /// deployment status from the deployment service.
+  DeviceDeploymentStatus? get primaryDeviceStatus => (study == null)
+      ? null
+      : deploymentStatus?.getDeviceStatusByRoleName(study!.deviceRoleName);
 
   /// Tries to deploy the [study] if it's ready to be deployed by registering
   /// the client device using [deviceRegistration] and verifying the study is
@@ -153,10 +168,8 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
     // early out if already deployed.
     if (status.index >= StudyStatus.Deployed.index) return status;
 
-    // check the status of this deployment.
+    // check the status of this deployment - early out if no status is available
     if (await getStudyDeploymentStatus() == null) return status;
-
-    status = StudyStatus.Deploying;
 
     // register the primary device for the given study deployment
     try {
@@ -172,20 +185,21 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
       );
     }
 
+    // check if the primary device is ready for deployment - early out if not
+    if (!(primaryDeviceStatus?.isReadyForDeployment ?? false)) return status;
+
     // get the deployment from the deployment service
     deployment = await _deploymentService.getDeviceDeploymentFor(
       study!.studyDeploymentId,
       study!.deviceRoleName,
     );
-    status = StudyStatus.DeviceDeploymentReceived;
 
-    // check for devices that still need to be registered
-    if (deploymentStatus != null) {
-      for (var deviceStatus in deploymentStatus!.deviceStatusList) {
-        if (deviceStatus.status == DeviceDeploymentStatusTypes.Unregistered) {
-          _remainingDevicesToRegister.add(deviceStatus.device);
-        }
-      }
+    if (deployment == null) {
+      print(
+        "$runtimeType - Deployment for device role name '${study!.deviceRoleName}' "
+        "in study deployment '${study!.studyDeploymentId}' is not available.",
+      );
+      return status = StudyStatus.DeploymentNotAvailable;
     }
 
     // mark this deployment as successful
@@ -253,15 +267,14 @@ class StudyRuntime<TRegistration extends DeviceRegistration> {
   }
 
   /// Tries to register the connected devices which still need to be registered
-  /// in the [_deploymentService].
+  /// in the deployment service.
   ///
   /// This is a convenient method for synchronizing the devices needed for a
   /// deployment and the available devices on this phone.
-  Future<void> tryRegisterRemainingDevicesToRegister() async {
-    for (var device in remainingDevicesToRegister) {
-      await tryRegisterConnectedDevice(device);
-    }
-  }
+  Future<void> tryRegisterRemainingDevicesToRegister() async =>
+      remainingDevicesToRegister?.forEach((device) async {
+        await tryRegisterConnectedDevice(device);
+      });
 
   /// Start collecting data for this [StudyRuntime].
   @mustCallSuper

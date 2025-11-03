@@ -11,8 +11,9 @@ part of 'carp_core_client.dart';
 /// It holds a list of [studies] added to this client and holds a [repository]
 /// of corresponding [StudyRuntime] for executing a study.
 abstract class ClientManager<
-    TPrimaryDevice extends PrimaryDeviceConfiguration<TRegistration>,
-    TRegistration extends DeviceRegistration> {
+  TPrimaryDevice extends PrimaryDeviceConfiguration<TRegistration>,
+  TRegistration extends DeviceRegistration
+> {
   DeploymentService? _deploymentService;
   DeviceDataCollectorFactory? _deviceController;
 
@@ -55,8 +56,8 @@ abstract class ClientManager<
     required DeviceDataCollectorFactory deviceController,
     TRegistration? registration,
   }) async {
-    this._deploymentService = deploymentService;
-    this._deviceController = deviceController;
+    _deploymentService = deploymentService;
+    _deviceController = deviceController;
     this.registration = registration;
   }
 
@@ -77,10 +78,14 @@ abstract class ClientManager<
   /// Returns the added study.
   @mustCallSuper
   Future<Study> addStudy(Study study) async {
-    assert(isConfigured,
-        'The client manager has not been configured yet. Call configure() first.');
-    assert(!repository.containsKey(study.studyDeploymentId),
-        'A study with the same study deployment ID and device role name has already been added.');
+    assert(
+      isConfigured,
+      'The client manager has not been configured yet. Call configure() first.',
+    );
+    assert(
+      !repository.containsKey(study.studyDeploymentId),
+      'A study with the same study deployment ID and device role name has already been added.',
+    );
     studies[study.studyDeploymentId] = study;
 
     return study;
@@ -93,8 +98,10 @@ abstract class ClientManager<
   @mustCallSuper
   Future<StudyStatus> tryDeployment(String studyDeploymentId) async {
     StudyRuntime? runtime = repository[studyDeploymentId];
-    assert(runtime != null && runtime.study != null,
-        'No runtime for this study found. Has this study been added using the addStudy method?');
+    assert(
+      runtime != null && runtime.study != null,
+      'No runtime for this study found. Has this study been added using the addStudy method?',
+    );
 
     // Early out in case this runtime has already received and validated deployment information.
     if (runtime!.status.index >= StudyStatus.Deployed.index) {

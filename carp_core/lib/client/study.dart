@@ -38,6 +38,16 @@ class Study {
 }
 
 /// Describes the status of a [Study].
+///
+/// This is based on the [state diagram for Study State](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-clients.md#study-state)
+/// However, all the "Deploying" states have been collapsed into a single
+/// [Deploying] state.
+///
+/// If a study is in the [Deploying] state, the client can query the
+/// [DeviceDeploymentStatus.remainingDevicesToRegisterToObtainDeployment] or the
+/// [DeviceDeploymentStatus.remainingDevicesToRegisterBeforeDeployment]
+/// of this device with [deviceRoleName] to understand what is holding the
+/// deployment back.
 enum StudyStatus {
   /// The study deployment process hasn't been started yet.
   DeploymentNotStarted,
@@ -50,29 +60,26 @@ enum StudyStatus {
   DeploymentNotAvailable,
 
   /// The study deployment process is ongoing, but not yet completed.
+  ///
+  /// According to the [state diagram for Study State](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-clients.md#study-state),
+  /// this state combines the following states:
+  ///
+  ///  * AwaitingOtherDeviceRegistrations - Deployment information for this
+  ///    primary device cannot be retrieved yet since other primary devices in
+  ///    the study deployment need to be registered first.
+  ///  * AwaitingDeviceDeployment -  The deployment service is ready to deliver
+  ///    the deployment information to this primary device.
+  ///  * DeviceDeploymentReceived - Deployment information has been received.
+  ///  * RegisteringDevices - Deployment can complete after all devices have been
+  ///    registered.
+  ///  * AwaitingOtherDeviceDeployments - Deployment for this primary device
+  ///    has completed, but awaiting deployment of other devices in this study
+  ///    deployment.
   Deploying,
 
-  /// Deployment information for this primary device cannot be retrieved yet since
-  /// other primary devices in the study deployment need to be registered first.
-  AwaitingOtherDeviceRegistrations,
-
-  /// The deployment service is ready to deliver the deployment information to
-  /// this primary device.
-  AwaitingDeviceDeployment,
-
-  /// Deployment information has been received.
-  DeviceDeploymentReceived,
-
-  /// Deployment can complete after all devices have been registered.
-  RegisteringDevices,
-
-  /// Device deployment for this primary device has completed,
-  /// but awaiting deployment of other devices in this study deployment.
-  AwaitingOtherDeviceDeployments,
-
   /// Deployment has been successfully completed.
-  /// The [PrimaryDeviceDeployment] has been retrieved and all necessary plugins
-  /// to execute the study have been loaded.
+  /// The [PrimaryDeviceDeployment] has been retrieved and ready to execute
+  /// the study.
   Deployed,
 
   /// The study is started and is sampling data.

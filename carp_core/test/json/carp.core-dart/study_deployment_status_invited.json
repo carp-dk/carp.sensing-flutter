@@ -1,0 +1,37 @@
+{
+  "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited",
+  "createdOn": "2025-11-01T14:38:32.517207394Z",
+  "studyDeploymentId": "9a4d329b-a262-4c9b-8b2f-00ae78361e65",
+  "deviceStatusList": [
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+        "isPrimaryDevice": true,
+        "roleName": "Primary Phone"
+      },
+      "canBeDeployed": true,
+      "remainingDevicesToRegisterToObtainDeployment": [
+        "Primary Phone"
+      ],
+      "remainingDevicesToRegisterBeforeDeployment": [
+        "Primary Phone"
+      ]
+    }
+  ],
+  "participantStatusList": [
+    {
+      "participantId": "0422ba51-85a2-4f54-b954-ea2f7362f99a",
+      "assignedParticipantRoles": {
+        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+        "roleNames": [
+          "Participant"
+        ]
+      },
+      "assignedPrimaryDeviceRoleNames": [
+        "Primary Phone"
+      ]
+    }
+  ],
+  "startedOn": null
+}

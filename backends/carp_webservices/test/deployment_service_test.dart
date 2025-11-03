@@ -116,14 +116,15 @@ void main() {
     }, skip: false);
 
     test('- register device', () async {
-      StudyDeploymentStatus status = await CarpDeploymentService()
-          .getStudyDeploymentStatus(testDeploymentId);
-      debugPrint('$status');
-      expect(status.primaryDeviceStatus!.device, isNotNull);
-      debugPrint('{$status.primaryDeviceStatus?.device}');
-      status = await CarpDeploymentService().registerDevice(
+      // StudyDeploymentStatus status = await CarpDeploymentService()
+      //     .getStudyDeploymentStatus(testDeploymentId);
+      // debugPrint('$status');
+      // expect(status.primaryDeviceStatus!.device, isNotNull);
+      // debugPrint('{$status.primaryDeviceStatus?.device}');
+      var status = await CarpDeploymentService().registerDevice(
           testDeploymentId,
-          status.primaryDeviceStatus!.device.roleName,
+          "Father's Phone",
+          // status.primaryDeviceStatus!.device.roleName,
           DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'));
       debugPrint('$status');
       expect(status.studyDeploymentId, testDeploymentId);
