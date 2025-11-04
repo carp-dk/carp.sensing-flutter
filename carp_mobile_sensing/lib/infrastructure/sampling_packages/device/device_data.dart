@@ -216,6 +216,15 @@ class Timezone extends Data {
 }
 
 /// Holds information about [AppLifecycleState] events collected from the phone.
+///
+/// [state] can be one of the following state:
+///  * inactive
+///  * hidden
+///  * paused
+///  * resumed
+///  * detached
+///
+/// See [AppLifecycleState] for details.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class AppLifecycleEvent extends Data {
   static const dataType = DeviceSamplingPackage.APP_LIFECYCLE_EVENT;
