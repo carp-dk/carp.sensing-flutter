@@ -56,14 +56,8 @@ class TextMessageLogProbe extends MeasurementProbe {
   Future<Measurement> getMeasurement() async {
     List<SmsMessage> allSms = [];
     allSms
-      ..addAll(
-        await Telephony.backgroundInstance.getInboxSms(
-          columns: ALL_SMS_COLUMNS,
-        ),
-      )
-      ..addAll(
-        await Telephony.backgroundInstance.getSentSms(columns: ALL_SMS_COLUMNS),
-      );
+      ..addAll(await _telephony.getInboxSms(columns: ALL_SMS_COLUMNS))
+      ..addAll(await _telephony.getSentSms(columns: ALL_SMS_COLUMNS));
     return Measurement.fromData(
       TextMessageLog(
         allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList(),
@@ -71,6 +65,10 @@ class TextMessageLogProbe extends MeasurementProbe {
     );
   }
 }
+
+// The singleton instance of the [Telephony] class to be used in
+// background execution context.
+Telephony get _telephony => Telephony.backgroundInstance;
 
 // A private stream controller to be used in the call-back from the SMS probe.
 StreamController<Measurement> _textMessageProbeController =
@@ -92,13 +90,27 @@ class TextMessageProbe extends StreamProbe {
   @override
   Stream<Measurement> get stream => _textMessageProbeController.stream;
 
-  @override
-  bool onInitialize() {
-    if (!Platform.isAndroid) {
-      throw SensingException('TextMessageProbe only available on Android.');
-    }
+  // @override
+  // bool onInitialize() {
+  //   if (!Platform.isAndroid) {
+  //     warning('$runtimeType only available on Android.');
+  //     return false;
+  //   }
 
-    Telephony.backgroundInstance.listenIncomingSms(
+  //   _telephony.listenIncomingSms(
+  //     onNewMessage: (SmsMessage message) {
+  //       _textMessageProbeController.add(
+  //         Measurement.fromData(TextMessage.fromSmsMessage(message)),
+  //       );
+  //     },
+  //     onBackgroundMessage: backgroundMessageHandler,
+  //   );
+  //   return true;
+  // }
+
+  @override
+  Future<bool> onStart() async {
+    _telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
         _textMessageProbeController.add(
           Measurement.fromData(TextMessage.fromSmsMessage(message)),
@@ -106,7 +118,8 @@ class TextMessageProbe extends StreamProbe {
       },
       onBackgroundMessage: backgroundMessageHandler,
     );
-    return true;
+
+    return await super.onStart();
   }
 }
 

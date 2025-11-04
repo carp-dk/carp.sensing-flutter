@@ -77,3 +77,10 @@ Map<String, dynamic> _$TimezoneToJson(Timezone instance) => <String, dynamic>{
   '__type': ?instance.$type,
   'timezone': instance.timezone,
 };
+
+AppLifecycleEvent _$AppLifecycleEventFromJson(Map<String, dynamic> json) =>
+    AppLifecycleEvent(json['state'] as String)
+      ..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$AppLifecycleEventToJson(AppLifecycleEvent instance) =>
+    <String, dynamic>{'__type': ?instance.$type, 'state': instance.state};

@@ -22,10 +22,10 @@ class CARPMobileSensingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'CARP Mobile Sensing Demo',
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: const ConsolePage(title: 'CARP Mobile Sensing Demo'),
-      );
+    title: 'CARP Mobile Sensing Demo',
+    theme: ThemeData(primarySwatch: Colors.blue),
+    home: const ConsolePage(title: 'CARP Mobile Sensing Demo'),
+  );
 }
 
 class ConsolePage extends StatefulWidget {
@@ -58,24 +58,23 @@ class Console extends State<ConsolePage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
-        body: SingleChildScrollView(
-          child: StreamBuilder(
-            stream: SmartPhoneClientManager().measurements,
-            builder: (context, AsyncSnapshot<Measurement> snapshot) => Text(
-                (snapshot.hasData)
-                    ? _log += toJsonString(snapshot.data)
-                    : _log),
-          ),
+    appBar: AppBar(title: Text(widget.title)),
+    body: SingleChildScrollView(
+      child: StreamBuilder(
+        stream: SmartPhoneClientManager().measurements,
+        builder: (context, AsyncSnapshot<Measurement> snapshot) => Text(
+          (snapshot.hasData) ? _log += toJsonString(snapshot.data) : _log,
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: restart,
-          tooltip: 'Start/Stop study',
-          child: Sensing().isRunning
-              ? const Icon(Icons.stop)
-              : const Icon(Icons.play_arrow),
-        ),
-      );
+      ),
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: restart,
+      tooltip: 'Start/Stop study',
+      child: Sensing().isRunning
+          ? const Icon(Icons.stop)
+          : const Icon(Icons.play_arrow),
+    ),
+  );
 
   /// Add [msg] to the console log.
   void log(String msg) => setState(() => _log += '$msg\n');
@@ -116,14 +115,16 @@ class Sensing {
     final protocol = await LocalStudyProtocolManager().getStudyProtocol('');
 
     // Create and configure a client manager for this phone and add the protocol.
-    SmartPhoneClientManager().configure().then((_) => SmartPhoneClientManager()
-        .addStudyFromProtocol(protocol)
-        .then((value) => study = value));
+    SmartPhoneClientManager().configure().then(
+      (_) => SmartPhoneClientManager()
+          .addStudyFromProtocol(protocol)
+          .then((value) => study = value),
+    );
 
     // Listening on the data stream and print them as json.
-    SmartPhoneClientManager()
-        .measurements
-        .listen((data) => print(toJsonString(data)));
+    SmartPhoneClientManager().measurements.listen(
+      (data) => print(toJsonString(data)),
+    );
   }
 
   /// Is sensing running, i.e. has the study executor been started?
@@ -153,9 +154,10 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
   Future<SmartphoneStudyProtocol> getStudyProtocol(String id) async {
     // Create a protocol. Note that the [id] is not used for anything.
     SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
-        ownerId: 'AB',
-        name: 'Protocol - id: $id',
-        dataEndPoint: SQLiteDataEndPoint());
+      ownerId: 'AB',
+      name: 'Protocol - id: $id',
+      dataEndPoint: SQLiteDataEndPoint(),
+    );
 
     // Define which devices are used for data collection.
     //
@@ -171,17 +173,17 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // Collect timezone info every time the app restarts.
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
-          Measure(type: DeviceSamplingPackage.TIMEZONE),
-        ]),
-        phone);
+      ImmediateTrigger(),
+      BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
+      phone,
+    );
 
     // Collect device info only once, when this study is deployed.
     protocol.addTaskControl(
       OneTimeTrigger(),
       BackgroundTask(
-          measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)]),
+        measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      ),
       phone,
     );
 
@@ -195,19 +197,23 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     protocol.addTaskControl(
       ImmediateTrigger(),
-      BackgroundTask(measures: [
-        Measure(type: DeviceSamplingPackage.FREE_MEMORY)
-          ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-              interval: const Duration(seconds: 10)),
-        Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-        Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-        Measure(type: SensorSamplingPackage.STEP_COUNT),
-        Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
-          ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-            interval: const Duration(seconds: 20),
-            duration: const Duration(seconds: 5),
-          ),
-      ]),
+      BackgroundTask(
+        measures: [
+          Measure(type: DeviceSamplingPackage.FREE_MEMORY)
+            ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+              interval: const Duration(seconds: 10),
+            ),
+          Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+          Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+          Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
+          Measure(type: SensorSamplingPackage.STEP_COUNT),
+          Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
+            ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+              interval: const Duration(seconds: 20),
+              duration: const Duration(seconds: 5),
+            ),
+        ],
+      ),
       phone,
     );
 

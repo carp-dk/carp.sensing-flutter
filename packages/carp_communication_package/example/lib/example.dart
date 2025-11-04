@@ -21,7 +21,7 @@ void main() async {
   Smartphone phone = Smartphone();
   protocol.addPrimaryDevice(phone);
 
-  // Add an background task that continuously collects SMS messages in/out
+  // Add an background task that collects incoming SMS messages
   protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask(

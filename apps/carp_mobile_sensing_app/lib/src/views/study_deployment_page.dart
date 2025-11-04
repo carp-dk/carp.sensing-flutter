@@ -213,11 +213,9 @@ class _MeasureLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final Icon icon =
-        (ProbeDescription.descriptors[measure!.type]?.icon != null)
-            ? Icon(ProbeDescription.descriptors[measure!.type]!.icon?.icon,
-                size: 25)
-            : Icon(Icons.error, size: 25);
+    final Icon icon = (ProbeDescription.descriptors[measure.type]?.icon != null)
+        ? Icon(ProbeDescription.descriptors[measure.type]!.icon?.icon, size: 25)
+        : Icon(Icons.error, size: 25);
 
     final String name = SamplingPackageRegistry()
             .samplingSchemes[measure.type]

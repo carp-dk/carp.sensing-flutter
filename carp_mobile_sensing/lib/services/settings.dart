@@ -187,18 +187,17 @@ class Settings {
 
     debug('$runtimeType - Shared Preferences:');
     _preferences!.getKeys().forEach(
-      (key) => debug('[$key] : ${_preferences!.get(key)}'),
+      (key) => debug('"$key" : ${_preferences!.get(key)}'),
     );
 
     // setting up time zone settings
     tz.initializeTimeZones();
     try {
       _timezone = (await FlutterTimezone.getLocalTimezone()).identifier;
-    } catch (_) {
+    } catch (error) {
       _timezone = tz.local.name;
-      warning(
-        'Could not get the local timezone - setting timezone to $timezoneLocation',
-      );
+      warning('$runtimeType - Could not get the local timezone - $error');
+      warning('$runtimeType - Setting timezone to $timezoneLocation');
     }
     info('Time zone set to $timezoneLocation');
     info('$runtimeType initialized');

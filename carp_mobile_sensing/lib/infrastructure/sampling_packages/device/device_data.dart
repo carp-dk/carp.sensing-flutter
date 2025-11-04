@@ -49,16 +49,16 @@ class DeviceInformation extends Data {
   /// The full device info for this device.
   Map<String, dynamic> deviceData = {};
 
-  DeviceInformation(
-      {this.deviceData = const {},
-      this.platform,
-      this.deviceId,
-      this.deviceName,
-      this.deviceModel,
-      this.deviceManufacturer,
-      this.operatingSystem,
-      this.hardware})
-      : super();
+  DeviceInformation({
+    this.deviceData = const {},
+    this.platform,
+    this.deviceId,
+    this.deviceName,
+    this.deviceModel,
+    this.deviceManufacturer,
+    this.operatingSystem,
+    this.hardware,
+  }) : super();
 
   /// Returns `true` if the [deviceId] is equal.
   @override
@@ -98,9 +98,9 @@ class BatteryState extends Data {
   BatteryState([this.batteryLevel, this.batteryStatus]) : super();
 
   BatteryState.fromBatteryState(int level, battery.BatteryState state)
-      : batteryLevel = level,
-        batteryStatus = _parseBatteryState(state),
-        super();
+    : batteryLevel = level,
+      batteryStatus = _parseBatteryState(state),
+      super();
 
   static String _parseBatteryState(battery.BatteryState state) =>
       switch (state) {
@@ -213,4 +213,26 @@ class Timezone extends Data {
       FromJsonFactory().fromJson<Timezone>(json);
   @override
   Map<String, dynamic> toJson() => _$TimezoneToJson(this);
+}
+
+/// Holds information about [AppLifecycleState] events collected from the phone.
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
+class AppLifecycleEvent extends Data {
+  static const dataType = DeviceSamplingPackage.APP_LIFECYCLE_EVENT;
+
+  /// The app lifecycle state.
+  String state;
+
+  AppLifecycleEvent(this.state) : super();
+
+  @override
+  bool equivalentTo(Data other) =>
+      (other is AppLifecycleEvent) ? state == other.state : false;
+
+  @override
+  Function get fromJsonFunction => _$AppLifecycleEventFromJson;
+  factory AppLifecycleEvent.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<AppLifecycleEvent>(json);
+  @override
+  Map<String, dynamic> toJson() => _$AppLifecycleEventToJson(this);
 }

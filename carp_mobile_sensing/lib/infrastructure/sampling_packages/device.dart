@@ -11,12 +11,16 @@
 ///  - device info
 ///  - battery status
 ///  - screen events
+///  - app lifecycle events
 ///  - free memory
 ///  - time zone
 library;
 
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';

@@ -50,7 +50,7 @@ Add the following to your app's `AndroidManifest.xml` file located in `android/a
 
   ...
    
-  <!-- The following permissions are used for CARP Mobile Sensing -->
+  <!-- The following permissions are used in the CARP Communication Package -->
   <uses-permission android:name="android.permission.CALL_PHONE"/>
   <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
   <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
@@ -119,7 +119,7 @@ StudyProtocol protocol = StudyProtocol(
 Smartphone phone = Smartphone();
 protocol.addPrimaryDevice(phone);
 
-// Add an automatic task that collects SMS messages in/out
+// Add an automatic task that collects incoming SMS messages
 protocol.addTaskControl(
     ImmediateTrigger(),
     BackgroundTask(

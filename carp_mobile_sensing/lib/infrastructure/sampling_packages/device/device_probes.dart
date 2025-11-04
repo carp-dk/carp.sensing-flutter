@@ -105,3 +105,27 @@ class TimezoneProbe extends MeasurementProbe {
     Timezone((await FlutterTimezone.getLocalTimezone()).identifier),
   );
 }
+
+/// A probe that collects app lifecycle events.
+class AppLifecycleProbe extends StreamProbe with WidgetsBindingObserver {
+  final StreamController<Measurement> _controller = StreamController();
+
+  @override
+  Stream<Measurement> get stream => _controller.stream.asBroadcastStream();
+
+  @override
+  Future<bool> onStart() async {
+    WidgetsBinding.instance.addObserver(this);
+    return await super.onStart();
+  }
+
+  @override
+  Future<bool> onStop() async {
+    WidgetsBinding.instance.removeObserver(this);
+    return await super.onStop();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) =>
+      _controller.add(Measurement.fromData(AppLifecycleEvent(state.name)));
+}

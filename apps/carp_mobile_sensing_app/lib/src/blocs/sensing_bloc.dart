@@ -105,8 +105,8 @@ class SensingBLoC {
     bool useCachedStudyDeployment = true,
     bool resumeSensingOnStartup = false,
   }) async {
-    await Settings().init();
     Settings().debugLevel = DebugLevel.debug;
+    await Settings().init();
     this.deploymentMode = deploymentMode;
     this.dataFormat = dataFormat;
     _resumeSensingOnStartup = resumeSensingOnStartup;
