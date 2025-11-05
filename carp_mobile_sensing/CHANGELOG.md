@@ -3,6 +3,7 @@
 * Better support for `StudyStatus` in the client manager ( [#504](https://github.com/cph-cachet/carp.sensing-flutter/issues/504))
 * Added `AppLifecycleEvent` measure to collect life-cycle event from the app
 * Fix of [#521](https://github.com/cph-cachet/carp.sensing-flutter/issues/521)
+* Fix of [#440](https://github.com/cph-cachet/carp.sensing-flutter/issues/440)
 
 ## 1.13.1
 
@@ -14,15 +15,15 @@
 
 ## 1.12.6
 
-* deprecating the `ONE_TIME_SENSING_TYPE` - now there is only one type of sensing user task ([#488](https://github.com/cph-cachet/carp.sensing-flutter/issues/488))
+* Deprecating the `ONE_TIME_SENSING_TYPE` - now there is only one type of sensing user task ([#488](https://github.com/cph-cachet/carp.sensing-flutter/issues/488))
 
 ## 1.12.4
 
-* upgrade of Android APK
-* bumped minimum Flutter SDK requirement to 3.3
-* upgrade of plugins to latest versions
+* Upgrade of Android APK
+* Bumped minimum Flutter SDK requirement to 3.3
+* Upgrade of plugins to latest versions
 * Fix of [#470](https://github.com/cph-cachet/carp.sensing-flutter/issues/470)
-* upgrade to latest Flutter plugins
+* Upgrade to latest Flutter plugins
 * Fix of [#481](https://github.com/cph-cachet/carp.sensing-flutter/issues/481)
 * Fix of [#482](https://github.com/cph-cachet/carp.sensing-flutter/issues/482)
 

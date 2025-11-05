@@ -1,3 +1,7 @@
+## 1.10.0
+
+* better support for `StudyStatus` in the client manager ( [#504](https://github.com/cph-cachet/carp.sensing-flutter/issues/504))
+
 ## 1.9.4
 
 * fix of issue [#506](https://github.com/cph-cachet/carp.sensing-flutter/issues/506)
