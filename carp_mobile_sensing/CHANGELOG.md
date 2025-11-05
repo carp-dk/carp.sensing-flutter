@@ -1,3 +1,9 @@
+## 1.14.0
+
+* Better support for `StudyStatus` in the client manager ( [#504](https://github.com/cph-cachet/carp.sensing-flutter/issues/504))
+* Added `AppLifecycleEvent` measure to collect life-cycle event from the app
+* Fix of [#521](https://github.com/cph-cachet/carp.sensing-flutter/issues/521)
+
 ## 1.13.1
 
 * Fix of [#491](https://github.com/cph-cachet/carp.sensing-flutter/issues/491)

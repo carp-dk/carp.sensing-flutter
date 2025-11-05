@@ -25,8 +25,8 @@ android {
         applicationId = "dk.cachet.carp_mobile_sensing_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 28
-        minSdkVersion = flutter.minSdkVersion
+        // minSdk = 28
+        minSdkVersion = 28
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
