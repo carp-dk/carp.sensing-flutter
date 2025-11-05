@@ -38,9 +38,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
-export 'infrastructure/sampling_packages/device.dart';
-export 'infrastructure/sampling_packages/sensors.dart';
-
 part 'infrastructure/data_managers/console_data_manager.dart';
 part 'infrastructure/data_managers/file_data_manager.dart';
 part 'infrastructure/data_managers/sqlite_data_manager.dart';

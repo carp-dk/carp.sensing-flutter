@@ -124,11 +124,7 @@ class CarpDataTypes {
 
   CarpDataTypes._() {
     add([
-      DataTypeMetaData(
-        type: GEOLOCATION_TYPE_NAME,
-        displayName: "Location",
-        timeType: DataTimeType.POINT,
-      ),
+      DataTypeMetaData(type: GEOLOCATION_TYPE_NAME, displayName: "Location"),
       DataTypeMetaData(
         type: STEP_COUNT_TYPE_NAME,
         displayName: "Step Count",
@@ -137,18 +133,12 @@ class CarpDataTypes {
       DataTypeMetaData(
         type: ECG_TYPE_NAME,
         displayName: "Electrocardiography (ECG)",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: PPG_TYPE_NAME,
         displayName: "Photoplethysmography (PPG)",
-        timeType: DataTimeType.POINT,
       ),
-      DataTypeMetaData(
-        type: HEART_RATE_TYPE_NAME,
-        displayName: "Heart Rate",
-        timeType: DataTimeType.POINT,
-      ),
+      DataTypeMetaData(type: HEART_RATE_TYPE_NAME, displayName: "Heart Rate"),
       DataTypeMetaData(
         type: INTERBEAT_INTERVAL_TYPE_NAME,
         displayName: "Interbeat Interval",
@@ -157,53 +147,42 @@ class CarpDataTypes {
       DataTypeMetaData(
         type: SENSOR_SKIN_CONTACT_TYPE_NAME,
         displayName: "Sensor Skin Contact",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME,
         displayName: "Acceleration excl. Gravity",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: EDA_TYPE_NAME,
         displayName: "Electrodermal Activity",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: ACCELERATION_TYPE_NAME,
         displayName: "Acceleration incl. Gravity",
-        timeType: DataTimeType.POINT,
       ),
-      DataTypeMetaData(
-        type: ROTATION_TYPE_NAME,
-        displayName: "Rotation",
-        timeType: DataTimeType.POINT,
-      ),
+      DataTypeMetaData(type: ROTATION_TYPE_NAME, displayName: "Rotation"),
       DataTypeMetaData(
         type: MAGNETIC_FIELD_TYPE_NAME,
         displayName: "Magnetic Field",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: ANGULAR_VELOCITY_TYPE_NAME,
         displayName: "Angular Velocity",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: SIGNAL_STRENGTH_TYPE_NAME,
         displayName: "Signal Strength",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: TRIGGERED_TASK_TYPE_NAME,
         displayName: "Triggered Task",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
         type: COMPLETED_TASK_TYPE_NAME,
         displayName: "Completed Task",
         timeType: DataTimeType.TIME_SPAN,
       ),
+      DataTypeMetaData(type: ERROR_TYPE_NAME, displayName: "Error"),
     ]);
   }
 }

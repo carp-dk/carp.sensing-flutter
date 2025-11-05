@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../sensors.dart';
+part of '../../../sampling_packages.dart';
 
 /// The pedometer probe listens to the hardware step counter sensor.
 ///
@@ -30,7 +30,9 @@ class PedometerProbe extends StreamProbe {
 
   @override
   Stream<Measurement> get stream => pedometer.Pedometer.stepCountStream.map(
-      (pedometer.StepCount count) => Measurement.fromData(
-          StepCount(steps: count.steps),
-          count.timeStamp.microsecondsSinceEpoch));
+    (pedometer.StepCount count) => Measurement.fromData(
+      StepCount(steps: count.steps),
+      count.timeStamp.microsecondsSinceEpoch,
+    ),
+  );
 }

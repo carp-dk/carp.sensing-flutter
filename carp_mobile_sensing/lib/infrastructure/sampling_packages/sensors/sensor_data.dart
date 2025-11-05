@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../sensors.dart';
+part of '../../../sampling_packages.dart';
 
 /// Ambient light intensity in Lux.
 /// Typically collected from the light sensor on the front of the phone.
@@ -147,37 +147,37 @@ class AccelerationFeatures extends SensorData {
     final zStats = Stats(zList);
 
     var features = AccelerationFeatures()
-          ..count = n
-          // mean
-          ..xMean = xStatistics.mean
-          ..yMean = yStatistics.mean
-          ..zMean = zStatistics.mean
-          // std dev
-          ..xStd = xStatistics.standardDeviation
-          ..yStd = yStatistics.standardDeviation
-          ..zStd = zStatistics.standardDeviation
-          //min
-          ..xMin = xStatistics.min
-          ..yMin = yStatistics.min
-          ..zMin = zStatistics.min
-          // max
-          ..xMax = xStatistics.max
-          ..yMax = yStatistics.max
-          ..zMax = zStatistics.max
-          //max-min diff
-          ..xMaxMinDiff = xStatistics.max - xStatistics.min
-          ..yMaxMinDiff = yStatistics.max - yStatistics.min
-          ..zMaxMinDiff = zStatistics.max - zStatistics.min
-          // median
-          ..xMedian = xStatistics.median
-          ..yMedian = yStatistics.median
-          ..zMedian = zStatistics.median
-          // energy
-          ..xEnergy = xStatistics.squaresSum / n
-          ..yEnergy = yStatistics.squaresSum / n
-          ..zEnergy = zStatistics.squaresSum / n
-        //
-        ;
+      ..count = n
+      // mean
+      ..xMean = xStatistics.mean
+      ..yMean = yStatistics.mean
+      ..zMean = zStatistics.mean
+      // std dev
+      ..xStd = xStatistics.standardDeviation
+      ..yStd = yStatistics.standardDeviation
+      ..zStd = zStatistics.standardDeviation
+      //min
+      ..xMin = xStatistics.min
+      ..yMin = yStatistics.min
+      ..zMin = zStatistics.min
+      // max
+      ..xMax = xStatistics.max
+      ..yMax = yStatistics.max
+      ..zMax = zStatistics.max
+      //max-min diff
+      ..xMaxMinDiff = xStatistics.max - xStatistics.min
+      ..yMaxMinDiff = yStatistics.max - yStatistics.min
+      ..zMaxMinDiff = zStatistics.max - zStatistics.min
+      // median
+      ..xMedian = xStatistics.median
+      ..yMedian = yStatistics.median
+      ..zMedian = zStatistics.median
+      // energy
+      ..xEnergy = xStatistics.squaresSum / n
+      ..yEnergy = yStatistics.squaresSum / n
+      ..zEnergy = zStatistics.squaresSum / n
+    //
+    ;
 
     // positive count
     features.xPosCount = xList.where((x) => x > 0).length;

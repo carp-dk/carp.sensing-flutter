@@ -21,8 +21,8 @@ dependencies:
 dependency_overrides:
   # carp_serializable:
   #   path: ../../carp_serializable/
-  # carp_core:
-  #   path: ../../carp_core
+  carp_core:
+    path: ../../carp_core
 
 dev_dependencies:
   test: any

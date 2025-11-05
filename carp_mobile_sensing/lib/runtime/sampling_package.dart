@@ -28,6 +28,7 @@ class SamplingPackageRegistry {
     // register the built-in packages
     register(DeviceSamplingPackage());
     register(SensorSamplingPackage());
+    register(MonitoringSamplingPackage());
   }
 
   /// Register a sampling package.
@@ -40,8 +41,10 @@ class SamplingPackageRegistry {
     CarpDataTypes().add(package.samplingSchemes.dataTypes);
 
     // register the package's device in the device registry
-    DeviceController()
-        .registerDevice(package.deviceType, package.deviceManager);
+    DeviceController().registerDevice(
+      package.deviceType,
+      package.deviceManager,
+    );
 
     // call back to the package
     package.onRegister();
@@ -99,8 +102,9 @@ class SamplingPackageRegistry {
     if (packages.isNotEmpty) {
       if (packages.length > 1) {
         warning(
-            "$runtimeType - It seems like the data type '$type' is defined in more than one sampling package. "
-            "Is using the probe provided in the ${packages.first} package.");
+          "$runtimeType - It seems like the data type '$type' is defined in more than one sampling package. "
+          "Is using the probe provided in the ${packages.first} package.",
+        );
       }
       probe = packages.first.create(type);
       probe?.deviceManager = packages.first.deviceManager;
@@ -162,7 +166,6 @@ abstract class SmartphoneSamplingPackage extends SamplingPackage {
   // all smartphone sampling packages uses the same static device manager
   static final _deviceManager = SmartphoneDeviceManager();
 
-  // @override
   @override
   List<DataTypeMetaData> get dataTypes => samplingSchemes.dataTypes;
 
@@ -174,4 +177,29 @@ abstract class SmartphoneSamplingPackage extends SamplingPackage {
 
   @override
   void onRegister() {}
+}
+
+class NoOpSamplingPackage extends SmartphoneSamplingPackage {
+  @override
+  DataTypeSamplingSchemeMap get samplingSchemes =>
+      DataTypeSamplingSchemeMap.from([
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.ERROR_TYPE_NAME]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.TRIGGERED_TASK_TYPE_NAME]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.COMPLETED_TASK_TYPE_NAME]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CamsDataTypes.HEARTBEAT_TYPE_NAME]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME]!,
+        ),
+      ]);
+
+  @override
+  Probe? create(String type) => null;
 }

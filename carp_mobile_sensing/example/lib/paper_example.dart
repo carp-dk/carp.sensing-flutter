@@ -20,25 +20,30 @@ void sensing() async {
   // add selected measures from the sampling packages
   protocol.addTaskControl(
     ImmediateTrigger(),
-    BackgroundTask(measures: [
-      Measure(type: SensorSamplingPackage.ACCELERATION),
-      Measure(type: SensorSamplingPackage.ROTATION),
-      Measure(type: DeviceSamplingPackage.FREE_MEMORY),
-      Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-      Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-      Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME),
-      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-    ]),
+    BackgroundTask(
+      measures: [
+        Measure(type: SensorSamplingPackage.ACCELERATION),
+        Measure(type: SensorSamplingPackage.ROTATION),
+        Measure(type: DeviceSamplingPackage.FREE_MEMORY),
+        Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+        Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+        Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME),
+        Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+      ],
+    ),
     phone,
     Control.Start,
   );
 
   var invitation = ParticipantInvitation(
-      participantId: const Uuid().v1,
-      assignedRoles: AssignedTo.all(),
-      identity: EmailAccountIdentity("test@test.com"),
-      invitation: StudyInvitation(
-          "Movement study", "This study tracks your movements."));
+    participantId: const Uuid().v1,
+    assignedRoles: AssignedTo.all(),
+    identity: EmailAccountIdentity("test@test.com"),
+    invitation: StudyInvitation(
+      "Movement study",
+      "This study tracks your movements.",
+    ),
+  );
 
   // deploy this protocol using the on-phone deployment service
   StudyDeploymentStatus status = await SmartphoneDeploymentService()
@@ -49,12 +54,15 @@ void sensing() async {
   await client.configure();
 
   // add the study and get the study runtime (controller)
-  final study = await client.addStudy(SmartphoneStudy(
-    studyDeploymentId: status.studyDeploymentId,
-    deviceRoleName: status.primaryDeviceStatus!.device.roleName,
-  ));
-  SmartphoneDeploymentController? controller =
-      client.getStudyRuntime(study.studyDeploymentId);
+  final study = await client.addStudy(
+    SmartphoneStudy(
+      studyDeploymentId: status.studyDeploymentId,
+      deviceRoleName: phone.roleName,
+    ),
+  );
+  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+    study.studyDeploymentId,
+  );
   // deploy the study on this phone
   await controller?.tryDeployment();
 

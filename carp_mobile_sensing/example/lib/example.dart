@@ -19,21 +19,25 @@ Future<void> minimalExample() async {
   // Create a protocol.
   final phone = Smartphone();
 
-  final protocol = SmartphoneStudyProtocol(
-    ownerId: 'AB',
-    name: 'Tracking steps, light, screen, and battery',
-    dataEndPoint: SQLiteDataEndPoint(),
-  )
-    ..addPrimaryDevice(phone)
-    ..addTaskControl(
-        DelayedTrigger(delay: const Duration(seconds: 10)),
-        BackgroundTask(measures: [
-          Measure(type: SensorSamplingPackage.STEP_COUNT),
-          Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-          Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-          Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-        ]),
-        phone);
+  final protocol =
+      SmartphoneStudyProtocol(
+          ownerId: 'AB',
+          name: 'Tracking steps, light, screen, and battery',
+          dataEndPoint: SQLiteDataEndPoint(),
+        )
+        ..addPrimaryDevice(phone)
+        ..addTaskControl(
+          DelayedTrigger(delay: const Duration(seconds: 10)),
+          BackgroundTask(
+            measures: [
+              Measure(type: SensorSamplingPackage.STEP_COUNT),
+              Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+              Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+              Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+            ],
+          ),
+          phone,
+        );
 
   // Create and configure a client manager for this phone.
   await SmartPhoneClientManager().configure();
@@ -47,9 +51,11 @@ Future<void> minimalExample() async {
   // Alternatively: do it all in one line of code....!
   // Create and configure a client manager for this phone, add the protocol,
   // and start sampling data.
-  SmartPhoneClientManager().configure().then((_) => SmartPhoneClientManager()
-      .addStudyFromProtocol(protocol)
-      .then((_) => SmartPhoneClientManager().start()));
+  SmartPhoneClientManager().configure().then(
+    (_) => SmartPhoneClientManager()
+        .addStudyFromProtocol(protocol)
+        .then((_) => SmartPhoneClientManager().start()),
+  );
 
   // Listening on the measurements stream.
   SmartPhoneClientManager().measurements.listen((measurement) {
@@ -87,12 +93,14 @@ Future<void> example_0() async {
   // battery level from the phone. Sampling is delayed by 10 seconds.
   protocol.addTaskControl(
     DelayedTrigger(delay: const Duration(seconds: 10)),
-    BackgroundTask(measures: [
-      Measure(type: SensorSamplingPackage.STEP_COUNT),
-      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-      Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-      Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-    ]),
+    BackgroundTask(
+      measures: [
+        Measure(type: SensorSamplingPackage.STEP_COUNT),
+        Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+        Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+        Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+      ],
+    ),
     phone,
   );
 
@@ -111,8 +119,9 @@ Future<void> example_0() async {
   // be used pr. default.
   // If not deployed before (i.e., cached) the study deployment will be
   // fetched from the deployment service.
-  SmartphoneDeploymentController? controller =
-      client.getStudyRuntime(study.studyDeploymentId);
+  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+    study.studyDeploymentId,
+  );
   await controller?.tryDeployment();
 
   // Configure the controller.
@@ -150,12 +159,14 @@ void example_1() async {
   // battery level. Sampling is delaying by 10 seconds.
   protocol.addTaskControl(
     ImmediateTrigger(),
-    BackgroundTask(measures: [
-      Measure(type: SensorSamplingPackage.STEP_COUNT),
-      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-      Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-      Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-    ]),
+    BackgroundTask(
+      measures: [
+        Measure(type: SensorSamplingPackage.STEP_COUNT),
+        Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+        Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+        Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+      ],
+    ),
     phone,
   );
 
@@ -171,12 +182,15 @@ void example_1() async {
 
   // Add the study to the client manager and get a study runtime to
   // control this deployment
-  final study = await client.addStudy(SmartphoneStudy(
-    studyDeploymentId: status.studyDeploymentId,
-    deviceRoleName: status.primaryDeviceStatus!.device.roleName,
-  ));
-  SmartphoneDeploymentController? controller =
-      client.getStudyRuntime(study.studyDeploymentId);
+  final study = await client.addStudy(
+    SmartphoneStudy(
+      studyDeploymentId: status.studyDeploymentId,
+      deviceRoleName: phone.roleName,
+    ),
+  );
+  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+    study.studyDeploymentId,
+  );
 
   // Deploy the study on this phone.
   await controller?.tryDeployment();
@@ -199,18 +213,19 @@ void example_2() async {
     ownerId: 'abc@dtu.dk',
     name: 'Tracking',
     studyDescription: StudyDescription(
-        title: 'CAMS App - Sensing Coverage Study',
-        description:
-            'The default study testing coverage of most measures. Used in the coverage tests.',
-        purpose: 'To test sensing coverage',
-        responsible: StudyResponsible(
-          id: 'abc',
-          title: 'professor',
-          address: 'Ørsteds Plads',
-          affiliation: 'Technical University of Denmark',
-          email: 'abc@dtu.dk',
-          name: 'Alex B. Christensen',
-        )),
+      title: 'CAMS App - Sensing Coverage Study',
+      description:
+          'The default study testing coverage of most measures. Used in the coverage tests.',
+      purpose: 'To test sensing coverage',
+      responsible: StudyResponsible(
+        id: 'abc',
+        title: 'professor',
+        address: 'Ørsteds Plads',
+        affiliation: 'Technical University of Denmark',
+        email: 'abc@dtu.dk',
+        name: 'Alex B. Christensen',
+      ),
+    ),
     dataEndPoint: FileDataEndPoint(
       bufferSize: 500 * 1000,
       zip: true,
@@ -227,45 +242,56 @@ void example_2() async {
   // but delay the sampling by 10 seconds
   protocol.addTaskControl(
     DelayedTrigger(delay: const Duration(seconds: 10)),
-    BackgroundTask(name: 'Sensor Task', measures: [
-      Measure(type: SensorSamplingPackage.ACCELERATION),
-      Measure(type: SensorSamplingPackage.ROTATION),
-    ]),
+    BackgroundTask(
+      name: 'Sensor Task',
+      measures: [
+        Measure(type: SensorSamplingPackage.ACCELERATION),
+        Measure(type: SensorSamplingPackage.ROTATION),
+      ],
+    ),
     phone,
     Control.Start,
   );
 
   // specify sampling configuration of a light measure
   var lightMeasure = Measure(
-      type: SensorSamplingPackage.AMBIENT_LIGHT,
-      samplingConfiguration: PeriodicSamplingConfiguration(
-        interval: const Duration(minutes: 10),
-        duration: const Duration(seconds: 20),
-      ));
+    type: SensorSamplingPackage.AMBIENT_LIGHT,
+    samplingConfiguration: PeriodicSamplingConfiguration(
+      interval: const Duration(minutes: 10),
+      duration: const Duration(seconds: 20),
+    ),
+  );
 
   // add it to the protocol
-  protocol.addTaskControl(ImmediateTrigger(),
-      BackgroundTask(name: 'Light')..addMeasure(lightMeasure), phone);
+  protocol.addTaskControl(
+    ImmediateTrigger(),
+    BackgroundTask(name: 'Light')..addMeasure(lightMeasure),
+    phone,
+  );
 
   // use the on-phone deployment service
   DeploymentService deploymentService = SmartphoneDeploymentService();
 
   // create a study deployment based on the protocol
   // no need for any invitation when deploying locally
-  StudyDeploymentStatus status =
-      await deploymentService.createStudyDeployment(protocol);
+  StudyDeploymentStatus status = await deploymentService.createStudyDeployment(
+    protocol,
+  );
 
   // create and configure a client manager for this phone
   SmartPhoneClientManager client = SmartPhoneClientManager();
   await client.configure(deploymentService: deploymentService);
 
   // create a study runtime to control this deployment
-  final study = await client.addStudy(SmartphoneStudy(
-    studyDeploymentId: status.studyDeploymentId,
-    deviceRoleName: status.primaryDeviceStatus!.device.roleName,
-  ));
-  SmartphoneDeploymentController? controller =
-      client.getStudyRuntime(study.studyDeploymentId);
+  final study = await client.addStudy(
+    SmartphoneStudy(
+      studyDeploymentId: status.studyDeploymentId,
+      deviceRoleName: phone.roleName,
+    ),
+  );
+  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+    study.studyDeploymentId,
+  );
 
   // deploy the study on this phone (controller)
   await controller?.tryDeployment();
@@ -279,14 +305,17 @@ void example_2() async {
   // listen only on CARP measurements
   controller?.measurements
       .where(
-          (measurement) => measurement.data.format.namespace == NameSpace.CARP)
+        (measurement) => measurement.data.format.namespace == NameSpace.CARP,
+      )
       .listen((event) => print(event));
 
   // listen on ambient light measurements only
   controller?.measurements
-      .where((measurement) =>
-          measurement.data.format.toString() ==
-          SensorSamplingPackage.AMBIENT_LIGHT)
+      .where(
+        (measurement) =>
+            measurement.data.format.toString() ==
+            SensorSamplingPackage.AMBIENT_LIGHT,
+      )
       .listen((measurement) => print(measurement));
 
   // map measurements to JSON and then print
@@ -295,18 +324,19 @@ void example_2() async {
       .listen((json) => print(json));
 
   // subscribe to the stream of measurements
-  StreamSubscription<Measurement> subscription =
-      controller!.measurements.listen((Measurement measurement) {
-    // do something w. the measurement, e.g. print the json
-    print(const JsonEncoder.withIndent(' ').convert(measurement));
-  });
+  StreamSubscription<Measurement> subscription = controller!.measurements
+      .listen((Measurement measurement) {
+        // do something w. the measurement, e.g. print the json
+        print(const JsonEncoder.withIndent(' ').convert(measurement));
+      });
 
   // Listen to a specific probe(s)
   controller.executor
       .lookupProbe(CarpDataTypes.ACCELERATION_TYPE_NAME)
-      .forEach((probe) => probe.measurements.listen(
-            (measurement) => print(measurement),
-          ));
+      .forEach(
+        (probe) =>
+            probe.measurements.listen((measurement) => print(measurement)),
+      );
 
   // Sampling can be stopped and started
   controller.executor.stop();
@@ -423,8 +453,11 @@ void example_4() async {
       // (all of the above can actually be handled directly by the SmartphoneDeploymentService.registerDevice() method)
 
       // register the device in the deployment service
-      await SmartphoneDeploymentService()
-          .registerDevice(studyDeploymentId, deviceRoleName, registration);
+      await SmartphoneDeploymentService().registerDevice(
+        studyDeploymentId,
+        deviceRoleName,
+        registration,
+      );
     }
   });
 
@@ -452,9 +485,10 @@ void transformedExample() async {
 void protocolExample() async {
   // Create a protocol. Note that the [id] is not used for anything.
   SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
-      ownerId: 'AB',
-      name: 'Track patient movement',
-      dataEndPoint: SQLiteDataEndPoint());
+    ownerId: 'AB',
+    name: 'Track patient movement',
+    dataEndPoint: SQLiteDataEndPoint(),
+  );
 
   // Define which devices are used for data collection.
   //
@@ -467,17 +501,17 @@ void protocolExample() async {
 
   // Collect timezone info every time the app restarts.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
-        Measure(type: DeviceSamplingPackage.TIMEZONE),
-      ]),
-      phone);
+    ImmediateTrigger(),
+    BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
+    phone,
+  );
 
   // Collect device info only once, when this study is deployed.
   protocol.addTaskControl(
     OneTimeTrigger(),
     BackgroundTask(
-        measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)]),
+      measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+    ),
     phone,
   );
 
@@ -490,13 +524,15 @@ void protocolExample() async {
   //  * free memory (there seems to be a bug in the underlying sysinfo plugin)
   protocol.addTaskControl(
     ImmediateTrigger(),
-    BackgroundTask(measures: [
-      Measure(type: DeviceSamplingPackage.FREE_MEMORY),
-      Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-      Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-      Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME),
-      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
-    ]),
+    BackgroundTask(
+      measures: [
+        Measure(type: DeviceSamplingPackage.FREE_MEMORY),
+        Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+        Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+        Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME),
+        Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+      ],
+    ),
     phone,
   );
 
@@ -789,32 +825,32 @@ void recurrentScheduledTriggerExample() {
 void appTaskExample() async {
   Smartphone phone = Smartphone(roleName: 'phone');
 
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'user@dtu.dk',
-    name: 'Tracking',
-  )
-    // collect device info as an app task
-    ..addTaskControl(
-      ImmediateTrigger(),
-      AppTask(
-        type: BackgroundSensingUserTask.SENSING_TYPE,
-        title: 'Device',
-        description: 'Collect device info',
-      )..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
-      phone,
-      Control.Start,
-    )
-    // start collecting screen events as an app task
-    ..addTaskControl(
-      ImmediateTrigger(),
-      AppTask(
-        type: BackgroundSensingUserTask.SENSING_TYPE,
-        title: 'Screen',
-        description: 'Collect screen events',
-      )..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT)),
-      phone,
-      Control.Start,
-    );
+  StudyProtocol protocol =
+      StudyProtocol(ownerId: 'user@dtu.dk', name: 'Tracking')
+        // collect device info as an app task
+        ..addTaskControl(
+          ImmediateTrigger(),
+          AppTask(
+            type: BackgroundSensingUserTask.SENSING_TYPE,
+            title: 'Device',
+            description: 'Collect device info',
+          )..addMeasure(
+            Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
+          ),
+          phone,
+          Control.Start,
+        )
+        // start collecting screen events as an app task
+        ..addTaskControl(
+          ImmediateTrigger(),
+          AppTask(
+            type: BackgroundSensingUserTask.SENSING_TYPE,
+            title: 'Screen',
+            description: 'Collect screen events',
+          )..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT)),
+          phone,
+          Control.Start,
+        );
 
   print(protocol);
 }

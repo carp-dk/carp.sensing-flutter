@@ -25,11 +25,13 @@ import 'package:carp_core/carp_core.dart';
 import 'domain.dart';
 import 'runtime.dart';
 import 'infrastructure.dart';
+import 'sampling_packages.dart';
 
 export 'domain.dart';
 export 'runtime.dart';
 export 'services.dart';
 export 'infrastructure.dart';
+export 'sampling_packages.dart';
 
 part 'carp_mobile_sensing.json.dart';
 
@@ -44,7 +46,7 @@ class CarpMobileSensing {
 
   CarpMobileSensing._() {
     Core.ensureInitialized();
-    CAMSDataType();
+    CamsDataTypes();
     _registerFromJsonFunctions();
   }
 

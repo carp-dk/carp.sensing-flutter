@@ -5,8 +5,18 @@
  * found in the LICENSE file.
  */
 
-part of '../device.dart';
+part of '../../../sampling_packages.dart';
 
+/// A [SamplingPackage] containing data types, sampling schemas and probes
+/// for collecting information from the device hardware:
+///
+///  - device info
+///  - battery status
+///  - screen events
+///  - app lifecycle events
+///  - free memory
+///  - time zone
+///
 class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for collection of basic device information like device name,
   /// model, manufacturer, operating system, and hardware profile.

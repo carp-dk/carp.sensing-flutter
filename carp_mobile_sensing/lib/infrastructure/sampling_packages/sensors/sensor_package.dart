@@ -5,8 +5,18 @@
  * found in the LICENSE file.
  */
 
-part of '../sensors.dart';
+part of '../../../sampling_packages.dart';
 
+/// A [SamplingPackage] containing data types, sampling schemas and probes
+/// for collecting information from the phone sensors:
+///
+///  - accelerometer
+///  - gyroscope
+///  - magnetometer
+///  - acceleration features
+///  - ambient light
+///  - pedometer (step events)
+///
 class SensorSamplingPackage extends SmartphoneSamplingPackage {
   /// Rate of change in velocity, including gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
@@ -59,47 +69,59 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-            CarpDataTypes().types[CarpDataTypes.ACCELERATION_TYPE_NAME]!,
-            IntervalSamplingConfiguration(
-                interval: const Duration(milliseconds: 200))),
+          CarpDataTypes().types[CarpDataTypes.ACCELERATION_TYPE_NAME]!,
+          IntervalSamplingConfiguration(
+            interval: const Duration(milliseconds: 200),
+          ),
+        ),
         DataTypeSamplingScheme(
-            CarpDataTypes()
-                .types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME]!,
-            IntervalSamplingConfiguration(
-                interval: const Duration(milliseconds: 200))),
+          CarpDataTypes().types[CarpDataTypes
+              .NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME]!,
+          IntervalSamplingConfiguration(
+            interval: const Duration(milliseconds: 200),
+          ),
+        ),
         DataTypeSamplingScheme(
-            CarpDataTypes().types[CarpDataTypes.ROTATION_TYPE_NAME]!,
-            IntervalSamplingConfiguration(
-                interval: const Duration(milliseconds: 200))),
+          CarpDataTypes().types[CarpDataTypes.ROTATION_TYPE_NAME]!,
+          IntervalSamplingConfiguration(
+            interval: const Duration(milliseconds: 200),
+          ),
+        ),
         DataTypeSamplingScheme(
-            CarpDataTypes().types[CarpDataTypes.MAGNETIC_FIELD_TYPE_NAME]!,
-            IntervalSamplingConfiguration(
-                interval: const Duration(milliseconds: 200))),
+          CarpDataTypes().types[CarpDataTypes.MAGNETIC_FIELD_TYPE_NAME]!,
+          IntervalSamplingConfiguration(
+            interval: const Duration(milliseconds: 200),
+          ),
+        ),
         DataTypeSamplingScheme(
-            CamsDataTypeMetaData(
-              type: ACCELERATION_FEATURES,
-              displayName: "Accelerometer Features",
-              timeType: DataTimeType.TIME_SPAN,
-            ),
-            PeriodicSamplingConfiguration(
-              interval: const Duration(minutes: 1),
-              duration: const Duration(seconds: 3),
-            )),
-        DataTypeSamplingScheme(CamsDataTypeMetaData.fromDataTypeMetaData(
-          dataTypeMetaData:
-              CarpDataTypes().types[CarpDataTypes.STEP_COUNT_TYPE_NAME]!,
-          permissions: [Permission.activityRecognition],
-        )),
+          CamsDataTypeMetaData(
+            type: ACCELERATION_FEATURES,
+            displayName: "Accelerometer Features",
+            timeType: DataTimeType.TIME_SPAN,
+          ),
+          PeriodicSamplingConfiguration(
+            interval: const Duration(minutes: 1),
+            duration: const Duration(seconds: 3),
+          ),
+        ),
         DataTypeSamplingScheme(
-            CamsDataTypeMetaData(
-              type: AMBIENT_LIGHT,
-              displayName: "Ambient Light",
-              timeType: DataTimeType.TIME_SPAN,
-            ),
-            PeriodicSamplingConfiguration(
-              interval: const Duration(minutes: 5),
-              duration: const Duration(seconds: 10),
-            )),
+          CamsDataTypeMetaData.fromDataTypeMetaData(
+            dataTypeMetaData:
+                CarpDataTypes().types[CarpDataTypes.STEP_COUNT_TYPE_NAME]!,
+            permissions: [Permission.activityRecognition],
+          ),
+        ),
+        DataTypeSamplingScheme(
+          CamsDataTypeMetaData(
+            type: AMBIENT_LIGHT,
+            displayName: "Ambient Light",
+            timeType: DataTimeType.TIME_SPAN,
+          ),
+          PeriodicSamplingConfiguration(
+            interval: const Duration(minutes: 5),
+            duration: const Duration(seconds: 10),
+          ),
+        ),
       ]);
 
   @override

@@ -140,9 +140,9 @@ class SmartphoneStudyProtocol extends StudyProtocol
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,
   }) : super(
-          ownerId: ownerId ?? const Uuid().v1,
-          description: studyDescription?.description ?? '',
-        ) {
+         ownerId: ownerId ?? const Uuid().v1,
+         description: studyDescription?.description ?? '',
+       ) {
     // add the smartphone specific protocol data as application-specific data
     _data = SmartphoneApplicationData(
       studyDescription: studyDescription,
@@ -178,11 +178,11 @@ class SmartphoneStudyProtocol extends StudyProtocol
       Measure(type: CarpDataTypes.ERROR_TYPE_NAME),
       Measure(type: CarpDataTypes.TRIGGERED_TASK_TYPE_NAME),
       Measure(type: CarpDataTypes.COMPLETED_TASK_TYPE_NAME),
-      Measure(type: Heartbeat.dataType),
+      Measure(type: CamsDataTypes.HEARTBEAT_TYPE_NAME),
     ];
     if (device is PrimaryDeviceConfiguration) {
       // For primary devices, also add the CompletedAppTask measure
-      measures.add(Measure(type: CompletedAppTask.dataType));
+      measures.add(Measure(type: CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME));
     }
 
     addTaskControl(

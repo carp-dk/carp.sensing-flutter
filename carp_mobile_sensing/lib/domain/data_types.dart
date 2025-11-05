@@ -41,6 +41,7 @@ class CamsDataTypeMetaData extends DataTypeMetaData {
   List<Permission> permissions;
 
   /// Create a new description of a data [type] with some [displayName].
+  ///
   /// Default [timeType] is [DataTimeType.POINT],
   /// default [dataEventType] is [DataEventType.EVENT], and
   /// default [permissions] is empty (no permissions required).
@@ -53,6 +54,7 @@ class CamsDataTypeMetaData extends DataTypeMetaData {
   });
 
   /// Create a new description of a data type based on the [dataTypeMetaData].
+  ///
   /// Default [dataEventType] is [DataEventType.EVENT], and
   /// default [permissions] is empty (no permissions required).
   CamsDataTypeMetaData.fromDataTypeMetaData({
@@ -60,23 +62,40 @@ class CamsDataTypeMetaData extends DataTypeMetaData {
     this.dataEventType = DataEventType.EVENT,
     this.permissions = const [],
   }) : super(
-          type: dataTypeMetaData.type,
-          displayName: dataTypeMetaData.displayName,
-          timeType: dataTypeMetaData.timeType,
-        );
+         type: dataTypeMetaData.type,
+         displayName: dataTypeMetaData.displayName,
+         timeType: dataTypeMetaData.timeType,
+       );
 }
 
 /// Contains CAMS data type definitions similar to CARP Core [CarpDataTypes].
-class CAMSDataType {
+class CamsDataTypes {
+  static final CamsDataTypes _instance = CamsDataTypes._();
+  factory CamsDataTypes() => _instance;
+
+  static const String HEARTBEAT_TYPE_NAME =
+      '${CarpDataTypes.CARP_NAMESPACE}.heartbeat';
+  static const String COMPLETED_APP_TASK_TYPE_NAME =
+      '${CarpDataTypes.CARP_NAMESPACE}.completedapptask';
   static const String FILE_TYPE_NAME = '${CarpDataTypes.CARP_NAMESPACE}.file';
 
-  CAMSDataType() {
+  CamsDataTypes._() {
     CarpDataTypes().add([
+      DataTypeMetaData(
+        type: HEARTBEAT_TYPE_NAME,
+        displayName: "Heart Beat",
+        timeType: DataTimeType.POINT,
+      ),
+      DataTypeMetaData(
+        type: COMPLETED_APP_TASK_TYPE_NAME,
+        displayName: "Completed AppTask",
+        timeType: DataTimeType.POINT,
+      ),
       DataTypeMetaData(
         type: FILE_TYPE_NAME,
         displayName: "File",
         timeType: DataTimeType.POINT,
-      )
+      ),
     ]);
   }
 }
