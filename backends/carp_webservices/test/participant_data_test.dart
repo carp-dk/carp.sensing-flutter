@@ -232,38 +232,32 @@ void main() {
       //     (data) => debugPrint('${data.roleName} : ${data.data.keys}'));
     });
 
-    test('- set common data (Address)', () async {
+    test('- set common data (Sex)', () async {
       final participation = CarpParticipationService().participation();
 
       ParticipantData data = await participation.setParticipantData({
-        AddressInput.type: AddressInput(
-          address1: 'DTU HealthTech',
-          address2: 'Technical University of Denmark',
-          street: 'Ørsteds Plads',
-          city: 'Kgs. Lyngby',
-          postalCode: 'DK-2800',
-          country: 'Denmark',
-        ),
+        SexInput.type: SexInput(value: Sex.Male),
       });
       debugPrint(toJsonString(data));
 
-      expect(data.common[AddressInput.type], isA<AddressInput>());
-      expect(
-        (data.common[AddressInput.type] as AddressInput).country,
-        'Denmark',
-      );
+      expect(data.common[SexInput.type], isA<SexInput>());
+      expect((data.common[SexInput.type] as SexInput).value, Sex.Male);
     });
 
-    test('- set role-specific data (Sex of Father)', () async {
+    test('- set role-specific data (Name of Mother)', () async {
       final participation = CarpParticipationService().participation();
 
       final data = await participation.setParticipantData({
-        SexInput.type: SexInput(value: Sex.Male),
-      }, father);
+        FullNameInput.type: FullNameInput(
+          firstName: 'Anna',
+          middleName: 'K.',
+          lastName: 'Doe',
+        ),
+      }, mother);
       debugPrint(toJsonString(data));
 
       final sex = data.roles
-          .firstWhere((role) => role.roleName == father)
+          .firstWhere((role) => role.roleName == mother)
           .data[SexInput.type];
 
       expect(sex, isA<SexInput>());

@@ -27,17 +27,18 @@ class SmartphoneStudy extends Study {
 
   /// Create a new study based on an [invitation].
   SmartphoneStudy.fromInvitation(ActiveParticipationInvitation invitation)
-      : this(
-          studyId: invitation.studyId,
-          studyDeploymentId: invitation.studyDeploymentId,
-          deviceRoleName:
-              invitation.deviceRoleName ?? Smartphone.DEFAULT_ROLE_NAME,
-          participantId: invitation.participantId,
-          participantRoleName: invitation.participantRoleName,
-        );
+    : this(
+        studyId: invitation.studyId,
+        studyDeploymentId: invitation.studyDeploymentId,
+        deviceRoleName:
+            invitation.deviceRoleName ?? Smartphone.DEFAULT_ROLE_NAME,
+        participantId: invitation.participantId,
+        participantRoleName: invitation.participantRoleName,
+      );
 
   @override
-  String toString() => '$runtimeType - '
+  String toString() =>
+      '$runtimeType - '
       'studyId: $studyId, '
       'studyDeploymentId: $studyDeploymentId, '
       'device role: $deviceRoleName, '
@@ -89,7 +90,7 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   // String? userId;
 
   /// The status of this study deployment.
-  StudyStatus status = StudyStatus.DeploymentNotStarted;
+  StudyDeploymentStatusTypes status = StudyDeploymentStatusTypes.Invited;
 
   /// Create a new [SmartphoneDeployment].
   ///
@@ -128,23 +129,24 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
     this.participantRoleName,
     required PrimaryDeviceDeployment deployment,
   }) : super(
-          deviceConfiguration: deployment.deviceConfiguration,
-          registration: deployment.registration,
-          connectedDevices: deployment.connectedDevices,
-          connectedDeviceRegistrations: deployment.connectedDeviceRegistrations,
-          tasks: deployment.tasks,
-          triggers: deployment.triggers,
-          taskControls: deployment.taskControls,
-          expectedParticipantData: deployment.expectedParticipantData,
-        ) {
+         deviceConfiguration: deployment.deviceConfiguration,
+         registration: deployment.registration,
+         connectedDevices: deployment.connectedDevices,
+         connectedDeviceRegistrations: deployment.connectedDeviceRegistrations,
+         tasks: deployment.tasks,
+         triggers: deployment.triggers,
+         taskControls: deployment.taskControls,
+         expectedParticipantData: deployment.expectedParticipantData,
+       ) {
     _studyDeploymentId = studyDeploymentId ?? const Uuid().v1;
 
     // check if this deployment has mapped study description in the application
     // data, i.e., a protocol generated from CAMS
     if (deployment.applicationData != null &&
         deployment.applicationData!.containsKey('studyDescription')) {
-      var data =
-          SmartphoneApplicationData.fromJson(deployment.applicationData!);
+      var data = SmartphoneApplicationData.fromJson(
+        deployment.applicationData!,
+      );
       _data.studyDescription = data.studyDescription;
       _data.dataEndPoint = data.dataEndPoint;
       _data.privacySchemaName = data.privacySchemaName;
@@ -169,17 +171,18 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
     required PrimaryDeviceDeployment deployment,
     required SmartphoneStudyProtocol protocol,
   }) : super(
-          deviceConfiguration: deployment.deviceConfiguration,
-          registration: deployment.registration,
-          connectedDevices:
-              protocol.connectedDevices ?? deployment.connectedDevices,
-          connectedDeviceRegistrations: deployment.connectedDeviceRegistrations,
-          tasks: protocol.tasks,
-          triggers: protocol.triggers,
-          taskControls: protocol.taskControls,
-          expectedParticipantData: protocol.expectedParticipantData ??
-              deployment.expectedParticipantData,
-        ) {
+         deviceConfiguration: deployment.deviceConfiguration,
+         registration: deployment.registration,
+         connectedDevices:
+             protocol.connectedDevices ?? deployment.connectedDevices,
+         connectedDeviceRegistrations: deployment.connectedDeviceRegistrations,
+         tasks: protocol.tasks,
+         triggers: protocol.triggers,
+         taskControls: protocol.taskControls,
+         expectedParticipantData:
+             protocol.expectedParticipantData ??
+             deployment.expectedParticipantData,
+       ) {
     _studyDeploymentId = studyDeploymentId ?? const Uuid().v1;
     _data.studyDescription = protocol.studyDescription;
     _data.dataEndPoint = protocol.dataEndPoint;
@@ -199,15 +202,15 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
     required String primaryDeviceRoleName,
     required SmartphoneStudyProtocol protocol,
   }) : super(
-          deviceConfiguration: Smartphone(roleName: primaryDeviceRoleName),
-          registration: DefaultDeviceRegistration(),
-          connectedDevices: protocol.connectedDevices ?? {},
-          connectedDeviceRegistrations: {},
-          tasks: protocol.tasks,
-          triggers: protocol.triggers,
-          taskControls: protocol.taskControls,
-          expectedParticipantData: protocol.expectedParticipantData ?? {},
-        ) {
+         deviceConfiguration: Smartphone(roleName: primaryDeviceRoleName),
+         registration: DefaultDeviceRegistration(),
+         connectedDevices: protocol.connectedDevices ?? {},
+         connectedDeviceRegistrations: {},
+         tasks: protocol.tasks,
+         triggers: protocol.triggers,
+         taskControls: protocol.taskControls,
+         expectedParticipantData: protocol.expectedParticipantData ?? {},
+       ) {
     _studyDeploymentId = studyDeploymentId ?? const Uuid().v1;
     _data.studyDescription = protocol.studyDescription;
     _data.dataEndPoint = protocol.dataEndPoint;
@@ -230,8 +233,9 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   DeviceConfiguration? getDeviceFromRoleName(String roleName) {
     if (deviceConfiguration.roleName == roleName) return deviceConfiguration;
     try {
-      return connectedDevices
-          .firstWhere((device) => device.roleName == roleName);
+      return connectedDevices.firstWhere(
+        (device) => device.roleName == roleName,
+      );
     } catch (_) {
       return null;
     }
@@ -243,7 +247,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   Map<String, dynamic> toJson() => _$SmartphoneDeploymentToJson(this);
 
   @override
-  String toString() => '$runtimeType - '
+  String toString() =>
+      '$runtimeType - '
       'studyId: $studyId, '
       'studyDeploymentId: $studyDeploymentId, '
       'device role: $deviceRoleName, '

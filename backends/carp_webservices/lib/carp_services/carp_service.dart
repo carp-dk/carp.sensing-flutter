@@ -41,8 +41,7 @@ class CarpService extends CarpBaseService {
   FileStorageReference getFileStorageReference([
     int id = -1,
     String? studyId,
-  ]) =>
-      FileStorageReference._(this, getStudyId(studyId), id);
+  ]) => FileStorageReference._(this, getStudyId(studyId), id);
 
   /// Get a [FileStorageReference] that reference a file with the original name
   /// [name] for study with id [studyId].
@@ -83,28 +82,15 @@ class CarpService extends CarpBaseService {
         ? "${getFileEndpointUri(studyId)}?query=$query"
         : getFileEndpointUri(studyId);
 
-    http.Response response =
-        await httpr.get(Uri.encodeFull(url), headers: headers);
-    int httpStatusCode = response.statusCode;
+    http.Response response = await _get(Uri.encodeFull(url));
 
-    switch (httpStatusCode) {
-      case HttpStatus.ok:
-        {
-          List<dynamic> list = json.decode(response.body) as List<dynamic>;
-          List<CarpFileResponse> fileList = [];
-          for (var element in list) {
-            fileList.add(CarpFileResponse._(element as Map<String, dynamic>));
-          }
-          return fileList;
-        }
-      default:
-        // All other cases are treated as an error.
-        {
-          Map<String, dynamic> responseJson =
-              json.decode(response.body) as Map<String, dynamic>;
-          throw CarpServiceException.fromMap(httpStatusCode, responseJson);
-        }
+    // we expect a list of files in the response
+    List<dynamic> list = _handleResponse(response) as List<dynamic>;
+    List<CarpFileResponse> fileList = [];
+    for (var element in list) {
+      fileList.add(CarpFileResponse._(element as Map<String, dynamic>));
     }
+    return fileList;
   }
 
   // --------------------------------------------------------------------------
@@ -140,26 +126,19 @@ class CarpService extends CarpBaseService {
     String? studyId,
   }) async {
     // GET the list of documents in this collection from the CARP web service
-    http.Response response = await httpr.get(
-        Uri.encodeFull('${getDocumentEndpointUri(studyId)}?query=$query'),
-        headers: headers);
-    int httpStatusCode = response.statusCode;
+    http.Response response = await _get(
+      Uri.encodeFull('${getDocumentEndpointUri(studyId)}?query=$query'),
+    );
 
-    if (httpStatusCode == HttpStatus.ok) {
-      List<dynamic> documentsJson = json.decode(response.body) as List<dynamic>;
-      List<DocumentSnapshot> documents = [];
-      for (var item in documentsJson) {
-        Map<String, dynamic> documentJson = item as Map<String, dynamic>;
-        String key = documentJson["name"].toString();
-        documents.add(DocumentSnapshot._(key, documentJson));
-      }
-      return documents;
+    // we expect a list of documents in the response
+    List<dynamic> documentsJson = _handleResponse(response) as List<dynamic>;
+    List<DocumentSnapshot> documents = [];
+    for (var item in documentsJson) {
+      Map<String, dynamic> documentJson = item as Map<String, dynamic>;
+      String key = documentJson["name"].toString();
+      documents.add(DocumentSnapshot._(key, documentJson));
     }
-
-    // All other cases are treated as an error.
-    Map<String, dynamic> responseJson =
-        json.decode(response.body) as Map<String, dynamic>;
-    throw CarpServiceException.fromMap(httpStatusCode, responseJson);
+    return documents;
   }
 
   /// Get all documents for a study.
@@ -169,25 +148,19 @@ class CarpService extends CarpBaseService {
   /// Note that this might return a very long list of documents and the
   /// request may time out.
   Future<List<DocumentSnapshot>> documents([String? studyId]) async {
-    http.Response response = await httpr
-        .get(Uri.encodeFull(getDocumentEndpointUri(studyId)), headers: headers);
-    int httpStatusCode = response.statusCode;
+    http.Response response = await _get(
+      Uri.encodeFull(getDocumentEndpointUri(studyId)),
+    );
 
-    if (httpStatusCode == HttpStatus.ok) {
-      List<dynamic> documentsJson = json.decode(response.body) as List<dynamic>;
-      List<DocumentSnapshot> documents = [];
-      for (var item in documentsJson) {
-        Map<String, dynamic> documentJson = item as Map<String, dynamic>;
-        String key = documentJson["name"].toString();
-        documents.add(DocumentSnapshot._(key, documentJson));
-      }
-      return documents;
+    // we expect a list of documents in the response
+    List<dynamic> documentsJson = _handleResponse(response) as List<dynamic>;
+    List<DocumentSnapshot> documents = [];
+    for (var item in documentsJson) {
+      Map<String, dynamic> documentJson = item as Map<String, dynamic>;
+      String key = documentJson["name"].toString();
+      documents.add(DocumentSnapshot._(key, documentJson));
     }
-
-    // All other cases are treated as an error.
-    Map<String, dynamic> responseJson =
-        json.decode(response.body) as Map<String, dynamic>;
-    throw CarpServiceException.fromMap(httpStatusCode, responseJson);
+    return documents;
   }
 
   /// Gets a [CollectionReference] for the [path].
@@ -207,60 +180,39 @@ class CarpService extends CarpBaseService {
   ///
   /// If [studyDeploymentId] is specified use this, otherwise use the study
   /// deployment id from [CarpService.study].
-  @Deprecated('The Informed Consent endpoints are deprecated in CAWS. '
-      'Informed Consent is uploaded as [InformedConsentInput] participant input '
-      'data using a [ParticipationReference].')
+  @Deprecated(
+    'The Informed Consent endpoints are deprecated in CAWS. '
+    'Informed Consent is uploaded as [InformedConsentInput] participant input '
+    'data using a [ParticipationReference].',
+  )
   Future<ConsentDocument> createConsentDocument(
     Map<String, dynamic> document, {
     String? studyDeploymentId,
   }) async {
-    debug('REQUEST: POST ${getConsentDocumentEndpointUri(studyDeploymentId)}');
-
-    // POST the document to the CARP web service
     http.Response response = await _post(
       getConsentDocumentEndpointUri(studyDeploymentId),
       body: json.encode(document),
     );
 
-    int httpStatusCode = response.statusCode;
-    Map<String, dynamic> responseJson =
-        json.decode(response.body) as Map<String, dynamic>;
-
-    if ((httpStatusCode == HttpStatus.ok) ||
-        (httpStatusCode == HttpStatus.created)) {
-      return ConsentDocument._(responseJson);
-    }
-
-    // All other cases are treated as an error.
-    throw CarpServiceException.fromMap(httpStatusCode, responseJson);
+    return ConsentDocument._(_handleResponse(response) as Map<String, dynamic>);
   }
 
   /// Get a previously uploaded (signed) consent document with document [id].
   ///
   /// If [studyDeploymentId] is specified use this, otherwise use the study
   /// deployment id from [CarpService.study].
-  @Deprecated('The Informed Consent endpoints are deprecated in CAWS. '
-      'Informed Consent is uploaded as [InformedConsentInput] participant input '
-      'data using a [ParticipationReference].')
+  @Deprecated(
+    'The Informed Consent endpoints are deprecated in CAWS. '
+    'Informed Consent is uploaded as [InformedConsentInput] participant input '
+    'data using a [ParticipationReference].',
+  )
   Future<ConsentDocument> getConsentDocument(
     int id, {
     String? studyDeploymentId,
   }) async {
     String url = "${getConsentDocumentEndpointUri(studyDeploymentId)}/$id";
-
-    // GET the consent document from the CARP web service
     http.Response response = await _get(Uri.encodeFull(url));
-
-    debug('RESPONSE: ${response.statusCode}\n${response.body}');
-
-    int httpStatusCode = response.statusCode;
-    Map<String, dynamic> responseJson =
-        json.decode(response.body) as Map<String, dynamic>;
-
-    if (httpStatusCode == HttpStatus.ok) return ConsentDocument._(responseJson);
-
-    // All other cases are treated as an error.
-    throw CarpServiceException.fromMap(httpStatusCode, responseJson);
+    return ConsentDocument._(_handleResponse(response) as Map<String, dynamic>);
   }
 
   // --------------------------------------------------------------------------
@@ -269,8 +221,10 @@ class CarpService extends CarpBaseService {
 
   /// Creates a new [DataPointReference] initialized at the current
   /// CarpService storage location.
-  @Deprecated('The DataPoint endpoints is deprecated in CAWS. '
-      'Data should be uploaded using the CARP-Core Data Stream endpoint.')
+  @Deprecated(
+    'The DataPoint endpoints is deprecated in CAWS. '
+    'Data should be uploaded using the CARP-Core Data Stream endpoint.',
+  )
   DataPointReference dataPointReference([String? studyDeploymentId]) =>
       DataPointReference._(this, getStudyDeploymentId(studyDeploymentId));
 }

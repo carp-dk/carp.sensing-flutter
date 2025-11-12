@@ -18,7 +18,7 @@ class FileStorageReference extends CarpReference {
   String get studyId => _studyId;
 
   FileStorageReference._(CarpService service, this._studyId, [this.id = -1])
-      : super._(service);
+    : super._(service);
 
   /// The URL for the file end point for this [FileStorageReference].
   String get fileEndpointUri =>
@@ -48,35 +48,20 @@ class FileStorageReference extends CarpReference {
     final String url = "$fileEndpointUri/$id";
 
     final response = await service._get(url);
-    int httpStatusCode = response.statusCode;
-    Map<String, dynamic> responseJson =
-        json.decode(response.body) as Map<String, dynamic>;
 
-    switch (httpStatusCode) {
-      case HttpStatus.ok:
-        return CarpFileResponse._(responseJson);
-      default:
-        throw CarpServiceException.fromMap(httpStatusCode, responseJson);
-    }
+    Map<String, dynamic> responseJson =
+        service._handleResponse(response) as Map<String, dynamic>;
+    return CarpFileResponse._(responseJson);
   }
 
   /// Deletes the file at this [FileStorageReference].
-  Future<int> delete() async {
+  Future<void> delete() async {
     assert(id > 0);
     final String url = "$fileEndpointUri/$id";
 
-    final response = await service._delete(url);
-    int httpStatusCode = response.statusCode;
-
-    switch (httpStatusCode) {
-      case HttpStatus.ok:
-      case HttpStatus.noContent:
-        return httpStatusCode;
-      default:
-        Map<String, dynamic> responseJson =
-            json.decode(response.body) as Map<String, dynamic>;
-        throw CarpServiceException.fromMap(httpStatusCode, responseJson);
-    }
+    await service
+        ._delete(url)
+        .then((response) => service._handleResponse(response));
   }
 }
 
@@ -91,15 +76,16 @@ class FileMetadata {
     this.contentLanguage,
     this.contentType,
     Map<String, String>? customMetadata,
-  })  : carpServiceName = null,
-        path = null,
-        name = null,
-        sizeBytes = null,
-        creationTimeMillis = null,
-        updatedTimeMillis = null,
-        md5Hash = null,
-        customMetadata =
-            (customMetadata == null) ? null : Map.unmodifiable(customMetadata);
+  }) : carpServiceName = null,
+       path = null,
+       name = null,
+       sizeBytes = null,
+       creationTimeMillis = null,
+       updatedTimeMillis = null,
+       md5Hash = null,
+       customMetadata = (customMetadata == null)
+           ? null
+           : Map.unmodifiable(customMetadata);
 
   // FileMetadata._fromMap(Map<dynamic, dynamic> map)
   //     : carpServiceName = map['carpServiceName'],

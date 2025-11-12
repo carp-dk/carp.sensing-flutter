@@ -80,10 +80,7 @@ class PhoneNumberInput extends Data {
   /// with spaces.
   String number;
 
-  PhoneNumberInput({
-    required this.countryCode,
-    required this.number,
-  }) : super();
+  PhoneNumberInput({required this.countryCode, required this.number}) : super();
 
   @override
   Function get fromJsonFunction => _$PhoneNumberInputFromJson;
@@ -128,11 +125,7 @@ class FullNameInput extends Data {
 
   String? firstName, middleName, lastName;
 
-  FullNameInput({
-    this.firstName,
-    this.middleName,
-    this.lastName,
-  }) : super();
+  FullNameInput({this.firstName, this.middleName, this.lastName}) : super();
 
   @override
   Function get fromJsonFunction => _$FullNameInputFromJson;

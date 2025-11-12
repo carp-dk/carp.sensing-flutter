@@ -1,3 +1,8 @@
+## 3.9.0
+
+* better exception handling
+* fix of issues [#500](https://github.com/cph-cachet/carp.sensing-flutter/issues/500)
+
 ## 3.8.0
 
 * anonymous authentication

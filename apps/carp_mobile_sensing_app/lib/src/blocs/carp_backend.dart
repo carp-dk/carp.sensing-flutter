@@ -4,8 +4,6 @@ part of '../../main.dart';
 ///
 /// Works as a singleton, and can be accessed by `CarpBackend()`.
 class CarpBackend {
-  static const String HOST_URI = "carp.computerome.dk";
-
   /// The URIs of the CARP Web Service (CAWS) host for each [DeploymentMode].
   static const Map<DeploymentMode, String> uris = {
     DeploymentMode.dev: 'dev.carp.dk',
@@ -62,8 +60,13 @@ class CarpBackend {
       );
 
   Future<void> initialize() async {
+    debug('$runtimeType - initializing...');
     await CarpAuthService().configure(authProperties);
+    debug('$runtimeType - AuthService configured ...');
+
+    // Configure the CAWS services
     CarpService().configure(app);
+    CarpParticipationService().configureFrom(CarpService());
 
     // register CARP as a data backend where data can be uploaded
     DataManagerRegistry().register(CarpDataManagerFactory());
@@ -71,15 +74,19 @@ class CarpBackend {
     info('$runtimeType initialized');
   }
 
-  /// Authenticate to the CAWS host.
-  Future<CarpUser> authenticate() async {
-    var user = await CarpAuthService().authenticate();
+  /// Open the web-based authentication screen to ask for username & password.
+  Future<CarpUser> authenticate() async =>
+      await CarpAuthService().authenticate();
 
-    // Configure the participation service in order to get the invitations
-    CarpParticipationService().configureFrom(CarpService());
-
-    return user;
-  }
+  /// Authenticate to the CAWS host using [username] and [password].
+  Future<CarpUser> authenticateWithUsernamePassword(
+    String username,
+    String password,
+  ) async =>
+      await CarpAuthService().authenticateWithUsernamePassword(
+        username: username,
+        password: password,
+      );
 
   /// Get the study invitation.
   Future<void> getStudyInvitation(BuildContext context) async {

@@ -129,7 +129,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- Configuration of AppAuth - see also flutter_appauth plugin -->
+         <!-- Used by authentication redirect to/from web view -->
         <activity
             android:name="net.openid.appauth.RedirectUriReceiverActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
@@ -147,7 +147,19 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="http" />
                 <data android:host="carp.computerome.dk" />
-                <data android:pathPrefix="/auth/dev" />
+                <data android:pathPrefix="/auth" />
+            </intent-filter>
+        </activity>
+
+        <!-- Used by authentication redirect to/from web view for anonymous users -->
+        <activity
+            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+            android:exported="true">
+            <intent-filter android:label="flutter_web_auth_2">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="caws-example-app" android:pathPrefix="/" />
             </intent-filter>
         </activity>
 

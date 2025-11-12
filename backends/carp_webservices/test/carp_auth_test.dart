@@ -50,7 +50,7 @@ void main() {
           username: username,
           password: 'wrong_password',
         ),
-        throwsA(isA<CarpServiceException>()),
+        throwsA(isA<CarpUnauthorizedException>()),
       );
     });
 

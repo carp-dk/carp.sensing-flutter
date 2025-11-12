@@ -62,7 +62,8 @@ class DeploymentReference extends RPCCarpReference {
   /// Refresh the deployment status for this [DeploymentReference] from CAWS.
   Future<StudyDeploymentStatus> getStatus() async =>
       _status = StudyDeploymentStatus.fromJson(
-        await _rpc(GetStudyDeploymentStatus(studyDeploymentId)),
+        await _rpc(GetStudyDeploymentStatus(studyDeploymentId))
+            as Map<String, dynamic>,
       );
 
   /// Register this device with [deviceRoleName] with [registration] for this
@@ -86,8 +87,9 @@ class DeploymentReference extends RPCCarpReference {
 
     return _status = StudyDeploymentStatus.fromJson(
       await _rpc(
-        RegisterDevice(studyDeploymentId, deviceRoleName, registration),
-      ),
+            RegisterDevice(studyDeploymentId, deviceRoleName, registration),
+          )
+          as Map<String, dynamic>,
     );
   }
 
@@ -97,7 +99,8 @@ class DeploymentReference extends RPCCarpReference {
   /// Throws a [CarpServiceException] if not.
   Future<StudyDeploymentStatus> unRegisterDevice() async =>
       _status = StudyDeploymentStatus.fromJson(
-        await _rpc(UnregisterDevice(studyDeploymentId, deviceRoleName)),
+        await _rpc(UnregisterDevice(studyDeploymentId, deviceRoleName))
+            as Map<String, dynamic>,
       );
 
   /// Get the deployment for this [DeploymentReference] for the specified
@@ -107,7 +110,8 @@ class DeploymentReference extends RPCCarpReference {
 
     // downloading a PrimaryDeviceDeployment
     var downloaded = PrimaryDeviceDeployment.fromJson(
-      await _rpc(GetDeviceDeploymentFor(studyDeploymentId, deviceRoleName)),
+      await _rpc(GetDeviceDeploymentFor(studyDeploymentId, deviceRoleName))
+          as Map<String, dynamic>,
     );
 
     // converting it to a SmartphoneDeployment and saving it
@@ -130,12 +134,13 @@ class DeploymentReference extends RPCCarpReference {
 
     return _status = StudyDeploymentStatus.fromJson(
       await _rpc(
-        DeviceDeployed(
-          studyDeploymentId,
-          deviceRoleName,
-          deployment!.lastUpdatedOn,
-        ),
-      ),
+            DeviceDeployed(
+              studyDeploymentId,
+              deviceRoleName,
+              deployment!.lastUpdatedOn,
+            ),
+          )
+          as Map<String, dynamic>,
     );
   }
 }

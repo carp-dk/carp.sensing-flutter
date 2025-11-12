@@ -83,8 +83,10 @@ class SensingBLoC {
       _model ??= StudyDeploymentViewModel(deployment!);
 
   /// Get a list of view models for the running probes.
-  Iterable<ProbeViewModel> get runningProbes =>
-      bloc.sensing.runningProbes.map((probe) => ProbeViewModel(probe));
+  Iterable<ProbeViewModel> get runningProbes => bloc.sensing.runningProbes
+      .toSet() // only unique probes
+      .where((probe) => probe is! StubProbe) // remove stub probes
+      .map((probe) => ProbeViewModel(probe));
 
   /// Get a list of view models for the available devices.
   Iterable<DeviceViewModel> get availableDevices =>
@@ -127,23 +129,23 @@ class SensingBLoC {
           body:
               'Data sampling is now running in the background. Click the STOP button to stop sampling again.',
         );
-    SmartPhoneClientManager().start();
+    Sensing().controller?.start();
   }
 
   void stop() {
     SmartPhoneClientManager().notificationController?.createNotification(
           title: 'Sensing Stopped',
           body:
-              'Sampling is stopped and no more data will be collected. Click the START button to restart sampling.',
+              'Sampling is stopped and no is being collected. Click the START button to restart sampling.',
         );
-    SmartPhoneClientManager().stop();
+    Sensing().controller?.executor.stop();
   }
 
   void dispose() => SmartPhoneClientManager().dispose();
 
   /// Is sensing running, i.e. has the study executor been started?
   bool get isRunning =>
-      SmartPhoneClientManager().state == ClientManagerState.started;
+      Sensing().controller?.executor.state == ExecutorState.started;
 }
 
 /// How to deploy a study.

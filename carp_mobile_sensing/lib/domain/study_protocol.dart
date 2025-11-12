@@ -14,16 +14,14 @@ mixin SmartphoneProtocolExtension {
 
   Map<String, dynamic>? get applicationData => _data.toJson();
 
-  set applicationData(Map<String, dynamic>? data) => _data = (data != null)
-      ? SmartphoneApplicationData.fromJson(data)
-      : SmartphoneApplicationData();
+  set applicationData(Map<String, dynamic>? data) =>
+      _data = (data != null) ? SmartphoneApplicationData.fromJson(data) : SmartphoneApplicationData();
 
   /// The description of this study protocol containing the title, description,
   /// purpose, and the responsible researcher for this study.
   @JsonKey(includeFromJson: false, includeToJson: false)
   StudyDescription? get studyDescription => _data.studyDescription;
-  set studyDescription(StudyDescription? description) =>
-      _data.studyDescription = description;
+  set studyDescription(StudyDescription? description) => _data.studyDescription = description;
 
   String get description => studyDescription?.description ?? '';
 
@@ -36,8 +34,7 @@ mixin SmartphoneProtocolExtension {
   /// used in the app.
   @JsonKey(includeFromJson: false, includeToJson: false)
   DataEndPoint? get dataEndPoint => _data.dataEndPoint;
-  set dataEndPoint(DataEndPoint? dataEndPoint) =>
-      _data.dataEndPoint = dataEndPoint;
+  set dataEndPoint(DataEndPoint? dataEndPoint) => _data.dataEndPoint = dataEndPoint;
 
   /// The name of a [PrivacySchema] to be used for protecting sensitive data.
   ///
@@ -128,21 +125,21 @@ class SmartphoneApplicationData {
 /// );
 /// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class SmartphoneStudyProtocol extends StudyProtocol
-    with SmartphoneProtocolExtension {
+class SmartphoneStudyProtocol extends StudyProtocol with SmartphoneProtocolExtension {
   /// Create a new [SmartphoneStudyProtocol].
   ///
+  /// Provide a unique descriptive [name] for the protocol.
+  ///
   /// If [ownerId] is not specified, a UUID will be generated.
+  /// Note, however, that this will be replaced with the ID of the user uploading the protocol,
+  /// if uploaded to CAWS.
   SmartphoneStudyProtocol({
     String? ownerId,
     required super.name,
     StudyDescription? studyDescription,
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,
-  }) : super(
-         ownerId: ownerId ?? const Uuid().v1,
-         description: studyDescription?.description ?? '',
-       ) {
+  }) : super(ownerId: ownerId ?? const Uuid().v1, description: studyDescription?.description ?? '') {
     // add the smartphone specific protocol data as application-specific data
     _data = SmartphoneApplicationData(
       studyDescription: studyDescription,
@@ -159,11 +156,20 @@ class SmartphoneStudyProtocol extends StudyProtocol
     return true;
   }
 
+  /// Get the [DeviceConfiguration] for the device with the given [roleName].
+  /// This can be either a primary device or a connected device.
+  /// Returns `null` if no such device is found.
+  DeviceConfiguration? getDeviceByRoleName(String roleName) {
+    for (var device in devices) {
+      if (device.roleName == roleName) {
+        return device;
+      }
+    }
+    return null;
+  }
+
   @override
-  bool addConnectedDevice(
-    DeviceConfiguration device,
-    PrimaryDeviceConfiguration primaryDevice,
-  ) {
+  bool addConnectedDevice(DeviceConfiguration device, PrimaryDeviceConfiguration primaryDevice) {
     super.addConnectedDevice(device, primaryDevice);
     _addSamplingTaskControl(device);
 
@@ -185,12 +191,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
       measures.add(Measure(type: CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME));
     }
 
-    addTaskControl(
-      NoOpTrigger(),
-      BackgroundTask(measures: measures),
-      device,
-      Control.Start,
-    );
+    addTaskControl(NoOpTrigger(), BackgroundTask(measures: measures), device, Control.Start);
   }
 
   factory SmartphoneStudyProtocol.fromJson(Map<String, dynamic> json) =>

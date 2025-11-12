@@ -34,18 +34,22 @@ class CarpParticipationService extends CarpBaseService
   /// If [accountId] is not specified, then the account id of the currently
   /// authenticated [CarpUser] is used.
   @override
-  Future<List<ActiveParticipationInvitation>> getActiveParticipationInvitations(
-      [String? accountId]) async {
+  Future<List<ActiveParticipationInvitation>>
+  getActiveParticipationInvitations([String? accountId]) async {
     accountId ??= CarpAuthService().currentUser.id;
 
-    Map<String, dynamic> responseJson =
-        await _rpc(GetActiveParticipationInvitations(accountId));
+    dynamic responseJson = await _rpc(
+      GetActiveParticipationInvitations(accountId),
+    );
 
-    // we expect a list of 'items' which maps to the invitations
-    List<dynamic> items = responseJson['items'] as List<dynamic>;
-    return items
-        .map((item) => ActiveParticipationInvitation.fromJson(
-            item as Map<String, dynamic>))
+    // we expect a list of invitations
+    List<dynamic> invitations = responseJson as List<dynamic>;
+    return invitations
+        .map(
+          (invitation) => ActiveParticipationInvitation.fromJson(
+            invitation as Map<String, dynamic>,
+          ),
+        )
         .toList();
   }
 
@@ -70,14 +74,14 @@ class CarpParticipationService extends CarpBaseService
   }) async {
     if (!isConfigured) {
       throw CarpServiceException(
-          message:
-              "CARP Service not initialized. Call 'CarpService().configure()' first.");
+        "CARP Service not initialized. Call 'CarpService().configure()' first.",
+      );
     }
 
     if (!CarpAuthService().authenticated) {
       throw CarpServiceException(
-          message:
-              "The current user is not authenticated to CAWS. Call 'CarpAuthService().authenticate...()' first.");
+        "The current user is not authenticated to CAWS. Call 'CarpAuthService().authenticate...()' first.",
+      );
     }
 
     List<ActiveParticipationInvitation> invitations =
@@ -92,11 +96,11 @@ class CarpParticipationService extends CarpBaseService
     } else {
       if (context.mounted) {
         invitation = await showDialog<ActiveParticipationInvitation>(
-            context: context,
-            barrierDismissible: allowClose,
-            builder: (BuildContext context) =>
-                ActiveParticipationInvitationDialog()
-                    .build(context, invitations));
+          context: context,
+          barrierDismissible: allowClose,
+          builder: (BuildContext context) =>
+              ActiveParticipationInvitationDialog().build(context, invitations),
+        );
       }
     }
 
@@ -109,15 +113,17 @@ class CarpParticipationService extends CarpBaseService
 
   @override
   Future<List<ParticipantData>> getParticipantDataList(
-      List<String> studyDeploymentIds) async {
+    List<String> studyDeploymentIds,
+  ) async {
     // early out if empty list
     if (studyDeploymentIds.isEmpty) return [];
 
-    Map<String, dynamic> responseJson =
-        await _rpc(GetParticipantDataList(studyDeploymentIds));
+    dynamic responseJson = await _rpc(
+      GetParticipantDataList(studyDeploymentIds),
+    );
 
-    // we expect a list of 'items'
-    List<dynamic> items = responseJson['items'] as List<dynamic>;
+    // we expect a list of participant data
+    List<dynamic> items = responseJson as List<dynamic>;
     if (items.isEmpty) return [];
 
     List<ParticipantData> data = [];
@@ -133,7 +139,7 @@ class CarpParticipationService extends CarpBaseService
     String studyDeploymentId,
     Map<String, Data> data, [
     String? inputByParticipantRole,
-  ]) async =>
-      await participation(studyDeploymentId)
-          .setParticipantData(data, inputByParticipantRole);
+  ]) async => await participation(
+    studyDeploymentId,
+  ).setParticipantData(data, inputByParticipantRole);
 }

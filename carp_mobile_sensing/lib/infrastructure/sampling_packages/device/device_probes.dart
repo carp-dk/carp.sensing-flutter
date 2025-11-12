@@ -108,10 +108,11 @@ class TimezoneProbe extends MeasurementProbe {
 
 /// A probe that collects app lifecycle events.
 class AppLifecycleProbe extends StreamProbe with WidgetsBindingObserver {
-  final StreamController<Measurement> _controller = StreamController();
+  final StreamController<Measurement> _controller =
+      StreamController.broadcast();
 
   @override
-  Stream<Measurement> get stream => _controller.stream.asBroadcastStream();
+  Stream<Measurement> get stream => _controller.stream;
 
   @override
   Future<bool> onStart() async {

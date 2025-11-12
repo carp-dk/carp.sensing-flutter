@@ -264,7 +264,7 @@ class StudyDeploymentStatus extends Serializable {
   /// The status of this device deployment:
   /// * Invited
   /// * DeployingDevices
-  /// * DeploymentReady
+  /// * Running
   /// * Stopped
   @JsonKey(includeFromJson: false, includeToJson: false)
   StudyDeploymentStatusTypes status = StudyDeploymentStatusTypes.Invited;

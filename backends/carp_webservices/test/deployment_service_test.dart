@@ -38,7 +38,7 @@ void main() {
       debugPrint('CarpService : ${CarpService().app}');
       debugPrint(" - signed in as: $user");
 
-      debugPrint('${CarpAuthService().manager?.discoveryDocument}');
+      // debugPrint('${CarpAuthService().manager?.discoveryDocument}');
     }, skip: false);
 
     test('- device ID', () async {
@@ -48,7 +48,7 @@ void main() {
   });
 
   group("Deployment - using DeploymentReference", () {
-    test('- get deployment status', () async {
+    test('- get status', () async {
       final status = await CarpDeploymentService().deployment().getStatus();
       debugPrint(toJsonString(status));
       expect(status.studyDeploymentId, testDeploymentId);
@@ -60,9 +60,21 @@ void main() {
       debugPrint('$status');
 
       expect(status.deviceStatusList.length, isNot(0));
-      var newStatus = await reference.registerDevice();
-      debugPrint('$newStatus');
-      expect(newStatus.studyDeploymentId, testDeploymentId);
+
+      try {
+        var newStatus = await reference.registerDevice();
+        debugPrint('$newStatus');
+        expect(newStatus.studyDeploymentId, testDeploymentId);
+      } catch (error) {
+        debugPrint('Error registering device: $error');
+
+        // if device is already registered, CAWS returns a 400 Bad Request
+        expect(error, isA<CarpBadRequestException>());
+        expect(
+          (error as CarpBadRequestException).message,
+          startsWith('The passed device is already registered'),
+        );
+      }
     }, skip: false);
 
     test('- get primary device deployment', () async {
@@ -77,7 +89,7 @@ void main() {
       expect(deployment.registration.deviceId, isNotNull);
     }, skip: false);
 
-    test('- deployment success', () async {
+    test('- deployed', () async {
       final reference = CarpDeploymentService().deployment();
       final status_1 = await reference.getStatus();
       debugPrint(toJsonString(status_1));
@@ -104,7 +116,7 @@ void main() {
   }, skip: true);
 
   group("Deployment - using CarpDeploymentService", () {
-    test('- get deployment status', () async {
+    test('- get status', () async {
       StudyDeploymentStatus status = await CarpDeploymentService()
           .getStudyDeploymentStatus(testDeploymentId);
       debugPrint(toJsonString(status.toJson()));
@@ -115,19 +127,43 @@ void main() {
     }, skip: false);
 
     test('- register device', () async {
-      // StudyDeploymentStatus status = await CarpDeploymentService()
-      //     .getStudyDeploymentStatus(testDeploymentId);
-      // debugPrint('$status');
-      // expect(status.primaryDeviceStatus!.device, isNotNull);
-      // debugPrint('{$status.primaryDeviceStatus?.device}');
-      var status = await CarpDeploymentService().registerDevice(
-        testDeploymentId,
-        "Father's Phone",
-        // status.primaryDeviceStatus!.device.roleName,
-        DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'),
-      );
-      debugPrint('$status');
-      expect(status.studyDeploymentId, testDeploymentId);
+      try {
+        var status = await CarpDeploymentService().registerDevice(
+          testDeploymentId,
+          testPhoneRoleName,
+          DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'),
+        );
+        debugPrint('$status');
+        expect(status.studyDeploymentId, testDeploymentId);
+      } catch (error) {
+        debugPrint('Error registering device: $error');
+
+        // if device is already registered, CAWS returns a 400 Bad Request
+        expect(error, isA<CarpBadRequestException>());
+        expect(
+          (error as CarpBadRequestException).message,
+          startsWith('The passed device is already registered'),
+        );
+      }
+    }, skip: false);
+
+    test('- register WRONG device', () async {
+      try {
+        await CarpDeploymentService().registerDevice(
+          testDeploymentId,
+          "WRONG Phone",
+          DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'),
+        );
+      } catch (error) {
+        // if a wrong device role name is used, CAWS returns a 400 Bad Request
+        expect(error, isA<CarpBadRequestException>());
+        expect(
+          (error as CarpBadRequestException).message,
+          startsWith(
+            "A device with the role name 'WRONG Phone' could not be found in the study deployment",
+          ),
+        );
+      }
     }, skip: false);
 
     test('- get primary device deployment', () async {
@@ -150,7 +186,7 @@ void main() {
       expect(deployment.registration.deviceId, isNotNull);
     }, skip: false);
 
-    test('- device deployed', () async {
+    test('- deployed', () async {
       StudyDeploymentStatus status_1 = await CarpDeploymentService()
           .getStudyDeploymentStatus(testDeploymentId);
       debugPrint('$status_1');

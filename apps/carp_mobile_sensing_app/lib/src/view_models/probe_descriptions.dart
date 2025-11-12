@@ -8,6 +8,36 @@ class ProbeDescriptor {
 
 class ProbeDescription {
   static Map<String, ProbeDescriptor> get descriptors => {
+        MonitoringSamplingPackage.ERROR: ProbeDescriptor(
+          'Error',
+          'Error.',
+          Icon(Icons.error, size: 50, color: CachetColors.GREY_4),
+        ),
+        MonitoringSamplingPackage.HEARTBEAT: ProbeDescriptor(
+          'Heartbeat',
+          'Device heartbeat.',
+          Icon(Icons.important_devices_sharp,
+              size: 50, color: CachetColors.GREY_4),
+        ),
+        MonitoringSamplingPackage.TRIGGERED_TASK: ProbeDescriptor(
+          'Triggered Task',
+          'Triggered Task',
+          Icon(Icons.dashboard_customize_outlined,
+              size: 50, color: CachetColors.GREY_4),
+        ),
+        MonitoringSamplingPackage.COMPLETED_TASK: ProbeDescriptor(
+          'Completed Task',
+          'Completed Task.',
+          Icon(Icons.document_scanner_outlined,
+              size: 50, color: CachetColors.GREY_4),
+        ),
+        MonitoringSamplingPackage.COMPLETED_APP_TASK: ProbeDescriptor(
+          'Completed App Task',
+          'Completed App Task.',
+          Icon(Icons.document_scanner_outlined,
+              size: 50, color: CachetColors.GREY_4),
+        ),
+
         DeviceSamplingPackage.FREE_MEMORY: ProbeDescriptor(
           'Memory',
           'Free physical and virtual memory.',

@@ -11,6 +11,11 @@ part of '../domain.dart';
 ///
 /// This class is a singleton that one time access the information from the
 /// local device to be used in the sensing framework.
+///
+/// It takes different hardware information from Android and iOS:
+///
+///  * [Android](https://developer.android.com/reference/android/os/Build)
+///  * [iOS](https://developer.apple.com/documentation/uikit/uidevice)
 class DeviceInfo {
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 
@@ -18,13 +23,35 @@ class DeviceInfo {
   factory DeviceInfo() => _instance;
   DeviceInfo._();
 
-  String? name;
-
+  /// Android or iOS
   String? platform;
+
+  /// The name of the hardware.
+  ///  * Android- the name of the hardware (from the kernel command line or /proc).
+  ///  * iOS - hardware type (e.g. 'iPhone7,1' for iPhone 6 Plus).
   String? hardware;
+
+  /// Unique device ID
+  /// * Android - Either a changelist number, or a label like "M4-rc20".
+  /// * iOS - [Unique UUID](https://developer.apple.com/documentation/uikit/uidevice/1620059-identifierforvendor) value identifying the current device.
   String? deviceID;
+
+  /// Device name.
+  /// * Android - The name of the industrial design.
+  /// * iOS < 16 user-assigned device name.
+  /// * iOS >= 16 a generic device name if project has no entitlement to get user-assigned device name.
+  ///
+  /// On iOS, se more about [device name](https://developer.apple.com/documentation/uikit/uidevice/1620015-name).
   String? deviceName;
+
+  /// The manufacturer of the device.
+  /// * Android - The manufacturer of the product/hardware.
+  /// * iOS - always "Apple"
   String? deviceManufacturer;
+
+  /// Device Model
+  /// * Android - The end-user-visible name for the end product.
+  /// * iOS - Device model according to OS
   String? deviceModel;
 
   /// The name of the current operating system.
@@ -50,10 +77,11 @@ class DeviceInfo {
 
     try {
       if (Platform.isAndroid) {
-        deviceData =
-            _readAndroidDeviceInfo(await _deviceInfoPlugin.androidInfo);
+        deviceData = _parseAndroidDeviceInfo(
+          await _deviceInfoPlugin.androidInfo,
+        );
       } else if (Platform.isIOS) {
-        deviceData = _readIosDeviceInfo(await _deviceInfoPlugin.iosInfo);
+        deviceData = _parseIosDeviceInfo(await _deviceInfoPlugin.iosInfo);
       }
     } on Exception {
       deviceData = {};
@@ -64,7 +92,7 @@ class DeviceInfo {
   String toString() =>
       '$deviceID - $deviceModel ${deviceManufacturer?.toUpperCase()} [SDK $sdk]';
 
-  Map<String, dynamic> _readAndroidDeviceInfo(AndroidDeviceInfo info) {
+  Map<String, dynamic> _parseAndroidDeviceInfo(AndroidDeviceInfo info) {
     platform = 'Android';
     hardware = info.hardware;
     deviceID = info.id;
@@ -79,7 +107,7 @@ class DeviceInfo {
     return info.data;
   }
 
-  Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo info) {
+  Map<String, dynamic> _parseIosDeviceInfo(IosDeviceInfo info) {
     platform = 'iOS';
     hardware = info.utsname.machine;
     deviceID = info.identifierForVendor;

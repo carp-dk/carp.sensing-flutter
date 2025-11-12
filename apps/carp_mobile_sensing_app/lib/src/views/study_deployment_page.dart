@@ -34,13 +34,13 @@ class StudyDeploymentPageState extends State<StudyDeploymentPage> {
             snap: false,
             actions: <Widget>[
               IconButton(
-                icon: Icon(
-                  Theme.of(context).platform == TargetPlatform.iOS
-                      ? Icons.more_horiz
-                      : Icons.more_vert,
-                ),
-                tooltip: 'Settings',
-                onPressed: _showSettings,
+                icon: Icon(Icons.refresh
+                    // Theme.of(context).platform == TargetPlatform.iOS
+                    //     ? Icons.more_horiz
+                    //     : Icons.more_vert,
+                    ),
+                tooltip: 'Refresh',
+                onPressed: _refreshDeploymentStatus,
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -62,7 +62,9 @@ class StudyDeploymentPageState extends State<StudyDeploymentPage> {
   }
 
   List<Widget> _studyPanel(
-      BuildContext context, StudyDeploymentViewModel viewModel) {
+    BuildContext context,
+    StudyDeploymentViewModel viewModel,
+  ) {
     List<Widget> children = [];
 
     children.add(AnnotatedRegion<SystemUiOverlayStyle>(
@@ -78,7 +80,9 @@ class StudyDeploymentPageState extends State<StudyDeploymentPage> {
   }
 
   Widget _studyControllerPanel(
-      BuildContext context, StudyDeploymentViewModel viewModel) {
+    BuildContext context,
+    StudyDeploymentViewModel viewModel,
+  ) {
     final ThemeData themeData = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -105,32 +109,35 @@ class StudyDeploymentPageState extends State<StudyDeploymentPage> {
                     _StudyControllerLine(viewModel.description),
                     _StudyControllerLine(viewModel.studyDeploymentId,
                         heading: 'Deployment ID'),
+                    _StudyControllerLine(viewModel.participantRoleName,
+                        heading: 'Participant Role'),
                     _StudyControllerLine(viewModel.deviceRoleName,
-                        heading: 'Device Role Name'),
-                    _StudyControllerLine(viewModel.userID, heading: 'User'),
-                    _StudyControllerLine(viewModel.dataEndpoint,
+                        heading: 'Device Role'),
+                    _StudyControllerLine(viewModel.dataEndpointType,
                         heading: 'Data Endpoint'),
+                    StreamBuilder<StudyStatus>(
+                        stream: viewModel.studyStatusEvents,
+                        initialData: StudyStatus.DeploymentNotStarted,
+                        builder: (_, __) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _StudyControllerLine(
+                                      viewModel.studyDeploymentStatus.name,
+                                      heading: 'Deployment Status'),
+                                  _StudyControllerLine(
+                                      viewModel.studyStatus.name,
+                                      heading: 'Study Status'),
+                                ])),
                     StreamBuilder<ExecutorState>(
-                        stream: viewModel.studyExecutorStateEvents,
-                        initialData: ExecutorState.created,
-                        builder:
-                            (context, AsyncSnapshot<ExecutorState> snapshot) {
-                          if (snapshot.hasData) {
-                            return _StudyControllerLine(
-                                ProbeDescription
-                                    .probeStateLabel[snapshot.data!],
-                                heading: 'State');
-                          } else {
-                            return _StudyControllerLine(
-                                ProbeDescription
-                                    .probeStateLabel[ExecutorState.initialized],
-                                heading: 'State');
-                          }
-                        }),
+                      stream: viewModel.executorStateEvents,
+                      initialData: ExecutorState.created,
+                      builder: (_, __) => _StudyControllerLine(
+                          viewModel.executorState.name,
+                          heading: 'Executor State'),
+                    ),
                     StreamBuilder<Measurement>(
                         stream: viewModel.measurements,
-                        builder: (context,
-                                AsyncSnapshot<Measurement> snapshot) =>
+                        builder: (context, AsyncSnapshot<Measurement> _) =>
                             _StudyControllerLine('${viewModel.samplingSize}',
                                 heading: 'Sample Size')),
                   ]))
@@ -141,9 +148,18 @@ class StudyDeploymentPageState extends State<StudyDeploymentPage> {
     );
   }
 
-  void _showSettings() {
+  /// Refresh the deployment status from the deployment service.
+  void _refreshDeploymentStatus() {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Settings not implemented yet...', softWrap: true)));
+        content: Text(
+      'Refreshing study deployment status...',
+      softWrap: true,
+    )));
+
+    bloc.sensing.controller?.getStudyDeploymentStatus().then((status) {
+      print('>> Refreshed deployment status: $status');
+      setState(() {});
+    });
   }
 }
 

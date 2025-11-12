@@ -8,7 +8,8 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
   @override
   Future<SmartphoneStudyProtocol> getStudyProtocol(String protocolId) async =>
-      getSingleUserStudyProtocol(protocolId);
+      getSingleUserStudyProtocol(
+          'CAMS App - Sensing Coverage Study - Single User');
 
   StudyDescription get studyDescription => StudyDescription(
       title: 'CAMS App - Sensing Coverage Study',

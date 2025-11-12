@@ -42,26 +42,27 @@ class CarpDeploymentService extends CarpBaseService
     Map<String, DeviceRegistration>? connectedDevicePreregistrations,
   ]) async => StudyDeploymentStatus.fromJson(
     await _rpc(
-      CreateStudyDeployment(
-        protocol,
-        invitations,
-        connectedDevicePreregistrations,
-      ),
-    ),
+          CreateStudyDeployment(
+            protocol,
+            invitations,
+            connectedDevicePreregistrations,
+          ),
+        )
+        as Map<String, dynamic>,
   );
 
   @override
   Future<Set<String>> removeStudyDeployments(Set<String> studyDeploymentIds) =>
       throw CarpServiceException(
-        message:
-            'Removing study deployments is not supported from the client side.',
+        'Removing study deployments is not supported from the client side.',
       );
 
   @override
   Future<StudyDeploymentStatus> getStudyDeploymentStatus(
     String studyDeploymentId,
   ) async => StudyDeploymentStatus.fromJson(
-    await _rpc(GetStudyDeploymentStatus(studyDeploymentId)),
+    await _rpc(GetStudyDeploymentStatus(studyDeploymentId))
+        as Map<String, dynamic>,
   );
 
   @override
@@ -71,9 +72,9 @@ class CarpDeploymentService extends CarpBaseService
     // fast out if not ids specified
     if (studyDeploymentIds.isEmpty) return [];
 
-    Map<String, dynamic> responseJson = await _rpc(
-      GetStudyDeploymentStatusList(studyDeploymentIds),
-    );
+    Map<String, dynamic> responseJson =
+        await _rpc(GetStudyDeploymentStatusList(studyDeploymentIds))
+            as Map<String, dynamic>;
 
     // we expect a list of 'items'
     List<Map<String, dynamic>> items =
@@ -93,7 +94,8 @@ class CarpDeploymentService extends CarpBaseService
     String deviceRoleName,
     DeviceRegistration registration,
   ) async => StudyDeploymentStatus.fromJson(
-    await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration)),
+    await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration))
+        as Map<String, dynamic>,
   );
 
   @override
@@ -101,7 +103,8 @@ class CarpDeploymentService extends CarpBaseService
     String studyDeploymentId,
     String deviceRoleName,
   ) async => StudyDeploymentStatus.fromJson(
-    await _rpc(UnregisterDevice(studyDeploymentId, deviceRoleName)),
+    await _rpc(UnregisterDevice(studyDeploymentId, deviceRoleName))
+        as Map<String, dynamic>,
   );
 
   @override
@@ -112,8 +115,9 @@ class CarpDeploymentService extends CarpBaseService
     // downloading a PrimaryDeviceDeployment
     var deployment = PrimaryDeviceDeployment.fromJson(
       await _rpc(
-        GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName),
-      ),
+            GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName),
+          )
+          as Map<String, dynamic>,
     );
     debug('$runtimeType - got deployment: $deployment');
 
@@ -131,15 +135,18 @@ class CarpDeploymentService extends CarpBaseService
     DateTime deviceDeploymentLastUpdatedOn,
   ) async => StudyDeploymentStatus.fromJson(
     await _rpc(
-      DeviceDeployed(
-        studyDeploymentId,
-        masterDeviceRoleName,
-        deviceDeploymentLastUpdatedOn,
-      ),
-    ),
+          DeviceDeployed(
+            studyDeploymentId,
+            masterDeviceRoleName,
+            deviceDeploymentLastUpdatedOn,
+          ),
+        )
+        as Map<String, dynamic>,
   );
 
   @override
   Future<StudyDeploymentStatus> stop(String studyDeploymentId) async =>
-      StudyDeploymentStatus.fromJson(await _rpc(Stop(studyDeploymentId)));
+      StudyDeploymentStatus.fromJson(
+        await _rpc(Stop(studyDeploymentId)) as Map<String, dynamic>,
+      );
 }

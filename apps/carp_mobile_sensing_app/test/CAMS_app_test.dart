@@ -51,7 +51,7 @@ void main() {
     // generate the protocol to be used in testing below
     // setting the right accountId, if to be uploaded to CAWS
     protocol ??= LocalStudyProtocolManager()
-        // .getSingleUserStudyProtocol('CAMS Health Protocol');
+        // .getSingleUserStudyProtocol('CAMS Demo App Protocol - Single user');
         .getFamilyStudyProtocol(
             'CAMS Demo App Protocol - Family study with Participant Data');
 

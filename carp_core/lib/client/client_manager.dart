@@ -1,117 +1,212 @@
 /*
- * Copyright 2021-2024 the Technical University of Denmark (DTU).
- * Use of this source code is governed by a MIT-style license that can be
- * found in the LICENSE file.
+ * Copyright (c) 2025, the Technical University of Denmark (DTU).
+ * All rights reserved. Please see the AUTHORS file for details. 
+ * Use of this source code is governed by a MIT-style license that 
+ * can be found in the LICENSE file.
  */
 
 part of 'carp_core_client.dart';
 
 /// Allows managing studies on a client device.
-///
-/// It holds a list of [studies] added to this client and holds a [repository]
-/// of corresponding [StudyRuntime] for executing a study.
 abstract class ClientManager<
   TPrimaryDevice extends PrimaryDeviceConfiguration<TRegistration>,
   TRegistration extends DeviceRegistration
 > {
+  final ClientRepository? _repository;
   DeploymentService? _deploymentService;
-  DeviceDataCollectorFactory? _deviceController;
+  DeviceDataCollectorFactory? _dataCollectorFactory;
+  TRegistration? _registration;
+  StudyDeploymentProxy? proxy;
 
-  /// All studies added to this client mapped to the study deployment ID.
-  Map<String, Study> studies = {};
+  /// Create a new [ClientManager].
+  ///
+  /// [repository] is used to persist the state of this client.
+  /// [deploymentService] is used to manage study deployments.
+  /// [dataCollectorFactory] determines which [DeviceDataCollector] to use
+  /// to collect data locally on this primary device and is used to create
+  /// [ConnectedDeviceDataCollector] instances for connected devices.
+  ClientManager({
+    ClientRepository? repository,
+    DeploymentService? deploymentService,
+    DeviceDataCollectorFactory? dataCollectorFactory,
+  }) : _repository = repository,
+       _deploymentService = deploymentService,
+       _dataCollectorFactory = dataCollectorFactory;
 
-  /// Repository of [StudyRuntime] mapped to the study deployment ID.
-  Map<String, StudyRuntime> repository = {};
-
-  /// The registration of this client.
-  TRegistration? registration;
+  /// Repository within which the state of this client is stored.
+  ClientRepository get repository =>
+      _repository ??
+      (throw NotConfiguredException(
+        'ClientManager has not been configured yet. Call configure() first.',
+      ));
 
   /// The application service through which study deployments, to be run on
   /// this client, can be managed and retrieved.
-  DeploymentService? get deploymentService => _deploymentService;
+  DeploymentService get deploymentService =>
+      _deploymentService ??
+      (throw NotConfiguredException(
+        'ClientManager has not been configured yet. Call configure() first.',
+      ));
 
-  /// The controller of connected devices used to collect data locally on
-  /// this primary device. Also works as a factory which is used to create
-  /// [DeviceDataCollector] instances for connected devices.
-  DeviceDataCollectorFactory? get deviceController => _deviceController;
+  /// Determines which [DeviceDataCollector] to use to collect data locally on
+  /// this primary device and this factory is used to create
+  /// [ConnectedDeviceDataCollector] instances for connected devices.
+  DeviceDataCollectorFactory? get dataCollectorFactory => _dataCollectorFactory;
 
-  /// Get the [StudyRuntime] for a [studyDeploymentId].
-  StudyRuntime? getStudyRuntime(String studyDeploymentId) =>
-      repository[studyDeploymentId];
+  /// The registration of this client.
+  TRegistration get registration =>
+      _registration ??
+      (throw NotConfiguredException(
+        'ClientManager has not been configured yet. Call configure() first.',
+      ));
 
   /// Determines whether a [DeviceRegistration] has been configured for this client,
-  /// which is necessary to start adding [StudyRuntime]s.
-  bool get isConfigured =>
-      (deploymentService != null) &&
-      (deviceController != null) &&
-      (registration != null);
+  /// which is necessary to start adding studies.
+  bool get isConfigured => repository.deviceRegistration != null;
 
-  /// Configure this [ClientManager] by specifying:
+  /// Makes a check if this client manager is ready for requests.
+  void _check() {
+    if (!isConfigured) {
+      throw NotConfiguredException(
+        'ClientManager has not been configured yet. Call configure() first.',
+      );
+    }
+  }
+
+  /// Configure this [ClientManager] by specifying a [registration] for
+  /// this client device.
+  ///
+  /// Optionally, you can specify or override:
   ///  * [deploymentService] - where to get study deployments
-  ///  * [deviceController] that handles devices connected to this client
-  ///  * [registration] - a unique device registration for this client device
+  ///  * [dataCollectorFactory] - which data collectors to use to collect data
+  ///
+  /// Throws an [AssertionError] if this client manager has already been configured.
+  /// Throws [NotConfiguredException] if after configuration either
+  /// [deploymentService] or [dataCollectorFactory] is not set.
   @mustCallSuper
   Future<void> configure({
-    required DeploymentService deploymentService,
-    required DeviceDataCollectorFactory deviceController,
-    TRegistration? registration,
+    required TRegistration registration,
+    DeploymentService? deploymentService,
+    DeviceDataCollectorFactory? dataCollectorFactory,
   }) async {
-    _deploymentService = deploymentService;
-    _deviceController = deviceController;
-    this.registration = registration;
+    assert(
+      !isConfigured,
+      'The client manager has already been configured. '
+      'Reconfiguring clients is not supported.',
+    );
+
+    _registration = registration;
+    repository.deviceRegistration = registration;
+
+    // override if specified and not null
+    _deploymentService = deploymentService ?? _deploymentService;
+    _dataCollectorFactory = dataCollectorFactory ?? _dataCollectorFactory;
+
+    if (_deploymentService == null || _dataCollectorFactory == null) {
+      throw NotConfiguredException(
+        'Both deploymentService and dataCollectorFactory must be specified '
+        'either during construction of the ClientManager or during configure().',
+      );
+    }
+
+    proxy = StudyDeploymentProxy(this.deploymentService);
   }
 
   /// Get the status for the studies which run on this client device.
   List<StudyStatus> getStudyStatusList() =>
-      repository.values.map((study) => study.status) as List<StudyStatus>;
+      repository.getStudyList().map((study) => study.status).toList();
+
+  /// Get the study with [studyDeploymentId] and [deviceRoleName] from this client manager.
+  /// Returns null if no such study has been added.
+  Study? getStudy(String studyDeploymentId, String deviceRoleName) =>
+      repository.getStudyByDeployment(studyDeploymentId, deviceRoleName);
 
   /// Add a study which needs to be executed on this client.
-  /// This involves registering this device for the specified study deployment.
+  /// No deployment is attempted yet.
   ///
-  /// A [Study] specifies:
+  /// [studyDeploymentId] is the ID of the study deployment for which to collect
+  /// data. [deviceRoleName] is the role of the client device which takes part in
+  /// the deployment identified by [studyDeploymentId].
   ///
-  ///  * [studyDeploymentId] - The ID of a study which has been deployed already
-  ///    and for which to collect data.
-  ///  * [deviceRoleName] - The role which the client device this runtime is
-  ///    intended for plays as part of the deployment identified by [studyDeploymentId].
+  /// Throws NotConfiguredException if the client has not yet been configured.
+  /// Throws IllegalArgumentException if a study with the same [studyDeploymentId] and
+  /// [deviceRoleName] has already been added to this client.
   ///
-  /// Returns the added study.
+  /// Return the newly added study.
   @mustCallSuper
-  Future<Study> addStudy(Study study) async {
-    assert(
-      isConfigured,
-      'The client manager has not been configured yet. Call configure() first.',
-    );
-    assert(
-      !repository.containsKey(study.studyDeploymentId),
-      'A study with the same study deployment ID and device role name has already been added.',
-    );
-    studies[study.studyDeploymentId] = study;
+  Future<Study> addStudy(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    _check();
+    if (getStudy(studyDeploymentId, deviceRoleName) != null) {
+      throw IllegalArgumentException(
+        'A study with the same study deployment ID and device role name has already been added.',
+      );
+    }
 
+    Study study = Study(studyDeploymentId, deviceRoleName);
+    repository.addStudy(study);
+
+    // Update study status based on deployment status
+    await proxy?.getStudyDeploymentStatus(study);
     return study;
   }
 
   /// Verifies whether the device is ready for deployment of the study runtime
-  /// identified by [study], and in case it is, deploys.
+  /// identified by [studyDeploymentId] and [deviceRoleName], and in case it is,
+  /// deploys.
   /// In case already deployed, nothing happens and the status of the deployment
   /// is returned.
+  ///
+  /// Throws NotConfiguredException if the client has not yet been configured.
+  /// Throws IllegalArgumentException if a study with the given [studyDeploymentId]
+  /// and [deviceRoleName] does not exist or if deployment failed because of unexpected
+  /// study deployment ID, device role name, or device registration.
   @mustCallSuper
-  Future<StudyStatus> tryDeployment(String studyDeploymentId) async {
-    StudyRuntime? runtime = repository[studyDeploymentId];
-    assert(
-      runtime != null && runtime.study != null,
-      'No runtime for this study found. Has this study been added using the addStudy method?',
-    );
+  Future<StudyStatus> tryDeployment(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    _check();
 
-    // Early out in case this runtime has already received and validated deployment information.
-    if (runtime!.status.index >= StudyStatus.Deployed.index) {
-      return runtime.status;
+    var study = getStudy(studyDeploymentId, deviceRoleName);
+
+    if (study == null) {
+      throw IllegalArgumentException(
+        "A study with the study deployment ID '$studyDeploymentId' "
+        "and device role name '$deviceRoleName' was not found. "
+        "Has this study been added using the addStudy method?",
+      );
     }
+    var status = study.status;
 
-    return await runtime.tryDeployment();
+    // Early out in case this study has already received and validated
+    // deployment information and is running.
+    if (study.status == StudyStatus.Running) return study.status;
+
+    // Try to deploy the study.
+    // IllegalArgumentException's will be thrown here when deployment or role
+    // name does not exist, or device is already registered.
+    var registration = repository.deviceRegistration;
+
+    if (registration != null) {
+      await proxy?.tryDeployment(study, registration);
+
+      var newStatus = study.status;
+      if (status != newStatus) repository.updateStudy(study);
+
+      return newStatus;
+    } else {
+      throw IllegalArgumentException(
+        'Device Registration information for the client is not available. '
+        'Set this before trying to deploy any studies.',
+      );
+    }
   }
 
-  /// Remove the study with [studyDeploymentId] from this client manager.
+  /// Remove the study with [studyDeploymentId] and [deviceRoleName] from this
+  /// client manager.
   ///
   /// Note that by removing a study, the deployment is not marked as stopped
   /// permanently in the deployment service.
@@ -120,34 +215,55 @@ abstract class ClientManager<
   ///
   /// If a study deployment is to be permanently stopped, use the [stopStudy] method.
   @mustCallSuper
-  Future<void> removeStudy(String studyDeploymentId) async {
-    var runtime = repository[studyDeploymentId];
-    repository.remove(studyDeploymentId);
-    if (runtime != null) await runtime.remove();
+  Future<void> removeStudy(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    _check();
+
+    var study = getStudy(studyDeploymentId, deviceRoleName);
+    if (study != null) repository.removeStudy(study);
   }
 
-  /// Permanently stop collecting data for [study] and mark it as stopped.
+  /// Permanently stop collecting data for the study with id [studyDeploymentId]
+  /// and mark it as stopped.
   ///
   /// Once a study is stopped it cannot be deployed anymore since it will
-  /// be marked as permanently stopped in the [DeploymentService].
+  /// be marked as permanently stopped in the deployment service.
   ///
   /// If you only want to remove the study from this client and be able to
   /// redeploy it later, use the [removeStudy] method instead.
   @mustCallSuper
-  Future<void> stopStudy(String studyDeploymentId) async {
-    var runtime = repository[studyDeploymentId];
+  Future<StudyStatus> stopStudy(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    _check();
 
-    if (runtime != null) {
-      await runtime.stop();
-      await removeStudy(studyDeploymentId);
+    var study = getStudy(studyDeploymentId, deviceRoleName);
 
-      // Permanently stop this study deployment on the deployment service.
-      await deploymentService?.stop(studyDeploymentId);
+    if (study == null) {
+      throw IllegalArgumentException(
+        "A study with the study deployment ID '$studyDeploymentId' "
+        "and device role name '$deviceRoleName' was not found. "
+        "Has this study been added using the addStudy method?",
+      );
     }
+    var status = study.status;
+    await proxy?.stop(study);
+    var newStatus = study.status;
+    if (status != newStatus) repository.updateStudy(study);
+
+    return newStatus;
   }
 }
 
 /// Allows managing studies on a smartphone.
-class SmartphoneClient extends ClientManager<Smartphone, DeviceRegistration> {
-  SmartphoneClient();
+class SmartphoneClient
+    extends ClientManager<Smartphone, DefaultDeviceRegistration> {
+  SmartphoneClient({
+    super.repository,
+    super.deploymentService,
+    super.dataCollectorFactory,
+  });
 }

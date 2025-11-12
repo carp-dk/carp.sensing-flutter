@@ -18,6 +18,9 @@ class MonitoringSamplingPackage extends SmartphoneSamplingPackage {
   /// Collect errors occurring during data collection
   static const String ERROR = CarpDataTypes.ERROR_TYPE_NAME;
 
+  /// Collect data on a triggered [TaskConfiguration].
+  static const String TRIGGERED_TASK = CarpDataTypes.TRIGGERED_TASK_TYPE_NAME;
+
   /// Collect a heartbeat from a primary or connected device.
   static const String HEARTBEAT = CamsDataTypes.HEARTBEAT_TYPE_NAME;
 

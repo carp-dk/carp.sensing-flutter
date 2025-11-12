@@ -9,17 +9,85 @@ part of 'carp_core_client.dart';
 
 /// A study deployment, identified by [studyDeploymentId], which a client
 /// device participates in with the role [deviceRoleName].
-class Study {
+///
+/// A study is a [ChangeNotifier] and updates to a study including its
+/// [deploymentStatus], [status], and [deployment] can be listened to.
+/// Moreover, the [events] stream emits a [StudyStatusEvent] event every
+/// time the status of a study changes.
+class Study with ChangeNotifier {
+  final DateTime _createdOn;
+  final String _studyDeploymentId;
+  final String _deviceRoleName;
+  final StreamController<StudyStatusEvent> _eventController =
+      StreamController<StudyStatusEvent>.broadcast();
+  StudyDeploymentStatus? _deploymentStatus;
+  PrimaryDeviceDeployment? _deployment;
+
+  /// Create a study uniquely identified by its [studyDeploymentId] and
+  /// [deviceRoleName].
+  Study(String studyDeploymentId, String deviceRoleName)
+    : _studyDeploymentId = studyDeploymentId,
+      _deviceRoleName = deviceRoleName,
+      _createdOn = DateTime.now();
+
+  /// Stream of study status events.
+  Stream<StudyStatusEvent> get events => _eventController.stream;
+
   /// The ID of the deployed study for which to collect data.
-  String studyDeploymentId;
+  String get studyDeploymentId => _studyDeploymentId;
 
   /// The role name of the device in the deployment this study runtime participates in.
-  String deviceRoleName;
+  String get deviceRoleName => _deviceRoleName;
 
-  /// The status of this study.
-  StudyStatus status = StudyStatus.DeploymentNotStarted;
+  /// The date and time when this study was created and added to the [ClientManager].
+  DateTime get createdOn => _createdOn;
 
-  Study(this.studyDeploymentId, this.deviceRoleName);
+  /// The deployment status of this study, when known.
+  StudyDeploymentStatus? get deploymentStatus => _deploymentStatus;
+
+  /// The deployment for this study, when received from the deployment service.
+  PrimaryDeviceDeployment? get deployment => _deployment;
+
+  /// The status of this study based on [deploymentStatus].
+  StudyStatus get status => switch (deploymentStatus?.status) {
+    null => StudyStatus.DeploymentNotAvailable,
+    StudyDeploymentStatusTypes.Invited => StudyStatus.DeploymentNotStarted,
+    StudyDeploymentStatusTypes.DeployingDevices => StudyStatus.Deploying,
+    StudyDeploymentStatusTypes.Running => StudyStatus.Running,
+    StudyDeploymentStatusTypes.Stopped => StudyStatus.Stopped,
+  };
+
+  /// An updated [deploymentStatus] has been received.
+  void deploymentStatusReceived(StudyDeploymentStatus deploymentStatus) {
+    _deploymentStatus = deploymentStatus;
+    _eventController.add(
+      StudyStatusEvent(this, StudyStatusEventTypes.DeploymentStatusReceived),
+    );
+    notifyListeners();
+  }
+
+  /// A new primary device [deployment] determining what data to collect for this study has been received.
+  ///
+  /// @throws IllegalArgumentException when the role name [deployment] is intended for is different from the expected [deviceRoleName].
+  void deviceDeploymentReceived(PrimaryDeviceDeployment deployment) {
+    if (deploymentStatus == null) {
+      throw IllegalStateException(
+        "Can't receive device deployment before having received deployment status.",
+      );
+    }
+
+    if (deployment.deviceConfiguration.roleName != deviceRoleName) {
+      throw ArgumentError(
+        "The deployment is intended for a device with a different role name.",
+      );
+    }
+
+    _deployment = deployment;
+    _eventController.add(
+      StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
+    );
+    notifyListeners();
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -88,4 +156,19 @@ enum StudyStatus {
   /// The study has been stopped, either from this client or via the deployment
   /// service.
   Stopped,
+}
+
+enum StudyStatusEventTypes {
+  /// Deployment status information has been made available.
+  DeploymentStatusReceived,
+
+  /// Deployment information for this study has been received.
+  DeviceDeploymentReceived,
+}
+
+/// An event related to a changes to a [Study].
+class StudyStatusEvent {
+  final Study study;
+  final StudyStatusEventTypes event;
+  const StudyStatusEvent(this.study, this.event);
 }

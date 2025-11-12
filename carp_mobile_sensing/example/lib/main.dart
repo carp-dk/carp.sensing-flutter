@@ -70,9 +70,12 @@ class Console extends State<ConsolePage> {
     floatingActionButton: FloatingActionButton(
       onPressed: restart,
       tooltip: 'Start/Stop study',
-      child: Sensing().isRunning
-          ? const Icon(Icons.stop)
-          : const Icon(Icons.play_arrow),
+      child: StreamBuilder<ExecutorState>(
+        stream: Sensing().controller?.executor.stateEvents,
+        initialData: ExecutorState.created,
+        builder: (_, _) =>
+            Sensing().isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
+      ),
     ),
   );
 
@@ -84,9 +87,9 @@ class Console extends State<ConsolePage> {
 
   /// Restart (start/stop) sampling.
   void restart() {
-    debug('>> status: ${Sensing().isRunning}');
-    Sensing().isRunning ? Sensing().stop() : Sensing().start();
-    setState(() {}); // to update the play/stop icon
+    setState(() {
+      Sensing().isRunning ? Sensing().stop() : Sensing().start();
+    }); // to update the play/stop icon
   }
 }
 
@@ -127,15 +130,19 @@ class Sensing {
     );
   }
 
+  /// The study runtime controller for this [study]
+  SmartphoneDeploymentController? get controller => (study != null)
+      ? SmartPhoneClientManager().getStudyRuntime(study!.studyDeploymentId)
+      : null;
+
   /// Is sensing running, i.e. has the study executor been started?
-  bool get isRunning =>
-      SmartPhoneClientManager().state == ClientManagerState.started;
+  bool get isRunning => controller?.executor.state == ExecutorState.started;
 
   /// Start sensing
-  void start() => SmartPhoneClientManager().start();
+  void start() => controller?.start();
 
   /// Stop sensing
-  void stop() => SmartPhoneClientManager().stop();
+  void stop() => controller?.executor.stop();
 
   /// Dispose sensing
   void dispose() => SmartPhoneClientManager().dispose();

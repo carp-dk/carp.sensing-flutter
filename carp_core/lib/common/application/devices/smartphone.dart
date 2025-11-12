@@ -9,8 +9,7 @@ part of '../../carp_core_common.dart';
 
 /// Configuration of an internet-connected smartphone with built-in [sensors].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class Smartphone
-    extends PrimaryDeviceConfiguration<SmartphoneDeviceRegistration> {
+class Smartphone extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
   /// The type of a smartphone device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.Smartphone';
@@ -22,49 +21,43 @@ class Smartphone
   DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-            CarpDataTypes().types[CarpDataTypes.GEOLOCATION_TYPE_NAME]!,
-            GranularitySamplingConfiguration(Granularity.Balanced)),
+          CarpDataTypes().types[CarpDataTypes.GEOLOCATION_TYPE_NAME]!,
+          GranularitySamplingConfiguration(Granularity.Balanced),
+        ),
         DataTypeSamplingScheme(
           CarpDataTypes().types[CarpDataTypes.STEP_COUNT_TYPE_NAME]!,
           NoOptionsSamplingConfiguration(),
         ),
-        DataTypeSamplingScheme(CarpDataTypes()
-            .types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME]!),
         DataTypeSamplingScheme(
-            CarpDataTypes().types[CarpDataTypes.ACCELERATION_TYPE_NAME]!),
+          CarpDataTypes().types[CarpDataTypes
+              .NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.ACCELERATION_TYPE_NAME]!,
+        ),
       ]);
 
   /// Create a new Smartphone device descriptor.
   /// If [roleName] is not specified, then the [DEFAULT_ROLE_NAME] is used.
-  Smartphone({
-    super.roleName = Smartphone.DEFAULT_ROLE_NAME,
-  });
+  Smartphone({super.roleName = Smartphone.DEFAULT_ROLE_NAME});
 
   @override
-  SmartphoneDeviceRegistration createRegistration({
+  DefaultDeviceRegistration createRegistration({
     String? deviceId,
     String? deviceDisplayName,
     String? platform,
+    String? deviceManufacturer,
     String? hardware,
-    String? computerName,
-    String? memorySize,
     String? deviceModel,
-    String? operatingSystem,
     String? sdk,
-    String? version,
-  }) =>
-      SmartphoneDeviceRegistration(
-        deviceId: deviceId,
-        deviceDisplayName: deviceDisplayName,
-        platform: platform,
-        hardware: hardware,
-        deviceName: computerName,
-        deviceManufacturer: memorySize,
-        deviceModel: deviceModel,
-        operatingSystem: operatingSystem,
-        sdk: sdk,
-        release: version,
-      );
+  }) => DefaultDeviceRegistration(
+    deviceId: deviceId,
+    deviceDisplayName:
+        deviceDisplayName ??
+        ((Platform.isAndroid)
+            ? '$platform (${deviceManufacturer?.toUpperCase()}) - $deviceModel [SDK: $sdk]'
+            : '$platform - $hardware [SDK: $sdk]'),
+  );
 
   @override
   Function get fromJsonFunction => _$SmartphoneFromJson;

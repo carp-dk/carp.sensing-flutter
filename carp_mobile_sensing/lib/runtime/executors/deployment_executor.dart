@@ -22,7 +22,8 @@ class SmartphoneDeploymentExecutor
   bool onInitialize() {
     if (configuration == null) {
       warning(
-          'Trying to initialize StudyDeploymentExecutor but the deployment configuration is null. Cannot initialize study deployment.');
+        'Trying to initialize StudyDeploymentExecutor but the deployment configuration is null. Cannot initialize study deployment.',
+      );
       return false;
     }
 
@@ -50,27 +51,30 @@ class SmartphoneDeploymentExecutor
 
       // let the device manger know about this executor
       getDeviceManagerFromRoleName(
-              executor.taskControl.destinationDeviceRoleName)
-          ?.executors
-          .add(executor);
+        executor.taskControl.destinationDeviceRoleName,
+      )?.executors.add(executor);
     }
 
     // listen for "done" tasks and add them as a [CompletedAppTask] measurement
-    AppTaskController()
-        .userTaskEvents
+    AppTaskController().userTaskEvents
         .where((userTask) => userTask.state == UserTaskState.done)
         .listen(
-            (userTask) => addMeasurement(Measurement.fromData(CompletedAppTask(
-                  taskName: userTask.name,
-                  taskType:
-                      // this is a temporary workaround to support the old one_time_sensing task type
-                      // see issue #488
-                      userTask.type ==
-                              BackgroundSensingUserTask.ONE_TIME_SENSING_TYPE
-                          ? BackgroundSensingUserTask.SENSING_TYPE
-                          : userTask.type,
-                  taskData: userTask.result,
-                ))));
+          (userTask) => addMeasurement(
+            Measurement.fromData(
+              CompletedAppTask(
+                taskName: userTask.name,
+                taskType:
+                    // this is a temporary workaround to support the old one_time_sensing task type
+                    // see issue #488
+                    userTask.type ==
+                        BackgroundSensingUserTask.ONE_TIME_SENSING_TYPE
+                    ? BackgroundSensingUserTask.SENSING_TYPE
+                    : userTask.type,
+                taskData: userTask.result,
+              ),
+            ),
+          ),
+        );
 
     return true;
   }
@@ -82,7 +86,8 @@ class SmartphoneDeploymentExecutor
 
     await AppTaskController().enqueueBufferedTasks();
     debug(
-        '$runtimeType - Deployment finished - ${await SmartPhoneClientManager().notificationController?.pendingNotificationRequestsCount} notifications are currently pending.');
+      '$runtimeType - Deployment finished - ${await SmartPhoneClientManager().notificationController?.pendingNotificationRequestsCount} notifications are currently pending.',
+    );
 
     return val;
   }
@@ -96,9 +101,8 @@ class SmartphoneDeploymentExecutor
       TaskControlExecutor executor = element as TaskControlExecutor;
 
       getDeviceManagerFromRoleName(
-              executor.taskControl.destinationDeviceRoleName)
-          ?.executors
-          .remove(executor);
+        executor.taskControl.destinationDeviceRoleName,
+      )?.executors.remove(executor);
     }
 
     ExecutorFactory().dispose();

@@ -1,4 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
+// import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';
@@ -6,6 +8,7 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_connectivity_package/connectivity.dart';
 import 'package:carp_esense_package/esense.dart';
 import 'package:carp_polar_package/carp_polar_package.dart';
+import 'package:carp_movesense_package/carp_movesense_package.dart';
 import 'package:carp_health_package/health_package.dart';
 import 'package:carp_context_package/carp_context_package.dart';
 import 'package:carp_audio_package/media.dart';
@@ -19,7 +22,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'credentials.dart';
 
 void main() {
+  Settings().debugLevel = DebugLevel.debug;
   SharedPreferences.setMockInitialValues({});
+  WidgetsFlutterBinding.ensureInitialized();
+  // TestWidgetsFlutterBinding.ensureInitialized();
   CarpMobileSensing.ensureInitialized();
 
   // CarpApp app;
@@ -36,9 +42,8 @@ void main() {
     SamplingPackageRegistry().register(AppsSamplingPackage());
     SamplingPackageRegistry().register(ESenseSamplingPackage());
     SamplingPackageRegistry().register(PolarSamplingPackage());
+    SamplingPackageRegistry().register(MovesenseSamplingPackage());
     SamplingPackageRegistry().register(HealthSamplingPackage());
-
-    FromJsonFactory().register(PolarDevice());
 
     // create a data manager in order to register the json functions
     CarpDataManager();
@@ -56,7 +61,7 @@ void main() {
     );
 
     /// The authentication configuration
-    final authProperties = CarpAuthProperties(
+    CarpAuthProperties authProperties = CarpAuthProperties(
       authURL: uri,
       clientId: 'studies-app',
       redirectURI: Uri.parse('carp-studies-auth://auth'),
@@ -123,7 +128,7 @@ void main() {
 
       final study = await CarpDeploymentService().getDeviceDeploymentFor(
         status.studyDeploymentId,
-        "Father's Phone",
+        "Primary Phone",
       );
       print(toJsonString(study));
     });

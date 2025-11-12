@@ -19,7 +19,7 @@ class CarpDataManagerFactory implements DataManagerFactory {
   }
 }
 
-/// Stores CAMS data points in the CARP Web Services (CAWS) backend.
+/// Upload CAMS measurement to the CARP Web Services (CAWS) backend.
 ///
 /// Upload of data to CAWS can happen in three ways, as specified in
 /// [CarpUploadMethod]:

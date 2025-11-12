@@ -189,7 +189,7 @@ class DeviceDeploymentStatus extends Serializable {
 /// The types of device deployment status.
 ///
 /// This is based on the [state diagram for a DeviceDeploymentStatus](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-deployments.md#study-and-device-deployment-state).
-/// Note, however, that the "NotDeployed" state is not explicitly represented here,
+/// Note, however, that the `NotDeployed` state is not explicitly represented here,
 /// since it is merely an abstract state in the Kotlin implementation.
 enum DeviceDeploymentStatusTypes {
   /// Device deployment status for when a device has not been registered.
@@ -198,13 +198,13 @@ enum DeviceDeploymentStatusTypes {
   /// Device deployment status for when a device has been registered.
   Registered,
 
-  /// Device deployment status when the device has previously been deployed
-  /// correctly, but due to changes in device registrations needs to be redeployed.
-  NeedsRedeployment,
-
   /// Device deployment status when the device has retrieved its
   /// [PrimaryDeviceDeployment] and was able to start executing the study.
   Deployed,
+
+  /// Device deployment status when the device has previously been deployed
+  /// correctly, but due to changes in device registrations needs to be redeployed.
+  NeedsRedeployment,
 }
 
 /// Primary [device] and its current [registration] assigned to participants as

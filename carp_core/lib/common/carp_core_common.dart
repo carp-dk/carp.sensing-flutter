@@ -1,6 +1,8 @@
 /// Contains common CARP domain classes which are used across the libraries.
 library;
 
+import 'dart:io';
+
 import 'package:iso_duration_parser/iso_duration_parser.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
@@ -27,6 +29,30 @@ part 'application/data.dart';
 part 'application/input_data.dart';
 
 part 'carp_core_common.g.dart';
+
+/// Exception thrown when the application is in an illegal state.
+class IllegalStateException implements Exception {
+  final String message;
+  IllegalStateException(this.message);
+  @override
+  String toString() => "IllegalStateException: $message";
+}
+
+/// Exception thrown when the argument provided to a method is invalid.
+class IllegalArgumentException implements Exception {
+  final String message;
+  IllegalArgumentException(this.message);
+  @override
+  String toString() => "IllegalArgumentException: $message";
+}
+
+/// Exception thrown when a required component has not been configured properly.
+class NotConfiguredException implements Exception {
+  final String message;
+  NotConfiguredException(this.message);
+  @override
+  String toString() => "NotConfiguredException: $message";
+}
 
 /// An immutable snapshot of a CARP Core domain object.
 /// Used as the base class for serializable CARP domain objects.

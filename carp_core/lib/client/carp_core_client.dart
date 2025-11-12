@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2025, the Technical University of Denmark (DTU).
+ * All rights reserved. Please see the AUTHORS file for details. 
+ * Use of this source code is governed by a MIT-style license that 
+ * can be found in the LICENSE file.
+ */
+
 /// This is the runtime which performs the actual data collection on a device (e.g.,
 /// desktop computer or smartphone). This subsystem contains reusable components
 /// which understand the runtime configuration derived from a study protocol by
@@ -18,6 +25,8 @@
 library;
 
 import 'dart:async';
+
+import 'package:flutter/material.dart' show ChangeNotifier;
 import 'package:meta/meta.dart';
 import 'package:carp_core/common/carp_core_common.dart';
 import 'package:carp_core/deployment/carp_core_deployment.dart';
@@ -26,3 +35,5 @@ part 'client_manager.dart';
 part 'study_runtime.dart';
 part 'study.dart';
 part 'device_data_collector.dart';
+part 'client_repository.dart';
+part 'study_deployment_proxy.dart';

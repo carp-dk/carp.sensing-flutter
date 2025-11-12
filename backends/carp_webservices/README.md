@@ -30,8 +30,6 @@ You also need to add an activity to the `AndroidManifest.xml` to allow for redir
   <application
     android:name="${applicationName}"
     android:label="CAWS Example"
-    android:fullBackupContent="@xml/backup_rules"
-    android:dataExtractionRules="@xml/data_extraction_rules"
     android:icon="@mipmap/ic_launcher">
 
   <!-- Used by authentication redirect to/from web view -->

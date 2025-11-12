@@ -32,10 +32,11 @@ class Persistence {
 
   static const String STUDY_ID_COLUMN = 'study_id';
   static const String STUDY_DEPLOYMENT_ID_COLUMN = 'study_deployment_id';
+  static const String STUDY_DEPLOYMENT_STATUS_COLUMN =
+      'study_deployment_status';
   static const String DEVICE_ROLE_NAME_COLUMN = 'device_role_name';
   static const String PARTICIPANT_ID_COLUMN = 'participant_id';
   static const String PARTICIPANT_ROLE_NAME_COLUMN = 'participant_role_name';
-  static const String STUDY_STATUS_COLUMN = 'study_status';
   static const String UPDATED_AT_COLUMN = 'updated_at';
   static const String DEPLOYED_AT_COLUMN = 'deployed_at';
   static const String DEPLOYMENT_COLUMN = 'deployment';
@@ -77,7 +78,7 @@ class Persistence {
           '$DEVICE_ROLE_NAME_COLUMN TEXT, '
           '$PARTICIPANT_ID_COLUMN TEXT, '
           '$PARTICIPANT_ROLE_NAME_COLUMN TEXT, '
-          '$STUDY_STATUS_COLUMN INTEGER, '
+          '$STUDY_DEPLOYMENT_STATUS_COLUMN INTEGER, '
           '$UPDATED_AT_COLUMN TEXT, '
           '$DEPLOYED_AT_COLUMN TEXT, '
           '$DEPLOYMENT_COLUMN TEXT)',
@@ -124,7 +125,7 @@ class Persistence {
               DEVICE_ROLE_NAME_COLUMN,
               PARTICIPANT_ID_COLUMN,
               PARTICIPANT_ROLE_NAME_COLUMN,
-              STUDY_STATUS_COLUMN,
+              STUDY_DEPLOYMENT_STATUS_COLUMN,
             ],
           ) ??
           [];
@@ -137,7 +138,7 @@ class Persistence {
             participantId: map[PARTICIPANT_ID_COLUMN] as String,
             participantRoleName: map[PARTICIPANT_ROLE_NAME_COLUMN] as String,
           );
-          final status = map[STUDY_STATUS_COLUMN] as int;
+          final status = map[STUDY_DEPLOYMENT_STATUS_COLUMN] as int;
           study.status = StudyStatus.values[status];
           list.add(study);
         }
@@ -161,7 +162,7 @@ class Persistence {
         DEVICE_ROLE_NAME_COLUMN: deployment.deviceRoleName,
         PARTICIPANT_ID_COLUMN: deployment.participantId,
         PARTICIPANT_ROLE_NAME_COLUMN: deployment.participantRoleName,
-        STUDY_STATUS_COLUMN: deployment.status.index,
+        STUDY_DEPLOYMENT_STATUS_COLUMN: deployment.status.index,
         UPDATED_AT_COLUMN: DateTime.now().toUtc().toIso8601String(),
         DEPLOYED_AT_COLUMN: deployment.deployed?.toUtc().toIso8601String(),
         DEPLOYMENT_COLUMN: jsonEncode(deployment),

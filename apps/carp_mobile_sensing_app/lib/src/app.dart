@@ -25,7 +25,7 @@ class LoadingPage extends StatelessWidget {
     await Permission.locationAlways.request();
     await Permission.activityRecognition.request();
     await Permission.sensors.request();
-    
+
     // For Android 14+, also request notification permission for foreground services
     if (Theme.of(context).platform == TargetPlatform.android) {
       await Permission.notification.request();
@@ -34,7 +34,8 @@ class LoadingPage extends StatelessWidget {
     // Initialize and use the CAWS backend if not in local deployment mode
     if (bloc.deploymentMode != DeploymentMode.local) {
       await CarpBackend().initialize();
-      await CarpBackend().authenticate();
+      // await CarpBackend().authenticate();
+      await CarpBackend().authenticateWithUsernamePassword(username, password);
 
       // Check if there is a local study.
       // If not, get a study deployment based on an invitation.
@@ -106,7 +107,12 @@ class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _restart,
-        child: bloc.isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
+        child: StreamBuilder<ExecutorState>(
+          stream: bloc.sensing.controller?.executor.stateEvents,
+          initialData: ExecutorState.created,
+          builder: (_, __) =>
+              bloc.isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
+        ),
       ),
     );
   }

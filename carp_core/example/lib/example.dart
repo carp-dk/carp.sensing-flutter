@@ -65,18 +65,19 @@ void carpCoreDeploymentExample() async {
 
   // This is called by `StudyService` when deploying a participant group.
   var invitation = ParticipantInvitation(
-      participantId: Uuid().v1,
-      assignedRoles: AssignedTo.all(),
-      identity: EmailAccountIdentity("test@test.com"),
-      invitation: StudyInvitation(
-          "Movement study", "This study tracks your movements."));
+    participantId: Uuid().v1,
+    assignedRoles: AssignedTo.all(),
+    identity: EmailAccountIdentity("test@test.com"),
+    invitation: StudyInvitation(
+      "Movement study",
+      "This study tracks your movements.",
+    ),
+  );
 
   String studyDeploymentId = Uuid().v1;
-  await deploymentService?.createStudyDeployment(
-    trackPatientStudy,
-    [invitation],
-    studyDeploymentId,
-  );
+  await deploymentService?.createStudyDeployment(trackPatientStudy, [
+    invitation,
+  ], studyDeploymentId);
 
   // What comes after is similar to what is called by the client in `carp.client`:
 
@@ -93,8 +94,9 @@ void carpCoreDeploymentExample() async {
 
   // Retrieve information on what to run and indicate the device is ready to
   // collect the requested data.
-  DeviceDeploymentStatus? patientPhoneStatus =
-      status?.getDeviceStatus(patientPhone);
+  DeviceDeploymentStatus? patientPhoneStatus = status?.getDeviceStatus(
+    patientPhone,
+  );
 
   if (patientPhoneStatus!
       .canObtainDeviceDeployment) // True since there are no dependent devices.
@@ -105,7 +107,10 @@ void carpCoreDeploymentExample() async {
     DateTime? deployedOn =
         deploymentInformation?.lastUpdatedOn; // To verify correct deployment.
     deploymentService?.deviceDeployed(
-        studyDeploymentId, patientPhone.roleName, deployedOn!);
+      studyDeploymentId,
+      patientPhone.roleName,
+      deployedOn!,
+    );
   }
 
   // Now that all devices have been registered and deployed, the deployment is ready.
@@ -137,23 +142,27 @@ void carpCoreDataExample() async {
   );
 
   var configuration = DataStreamsConfiguration(
-      studyDeploymentId: studyDeploymentId,
-      expectedDataStreams: {geolocation, stepCount});
+    studyDeploymentId: studyDeploymentId,
+    expectedDataStreams: {geolocation, stepCount},
+  );
 
   dataStreamService?.openDataStreams(configuration);
 
   var measurement = Measurement(
-      sensorStartTime: DateTime.now().microsecondsSinceEpoch,
-      data: Geolocation(latitude: 12, longitude: 23));
+    sensorStartTime: DateTime.now().microsecondsSinceEpoch,
+    data: Geolocation(latitude: 12, longitude: 23),
+  );
 
   var uploadData = DataStreamBatch(
-      dataStream: DataStreamId(
-          studyDeploymentId: studyDeploymentId,
-          deviceRoleName: device,
-          dataType: Geolocation.dataType),
-      firstSequenceId: 0,
-      measurements: [measurement],
-      triggerIds: {0});
+    dataStream: DataStreamId(
+      studyDeploymentId: studyDeploymentId,
+      deviceRoleName: device,
+      dataType: Geolocation.dataType,
+    ),
+    firstSequenceId: 0,
+    measurements: [measurement],
+    triggerIds: {0},
+  );
 
   dataStreamService?.appendToDataStreams(studyDeploymentId, [uploadData]);
 }
@@ -163,43 +172,52 @@ void carpCoreDataExample() async {
 /// Example initialization of a smartphone client for the participant that got
 /// invited to a study.
 void carpCoreClientExample() async {
+  ClientRepository? repository;
   ParticipationService? participationService;
   DeploymentService? deploymentService;
   DeviceDataCollectorFactory? deviceRegistry;
 
   // Retrieve invitation to participate in the study using a specific device.
   Account account = Account.withEmailIdentity('jakba@dtu.dk');
-  ActiveParticipationInvitation? invitation = (await participationService
-          ?.getActiveParticipationInvitations(account.id))
-      ?.first;
+  ActiveParticipationInvitation? invitation =
+      (await participationService?.getActiveParticipationInvitations(
+        account.id,
+      ))?.first;
   String? studyDeploymentId = invitation?.studyDeploymentId;
   String? deviceToUse = invitation?.assignedDevices?.first.device.roleName;
 
-  // Create a study runtime for the study.
-  var client = SmartphoneClient();
-  // Configure the client by specifying the deployment service, the device controller,
-  // and a unique device id.
-  client.configure(
-      deploymentService: deploymentService!,
-      deviceController: deviceRegistry!,
-      registration: SmartphoneDeviceRegistration(
-        deviceId: 'xxxxx',
-        deviceDisplayName: "Pixel 6 Pro (Android 12)",
-      ));
-
-  final study = await client.addStudy(Study(studyDeploymentId!, deviceToUse!));
-
-  // Register connected devices in case needed.
-  var connectedDevice = study.deviceRoleName;
-  var connectedRegistration = client.registration;
-  deploymentService.registerDevice(
-    studyDeploymentId,
-    connectedDevice,
-    connectedRegistration!,
+  // Add the study to a client device manager.
+  var client = SmartphoneClient(
+    repository: repository,
+    deploymentService: deploymentService,
+    dataCollectorFactory: deviceRegistry,
   );
 
-  // Try deployment now that devices have been registered.
-  StudyStatus status = await client.tryDeployment(study.studyDeploymentId);
-  var isDeployed = status == StudyStatus.Deployed;
-  assert(isDeployed, true);
+  var registration = Smartphone().createRegistration(
+    deviceId: 'xxxxx',
+    deviceDisplayName: "Pixel 6 Pro (Android 12)",
+  );
+  client.configure(registration: registration);
+
+  var study = await client.addStudy(studyDeploymentId!, deviceToUse!);
+
+  // Register connected devices in case needed.
+  if (study.status == StudyStatus.Deploying) {
+    study.deployment?.connectedDevices.forEach((connectedDevice) {
+      var connectedRegistration = connectedDevice.createRegistration();
+      deploymentService?.registerDevice(
+        studyDeploymentId,
+        connectedDevice.roleName,
+        connectedRegistration,
+      );
+    });
+
+    // Try deployment now that devices have been registered.
+    var status = await client.tryDeployment(
+      study.studyDeploymentId,
+      study.deviceRoleName,
+    );
+
+    assert(status == StudyStatus.Running); // True.
+  }
 }

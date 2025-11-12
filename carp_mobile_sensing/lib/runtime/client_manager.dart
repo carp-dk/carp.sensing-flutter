@@ -7,7 +7,7 @@
 part of '../runtime.dart';
 
 /// The possible states of the [SmartPhoneClientManager].
-enum ClientManagerState { created, configured, started, stopped, disposed }
+enum ClientManagerState { created, configured, disposed }
 
 class SmartPhoneClientManager extends ClientManager
     with WidgetsBindingObserver {
@@ -95,6 +95,9 @@ class SmartPhoneClientManager extends ClientManager
     bool askForPermissions = true,
     bool heartbeat = true,
   }) async {
+    // fast out if already configured
+    if (state.index >= ClientManagerState.configured.index) return;
+
     // initialize misc device settings
     await DeviceInfo().init();
     await Settings().init();
@@ -283,12 +286,11 @@ class SmartPhoneClientManager extends ClientManager
   @mustCallSuper
   Future<void> deactivate() async => await save();
 
-  /// Start all studies in this client manager.
+  /// Start data sampling in all studies in this client manager.
   void start() {
     for (var studyDeploymentId in repository.keys) {
       getStudyRuntime(studyDeploymentId)?.start();
     }
-    _state = ClientManagerState.started;
   }
 
   /// Stop all studies in this client manager.
@@ -296,7 +298,6 @@ class SmartPhoneClientManager extends ClientManager
     for (var studyDeploymentId in repository.keys) {
       await getStudyRuntime(studyDeploymentId)?.stop();
     }
-    _state = ClientManagerState.stopped;
   }
 
   /// Restore and resume all study deployments which were running on this
@@ -335,7 +336,6 @@ class SmartPhoneClientManager extends ClientManager
         if (study.status == StudyStatus.Running) controller?.start();
       }
     }
-    _state = ClientManagerState.started;
     return studyCount;
   }
 

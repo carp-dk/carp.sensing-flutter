@@ -388,7 +388,10 @@ SmartphoneDeployment _$SmartphoneDeploymentFromJson(
       ..deployed = json['deployed'] == null
           ? null
           : DateTime.parse(json['deployed'] as String)
-      ..status = $enumDecode(_$StudyStatusEnumMap, json['status']);
+      ..status = $enumDecode(
+        _$StudyDeploymentStatusTypesEnumMap,
+        json['status'],
+      );
 
 Map<String, dynamic> _$SmartphoneDeploymentToJson(
   SmartphoneDeployment instance,
@@ -411,17 +414,14 @@ Map<String, dynamic> _$SmartphoneDeploymentToJson(
   'participantId': ?instance.participantId,
   'participantRoleName': ?instance.participantRoleName,
   'deployed': ?instance.deployed?.toIso8601String(),
-  'status': _$StudyStatusEnumMap[instance.status]!,
+  'status': _$StudyDeploymentStatusTypesEnumMap[instance.status]!,
 };
 
-const _$StudyStatusEnumMap = {
-  StudyStatus.DeploymentNotStarted: 'DeploymentNotStarted',
-  StudyStatus.DeploymentStatusAvailable: 'DeploymentStatusAvailable',
-  StudyStatus.DeploymentNotAvailable: 'DeploymentNotAvailable',
-  StudyStatus.Deploying: 'Deploying',
-  StudyStatus.Deployed: 'Deployed',
-  StudyStatus.Running: 'Running',
-  StudyStatus.Stopped: 'Stopped',
+const _$StudyDeploymentStatusTypesEnumMap = {
+  StudyDeploymentStatusTypes.Invited: 'Invited',
+  StudyDeploymentStatusTypes.DeployingDevices: 'DeployingDevices',
+  StudyDeploymentStatusTypes.Running: 'Running',
+  StudyDeploymentStatusTypes.Stopped: 'Stopped',
 };
 
 AppTask _$AppTaskFromJson(Map<String, dynamic> json) => AppTask(
