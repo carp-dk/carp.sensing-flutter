@@ -8,24 +8,34 @@ part of '../domain.dart';
 
 /// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
 class SmartphoneStudy extends Study {
-  /// The unique id of the study.
+  /// The unique id of the study in the deployment service.
   String? studyId;
 
   /// The ID of the participant in this study.
   String? participantId;
 
-  /// The role name of the participant in this study.
+  /// The role of the participant in this study.
   String? participantRoleName;
 
+  /// Create a [SmartphoneStudy].
   SmartphoneStudy({
     this.studyId,
     required String studyDeploymentId,
     required String deviceRoleName,
     this.participantId,
     this.participantRoleName,
-  }) : super(studyDeploymentId, deviceRoleName);
+    DateTime? createdOn,
+    StudyDeploymentStatus? deploymentStatus,
+    PrimaryDeviceDeployment? deployment,
+  }) : super(
+         studyDeploymentId,
+         deviceRoleName,
+         createdOn,
+         deploymentStatus,
+         deployment,
+       );
 
-  /// Create a new study based on an [invitation].
+  /// Create a [SmartphoneStudy] from [invitation].
   SmartphoneStudy.fromInvitation(ActiveParticipationInvitation invitation)
     : this(
         studyId: invitation.studyId,
@@ -35,6 +45,33 @@ class SmartphoneStudy extends Study {
         participantId: invitation.participantId,
         participantRoleName: invitation.participantRoleName,
       );
+
+  /// Create a [SmartphoneStudy] from a SQL Result Map.
+  factory SmartphoneStudy.fromMap(Map<String, Object?> map) {
+    final statusJson = map[Persistence.DEPLOYMENT_STATUS_COLUMN] as String;
+    final status = StudyDeploymentStatus.fromJson(
+      json.decode(statusJson) as Map<String, dynamic>,
+    );
+
+    final deploymentJson = map[Persistence.DEPLOYMENT_COLUMN] as String;
+    final deployment = SmartphoneDeployment.fromJson(
+      json.decode(deploymentJson) as Map<String, dynamic>,
+    );
+
+    return SmartphoneStudy(
+      studyId: map[Persistence.STUDY_ID_COLUMN] as String,
+      studyDeploymentId: map[Persistence.STUDY_DEPLOYMENT_ID_COLUMN] as String,
+      deviceRoleName: map[Persistence.DEVICE_ROLE_NAME_COLUMN] as String,
+      participantId: map[Persistence.PARTICIPANT_ID_COLUMN] as String,
+      participantRoleName:
+          map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String,
+      createdOn: DateTime.tryParse(
+        map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String,
+      ),
+      deploymentStatus: status,
+      deployment: deployment,
+    );
+  }
 
   @override
   String toString() =>

@@ -1,8 +1,8 @@
 /*
- * Copyright 2022 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
- * Use of this source code is governed by a MIT-style license that can be
- * found in the LICENSE file.
+ * Copyright (c) 2025, the Technical University of Denmark (DTU).
+ * All rights reserved. Please see the AUTHORS file for details. 
+ * Use of this source code is governed by a MIT-style license that 
+ * can be found in the LICENSE file.
  */
 
 part of 'carp_core_client.dart';
@@ -18,20 +18,28 @@ class Study with ChangeNotifier {
   final DateTime _createdOn;
   final String _studyDeploymentId;
   final String _deviceRoleName;
-  final StreamController<StudyStatusEvent> _eventController =
-      StreamController<StudyStatusEvent>.broadcast();
   StudyDeploymentStatus? _deploymentStatus;
   PrimaryDeviceDeployment? _deployment;
 
+  final StreamController<StudyStatusEvent> _eventController =
+      StreamController<StudyStatusEvent>.broadcast();
+
   /// Create a study uniquely identified by its [studyDeploymentId] and
   /// [deviceRoleName].
-  Study(String studyDeploymentId, String deviceRoleName)
-    : _studyDeploymentId = studyDeploymentId,
-      _deviceRoleName = deviceRoleName,
-      _createdOn = DateTime.now();
-
-  /// Stream of study status events.
-  Stream<StudyStatusEvent> get events => _eventController.stream;
+  Study(
+    String studyDeploymentId,
+    String deviceRoleName, [
+    DateTime? createdOn,
+    StudyDeploymentStatus? deploymentStatus,
+    PrimaryDeviceDeployment? deployment,
+  ]) : _studyDeploymentId = studyDeploymentId,
+       _deviceRoleName = deviceRoleName,
+       _createdOn = createdOn ?? DateTime.now(),
+       _deploymentStatus = deploymentStatus,
+       _deployment = deployment {
+    // print events for logging purpose
+    events.listen((event) => print);
+  }
 
   /// The ID of the deployed study for which to collect data.
   String get studyDeploymentId => _studyDeploymentId;
@@ -57,6 +65,9 @@ class Study with ChangeNotifier {
     StudyDeploymentStatusTypes.Stopped => StudyStatus.Stopped,
   };
 
+  /// Stream of study status events.
+  Stream<StudyStatusEvent> get events => _eventController.stream;
+
   /// An updated [deploymentStatus] has been received.
   void deploymentStatusReceived(StudyDeploymentStatus deploymentStatus) {
     _deploymentStatus = deploymentStatus;
@@ -66,18 +77,18 @@ class Study with ChangeNotifier {
     notifyListeners();
   }
 
-  /// A new primary device [deployment] determining what data to collect for this study has been received.
-  ///
-  /// @throws IllegalArgumentException when the role name [deployment] is intended for is different from the expected [deviceRoleName].
+  /// A new primary device [deployment] determining what data to collect for
+  /// this study has been received.
   void deviceDeploymentReceived(PrimaryDeviceDeployment deployment) {
     if (deploymentStatus == null) {
-      throw IllegalStateException(
+      deploymentError(
         "Can't receive device deployment before having received deployment status.",
       );
+      return;
     }
 
     if (deployment.deviceConfiguration.roleName != deviceRoleName) {
-      throw ArgumentError(
+      deploymentError(
         "The deployment is intended for a device with a different role name.",
       );
     }
@@ -85,6 +96,15 @@ class Study with ChangeNotifier {
     _deployment = deployment;
     _eventController.add(
       StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
+    );
+    notifyListeners();
+  }
+
+  /// The deployment is i an error state.
+  void deploymentError([String? message]) {
+    if (message != null) print(message);
+    _eventController.add(
+      StudyStatusEvent(this, StudyStatusEventTypes.DeploymentError),
     );
     notifyListeners();
   }
@@ -164,6 +184,13 @@ enum StudyStatusEventTypes {
 
   /// Deployment information for this study has been received.
   DeviceDeploymentReceived,
+
+  /// An error has occurred during deployment.
+  ///
+  /// This event type is not included in CARP Core in Kotlin, but added to this
+  /// Dart package in order to handle deployment error more gracefully in a
+  /// Flutter client.
+  DeploymentError,
 }
 
 /// An event related to a changes to a [Study].
@@ -171,4 +198,6 @@ class StudyStatusEvent {
   final Study study;
   final StudyStatusEventTypes event;
   const StudyStatusEvent(this.study, this.event);
+  @override
+  String toString() => '$runtimeType - $event ($study)';
 }

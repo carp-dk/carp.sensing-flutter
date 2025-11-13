@@ -16,24 +16,21 @@ abstract interface class ClientRepository {
 
   /// Adds [study] to the repository.
   ///
-  /// Throws [AssertionError] if [study] has the same study deployment ID and
-  /// device role name as an existing.
+  /// Throws [IllegalArgumentException] if [study] has the same study deployment
+  /// ID and device role name as an existing study.
   void addStudy(Study study);
-
-  /// Get the [Study] with [studyId], or null when no such study is found.
-  Study? getStudy(String studyId);
 
   /// Return the [Study] with [studyDeploymentId] and [deviceRoleName],
   /// or null when no such study is found.
-  Study? getStudyByDeployment(String studyDeploymentId, String deviceRoleName);
+  Study? getStudy(String studyDeploymentId, String deviceRoleName);
 
   /// Return all [Study]s for the client.
   List<Study> getStudyList();
 
   /// Update a [study] which is already stored in the repository.
   ///
-  /// Throws [AssertionError] if no study with the same id is stored in the
-  /// repository.
+  /// Throws [IllegalArgumentException] if this study has not previously
+  /// been added to this repository.
   void updateStudy(Study study);
 
   /// Remove [study] which is already stored in the repository.

@@ -27,31 +27,32 @@ part of '../infrastructure.dart';
 /// Files can be accessed via AndroidStudio.
 class Persistence {
   static const String DATABASE_NAME = 'carp';
-  static const String DEPLOYMENT_TABLE_NAME = 'deployment';
+  static const String STUDY_TABLE_NAME = 'studies';
   static const String TASK_QUEUE_TABLE_NAME = 'task_queue';
 
   static const String STUDY_ID_COLUMN = 'study_id';
   static const String STUDY_DEPLOYMENT_ID_COLUMN = 'study_deployment_id';
-  static const String STUDY_DEPLOYMENT_STATUS_COLUMN =
-      'study_deployment_status';
   static const String DEVICE_ROLE_NAME_COLUMN = 'device_role_name';
   static const String PARTICIPANT_ID_COLUMN = 'participant_id';
   static const String PARTICIPANT_ROLE_NAME_COLUMN = 'participant_role_name';
-  static const String UPDATED_AT_COLUMN = 'updated_at';
-  static const String DEPLOYED_AT_COLUMN = 'deployed_at';
+  static const String CREATED_ON_COLUMN = 'created_on';
+  static const String UPDATED_ON_COLUMN = 'updated_on';
+  static const String DEPLOYED_ON_COLUMN = 'deployed_on';
+  static const String DEPLOYMENT_STATUS_COLUMN = 'deployment_status';
   static const String DEPLOYMENT_COLUMN = 'deployment';
-  // static const String USER_ID_COLUMN = 'user_id';
 
   static const String ID_COLUMN = 'id';
   static const String TASK_ID_COLUMN = 'task_id';
   static const String TASK_COLUMN = 'task';
 
+  String? _databasePath;
+  Database? _database;
+
   static final Persistence _instance = Persistence._();
   Persistence._();
-  factory Persistence() => _instance;
 
-  String? _databasePath;
-  Database? database;
+  /// Get the singleton persistence layer.
+  factory Persistence() => _instance;
 
   /// Path of the database.
   String get databasePath => '$_databasePath';
@@ -60,27 +61,28 @@ class Persistence {
   String get databaseName => '$_databasePath/$DATABASE_NAME.db';
 
   /// Initialize the persistence layer and the database.
-  Future<void> init([SmartphoneDeployment? deployment]) async {
+  Future<void> init() async {
     info('Initializing $runtimeType...');
     _databasePath ??= await getDatabasesPath();
 
     // open the database - make sure to use the same database across app (re)start
-    database = await openDatabase(
+    _database = await openDatabase(
       databaseName,
       version: 1,
       singleInstance: true,
       onCreate: (Database db, int version) async {
         // when creating the database, create the tables
         await db.execute(
-          'CREATE TABLE $DEPLOYMENT_TABLE_NAME ('
+          'CREATE TABLE $STUDY_TABLE_NAME ('
           '$STUDY_ID_COLUMN TEXT, '
-          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT PRIMARY KEY, '
+          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
           '$DEVICE_ROLE_NAME_COLUMN TEXT, '
           '$PARTICIPANT_ID_COLUMN TEXT, '
           '$PARTICIPANT_ROLE_NAME_COLUMN TEXT, '
-          '$STUDY_DEPLOYMENT_STATUS_COLUMN INTEGER, '
-          '$UPDATED_AT_COLUMN TEXT, '
-          '$DEPLOYED_AT_COLUMN TEXT, '
+          '$CREATED_ON_COLUMN TEXT, '
+          '$UPDATED_ON_COLUMN TEXT, '
+          '$DEPLOYED_ON_COLUMN TEXT, '
+          '$DEPLOYMENT_STATUS_COLUMN TEXT, '
           '$DEPLOYMENT_COLUMN TEXT)',
         );
 
@@ -96,9 +98,6 @@ class Persistence {
       },
     );
 
-    // save the deployment if specified
-    if (deployment != null) saveDeployment(deployment);
-
     // listen to changes to the app task queue so we can save them
     AppTaskController().userTaskEvents.listen((task) => saveUserTask(task));
 
@@ -107,68 +106,68 @@ class Persistence {
 
   /// Close the persistence layer. After close is called, no deployment can be
   /// accessed or saved.
-  Future<void> close() async => await database?.close();
+  Future<void> close() async => await _database?.close();
 
-  /// Get the list of all study deployments previously stored on this phone.
+  /// Get the list of all studies previously stored on this phone.
   ///
   /// Returns an empty list, if not study deployments are stored.
-  Future<List<SmartphoneStudy>> getAllStudyDeployments() async {
-    info("$runtimeType - Getting all study deployments stored on this device.");
+  Future<List<SmartphoneStudy>> getAllStudies() async {
     List<SmartphoneStudy> list = [];
     try {
       final List<Map<String, Object?>> maps =
-          await database?.query(
-            DEPLOYMENT_TABLE_NAME,
+          await _database?.query(
+            STUDY_TABLE_NAME,
             columns: [
               STUDY_ID_COLUMN,
               STUDY_DEPLOYMENT_ID_COLUMN,
               DEVICE_ROLE_NAME_COLUMN,
               PARTICIPANT_ID_COLUMN,
               PARTICIPANT_ROLE_NAME_COLUMN,
-              STUDY_DEPLOYMENT_STATUS_COLUMN,
+              CREATED_ON_COLUMN,
+              DEPLOYMENT_STATUS_COLUMN,
+              DEPLOYMENT_COLUMN,
             ],
           ) ??
           [];
       if (maps.isNotEmpty) {
         for (var map in maps) {
-          final study = SmartphoneStudy(
-            studyId: map[STUDY_ID_COLUMN] as String,
-            studyDeploymentId: map[STUDY_DEPLOYMENT_ID_COLUMN] as String,
-            deviceRoleName: map[DEVICE_ROLE_NAME_COLUMN] as String,
-            participantId: map[PARTICIPANT_ID_COLUMN] as String,
-            participantRoleName: map[PARTICIPANT_ROLE_NAME_COLUMN] as String,
-          );
-          final status = map[STUDY_DEPLOYMENT_STATUS_COLUMN] as int;
-          study.status = StudyStatus.values[status];
-          list.add(study);
+          list.add(SmartphoneStudy.fromMap(map));
         }
       }
     } catch (exception) {
-      warning('$runtimeType - Failed to load deployments - $exception');
+      warning('$runtimeType - Failed to load studies - $exception');
     }
 
     return list;
   }
 
-  /// Save the [deployment] persistently to a local cache.
-  /// Returns `true` if successful.
-  Future<bool> saveDeployment(SmartphoneDeployment deployment) async {
-    info("$runtimeType - Saving deployment to database.");
+  /// Save the [study] persistently to a local cache.
+  /// Returns true if successful.
+  Future<bool> saveStudy(Study study) async {
     bool success = true;
     try {
       final Map<String, dynamic> map = {
-        STUDY_ID_COLUMN: deployment.studyId,
-        STUDY_DEPLOYMENT_ID_COLUMN: deployment.studyDeploymentId,
-        DEVICE_ROLE_NAME_COLUMN: deployment.deviceRoleName,
-        PARTICIPANT_ID_COLUMN: deployment.participantId,
-        PARTICIPANT_ROLE_NAME_COLUMN: deployment.participantRoleName,
-        STUDY_DEPLOYMENT_STATUS_COLUMN: deployment.status.index,
-        UPDATED_AT_COLUMN: DateTime.now().toUtc().toIso8601String(),
-        DEPLOYED_AT_COLUMN: deployment.deployed?.toUtc().toIso8601String(),
-        DEPLOYMENT_COLUMN: jsonEncode(deployment),
+        STUDY_DEPLOYMENT_ID_COLUMN: study.studyDeploymentId,
+        DEVICE_ROLE_NAME_COLUMN: study.deviceRoleName,
+        PARTICIPANT_ID_COLUMN: '',
+        PARTICIPANT_ROLE_NAME_COLUMN: '',
+        CREATED_ON_COLUMN: study.createdOn.toUtc().toIso8601String(),
+        UPDATED_ON_COLUMN: DateTime.now().toUtc().toIso8601String(),
+        DEPLOYED_ON_COLUMN: study.deploymentStatus?.createdOn
+            .toUtc()
+            .toIso8601String(),
+        DEPLOYMENT_STATUS_COLUMN: jsonEncode(study.deploymentStatus),
+        DEPLOYMENT_COLUMN: jsonEncode(study.deployment),
       };
-      await database?.insert(
-        DEPLOYMENT_TABLE_NAME,
+
+      if (study.deployment is SmartphoneDeployment) {
+        final d = study.deployment as SmartphoneDeployment;
+        map[PARTICIPANT_ID_COLUMN] = d.participantId;
+        map[PARTICIPANT_ROLE_NAME_COLUMN] = d.participantRoleName;
+      }
+
+      await _database?.insert(
+        STUDY_TABLE_NAME,
         map,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
@@ -179,42 +178,56 @@ class Persistence {
     return success;
   }
 
-  /// Restore the [SmartphoneDeployment] with the [deploymentId] from local cache.
-  /// Returns a [SmartphoneDeployment] if successful, null otherwise.
-  Future<SmartphoneDeployment?> restoreDeployment(String deploymentId) async {
-    info("$runtimeType - Restoring deployment, deploymentId: $deploymentId");
-    SmartphoneDeployment? deployment;
+  /// Return the [SmartphoneStudy] with [studyDeploymentId] and [deviceRoleName],
+  /// or null when no such study is found.
+  Future<SmartphoneStudy?> getStudy(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    SmartphoneStudy? study;
     try {
       final List<Map<String, Object?>> maps =
-          await database?.query(
-            DEPLOYMENT_TABLE_NAME,
-            columns: [DEPLOYMENT_COLUMN],
-            where: '$STUDY_DEPLOYMENT_ID_COLUMN = ?',
-            whereArgs: [deploymentId],
+          await _database?.query(
+            STUDY_TABLE_NAME,
+            columns: [
+              STUDY_ID_COLUMN,
+              STUDY_DEPLOYMENT_ID_COLUMN,
+              DEVICE_ROLE_NAME_COLUMN,
+              PARTICIPANT_ID_COLUMN,
+              PARTICIPANT_ROLE_NAME_COLUMN,
+              CREATED_ON_COLUMN,
+              DEPLOYMENT_STATUS_COLUMN,
+              DEPLOYMENT_COLUMN,
+            ],
+            where:
+                '$STUDY_DEPLOYMENT_ID_COLUMN = ? AND '
+                '$DEVICE_ROLE_NAME_COLUMN = ?',
+            whereArgs: [studyDeploymentId, deviceRoleName],
           ) ??
           [];
 
       if (maps.isNotEmpty) {
-        final jsonString = maps[0][DEPLOYMENT_COLUMN] as String;
-        deployment = SmartphoneDeployment.fromJson(
-          json.decode(jsonString) as Map<String, dynamic>,
-        );
+        study = SmartphoneStudy.fromMap(maps[0]);
       }
     } catch (exception) {
       warning('$runtimeType - Failed to restore deployment - $exception');
     }
 
-    return deployment;
+    return study;
   }
 
-  /// Erase the [SmartphoneDeployment] with the [deploymentId] from local cache.
-  Future<void> eraseDeployment(String deploymentId) async {
-    info("$runtimeType - Erasing deployment, deploymentId: $deploymentId");
+  /// Remove the [study] from local cache.
+  Future<void> removeStudy(Study study) async {
+    final deploymentId = study.studyDeploymentId;
+    final deviceRoleName = study.deviceRoleName;
+    info("$runtimeType - Erasing study, deploymentId: $study");
     try {
-      await database?.delete(
-        DEPLOYMENT_TABLE_NAME,
-        where: '$STUDY_DEPLOYMENT_ID_COLUMN = ?',
-        whereArgs: [deploymentId],
+      await _database?.delete(
+        STUDY_TABLE_NAME,
+        where:
+            '$STUDY_DEPLOYMENT_ID_COLUMN = ? AND '
+            '$DEVICE_ROLE_NAME_COLUMN = ?',
+        whereArgs: [deploymentId, deviceRoleName],
       );
     } catch (exception) {
       warning('$runtimeType - Failed to erase deployment - $exception');
@@ -241,7 +254,7 @@ class Persistence {
           TASK_COLUMN: jsonEncode(snapshot),
         };
         int count =
-            await database?.update(
+            await _database?.update(
               TASK_QUEUE_TABLE_NAME,
               map,
               where: '$TASK_ID_COLUMN = ?',
@@ -251,7 +264,7 @@ class Persistence {
             0;
 
         if (count == 0) {
-          await database?.insert(
+          await _database?.insert(
             TASK_QUEUE_TABLE_NAME,
             map,
             conflictAlgorithm: ConflictAlgorithm.replace,
@@ -259,7 +272,7 @@ class Persistence {
         }
         break;
       case UserTaskState.dequeued:
-        await database?.delete(
+        await _database?.delete(
           TASK_QUEUE_TABLE_NAME,
           where: '$TASK_ID_COLUMN = ?',
           whereArgs: [task.id],
@@ -273,7 +286,7 @@ class Persistence {
     List<UserTaskSnapshot> result = [];
     try {
       final List<Map<String, Object?>> list =
-          await database?.query(
+          await _database?.query(
             TASK_QUEUE_TABLE_NAME,
             columns: [TASK_COLUMN],
           ) ??

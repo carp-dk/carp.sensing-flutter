@@ -119,7 +119,7 @@ abstract class ClientManager<
   /// Get the study with [studyDeploymentId] and [deviceRoleName] from this client manager.
   /// Returns null if no such study has been added.
   Study? getStudy(String studyDeploymentId, String deviceRoleName) =>
-      repository.getStudyByDeployment(studyDeploymentId, deviceRoleName);
+      repository.getStudy(studyDeploymentId, deviceRoleName);
 
   /// Add a study which needs to be executed on this client.
   /// No deployment is attempted yet.

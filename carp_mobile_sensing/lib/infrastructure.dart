@@ -46,3 +46,4 @@ part 'infrastructure/file_study_manager.dart';
 part 'infrastructure/local_notification_controller.dart';
 part 'infrastructure/deployment_service.dart';
 part 'infrastructure/persistence.dart';
+part 'infrastructure/client_repository.dart';

@@ -1,7 +1,8 @@
 /*
- * Copyright 2021 the Technical University of Denmark (DTU).
- * Use of this source code is governed by a MIT-style license that can be
- * found in the LICENSE file.
+ * Copyright (c) 2025, the Technical University of Denmark (DTU).
+ * All rights reserved. Please see the AUTHORS file for details. 
+ * Use of this source code is governed by a MIT-style license that 
+ * can be found in the LICENSE file.
  */
 
 part of '../runtime.dart';
@@ -9,7 +10,7 @@ part of '../runtime.dart';
 /// The possible states of the [SmartPhoneClientManager].
 enum ClientManagerState { created, configured, disposed }
 
-class SmartPhoneClientManager extends ClientManager
+class SmartPhoneClientManager extends SmartphoneClient
     with WidgetsBindingObserver {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
   NotificationController? _notificationController;

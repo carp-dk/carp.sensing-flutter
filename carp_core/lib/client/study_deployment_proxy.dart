@@ -26,8 +26,8 @@ class StudyDeploymentProxy {
         study.studyDeploymentId,
       );
     } catch (error) {
-      print(
-        "$runtimeType - Could not get deployment with id '${study.studyDeploymentId}' "
+      study.deploymentError(
+        "$runtimeType - Could not get deployment status with id '${study.studyDeploymentId}' "
         "from the deployment service: $deploymentService."
         "\nError: $error",
       );
@@ -69,8 +69,10 @@ class StudyDeploymentProxy {
         deviceRegistration,
       );
     } catch (error) {
-      // we only print a warning - this device may already be registered
-      print(
+      // Note that this device may already be registered which will throw an
+      // exception from the deployment service. But, this should not prevent
+      // getting the deployment.
+      study.deploymentError(
         "$runtimeType - Error registering '${study.deviceRoleName}' as primary device.\n$error",
       );
       deploymentStatus = null;
@@ -79,12 +81,13 @@ class StudyDeploymentProxy {
     // If we didn't get a deployment status from registration, try to get it directly.
     deploymentStatus ??= await getStudyDeploymentStatus(study);
 
-    // If we still don't have a deployment status, throw an error.
+    // If we still don't have a deployment status, mark this as an error and exit.
     if (deploymentStatus == null) {
-      throw IllegalArgumentException(
+      study.deploymentError(
         "No study deployment with ID '$studyDeploymentId' found when trying to register device "
         "with role name '$deviceRoleName'.",
       );
+      return;
     }
 
     // Update study with new deployment status.
@@ -103,18 +106,14 @@ class StudyDeploymentProxy {
     if (!deviceStatus.canObtainDeviceDeployment) return;
 
     // Get deployment information.
-    print("$runtimeType - Trying to get deployment...");
-
     final device = deviceStatus.device;
     final deployment = await deploymentService.getDeviceDeploymentFor(
       studyDeploymentId,
       deviceRoleName,
     );
 
-    print("$runtimeType - DEPLOYMENT RECEIVED:\n$deployment");
-
     if (deployment == null) {
-      print(
+      study.deploymentError(
         "$runtimeType - Deployment for device role name '$deviceRoleName' "
         "in study deployment '$studyDeploymentId' is not available.",
       );
@@ -122,10 +121,11 @@ class StudyDeploymentProxy {
     }
 
     if (deployment.deviceConfiguration.roleName != deviceRoleName) {
-      throw IllegalArgumentException(
+      study.deploymentError(
         "The device role name of the deployment is '${deployment.deviceConfiguration.roleName}', "
         "which does not match the requested device role name '$deviceRoleName'.",
       );
+      return;
     }
 
     // notify the study that the deployment has been received
@@ -160,10 +160,6 @@ class StudyDeploymentProxy {
         "$runtimeType - Error marking deployment '$studyDeploymentId' as deployed.\n$error",
       );
     }
-
-    print(
-      "$runtimeType - Study deployment '$studyDeploymentId' successfully deployed.",
-    );
   }
 
   /// Permanently stop this [study].
