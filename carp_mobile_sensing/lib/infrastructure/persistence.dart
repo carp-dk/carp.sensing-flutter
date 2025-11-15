@@ -101,7 +101,12 @@ class Persistence {
       },
     );
 
-    // listen to changes to the app task queue so we can save them
+    // Listen to changes to studies in the client repository so we can save them.
+    SmartphoneClientRepository().userTaskEvents.listen(
+      (study) => saveStudy(study.study),
+    );
+
+    // Listen to changes to the app task queue so we can save them.
     AppTaskController().userTaskEvents.listen((task) => saveUserTask(task));
 
     info('$runtimeType - SQLite DB initialized - name: $databaseName');

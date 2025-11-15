@@ -28,6 +28,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:async/async.dart';
+
 import 'package:archive/archive_io.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

@@ -7,35 +7,36 @@
 
 part of '../infrastructure.dart';
 
-/// A [ClientRepository] that runs on a smartphone.
+/// A [ClientRepository] that runs on a smartphone. Works as a singleton.
 /// Uses the [Persistence] infrastructure to store study information persistently
-/// in a SQLite DB on the phone.
+/// across app restarts.
 class SmartphoneClientRepository implements ClientRepository {
   static final SmartphoneClientRepository _instance =
       SmartphoneClientRepository._();
-  SmartphoneClientRepository._();
-  StreamSubscription<StudyStatusEvent>? _subscription;
+  final StreamGroup<StudyStatusEvent> _group = StreamGroup.broadcast();
+
+  /// Create the singleton instance and load all studies from persistence storage.
+  SmartphoneClientRepository._() {
+    Persistence().getAllStudies().then(
+      (studies) => _repository = studies.toSet(),
+    );
+  }
 
   /// Get the singleton [SmartphoneClientRepository].
   factory SmartphoneClientRepository() => _instance;
 
   /// The in-memory cache of this repository.
-  final Set<Study> _repository = {};
+  Set<Study> _repository = {};
+
+  /// A stream of [StudyStatusEvent] events generate whenever a study change state.
+  Stream<StudyStatusEvent> get userTaskEvents => _group.stream;
 
   @override
   DeviceRegistration? deviceRegistration;
 
   @override
-  void addStudy(Study study) {
-    _repository.add(study);
-
-    // Listen for updates to this study and save it (if no error).
-    _subscription = study.events.listen((event) {
-      if (event.event != StudyStatusEventTypes.DeploymentError) {
-        Persistence().saveStudy(study);
-      }
-    });
-  }
+  void addStudy(Study study) =>
+      (_repository.add(study)) ? _group.add(study.events) : null;
 
   @override
   Study? getStudy(String studyDeploymentId, String deviceRoleName) {
@@ -45,7 +46,7 @@ class SmartphoneClientRepository implements ClientRepository {
             study.studyDeploymentId == studyDeploymentId &&
             study.deviceRoleName == deviceRoleName,
       );
-    } catch (error) {
+    } catch (_) {
       return null;
     }
   }
@@ -55,13 +56,11 @@ class SmartphoneClientRepository implements ClientRepository {
 
   @override
   void removeStudy(Study study) {
-    _subscription?.cancel();
+    _group.remove(study.events);
     _repository.remove(study);
     Persistence().removeStudy(study);
   }
 
   @override
-  void updateStudy(Study study) {
-    Persistence().saveStudy(study);
-  }
+  void updateStudy(Study study) => Persistence().saveStudy(study);
 }
