@@ -6,14 +6,17 @@
 
 part of '../infrastructure.dart';
 
-/// Stores meta data about the running [SmartphoneDeployment] and all
-/// [UserTask] json objects in an SQLite database on the device's
-/// local storage media. To be used across app restarts.
+/// The [Persistence] class is a singleton which handles persistence of study
+/// runtime information to a SQLite database on the phone. Used to store information
+/// across app re-start on:
 ///
-/// Deployments are stored in the `deployment` table and user tasks are stored
+///  * Running studies on the phone as managed by the [SmartphoneClientRepository]
+///  * User tasks on the task queue as managed by the [AppTaskController]
+///
+/// Studies are stored in the `studies` table and user tasks are stored
 /// in the `task_queue` table.
 ///
-/// The path and filename format is
+/// The path and filename format for the database is
 ///
 ///   `~/carp.db`
 ///
