@@ -40,6 +40,9 @@ abstract class ClientManager<
         'ClientManager has not been configured yet. Call configure() first.',
       ));
 
+  /// Get the studies running on this client device.
+  List<Study> get studies => repository.getStudyList();
+
   /// The application service through which study deployments, to be run on
   /// this client, can be managed and retrieved.
   DeploymentService get deploymentService =>
@@ -114,9 +117,10 @@ abstract class ClientManager<
 
   /// Get the status for the studies which run on this client device.
   List<StudyStatus> getStudyStatusList() =>
-      repository.getStudyList().map((study) => study.status).toList();
+      studies.map((study) => study.status).toList();
 
-  /// Get the study with [studyDeploymentId] and [deviceRoleName] from this client manager.
+  /// Get the study with [studyDeploymentId] and [deviceRoleName] from this client
+  /// manager.
   /// Returns null if no such study has been added.
   Study? getStudy(String studyDeploymentId, String deviceRoleName) =>
       repository.getStudy(studyDeploymentId, deviceRoleName);
@@ -129,12 +133,10 @@ abstract class ClientManager<
   /// the deployment identified by [studyDeploymentId].
   ///
   /// Throws NotConfiguredException if the client has not yet been configured.
-  /// Throws IllegalArgumentException if a study with the same [studyDeploymentId] and
-  /// [deviceRoleName] has already been added to this client.
-  ///
-  /// Return the newly added study.
+  /// Throws IllegalArgumentException if a study with the same deployment id
+  /// and device role name has already been added to this client.
   @mustCallSuper
-  Future<Study> addStudy(Study study) async {
+  Future<void> addStudy(Study study) async {
     _check();
     if (getStudy(study.studyDeploymentId, study.deviceRoleName) != null) {
       throw IllegalArgumentException(
@@ -146,7 +148,6 @@ abstract class ClientManager<
 
     // Update study status based on deployment status
     await proxy?.getStudyDeploymentStatus(study);
-    return study;
   }
 
   /// Verifies whether the device is ready for deployment of the study runtime

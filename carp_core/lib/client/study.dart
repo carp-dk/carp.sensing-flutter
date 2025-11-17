@@ -101,6 +101,16 @@ class Study with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Mark the [deployment] as updated. If [deployment] is null, nothing happens.
+  void deploymentUpdated() {
+    if (deployment != null) {
+      _eventController.add(
+        StudyStatusEvent(this, StudyStatusEventTypes.DeploymentUpdated),
+      );
+      notifyListeners();
+    }
+  }
+
   /// The deployment is i an error state.
   void deploymentError([String? message]) {
     if (message != null) print(message);
@@ -185,6 +195,13 @@ enum StudyStatusEventTypes {
 
   /// Deployment information for this study has been received.
   DeviceDeploymentReceived,
+
+  /// The deployment has been updated.
+  ///
+  /// This event type is not included in CARP Core in Kotlin, but added to this
+  /// Dart package in order to handle deployment updates more gracefully in a
+  /// Flutter client.
+  DeploymentUpdated,
 
   /// An error has occurred during deployment.
   ///

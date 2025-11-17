@@ -41,6 +41,7 @@ class Persistence {
   static const String CREATED_ON_COLUMN = 'created_on';
   static const String UPDATED_ON_COLUMN = 'updated_on';
   static const String DEPLOYED_ON_COLUMN = 'deployed_on';
+  static const String SAMPLING_STATUS_COLUMN = 'sampling_status';
   static const String DEPLOYMENT_STATUS_COLUMN = 'deployment_status';
   static const String DEPLOYMENT_COLUMN = 'deployment';
 
@@ -85,6 +86,7 @@ class Persistence {
           '$CREATED_ON_COLUMN TEXT, '
           '$UPDATED_ON_COLUMN TEXT, '
           '$DEPLOYED_ON_COLUMN TEXT, '
+          '$SAMPLING_STATUS_COLUMN INT'
           '$DEPLOYMENT_STATUS_COLUMN TEXT, '
           '$DEPLOYMENT_COLUMN TEXT)',
         );
@@ -132,6 +134,7 @@ class Persistence {
               PARTICIPANT_ID_COLUMN,
               PARTICIPANT_ROLE_NAME_COLUMN,
               CREATED_ON_COLUMN,
+              SAMPLING_STATUS_COLUMN,
               DEPLOYMENT_STATUS_COLUMN,
               DEPLOYMENT_COLUMN,
             ],
@@ -164,6 +167,9 @@ class Persistence {
         DEPLOYED_ON_COLUMN: study.deploymentStatus?.createdOn
             .toUtc()
             .toIso8601String(),
+        SAMPLING_STATUS_COLUMN: study is SmartphoneStudy
+            ? study.samplingStatus.index
+            : 0,
         DEPLOYMENT_STATUS_COLUMN: jsonEncode(study.deploymentStatus),
         DEPLOYMENT_COLUMN: jsonEncode(study.deployment),
       };
@@ -204,6 +210,7 @@ class Persistence {
               PARTICIPANT_ID_COLUMN,
               PARTICIPANT_ROLE_NAME_COLUMN,
               CREATED_ON_COLUMN,
+              SAMPLING_STATUS_COLUMN,
               DEPLOYMENT_STATUS_COLUMN,
               DEPLOYMENT_COLUMN,
             ],

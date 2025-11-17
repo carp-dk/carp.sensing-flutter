@@ -199,7 +199,8 @@ void carpCoreClientExample() async {
   );
   client.configure(registration: registration);
 
-  var study = await client.addStudy(studyDeploymentId!, deviceToUse!);
+  var study = Study(studyDeploymentId!, deviceToUse!);
+  await client.addStudy(study);
 
   // Register connected devices in case needed.
   if (study.status == StudyStatus.Deploying) {

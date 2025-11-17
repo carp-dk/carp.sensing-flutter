@@ -10,14 +10,14 @@ part of '../runtime.dart';
 /// The possible states of the [SmartPhoneClientManager].
 enum ClientManagerState { created, configured, disposed }
 
-class SmartPhoneClientManager extends SmartphoneClient
-    with WidgetsBindingObserver {
+class SmartPhoneClientManager extends SmartphoneClient {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
   NotificationController? _notificationController;
   bool _heartbeat = true;
   bool _askForPermissions = true;
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
+  final Map<Study, SmartphoneStudyController> _controllers = {};
 
   /// Will this client manager ask for permission when a new study is deployed?
   bool get askForPermissions => _askForPermissions;
@@ -27,13 +27,28 @@ class SmartPhoneClientManager extends SmartphoneClient
 
   /// The stream of all [Measurement]s collected by this client manager.
   /// This is the aggregation of all measurements collected by the
-  /// [studies] running on this client.
+  /// studies running on this client.
   Stream<Measurement> get measurements => _group.stream;
 
-  SmartPhoneClientManager._() {
+  SmartPhoneClientManager._()
+    : super(repository: SmartphoneClientRepository()) {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance.addObserver(this);
+    // WidgetsBinding.instance.addObserver(this);
     CarpMobileSensing.ensureInitialized();
+
+    // Make sure to create controllers for ally studies which may have been
+    // loaded from the persistence repository.
+    Persistence().getAllStudies().then((studies) {
+      for (var study in studies) {
+        final controller = SmartphoneStudyController(study);
+        _controllers[study] = controller;
+        _group.add(controller.measurements);
+      }
+
+      // Once all studies and their controllers are loaded, we can resume
+      // the sampling
+      resume();
+    });
   }
 
   /// Get the singleton [SmartPhoneClientManager].
@@ -159,7 +174,7 @@ class SmartPhoneClientManager extends SmartphoneClient
   }
 
   @override
-  Future<SmartphoneStudy> addStudy(Study study) async {
+  Future<void> addStudy(Study study) async {
     assert(
       study is SmartphoneStudy,
       'Trying to add a study which is not a SmartphoneStudy to a SmartphoneStudyClientManager.',
@@ -169,12 +184,10 @@ class SmartPhoneClientManager extends SmartphoneClient
 
     // Always create a fresh controller
     final controller = SmartphoneStudyController(study as SmartphoneStudy);
+    _controllers[study] = controller;
     _group.add(controller.measurements);
 
-    // await controller.addStudy(study, registration);
     info('$runtimeType - Added study: $study');
-
-    return study;
   }
 
   /// Add a study based on an [invitation] which needs to be executed on
@@ -182,9 +195,7 @@ class SmartPhoneClientManager extends SmartphoneClient
   ///
   /// This is similar to the [addStudy] method, but the study is created from the
   /// [invitation].
-  ///
-  /// Returns the newly added study.
-  Future<SmartphoneStudy> addStudyFromInvitation(
+  Future<void> addStudyFromInvitation(
     ActiveParticipationInvitation invitation,
   ) async => await addStudy(
     SmartphoneStudy(
@@ -202,9 +213,7 @@ class SmartPhoneClientManager extends SmartphoneClient
   /// This is similar to the [addStudy] method, but the study is created from the
   /// [protocol]. If [studyDeploymentId] is specifies this id is used as the study
   /// deployment id. If not specified, an UUID v1 id is generated.
-  ///
-  /// Returns the newly added study.
-  Future<SmartphoneStudy> addStudyFromProtocol(
+  Future<void> addStudyFromProtocol(
     StudyProtocol protocol, [
     String? studyDeploymentId,
   ]) async {
@@ -229,13 +238,17 @@ class SmartPhoneClientManager extends SmartphoneClient
           ? 'Participant'
           : protocol.participantRoles?.first.role,
     );
-    return await addStudy(study);
+    await addStudy(study);
   }
 
   @override
-  Future<void> removeStudy(String studyDeploymentId) async {
-    // fast out if not a valid deployment id
-    if (!studies.containsKey(studyDeploymentId)) return;
+  Future<void> removeStudy(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    var study = getStudy(studyDeploymentId, deviceRoleName);
+    // fast out if not a valid study
+    if (study == null) return;
 
     info('Removing study from $runtimeType - $studyDeploymentId');
 
@@ -244,134 +257,105 @@ class SmartPhoneClientManager extends SmartphoneClient
 
     AppTaskController().removeStudyDeployment(studyDeploymentId);
 
-    var m = getStudyRuntime(studyDeploymentId)?.measurements;
-    if (m != null) _group.remove(m);
-
-    await super.removeStudy(studyDeploymentId);
+    var controller = _controllers[study];
+    if (controller != null) _group.remove(controller.measurements);
+    _controllers.remove(study);
+    await super.removeStudy(studyDeploymentId, deviceRoleName);
   }
 
-  /// Persistently save information related to this client manger.
-  /// Typically used for later resuming when app is restarted. See [resume].
-  Future<void> save() async {
-    for (var studyDeploymentId in repository.keys) {
-      await getStudyRuntime(studyDeploymentId)?.saveDeployment();
-    }
-  }
+  // /// Persistently save information related to this client manger.
+  // /// Typically used for later resuming when app is restarted. See [resume].
+  // Future<void> save() async {
+  //   for (var studyDeploymentId in repository.keys) {
+  //     await getStudyRuntime(studyDeploymentId)?.saveDeployment();
+  //   }
+  // }
 
-  /// Called when this client manager is being (re-)activated by the OS.
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.activate()`.
-  @protected
-  @mustCallSuper
-  void activate() {}
+  // /// Called when this client manager is being (re-)activated by the OS.
+  // ///
+  // /// Implementations of this method should start with a call to the inherited
+  // /// method, as in `super.activate()`.
+  // @protected
+  // @mustCallSuper
+  // void activate() {}
 
-  /// Called when this client manager is being deactivated and potentially
-  /// stopped by the OS.
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.deactivate()`.
-  @protected
-  @mustCallSuper
-  Future<void> deactivate() async => await save();
+  // /// Called when this client manager is being deactivated and potentially
+  // /// stopped by the OS.
+  // ///
+  // /// Implementations of this method should start with a call to the inherited
+  // /// method, as in `super.deactivate()`.
+  // @protected
+  // @mustCallSuper
+  // Future<void> deactivate() async => await save();
 
   /// Start data sampling in all studies in this client manager.
   void start() {
-    for (var studyDeploymentId in repository.keys) {
-      getStudyRuntime(studyDeploymentId)?.start();
+    for (var controller in _controllers.values) {
+      controller.start();
     }
   }
 
-  /// Stop all studies in this client manager.
-  Future<void> stop() async {
-    for (var studyDeploymentId in repository.keys) {
-      await getStudyRuntime(studyDeploymentId)?.stop();
+  // /// Stop all studies in this client manager.
+  // Future<void> stop() async {
+  //   for (var studyDeploymentId in repository.keys) {
+  //     await getStudyRuntime(studyDeploymentId)?.stop();
+  //   }
+  // }
+
+  /// Resume all studies deployed on this client manager.
+  ///
+  /// This method is useful on app restart, since it will resume all sampling
+  /// on this client. Data sampling will be resumed for studies which were
+  /// running (i.e., having [ExecutorState.started]) when the app was closed.
+  ///
+  /// To see the status of resumed studies, use the [getStudyStatusList]
+  /// methods **after** this resume method has ended.
+  Future<void> resume() async {
+    info('$runtimeType - Resuming all studies...');
+
+    for (var study in studies) {
+      debug('$runtimeType - Resuming study: $study');
+      final controller = _controllers[study];
+
+      // If this study was running when the app was closed, restart sampling.
+      // TODO: We actually do not know the status of the sampling, i.e., the executor....
+      if (study.status == StudyStatus.Running) controller?.start();
     }
   }
 
-  /// Restore and resume all study deployments which were running on this
-  /// client manager when the app was killed / stopped (e.g., by the OS).
-  ///
-  /// This method is useful on app restart, since it will restore and
-  /// resume all sampling on this client.
-  /// Data sampling will be resumed for studies which were running
-  /// (i.e., having [StudyStatus.Running]) when the app was closed.
-  ///
-  /// Returns the number of restored studies, if any (may be zero).
-  /// To access a list of resumed studies, check the list of [studies]
-  /// **after** this resume method has ended.
-  Future<int> resume() async {
-    info('$runtimeType - restoring all study deployments');
-    var persistentStudies = await Persistence().getAllStudyDeployments();
-
-    debug('$runtimeType - studies: $persistentStudies');
-
-    for (var study in persistentStudies) {
-      debug('$runtimeType - study status: ${study.status}');
-
-      // only add deployed, running or stopped studies
-      if (study.status == StudyStatus.Deployed ||
-          study.status == StudyStatus.Running ||
-          study.status == StudyStatus.Stopped) {
-        // add the restored study
-        await addStudy(study);
-
-        // deploy the study using the cached deployment
-        final controller = getStudyRuntime(study.studyDeploymentId);
-        await controller?.tryDeployment();
-        await controller?.configure();
-
-        // if this study was running when the app was closed, restart sampling
-        if (study.status == StudyStatus.Running) controller?.start();
-      }
-    }
-    return studyCount;
-  }
-
-  /// Called when this client is disposed permanently.
-  ///
-  /// When this method is called, the client is never used again. It is an error
-  /// to call any of the [start] or [stop] methods at this point.
-  ///
-  /// Subclasses should override this method to release any resources retained
-  /// by this client.
-  /// Implementations of this method should end with a call to the inherited
-  /// method, as in `super.dispose()`.
-  ///
-  /// See also:
-  ///
-  ///  * [deactivate], which is called prior to [dispose].
+  /// Called when this client is disposed. Will dispose all studies running
+  /// in this client.
   @mustCallSuper
   void dispose() {
-    deactivate();
-    for (var studyDeploymentId in repository.keys) {
-      getStudyRuntime(studyDeploymentId)?.dispose();
+    for (var controller in _controllers.values) {
+      controller.dispose();
     }
+
     _group.close();
     Persistence().close();
     _state = ClientManagerState.disposed;
   }
 
-  // TODO - we don't need this anymore - studies are automatically saved when updated.
+  // // TODO - we don't need this anymore - studies are automatically saved when updated.
 
-  /// Called when the system puts the app in the background or returns
-  /// the app to the foreground.
-  ///
-  /// Implements the [WidgetsBindingObserver].
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    debug('$runtimeType - App lifecycle state changed: $state');
-    switch (state) {
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.hidden:
-        break;
-      case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
-        deactivate();
-        break;
-      case AppLifecycleState.resumed:
-        activate();
-        break;
-    }
-  }
+  // /// Called when the system puts the app in the background or returns
+  // /// the app to the foreground.
+  // ///
+  // /// Implements the [WidgetsBindingObserver].
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   debug('$runtimeType - App lifecycle state changed: $state');
+  //   switch (state) {
+  //     case AppLifecycleState.inactive:
+  //     case AppLifecycleState.hidden:
+  //       break;
+  //     case AppLifecycleState.paused:
+  //     case AppLifecycleState.detached:
+  //       deactivate();
+  //       break;
+  //     case AppLifecycleState.resumed:
+  //       activate();
+  //       break;
+  //   }
+  // }
 }

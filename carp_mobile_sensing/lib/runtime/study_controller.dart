@@ -10,12 +10,31 @@ part of '../runtime.dart';
 /// A [SmartphoneStudyController] controls the execution of a [SmartphoneStudy].
 class SmartphoneStudyController {
   final SmartphoneStudy _study;
-
   int _samplingSize = 0;
   DataManager? _dataManager;
   // DataEndPoint? _dataEndPoint;
   final SmartphoneDeploymentExecutor _executor = SmartphoneDeploymentExecutor();
   Map<Permission, PermissionStatus>? _permissions;
+
+  /// Create a new [SmartphoneStudyController] to control the runtime behavior
+  /// of a [study].
+  SmartphoneStudyController(SmartphoneStudy study) : _study = study {
+    study.events.listen((event) {
+      switch (event.event) {
+        case StudyStatusEventTypes.DeploymentStatusReceived:
+          _deploymentStatusReceived();
+          break;
+        case StudyStatusEventTypes.DeviceDeploymentReceived:
+          // case StudyStatusEventTypes.DeploymentUpdated:
+          _deviceDeploymentReceived();
+          break;
+        default:
+      }
+    });
+
+    // Keep the sampling status updated.
+    executor.stateEvents.listen((state) => study.samplingStatus = state);
+  }
 
   /// The study that this [SmartphoneStudyController] controls
   SmartphoneStudy get study => _study;
@@ -108,25 +127,10 @@ class SmartphoneStudyController {
   /// across app restart.
   int get samplingSize => _samplingSize;
 
-  /// Create a new [SmartphoneStudyController] to control the runtime behavior
-  /// of a [study].
-  SmartphoneStudyController(SmartphoneStudy study) : _study = study {
-    study.events.listen((event) {
-      switch (event.event) {
-        case StudyStatusEventTypes.DeploymentStatusReceived:
-          _deploymentStatusReceived();
-          break;
-        case StudyStatusEventTypes.DeviceDeploymentReceived:
-          _deviceDeploymentReceived();
-          break;
-        default:
-      }
-    });
-  }
-
+  /// Handles updates of the [deployment] status.
   Future<void> _deploymentStatusReceived() async {}
 
-  /// Handles the reception of a new deployment.
+  /// Handles the reception of a new or updated [deployment].
   ///
   /// This entails configuring devices, data manager, and executor to get
   /// ready to handle sampling of data. Note that data sampling is NOT started
@@ -152,8 +156,6 @@ class SmartphoneStudyController {
       );
       return;
     }
-
-    deployment?.deployed = DateTime.now().toUtc();
 
     info('$runtimeType - Configuring based on new deployment information...');
 
@@ -193,6 +195,9 @@ class SmartphoneStudyController {
 
     // listen to all measurements to keep track of sampling size
     measurements.listen((_) => _samplingSize++);
+
+    // start data sampling
+    start();
 
     var statusMsg =
         '===============================================================\n'
@@ -383,7 +388,7 @@ class SmartphoneStudyController {
   /// If [resume] is true, immediately resume data collection according to the
   /// configuration in [deployment]. If not, sampling can be started later
   /// by calling [executor.start].
-  Future<void> start([bool resume = true]) async {
+  Future<void> start() async {
     if (study.status == StudyStatus.Stopped) {
       warning(
         '$runtimeType - Study has been stopped. Will not start data sampling.',
@@ -408,8 +413,15 @@ class SmartphoneStudyController {
       await askForAllPermissions();
     }
 
-    if (resume) executor.start();
+    // Start data sampling, if needed.
+    if (study.samplingStatus == ExecutorState.started) executor.start();
   }
+
+  /// Start data sampling.
+  void resume() => executor.start();
+
+  /// Pause data sampling.
+  void pause() => executor.stop();
 
   /// Called when this controller is disposed.
   ///
@@ -425,7 +437,7 @@ class SmartphoneStudyController {
   @mustCallSuper
   void dispose() {
     info('$runtimeType - Disposing study from this smartphone...');
-    executor.dispose();
+    pause();
     dataManager?.close();
   }
 }

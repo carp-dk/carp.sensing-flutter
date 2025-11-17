@@ -35,6 +35,7 @@ part 'domain/study_description.dart';
 part 'domain/data_endpoint.dart';
 part 'domain/sampling_configurations.dart';
 part 'domain/device_configurations.dart';
+part 'domain/smartphone_study.dart';
 part 'domain/smartphone_deployment.dart';
 part 'domain/app_task.dart';
 part 'domain/tasks.dart';
