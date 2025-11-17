@@ -83,7 +83,7 @@ class PassiveTrigger extends TriggerConfiguration {
 /// A trigger that triggers after [delay] from the (re)start of the app.
 ///
 /// The delay is measured from the **start of sensing**, i.e. typically when
-/// the `start()` method is called on a [SmartphoneDeploymentController].
+/// the `start()` method is called on a [SmartphoneStudyController].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DelayedTrigger extends TriggerConfiguration {
   /// Delay before this trigger is executed.
@@ -232,15 +232,23 @@ class RecurrentScheduledTrigger extends PeriodicTrigger {
   }) : super(period: const Duration(seconds: 1)) {
     assert(separationCount >= 0, 'Separation count must be zero or positive.');
     if (type == RecurrentType.weekly) {
-      assert(dayOfWeek != null,
-          'dayOfWeek must be specified in a weekly recurrence.');
+      assert(
+        dayOfWeek != null,
+        'dayOfWeek must be specified in a weekly recurrence.',
+      );
     } else if (type == RecurrentType.monthly) {
-      assert(weekOfMonth != null || dayOfMonth != null,
-          'Specify monthly recurrence using either dayOfMonth or weekOfMonth');
-      assert(dayOfMonth == null || (dayOfMonth! >= 1 && dayOfMonth! <= 31),
-          'dayOfMonth must be in the range [1-31]');
-      assert(weekOfMonth == null || (weekOfMonth! >= 1 && weekOfMonth! <= 4),
-          'weekOfMonth must be in the range [1-4]');
+      assert(
+        weekOfMonth != null || dayOfMonth != null,
+        'Specify monthly recurrence using either dayOfMonth or weekOfMonth',
+      );
+      assert(
+        dayOfMonth == null || (dayOfMonth! >= 1 && dayOfMonth! <= 31),
+        'dayOfMonth must be in the range [1-31]',
+      );
+      assert(
+        weekOfMonth == null || (weekOfMonth! >= 1 && weekOfMonth! <= 4),
+        'weekOfMonth must be in the range [1-4]',
+      );
     }
   }
 
@@ -254,12 +262,19 @@ class RecurrentScheduledTrigger extends PeriodicTrigger {
     late DateTime firstDay;
     DateTime now = DateTime.now();
     DateTime start = DateTime(
-        now.year, now.month, now.day, time.hour, time.minute, time.second);
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+      time.second,
+    );
 
     switch (type) {
       case RecurrentType.daily:
-        firstDay =
-            (start.isAfter(now)) ? start : start.add(const Duration(hours: 24));
+        firstDay = (start.isAfter(now))
+            ? start
+            : start.add(const Duration(hours: 24));
         break;
       case RecurrentType.weekly:
         int days = dayOfWeek! - now.weekday;
@@ -296,8 +311,14 @@ class RecurrentScheduledTrigger extends PeriodicTrigger {
         break;
     }
 
-    return DateTime(firstDay.year, firstDay.month, firstDay.day, time.hour,
-        time.minute, time.second);
+    return DateTime(
+      firstDay.year,
+      firstDay.month,
+      firstDay.day,
+      time.hour,
+      time.minute,
+      time.second,
+    );
   }
 
   /// The period between the recurring samplings.
@@ -358,16 +379,26 @@ class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
     int? month,
     int? weekday,
   }) {
-    assert(minute == null || (minute >= 0 && minute <= 59),
-        'minute must be in the range of [0-59] or null (=match all).');
-    assert(hour == null || (hour >= 0 && hour <= 23),
-        'hour must be in the range of [0-23] or null (=match all).');
-    assert(day == null || (day >= 1 && day <= 31),
-        'day must be in the range of [1-31] or null (=match all).');
-    assert(month == null || (month >= 1 && month <= 12),
-        'month must be in the range of [1-12] or null (=match all).');
-    assert(weekday == null || (weekday >= 0 && weekday <= 6),
-        'weekday must be in the range of [0-6] or null (=match all).');
+    assert(
+      minute == null || (minute >= 0 && minute <= 59),
+      'minute must be in the range of [0-59] or null (=match all).',
+    );
+    assert(
+      hour == null || (hour >= 0 && hour <= 23),
+      'hour must be in the range of [0-23] or null (=match all).',
+    );
+    assert(
+      day == null || (day >= 1 && day <= 31),
+      'day must be in the range of [1-31] or null (=match all).',
+    );
+    assert(
+      month == null || (month >= 1 && month <= 12),
+      'month must be in the range of [1-12] or null (=match all).',
+    );
+    assert(
+      weekday == null || (weekday >= 0 && weekday <= 6),
+      'weekday must be in the range of [0-6] or null (=match all).',
+    );
     return CronScheduledTrigger._(
       cronExpression: _cronToString(minute, hour, day, month, weekday),
     );
@@ -388,14 +419,17 @@ class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
   factory CronScheduledTrigger.parse({
     required String cronExpression,
     Duration? duration,
-  }) =>
-      CronScheduledTrigger._(cronExpression: cronExpression);
+  }) => CronScheduledTrigger._(cronExpression: cronExpression);
 
   CronScheduledTrigger._({required this.cronExpression}) : super();
 
   static String _cronToString(
-          int? minute, int? hour, int? day, int? month, int? weekday) =>
-      '${_cf(minute)} ${_cf(hour)} ${_cf(day)} ${_cf(month)} ${_cf(weekday)}';
+    int? minute,
+    int? hour,
+    int? day,
+    int? month,
+    int? weekday,
+  ) => '${_cf(minute)} ${_cf(hour)} ${_cf(day)} ${_cf(month)} ${_cf(weekday)}';
   static String _cf(int? exp) => (exp == null) ? '*' : exp.toString();
 
   @override
@@ -435,10 +469,8 @@ class SamplingEventTrigger extends TriggerConfiguration {
 
   /// Create a trigger that triggers when a measure of [measureType] is collected,
   /// and checks the [triggerCondition] to determine if it should trigger.
-  SamplingEventTrigger({
-    required this.measureType,
-    this.triggerCondition,
-  }) : super();
+  SamplingEventTrigger({required this.measureType, this.triggerCondition})
+    : super();
 
   @override
   Function get fromJsonFunction => _$SamplingEventTriggerFromJson;
@@ -519,10 +551,8 @@ class ConditionalPeriodicTrigger extends TriggerConfiguration {
   ConditionalEvaluator? triggerCondition;
 
   /// Create a [ConditionalSamplingEventTrigger].
-  ConditionalPeriodicTrigger({
-    required this.period,
-    this.triggerCondition,
-  }) : super();
+  ConditionalPeriodicTrigger({required this.period, this.triggerCondition})
+    : super();
 
   @override
   Function get fromJsonFunction => _$ConditionalPeriodicTriggerFromJson;
@@ -568,8 +598,10 @@ class RandomRecurrentTrigger extends TriggerConfiguration
     required this.startTime,
     required this.endTime,
   }) : super() {
-    assert(startTime.isBefore(endTime),
-        'startTime must be before endTime with a 24 hour period.');
+    assert(
+      startTime.isBefore(endTime),
+      'startTime must be before endTime with a 24 hour period.',
+    );
   }
 
   @override
@@ -590,10 +622,8 @@ class UserTaskTrigger extends TriggerConfiguration {
   UserTaskState triggerCondition;
 
   /// Create a [UserTaskTrigger].
-  UserTaskTrigger({
-    required this.taskName,
-    required this.triggerCondition,
-  }) : super();
+  UserTaskTrigger({required this.taskName, required this.triggerCondition})
+    : super();
 
   @override
   Function get fromJsonFunction => _$UserTaskTriggerFromJson;

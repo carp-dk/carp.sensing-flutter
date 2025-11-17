@@ -107,10 +107,18 @@ class StudyDeploymentProxy {
 
     // Get deployment information.
     final device = deviceStatus.device;
-    final deployment = await deploymentService.getDeviceDeploymentFor(
-      studyDeploymentId,
-      deviceRoleName,
-    );
+    PrimaryDeviceDeployment? deployment;
+    try {
+      deployment = await deploymentService.getDeviceDeploymentFor(
+        studyDeploymentId,
+        deviceRoleName,
+      );
+    } catch (error) {
+      study.deploymentError(
+        "$runtimeType - Error getting deployment information.\n$error",
+      );
+      deploymentStatus = null;
+    }
 
     if (deployment == null) {
       study.deploymentError(

@@ -46,22 +46,21 @@ class SmartPhoneClientManager extends SmartphoneClient
   bool get heartbeat => _heartbeat;
 
   /// The number of studies running on this client.
-  int get studyCount => studies.length;
+  int get studyCount => repository.getStudyList().length;
 
   // /// The list of studies deployed on this client manager.
   // List<Study> get studies => repository.keys.toList();
 
-  @override
   DeviceController get deviceController =>
-      super.deviceController as DeviceController;
+      super.dataCollectorFactory as DeviceController;
 
   /// The [NotificationController] responsible for sending notification on [AppTask]s.
   NotificationController? get notificationController => _notificationController;
 
-  @override
-  SmartphoneDeploymentController? getStudyRuntime(String studyDeploymentId) =>
-      super.getStudyRuntime(studyDeploymentId)
-          as SmartphoneDeploymentController;
+  // @override
+  // SmartphoneDeploymentController? getStudyRuntime(String studyDeploymentId) =>
+  //     super.getStudyRuntime(studyDeploymentId)
+  //         as SmartphoneDeploymentController;
 
   /// Configure this [SmartPhoneClientManager].
   ///
@@ -88,9 +87,9 @@ class SmartPhoneClientManager extends SmartphoneClient
   /// (every 5 minutes).
   @override
   Future<void> configure({
-    DeploymentService? deploymentService,
-    DeviceDataCollectorFactory? deviceController,
     DeviceRegistration? registration,
+    DeploymentService? deploymentService,
+    DeviceDataCollectorFactory? dataCollectorFactory,
     bool enableNotifications = true,
     NotificationController? notificationController,
     bool askForPermissions = true,
@@ -109,15 +108,19 @@ class SmartPhoneClientManager extends SmartphoneClient
     DataManagerRegistry().register(FileDataManagerFactory());
     DataManagerRegistry().register(SQLiteDataManagerFactory());
 
-    // create the device registration using the [DeviceInfo] singleton
-    registration ??= DefaultDeviceRegistration(
+    // create the device registration using the [Smartphone] registration builder.
+    registration ??= Smartphone().createRegistration(
       deviceId: DeviceInfo().deviceID,
-      deviceDisplayName: DeviceInfo().toString(),
+      platform: DeviceInfo().platform,
+      deviceManufacturer: DeviceInfo().deviceManufacturer,
+      hardware: DeviceInfo().hardware,
+      deviceModel: DeviceInfo().deviceModel,
+      sdk: DeviceInfo().sdk,
     );
 
     // initialize default services, if not specified
     deploymentService ??= SmartphoneDeploymentService();
-    deviceController ??= DeviceController();
+    dataCollectorFactory ??= DeviceController();
     if (enableNotifications) {
       _notificationController =
           notificationController ?? FlutterLocalNotificationController();
@@ -131,22 +134,23 @@ class SmartPhoneClientManager extends SmartphoneClient
     );
 
     super.configure(
-      deploymentService: deploymentService,
-      deviceController: deviceController,
       registration: registration,
+      deploymentService: deploymentService,
+      dataCollectorFactory: dataCollectorFactory,
     );
 
     // look up and register all connected devices and services on this client
-    this.deviceController.registerAllAvailableDevices();
+    // TODO: I can't do this until I have a deployment protocol, which specified which devices to register?
+    // deviceController.registerAllAvailableDevices();
 
     var statusMsg =
         '===========================================================\n'
         '  CARP Mobile Sensing (CAMS) - $runtimeType\n'
         '===========================================================\n'
         '             device : ${registration.deviceDisplayName}\n'
-        ' deployment service : ${this.deploymentService}\n'
-        '  device controller : ${this.deviceController}\n'
-        '  available devices : ${this.deviceController.devicesToString()}\n'
+        ' deployment service : $deploymentService\n'
+        '  device controller : $deviceController\n'
+        '  available devices : ${deviceController.devicesToString()}\n'
         '        persistence : ${Persistence().databaseName.split('/').last}\n'
         '===========================================================\n';
     debugPrint(statusMsg);
@@ -163,18 +167,14 @@ class SmartPhoneClientManager extends SmartphoneClient
 
     await super.addStudy(study);
 
-    // Always create a new controller
-    final controller = SmartphoneDeploymentController(
-      deploymentService!,
-      deviceController,
-    );
-    repository[study.studyDeploymentId] = controller;
+    // Always create a fresh controller
+    final controller = SmartphoneStudyController(study as SmartphoneStudy);
     _group.add(controller.measurements);
 
-    await controller.addStudy(study, registration!);
+    // await controller.addStudy(study, registration);
     info('$runtimeType - Added study: $study');
 
-    return study as SmartphoneStudy;
+    return study;
   }
 
   /// Add a study based on an [invitation] which needs to be executed on
@@ -186,22 +186,15 @@ class SmartPhoneClientManager extends SmartphoneClient
   /// Returns the newly added study.
   Future<SmartphoneStudy> addStudyFromInvitation(
     ActiveParticipationInvitation invitation,
-  ) async {
-    assert(
-      deploymentService != null,
-      'Deployment Service has not been configured. Call configure() first.',
-    );
-
-    final study = SmartphoneStudy(
+  ) async => await addStudy(
+    SmartphoneStudy(
       studyId: invitation.studyId,
       studyDeploymentId: invitation.studyDeploymentId,
       deviceRoleName: invitation.deviceRoleName ?? Smartphone.DEFAULT_ROLE_NAME,
       participantId: invitation.participantId,
       participantRoleName: invitation.participantRoleName,
-    );
-
-    return await addStudy(study);
-  }
+    ),
+  );
 
   /// Create and add a study based on the [protocol] which needs to be executed on
   /// this client.
@@ -215,12 +208,7 @@ class SmartPhoneClientManager extends SmartphoneClient
     StudyProtocol protocol, [
     String? studyDeploymentId,
   ]) async {
-    assert(
-      deploymentService != null,
-      'Deployment Service has not been configured. Call configure() first.',
-    );
-
-    final status = await deploymentService!.createStudyDeployment(
+    final status = await deploymentService.createStudyDeployment(
       protocol,
       [],
       studyDeploymentId,
@@ -363,6 +351,8 @@ class SmartPhoneClientManager extends SmartphoneClient
     Persistence().close();
     _state = ClientManagerState.disposed;
   }
+
+  // TODO - we don't need this anymore - studies are automatically saved when updated.
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.

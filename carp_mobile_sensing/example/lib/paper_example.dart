@@ -60,7 +60,7 @@ void sensing() async {
       deviceRoleName: phone.roleName,
     ),
   );
-  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+  SmartphoneStudyController? controller = client.getStudyRuntime(
     study.studyDeploymentId,
   );
   // deploy the study on this phone

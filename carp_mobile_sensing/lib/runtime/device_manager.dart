@@ -10,8 +10,11 @@
 part of '../runtime.dart';
 
 /// A [DeviceManager] handles a hardware device or online service on runtime.
-abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
-    extends DeviceDataCollector<TDeviceConfiguration> {
+abstract class DeviceManager<
+  TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
+  TRegistration extends DeviceRegistration
+>
+    implements ConnectedDeviceDataCollector {
   final StreamController<DeviceStatus> _eventController =
       StreamController.broadcast();
 
@@ -20,23 +23,42 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
   Timer? _heartbeatTimer;
   DeviceStatus _status = DeviceStatus.unknown;
 
+  final String _deviceType;
+
+  /// Create a new [DeviceManager] specifying its [deviceType] and [configuration].
+  DeviceManager(
+    this._deviceType,
+    this.configuration, [
+    this._restartOnReconnect = true,
+  ]);
+
+  @override
+  Set<DataType> get supportedDataTypes =>
+      configuration.supportedDataTypes
+          ?.map((str) => DataType.fromString(str))
+          .toSet() ??
+      {};
+
+  /// Get a unique id for this device.
+  String get id;
+
+  // Get a printer-friendly display name for this device.
+  String? get displayName;
+
+  /// The configuration for this device.
+  DeviceConfiguration configuration;
+
+  /// The type of the device managed by this device manager
+  String get deviceType => _deviceType;
+
   /// Is data sampling resumed when this device is (re)connected?
   bool get restartOnReconnect => _restartOnReconnect;
 
   /// The set of task control executors that use this device manager.
   final Set<TaskControlExecutor> executors = {};
 
-  DeviceManager(
-    super.type, [
-    super.configuration,
-    this._restartOnReconnect = true,
-  ]);
-
-  @override
-  Set<String> get supportedDataTypes => configuration?.supportedDataTypes ?? {};
-
-  /// The name of the [type] without the namespace.
-  String get typeName => type.split('.').last;
+  /// The name of the [deviceType] without the namespace.
+  String get typeName => deviceType.split('.').last;
 
   /// The runtime status of this device.
   DeviceStatus get status => _status;
@@ -65,8 +87,9 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
   @nonVirtual
   void initialize(TDeviceConfiguration configuration) {
     info(
-        '$runtimeType - Initializing, type: $typeName, configuration: $configuration');
-    super.configuration = configuration;
+      '$runtimeType - Initializing, type: $typeName, configuration: $configuration',
+    );
+    this.configuration = configuration;
     onInitialize(configuration);
 
     // Listen to status events and when this device is (re)connected, restart sampling.
@@ -86,23 +109,31 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
 
   /// Start heartbeat monitoring for this device for the deployment controlled
   /// by [controller].
-  void startHeartbeatMonitoring(SmartphoneDeploymentController controller) {
+  void startHeartbeatMonitoring(SmartphoneStudyController controller) {
     if (!isInitialized) {
       warning(
-          '$runtimeType - Trying to start heartbeat monitoring before device is initialized. '
-          'Please initialize device first.');
+        '$runtimeType - Trying to start heartbeat monitoring before device is initialized. '
+        'Please initialize device first.',
+      );
       return;
     }
     debug(
-        '$runtimeType - Setting up heartbeat monitoring for device: $configuration');
+      '$runtimeType - Setting up heartbeat monitoring for device: $configuration',
+    );
     _heartbeatTimer = Timer.periodic(
-        const Duration(minutes: DeviceController.HEARTBEAT_PERIOD),
-        (_) => (isConnected)
-            ? controller.executor.addMeasurement(Measurement.fromData(Heartbeat(
-                period: DeviceController.HEARTBEAT_PERIOD,
-                deviceType: configuration!.type,
-                deviceRoleName: configuration!.roleName)))
-            : null);
+      const Duration(minutes: DeviceController.HEARTBEAT_PERIOD),
+      (_) => (isConnected)
+          ? controller.executor.addMeasurement(
+              Measurement.fromData(
+                Heartbeat(
+                  period: DeviceController.HEARTBEAT_PERIOD,
+                  deviceType: configuration!.type,
+                  deviceRoleName: configuration!.roleName,
+                ),
+              ),
+            )
+          : null,
+    );
   }
 
   /// Stop heartbeat monitoring for this device.
@@ -113,7 +144,8 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
   Future<bool> hasPermissions() async {
     if (!_hasPermissions) {
       info(
-          '$runtimeType - Checking permissions for device of type: $typeName and id: $id');
+        '$runtimeType - Checking permissions for device of type: $typeName and id: $id',
+      );
       _hasPermissions = true;
 
       // check any device-specific permission
@@ -133,7 +165,8 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
   @nonVirtual
   Future<void> requestPermissions() async {
     info(
-        '$runtimeType - Requesting permissions for device of type: $typeName and id: $id');
+      '$runtimeType - Requesting permissions for device of type: $typeName and id: $id',
+    );
 
     await onRequestPermissions();
   }
@@ -149,7 +182,8 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
   @nonVirtual
   Future<DeviceStatus> connect() async {
     info(
-        '$runtimeType - Trying to connect to device of type: $typeName and id: $id');
+      '$runtimeType - Trying to connect to device of type: $typeName and id: $id',
+    );
 
     if (!isInitialized) {
       warning('$runtimeType has not been initialized - cannot connect to it.');
@@ -157,8 +191,10 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
     }
 
     if (!(await hasPermissions())) {
-      warning('$runtimeType has not the permissions required to connect. '
-          'Call requestPermissions() before calling connect.');
+      warning(
+        '$runtimeType has not the permissions required to connect. '
+        'Call requestPermissions() before calling connect.',
+      );
       return status;
     }
 
@@ -166,7 +202,8 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
       status = await onConnect();
     } catch (error) {
       warning(
-          '$runtimeType - Error connecting to device of type: $typeName. $error');
+        '$runtimeType - Error connecting to device of type: $typeName. $error',
+      );
     }
 
     return status;
@@ -212,7 +249,8 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
     bool success = false;
     if (status == DeviceStatus.connected || status == DeviceStatus.connecting) {
       info(
-          '$runtimeType - Trying to disconnect from device of type: $typeName and id: $id');
+        '$runtimeType - Trying to disconnect from device of type: $typeName and id: $id',
+      );
 
       // Stop all sampling on this device.
       stop();
@@ -223,7 +261,8 @@ abstract class DeviceManager<TDeviceConfiguration extends DeviceConfiguration>
       return success;
     } else {
       warning(
-          '$runtimeType is not connected, so nothing to disconnect from....');
+        '$runtimeType is not connected, so nothing to disconnect from....',
+      );
       return true;
     }
   }
@@ -254,7 +293,8 @@ abstract class OnlineServiceManager<TDeviceConfiguration extends OnlineService>
 /// this hardware device manager allow for getting the battery level and
 /// listen to battery events.
 abstract class HardwareDeviceManager<
-        TDeviceConfiguration extends DeviceConfiguration>
+  TDeviceConfiguration extends DeviceConfiguration
+>
     extends DeviceManager<TDeviceConfiguration> {
   /// The runtime battery level of this hardware device.
   /// Returns null if unknown.
@@ -285,15 +325,15 @@ class SmartphoneDeviceManager extends HardwareDeviceManager<Smartphone> {
   @override
   String? get displayName => DeviceInfo().toString();
 
-  SmartphoneDeviceManager([
-    Smartphone? configuration,
-  ]) : super(Smartphone.DEVICE_TYPE, configuration, false);
+  SmartphoneDeviceManager([Smartphone? configuration])
+    : super(Smartphone.DEVICE_TYPE, configuration, false);
 
   @override
   void onInitialize(Smartphone configuration) {
     // listen to the battery
-    battery.onBatteryStateChanged
-        .listen((state) async => _batteryLevel = await battery.batteryLevel);
+    battery.onBatteryStateChanged.listen(
+      (state) async => _batteryLevel = await battery.batteryLevel,
+    );
 
     // find the supported data types
     for (var package in SamplingPackageRegistry().packages) {
@@ -325,7 +365,8 @@ class SmartphoneDeviceManager extends HardwareDeviceManager<Smartphone> {
 
 /// A device manager for a connectable Bluetooth device.
 abstract class BTLEDeviceManager<
-        TDeviceConfiguration extends DeviceConfiguration>
+  TDeviceConfiguration extends DeviceConfiguration
+>
     extends HardwareDeviceManager<TDeviceConfiguration> {
   String _btleAddress = '', _btleName = '';
 
@@ -343,7 +384,7 @@ abstract class BTLEDeviceManager<
   @mustCallSuper
   Future<bool> onHasPermissions() async => (Platform.isAndroid)
       ? await Permission.bluetoothConnect.isGranted &&
-          await Permission.bluetoothScan.isGranted
+            await Permission.bluetoothScan.isGranted
       // : (Platform.isIOS)
       //     ? await Permission.bluetooth.isGranted
       // for some reason it seems like Permission.bluetooth.isGranted always

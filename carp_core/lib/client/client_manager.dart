@@ -134,18 +134,14 @@ abstract class ClientManager<
   ///
   /// Return the newly added study.
   @mustCallSuper
-  Future<Study> addStudy(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
+  Future<Study> addStudy(Study study) async {
     _check();
-    if (getStudy(studyDeploymentId, deviceRoleName) != null) {
+    if (getStudy(study.studyDeploymentId, study.deviceRoleName) != null) {
       throw IllegalArgumentException(
         'A study with the same study deployment ID and device role name has already been added.',
       );
     }
 
-    Study study = Study(studyDeploymentId, deviceRoleName);
     repository.addStudy(study);
 
     // Update study status based on deployment status
@@ -259,8 +255,7 @@ abstract class ClientManager<
 }
 
 /// Allows managing studies on a smartphone.
-class SmartphoneClient
-    extends ClientManager<Smartphone, DefaultDeviceRegistration> {
+class SmartphoneClient extends ClientManager<Smartphone, DeviceRegistration> {
   SmartphoneClient({
     super.repository,
     super.deploymentService,

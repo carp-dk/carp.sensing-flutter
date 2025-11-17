@@ -32,7 +32,7 @@ abstract interface class DeviceDataCollector {
   Set<DataType> get supportedDataTypes;
 }
 
-/// Collects [Data] for a single external device.
+/// Collects [Data] for a single connected device.
 abstract interface class ConnectedDeviceDataCollector<
   TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
   TRegistration extends DeviceRegistration

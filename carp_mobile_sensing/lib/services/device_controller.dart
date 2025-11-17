@@ -46,7 +46,6 @@ class DeviceController implements DeviceDataCollectorFactory {
     return false;
   }
 
-  @override
   DeviceManager? getDevice(String deviceType) => _devices[deviceType];
 
   @override
@@ -91,9 +90,16 @@ class DeviceController implements DeviceDataCollectorFactory {
     manager.type = deviceType;
     _devices[deviceType] = manager as DeviceManager;
     if (manager is HardwareDeviceManager) {
-      _batteryEventGroup.add(manager.batteryEvents.map((batteryLevel) =>
-          BatteryStatus(manager.id, manager.type,
-              manager.configuration?.roleName, batteryLevel)));
+      _batteryEventGroup.add(
+        manager.batteryEvents.map(
+          (batteryLevel) => BatteryStatus(
+            manager.id,
+            manager.type,
+            manager.configuration?.roleName,
+            batteryLevel,
+          ),
+        ),
+      );
     }
   }
 
@@ -113,6 +119,22 @@ class DeviceController implements DeviceDataCollectorFactory {
 
   @override
   String toString() => '$runtimeType [${_devices.length}]';
+
+  @override
+  DeviceDataCollector localDataCollector;
+
+  @override
+  ConnectedDeviceDataCollector<
+    DeviceConfiguration<DeviceRegistration>,
+    DeviceRegistration
+  >
+  createConnectedDataCollector(
+    String deviceType,
+    DeviceRegistration deviceRegistration,
+  ) {
+    // TODO: implement createConnectedDataCollector
+    throw UnimplementedError();
+  }
 }
 
 /// Runtime battery status of a device.
@@ -130,7 +152,8 @@ class BatteryStatus {
   );
 
   @override
-  String toString() => '$runtimeType - '
+  String toString() =>
+      '$runtimeType - '
       'device id: $deviceId, '
       'type: $deviceType, '
       'role name: $deviceRoleName, '

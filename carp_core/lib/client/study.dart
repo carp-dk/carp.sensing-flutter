@@ -38,6 +38,7 @@ class Study with ChangeNotifier {
        _deploymentStatus = deploymentStatus,
        _deployment = deployment {
     // print events for logging purpose
+    // TODO: remove later
     events.listen((event) => print);
   }
 

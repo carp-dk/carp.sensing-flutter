@@ -119,7 +119,7 @@ Future<void> example_0() async {
   // be used pr. default.
   // If not deployed before (i.e., cached) the study deployment will be
   // fetched from the deployment service.
-  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+  SmartphoneStudyController? controller = client.getStudyRuntime(
     study.studyDeploymentId,
   );
   await controller?.tryDeployment();
@@ -188,7 +188,7 @@ void example_1() async {
       deviceRoleName: phone.roleName,
     ),
   );
-  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+  SmartphoneStudyController? controller = client.getStudyRuntime(
     study.studyDeploymentId,
   );
 
@@ -289,7 +289,7 @@ void example_2() async {
       deviceRoleName: phone.roleName,
     ),
   );
-  SmartphoneDeploymentController? controller = client.getStudyRuntime(
+  SmartphoneStudyController? controller = client.getStudyRuntime(
     study.studyDeploymentId,
   );
 

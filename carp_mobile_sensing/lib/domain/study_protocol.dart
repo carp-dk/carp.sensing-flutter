@@ -14,14 +14,16 @@ mixin SmartphoneProtocolExtension {
 
   Map<String, dynamic>? get applicationData => _data.toJson();
 
-  set applicationData(Map<String, dynamic>? data) =>
-      _data = (data != null) ? SmartphoneApplicationData.fromJson(data) : SmartphoneApplicationData();
+  set applicationData(Map<String, dynamic>? data) => _data = (data != null)
+      ? SmartphoneApplicationData.fromJson(data)
+      : SmartphoneApplicationData();
 
   /// The description of this study protocol containing the title, description,
   /// purpose, and the responsible researcher for this study.
   @JsonKey(includeFromJson: false, includeToJson: false)
   StudyDescription? get studyDescription => _data.studyDescription;
-  set studyDescription(StudyDescription? description) => _data.studyDescription = description;
+  set studyDescription(StudyDescription? description) =>
+      _data.studyDescription = description;
 
   String get description => studyDescription?.description ?? '';
 
@@ -34,7 +36,8 @@ mixin SmartphoneProtocolExtension {
   /// used in the app.
   @JsonKey(includeFromJson: false, includeToJson: false)
   DataEndPoint? get dataEndPoint => _data.dataEndPoint;
-  set dataEndPoint(DataEndPoint? dataEndPoint) => _data.dataEndPoint = dataEndPoint;
+  set dataEndPoint(DataEndPoint? dataEndPoint) =>
+      _data.dataEndPoint = dataEndPoint;
 
   /// The name of a [PrivacySchema] to be used for protecting sensitive data.
   ///
@@ -54,7 +57,7 @@ mixin SmartphoneProtocolExtension {
   void removeApplicationData(String key) => _data.applicationData?.remove(key);
 }
 
-/// Holds application-specific data for a [SmartphoneStudyProtocol].
+/// Holds application-specific configuration for a [SmartphoneStudyProtocol].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SmartphoneApplicationData {
   /// The description of this study protocol containing the title, description,
@@ -125,7 +128,8 @@ class SmartphoneApplicationData {
 /// );
 /// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class SmartphoneStudyProtocol extends StudyProtocol with SmartphoneProtocolExtension {
+class SmartphoneStudyProtocol extends StudyProtocol
+    with SmartphoneProtocolExtension {
   /// Create a new [SmartphoneStudyProtocol].
   ///
   /// Provide a unique descriptive [name] for the protocol.
@@ -139,7 +143,10 @@ class SmartphoneStudyProtocol extends StudyProtocol with SmartphoneProtocolExten
     StudyDescription? studyDescription,
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,
-  }) : super(ownerId: ownerId ?? const Uuid().v1, description: studyDescription?.description ?? '') {
+  }) : super(
+         ownerId: ownerId ?? const Uuid().v1,
+         description: studyDescription?.description ?? '',
+       ) {
     // add the smartphone specific protocol data as application-specific data
     _data = SmartphoneApplicationData(
       studyDescription: studyDescription,
@@ -169,7 +176,10 @@ class SmartphoneStudyProtocol extends StudyProtocol with SmartphoneProtocolExten
   }
 
   @override
-  bool addConnectedDevice(DeviceConfiguration device, PrimaryDeviceConfiguration primaryDevice) {
+  bool addConnectedDevice(
+    DeviceConfiguration device,
+    PrimaryDeviceConfiguration primaryDevice,
+  ) {
     super.addConnectedDevice(device, primaryDevice);
     _addSamplingTaskControl(device);
 
@@ -191,7 +201,12 @@ class SmartphoneStudyProtocol extends StudyProtocol with SmartphoneProtocolExten
       measures.add(Measure(type: CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME));
     }
 
-    addTaskControl(NoOpTrigger(), BackgroundTask(measures: measures), device, Control.Start);
+    addTaskControl(
+      NoOpTrigger(),
+      BackgroundTask(measures: measures),
+      device,
+      Control.Start,
+    );
   }
 
   factory SmartphoneStudyProtocol.fromJson(Map<String, dynamic> json) =>

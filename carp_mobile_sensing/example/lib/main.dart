@@ -131,7 +131,7 @@ class Sensing {
   }
 
   /// The study runtime controller for this [study]
-  SmartphoneDeploymentController? get controller => (study != null)
+  SmartphoneStudyController? get controller => (study != null)
       ? SmartPhoneClientManager().getStudyRuntime(study!.studyDeploymentId)
       : null;
 
