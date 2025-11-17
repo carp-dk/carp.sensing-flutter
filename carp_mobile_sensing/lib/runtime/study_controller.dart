@@ -268,13 +268,12 @@ class SmartphoneStudyController {
         await tryRegisterConnectedDevice(device);
       });
 
-  //------------
-
   /// Asking for permissions for all the measures included in this
   /// study [deployment].
   ///
-  /// Should be called after deployment has taken place (using the [tryDeployment] method)
-  /// but before this controller is started (via the [start] method).
+  /// Since we only ask for permission relevant to the deployment, this method
+  /// should be called after deployment has taken place but before this controller
+  /// is started.
   ///
   /// This method is only relevant on Android, and does nothing on iOS.
   /// iOS automatically asks for permissions when a resource is accessed.
