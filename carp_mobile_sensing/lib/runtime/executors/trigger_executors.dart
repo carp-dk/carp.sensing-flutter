@@ -137,7 +137,7 @@ class ElapsedTimeTriggerExecutor
   List<DateTime> getSchedule(DateTime from, DateTime to, [int? max]) {
     if (deployment?.deployed == null) return [];
     if (configuration?.elapsedTime == null) return [];
-    final dd = deployment!.deployed!.add(configuration!.elapsedTime!);
+    final dd = deployment!.deployed.add(configuration!.elapsedTime!);
     return (dd.isAfter(from) && dd.isBefore(to)) ? [dd] : [];
   }
 
@@ -160,7 +160,7 @@ class ElapsedTimeTriggerExecutor
     int delay =
         configuration!.elapsedTime!.inMilliseconds -
         (DateTime.now().millisecondsSinceEpoch -
-            deployment!.deployed!.millisecondsSinceEpoch);
+            deployment!.deployed.millisecondsSinceEpoch);
 
     if (delay > 0) {
       timer = Timer(Duration(milliseconds: delay), () => onTrigger());
@@ -306,7 +306,10 @@ class SamplingEventTriggerExecutor
   @override
   Future<bool> onResume() async {
     _subscription ??= SmartPhoneClientManager()
-        .getStudyRuntime(deployment!.studyDeploymentId)
+        .getController(
+          deployment!.studyDeploymentId,
+          deployment!.deviceRoleName,
+        )
         ?.measurementsByType(configuration!.measureType)
         .distinct()
         .listen((measurement) {
@@ -337,7 +340,10 @@ class ConditionalSamplingEventTriggerExecutor
   @override
   Future<bool> onResume() async {
     _subscription ??= SmartPhoneClientManager()
-        .getStudyRuntime(deployment!.studyDeploymentId)
+        .getController(
+          deployment!.studyDeploymentId,
+          deployment!.deviceRoleName,
+        )
         ?.measurementsByType(configuration!.measureType)
         .listen((measurement) {
           if (configuration!.triggerCondition != null &&

@@ -60,11 +60,11 @@ class SmartPhoneClientManager extends SmartphoneClient {
   /// Is this client sending [Heartbeat] measurements for its studies?
   bool get heartbeat => _heartbeat;
 
-  /// The number of studies running on this client.
-  int get studyCount => repository.getStudyList().length;
-
-  // /// The list of studies deployed on this client manager.
-  // List<Study> get studies => repository.keys.toList();
+  @override
+  List<SmartphoneStudy> get studies => repository
+      .getStudyList()
+      .map((study) => study as SmartphoneStudy)
+      .toList();
 
   DeviceController get deviceController =>
       super.dataCollectorFactory as DeviceController;
@@ -72,10 +72,11 @@ class SmartPhoneClientManager extends SmartphoneClient {
   /// The [NotificationController] responsible for sending notification on [AppTask]s.
   NotificationController? get notificationController => _notificationController;
 
-  // @override
-  // SmartphoneDeploymentController? getStudyRuntime(String studyDeploymentId) =>
-  //     super.getStudyRuntime(studyDeploymentId)
-  //         as SmartphoneDeploymentController;
+  /// The study controller for the study with [studyDeploymentId] and [deviceRoleName].
+  SmartphoneStudyController? getController(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) => _controllers[getStudy(studyDeploymentId, deviceRoleName)];
 
   /// Configure this [SmartPhoneClientManager].
   ///

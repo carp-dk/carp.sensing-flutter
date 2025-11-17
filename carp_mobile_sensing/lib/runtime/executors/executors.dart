@@ -1,6 +1,5 @@
 /*
- * Copyright 2018-2022 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018-2025 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -124,7 +123,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   late _ExecutorStateMachine _stateMachine;
   SmartphoneDeployment? _deployment;
   TConfig? _configuration;
-  bool _isStarting = false;
+  bool _isResuming = false;
 
   @override
   SmartphoneDeployment? get deployment => _deployment;
@@ -142,7 +141,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   ExecutorState get state => _stateMachine.state;
 
   @override
-  bool get isResuming => _isStarting;
+  bool get isResuming => _isResuming;
 
   AbstractExecutor() {
     _stateMachine = _CreatedState(this);
@@ -173,7 +172,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   @override
   @nonVirtual
   void resume() {
-    _isStarting = true;
+    _isResuming = true;
     info('Starting $this - $configuration');
     _stateMachine.resume();
   }
@@ -365,7 +364,7 @@ abstract class _AbstractExecutorState implements _ExecutorStateMachine {
         // if we can't start the executor, then put it in stopped state
         executor._setState(_PausedState(executor));
       }
-      executor._isStarting = false;
+      executor._isResuming = false;
     });
   }
 
@@ -446,7 +445,7 @@ class _PausedState extends _AbstractExecutorState {
   void resume() {
     executor.onResume().then((started) {
       if (started) executor._setState(_ResumedState(executor));
-      executor._isStarting = false;
+      executor._isResuming = false;
     });
   }
 

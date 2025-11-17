@@ -12,8 +12,9 @@ part of '../services.dart';
 ///
 /// Each specific device is handled by a [DeviceManager] which are available as
 /// a map of [devices].
-class DeviceController implements DeviceDataCollectorFactory {
+class DeviceController extends DeviceDataCollectorFactory {
   static final DeviceController _instance = DeviceController._();
+  DeviceController._() : super();
   final Map<String, DeviceManager> _devices = {};
   final StreamGroup<BatteryStatus> _batteryEventGroup = StreamGroup.broadcast();
 
@@ -22,10 +23,12 @@ class DeviceController implements DeviceDataCollectorFactory {
 
   /// Get the singleton [DeviceController].
   factory DeviceController() => _instance;
-  DeviceController._();
+
+  /// The list of devices registered in this controller.
+  Map<String, DeviceManager> get devices => _devices;
 
   @override
-  Map<String, DeviceManager> get devices => _devices;
+  DeviceDataCollector get localDataCollector => smartphoneDeviceManager;
 
   /// The smartphone (primary device) manager.
   SmartphoneDeviceManager get smartphoneDeviceManager =>
@@ -38,23 +41,33 @@ class DeviceController implements DeviceDataCollectorFactory {
   /// The stream of all battery events from all connected devices.
   Stream<BatteryStatus> get batteryEvents => _batteryEventGroup.stream;
 
-  @override
-  bool supportsDevice(String type) {
+  /// Do this controller support the specified device [deviceType]?
+  bool supportsDevice(String deviceType) {
     for (var package in SamplingPackageRegistry().packages) {
-      if (package.deviceType == type) return true;
+      if (package.deviceType == deviceType) return true;
     }
     return false;
   }
 
+  /// Get a device manger for the specified [deviceType].
   DeviceManager? getDevice(String deviceType) => _devices[deviceType];
 
-  @override
+  /// Do this controller support the specified device [deviceType]?
   bool hasDevice(String deviceType) => _devices.containsKey(deviceType);
 
   @override
-  Future<DeviceManager?> createDevice(String deviceType) async {
+  DeviceManager? createConnectedDataCollector(
+    String deviceType,
+    DeviceRegistration deviceRegistration,
+  ) => createDevice(deviceType, deviceRegistration);
+
+  /// Create a device manager for
+  DeviceManager? createDevice(
+    String deviceType,
+    DeviceRegistration deviceRegistration,
+  ) {
     // early out if already registered
-    if (_devices.containsKey(deviceType)) return _devices[deviceType]!;
+    if (devices.containsKey(deviceType)) return devices[deviceType]!;
 
     info('$runtimeType - Creating device manager for device type: $deviceType');
 
@@ -82,28 +95,24 @@ class DeviceController implements DeviceDataCollectorFactory {
     }
   }
 
-  @override
-  void registerDevice(String deviceType, DeviceDataCollector manager) {
-    if (_devices.containsKey(deviceType)) return;
+  /// Register [manager] as a device manager for a device of type [deviceType].
+  void registerDevice(String deviceType, DeviceManager manager) {
+    // Fast out if already registered.
+    if (devices.containsKey(deviceType)) return;
 
     debug('$runtimeType - registering device of type: $deviceType');
-    manager.type = deviceType;
-    _devices[deviceType] = manager as DeviceManager;
+    devices[deviceType] = manager;
     if (manager is HardwareDeviceManager) {
       _batteryEventGroup.add(
         manager.batteryEvents.map(
-          (batteryLevel) => BatteryStatus(
-            manager.id,
-            manager.type,
-            manager.configuration?.roleName,
-            batteryLevel,
-          ),
+          (batteryLevel) =>
+              BatteryStatus(manager.id, manager.deviceType, batteryLevel),
         ),
       );
     }
   }
 
-  @override
+  /// Unregister the manager for [deviceType].
   void unregisterDevice(String deviceType) => _devices.remove(deviceType);
 
   /// A convenient method for disconnecting all connected devices.
@@ -119,43 +128,20 @@ class DeviceController implements DeviceDataCollectorFactory {
 
   @override
   String toString() => '$runtimeType [${_devices.length}]';
-
-  @override
-  DeviceDataCollector localDataCollector;
-
-  @override
-  ConnectedDeviceDataCollector<
-    DeviceConfiguration<DeviceRegistration>,
-    DeviceRegistration
-  >
-  createConnectedDataCollector(
-    String deviceType,
-    DeviceRegistration deviceRegistration,
-  ) {
-    // TODO: implement createConnectedDataCollector
-    throw UnimplementedError();
-  }
 }
 
 /// Runtime battery status of a device.
 class BatteryStatus {
   final String deviceId;
   final String deviceType;
-  final String? deviceRoleName;
   final int batteryLevel;
 
-  BatteryStatus(
-    this.deviceId,
-    this.deviceType,
-    this.deviceRoleName,
-    this.batteryLevel,
-  );
+  BatteryStatus(this.deviceId, this.deviceType, this.batteryLevel);
 
   @override
   String toString() =>
       '$runtimeType - '
       'device id: $deviceId, '
       'type: $deviceType, '
-      'role name: $deviceRoleName, '
       'battery level: $batteryLevel ';
 }

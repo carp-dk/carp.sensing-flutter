@@ -170,7 +170,7 @@ abstract class SmartphoneSamplingPackage extends SamplingPackage {
   List<DataTypeMetaData> get dataTypes => samplingSchemes.dataTypes;
 
   @override
-  String get deviceType => _deviceManager.type;
+  String get deviceType => _deviceManager.deviceType;
 
   @override
   DeviceManager get deviceManager => _deviceManager;

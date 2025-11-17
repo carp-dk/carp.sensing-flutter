@@ -10,17 +10,17 @@ part of 'carp_core_client.dart';
 /// Provides a [localDataCollector] to collect data locally on the primary device
 /// and supports creating [ConnectedDeviceDataCollector] instances for connected
 /// devices.
-abstract interface class DeviceDataCollectorFactory {
+abstract class DeviceDataCollectorFactory {
   /// The data collector for the primary device.
-  DeviceDataCollector localDataCollector;
+  DeviceDataCollector? localDataCollector;
 
-  DeviceDataCollectorFactory(this.localDataCollector);
+  DeviceDataCollectorFactory([this.localDataCollector]);
 
   /// Create a [ConnectedDeviceDataCollector] for a connected [deviceType]
   /// using connection options specified in [deviceRegistration].
   ///
-  /// @throws UnsupportedOperationException in case the [ConnectedDeviceDataCollector] cannot be created.
-  ConnectedDeviceDataCollector createConnectedDataCollector(
+  /// Returns null in case the [ConnectedDeviceDataCollector] cannot be created.
+  ConnectedDeviceDataCollector? createConnectedDataCollector(
     String deviceType,
     DeviceRegistration deviceRegistration,
   );
@@ -38,8 +38,6 @@ abstract interface class ConnectedDeviceDataCollector<
   TRegistration extends DeviceRegistration
 >
     extends DeviceDataCollector {
-  ConnectedDeviceDataCollector(TRegistration registration);
-
   /// Determines whether a connection can be made at this point in time to the device.
   bool canConnect();
 }

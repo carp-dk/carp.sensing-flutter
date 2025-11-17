@@ -22,22 +22,29 @@ abstract class DeviceManager<
   bool _hasPermissions = false;
   Timer? _heartbeatTimer;
   DeviceStatus _status = DeviceStatus.unknown;
-
   final String _deviceType;
+  TDeviceConfiguration? _configuration;
 
-  /// Create a new [DeviceManager] specifying its [deviceType] and [configuration].
+  /// Create a new [DeviceManager] specifying its [deviceType].
+  ///
+  /// Its [configuration] can be specified on creation here, or specified later
+  /// in the [initialize] method.
   DeviceManager(
-    this._deviceType,
-    this.configuration, [
+    String deviceType, [
+    TDeviceConfiguration? configuration,
     this._restartOnReconnect = true,
-  ]);
+  ]) : _deviceType = deviceType,
+       _configuration = configuration;
 
   @override
   Set<DataType> get supportedDataTypes =>
-      configuration.supportedDataTypes
+      configuration?.supportedDataTypes
           ?.map((str) => DataType.fromString(str))
           .toSet() ??
       {};
+
+  /// The type of the device managed by this device manager
+  String get deviceType => _deviceType;
 
   /// Get a unique id for this device.
   String get id;
@@ -46,10 +53,7 @@ abstract class DeviceManager<
   String? get displayName;
 
   /// The configuration for this device.
-  DeviceConfiguration configuration;
-
-  /// The type of the device managed by this device manager
-  String get deviceType => _deviceType;
+  DeviceConfiguration? get configuration => _configuration;
 
   /// Is data sampling resumed when this device is (re)connected?
   bool get restartOnReconnect => _restartOnReconnect;
@@ -89,7 +93,7 @@ abstract class DeviceManager<
     info(
       '$runtimeType - Initializing, type: $typeName, configuration: $configuration',
     );
-    this.configuration = configuration;
+    _configuration = configuration;
     onInitialize(configuration);
 
     // Listen to status events and when this device is (re)connected, restart sampling.
@@ -127,8 +131,8 @@ abstract class DeviceManager<
               Measurement.fromData(
                 Heartbeat(
                   period: DeviceController.HEARTBEAT_PERIOD,
-                  deviceType: configuration!.type,
-                  deviceRoleName: configuration!.roleName,
+                  deviceType: deviceType,
+                  deviceRoleName: configuration?.roleName ?? "unknown",
                 ),
               ),
             )
@@ -278,11 +282,14 @@ abstract class DeviceManager<
 }
 
 /// A [DeviceManager] for an online service, like a weather service.
-abstract class OnlineServiceManager<TDeviceConfiguration extends OnlineService>
-    extends DeviceManager<TDeviceConfiguration> {
+abstract class OnlineServiceManager<
+  TDeviceConfiguration extends OnlineService<TRegistration>,
+  TRegistration extends DeviceRegistration
+>
+    extends DeviceManager<TDeviceConfiguration, TRegistration> {
   OnlineServiceManager(
-    super.type, [
-    super.configuration,
+    super.type,
+    super.configuration, [
     super.restartOnReconnect,
   ]);
 }
@@ -293,9 +300,10 @@ abstract class OnlineServiceManager<TDeviceConfiguration extends OnlineService>
 /// this hardware device manager allow for getting the battery level and
 /// listen to battery events.
 abstract class HardwareDeviceManager<
-  TDeviceConfiguration extends DeviceConfiguration
+  TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
+  TRegistration extends DeviceRegistration
 >
-    extends DeviceManager<TDeviceConfiguration> {
+    extends DeviceManager<TDeviceConfiguration, TRegistration> {
   /// The runtime battery level of this hardware device.
   /// Returns null if unknown.
   int? get batteryLevel;
@@ -304,29 +312,30 @@ abstract class HardwareDeviceManager<
   Stream<int> get batteryEvents => const Stream.empty();
 
   HardwareDeviceManager(
-    super.type, [
-    super.configuration,
+    super.type,
+    super.configuration, [
     super.restartOnReconnect,
   ]);
 }
 
 /// A device manager for a smartphone.
-class SmartphoneDeviceManager extends HardwareDeviceManager<Smartphone> {
+class SmartphoneDeviceManager
+    extends HardwareDeviceManager<Smartphone, DefaultDeviceRegistration> {
   int _batteryLevel = 0;
   Battery battery = Battery();
-  final Set<String> _supportedDataTypes = {};
+  final Set<DataType> _supportedDataTypes = {};
+
+  SmartphoneDeviceManager([Smartphone? configuration])
+    : super(Smartphone.DEVICE_TYPE, configuration, false);
 
   @override
-  Set<String> get supportedDataTypes => _supportedDataTypes;
+  Set<DataType> get supportedDataTypes => _supportedDataTypes;
 
   @override
   String get id => DeviceInfo().deviceID!;
 
   @override
   String? get displayName => DeviceInfo().toString();
-
-  SmartphoneDeviceManager([Smartphone? configuration])
-    : super(Smartphone.DEVICE_TYPE, configuration, false);
 
   @override
   void onInitialize(Smartphone configuration) {
@@ -338,7 +347,9 @@ class SmartphoneDeviceManager extends HardwareDeviceManager<Smartphone> {
     // find the supported data types
     for (var package in SamplingPackageRegistry().packages) {
       if (package is SmartphoneSamplingPackage) {
-        _supportedDataTypes.addAll(package.dataTypes.map((type) => type.type));
+        _supportedDataTypes.addAll(
+          package.dataTypes.map((type) => DataType.fromString(type.type)),
+        );
       }
     }
   }
@@ -351,7 +362,7 @@ class SmartphoneDeviceManager extends HardwareDeviceManager<Smartphone> {
       battery.onBatteryStateChanged.map((_) => _batteryLevel);
 
   @override
-  Future<bool> canConnect() async => true; // can always connect to the phone
+  bool canConnect() => true; // can always connect to the phone
 
   @override
   Future<void> onRequestPermissions() async {}
@@ -365,9 +376,10 @@ class SmartphoneDeviceManager extends HardwareDeviceManager<Smartphone> {
 
 /// A device manager for a connectable Bluetooth device.
 abstract class BTLEDeviceManager<
-  TDeviceConfiguration extends DeviceConfiguration
+  TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
+  TRegistration extends DeviceRegistration
 >
-    extends HardwareDeviceManager<TDeviceConfiguration> {
+    extends DeviceManager<TDeviceConfiguration, TRegistration> {
   String _btleAddress = '', _btleName = '';
 
   /// The Bluetooth address of this device in the form `00:04:79:00:0F:4D`.

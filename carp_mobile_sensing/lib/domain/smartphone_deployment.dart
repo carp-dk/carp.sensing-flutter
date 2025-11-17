@@ -22,7 +22,7 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   String get studyDeploymentId => _studyDeploymentId;
 
   /// The role name of this smartphone device.
-  String? get deviceRoleName => deviceConfiguration.roleName;
+  String get deviceRoleName => deviceConfiguration.roleName;
 
   /// The ID of the participant in this deployment.
   String? participantId;
