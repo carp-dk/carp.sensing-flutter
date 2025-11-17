@@ -37,7 +37,7 @@ class RemoteTriggerExecutor extends TriggerExecutor<RemoteTrigger> {
   final client = Client();
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     // Set up a periodic timer to look for a resource at the specified URI
     timer = Timer.periodic(configuration!.interval, (_) async {
       var response = await client.get(

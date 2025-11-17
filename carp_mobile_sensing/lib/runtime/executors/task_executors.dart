@@ -42,11 +42,12 @@ abstract class TaskExecutor<TConfig extends TaskConfiguration>
           probe.initialize(measure, deployment!);
         } else {
           warning(
-              "A probe for measure type '${measure.type}' could not be created. "
-              'This may be because this probe is not available on the operating system '
-              'of this phone (primary device) or on the connected device. '
-              'Or it may be because the sampling package containing this probe has not '
-              'been registered in the SamplingPackageRegistry.');
+            "A probe for measure type '${measure.type}' could not be created. "
+            'This may be because this probe is not available on the operating system '
+            'of this phone (primary device) or on the connected device. '
+            'Or it may be because the sampling package containing this probe has not '
+            'been registered in the SamplingPackageRegistry.',
+          );
         }
       }
     }
@@ -60,13 +61,14 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
 
   /// Are all [probes] in a stopped state?
   bool get haveAllProbesStopped =>
-      !probes.any((probe) => probe.state != ExecutorState.stopped);
+      !probes.any((probe) => probe.state != ExecutorState.paused);
 
   /// Connect all connectable devices used by the [probes] in this
   /// background task executor.
   Future<void> connectAllConnectableDevices() async {
     debug(
-        '$runtimeType - Trying to connect to all connectable devices for this background executor.');
+      '$runtimeType - Trying to connect to all connectable devices for this background executor.',
+    );
 
     probes
         .where((probe) => !probe.deviceManager.isConnecting)
@@ -74,39 +76,44 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     // Early out if no probes.
     if (probes.isEmpty) return true;
 
     // Early out if already running (this is a background task)
-    if (state == ExecutorState.started) {
+    if (state == ExecutorState.resumed) {
       warning(
-          'Trying to start $this but it is already started. Ignoring this.');
+        'Trying to start $this but it is already started. Ignoring this.',
+      );
       return false;
     }
 
     // Listen to stop this background executor when all of its underlying
     // probes have stopped - Issue #384
-    _subscription =
-        states.where((event) => event == ExecutorState.stopped).listen((_) {
-      if (haveAllProbesStopped) {
-        debug(
-            '$runtimeType - all probes have stopped - stopping this $this too.');
-        stop();
-      }
-    });
+    _subscription = states.where((event) => event == ExecutorState.paused).listen(
+      (_) {
+        if (haveAllProbesStopped) {
+          debug(
+            '$runtimeType - all probes have stopped - stopping this $this too.',
+          );
+          pause();
+        }
+      },
+    );
 
     // Check if the devices for this task is connected.
     await connectAllConnectableDevices();
 
     if (configuration?.duration != null) {
       // If the task has a duration (optional), stop it again after this duration has passed.
-      Timer(Duration(seconds: configuration!.duration!.inSeconds.truncate()),
-          () => stop());
+      Timer(
+        Duration(seconds: configuration!.duration!.inSeconds.truncate()),
+        () => pause(),
+      );
     }
 
     // Now - finally - we can start the probes.
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
@@ -116,16 +123,16 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     _subscription?.cancel();
-    return super.onStop();
+    return super.onPause();
   }
 }
 
 /// Executes a [FunctionTask].
 class FunctionTaskExecutor extends TaskExecutor<FunctionTask> {
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     if (configuration?.function != null) {
       Function.apply(configuration!.function!, []);
     }
@@ -152,18 +159,18 @@ class AppTaskExecutor<TConfig extends AppTask> extends TaskExecutor<TConfig> {
   bool onInitialize() => true;
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     // when an app task is started, create a new UserTask by adding it to the queue
     UserTask? userTask = await AppTaskController().enqueue(this);
 
     // automatically stop this executor again to be reused later
     // issue => https://github.com/cph-cachet/carp.sensing-flutter/issues/429
-    Future.delayed(const Duration(seconds: 5), () => stop());
+    Future.delayed(const Duration(seconds: 5), () => pause());
 
     return userTask != null;
   }
 
   // does nothing when stopping an app task
   @override
-  Future<bool> onStop() async => true;
+  Future<bool> onPause() async => true;
 }

@@ -306,7 +306,7 @@ class SmartPhoneClientManager extends SmartphoneClient {
   ///
   /// This method is useful on app restart, since it will resume all sampling
   /// on this client. Data sampling will be resumed for studies which were
-  /// running (i.e., having [ExecutorState.started]) when the app was closed.
+  /// running (i.e., having [ExecutorState.resumed]) when the app was closed.
   ///
   /// To see the status of resumed studies, use the [getStudyStatusList]
   /// methods **after** this resume method has ended.

@@ -136,13 +136,13 @@ class Sensing {
       : null;
 
   /// Is sensing running, i.e. has the study executor been started?
-  bool get isRunning => controller?.executor.state == ExecutorState.started;
+  bool get isRunning => controller?.executor.state == ExecutorState.resumed;
 
   /// Start sensing
   void start() => controller?.start();
 
   /// Stop sensing
-  void stop() => controller?.executor.stop();
+  void stop() => controller?.executor.pause();
 
   /// Dispose sensing
   void dispose() => SmartPhoneClientManager().dispose();

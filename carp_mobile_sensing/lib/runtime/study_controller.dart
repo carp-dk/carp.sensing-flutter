@@ -414,14 +414,14 @@ class SmartphoneStudyController {
     }
 
     // Start data sampling, if needed.
-    if (study.samplingStatus == ExecutorState.started) executor.start();
+    if (study.samplingStatus == ExecutorState.resumed) executor.resume();
   }
 
   /// Start data sampling.
-  void resume() => executor.start();
+  void resume() => executor.resume();
 
   /// Pause data sampling.
-  void pause() => executor.stop();
+  void pause() => executor.pause();
 
   /// Called when this controller is disposed.
   ///

@@ -234,7 +234,7 @@ abstract class DeviceManager<
   @nonVirtual
   void stop() {
     for (var executor in executors) {
-      executor.stop();
+      executor.pause();
     }
   }
 

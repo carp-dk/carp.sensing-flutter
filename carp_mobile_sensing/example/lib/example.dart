@@ -339,13 +339,13 @@ void example_2() async {
       );
 
   // Sampling can be stopped and started
-  controller.executor.stop();
-  controller.executor.start();
+  controller.executor.pause();
+  controller.executor.resume();
 
   // Stop specific probe(s)
   controller.executor
       .lookupProbe(CarpDataTypes.ACCELERATION_TYPE_NAME)
-      .forEach((probe) => probe.stop());
+      .forEach((probe) => probe.pause());
 
   // Adapt a measure
   //
@@ -874,13 +874,13 @@ void appTaskControllerExample() async {
         //
         break;
       case UserTaskState.started:
-        userTask.backgroundTaskExecutor.start();
+        userTask.backgroundTaskExecutor.resume();
         break;
       case UserTaskState.canceled:
         //
         break;
       case UserTaskState.done:
-        userTask.backgroundTaskExecutor.stop();
+        userTask.backgroundTaskExecutor.pause();
         break;
       case UserTaskState.notified:
         print('Task id: ${userTask.id} was clicked in the OS.');

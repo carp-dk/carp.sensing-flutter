@@ -79,7 +79,8 @@ abstract class UserTask {
   }
 
   /// Is this task available to be done by the user?
-  bool get availableForUser => (_state == UserTaskState.enqueued ||
+  bool get availableForUser =>
+      (_state == UserTaskState.enqueued ||
       _state == UserTaskState.canceled ||
       _state == UserTaskState.notified);
 
@@ -237,8 +238,10 @@ class BackgroundSensingUserTask extends UserTask {
   static const String SENSING_TYPE = 'sensing';
 
   /// A background sensing user task which runs once and then stops.
-  @Deprecated('Use BackgroundSensingUserTask.SENSING_TYPE instead. '
-      'This will be removed in a future version.')
+  @Deprecated(
+    'Use BackgroundSensingUserTask.SENSING_TYPE instead. '
+    'This will be removed in a future version.',
+  )
   static const String ONE_TIME_SENSING_TYPE = 'one_time_sensing';
 
   BackgroundSensingUserTask(super.executor);
@@ -246,12 +249,12 @@ class BackgroundSensingUserTask extends UserTask {
   @override
   void onStart() {
     super.onStart();
-    backgroundTaskExecutor.start();
+    backgroundTaskExecutor.resume();
   }
 
   @override
   void onDone({dequeue = false, Data? result}) {
     super.onDone(dequeue: dequeue, result: result);
-    backgroundTaskExecutor.stop();
+    backgroundTaskExecutor.pause();
   }
 }

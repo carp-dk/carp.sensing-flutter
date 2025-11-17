@@ -81,8 +81,8 @@ class SmartphoneDeploymentExecutor
 
   /// Run the deployment, and after the deployment is finished, enqueue all buffered tasks.
   @override
-  Future<bool> onStart() async {
-    bool val = await super.onStart();
+  Future<bool> onResume() async {
+    bool val = await super.onResume();
 
     await AppTaskController().enqueueBufferedTasks();
     debug(

@@ -115,15 +115,15 @@ class AppLifecycleProbe extends StreamProbe with WidgetsBindingObserver {
   Stream<Measurement> get stream => _controller.stream;
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     WidgetsBinding.instance.addObserver(this);
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     WidgetsBinding.instance.removeObserver(this);
-    return await super.onStop();
+    return await super.onPause();
   }
 
   @override

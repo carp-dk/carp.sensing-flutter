@@ -40,15 +40,15 @@ abstract class TriggerExecutor<TConfig extends TriggerConfiguration>
   bool onInitialize() => true;
 
   @override
-  Future<bool> onStart() async => true;
+  Future<bool> onResume() async => true;
 
   @override
   @mustCallSuper
-  Future<bool> onRestart() async => await onStop();
+  Future<bool> onRestart() async => await onPause();
 
   @override
   @mustCallSuper
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     timer?.cancel();
     return true;
   }
@@ -75,7 +75,7 @@ class NoOpTriggerExecutor extends TriggerExecutor<TriggerConfiguration> {}
 /// Executes an [ImmediateTrigger], i.e. starts sampling immediately.
 class ImmediateTriggerExecutor extends TriggerExecutor<TriggerConfiguration> {
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     onTrigger();
     return true;
   }
@@ -85,7 +85,7 @@ class ImmediateTriggerExecutor extends TriggerExecutor<TriggerConfiguration> {
 /// study deployment.
 class OneTimeTriggerExecutor extends TriggerExecutor<OneTimeTrigger> {
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     if (!configuration!.hasBeenTriggered) {
       // Note that the trigger stamp is saved in the deployment configuration.
       // However, this is not persisted and if this deployment is re-deployed,
@@ -123,7 +123,7 @@ class PassiveTriggerExecutor extends TriggerExecutor<PassiveTrigger> {
 /// Executes a [DelayedTrigger], i.e. triggers after the specified delay.
 class DelayedTriggerExecutor extends TriggerExecutor<DelayedTrigger> {
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     timer = Timer(configuration!.delay, () => onTrigger());
     return true;
   }
@@ -142,7 +142,7 @@ class ElapsedTimeTriggerExecutor
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     if (deployment?.deployed == null) {
       warning(
         '$runtimeType - This deployment does not have a start time. Cannot execute this trigger.',
@@ -194,7 +194,7 @@ class PeriodicTriggerExecutor
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     timer = Timer.periodic(configuration!.period, (_) => onTrigger());
     return true;
   }
@@ -211,7 +211,7 @@ class DateTimeTriggerExecutor
       : [];
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     if (configuration!.schedule.isAfter(DateTime.now())) {
       warning('The schedule of the DateTimeTrigger cannot be in the past.');
       return false;
@@ -242,7 +242,7 @@ class RecurrentScheduledTriggerExecutor
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     Duration delay = configuration!.firstOccurrence.difference(DateTime.now());
     if (configuration!.end == null ||
         configuration!.end!.isAfter(DateTime.now())) {
@@ -280,7 +280,7 @@ class CronScheduledTriggerExecutor
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     debug('creating cron job : $configuration');
     var schedule = cron.Schedule.parse(configuration!.cronExpression);
     _task = _cron.schedule(schedule, () async {
@@ -291,9 +291,9 @@ class CronScheduledTriggerExecutor
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     _task?.cancel();
-    return super.onStop();
+    return super.onPause();
   }
 }
 
@@ -304,7 +304,7 @@ class SamplingEventTriggerExecutor
   StreamSubscription<Measurement>? _subscription;
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     _subscription ??= SmartPhoneClientManager()
         .getStudyRuntime(deployment!.studyDeploymentId)
         ?.measurementsByType(configuration!.measureType)
@@ -323,9 +323,9 @@ class SamplingEventTriggerExecutor
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     _subscription?.cancel();
-    return super.onStop();
+    return super.onPause();
   }
 }
 
@@ -335,7 +335,7 @@ class ConditionalSamplingEventTriggerExecutor
   StreamSubscription<Measurement>? _subscription;
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     _subscription ??= SmartPhoneClientManager()
         .getStudyRuntime(deployment!.studyDeploymentId)
         ?.measurementsByType(configuration!.measureType)
@@ -349,9 +349,9 @@ class ConditionalSamplingEventTriggerExecutor
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     _subscription?.cancel();
-    return super.onStop();
+    return super.onPause();
   }
 }
 
@@ -359,7 +359,7 @@ class ConditionalSamplingEventTriggerExecutor
 class ConditionalPeriodicTriggerExecutor
     extends TriggerExecutor<ConditionalPeriodicTrigger> {
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     // create a recurrent timer that checks the conditions periodically
     timer = Timer.periodic(configuration!.period, (_) {
       if (configuration!.triggerCondition != null &&
@@ -461,7 +461,7 @@ class RandomRecurrentTriggerExecutor
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     // sampling might be started after [startTime] or the app wasn't running at [startTime]
     // therefore, first check if the random timers have been scheduled for today
     if (TimeOfDay.now().isAfter(startTime)) {
@@ -509,7 +509,7 @@ class UserTaskTriggerExecutor extends TriggerExecutor<UserTaskTrigger> {
   StreamSubscription<UserTask>? _subscription;
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     // listen for event of the specified type and trigger as needed
     _subscription ??= AppTaskController().userTaskEvents.listen((
       userTask,
@@ -523,9 +523,9 @@ class UserTaskTriggerExecutor extends TriggerExecutor<UserTaskTrigger> {
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     _subscription?.cancel();
-    return super.onStop();
+    return super.onPause();
   }
 }
 
@@ -535,7 +535,7 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
   Timer? _timer;
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     _timer = Timer.periodic(Duration(minutes: 1), (_) {
       if (!AppTaskController().userTaskQueue
           .where((task) => task.state == UserTaskState.enqueued)
@@ -548,8 +548,8 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     _timer?.cancel();
-    return super.onStop();
+    return super.onPause();
   }
 }
