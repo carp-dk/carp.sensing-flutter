@@ -53,7 +53,7 @@ abstract class DeviceManager<
   String? get displayName;
 
   /// The configuration for this device.
-  DeviceConfiguration? get configuration => _configuration;
+  TDeviceConfiguration? get configuration => _configuration;
 
   /// Is data sampling resumed when this device is (re)connected?
   bool get restartOnReconnect => _restartOnReconnect;

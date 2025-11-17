@@ -124,16 +124,6 @@ class SmartPhoneClientManager extends SmartphoneClient {
     DataManagerRegistry().register(FileDataManagerFactory());
     DataManagerRegistry().register(SQLiteDataManagerFactory());
 
-    // create the device registration using the [Smartphone] registration builder.
-    registration ??= Smartphone().createRegistration(
-      deviceId: DeviceInfo().deviceID,
-      platform: DeviceInfo().platform,
-      deviceManufacturer: DeviceInfo().deviceManufacturer,
-      hardware: DeviceInfo().hardware,
-      deviceModel: DeviceInfo().deviceModel,
-      sdk: DeviceInfo().sdk,
-    );
-
     // initialize default services, if not specified
     deploymentService ??= SmartphoneDeploymentService();
     dataCollectorFactory ??= DeviceController();
@@ -141,12 +131,23 @@ class SmartPhoneClientManager extends SmartphoneClient {
       _notificationController =
           notificationController ?? FlutterLocalNotificationController();
     }
+
     _heartbeat = heartbeat;
     _askForPermissions = askForPermissions;
 
     // initialize the app task controller singleton
     await AppTaskController().initialize(
       enableNotifications: enableNotifications,
+    );
+
+    // Create the device registration using the [Smartphone] registration builder.
+    registration ??= Smartphone().createRegistration(
+      deviceId: DeviceInfo().deviceID,
+      platform: DeviceInfo().platform,
+      deviceManufacturer: DeviceInfo().deviceManufacturer,
+      hardware: DeviceInfo().hardware,
+      deviceModel: DeviceInfo().deviceModel,
+      sdk: DeviceInfo().sdk,
     );
 
     super.configure(
