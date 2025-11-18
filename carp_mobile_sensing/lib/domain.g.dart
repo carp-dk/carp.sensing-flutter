@@ -385,9 +385,7 @@ SmartphoneDeployment _$SmartphoneDeploymentFromJson(
         participantRoleName: json['participantRoleName'] as String?,
       )
       ..applicationData = json['applicationData'] as Map<String, dynamic>?
-      ..deployed = json['deployed'] == null
-          ? null
-          : DateTime.parse(json['deployed'] as String)
+      ..deployed = DateTime.parse(json['deployed'] as String)
       ..status = $enumDecode(
         _$StudyDeploymentStatusTypesEnumMap,
         json['status'],
@@ -413,7 +411,7 @@ Map<String, dynamic> _$SmartphoneDeploymentToJson(
   'studyDeploymentId': instance.studyDeploymentId,
   'participantId': ?instance.participantId,
   'participantRoleName': ?instance.participantRoleName,
-  'deployed': ?instance.deployed?.toIso8601String(),
+  'deployed': instance.deployed.toIso8601String(),
   'status': _$StudyDeploymentStatusTypesEnumMap[instance.status]!,
 };
 

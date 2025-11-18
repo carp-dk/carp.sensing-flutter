@@ -40,8 +40,7 @@ class SmartphoneStudyController {
   SmartphoneStudy get study => _study;
 
   /// The deployment associated with this [study].
-  SmartphoneDeployment? get deployment =>
-      study.deployment as SmartphoneDeployment?;
+  SmartphoneDeployment? get deployment => study.deployment;
 
   /// The list of all devices - both primary and connected devices - that remain
   /// to be registered before all devices in this [study] are registered.
@@ -233,7 +232,7 @@ class SmartphoneStudyController {
       DeviceManager deviceManager = _deviceController.getDevice(deviceType)!;
 
       // create a registration based on the device manager's unique id and name of the device
-      var registration = deviceManager.configuration.createRegistration(
+      var registration = deviceManager.configuration?.createRegistration(
         deviceId: deviceManager.id,
         deviceDisplayName: deviceManager.displayName,
       );
@@ -242,7 +241,7 @@ class SmartphoneStudyController {
         await _deploymentService.registerDevice(
           study.studyDeploymentId,
           deviceRoleName,
-          registration,
+          registration!,
         );
       } catch (error) {
         warning(
@@ -274,7 +273,7 @@ class SmartphoneStudyController {
       });
 
   /// Asking for permissions for all the measures included in this
-  /// study [deployment].
+  /// [study].
   ///
   /// Since we only ask for permission relevant to the deployment, this method
   /// should be called after deployment has taken place but before this controller
@@ -413,7 +412,7 @@ class SmartphoneStudyController {
       await askForAllPermissions();
     }
 
-    // Start data sampling, if needed.
+    // Resume data sampling, if needed.
     if (study.samplingStatus == ExecutorState.resumed) executor.resume();
   }
 

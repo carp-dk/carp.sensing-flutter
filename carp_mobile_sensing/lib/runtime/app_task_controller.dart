@@ -68,9 +68,7 @@ class AppTaskController {
   /// If [enableNotifications] is true, a notification will be added to
   /// the phone's notification system when a task is enqueued via the
   /// [enqueue] method.
-  Future<void> initialize({
-    bool enableNotifications = true,
-  }) async {
+  Future<void> initialize({bool enableNotifications = true}) async {
     // set up a timer which cleans up in the queue once an hour
     _garbageCollector = Timer.periodic(const Duration(hours: 1), (timer) {
       for (var task in userTasks) {
@@ -125,12 +123,14 @@ class AppTaskController {
   }) async {
     if (_userTaskFactories[executor.task.type] == null) {
       warning(
-          '$runtimeType - Could not enqueue AppTask. Could not find a factory for creating '
-          "a UserTask for type '${executor.task.type}'");
+        '$runtimeType - Could not enqueue AppTask. Could not find a factory for creating '
+        "a UserTask for type '${executor.task.type}'",
+      );
       return null;
     } else {
-      UserTask userTask =
-          _userTaskFactories[executor.task.type]!.create(executor);
+      UserTask userTask = _userTaskFactories[executor.task.type]!.create(
+        executor,
+      );
       userTask.state = UserTaskState.enqueued;
       userTask.enqueued = DateTime.now();
       userTask.triggerTime = triggerTime ?? DateTime.now();
@@ -141,12 +141,10 @@ class AppTaskController {
       if (notificationsEnabled && sendNotification) {
         // create notification
         (triggerTime == null)
-            ? await SmartPhoneClientManager()
-                .notificationController
-                ?.createTaskNotification(userTask)
-            : await SmartPhoneClientManager()
-                .notificationController
-                ?.scheduleTaskNotification(userTask);
+            ? await SmartPhoneClientManager().notificationController
+                  ?.createTaskNotification(userTask)
+            : await SmartPhoneClientManager().notificationController
+                  ?.scheduleTaskNotification(userTask);
       }
       return userTask;
     }
@@ -160,12 +158,14 @@ class AppTaskController {
     DateTime? triggerTime,
     bool sendNotification = true,
   }) {
-    _userTaskBuffer.add(UserTaskBufferItem(
-      taskControl,
-      executor,
-      sendNotification,
-      triggerTime ?? DateTime.now(),
-    ));
+    _userTaskBuffer.add(
+      UserTaskBufferItem(
+        taskControl,
+        executor,
+        sendNotification,
+        triggerTime ?? DateTime.now(),
+      ),
+    );
   }
 
   /// Enqueue all tasks buffered with [buffer].
@@ -177,18 +177,22 @@ class AppTaskController {
     _userTaskBuffer.sort((a, b) => a.triggerTime.compareTo(b.triggerTime));
     var remainingNotifications =
         NotificationController.pendingNotificationLimit -
-            (await SmartPhoneClientManager()
-                    .notificationController
-                    ?.pendingNotificationRequestsCount ??
-                0);
+        (await SmartPhoneClientManager()
+                .notificationController
+                ?.pendingNotificationRequestsCount ??
+            0);
 
-    var numberOfTasksToEnqueue =
-        min(remainingNotifications, _userTaskBuffer.length);
+    var numberOfTasksToEnqueue = min(
+      remainingNotifications,
+      _userTaskBuffer.length,
+    );
 
     // Being mindful of the OS limitations, only schedule however many
     // tasks as remaining notification slots
-    List<UserTaskBufferItem> toEnqueue =
-        _userTaskBuffer.sublist(0, numberOfTasksToEnqueue);
+    List<UserTaskBufferItem> toEnqueue = _userTaskBuffer.sublist(
+      0,
+      numberOfTasksToEnqueue,
+    );
 
     debug('$runtimeType - Enqueuing ${toEnqueue.length} tasks.');
 
@@ -203,9 +207,6 @@ class AppTaskController {
 
     // Discard the tasks that we couldn't queue, they will be re-queued later.
     _userTaskBuffer.clear();
-
-    // Persist the tasks that were just enqueued
-    SmartPhoneClientManager().save();
   }
 
   /// De-queue (remove) an [UserTask] with [id] from the [userTasks].
@@ -213,7 +214,8 @@ class AppTaskController {
     UserTask? userTask = _userTaskMap[id];
     if (userTask == null) {
       warning(
-          "$runtimeType - Could not dequeue AppTask - id is not valid: '$id'");
+        "$runtimeType - Could not dequeue AppTask - id is not valid: '$id'",
+      );
     } else {
       userTask.state = UserTaskState.dequeued;
       _userTaskMap.remove(id);
@@ -221,8 +223,7 @@ class AppTaskController {
       info('$runtimeType - Dequeued $userTask');
 
       if (notificationsEnabled) {
-        SmartPhoneClientManager()
-            .notificationController
+        SmartPhoneClientManager().notificationController
             ?.cancelTaskNotification(userTask);
       }
     }
@@ -243,7 +244,8 @@ class AppTaskController {
       }
     } else {
       warning(
-          "$runtimeType - Error in callback from notification - no task with id '$id' found.");
+        "$runtimeType - Error in callback from notification - no task with id '$id' found.",
+      );
     }
   }
 
@@ -255,7 +257,8 @@ class AppTaskController {
     UserTask? userTask = _userTaskMap[id];
     if (userTask == null) {
       warning(
-          "$runtimeType - Could not find User Task - id is not valid: '$id'");
+        "$runtimeType - Could not find User Task - id is not valid: '$id'",
+      );
     } else {
       userTask.state = UserTaskState.done;
       userTask.doneTime = DateTime.now();
@@ -263,9 +266,9 @@ class AppTaskController {
       _controller.sink.add(userTask);
       info('$runtimeType - Marked $userTask as done');
 
-      SmartPhoneClientManager()
-          .notificationController
-          ?.cancelTaskNotification(userTask);
+      SmartPhoneClientManager().notificationController?.cancelTaskNotification(
+        userTask,
+      );
     }
   }
 
@@ -276,7 +279,8 @@ class AppTaskController {
     UserTask? userTask = _userTaskMap[id];
     if (userTask == null) {
       warning(
-          "$runtimeType - Could not expire AppTask - id is not valid: '$id'");
+        "$runtimeType - Could not expire AppTask - id is not valid: '$id'",
+      );
     } else {
       // only expire tasks which are not already done or expired
       if (userTask.state != UserTaskState.done) {
@@ -284,9 +288,9 @@ class AppTaskController {
         _controller.sink.add(userTask);
         info('$runtimeType - Expired $userTask');
       }
-      SmartPhoneClientManager()
-          .notificationController
-          ?.cancelTaskNotification(userTask);
+      SmartPhoneClientManager().notificationController?.cancelTaskNotification(
+        userTask,
+      );
     }
   }
 
@@ -294,9 +298,11 @@ class AppTaskController {
   /// all notifications generated for these tasks.
   void removeStudyDeployment(String studyDeploymentId) {
     final userTasks = _userTaskMap.values
-        .where((task) =>
-            task.appTaskExecutor.deployment?.studyDeploymentId ==
-            studyDeploymentId)
+        .where(
+          (task) =>
+              task.appTaskExecutor.deployment?.studyDeploymentId ==
+              studyDeploymentId,
+        )
         .toList();
 
     for (var userTask in userTasks) {
@@ -314,45 +320,51 @@ class AppTaskController {
 
       // now create new AppTaskExecutors, initialize them, and add them to the queue
       for (var snapshot in snapshots) {
-        AppTaskExecutor executor = AppTaskExecutor();
+        if (snapshot.studyDeploymentId != null &&
+            snapshot.deviceRoleName != null) {
+          // find the study and deployment based on the snapshot
 
-        // find the deployment based on the deployment id in the snapshot
-        SmartphoneDeployment? deployment;
-        if (snapshot.studyDeploymentId != null) {
-          deployment = SmartPhoneClientManager()
-              .getStudyRuntime(snapshot.studyDeploymentId!)
-              ?.deployment;
-        }
-        if (deployment == null) {
-          warning(
-              '$runtimeType - Could not find deployment information based on snapshot: $snapshot');
-        } else {
-          executor.initialize(snapshot.task, deployment);
+          SmartphoneStudy? study = SmartPhoneClientManager().getStudy(
+            snapshot.studyDeploymentId!,
+            snapshot.deviceRoleName!,
+          );
+          SmartphoneDeployment? deployment = study?.deployment;
 
-          // add the stream of measurements to the overall smartphone deployment controller
-          // issue => https://github.com/cph-cachet/carp.sensing-flutter/issues/437
-          SmartPhoneClientManager()
-              .getStudyRuntime(snapshot.studyDeploymentId!)
-              ?.executor
-              .addMeasurements(executor.measurements);
-
-          // now put the restored task back on the queue
-          if (_userTaskFactories[executor.task.type] == null) {
+          if (study == null || deployment == null) {
             warning(
-                '$runtimeType - Could not enqueue AppTask. Could not find a factory for creating '
-                "a UserTask for type '${executor.task.type}'");
+              '$runtimeType - Could not find study deployment information based on snapshot: $snapshot',
+            );
           } else {
-            UserTask userTask =
-                _userTaskFactories[executor.task.type]!.create(executor);
-            userTask.id = snapshot.id;
-            userTask.state = snapshot.state;
-            userTask.enqueued = snapshot.enqueued;
-            userTask.triggerTime = snapshot.triggerTime;
-            userTask.doneTime = snapshot.doneTime;
+            AppTaskExecutor executor = AppTaskExecutor();
+            executor.initialize(snapshot.task, deployment);
 
-            _userTaskMap[userTask.id] = userTask;
-            debug(
-                '$runtimeType - Enqueued UserTask from loaded task queue: $userTask');
+            // add the stream of measurements to the overall smartphone deployment controller
+            // issue => https://github.com/cph-cachet/carp.sensing-flutter/issues/437
+            SmartPhoneClientManager()
+                .getStudyController(study!)
+                ?.executor
+                .addMeasurements(executor.measurements);
+
+            // now put the restored task back on the queue
+            if (_userTaskFactories[executor.task.type] == null) {
+              warning(
+                '$runtimeType - Could not enqueue AppTask. Could not find a factory for creating '
+                "a UserTask for type '${executor.task.type}'",
+              );
+            } else {
+              UserTask userTask = _userTaskFactories[executor.task.type]!
+                  .create(executor);
+              userTask.id = snapshot.id;
+              userTask.state = snapshot.state;
+              userTask.enqueued = snapshot.enqueued;
+              userTask.triggerTime = snapshot.triggerTime;
+              userTask.doneTime = snapshot.doneTime;
+
+              _userTaskMap[userTask.id] = userTask;
+              debug(
+                '$runtimeType - Enqueued UserTask from loaded task queue: $userTask',
+              );
+            }
           }
         }
       }
@@ -370,8 +382,12 @@ class UserTaskBufferItem {
   DateTime triggerTime;
   bool sendNotification;
 
-  UserTaskBufferItem(this.taskControl, this.taskExecutor, this.sendNotification,
-      this.triggerTime);
+  UserTaskBufferItem(
+    this.taskControl,
+    this.taskExecutor,
+    this.sendNotification,
+    this.triggerTime,
+  );
 }
 
 /// A snapshot of a [UserTask] at any given time. Used for saving user tasks
@@ -423,7 +439,8 @@ class UserTaskSnapshot extends Serializable {
   Map<String, dynamic> toJson() => _$UserTaskSnapshotToJson(this);
 
   @override
-  String toString() => '$runtimeType - id:$id, '
+  String toString() =>
+      '$runtimeType - id:$id, '
       'task: $task, state: ${state.name}, enqueued: $enqueued, '
       'triggerTime: $triggerTime, doneTime: $doneTime, '
       'studyDeploymentId: $studyDeploymentId, deviceRoleName: $deviceRoleName';

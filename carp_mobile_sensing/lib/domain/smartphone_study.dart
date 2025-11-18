@@ -8,7 +8,7 @@
 part of '../domain.dart';
 
 /// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
-class SmartphoneStudy extends Study {
+class SmartphoneStudy extends Study<SmartphoneDeployment> {
   /// The unique id of the study in the deployment service.
   String? studyId;
 
@@ -30,7 +30,7 @@ class SmartphoneStudy extends Study {
     this.participantRoleName,
     DateTime? createdOn,
     StudyDeploymentStatus? deploymentStatus,
-    PrimaryDeviceDeployment? deployment,
+    SmartphoneDeployment? deployment,
   }) : super(
          studyDeploymentId,
          deviceRoleName,

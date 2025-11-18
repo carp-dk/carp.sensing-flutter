@@ -305,11 +305,16 @@ class SamplingEventTriggerExecutor
 
   @override
   Future<bool> onResume() async {
+    // Fast out if no deployment.
+    if (deployment == null) return false;
+
+    SmartphoneStudy? study = SmartPhoneClientManager().getStudy(
+      deployment!.studyDeploymentId,
+      deployment!.deviceRoleName,
+    );
+
     _subscription ??= SmartPhoneClientManager()
-        .getController(
-          deployment!.studyDeploymentId,
-          deployment!.deviceRoleName,
-        )
+        .getStudyController(study!)
         ?.measurementsByType(configuration!.measureType)
         .distinct()
         .listen((measurement) {
@@ -339,11 +344,16 @@ class ConditionalSamplingEventTriggerExecutor
 
   @override
   Future<bool> onResume() async {
+    // Fast out if no deployment.
+    if (deployment == null) return false;
+
+    SmartphoneStudy? study = SmartPhoneClientManager().getStudy(
+      deployment!.studyDeploymentId,
+      deployment!.deviceRoleName,
+    );
+
     _subscription ??= SmartPhoneClientManager()
-        .getController(
-          deployment!.studyDeploymentId,
-          deployment!.deviceRoleName,
-        )
+        .getStudyController(study!)
         ?.measurementsByType(configuration!.measureType)
         .listen((measurement) {
           if (configuration!.triggerCondition != null &&

@@ -10,9 +10,10 @@ part of 'carp_core_client.dart';
 /// Allows managing studies on a client device.
 abstract class ClientManager<
   TPrimaryDevice extends PrimaryDeviceConfiguration<TRegistration>,
-  TRegistration extends DeviceRegistration
+  TRegistration extends DeviceRegistration,
+  TStudy extends Study
 > {
-  final ClientRepository? _repository;
+  final ClientRepository<TStudy>? _repository;
   DeploymentService? _deploymentService;
   DeviceDataCollectorFactory? _dataCollectorFactory;
   TRegistration? _registration;
@@ -26,7 +27,7 @@ abstract class ClientManager<
   /// to collect data locally on this primary device and is used to create
   /// [ConnectedDeviceDataCollector] instances for connected devices.
   ClientManager({
-    ClientRepository? repository,
+    ClientRepository<TStudy>? repository,
     DeploymentService? deploymentService,
     DeviceDataCollectorFactory? dataCollectorFactory,
   }) : _repository = repository,
@@ -34,14 +35,14 @@ abstract class ClientManager<
        _dataCollectorFactory = dataCollectorFactory;
 
   /// Repository within which the state of this client is stored.
-  ClientRepository get repository =>
+  ClientRepository<TStudy> get repository =>
       _repository ??
       (throw NotConfiguredException(
         'ClientManager has not been configured yet. Call configure() first.',
       ));
 
   /// Get the studies running on this client device.
-  List<Study> get studies => repository.getStudyList();
+  List<TStudy> get studies => repository.getStudyList();
 
   /// The application service through which study deployments, to be run on
   /// this client, can be managed and retrieved.
@@ -122,10 +123,10 @@ abstract class ClientManager<
   /// Get the study with [studyDeploymentId] and [deviceRoleName] from this client
   /// manager.
   /// Returns null if no such study has been added.
-  Study? getStudy(String studyDeploymentId, String deviceRoleName) =>
+  TStudy? getStudy(String studyDeploymentId, String deviceRoleName) =>
       repository.getStudy(studyDeploymentId, deviceRoleName);
 
-  /// Add a study which needs to be executed on this client.
+  /// Add a [study] which needs to be executed on this client.
   /// No deployment is attempted yet.
   ///
   /// [studyDeploymentId] is the ID of the study deployment for which to collect
@@ -135,8 +136,10 @@ abstract class ClientManager<
   /// Throws NotConfiguredException if the client has not yet been configured.
   /// Throws IllegalArgumentException if a study with the same deployment id
   /// and device role name has already been added to this client.
+  ///
+  /// Return the study if successfully added to this client manager.
   @mustCallSuper
-  Future<void> addStudy(Study study) async {
+  Future<TStudy> addStudy(TStudy study) async {
     _check();
     if (getStudy(study.studyDeploymentId, study.deviceRoleName) != null) {
       throw IllegalArgumentException(
@@ -148,6 +151,7 @@ abstract class ClientManager<
 
     // Update study status based on deployment status
     await proxy?.getStudyDeploymentStatus(study);
+    return study;
   }
 
   /// Verifies whether the device is ready for deployment of the study runtime
@@ -256,7 +260,8 @@ abstract class ClientManager<
 }
 
 /// Allows managing studies on a smartphone.
-class SmartphoneClient extends ClientManager<Smartphone, DeviceRegistration> {
+class SmartphoneClient
+    extends ClientManager<Smartphone, DeviceRegistration, Study> {
   SmartphoneClient({
     super.repository,
     super.deploymentService,

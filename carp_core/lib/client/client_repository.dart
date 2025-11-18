@@ -7,10 +7,10 @@
 
 part of 'carp_core_client.dart';
 
-/// A repository which handles persisting the state of a client device.
+/// A repository which handles persisting the state of studies.
 /// Used by a [ClientManager] to store and retrieve information about
 /// the client device and the studies it is handling.
-abstract interface class ClientRepository {
+abstract interface class ClientRepository<TStudy extends Study> {
   /// The [DeviceRegistration] used to register the client in deployments.
   DeviceRegistration? deviceRegistration;
 
@@ -18,22 +18,20 @@ abstract interface class ClientRepository {
   ///
   /// Throws [IllegalArgumentException] if [study] has the same study deployment
   /// ID and device role name as an existing study.
-  void addStudy(Study study);
+  void addStudy(TStudy study);
 
-  /// Return the [Study] with [studyDeploymentId] and [deviceRoleName],
+  /// Return the study with [studyDeploymentId] and [deviceRoleName],
   /// or null when no such study is found.
-  Study? getStudy(String studyDeploymentId, String deviceRoleName);
+  TStudy? getStudy(String studyDeploymentId, String deviceRoleName);
 
-  /// Return all [Study]s for the client.
-  List<Study> getStudyList();
+  /// Return all studies in this repository.
+  List<TStudy> getStudyList();
 
   /// Update a [study] which is already stored in the repository.
-  ///
-  /// Throws [IllegalArgumentException] if this study has not previously
-  /// been added to this repository.
-  void updateStudy(Study study);
+  /// In case [study] is not stored in this repository, nothing happens.
+  void updateStudy(TStudy study);
 
   /// Remove [study] which is already stored in the repository.
   /// In case [study] is not stored in this repository, nothing happens.
-  void removeStudy(Study study);
+  void removeStudy(TStudy study);
 }

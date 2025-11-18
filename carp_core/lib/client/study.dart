@@ -14,12 +14,13 @@ part of 'carp_core_client.dart';
 /// [deploymentStatus], [status], and [deployment] can be listened to.
 /// Moreover, the [events] stream emits a [StudyStatusEvent] event every
 /// time the status of a study changes.
-class Study with ChangeNotifier {
+class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
+    with ChangeNotifier {
   final DateTime _createdOn;
   final String _studyDeploymentId;
   final String _deviceRoleName;
   StudyDeploymentStatus? _deploymentStatus;
-  PrimaryDeviceDeployment? _deployment;
+  TDeviceDeployment? _deployment;
 
   final StreamController<StudyStatusEvent> _eventController =
       StreamController<StudyStatusEvent>.broadcast();
@@ -31,7 +32,7 @@ class Study with ChangeNotifier {
     String deviceRoleName, [
     DateTime? createdOn,
     StudyDeploymentStatus? deploymentStatus,
-    PrimaryDeviceDeployment? deployment,
+    TDeviceDeployment? deployment,
   ]) : _studyDeploymentId = studyDeploymentId,
        _deviceRoleName = deviceRoleName,
        _createdOn = createdOn ?? DateTime.now(),
@@ -55,7 +56,7 @@ class Study with ChangeNotifier {
   StudyDeploymentStatus? get deploymentStatus => _deploymentStatus;
 
   /// The deployment for this study, when received from the deployment service.
-  PrimaryDeviceDeployment? get deployment => _deployment;
+  TDeviceDeployment? get deployment => _deployment;
 
   /// The status of this study based on [deploymentStatus].
   StudyStatus get status => switch (deploymentStatus?.status) {
@@ -80,7 +81,7 @@ class Study with ChangeNotifier {
 
   /// A new primary device [deployment] determining what data to collect for
   /// this study has been received.
-  void deviceDeploymentReceived(PrimaryDeviceDeployment deployment) {
+  void deviceDeploymentReceived(TDeviceDeployment deployment) {
     if (deploymentStatus == null) {
       deploymentError(
         "Can't receive device deployment before having received deployment status.",
