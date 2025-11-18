@@ -341,7 +341,7 @@ class AppTaskController {
             // add the stream of measurements to the overall smartphone deployment controller
             // issue => https://github.com/cph-cachet/carp.sensing-flutter/issues/437
             SmartPhoneClientManager()
-                .getStudyController(study!)
+                .getStudyController(study)
                 ?.executor
                 .addMeasurements(executor.measurements);
 

@@ -132,34 +132,19 @@ class SmartphoneStudyController {
   /// Handles the reception of a new or updated [deployment].
   ///
   /// This entails configuring devices, data manager, and executor to get
-  /// ready to handle sampling of data. Note that data sampling is NOT started
-  /// automatically on reception of a new deployment. This has to be done explicitly
-  /// by calling the [start] method.
+  /// ready to handle sampling of data. Data sampling is started if the
+  /// [SmartphoneStudy.samplingStatus] is in a resumed state.
   Future<void> _deviceDeploymentReceived() async {
-    assert(
-      study.deployment is SmartphoneDeployment,
-      'A StudyDeploymentController can only work with a SmartphoneDeployment device deployment',
-    );
-
     // fast out if study has been stopped
     if (study.status == StudyStatus.Stopped) {
       info('$runtimeType - Study has been stopped and cannot be started.');
       return;
     }
 
-    // fast out if already deployed
-    if (study.deployment != null &&
-        study.status.index >= StudyStatus.Deployed.index) {
-      info(
-        '$runtimeType - Study deployment already deployed. Skipping deployment.',
-      );
-      return;
-    }
-
     info('$runtimeType - Configuring based on new deployment information...');
 
     // initialize all devices from the deployment, incl. this smartphone.
-    initializeDevices();
+    _initializeDevices();
 
     // try to register relevant connected devices
     tryRegisterRemainingDevicesToRegister();
@@ -190,7 +175,7 @@ class SmartphoneStudyController {
     await connectAllConnectableDevices();
 
     // start heartbeat monitoring
-    if (SmartPhoneClientManager().heartbeat) startHeartbeatMonitoring();
+    if (SmartPhoneClientManager().heartbeat) _startHeartbeatMonitoring();
 
     // listen to all measurements to keep track of sampling size
     measurements.listen((_) => _samplingSize++);
@@ -231,17 +216,11 @@ class SmartphoneStudyController {
     if (_deviceController.hasDevice(deviceType)) {
       DeviceManager deviceManager = _deviceController.getDevice(deviceType)!;
 
-      // create a registration based on the device manager's unique id and name of the device
-      var registration = deviceManager.configuration?.createRegistration(
-        deviceId: deviceManager.id,
-        deviceDisplayName: deviceManager.displayName,
-      );
-
       try {
         await _deploymentService.registerDevice(
           study.studyDeploymentId,
           deviceRoleName,
-          registration!,
+          deviceManager.registration,
         );
       } catch (error) {
         warning(
@@ -336,16 +315,16 @@ class SmartphoneStudyController {
   }
 
   /// Initialize all devices in this [deployment].
-  void initializeDevices() {
+  void _initializeDevices() {
     assert(deployment != null, 'Deployment is null.');
 
     for (var configuration in deployment!.devices) {
-      initializeDevice(configuration);
+      _initializeDevice(configuration);
     }
   }
 
   /// Initialize the device specified in the [configuration].
-  void initializeDevice(DeviceConfiguration configuration) {
+  void _initializeDevice(DeviceConfiguration configuration) {
     if (_deviceController.hasDevice(configuration.type)) {
       _deviceController.devices[configuration.type]?.initialize(configuration);
     } else {
@@ -360,7 +339,7 @@ class SmartphoneStudyController {
 
   /// Start heartbeat monitoring for all devices, incl. the phone, for the
   /// [deployment] controlled by this controller.
-  void startHeartbeatMonitoring() {
+  void _startHeartbeatMonitoring() {
     for (var configuration in deployment!.devices) {
       _deviceController
           .getDevice(configuration.type)

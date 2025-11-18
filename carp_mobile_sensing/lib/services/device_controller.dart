@@ -63,9 +63,9 @@ class DeviceController extends DeviceDataCollectorFactory {
 
   /// Create a device manager for
   DeviceManager? createDevice(
-    String deviceType,
-    DeviceRegistration deviceRegistration,
-  ) {
+    String deviceType, [
+    DeviceRegistration? deviceRegistration,
+  ]) {
     // early out if already registered
     if (devices.containsKey(deviceType)) return devices[deviceType]!;
 

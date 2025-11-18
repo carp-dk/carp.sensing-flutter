@@ -118,29 +118,20 @@ Future<void> example_0() async {
   await client.configure();
   var study = await client.addStudyFromProtocol(protocol);
 
-  // Get the study controller and try to deploy the study.
-  //
-  // Note that if the study has already been deployed on this phone
-  // it has been cached locally in a file and the local cache will
-  // be used pr. default.
-  // If not deployed before (i.e., cached) the study deployment will be
-  // fetched from the deployment service.
-  SmartphoneStudyController? controller = client.getController(
-    study.studyDeploymentId,
-    study.deviceRoleName,
-  );
-  await controller?.tryDeployment();
-
-  // Configure the controller.
-  await controller?.configure();
-
   // STEP III -- START THE STUDY
 
-  // Start the data sampling
-  controller?.start();
+  // Start the study.
+  //
+  // This will first deploy the study since it has not been deployed yet and
+  // the start the study. Data sampling will NOT be started, since the study's
+  // [samplingStatus] is still not resumed.
+  SmartPhoneClientManager().start();
+
+  // Now resume data sampling.
+  SmartPhoneClientManager().resume();
 
   // Listening and print all measurements collected
-  controller?.measurements.forEach(print);
+  SmartPhoneClientManager().measurements.forEach(print);
 }
 
 /// This is an example of how to set up a study.
@@ -195,15 +186,9 @@ void example_1() async {
       deviceRoleName: phone.roleName,
     ),
   );
-  SmartphoneStudyController? controller = client.getStudyRuntime(
-    study.studyDeploymentId,
-  );
-
-  // Deploy the study on this phone.
-  await controller?.tryDeployment();
+  SmartphoneStudyController? controller = client.getStudyController(study);
 
   // Configure the controller and start sampling.
-  await controller?.configure();
   controller?.start();
 
   // Print all data events from the study
@@ -296,12 +281,7 @@ void example_2() async {
       deviceRoleName: phone.roleName,
     ),
   );
-  SmartphoneStudyController? controller = client.getStudyRuntime(
-    study.studyDeploymentId,
-  );
-
-  // deploy the study on this phone (controller)
-  await controller?.tryDeployment();
+  SmartphoneStudyController? controller = client.getStudyController(study);
 
   // start sampling
   controller?.start();
@@ -415,13 +395,7 @@ void example_3() async {
 
   // add and deploy the protocol
   final study = await client.addStudyFromProtocol(protocol);
-  final controller = client.getStudyRuntime(study.studyDeploymentId);
-
-  // configure the controller
-  controller?.configure(
-    dataEndPoint: FileDataEndPoint(bufferSize: 50 * 1000, encrypt: false),
-    transformer: (data) => data,
-  );
+  final controller = client.getStudyController(study);
 }
 
 /// Example of device management.
@@ -450,7 +424,7 @@ void example_4() async {
     String deviceRoleName = deviceStatus.device.roleName;
 
     // create and register the device in the CAMS DeviceRegistry
-    await DeviceController().createDevice(type);
+    DeviceController().createDevice(type);
 
     // if the device manager is created successfully on the phone
     if (DeviceController().hasDevice(type)) {
