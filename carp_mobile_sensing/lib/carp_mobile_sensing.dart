@@ -1,14 +1,15 @@
-/// This library contains the software architecture for the CARP Mobile Sensing (CAMS)
-/// framework implemented in Flutter. Supports cross-platform (iOS and Android) sensing.
+/// This library contains the software architecture for the CARP Mobile Sensing
+/// (CAMS) framework implemented in Flutter.
+/// Supports cross-platform (iOS and Android) mobile sensing.
 ///
 /// The CAMS software architecture is a domain-drive design (DDD) model using an
 /// onion-based layout with the following onion layers:
 ///
 ///  * [domain] - contains the core domain model for CAMS which extends the domain
 ///             model of the [carp_core](https://pub.dev/packages/carp_core) domain model.
+///             This also include definition of service interfaces.
 ///  * [runtime] - contains the business logic for executing a sensing study (normally
-///              called 'application services' in DDD).
-///  * [services] - contains all services definitions used for sensing.
+///              called 'application' in DDD).
 ///  * [infrastructure] - contains specific implementation of the services used.
 ///
 /// Domain-driven design (DDD) is a software design approach that focuses on modeling

@@ -5,155 +5,165 @@
  * can be found in the LICENSE file.
  */
 
-import 'package:flutter/material.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:flutter/material.dart' hide TimeOfDay;
 
-void main() => runApp(const MobileSensingApp());
+import 'trigger_example.dart';
 
-class MobileSensingApp extends StatelessWidget {
-  const MobileSensingApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mobile Sensing',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData.dark(),
-      home: const StudyPage(),
-    );
-  }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  CarpMobileSensing.ensureInitialized();
+  runApp(const CARPMobileSensingApp());
 }
 
-class StudyPage extends StatefulWidget {
-  const StudyPage({super.key});
+class CARPMobileSensingApp extends StatelessWidget {
+  const CARPMobileSensingApp({super.key});
 
   @override
-  State<StudyPage> createState() => StudyPageState();
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'CARP Mobile Sensing Demo',
+    theme: ThemeData(primarySwatch: Colors.blue),
+    home: const ConsolePage(title: 'CARP Mobile Sensing Demo'),
+  );
 }
 
-/// Shows a list of studies in a ListView.
-class StudyPageState extends State<StudyPage> {
-  SmartPhoneClientManager client = SmartPhoneClientManager();
+class ConsolePage extends StatefulWidget {
+  final String title;
+  const ConsolePage({super.key, required this.title});
+  @override
+  Console createState() => Console();
+}
+
+/// A simple UI with a console that shows the sensed data in a json format.
+class Console extends State<ConsolePage> {
+  String _log = '';
 
   @override
   void initState() {
-    client.configure(enableNotifications: false, askForPermissions: true);
-
-    // Listening on all the measurements print them as json.
-    SmartPhoneClientManager().measurements.listen(
-      (data) => print(toJsonString(data)),
-    );
-
     super.initState();
+    Settings().debugLevel = DebugLevel.debug;
+    Settings().init().then((_) {
+      Sensing().init().then((_) {
+        log('Client state : ${SmartPhoneClientManager().state}');
+      });
+    });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('CARP Mobile Sensing')),
-      body: ListView.builder(
-        padding: EdgeInsets.symmetric(vertical: 4.0),
-        itemCount: client.studies.length,
-        itemBuilder: studyTileWithBorder,
+  void dispose() {
+    Sensing().dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(widget.title)),
+    body: SingleChildScrollView(
+      child: StreamBuilder(
+        stream: SmartPhoneClientManager().measurements,
+        builder: (context, AsyncSnapshot<Measurement> snapshot) => Text(
+          (snapshot.hasData) ? _log += toJsonString(snapshot.data) : _log,
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addStudy,
-        tooltip: 'Add new study',
-        child: Icon(Icons.add),
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: restart,
+      tooltip: 'Start/Stop study',
+      child: StreamBuilder<ExecutorState>(
+        stream: Sensing().controller?.executor.stateEvents,
+        initialData: ExecutorState.created,
+        builder: (_, _) =>
+            Sensing().isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
       ),
+    ),
+  );
+
+  /// Add [msg] to the console log.
+  void log(String msg) => setState(() => _log += '$msg\n');
+
+  /// Clear the console log.
+  void clearLog() => setState(() => _log = '');
+
+  /// Restart (start/stop) sampling.
+  void restart() {
+    setState(() {
+      Sensing().isRunning ? Sensing().pause() : Sensing().resume();
+    }); // to update the play/stop icon
+  }
+}
+
+/// This class handles sensing logic.
+///
+/// This example is useful for creating a Business Logical Object (BLOC) in a
+/// Flutter app.
+///
+/// For a much more elaborate example of a app using CAMS, see the CARP Mobile
+/// Sensing App at https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app
+class Sensing {
+  static final Sensing _instance = Sensing._();
+  Sensing._() {
+    ExecutorFactory().registerTriggerFactory(RemoteTriggerFactory());
+  }
+
+  /// The singleton Sensing instance.
+  factory Sensing() => _instance;
+
+  /// The study deployed on this phone.
+  SmartphoneStudy? study;
+
+  /// Initialize sensing.
+  Future<void> init() async {
+    // Get the protocol. See below for how to configure a study protocol.
+    final protocol = await LocalStudyProtocolManager().getStudyProtocol('');
+
+    // Create and configure a client manager for this phone, add the protocol
+    // and start the study.
+    await SmartPhoneClientManager().configure();
+    study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
+    SmartPhoneClientManager().start();
+
+    // Listening on the data stream and print them as json.
+    SmartPhoneClientManager().measurements.listen(
+      (data) => print(toJsonString(data)),
     );
   }
 
-  /// Create a list tile for a study showing the study's description and runtime
-  /// status using a StreamBuilder.
-  ///
-  /// The leading icon can be used to control the study in three different ways:
-  ///  * start the study
-  ///  * resume data sampling
-  ///  * pause data sampling
-  ///
-  /// This is handled in the [runStudy] method.
-  Widget studyTileWithBorder(BuildContext context, int index) {
-    var study = client.studies[index];
+  /// The study runtime controller for this [study]
+  SmartphoneStudyController? get controller => (study != null)
+      ? SmartPhoneClientManager().getStudyController(study!)
+      : null;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-      child: StreamBuilder<StudyStatusEvent>(
-        stream: study.events,
-        builder: (context, AsyncSnapshot<StudyStatusEvent> snapshot) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(color: Colors.grey.shade300, width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8.0,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ListTile(
-              isThreeLine: true,
-              leading: Icon(switch (study.samplingStatus) {
-                ExecutorState.paused ||
-                ExecutorState.initialized => Icons.play_arrow,
-                ExecutorState.resumed => Icons.stop,
-                _ => Icons.refresh,
-              }, size: 40),
-              title: Text('Study #$index'),
-              subtitle: Text(study.toString()),
-              trailing: executorStateIcon[study.samplingStatus],
-              onTap: () => runStudy(study),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  /// Is sensing running, i.e. has the study executor been started?
+  // bool get isRunning => controller?.executor.state == ExecutorState.resumed;
+  bool get isRunning => study?.samplingStatus == ExecutorState.resumed;
 
-  /// A set of icons to illustrate the [SmartphoneStudy.samplingStatus].
-  static Map<ExecutorState, Icon> get executorStateIcon => {
-    ExecutorState.created: Icon(Icons.child_care),
-    ExecutorState.initialized: Icon(Icons.check),
-    ExecutorState.resumed: Icon(Icons.radio_button_checked),
-    ExecutorState.paused: Icon(Icons.radio_button_unchecked),
-    ExecutorState.undefined: Icon(Icons.error_outline),
-  };
+  /// Start sensing
+  void resume() => controller?.resume();
 
-  /// Add a new study to the client's list of studies based on the [protocol]
-  /// specified below.
-  void addStudy() =>
-      client.addStudyFromProtocol(protocol).then((_) => setState(() {}));
+  /// Stop sensing
+  void pause() => controller?.pause();
 
-  /// Run (start, resume, pause) [study] based on its current state.
-  void runStudy(SmartphoneStudy study) => setState(() {
-    var controller = client.getStudyController(study);
+  /// Dispose sensing
+  void dispose() => SmartPhoneClientManager().dispose();
+}
 
-    // If the study has not been started (and deployed) yet, do this first
-    if (study.status.index <= StudyStatus.Deployed.index) {
-      controller?.start();
-    } else {
-      if (study.isSampling) {
-        controller?.pause();
-      } else {
-        controller?.resume();
-      }
-    }
-  });
+/// This is a simple local [StudyProtocolManager].
+///
+/// This class shows how to configure a [StudyProtocol] with devices,
+/// triggers, tasks, measures, and task controls.
+class LocalStudyProtocolManager implements StudyProtocolManager {
+  @override
+  Future<void> initialize() async {}
 
-  /// Create a new study protocol.
-  SmartphoneStudyProtocol get protocol {
+  /// Create a new CAMS study protocol.
+  @override
+  Future<SmartphoneStudyProtocol> getStudyProtocol(String id) async {
+    // Create a protocol. Note that the [id] is not used for anything.
     SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
       ownerId: 'AB',
-      name: 'Demo Protocol',
+      name: 'Protocol - id: $id',
       dataEndPoint: SQLiteDataEndPoint(),
     );
 
@@ -260,7 +270,9 @@ class StudyPageState extends State<StudyPage> {
     // );
 
     // var task_2 = BackgroundTask(
-    //   measures: [Measure(type: DeviceSamplingPackage.BATTERY_STATE)],
+    //   measures: [
+    //     Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+    //   ],
     // );
 
     // // Start both task_1 and task_2
@@ -346,5 +358,10 @@ class StudyPageState extends State<StudyPage> {
     //     phone);
 
     return protocol;
+  }
+
+  @override
+  Future<bool> saveStudyProtocol(String studyId, StudyProtocol protocol) async {
+    throw UnimplementedError();
   }
 }

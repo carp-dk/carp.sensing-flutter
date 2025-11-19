@@ -21,6 +21,9 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   /// The status of the sampling of this study.
   ExecutorState samplingStatus = ExecutorState.created;
 
+  /// Is this study sampling data?
+  bool get isSampling => samplingStatus == ExecutorState.resumed;
+
   @override
   Stream<StudyStatusEvent<SmartphoneStudy>> get events => super.events.map(
     (event) => StudyStatusEvent<SmartphoneStudy>(this, event.event),
