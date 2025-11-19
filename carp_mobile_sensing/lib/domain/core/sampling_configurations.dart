@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// A sampling configuration that saves the last time it was sampled.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)

@@ -212,9 +212,9 @@ enum StudyStatusEventTypes {
   DeploymentError,
 }
 
-/// An event related to a changes to a [Study].
-class StudyStatusEvent {
-  final Study study;
+/// An event related to a changes to a [study].
+class StudyStatusEvent<TStudy extends Study> {
+  final TStudy study;
   final StudyStatusEventTypes event;
   const StudyStatusEvent(this.study, this.event);
   @override

@@ -5,7 +5,7 @@
  * can be found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// Contains the entire description and configuration for a study deployment on
 /// a smartphone.

@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// Provides (static) information about the local device.
 ///

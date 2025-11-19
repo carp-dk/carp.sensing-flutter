@@ -80,7 +80,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
       ),
     );
 
-    // then "control" the task by either starting or stopping it
+    // then "control" the task by either resuming or pausing it
     if (taskControl.control == Control.Start) {
       taskExecutor?.resume();
     } else if (taskControl.control == Control.Stop) {

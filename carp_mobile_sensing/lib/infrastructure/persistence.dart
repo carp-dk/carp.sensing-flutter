@@ -86,7 +86,7 @@ class Persistence {
           '$CREATED_ON_COLUMN TEXT, '
           '$UPDATED_ON_COLUMN TEXT, '
           '$DEPLOYED_ON_COLUMN TEXT, '
-          '$SAMPLING_STATUS_COLUMN INT'
+          '$SAMPLING_STATUS_COLUMN INTEGER, '
           '$DEPLOYMENT_STATUS_COLUMN TEXT, '
           '$DEPLOYMENT_COLUMN TEXT)',
         );
@@ -105,13 +105,13 @@ class Persistence {
 
     // Listen to changes to studies in the client repository so we can save them.
     SmartphoneClientRepository().userTaskEvents.listen(
-      (study) => saveStudy(study.study),
+      (study) => updateStudy(study.study),
     );
 
     // Listen to changes to the app task queue so we can save them.
     AppTaskController().userTaskEvents.listen((task) => saveUserTask(task));
 
-    info('$runtimeType - SQLite DB initialized - name: $databaseName');
+    info('$runtimeType - SQLite DB initialized - file: $databaseName');
   }
 
   /// Close the persistence layer. After close is called, no deployment can be
@@ -154,43 +154,58 @@ class Persistence {
 
   /// Save the [study] persistently to a local cache.
   /// Returns true if successful.
-  Future<bool> saveStudy(Study study) async {
+  Future<bool> saveStudy(SmartphoneStudy study) async {
     bool success = true;
     try {
-      final Map<String, dynamic> map = {
-        STUDY_DEPLOYMENT_ID_COLUMN: study.studyDeploymentId,
-        DEVICE_ROLE_NAME_COLUMN: study.deviceRoleName,
-        PARTICIPANT_ID_COLUMN: '',
-        PARTICIPANT_ROLE_NAME_COLUMN: '',
-        CREATED_ON_COLUMN: study.createdOn.toUtc().toIso8601String(),
-        UPDATED_ON_COLUMN: DateTime.now().toUtc().toIso8601String(),
-        DEPLOYED_ON_COLUMN: study.deploymentStatus?.createdOn
-            .toUtc()
-            .toIso8601String(),
-        SAMPLING_STATUS_COLUMN: study is SmartphoneStudy
-            ? study.samplingStatus.index
-            : 0,
-        DEPLOYMENT_STATUS_COLUMN: jsonEncode(study.deploymentStatus),
-        DEPLOYMENT_COLUMN: jsonEncode(study.deployment),
-      };
-
-      if (study.deployment is SmartphoneDeployment) {
-        final d = study.deployment as SmartphoneDeployment;
-        map[PARTICIPANT_ID_COLUMN] = d.participantId;
-        map[PARTICIPANT_ROLE_NAME_COLUMN] = d.participantRoleName;
-      }
-
       await _database?.insert(
         STUDY_TABLE_NAME,
-        map,
+        _getMap(study),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+      debug('$runtimeType - Inserted study - $study');
     } catch (exception) {
       success = false;
-      warning('$runtimeType - Failed to save deployment - $exception');
+      warning('$runtimeType - Failed to save study - $exception');
     }
     return success;
   }
+
+  /// Update the [study] persistently to a local cache.
+  /// Returns true if successful.
+  Future<bool> updateStudy(SmartphoneStudy study) async {
+    bool success = true;
+    try {
+      await _database?.update(
+        STUDY_TABLE_NAME,
+        _getMap(study),
+        where:
+            '$STUDY_DEPLOYMENT_ID_COLUMN = ? AND '
+            '$DEVICE_ROLE_NAME_COLUMN = ?',
+        whereArgs: [study.studyDeploymentId, study.deviceRoleName],
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      debug('$runtimeType - Updated study - $study');
+    } catch (exception) {
+      success = false;
+      warning('$runtimeType - Failed to update study - $exception');
+    }
+    return success;
+  }
+
+  Map<String, dynamic> _getMap(SmartphoneStudy study) => {
+    STUDY_DEPLOYMENT_ID_COLUMN: study.studyDeploymentId,
+    DEVICE_ROLE_NAME_COLUMN: study.deviceRoleName,
+    PARTICIPANT_ID_COLUMN: study.deployment?.participantId,
+    PARTICIPANT_ROLE_NAME_COLUMN: study.deployment?.participantRoleName,
+    CREATED_ON_COLUMN: study.createdOn.toUtc().toIso8601String(),
+    UPDATED_ON_COLUMN: DateTime.now().toUtc().toIso8601String(),
+    DEPLOYED_ON_COLUMN: study.deploymentStatus?.createdOn
+        .toUtc()
+        .toIso8601String(),
+    SAMPLING_STATUS_COLUMN: study.samplingStatus.index,
+    DEPLOYMENT_STATUS_COLUMN: jsonEncode(study.deploymentStatus),
+    DEPLOYMENT_COLUMN: jsonEncode(study.deployment),
+  };
 
   /// Return the [SmartphoneStudy] with [studyDeploymentId] and [deviceRoleName],
   /// or null when no such study is found.

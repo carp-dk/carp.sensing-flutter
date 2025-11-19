@@ -38,7 +38,8 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
-  static const String ACCELERATION_FEATURES = 'accelerationfeatures';
+  static const String ACCELERATION_FEATURES =
+      '${CarpDataTypes.CARP_NAMESPACE}.accelerationfeatures';
 
   /// Rotation of the phone in x,y,z (typically measured by a gyroscope).
   ///  * Event-based measure.

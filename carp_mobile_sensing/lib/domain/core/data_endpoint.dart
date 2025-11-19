@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// Specify an endpoint where a [DataManager] can upload data.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -20,10 +20,8 @@ class DataEndPoint extends Serializable {
   /// Creates a [DataEndPoint].
   /// [type] is defined in [DataEndPointTypes].
   /// [dataFormat] is defined in [NameSpace]. Default is [NameSpace.CARP].
-  DataEndPoint({
-    required this.type,
-    this.dataFormat = NameSpace.CARP,
-  }) : super();
+  DataEndPoint({required this.type, this.dataFormat = NameSpace.CARP})
+    : super();
 
   @override
   Function get fromJsonFunction => _$DataEndPointFromJson;
@@ -110,7 +108,8 @@ class FileDataEndPoint extends DataEndPoint {
   Map<String, dynamic> toJson() => _$FileDataEndPointToJson(this);
 
   @override
-  String toString() => '$runtimeType - buffer ${(bufferSize / 1000).round()} KB'
+  String toString() =>
+      '$runtimeType - buffer ${(bufferSize / 1000).round()} KB'
       '${zip ? ', zipped' : ''}${encrypt ? ', encrypted' : ''}';
 }
 

@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// A mixin holding smartphone-specific data for a [SmartphoneStudyProtocol] and
 /// [SmartphoneDeployment].

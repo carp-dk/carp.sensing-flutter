@@ -424,7 +424,7 @@ void example_4() async {
     String deviceRoleName = deviceStatus.device.roleName;
 
     // create and register the device in the CAMS DeviceRegistry
-    DeviceController().createDevice(type);
+    DeviceController().getDevice(type);
 
     // if the device manager is created successfully on the phone
     if (DeviceController().hasDevice(type)) {

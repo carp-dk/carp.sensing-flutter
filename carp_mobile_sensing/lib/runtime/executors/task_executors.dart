@@ -59,8 +59,8 @@ abstract class TaskExecutor<TConfig extends TaskConfiguration>
 class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   StreamSubscription<ExecutorState>? _subscription;
 
-  /// Are all [probes] in a stopped state?
-  bool get haveAllProbesStopped =>
+  /// Are all [probes] in a paused state?
+  bool get haveAllProbesPaused =>
       !probes.any((probe) => probe.state != ExecutorState.paused);
 
   /// Connect all connectable devices used by the [probes] in this
@@ -88,18 +88,18 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
       return false;
     }
 
-    // Listen to stop this background executor when all of its underlying
-    // probes have stopped - Issue #384
-    _subscription = states.where((event) => event == ExecutorState.paused).listen(
-      (_) {
-        if (haveAllProbesStopped) {
-          debug(
-            '$runtimeType - all probes have stopped - stopping this $this too.',
-          );
-          pause();
-        }
-      },
-    );
+    // Listen to pause this background executor when all of its underlying
+    // probes have paused - Issue #384
+    _subscription = states
+        .where((event) => event == ExecutorState.paused)
+        .listen((_) {
+          if (haveAllProbesPaused) {
+            debug(
+              '$runtimeType - all probes are paused - pausing this $this too.',
+            );
+            pause();
+          }
+        });
 
     // Check if the devices for this task is connected.
     await connectAllConnectableDevices();
@@ -170,7 +170,7 @@ class AppTaskExecutor<TConfig extends AppTask> extends TaskExecutor<TConfig> {
     return userTask != null;
   }
 
-  // does nothing when stopping an app task
+  // does nothing when pausing an app task
   @override
   Future<bool> onPause() async => true;
 }

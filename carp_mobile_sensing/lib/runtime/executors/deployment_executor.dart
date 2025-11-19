@@ -36,12 +36,12 @@ class SmartphoneDeploymentExecutor
 
       TaskControlExecutor executor;
 
-      // a TriggeredAppTaskExecutor need BOTH a [Schedulable] trigger and an [AppTask]
+      // A TriggeredAppTaskExecutor need BOTH a [Schedulable] trigger and an [AppTask]
       // to schedule
       if (trigger is Schedulable && task is AppTask) {
         executor = AppTaskControlExecutor(this, taskControl, trigger, task);
       } else {
-        // all other cases we use the normal background triggering relying on the app
+        // All other cases we use the normal background triggering relying on the app
         // running in the background
         executor = TaskControlExecutor(this, taskControl, trigger, task);
       }

@@ -28,9 +28,9 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 
-part 'services/data_manager.dart';
-part 'services/device_controller.dart';
-part 'services/notification_controller.dart';
-part 'services/settings.dart';
-part 'services/study_manager.dart';
-part 'services/log.dart';
+part 'domain/services/data_manager.dart';
+part 'runtime/device_controller.dart';
+part 'domain/services/notification_controller.dart';
+part 'infrastructure/settings.dart';
+part 'infrastructure/study_manager.dart';
+part 'infrastructure/phone/logging.dart';

@@ -44,8 +44,8 @@ part 'infrastructure/data_managers/console_data_manager.dart';
 part 'infrastructure/data_managers/file_data_manager.dart';
 part 'infrastructure/data_managers/sqlite_data_manager.dart';
 
-part 'infrastructure/file_study_manager.dart';
-part 'infrastructure/local_notification_controller.dart';
+part 'infrastructure/phone/file_study_manager.dart';
+part 'infrastructure/phone/local_notification_controller.dart';
 part 'infrastructure/deployment_service.dart';
 part 'infrastructure/persistence.dart';
-part 'infrastructure/client_repository.dart';
+part 'runtime/client_repository.dart';

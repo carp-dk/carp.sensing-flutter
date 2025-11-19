@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// Signature of a data transformer.
 typedef DataTransformer = Data Function(Data);

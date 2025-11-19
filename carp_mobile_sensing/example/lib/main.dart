@@ -1,7 +1,8 @@
 /*
- * Copyright 2018 the Technical University of Denmark (DTU).
- * Use of this source code is governed by a MIT-style license that can be
- * found in the LICENSE file.
+ * Copyright (c) 2025, the Technical University of Denmark (DTU).
+ * All rights reserved. Please see the AUTHORS file for details. 
+ * Use of this source code is governed by a MIT-style license that 
+ * can be found in the LICENSE file.
  */
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -88,7 +89,7 @@ class Console extends State<ConsolePage> {
   /// Restart (start/stop) sampling.
   void restart() {
     setState(() {
-      Sensing().isRunning ? Sensing().stop() : Sensing().start();
+      Sensing().isRunning ? Sensing().pause() : Sensing().resume();
     }); // to update the play/stop icon
   }
 }
@@ -110,19 +111,18 @@ class Sensing {
   factory Sensing() => _instance;
 
   /// The study deployed on this phone.
-  Study? study;
+  SmartphoneStudy? study;
 
   /// Initialize sensing.
   Future<void> init() async {
     // Get the protocol. See below for how to configure a study protocol.
     final protocol = await LocalStudyProtocolManager().getStudyProtocol('');
 
-    // Create and configure a client manager for this phone and add the protocol.
-    SmartPhoneClientManager().configure().then(
-      (_) => SmartPhoneClientManager()
-          .addStudyFromProtocol(protocol)
-          .then((value) => study = value),
-    );
+    // Create and configure a client manager for this phone, add the protocol
+    // and start the study.
+    await SmartPhoneClientManager().configure();
+    study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
+    SmartPhoneClientManager().start();
 
     // Listening on the data stream and print them as json.
     SmartPhoneClientManager().measurements.listen(
@@ -132,17 +132,18 @@ class Sensing {
 
   /// The study runtime controller for this [study]
   SmartphoneStudyController? get controller => (study != null)
-      ? SmartPhoneClientManager().getStudyRuntime(study!.studyDeploymentId)
+      ? SmartPhoneClientManager().getStudyController(study!)
       : null;
 
   /// Is sensing running, i.e. has the study executor been started?
-  bool get isRunning => controller?.executor.state == ExecutorState.resumed;
+  // bool get isRunning => controller?.executor.state == ExecutorState.resumed;
+  bool get isRunning => study?.samplingStatus == ExecutorState.resumed;
 
   /// Start sensing
-  void start() => controller?.start();
+  void resume() => controller?.resume();
 
   /// Stop sensing
-  void stop() => controller?.executor.pause();
+  void pause() => controller?.pause();
 
   /// Dispose sensing
   void dispose() => SmartPhoneClientManager().dispose();

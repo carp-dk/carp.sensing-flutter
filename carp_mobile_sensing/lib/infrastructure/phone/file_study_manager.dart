@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../infrastructure.dart';
+part of '../../infrastructure.dart';
 
 /// Retrieve and store [StudyProtocol] json definitions on the device's local
 /// file system.
@@ -30,7 +30,8 @@ class FileStudyProtocolManager implements StudyProtocolManager {
     try {
       String jsonString = File(filename(studyId)).readAsStringSync();
       study = SmartphoneStudyProtocol.fromJson(
-          json.decode(jsonString) as Map<String, dynamic>);
+        json.decode(jsonString) as Map<String, dynamic>,
+      );
     } catch (exception) {
       warning("Failed to load study '$studyId' - $exception");
     }

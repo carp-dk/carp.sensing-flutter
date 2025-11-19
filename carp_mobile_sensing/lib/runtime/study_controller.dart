@@ -143,13 +143,12 @@ class SmartphoneStudyController {
 
     info('$runtimeType - Configuring based on new deployment information...');
 
-    // initialize all devices from the deployment, incl. this smartphone.
-    _initializeDevices();
-
-    // try to register relevant connected devices
+    // Try to register the remaining connected devices with the deployment service.
+    // Note that we allow this to run asynchronously, since this is not critical to
+    // deploying this study.
     tryRegisterRemainingDevicesToRegister();
 
-    // initialize the data manager
+    // Initialize the data manager
     if (dataEndPoint != null) {
       _dataManager = DataManagerRegistry().create(dataEndPoint!.type);
     }
@@ -167,7 +166,10 @@ class SmartphoneStudyController {
       measurements,
     );
 
-    // initialize the executor, which recursively initializes all executors and probes
+    // Initialize all devices from the deployment, incl. this smartphone.
+    _initializeDevices();
+
+    // Initialize the executor, which recursively initializes all executors and probes
     _executor.initialize(deployment!, deployment!);
 
     // Connect to all connectable devices, incl. this phone.
@@ -193,7 +195,7 @@ class SmartphoneStudyController {
         '     role name : ${deployment!.deviceConfiguration.roleName}\n'
         '      platform : ${DeviceInfo().platform.toString()}\n'
         '     device ID : ${DeviceInfo().deviceID.toString()}\n'
-        ' data endpoint : $dataEndPoint\n'
+        ' data endpoint : ${dataEndPoint?.type}\n'
         '  data manager : $_dataManager\n'
         '===============================================================\n';
     debugPrint(statusMsg);
@@ -404,7 +406,7 @@ class SmartphoneStudyController {
   /// Called when this controller is disposed.
   ///
   /// This entails:
-  ///   * stopping data sampling
+  ///   * pausing data sampling
   ///   * closing the data manager (e.g., flushing data to a file)
   ///
   /// Note that all cached deployment information and any data sampled

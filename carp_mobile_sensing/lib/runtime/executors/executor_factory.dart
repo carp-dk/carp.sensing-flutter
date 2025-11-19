@@ -83,7 +83,8 @@ class ExecutorFactory {
         _triggerExecutors[triggerId] = executor;
       } else {
         warning(
-            "$runtimeType - Unknown trigger type. Cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'.");
+          "$runtimeType - Unknown trigger type. Cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'.",
+        );
         return null;
       }
     }
@@ -134,11 +135,8 @@ class SmartphoneTriggerFactory implements TriggerFactory {
       startTime: const TimeOfDay(hour: 1),
       endTime: const TimeOfDay(hour: 2),
     ),
-    UserTaskTrigger(
-      taskName: 'ignored',
-      triggerCondition: UserTaskState.done,
-    ),
-    NoUserTaskTrigger(taskName: 'ignored')
+    UserTaskTrigger(taskName: 'ignored', triggerCondition: UserTaskState.done),
+    NoUserTaskTrigger(taskName: 'ignored'),
   };
 
   @override
@@ -154,8 +152,10 @@ class SmartphoneTriggerFactory implements TriggerFactory {
     if (trigger is ElapsedTimeTrigger) return ElapsedTimeTriggerExecutor();
 
     if (trigger is ScheduledTrigger) {
-      warning("ScheduledTrigger is not implemented yet. "
-          "Using an 'ImmediateTriggerExecutor' instead.");
+      warning(
+        "ScheduledTrigger is not implemented yet. "
+        "Using an 'ImmediateTriggerExecutor' instead.",
+      );
       return ImmediateTriggerExecutor();
     }
 
@@ -184,8 +184,9 @@ class SmartphoneTriggerFactory implements TriggerFactory {
     if (trigger is NoUserTaskTrigger) return NoUserTaskTriggerExecutor();
 
     warning(
-        "Unknown trigger used - cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'. "
-        "Using an 'ImmediateTriggerExecutor' instead.");
+      "Unknown trigger used - cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'. "
+      "Using an 'ImmediateTriggerExecutor' instead.",
+    );
     return ImmediateTriggerExecutor();
   }
 }

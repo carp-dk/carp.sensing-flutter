@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../infrastructure.dart';
+part of '../../infrastructure.dart';
 
 /// A [NotificationController] based on the [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
 /// Flutter plugin.

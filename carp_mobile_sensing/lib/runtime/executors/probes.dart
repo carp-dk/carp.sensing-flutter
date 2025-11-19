@@ -296,9 +296,9 @@ abstract class StreamProbe extends Probe {
 ///
 /// method in order to provide the stream to collect data from.
 ///
-/// Note that this probe will finish its collection period even if it is stopped.
-/// Hence, data can still be generated from this probe, even if stopped.
-/// Stopping this probe will stop the creation of new collection periods.
+/// Note that this probe will finish its sampling window even if it is paused.
+/// Hence, data can still be generated from this probe, even if paused.
+/// Pausing this probe will stop the creation of new collection periods.
 abstract class PeriodicStreamProbe extends StreamProbe {
   Timer? _timer;
 

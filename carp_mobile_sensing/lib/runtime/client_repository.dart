@@ -10,10 +10,11 @@ part of '../infrastructure.dart';
 /// A [ClientRepository] that runs on a smartphone. Works as a singleton.
 /// Uses the [Persistence] infrastructure to store study information persistently
 /// across app restarts.
-class SmartphoneClientRepository implements ClientRepository {
+class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   static final SmartphoneClientRepository _instance =
       SmartphoneClientRepository._();
-  final StreamGroup<StudyStatusEvent> _group = StreamGroup.broadcast();
+  final StreamGroup<StudyStatusEvent<SmartphoneStudy>> _group =
+      StreamGroup.broadcast();
 
   /// Create the singleton instance and load all studies from persistence storage.
   SmartphoneClientRepository._() {
@@ -26,20 +27,24 @@ class SmartphoneClientRepository implements ClientRepository {
   factory SmartphoneClientRepository() => _instance;
 
   /// The in-memory cache of this repository.
-  Set<Study> _repository = {};
+  Set<SmartphoneStudy> _repository = {};
 
   /// A stream of [StudyStatusEvent] events generate whenever a study change state.
-  Stream<StudyStatusEvent> get userTaskEvents => _group.stream;
+  Stream<StudyStatusEvent<SmartphoneStudy>> get userTaskEvents => _group.stream;
 
   @override
   DeviceRegistration? deviceRegistration;
 
   @override
-  void addStudy(Study study) =>
-      (_repository.add(study)) ? _group.add(study.events) : null;
+  void addStudy(SmartphoneStudy study) {
+    if (_repository.add(study)) {
+      _group.add(study.events);
+      Persistence().saveStudy(study);
+    }
+  }
 
   @override
-  Study? getStudy(String studyDeploymentId, String deviceRoleName) {
+  SmartphoneStudy? getStudy(String studyDeploymentId, String deviceRoleName) {
     try {
       return _repository.firstWhere(
         (study) =>
@@ -52,15 +57,15 @@ class SmartphoneClientRepository implements ClientRepository {
   }
 
   @override
-  List<Study> getStudyList() => _repository.toList();
+  List<SmartphoneStudy> getStudyList() => _repository.toList();
 
   @override
-  void removeStudy(Study study) {
+  void removeStudy(SmartphoneStudy study) {
     _group.remove(study.events);
     _repository.remove(study);
     Persistence().removeStudy(study);
   }
 
   @override
-  void updateStudy(Study study) => Persistence().saveStudy(study);
+  void updateStudy(SmartphoneStudy study) => Persistence().updateStudy(study);
 }

@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../services.dart';
+part of '../../services.dart';
 
 /// A controller of user notifications allow for creating, scheduling, and
 /// canceling user notifications.
@@ -125,24 +125,23 @@ class NoOpNotificationController implements NotificationController {
     int? id,
     required String title,
     String? body,
-  }) async =>
-      0;
+  }) async => 0;
 
   @override
-  Future<int> scheduleNotification(
-          {int? id,
-          required String title,
-          String? body,
-          required DateTime schedule}) async =>
-      0;
+  Future<int> scheduleNotification({
+    int? id,
+    required String title,
+    String? body,
+    required DateTime schedule,
+  }) async => 0;
 
   @override
-  Future<int> scheduleRecurrentNotifications(
-          {int? id,
-          required String title,
-          String? body,
-          required RecurrentScheduledTrigger schedule}) async =>
-      0;
+  Future<int> scheduleRecurrentNotifications({
+    int? id,
+    required String title,
+    String? body,
+    required RecurrentScheduledTrigger schedule,
+  }) async => 0;
 
   @override
   Future<void> cancelNotification(int id) async {}

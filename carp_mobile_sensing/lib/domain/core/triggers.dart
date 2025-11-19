@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// A trigger that does nothing.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)

@@ -60,14 +60,7 @@ void sensing() async {
       deviceRoleName: phone.roleName,
     ),
   );
-  SmartphoneStudyController? controller = client.getStudyRuntime(
-    study.studyDeploymentId,
-  );
-  // deploy the study on this phone
-  await controller?.tryDeployment();
-
-  // configure the controller and start the study
-  await controller?.configure();
+  SmartphoneStudyController? controller = client.getStudyController(study);
   controller?.start();
 
   // listening on the data stream and print them as json to the debug console

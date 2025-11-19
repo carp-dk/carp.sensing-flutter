@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../services.dart';
+part of '../../services.dart';
 
 /// The [DataManager] interface is used to upload [Measurement] objects to any
 /// data manager that implements this interface.
@@ -131,7 +131,8 @@ abstract class AbstractDataManager implements DataManager {
 
   @override
   Future<void> onError(Object? error) async => await onMeasurement(
-      Measurement.fromData(Error(message: error.toString())));
+    Measurement.fromData(Error(message: error.toString())),
+  );
 
   @override
   @mustCallSuper

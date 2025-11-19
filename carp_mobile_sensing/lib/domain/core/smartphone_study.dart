@@ -5,7 +5,7 @@
  * can be found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
 class SmartphoneStudy extends Study<SmartphoneDeployment> {
@@ -20,6 +20,11 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
 
   /// The status of the sampling of this study.
   ExecutorState samplingStatus = ExecutorState.created;
+
+  @override
+  Stream<StudyStatusEvent<SmartphoneStudy>> get events => super.events.map(
+    (event) => StudyStatusEvent<SmartphoneStudy>(this, event.event),
+  );
 
   /// Create a [SmartphoneStudy].
   SmartphoneStudy({

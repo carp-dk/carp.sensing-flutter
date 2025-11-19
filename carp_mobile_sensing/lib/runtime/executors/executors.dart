@@ -173,7 +173,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   @nonVirtual
   void resume() {
     _isResuming = true;
-    info('Starting $this - $configuration');
+    info('Resuming $this - $configuration');
     _stateMachine.resume();
   }
 
@@ -187,7 +187,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   @override
   @nonVirtual
   void pause() {
-    info('Stopping $this - $configuration');
+    info('Pausing $this - $configuration');
     _stateMachine.pause();
   }
 

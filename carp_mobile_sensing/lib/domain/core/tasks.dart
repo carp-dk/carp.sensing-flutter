@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// Signature of Dart function that have no arguments and returns no data.
 typedef VoidFunction = void Function();
@@ -27,11 +27,7 @@ class FunctionTask extends TaskConfiguration {
   VoidFunction? function;
 
   /// Create a function task that executed [function] when resumed.
-  FunctionTask({
-    super.name,
-    super.description,
-    this.function,
-  });
+  FunctionTask({super.name, super.description, this.function});
 
   @override
   Function get fromJsonFunction => _$FunctionTaskFromJson;

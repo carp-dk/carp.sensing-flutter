@@ -5,16 +5,13 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// An online service which works as a "software device" in a protocol.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class OnlineService<TRegistration extends DeviceRegistration>
     extends DeviceConfiguration<TRegistration> {
-  OnlineService({
-    required super.roleName,
-    super.isOptional = true,
-  });
+  OnlineService({required super.roleName, super.isOptional = true});
   @override
   Function get fromJsonFunction => _$OnlineServiceFromJson;
 

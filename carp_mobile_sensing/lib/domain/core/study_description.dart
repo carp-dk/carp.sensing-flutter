@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyDescription extends Serializable {

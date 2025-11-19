@@ -123,9 +123,9 @@ Below is a small primer in the use of CAMS for a very simple sampling study runn
 Following [`carp_core`](https://pub.dev/documentation/carp_core/latest/), a CAMS study can be configured, deployed, executed, and used in different steps:
 
 1. Define a [`SmartphoneStudyProtocol`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SmartphoneStudyProtocol-class.html).
-2. Deploy this protocol to the [`SmartPhoneClientManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SmartPhoneClientManager-class.html).
+2. Deploy this protocol to the [`SmartPhoneClientManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/SmartPhoneClientManager-class.html).
 3. Use the generated data (called `measurements`) locally in the app or specify how and where to store or upload it using a [`DataEndPoint`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DataEndPoint-class.html).
-4. Control the execution of the study, like calling [`start`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SmartPhoneClientManager/start.html).
+4. Control the execution of the study, like calling [`start`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/SmartPhoneClientManager/start.html).
 
 ### Defining a `SmartphoneStudyProtocol`
 
@@ -163,7 +163,7 @@ See the CAMS [wiki][wiki] for an overview and more details.
 ### Deploying and Running a Study on a `SmartPhoneClientManager`
 
 In CAMS, we talk about a study protocol being 'deployed' on a primary device, like a phone. CAMS has a fairly [sophisticated software architecture](https://github.com/cph-cachet/carp.sensing-flutter/wiki/1.-Software-Architecture) for doing this.
-However, if we just want to define and deploy a study locally on the phone, this can be done using the [`SmartPhoneClientManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SmartPhoneClientManager-class.html) singleton.
+However, if we just want to define and deploy a study locally on the phone, this can be done using the [`SmartPhoneClientManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/SmartPhoneClientManager-class.html) singleton.
 
 ```dart
 // Create and configure a client manager for this phone.
@@ -188,7 +188,7 @@ This will start the sampling, as specified in the protocol, and data is stored i
 
 ### Using the generated data
 
-The generated data can be accessed and used in the app. Access to data is done by listening on the [`measurements`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SmartPhoneClientManager/measurements.html) stream from the client manager:
+The generated data can be accessed and used in the app. Access to data is done by listening on the [`measurements`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/SmartPhoneClientManager/measurements.html) stream from the client manager:
 
 ```dart
 // Listening on the data stream and print them as json.
@@ -210,7 +210,7 @@ Calling `SmartPhoneClientManager().dispose()` would dispose of the client manage
 
 CAMS is designed to be extended in many ways, including [adding new sampling capabilities](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-new-sampling-capabilities) by implementing a Sampling Package, [adding a new data management and backend support](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-a-new-data-manager) by creating a Data Manager, and [creating data and privacy transformer schemas](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-data-and-privacy-transformers) that can transform CARP data to other formats, including privacy protecting them, by implementing a [Transformer Schema](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DataTransformerSchema-class.html).
 
-For example, you can write your own `DataEndPoint` definitions and a corresponding [`DataManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/DataManager-class.html) class for uploading data to your own data endpoint. See the wiki on how to [add a new data manager](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-a-new-data-manager).
+For example, you can write your own `DataEndPoint` definitions and a corresponding [`DataManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/DataManager-class.html) class for uploading data to your own data endpoint. See the wiki on how to [add a new data manager](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-a-new-data-manager).
 
 Please see the wiki on how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing) CAMS.
 

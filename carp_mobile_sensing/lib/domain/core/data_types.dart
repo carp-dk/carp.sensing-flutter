@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../domain.dart';
+part of '../../domain.dart';
 
 /// Describes how a data type is collected (one-time or event-based).
 enum DataEventType {

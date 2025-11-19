@@ -16,7 +16,6 @@ class DeviceController extends DeviceDataCollectorFactory {
   static final DeviceController _instance = DeviceController._();
   DeviceController._() : super();
   final Map<String, DeviceManager> _devices = {};
-  final StreamGroup<BatteryStatus> _batteryEventGroup = StreamGroup.broadcast();
 
   /// The period of sending [Heartbeat] measurements, in minutes.
   static const int HEARTBEAT_PERIOD = 5;
@@ -38,9 +37,6 @@ class DeviceController extends DeviceDataCollectorFactory {
   List<DeviceManager> get connectedDevices =>
       _devices.values.where((manager) => manager.isConnected).toList();
 
-  /// The stream of all battery events from all connected devices.
-  Stream<BatteryStatus> get batteryEvents => _batteryEventGroup.stream;
-
   /// Do this controller support the specified device [deviceType]?
   bool supportsDevice(String deviceType) {
     for (var package in SamplingPackageRegistry().packages) {
@@ -49,9 +45,6 @@ class DeviceController extends DeviceDataCollectorFactory {
     return false;
   }
 
-  /// Get a device manger for the specified [deviceType].
-  DeviceManager? getDevice(String deviceType) => _devices[deviceType];
-
   /// Do this controller support the specified device [deviceType]?
   bool hasDevice(String deviceType) => _devices.containsKey(deviceType);
 
@@ -59,15 +52,15 @@ class DeviceController extends DeviceDataCollectorFactory {
   DeviceManager? createConnectedDataCollector(
     String deviceType,
     DeviceRegistration deviceRegistration,
-  ) => createDevice(deviceType, deviceRegistration);
+  ) => getDevice(deviceType);
 
-  /// Create a device manager for
-  DeviceManager? createDevice(
-    String deviceType, [
-    DeviceRegistration? deviceRegistration,
-  ]) {
+  /// Get a device manger for the specified [deviceType].
+  /// If a device manager is not yet available, it is created from the
+  /// sampling packages.
+  /// Returns null if no device manager for [deviceType] is found.
+  DeviceManager? getDevice(String deviceType) {
     // early out if already registered
-    if (devices.containsKey(deviceType)) return devices[deviceType]!;
+    if (devices.containsKey(deviceType)) return devices[deviceType];
 
     info('$runtimeType - Creating device manager for device type: $deviceType');
 
@@ -102,14 +95,6 @@ class DeviceController extends DeviceDataCollectorFactory {
 
     debug('$runtimeType - registering device of type: $deviceType');
     devices[deviceType] = manager;
-    if (manager is HardwareDeviceManager) {
-      _batteryEventGroup.add(
-        manager.batteryEvents.map(
-          (batteryLevel) =>
-              BatteryStatus(manager.id, manager.deviceType, batteryLevel),
-        ),
-      );
-    }
   }
 
   /// Unregister the manager for [deviceType].
