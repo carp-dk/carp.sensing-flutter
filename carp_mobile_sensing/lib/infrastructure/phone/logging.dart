@@ -5,22 +5,22 @@
  * found in the LICENSE file.
  */
 
-part of '../../services.dart';
+part of '../../infrastructure.dart';
 
 /// Add an information messages to the system log.
 void info(String message) =>
     (Settings().debugLevel.index >= DebugLevel.info.index)
-    ? log.log('\x1B[32m[CAMS INFO]\x1B[0m $message')
+    ? log('\x1B[32m[CAMS INFO]\x1B[0m $message')
     : 0;
 
 /// Add a warning messages to the system log.
 void warning(String message) =>
     (Settings().debugLevel.index >= DebugLevel.warning.index)
-    ? log.log('\x1B[31m[CAMS WARNING]\x1B[0m $message')
+    ? log('\x1B[31m[CAMS WARNING]\x1B[0m $message')
     : 0;
 
 /// Add a debug messages to the system log.
 void debug(String message) =>
     (Settings().debugLevel.index >= DebugLevel.debug.index)
-    ? log.log('\x1B[35m[CAMS DEBUG]\x1B[0m $message')
+    ? log('\x1B[35m[CAMS DEBUG]\x1B[0m $message')
     : 0;

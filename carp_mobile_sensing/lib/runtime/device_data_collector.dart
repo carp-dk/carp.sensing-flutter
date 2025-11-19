@@ -5,7 +5,7 @@
  * can be found in the LICENSE file.
  */
 
-part of 'carp_core_client.dart';
+part of '../runtime.dart';
 
 // /// Collects [Data] for a single device.
 // abstract class DeviceDataCollector<

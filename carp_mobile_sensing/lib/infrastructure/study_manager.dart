@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../services.dart';
+part of '../infrastructure.dart';
 
 /// An interface defining a manger of [SmartphoneStudyProtocol]s.
 ///
@@ -21,8 +21,5 @@ abstract class StudyProtocolManager {
 
   /// Save a [SmartphoneStudyProtocol] with the ID [id].
   /// Returns `true` if successful, `false` otherwise.
-  Future<bool> saveStudyProtocol(
-    String id,
-    SmartphoneStudyProtocol protocol,
-  );
+  Future<bool> saveStudyProtocol(String id, SmartphoneStudyProtocol protocol);
 }

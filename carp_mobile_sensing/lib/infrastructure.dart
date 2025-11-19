@@ -26,19 +26,25 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' hide log;
+import 'dart:developer' show log;
 
-import 'package:async/async.dart';
+import 'package:carp_serializable/carp_serializable.dart';
+import 'package:carp_core/carp_core.dart';
+import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'package:archive/archive_io.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-
-import 'package:carp_core/carp_core.dart';
-import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 part 'infrastructure/data_managers/console_data_manager.dart';
 part 'infrastructure/data_managers/file_data_manager.dart';
@@ -46,6 +52,9 @@ part 'infrastructure/data_managers/sqlite_data_manager.dart';
 
 part 'infrastructure/phone/file_study_manager.dart';
 part 'infrastructure/phone/local_notification_controller.dart';
+part 'infrastructure/phone/logging.dart';
+
 part 'infrastructure/deployment_service.dart';
 part 'infrastructure/persistence.dart';
-part 'runtime/client_repository.dart';
+part 'infrastructure/settings.dart';
+part 'infrastructure/study_manager.dart';

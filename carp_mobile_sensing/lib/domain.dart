@@ -22,13 +22,16 @@ library;
 
 import 'dart:io';
 import 'dart:convert';
+import 'dart:async';
+
+import 'package:carp_serializable/carp_serializable.dart';
+import 'package:carp_core/carp_core.dart';
+import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
+
+import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:json_annotation/json_annotation.dart';
-
-import 'package:carp_core/carp_core.dart';
-import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 part 'domain/core/study_protocol.dart';
 part 'domain/core/study_description.dart';
@@ -42,7 +45,9 @@ part 'domain/core/tasks.dart';
 part 'domain/core/triggers.dart';
 part 'domain/core/data.dart';
 part 'domain/core/data_types.dart';
-part 'domain/services/device_info.dart';
 part 'domain/core/transformers.dart';
+part 'domain/services/device_info.dart';
+part 'domain/services/data_manager.dart';
+part 'domain/services/notification_controller.dart';
 
 part 'domain.g.dart';

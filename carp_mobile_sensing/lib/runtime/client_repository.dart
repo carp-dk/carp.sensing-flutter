@@ -5,7 +5,7 @@
  * can be found in the LICENSE file.
  */
 
-part of '../infrastructure.dart';
+part of '../runtime.dart';
 
 /// A [ClientRepository] that runs on a smartphone. Works as a singleton.
 /// Uses the [Persistence] infrastructure to store study information persistently

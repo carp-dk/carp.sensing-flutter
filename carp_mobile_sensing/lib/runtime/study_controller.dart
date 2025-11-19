@@ -4,7 +4,6 @@
  * Use of this source code is governed by a MIT-style license that 
  * can be found in the LICENSE file.
  */
-
 part of '../runtime.dart';
 
 /// A [SmartphoneStudyController] controls the execution of a [SmartphoneStudy].

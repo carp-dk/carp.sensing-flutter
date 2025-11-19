@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../../services.dart';
+part of '../../domain.dart';
 
 /// A controller of user notifications allow for creating, scheduling, and
 /// canceling user notifications.
