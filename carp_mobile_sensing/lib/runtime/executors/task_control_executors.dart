@@ -17,49 +17,54 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
       StreamController<Measurement>.broadcast();
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
 
-  late SmartphoneDeploymentExecutor _deploymentExecutor;
-  late TriggerConfiguration _trigger;
-  late TaskConfiguration _task;
-  late TaskControl _taskControl;
+  final TriggerConfiguration _trigger;
+  final TaskConfiguration _task;
+  final TaskControl _taskControl;
   TriggerExecutor? triggerExecutor;
   TaskExecutor? taskExecutor;
 
-  SmartphoneDeploymentExecutor get deploymentExecutor => _deploymentExecutor;
+  String get studyDeploymentId => deployment!.studyDeploymentId;
   TriggerConfiguration get trigger => _trigger;
   TaskConfiguration get task => _task;
   TaskControl get taskControl => _taskControl;
 
   TaskControlExecutor(
-    SmartphoneDeploymentExecutor deploymentExecutor,
     TaskControl taskControl,
     TriggerConfiguration trigger,
     TaskConfiguration task,
-  ) : super() {
-    _deploymentExecutor = deploymentExecutor;
-    _taskControl = taskControl;
-    _trigger = trigger;
-    _task = task;
-  }
+  ) : _taskControl = taskControl,
+      _trigger = trigger,
+      _task = task,
+      super();
 
   @override
   bool onInitialize() {
     _group.add(_controller.stream);
 
-    // get the trigger executor and initialize with this task control executor
-    if (ExecutorFactory().getTriggerExecutor(taskControl.triggerId) == null) {
+    // get or create the trigger executor and initialize with this task control executor
+    triggerExecutor = ExecutorFactory().getTriggerExecutor(
+      studyDeploymentId,
+      taskControl.triggerId,
+    );
+    if (triggerExecutor == null) {
       triggerExecutor = ExecutorFactory().createTriggerExecutor(
+        studyDeploymentId,
         taskControl.triggerId,
         trigger,
       );
       triggerExecutor?.initialize(trigger, deployment);
     }
-    triggerExecutor = ExecutorFactory().getTriggerExecutor(
-      taskControl.triggerId,
-    );
+    // now start listening on the trigger and trigger events
     triggerExecutor?.triggerEvents.listen((_) => onTrigger());
 
     // get the task executor and add the measurements it collects to the stream group
-    taskExecutor = ExecutorFactory().getTaskExecutor(task);
+    taskExecutor = ExecutorFactory().getTaskExecutor(studyDeploymentId, task);
+    if (taskExecutor == null) {
+      warning(
+        "$runtimeType - Cannot find a TaskExecutor for task type '${task.runtimeType}'.",
+      );
+      return false;
+    }
     taskExecutor?.initialize(task, deployment);
     _group.add(taskExecutor!.measurements);
 
@@ -141,7 +146,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
 /// [Schedulable].
 class AppTaskControlExecutor extends TaskControlExecutor {
   AppTaskControlExecutor(
-    super.deploymentExecutor,
+    // super.deploymentExecutor,
     super.taskControl,
     super.trigger,
     super.task,

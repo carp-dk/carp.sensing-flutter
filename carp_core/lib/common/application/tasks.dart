@@ -42,11 +42,8 @@ class TaskConfiguration extends Serializable {
   void removeMeasure(Measure measure) => measures!.remove(measure);
 
   /// Create a task. If [name] is not specified, a name is generated.
-  TaskConfiguration({
-    String? name,
-    this.description,
-    List<Measure>? measures,
-  }) : super() {
+  TaskConfiguration({String? name, this.description, List<Measure>? measures})
+    : super() {
     this.name = name ?? 'Task #${_counter++}';
     this.measures = measures ?? [];
   }
@@ -63,6 +60,23 @@ class TaskConfiguration extends Serializable {
   @override
   String toString() =>
       '$runtimeType - name: $name, measures size: ${measures?.length}';
+}
+
+/// A task which is used for monitoring the execution of the data sampling
+/// collecting data on [CompletedTask], [TriggeredTask], and [Error].
+/// This task is not supposed to be executed as such, but allows the addition
+/// of such monitoring measure to be added to a protocol.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class MonitoringTask extends TaskConfiguration {
+  /// Create a new task which can run in the background.
+  MonitoringTask({super.name, super.description, super.measures});
+
+  @override
+  Function get fromJsonFunction => _$MonitoringTaskFromJson;
+  factory MonitoringTask.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<MonitoringTask>(json);
+  @override
+  Map<String, dynamic> toJson() => _$MonitoringTaskToJson(this);
 }
 
 /// A task which specifies that all containing measures and/or
@@ -140,21 +154,18 @@ class WebTask extends TaskConfiguration {
   String url;
 
   /// Create a task which redirects to a web page [url].
-  WebTask({
-    super.name,
-    super.description,
-    super.measures,
-    required this.url,
-  });
+  WebTask({super.name, super.description, super.measures, required this.url});
 
   /// Replace the variables in [url] with the specified runtime values,
   /// if the variables are present.
   String getUrl(
-          String participantId, String studyDeploymentId, int triggerId) =>
-      url
-          .replaceFirst('\$PARTICIPANT_ID', participantId)
-          .replaceFirst('\$DEPLOYMENT_ID', studyDeploymentId)
-          .replaceFirst('\$TRIGGER_ID', triggerId.toString());
+    String participantId,
+    String studyDeploymentId,
+    int triggerId,
+  ) => url
+      .replaceFirst('\$PARTICIPANT_ID', participantId)
+      .replaceFirst('\$DEPLOYMENT_ID', studyDeploymentId)
+      .replaceFirst('\$TRIGGER_ID', triggerId.toString());
 
   @override
   Function get fromJsonFunction => _$WebTaskFromJson;

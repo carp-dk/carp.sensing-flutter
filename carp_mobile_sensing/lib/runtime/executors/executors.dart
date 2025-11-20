@@ -357,8 +357,8 @@ abstract class _AbstractExecutorState implements _ExecutorStateMachine {
   /// Internal helper function to start the executor.
   /// Used below for both resume and restart.
   void _start() {
-    executor.onResume().then((started) {
-      if (started) {
+    executor.onResume().then((resumed) {
+      if (resumed) {
         executor._setState(_ResumedState(executor));
       } else {
         // if we can't start the executor, then put it in stopped state
@@ -428,8 +428,8 @@ class _ResumedState extends _AbstractExecutorState {
 
   @override
   void pause() {
-    executor.onPause().then((stopped) {
-      if (stopped) executor._setState(_PausedState(executor));
+    executor.onPause().then((paused) {
+      if (paused) executor._setState(_PausedState(executor));
     });
   }
 }
@@ -443,8 +443,8 @@ class _PausedState extends _AbstractExecutorState {
 
   @override
   void resume() {
-    executor.onResume().then((started) {
-      if (started) executor._setState(_ResumedState(executor));
+    executor.onResume().then((resumed) {
+      if (resumed) executor._setState(_ResumedState(executor));
       executor._isResuming = false;
     });
   }

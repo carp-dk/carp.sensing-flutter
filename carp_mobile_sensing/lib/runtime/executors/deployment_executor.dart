@@ -34,25 +34,28 @@ class SmartphoneDeploymentExecutor
       final trigger = configuration!.triggers['${taskControl.triggerId}']!;
       final task = configuration!.getTaskByName(taskControl.taskName)!;
 
-      TaskControlExecutor executor;
+      // Only create an executor for "real" tasks
+      if (task is! MonitoringTask) {
+        TaskControlExecutor executor;
 
-      // A TriggeredAppTaskExecutor need BOTH a [Schedulable] trigger and an [AppTask]
-      // to schedule
-      if (trigger is Schedulable && task is AppTask) {
-        executor = AppTaskControlExecutor(this, taskControl, trigger, task);
-      } else {
-        // All other cases we use the normal background triggering relying on the app
-        // running in the background
-        executor = TaskControlExecutor(this, taskControl, trigger, task);
+        // A TriggeredAppTaskExecutor need BOTH a [Schedulable] trigger and an [AppTask]
+        // to schedule
+        if (trigger is Schedulable && task is AppTask) {
+          executor = AppTaskControlExecutor(taskControl, trigger, task);
+        } else {
+          // All other cases we use the normal background triggering relying on the app
+          // running in the background
+          executor = TaskControlExecutor(taskControl, trigger, task);
+        }
+
+        executor.initialize(taskControl, deployment!);
+        addExecutor(executor);
+
+        // let the device manger know about this executor
+        getDeviceManagerFromRoleName(
+          executor.taskControl.destinationDeviceRoleName,
+        )?.executors.add(executor);
       }
-
-      executor.initialize(taskControl, deployment!);
-      addExecutor(executor);
-
-      // let the device manger know about this executor
-      getDeviceManagerFromRoleName(
-        executor.taskControl.destinationDeviceRoleName,
-      )?.executors.add(executor);
     }
 
     // listen for "done" tasks and add them as a [CompletedAppTask] measurement
@@ -104,8 +107,6 @@ class SmartphoneDeploymentExecutor
         executor.taskControl.destinationDeviceRoleName,
       )?.executors.remove(executor);
     }
-
-    ExecutorFactory().dispose();
   }
 
   /// Add the stream of [measurements] to the overall stream of measurements

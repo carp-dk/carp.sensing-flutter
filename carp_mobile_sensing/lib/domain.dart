@@ -33,7 +33,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'domain/core/study_protocol.dart';
+part 'domain/core/smartphone_protocol.dart';
 part 'domain/core/study_description.dart';
 part 'domain/core/data_endpoint.dart';
 part 'domain/core/sampling_configurations.dart';

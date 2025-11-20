@@ -12,11 +12,15 @@ void _registerFromJsonFunctions() {
     DataEndPoint(type: ''),
     FileDataEndPoint(),
     SQLiteDataEndPoint(),
-    StudyDescription(title: '')
+    StudyDescription(title: ''),
   ]);
 
   // Task classes
-  FromJsonFactory().registerAll([AppTask(type: ''), FunctionTask()]);
+  FromJsonFactory().registerAll([
+    AppTask(type: ''),
+    FunctionTask(),
+    MonitoringTask(),
+  ]);
 
   // Trigger classes
   FromJsonFactory().registerAll([
@@ -38,11 +42,8 @@ void _registerFromJsonFunctions() {
       startTime: const TimeOfDay(hour: 1),
       endTime: const TimeOfDay(hour: 2),
     ),
-    UserTaskTrigger(
-      taskName: 'ignored',
-      triggerCondition: UserTaskState.done,
-    ),
-    NoUserTaskTrigger(taskName: 'ignored')
+    UserTaskTrigger(taskName: 'ignored', triggerCondition: UserTaskState.done),
+    NoUserTaskTrigger(taskName: 'ignored'),
   ]);
 
   // Data classes
@@ -55,16 +56,14 @@ void _registerFromJsonFunctions() {
     FreeMemory(),
     ScreenEvent(),
     Timezone(''),
-    AmbientLight(3, 5, 7, 3)
+    AmbientLight(3, 5, 7, 3),
   ]);
 
   // Sampling Configuration classes
   FromJsonFactory().registerAll([
     PersistentSamplingConfiguration(),
     HistoricSamplingConfiguration(),
-    IntervalSamplingConfiguration(
-      interval: Duration.zero,
-    ),
+    IntervalSamplingConfiguration(interval: Duration.zero),
     PeriodicSamplingConfiguration(
       interval: Duration.zero,
       duration: Duration.zero,
@@ -73,22 +72,24 @@ void _registerFromJsonFunctions() {
       normal: PersistentSamplingConfiguration(),
       low: PersistentSamplingConfiguration(),
       critical: PersistentSamplingConfiguration(),
-    )
+    ),
   ]);
 
   // AppTaskController classes
   // FromJsonFactory().register(UserTaskSnapshotList());
-  FromJsonFactory().register(UserTaskSnapshot(
-    '',
-    AppTask(type: 'ignored'),
-    UserTaskState.canceled,
-    DateTime.now(),
-    DateTime.now(),
-    DateTime.now(),
-    true,
-    '',
-    '',
-  ));
+  FromJsonFactory().register(
+    UserTaskSnapshot(
+      '',
+      AppTask(type: 'ignored'),
+      UserTaskState.canceled,
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      true,
+      '',
+      '',
+    ),
+  );
 
   _fromJsonFunctionsRegistered = true;
 }

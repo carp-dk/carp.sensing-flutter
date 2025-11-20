@@ -28,6 +28,7 @@ abstract class TriggerExecutor<TConfig extends TriggerConfiguration>
   Stream<TriggerEvent> get triggerEvents => _controller.stream;
 
   /// A lot of trigger executors use a timer, so we declare one here
+  /// to be used by all trigger implementations.
   Timer? timer;
 
   @override

@@ -23,26 +23,27 @@ abstract class TriggerFactory {
 
 /// A factory that can create a:
 ///
-///  * [TriggerExecutor] using the [createTriggerExecutor] method
+///  * [TriggerExecutor] using the [getTriggerExecutor] method
 ///  * [TaskExecutor] using the [getTaskExecutor] method
 ///
 /// Note that each deployment needs its own set of trigger and task executors.
-/// This is because trigger executors needs to be reused across tasks in the same
-/// deployment (in the task control), while avoiding them to be reused across
-/// deployments (if the trigger or task has the same name).
-/// Therefore, the [dispose] methods should be called when starting the execution
-/// of a new deployment.
+/// This is because trigger and task executors can be reused across task controls
+/// in the same study deployment.
+///
+/// Therefore, each [SmartphoneDeploymentExecutor] has its own [ExecutorFactory]
+/// in order to avoiding executors to be reused across deployments (if the trigger
+/// or task has the same id/name).
 class ExecutorFactory {
   static final ExecutorFactory _instance = ExecutorFactory._();
 
   final Map<Type, TriggerFactory> _triggerFactories = {};
 
-  final Map<int, TriggerExecutor> _triggerExecutors = {};
-  final Map<String, TaskExecutor> _taskExecutors = {};
+  // deploymentId -> triggerId => executor
+  final Map<String, Map<int, TriggerExecutor>> _triggerExecutors = {};
+  // deploymentId -> taskName => executor
+  final Map<String, Map<String, TaskExecutor>> _taskExecutors = {};
 
   /// Get the singleton instance of [ExecutorFactory].
-  ///
-  /// The [ExecutorFactory] is designed to work as a singleton.
   factory ExecutorFactory() => _instance;
 
   ExecutorFactory._() {
@@ -52,7 +53,7 @@ class ExecutorFactory {
   /// Register [factory] which can create [TriggerExecutor]s
   /// for the specified [TriggerFactory] runtime types.
   ///
-  /// This is used in the [createTriggerExecutor] method for creating new
+  /// This is used in the [getTriggerExecutor] method for creating new
   /// [TriggerExecutor]s.
   void registerTriggerFactory(TriggerFactory factory) {
     for (var type in factory.types) {
@@ -61,48 +62,58 @@ class ExecutorFactory {
     factory.onRegister();
   }
 
-  /// Get the [TriggerExecutor] for a [triggerId], if available.
-  TriggerExecutor? getTriggerExecutor(int triggerId) =>
-      _triggerExecutors[triggerId];
+  /// Get a [TriggerExecutor] based on the [studyDeploymentId] and [triggerId].
+  /// Returns null if not found.
+  TriggerExecutor? getTriggerExecutor(
+    String studyDeploymentId,
+    int triggerId,
+  ) => _triggerExecutors[studyDeploymentId]?[triggerId];
 
-  /// Create a [TriggerExecutor] based on the [trigger] type.
+  /// Create a [TriggerExecutor] based on the [studyDeploymentId] and [triggerId].
   /// Returns null if [trigger] is not supported by any registered [TriggerFactory]
   /// factories.
   TriggerExecutor? createTriggerExecutor(
+    String studyDeploymentId,
     int triggerId,
     TriggerConfiguration trigger,
   ) {
-    if (_triggerExecutors[triggerId] == null) {
-      TriggerExecutor? executor;
+    TriggerExecutor? executor;
 
-      if (_triggerFactories[trigger.runtimeType] != null) {
-        executor = _triggerFactories[trigger.runtimeType]!.create(trigger);
-      }
-
-      if (executor != null) {
-        _triggerExecutors[triggerId] = executor;
-      } else {
-        warning(
-          "$runtimeType - Unknown trigger type. Cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'.",
-        );
-        return null;
-      }
+    if (_triggerFactories[trigger.runtimeType] != null) {
+      executor = _triggerFactories[trigger.runtimeType]!.create(trigger);
     }
-    return _triggerExecutors[triggerId]!;
+
+    if (executor == null) {
+      warning(
+        "$runtimeType - Cannot create a TriggerExecutor for trigger type '${trigger.runtimeType}'.",
+      );
+    } else {
+      _triggerExecutors[studyDeploymentId] = {};
+      _triggerExecutors[studyDeploymentId]?[triggerId] = executor;
+    }
+    return _triggerExecutors[studyDeploymentId]?[triggerId];
   }
 
   /// Get the [TaskExecutor] for a [task] based on the task name. If the task
   /// executor does not exist, a new one is created based on the type of the task.
-  TaskExecutor getTaskExecutor(TaskConfiguration task) {
-    if (_taskExecutors[task.name] == null) {
-      TaskExecutor executor = BackgroundTaskExecutor();
-      if (task is AppTask) executor = AppTaskExecutor();
-      if (task is FunctionTask) executor = FunctionTaskExecutor();
-
-      _taskExecutors[task.name] = executor;
+  /// Returns null if the type of [task] is unknown.
+  TaskExecutor? getTaskExecutor(
+    String studyDeploymentId,
+    TaskConfiguration task,
+  ) {
+    if (_taskExecutors[studyDeploymentId]?[task.name] == null) {
+      TaskExecutor? executor = switch (task) {
+        BackgroundTask() => BackgroundTaskExecutor(),
+        AppTask() => AppTaskExecutor(),
+        FunctionTask() => FunctionTaskExecutor(),
+        _ => null,
+      };
+      if (executor != null) {
+        _taskExecutors[studyDeploymentId] = {};
+        _taskExecutors[studyDeploymentId]?[task.name] = executor;
+      }
     }
-
-    return _taskExecutors[task.name]!;
+    return _taskExecutors[studyDeploymentId]?[task.name];
   }
 
   /// Dispose of all trigger and task executors.

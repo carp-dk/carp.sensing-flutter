@@ -83,7 +83,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
     // Early out if already running (this is a background task)
     if (state == ExecutorState.resumed) {
       warning(
-        'Trying to start $this but it is already started. Ignoring this.',
+        '$runtimeType - Trying to resume $this but it is already resumed. Ignoring this.',
       );
       return false;
     }
@@ -95,7 +95,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
         .listen((_) {
           if (haveAllProbesPaused) {
             debug(
-              '$runtimeType - all probes are paused - pausing this $this too.',
+              '$runtimeType - All probes are paused - pausing this $this too.',
             );
             pause();
           }

@@ -188,7 +188,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
 
   /// Add the trigger, task completed, error, and heartbeat measures to the protocol
   /// since CAMS always collects and upload this data from any device.
-  /// If the device is a primary device, also add the CompletedAppTask measure.
+  /// If the device is a primary device, also add the [CompletedAppTask] measure.
   void _addSamplingTaskControl(DeviceConfiguration device) {
     var measures = [
       Measure(type: CarpDataTypes.ERROR_TYPE_NAME),
@@ -197,16 +197,11 @@ class SmartphoneStudyProtocol extends StudyProtocol
       Measure(type: CamsDataTypes.HEARTBEAT_TYPE_NAME),
     ];
     if (device is PrimaryDeviceConfiguration) {
-      // For primary devices, also add the CompletedAppTask measure
+      // For primary devices, also add the [CompletedAppTask] measure
       measures.add(Measure(type: CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME));
     }
 
-    addTaskControl(
-      NoOpTrigger(),
-      BackgroundTask(measures: measures),
-      device,
-      Control.Start,
-    );
+    addTaskControl(NoOpTrigger(), MonitoringTask(measures: measures), device);
   }
 
   factory SmartphoneStudyProtocol.fromJson(Map<String, dynamic> json) =>

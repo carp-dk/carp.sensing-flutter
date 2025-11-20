@@ -136,6 +136,23 @@ Map<String, dynamic> _$TaskConfigurationToJson(TaskConfiguration instance) =>
       'description': ?instance.description,
     };
 
+MonitoringTask _$MonitoringTaskFromJson(Map<String, dynamic> json) =>
+    MonitoringTask(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      measures: (json['measures'] as List<dynamic>?)
+          ?.map((e) => Measure.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    )..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$MonitoringTaskToJson(MonitoringTask instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'name': instance.name,
+      'measures': ?instance.measures?.map((e) => e.toJson()).toList(),
+      'description': ?instance.description,
+    };
+
 BackgroundTask _$BackgroundTaskFromJson(Map<String, dynamic> json) =>
     BackgroundTask(
       name: json['name'] as String?,

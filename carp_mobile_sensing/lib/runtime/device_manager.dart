@@ -360,10 +360,7 @@ class SmartphoneDeviceManager
     for (var package in SamplingPackageRegistry().packages) {
       if (package is SmartphoneSamplingPackage) {
         _supportedDataTypes.addAll(
-          package.dataTypes.map((type) {
-            print('>> ${type.type}');
-            return DataType.fromString(type.type);
-          }),
+          package.dataTypes.map((type) => DataType.fromString(type.type)),
         );
       }
     }

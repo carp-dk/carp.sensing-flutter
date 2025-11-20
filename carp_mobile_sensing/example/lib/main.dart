@@ -5,11 +5,12 @@
  * can be found in the LICENSE file.
  */
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TimeOfDay;
+
+// The CAMS packages
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-import 'package:flutter/material.dart' hide TimeOfDay;
 
 void main() => runApp(const MobileSensingApp());
 
@@ -43,12 +44,13 @@ class StudyPageState extends State<StudyPage> {
 
   @override
   void initState() {
+    Settings().debugLevel = DebugLevel.debug;
     client.configure(enableNotifications: false, askForPermissions: true);
 
-    // Listening on all the measurements print them as json.
-    SmartPhoneClientManager().measurements.listen(
-      (data) => print(toJsonString(data)),
-    );
+    // // Listening on all the measurements print them as json.
+    // SmartPhoneClientManager().measurements.listen(
+    //   (measurement) => print(toJsonString(measurement)),
+    // );
 
     super.initState();
   }
@@ -94,22 +96,30 @@ class StudyPageState extends State<StudyPage> {
               border: Border.all(color: Colors.grey.shade300, width: 1.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Theme.of(context).shadowColor,
                   blurRadius: 8.0,
                   offset: Offset(0, 4),
                 ),
               ],
             ),
             child: ListTile(
+              titleTextStyle: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
               isThreeLine: true,
               leading: Icon(switch (study.samplingStatus) {
                 ExecutorState.paused ||
                 ExecutorState.initialized => Icons.play_arrow,
-                ExecutorState.resumed => Icons.stop,
+                ExecutorState.resumed => Icons.pause,
                 _ => Icons.refresh,
               }, size: 40),
-              title: Text('Study #$index'),
-              subtitle: Text(study.toString()),
+              title: Text('Study Deployment #$index'),
+              subtitle: Text(
+                'ID: ...-${study.studyDeploymentId.split('-').last}\n'
+                'Status: ${study.status.name}\n'
+                'Sampling: ${study.samplingStatus.name}',
+              ),
               trailing: executorStateIcon[study.samplingStatus],
               onTap: () => runStudy(study),
             ),
@@ -130,6 +140,7 @@ class StudyPageState extends State<StudyPage> {
 
   /// Add a new study to the client's list of studies based on the [protocol]
   /// specified below.
+  /// Note that it is the same protocol and hence study we add every time.
   void addStudy() =>
       client.addStudyFromProtocol(protocol).then((_) => setState(() {}));
 
@@ -139,11 +150,19 @@ class StudyPageState extends State<StudyPage> {
 
     // If the study has not been started (and deployed) yet, do this first
     if (study.status.index <= StudyStatus.Deployed.index) {
+      print('>> STARTING study ${study.studyDeploymentId}');
+      // Listening on all the measurements print them.
+      controller?.executor.measurements.listen(
+        (measurement) =>
+            print('>> ${study.studyDeploymentId} - ${measurement.dataType}'),
+      );
       controller?.start();
     } else {
       if (study.isSampling) {
+        print('>>  PAUSING study ${study.studyDeploymentId}');
         controller?.pause();
       } else {
+        print('>> RESUMING study ${study.studyDeploymentId}');
         controller?.resume();
       }
     }
@@ -151,7 +170,7 @@ class StudyPageState extends State<StudyPage> {
 
   /// Create a new study protocol.
   SmartphoneStudyProtocol get protocol {
-    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
+    var protocol = SmartphoneStudyProtocol(
       ownerId: 'AB',
       name: 'Demo Protocol',
       dataEndPoint: SQLiteDataEndPoint(),
@@ -169,21 +188,43 @@ class StudyPageState extends State<StudyPage> {
     // Add a participant role
     protocol.addParticipantRole(ParticipantRole('Participant'));
 
-    // Collect timezone info every time the app restarts.
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
-      phone,
+    var trigger_1 = PeriodicTrigger(period: Duration(seconds: 10));
+    var trigger_2 = PeriodicTrigger(period: Duration(seconds: 20));
+    var task_1 = BackgroundTask(
+      measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+    );
+    var task_2 = BackgroundTask(
+      measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
     );
 
-    // Collect device info only once, when this study is deployed.
-    protocol.addTaskControl(
-      OneTimeTrigger(),
-      BackgroundTask(
-        measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-      ),
-      phone,
-    );
+    protocol.addTaskControl(trigger_1, task_1, phone);
+    protocol.addTaskControl(trigger_1, task_2, phone);
+    // protocol.addTaskControl(trigger_1, task_1, phone);
+    protocol.addTaskControl(trigger_2, task_1, phone);
+
+    // protocol.addTaskControl(
+    //   PeriodicTrigger(period: Duration(seconds: 10)),
+    //   BackgroundTask(
+    //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+    //   ),
+    //   phone,
+    // );
+
+    // // Collect timezone info every time the app restarts.
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
+    //   phone,
+    // );
+
+    // // Collect device info only once, when this study is deployed.
+    // protocol.addTaskControl(
+    //   OneTimeTrigger(),
+    //   BackgroundTask(
+    //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+    //   ),
+    //   phone,
+    // );
 
     // Add background measures from the [DeviceSamplingPackage] and
     // [SensorSamplingPackage] sampling packages.
@@ -193,27 +234,27 @@ class StudyPageState extends State<StudyPage> {
     //  * ambient light
     //  * free memory (there seems to be a bug in the underlying sysinfo plugin)
 
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: DeviceSamplingPackage.FREE_MEMORY)
-            ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-              interval: const Duration(seconds: 10),
-            ),
-          Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-          Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-          Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
-          Measure(type: SensorSamplingPackage.STEP_COUNT),
-          Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
-            ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-              interval: const Duration(seconds: 20),
-              duration: const Duration(seconds: 5),
-            ),
-        ],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: DeviceSamplingPackage.FREE_MEMORY)
+    //         ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+    //           interval: const Duration(seconds: 10),
+    //         ),
+    //       Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+    //       Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+    //       Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
+    //       Measure(type: SensorSamplingPackage.STEP_COUNT),
+    //       Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
+    //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+    //           interval: const Duration(seconds: 20),
+    //           duration: const Duration(seconds: 5),
+    //         ),
+    //     ],
+    //   ),
+    //   phone,
+    // );
 
     // // Collect IMU data every 10 secs for 1 sec.
     // // Also shows how the sampling interval can be specified ("overridden").
@@ -235,20 +276,20 @@ class StudyPageState extends State<StudyPage> {
     //   phone,
     // );
 
-    // Extract acceleration features every minute over 10 seconds
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: SensorSamplingPackage.ACCELERATION_FEATURES)
-            ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-              interval: const Duration(minutes: 1),
-              duration: const Duration(seconds: 10),
-            ),
-        ],
-      ),
-      phone,
-    );
+    // // Extract acceleration features every minute over 10 seconds
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: SensorSamplingPackage.ACCELERATION_FEATURES)
+    //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+    //           interval: const Duration(minutes: 1),
+    //           duration: const Duration(seconds: 10),
+    //         ),
+    //     ],
+    //   ),
+    //   phone,
+    // );
 
     // // Example of how to start and stop sampling using the Control.Start and
     // // Control.Stop method
