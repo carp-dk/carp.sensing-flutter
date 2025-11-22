@@ -40,11 +40,18 @@ class StudyPage extends StatefulWidget {
 
 /// Shows a list of studies in a ListView.
 class StudyPageState extends State<StudyPage> {
+  /// The client manager used in this app.
+  /// Note that a [SmartPhoneClientManager] is a singleton, so it can always be
+  /// accessed using `SmartPhoneClientManager()`. But here is't shorter to just
+  /// have a `client` property to use.
   SmartPhoneClientManager client = SmartPhoneClientManager();
 
   @override
   void initState() {
+    // Set debug level for more detailed debugging information.
     Settings().debugLevel = DebugLevel.debug;
+
+    // Configure the client.
     client.configure(enableNotifications: false, askForPermissions: true);
 
     // // Listening on all the measurements print them as json.
@@ -59,10 +66,13 @@ class StudyPageState extends State<StudyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('CARP Mobile Sensing')),
-      body: ListView.builder(
-        padding: EdgeInsets.symmetric(vertical: 4.0),
-        itemCount: client.studies.length,
-        itemBuilder: studyTileWithBorder,
+      body: ListenableBuilder(
+        listenable: client,
+        builder: (BuildContext context, Widget? child) => ListView.builder(
+          padding: EdgeInsets.symmetric(vertical: 4.0),
+          itemCount: client.studies.length,
+          itemBuilder: studyTileWithBorder,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addStudy,
@@ -73,9 +83,11 @@ class StudyPageState extends State<StudyPage> {
   }
 
   /// Create a list tile for a study showing the study's description and runtime
-  /// status using a StreamBuilder.
+  /// status using a StreamBuilder that listens on the `events` stream from
+  /// the study..
   ///
-  /// The leading icon can be used to control the study in three different ways:
+  /// Depending on the state of the study, pressing the leading icon can be used
+  /// to control the study in three different ways:
   ///  * start the study
   ///  * resume data sampling
   ///  * pause data sampling
@@ -87,7 +99,7 @@ class StudyPageState extends State<StudyPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
       child: StreamBuilder<StudyStatusEvent>(
-        stream: study.events,
+        stream: study.events, // listen to events from the study
         builder: (context, AsyncSnapshot<StudyStatusEvent> snapshot) {
           return Container(
             decoration: BoxDecoration(

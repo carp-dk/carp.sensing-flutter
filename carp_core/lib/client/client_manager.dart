@@ -129,28 +129,21 @@ abstract class ClientManager<
   /// Add a [study] which needs to be executed on this client.
   /// No deployment is attempted yet.
   ///
-  /// [studyDeploymentId] is the ID of the study deployment for which to collect
-  /// data. [deviceRoleName] is the role of the client device which takes part in
-  /// the deployment identified by [studyDeploymentId].
+  /// If a study with the same deployment id and device role name has already
+  /// been added to this client, nothing happens and this study is returned.
   ///
   /// Throws NotConfiguredException if the client has not yet been configured.
-  /// Throws IllegalArgumentException if a study with the same deployment id
-  /// and device role name has already been added to this client.
-  ///
-  /// Return the study if successfully added to this client manager.
+  /// Return the study successfully added to this client manager or the existing
+  /// study if it was already added.
   @mustCallSuper
   Future<TStudy> addStudy(TStudy study) async {
     _check();
-    if (getStudy(study.studyDeploymentId, study.deviceRoleName) != null) {
-      throw IllegalArgumentException(
-        'A study with the same study deployment ID and device role name has already been added.',
-      );
+    if (!repository.hasStudy(study)) {
+      repository.addStudy(study);
+
+      // Update study status based on deployment status
+      await proxy?.getStudyDeploymentStatus(study);
     }
-
-    repository.addStudy(study);
-
-    // Update study status based on deployment status
-    await proxy?.getStudyDeploymentStatus(study);
     return study;
   }
 

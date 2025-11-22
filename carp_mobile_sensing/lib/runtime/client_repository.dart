@@ -13,15 +13,11 @@ part of '../runtime.dart';
 class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   static final SmartphoneClientRepository _instance =
       SmartphoneClientRepository._();
-  final StreamGroup<StudyStatusEvent<SmartphoneStudy>> _group =
+  final StreamGroup<StudyStatusEvent<SmartphoneStudy>> _studyStatusEventGroup =
       StreamGroup.broadcast();
 
   /// Create the singleton instance and load all studies from persistence storage.
-  SmartphoneClientRepository._() {
-    Persistence().getAllStudies().then(
-      (studies) => _repository = studies.toSet(),
-    );
-  }
+  SmartphoneClientRepository._();
 
   /// Get the singleton [SmartphoneClientRepository].
   factory SmartphoneClientRepository() => _instance;
@@ -30,15 +26,23 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   Set<SmartphoneStudy> _repository = {};
 
   /// A stream of [StudyStatusEvent] events generate whenever a study change state.
-  Stream<StudyStatusEvent<SmartphoneStudy>> get userTaskEvents => _group.stream;
+  Stream<StudyStatusEvent<SmartphoneStudy>> get studyStatusEvents =>
+      _studyStatusEventGroup.stream;
 
   @override
   DeviceRegistration? deviceRegistration;
 
+  Future<void> init() async {
+    _repository = (await Persistence().getAllStudies()).toSet();
+    for (var study in _repository) {
+      _studyStatusEventGroup.add(study.events);
+    }
+  }
+
   @override
   void addStudy(SmartphoneStudy study) {
     if (_repository.add(study)) {
-      _group.add(study.events);
+      _studyStatusEventGroup.add(study.events);
       Persistence().saveStudy(study);
     }
   }
@@ -57,15 +61,21 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   }
 
   @override
+  bool hasStudy(SmartphoneStudy study) => _repository.contains(study);
+
+  @override
   List<SmartphoneStudy> getStudyList() => _repository.toList();
 
   @override
   void removeStudy(SmartphoneStudy study) {
-    _group.remove(study.events);
+    _studyStatusEventGroup.remove(study.events);
     _repository.remove(study);
     Persistence().removeStudy(study);
   }
 
   @override
   void updateStudy(SmartphoneStudy study) => Persistence().updateStudy(study);
+
+  @override
+  String toString() => '$runtimeType [${_repository.length}]';
 }

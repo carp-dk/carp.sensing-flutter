@@ -1,30 +1,19 @@
 /*
- * Copyright 2018-2022 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
- * Use of this source code is governed by a MIT-style license that can be
- * found in the LICENSE file.
+ * Copyright (c) 2025, the Technical University of Denmark (DTU).
+ * All rights reserved. Please see the AUTHORS file for details. 
+ * Use of this source code is governed by a MIT-style license that 
+ * can be found in the LICENSE file.
  */
 
 part of '../../runtime.dart';
 
-/// A factory which can create a [TriggerExecutor] based on the runtime type
-/// of an [TriggerConfiguration].
-abstract class TriggerFactory {
-  /// The set of supported [TriggerConfiguration] runtime types.
-  Set<Type> get types => {};
-
-  /// Callback method when this package is being registered.
-  void onRegister();
-
-  /// Create a [TriggerExecutor] based on [trigger].
-  /// Returns null if [trigger] is not supported by this factory.
-  TriggerExecutor? create(TriggerConfiguration trigger);
-}
-
-/// A factory that can create a:
+/// A factory that holds the set of trigger and task executors used in all
+/// deployments. Accessed as a singleton using `ExecutorFactory()`.
 ///
-///  * [TriggerExecutor] using the [getTriggerExecutor] method
-///  * [TaskExecutor] using the [getTaskExecutor] method
+/// Use [getTaskExecutor] to get or create a new task executor.
+/// Use [getTriggerExecutor] to get an existing trigger executor.
+/// Use [createTriggerExecutor] to get create a new trigger executor using
+/// the available [TriggerFactory]s.
 ///
 /// Note that each deployment needs its own set of trigger and task executors.
 /// This is because trigger and task executors can be reused across task controls
@@ -36,10 +25,12 @@ abstract class TriggerFactory {
 class ExecutorFactory {
   static final ExecutorFactory _instance = ExecutorFactory._();
 
+  // type => factory
   final Map<Type, TriggerFactory> _triggerFactories = {};
 
   // deploymentId -> triggerId => executor
   final Map<String, Map<int, TriggerExecutor>> _triggerExecutors = {};
+
   // deploymentId -> taskName => executor
   final Map<String, Map<String, TaskExecutor>> _taskExecutors = {};
 
@@ -53,7 +44,7 @@ class ExecutorFactory {
   /// Register [factory] which can create [TriggerExecutor]s
   /// for the specified [TriggerFactory] runtime types.
   ///
-  /// This is used in the [getTriggerExecutor] method for creating new
+  /// This is used in the [createTriggerExecutor] method for creating new
   /// [TriggerExecutor]s.
   void registerTriggerFactory(TriggerFactory factory) {
     for (var type in factory.types) {
@@ -117,8 +108,6 @@ class ExecutorFactory {
   }
 
   /// Dispose of all trigger and task executors.
-  ///
-  /// Used when a new deployment is to be executed.
   void dispose() {
     _triggerExecutors.clear();
     _taskExecutors.clear();
@@ -202,104 +191,16 @@ class SmartphoneTriggerFactory implements TriggerFactory {
   }
 }
 
-// /// A factory that can create a:
-// ///
-// ///  * [TriggerExecutor] using the [createTriggerExecutor] method
-// ///  * [TaskExecutor] using the [getTaskExecutor] method
-// ///
-// /// Note that each deployment has its own [ExecutorFactory].
-// /// This is because trigger executors needs to be reused across tasks in the same
-// /// deployment (in the task control), while avoiding them to be reused across
-// /// deployments (if the trigger or task has the same name).
-// class ExecutorFactory {
-//   final Map<int, TriggerExecutor> _triggerExecutors = {};
-//   final Map<String, TaskExecutor> _taskExecutors = {};
+/// A factory which can [create] a [TriggerExecutor] based on the runtime type
+/// of an [TriggerConfiguration].
+abstract class TriggerFactory {
+  /// The set of supported [TriggerConfiguration] runtime types.
+  Set<Type> get types => {};
 
-//   /// Get the [TriggerExecutor] for a [triggerId], if available.
-//   TriggerExecutor? getTriggerExecutor(int triggerId) =>
-//       _triggerExecutors[triggerId];
+  /// Callback method when this package is being registered.
+  void onRegister();
 
-//   /// Create a [TriggerExecutor] based on the [trigger] type.
-//   TriggerExecutor createTriggerExecutor(
-//     int triggerId,
-//     TriggerConfiguration trigger,
-//   ) {
-//     if (_triggerExecutors[triggerId] == null) {
-//       TriggerExecutor executor = ImmediateTriggerExecutor();
-
-//       switch (trigger.runtimeType) {
-//         case const (ElapsedTimeTrigger):
-//           executor = ElapsedTimeTriggerExecutor();
-//           break;
-//         case const (ScheduledTrigger):
-//           warning("ScheduledTrigger is not implemented yet. "
-//               "Using an 'ImmediateTriggerExecutor' instead.");
-//           executor = ImmediateTriggerExecutor();
-//           break;
-//         case const (NoOpTrigger):
-//           executor = NoOpTriggerExecutor();
-//           break;
-//         case const (ImmediateTrigger):
-//           executor = ImmediateTriggerExecutor();
-//           break;
-//         case const (OneTimeTrigger):
-//           executor = OneTimeTriggerExecutor();
-//           break;
-//         case const (DelayedTrigger):
-//           executor = DelayedTriggerExecutor();
-//           break;
-//         case const (PeriodicTrigger):
-//           executor = PeriodicTriggerExecutor();
-//           break;
-//         case const (DateTimeTrigger):
-//           executor = DateTimeTriggerExecutor();
-//           break;
-//         case const (RecurrentScheduledTrigger):
-//           executor = RecurrentScheduledTriggerExecutor();
-//           break;
-//         case const (CronScheduledTrigger):
-//           executor = CronScheduledTriggerExecutor();
-//           break;
-//         case const (SamplingEventTrigger):
-//           executor = SamplingEventTriggerExecutor();
-//           break;
-//         case const (ConditionalSamplingEventTrigger):
-//           executor = ConditionalSamplingEventTriggerExecutor();
-//           break;
-//         case const (ConditionalPeriodicTrigger):
-//           executor = ConditionalPeriodicTriggerExecutor();
-//           break;
-//         case const (RandomRecurrentTrigger):
-//           executor = RandomRecurrentTriggerExecutor();
-//           break;
-//         case const (PassiveTrigger):
-//           executor = PassiveTriggerExecutor();
-//           break;
-//         case const (UserTaskTrigger):
-//           executor = UserTaskTriggerExecutor();
-//           break;
-//         default:
-//           warning(
-//               "Unknown trigger used - cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'. "
-//               "Using an 'ImmediateTriggerExecutor' instead.");
-//           executor = ImmediateTriggerExecutor();
-//       }
-//       _triggerExecutors[triggerId] = executor;
-//     }
-//     return _triggerExecutors[triggerId]!;
-//   }
-
-//   /// Get the [TaskExecutor] for a [task] based on the task name. If the task
-//   /// executor does not exist, a new one is created based on the type of the task.
-//   TaskExecutor getTaskExecutor(TaskConfiguration task) {
-//     if (_taskExecutors[task.name] == null) {
-//       TaskExecutor executor = BackgroundTaskExecutor();
-//       if (task is AppTask) executor = AppTaskExecutor();
-//       if (task is FunctionTask) executor = FunctionTaskExecutor();
-
-//       _taskExecutors[task.name] = executor;
-//     }
-
-//     return _taskExecutors[task.name]!;
-//   }
-// }
+  /// Create a [TriggerExecutor] based on [trigger].
+  /// Returns null if [trigger] is not supported by this factory.
+  TriggerExecutor? create(TriggerConfiguration trigger);
+}

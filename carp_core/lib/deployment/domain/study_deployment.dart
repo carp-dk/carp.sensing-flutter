@@ -266,8 +266,8 @@ class StudyDeploymentStatus extends Serializable {
   /// * DeployingDevices
   /// * Running
   /// * Stopped
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  StudyDeploymentStatusTypes status = StudyDeploymentStatusTypes.Invited;
+  // @JsonKey(includeFromJson: true, includeToJson: true)
+  StudyDeploymentStatusTypes? status = StudyDeploymentStatusTypes.Invited;
 
   /// The time when the deployment was created.
   late DateTime createdOn;
@@ -307,24 +307,16 @@ class StudyDeploymentStatus extends Serializable {
     StudyDeploymentStatus status = FromJsonFactory()
         .fromJson<StudyDeploymentStatus>(json);
 
-    // when this object was create from json deserialization,
-    // the last part of the $type reflects the status
-    switch (status.$type?.split('.').last) {
-      case 'Invited':
-        status.status = StudyDeploymentStatusTypes.Invited;
-        break;
-      case 'DeployingDevices':
-        status.status = StudyDeploymentStatusTypes.DeployingDevices;
-        break;
-      case 'Running':
-        status.status = StudyDeploymentStatusTypes.Running;
-        break;
-      case 'Stopped':
-        status.status = StudyDeploymentStatusTypes.Stopped;
-        break;
-      default:
-        status.status = StudyDeploymentStatusTypes.Invited;
-    }
+    // When this object was create from json deserialization, from CARP Core Kotlin,
+    // the last part of the $type reflects the status:
+    //   "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited"
+    status.status ??= switch (status.$type?.split('.').last) {
+      'Invited' => StudyDeploymentStatusTypes.Invited,
+      'DeployingDevices' => StudyDeploymentStatusTypes.DeployingDevices,
+      'Running' => StudyDeploymentStatusTypes.Running,
+      'Stopped' => StudyDeploymentStatusTypes.Stopped,
+      _ => StudyDeploymentStatusTypes.Invited,
+    };
     return status;
   }
 
@@ -336,5 +328,5 @@ class StudyDeploymentStatus extends Serializable {
 
   @override
   String toString() =>
-      '$runtimeType - deploymentId: $studyDeploymentId, status: ${status.toString().split('.').last}';
+      '$runtimeType - deploymentId: $studyDeploymentId, status: ${status?.name}';
 }

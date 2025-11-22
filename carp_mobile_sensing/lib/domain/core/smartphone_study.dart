@@ -9,6 +9,8 @@ part of '../../domain.dart';
 
 /// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
 class SmartphoneStudy extends Study<SmartphoneDeployment> {
+  ExecutorState _samplingStatus = ExecutorState.created;
+
   /// The unique id of the study in the deployment service.
   String? studyId;
 
@@ -19,14 +21,27 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   String? participantRoleName;
 
   /// The status of the sampling of this study.
-  ExecutorState samplingStatus = ExecutorState.created;
+  ExecutorState get samplingStatus => _samplingStatus;
+  set samplingStatus(ExecutorState state) {
+    _samplingStatus = state;
+
+    debug('$runtimeType - Setting sampling state: $state');
+
+    createEvent(
+      SmartphoneStudyStatusEvent(
+        this,
+        StudyStatusEventTypes.DeploymentUpdated,
+        samplingStatus,
+      ),
+    );
+  }
 
   /// Is this study sampling data?
   bool get isSampling => samplingStatus == ExecutorState.resumed;
 
   @override
-  Stream<StudyStatusEvent<SmartphoneStudy>> get events => super.events.map(
-    (event) => StudyStatusEvent<SmartphoneStudy>(this, event.event),
+  Stream<SmartphoneStudyStatusEvent> get events => super.events.map(
+    (event) => SmartphoneStudyStatusEvent(this, event.event, samplingStatus),
   );
 
   /// Create a [SmartphoneStudy].
@@ -60,27 +75,33 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
 
   /// Create a [SmartphoneStudy] from a SQL Result Map.
   factory SmartphoneStudy.fromMap(Map<String, Object?> map) {
-    final statusJson = map[Persistence.DEPLOYMENT_STATUS_COLUMN] as String;
-    final status = StudyDeploymentStatus.fromJson(
-      json.decode(statusJson) as Map<String, dynamic>,
-    );
+    final statusJson = map[Persistence.DEPLOYMENT_STATUS_COLUMN] as String?;
+    final status = statusJson != null && statusJson != 'null'
+        ? StudyDeploymentStatus.fromJson(
+            json.decode(statusJson) as Map<String, dynamic>,
+          )
+        : null;
 
-    final deploymentJson = map[Persistence.DEPLOYMENT_COLUMN] as String;
-    final deployment = SmartphoneDeployment.fromJson(
-      json.decode(deploymentJson) as Map<String, dynamic>,
-    );
+    final deploymentJson = map[Persistence.DEPLOYMENT_COLUMN] as String?;
+    final deployment = deploymentJson != null && deploymentJson != 'null'
+        ? SmartphoneDeployment.fromJson(
+            json.decode(deploymentJson) as Map<String, dynamic>,
+          )
+        : null;
 
     return SmartphoneStudy(
-        studyId: map[Persistence.STUDY_ID_COLUMN] as String,
+        studyId: map[Persistence.STUDY_ID_COLUMN] as String?,
         studyDeploymentId:
             map[Persistence.STUDY_DEPLOYMENT_ID_COLUMN] as String,
         deviceRoleName: map[Persistence.DEVICE_ROLE_NAME_COLUMN] as String,
-        participantId: map[Persistence.PARTICIPANT_ID_COLUMN] as String,
+        participantId: map[Persistence.PARTICIPANT_ID_COLUMN] as String?,
         participantRoleName:
-            map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String,
-        createdOn: DateTime.tryParse(
-          map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String,
-        ),
+            map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String?,
+        createdOn: map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] != null
+            ? DateTime.tryParse(
+                map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String,
+              )
+            : null,
         deploymentStatus: status,
         deployment: deployment,
       )
@@ -96,4 +117,12 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
       'device role: $deviceRoleName, '
       'participant id: $participantId, '
       'participant role: $participantRoleName';
+}
+
+/// An event related to a running [study]. including its runtime [state].
+class SmartphoneStudyStatusEvent extends StudyStatusEvent<SmartphoneStudy> {
+  final ExecutorState state;
+  const SmartphoneStudyStatusEvent(super.study, super.event, this.state);
+  @override
+  String toString() => '${super.toString()}, state: $state';
 }

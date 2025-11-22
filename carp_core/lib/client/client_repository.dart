@@ -16,15 +16,20 @@ abstract interface class ClientRepository<TStudy extends Study> {
 
   /// Adds [study] to the repository.
   ///
-  /// Throws [IllegalArgumentException] if [study] has the same study deployment
-  /// ID and device role name as an existing study.
+  /// If study with the same study deployment id and device role name as [study]
+  /// already exists in this repository, nothing happens.
+  /// If a study needs to be updated, use the [updateStudy] method.
   void addStudy(TStudy study);
 
   /// Return the study with [studyDeploymentId] and [deviceRoleName],
   /// or null when no such study is found.
   TStudy? getStudy(String studyDeploymentId, String deviceRoleName);
 
-  /// Return all studies in this repository.
+  /// Is [study] in this repository?
+  bool hasStudy(TStudy study);
+
+  /// Return all studies in this repository. May be an empty list if no
+  /// studies have been added.
   List<TStudy> getStudyList();
 
   /// Update a [study] which is already stored in the repository.

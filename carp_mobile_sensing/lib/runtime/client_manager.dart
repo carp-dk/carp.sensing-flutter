@@ -10,14 +10,27 @@ part of '../runtime.dart';
 /// The possible states of the [SmartPhoneClientManager].
 enum ClientManagerState { created, configured, disposed }
 
+/// The singleton `SmartPhoneClientManager()` is the main entry point for CARP
+/// Mobile Sensing.
+///
+/// It holds a set of [Smartphone] [studies], which can been added, removed,
+/// started, and stopped via the [addStudy], [removeStudy], [startStudy],
+/// and [stopStudy] methods.
+///
+/// A [SmartPhoneClientManager] is also a [ChangeNotifier] which notifies its
+/// listeners on any changes to its list of [studies]. The [events] stream emits
+/// and event when the state of the client changes.
 class SmartPhoneClientManager
-    extends ClientManager<Smartphone, DeviceRegistration, SmartphoneStudy> {
+    extends ClientManager<Smartphone, DeviceRegistration, SmartphoneStudy>
+    with ChangeNotifier {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
   NotificationController? _notificationController;
   bool _heartbeat = true;
   bool _askForPermissions = true;
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
+  final StreamController<ClientManagerState> _controller =
+      StreamController.broadcast();
   final Map<Study, SmartphoneStudyController> _controllers = {};
 
   /// Will this client manager ask for permission when a new study is deployed?
@@ -25,6 +38,14 @@ class SmartPhoneClientManager
 
   /// The runtime state of this client manager.
   ClientManagerState get state => _state;
+  set state(ClientManagerState state) {
+    _state = state;
+    _controller.add(state);
+    notifyListeners();
+  }
+
+  /// A stream of [ClientManagerState] events.
+  Stream<ClientManagerState> get events => _controller.stream;
 
   /// The stream of all [Measurement]s collected by this client manager.
   /// This is the aggregation of all measurements collected by the
@@ -34,22 +55,7 @@ class SmartPhoneClientManager
   SmartPhoneClientManager._()
     : super(repository: SmartphoneClientRepository()) {
     WidgetsFlutterBinding.ensureInitialized();
-    // WidgetsBinding.instance.addObserver(this);
     CarpMobileSensing.ensureInitialized();
-
-    // Make sure to create controllers for ally studies which may have been
-    // loaded from the persistence repository.
-    Persistence().getAllStudies().then((studies) {
-      for (var study in studies) {
-        final controller = SmartphoneStudyController(study);
-        _controllers[study] = controller;
-        _group.add(controller.measurements);
-      }
-
-      // Once all studies and their controllers are loaded, we can (re)start
-      // the sampling
-      start();
-    });
   }
 
   /// Get the singleton [SmartPhoneClientManager].
@@ -67,9 +73,17 @@ class SmartPhoneClientManager
   /// The [NotificationController] responsible for sending notification on [AppTask]s.
   NotificationController? get notificationController => _notificationController;
 
-  /// The study controller for a [study].
-  SmartphoneStudyController? getStudyController(SmartphoneStudy study) =>
-      _controllers[study];
+  /// Get the study controller for a [study].
+  /// If a study controller is not available, a fresh controller will be created.
+  SmartphoneStudyController? getStudyController(SmartphoneStudy study) {
+    if (_controllers.containsKey(study)) return _controllers[study];
+
+    // Create a fresh controller and start listening to it.
+    final controller = SmartphoneStudyController(study);
+    _controllers[study] = controller;
+    _group.add(controller.measurements);
+    return controller;
+  }
 
   /// Configure this [SmartPhoneClientManager].
   ///
@@ -104,20 +118,24 @@ class SmartPhoneClientManager
     bool askForPermissions = true,
     bool heartbeat = true,
   }) async {
-    // fast out if already configured
+    // Fast out if already configured
     if (state.index >= ClientManagerState.configured.index) return;
 
-    // initialize misc device settings
+    _heartbeat = heartbeat;
+    _askForPermissions = askForPermissions;
+
+    // Initialize infrastructure services and the repository.
     await DeviceInfo().init();
     await Settings().init();
     await Persistence().init();
+    await SmartphoneClientRepository().init();
 
-    // create and register the built-in data managers
+    // Create and register the built-in data managers.
     DataManagerRegistry().register(ConsoleDataManagerFactory());
     DataManagerRegistry().register(FileDataManagerFactory());
     DataManagerRegistry().register(SQLiteDataManagerFactory());
 
-    // initialize default services, if not specified
+    // Initialize default services, if not specified
     deploymentService ??= SmartphoneDeploymentService();
     dataCollectorFactory ??= DeviceController();
     if (enableNotifications) {
@@ -125,10 +143,7 @@ class SmartPhoneClientManager
           notificationController ?? FlutterLocalNotificationController();
     }
 
-    _heartbeat = heartbeat;
-    _askForPermissions = askForPermissions;
-
-    // initialize the app task controller singleton
+    // Initialize the app task controller.
     await AppTaskController().initialize(
       enableNotifications: enableNotifications,
     );
@@ -149,15 +164,15 @@ class SmartPhoneClientManager
       dataCollectorFactory: dataCollectorFactory,
     );
 
-    // look up and register all connected devices and services on this client
-    // TODO: I can't do this until I have a deployment protocol, which specified which devices to register?
-    // deviceController.registerAllAvailableDevices();
+    // Register all connected devices and services available in this client.
+    deviceController.registerAllAvailableDevices();
 
     var statusMsg =
         '===========================================================\n'
         '  CARP Mobile Sensing (CAMS) - $runtimeType\n'
         '===========================================================\n'
         '             device : ${registration.deviceDisplayName}\n'
+        '         repository : $repository\n'
         ' deployment service : $deploymentService\n'
         '  device controller : $deviceController\n'
         '  available devices : ${deviceController.devicesToString()}\n'
@@ -165,19 +180,30 @@ class SmartPhoneClientManager
         '===========================================================\n';
     debugPrint(statusMsg);
 
-    _state = ClientManagerState.configured;
+    // Now add previously stored studies to this client.
+    debug(
+      '$runtimeType - Loaded ${studies.length} studies. Now starting them...',
+    );
+    for (var study in studies) {
+      await addStudy(study);
+
+      study.deploymentStatusReceived();
+      study.deviceDeploymentReceived(); // will also start sampling
+    }
+
+    state = ClientManagerState.configured;
+    notifyListeners();
   }
 
   @override
   Future<SmartphoneStudy> addStudy(SmartphoneStudy study) async {
     await super.addStudy(study);
 
-    // Always create a fresh controller
-    final controller = SmartphoneStudyController(study);
-    _controllers[study] = controller;
-    _group.add(controller.measurements);
+    // Will create a fresh controller, if this is a new study.
+    getStudyController(study);
 
-    info('$runtimeType - Added study: $study');
+    info('$runtimeType - Adding study: $study');
+    notifyListeners();
     return study;
   }
 
@@ -241,7 +267,7 @@ class SmartPhoneClientManager
     // fast out if not a valid study
     if (study == null) return;
 
-    info('Removing study from $runtimeType - $studyDeploymentId');
+    info('$runtimeType - Removing study: $study');
 
     // Disconnecting from all devices will stop sensing on each of them.
     await deviceController.disconnectAllConnectedDevices();
@@ -252,6 +278,21 @@ class SmartPhoneClientManager
     if (controller != null) _group.remove(controller.measurements);
     _controllers.remove(study);
     await super.removeStudy(studyDeploymentId, deviceRoleName);
+    notifyListeners();
+  }
+
+  /// Start the study with [studyDeploymentId] and [deviceRoleName] from this
+  /// client manager.
+  ///
+  /// Note that [start] only needs to be called once. Once started, data sampling
+  /// can be resumed and paused via the controller's [resume] and [pause] methods.
+  @mustCallSuper
+  Future<void> startStudy(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    var study = getStudy(studyDeploymentId, deviceRoleName);
+    if (study != null) getStudyController(study)?.start();
   }
 
   /// Start data sampling in all studies in this client manager.
@@ -281,14 +322,18 @@ class SmartPhoneClientManager
 
   /// Called when this client is disposed. Will dispose all studies running
   /// in this client.
+  @override
   @mustCallSuper
   void dispose() {
+    pause(); // first pause all data sampling
     for (var controller in _controllers.values) {
       controller.dispose();
     }
+    ExecutorFactory().dispose();
 
     _group.close();
     Persistence().close();
     _state = ClientManagerState.disposed;
+    super.dispose();
   }
 }

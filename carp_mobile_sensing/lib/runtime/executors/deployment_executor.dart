@@ -1,10 +1,9 @@
 /*
- * Copyright 2018 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
- * Use of this source code is governed by a MIT-style license that can be
- * found in the LICENSE file.
+ * Copyright (c) 2025, the Technical University of Denmark (DTU).
+ * All rights reserved. Please see the AUTHORS file for details. 
+ * Use of this source code is governed by a MIT-style license that 
+ * can be found in the LICENSE file.
  */
-
 part of '../../runtime.dart';
 
 /// A [SmartphoneDeploymentExecutor] is responsible for executing a [SmartphoneDeployment].
@@ -12,7 +11,8 @@ part of '../../runtime.dart';
 ///
 /// Note that the [SmartphoneDeploymentExecutor] in itself is an [Executor] and hence work
 /// as a 'super executor'. This - amongst other things - imply that you can listen
-/// to all collected measurements from the [measurements] stream.
+/// to all collected measurements from the [measurements] stream and to all state
+/// event changes in the [stateEvents] stream.
 class SmartphoneDeploymentExecutor
     extends AggregateExecutor<SmartphoneDeployment> {
   final StreamController<Measurement> _manualMeasurementController =
@@ -22,7 +22,8 @@ class SmartphoneDeploymentExecutor
   bool onInitialize() {
     if (configuration == null) {
       warning(
-        'Trying to initialize StudyDeploymentExecutor but the deployment configuration is null. Cannot initialize study deployment.',
+        'Trying to initialize a $runtimeType, but the deployment configuration is null. '
+        'Cannot initialize study deployment.',
       );
       return false;
     }
@@ -127,6 +128,7 @@ class SmartphoneDeploymentExecutor
   }
 
   /// A list of the running probes in this study deployment executor.
+  /// May be empty.
   List<Probe> get probes {
     List<Probe> probes = [];
 

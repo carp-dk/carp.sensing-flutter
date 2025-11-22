@@ -21,7 +21,6 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   final String _deviceRoleName;
   StudyDeploymentStatus? _deploymentStatus;
   TDeviceDeployment? _deployment;
-
   final StreamController<StudyStatusEvent> _eventController =
       StreamController<StudyStatusEvent>.broadcast();
 
@@ -70,10 +69,15 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// Stream of study status events.
   Stream<StudyStatusEvent> get events => _eventController.stream;
 
+  /// Create a [StudyStatusEvent] of a specific [type].
+  void createEvent(StudyStatusEvent event) => _eventController.add(event);
+
   /// An updated [deploymentStatus] has been received.
-  void deploymentStatusReceived(StudyDeploymentStatus deploymentStatus) {
-    _deploymentStatus = deploymentStatus;
-    _eventController.add(
+  /// If [deploymentStatus] is not specified, the previously status is marked
+  /// as updated.
+  void deploymentStatusReceived([StudyDeploymentStatus? deploymentStatus]) {
+    _deploymentStatus ??= deploymentStatus;
+    createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeploymentStatusReceived),
     );
     notifyListeners();
@@ -81,7 +85,9 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
 
   /// A new primary device [deployment] determining what data to collect for
   /// this study has been received.
-  void deviceDeploymentReceived(TDeviceDeployment deployment) {
+  /// If [deployment] is not specified, the previously deployment is marked
+  /// as updated.
+  void deviceDeploymentReceived([TDeviceDeployment? deployment]) {
     if (deploymentStatus == null) {
       deploymentError(
         "Can't receive device deployment before having received deployment status.",
@@ -89,14 +95,16 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
       return;
     }
 
-    if (deployment.deviceConfiguration.roleName != deviceRoleName) {
+    _deployment ??= deployment;
+
+    if (this.deployment?.deviceConfiguration.roleName != deviceRoleName) {
       deploymentError(
-        "The deployment is intended for a device with a different role name.",
+        "$runtimeType - The deployment is intended for a device with a different role name."
+        "Was expecting '$deviceRoleName' but got '${this.deployment?.deviceConfiguration.roleName}'.",
       );
     }
 
-    _deployment = deployment;
-    _eventController.add(
+    createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
     );
     notifyListeners();
@@ -105,7 +113,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// Mark the [deployment] as updated. If [deployment] is null, nothing happens.
   void deploymentUpdated() {
     if (deployment != null) {
-      _eventController.add(
+      createEvent(
         StudyStatusEvent(this, StudyStatusEventTypes.DeploymentUpdated),
       );
       notifyListeners();
@@ -115,9 +123,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// The deployment is i an error state.
   void deploymentError([String? message]) {
     if (message != null) print(message);
-    _eventController.add(
-      StudyStatusEvent(this, StudyStatusEventTypes.DeploymentError),
-    );
+    createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentError));
     notifyListeners();
   }
 
@@ -182,7 +188,7 @@ enum StudyStatus {
   /// the study.
   Deployed,
 
-  /// The study is started and is sampling data.
+  /// The study is started and ready to sample data on the client.
   Running,
 
   /// The study has been stopped, either from this client or via the deployment
@@ -190,6 +196,11 @@ enum StudyStatus {
   Stopped,
 }
 
+/// Different types of event that happens to a study while running.
+///
+/// In contrast to [StudyStatus] which is a permanent state of a study during the
+/// deployment process, this [StudyStatusEventTypes] reflects changes to a study
+/// on runtime during the [StudyStatus.Running] phase.
 enum StudyStatusEventTypes {
   /// Deployment status information has been made available.
   DeploymentStatusReceived,
@@ -198,21 +209,19 @@ enum StudyStatusEventTypes {
   DeviceDeploymentReceived,
 
   /// The deployment has been updated.
-  ///
-  /// This event type is not included in CARP Core in Kotlin, but added to this
-  /// Dart package in order to handle deployment updates more gracefully in a
-  /// Flutter client.
   DeploymentUpdated,
 
   /// An error has occurred during deployment.
-  ///
-  /// This event type is not included in CARP Core in Kotlin, but added to this
-  /// Dart package in order to handle deployment error more gracefully in a
-  /// Flutter client.
   DeploymentError,
+
+  /// Data sampling is resumed.
+  Resumed,
+
+  /// Data sampling is paused.
+  Paused,
 }
 
-/// An event related to a changes to a [study].
+/// An event related to a running [study].
 class StudyStatusEvent<TStudy extends Study> {
   final TStudy study;
   final StudyStatusEventTypes event;

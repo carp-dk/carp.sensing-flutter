@@ -147,6 +147,10 @@ StudyDeploymentStatus _$StudyDeploymentStatusFromJson(
             const [],
       )
       ..$type = json['__type'] as String?
+      ..status = $enumDecodeNullable(
+        _$StudyDeploymentStatusTypesEnumMap,
+        json['status'],
+      )
       ..createdOn = DateTime.parse(json['createdOn'] as String)
       ..participantStatusList = (json['participantStatusList'] as List<dynamic>)
           .map((e) => ParticipantStatus.fromJson(e as Map<String, dynamic>))
@@ -159,6 +163,7 @@ Map<String, dynamic> _$StudyDeploymentStatusToJson(
   StudyDeploymentStatus instance,
 ) => <String, dynamic>{
   '__type': ?instance.$type,
+  'status': ?_$StudyDeploymentStatusTypesEnumMap[instance.status],
   'createdOn': instance.createdOn.toIso8601String(),
   'studyDeploymentId': instance.studyDeploymentId,
   'deviceStatusList': instance.deviceStatusList.map((e) => e.toJson()).toList(),
@@ -166,6 +171,13 @@ Map<String, dynamic> _$StudyDeploymentStatusToJson(
       .map((e) => e.toJson())
       .toList(),
   'startedOn': ?instance.startedOn?.toIso8601String(),
+};
+
+const _$StudyDeploymentStatusTypesEnumMap = {
+  StudyDeploymentStatusTypes.Invited: 'Invited',
+  StudyDeploymentStatusTypes.DeployingDevices: 'DeployingDevices',
+  StudyDeploymentStatusTypes.Running: 'Running',
+  StudyDeploymentStatusTypes.Stopped: 'Stopped',
 };
 
 ParticipantData _$ParticipantDataFromJson(Map<String, dynamic> json) =>

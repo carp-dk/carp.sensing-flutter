@@ -29,6 +29,7 @@ class SmartphoneStudyController {
           break;
         default:
       }
+      debug('$runtimeType - Created.');
     });
 
     // Keep the sampling status updated.
@@ -168,7 +169,10 @@ class SmartphoneStudyController {
     // Initialize all devices from the deployment, incl. this smartphone.
     _initializeDevices();
 
-    // Initialize the executor, which recursively initializes all executors and probes
+    // Initialize the executor, which recursively initializes all executors and probes.
+    // But before doing this, save any existing sampling status which might have
+    // been loaded, so that we can properly resume sampling.
+    var existingSamplingStatus = study.samplingStatus;
     _executor.initialize(deployment!, deployment!);
 
     // Connect to all connectable devices, incl. this phone.
@@ -182,6 +186,7 @@ class SmartphoneStudyController {
     measurements.listen((_) => _samplingSize++);
 
     // start data sampling
+    study.samplingStatus = existingSamplingStatus;
     start();
 
     var statusMsg =
@@ -330,7 +335,7 @@ class SmartphoneStudyController {
       _deviceController.devices[configuration.type]?.initialize(configuration);
     } else {
       warning(
-        "A device of type '${configuration.type}' is not available on this device. "
+        "$runtimeType - A device of type '${configuration.type}' is not available on this device. "
         "This may be because this device is not available on this operating system. "
         "Or it may be because the sampling package containing this device has not been "
         "registered in the SamplingPackageRegistry.",
@@ -364,9 +369,10 @@ class SmartphoneStudyController {
 
   /// Start data collection using this controller.
   ///
-  /// If [resume] is true, immediately resume data collection according to the
-  /// configuration in [deployment]. If not, sampling can be started later
-  /// by calling [executor.start].
+  /// Will attempt to deploy this [study] if not already done.
+  ///
+  /// Will resume data collection if the [study]'s samplingStatus is `Resumed`.
+  /// If not, sampling can be started later by calling the [resume] method.
   Future<void> start() async {
     if (study.status == StudyStatus.Stopped) {
       warning(
@@ -379,15 +385,16 @@ class SmartphoneStudyController {
       '$runtimeType - Starting data sampling for study deployment: ${deployment?.studyDeploymentId}',
     );
 
-    // if this study has not yet been deployed, do this first.
+    // If this study has not yet been deployed, do this first.
     if (study.status.index < StudyStatus.Deployed.index) {
+      debug('$runtimeType - Study not yet deployed - trying to deploy...');
       await SmartPhoneClientManager().tryDeployment(
         study.studyDeploymentId,
         study.deviceRoleName,
       );
     }
 
-    // ask for permissions for all measures in this deployment
+    // Ask for permissions for all measures in this deployment
     if (SmartPhoneClientManager().askForPermissions) {
       await askForAllPermissions();
     }
@@ -396,7 +403,7 @@ class SmartphoneStudyController {
     if (study.samplingStatus == ExecutorState.resumed) executor.resume();
   }
 
-  /// Start data sampling.
+  /// Resume data sampling.
   void resume() => executor.resume();
 
   /// Pause data sampling.
