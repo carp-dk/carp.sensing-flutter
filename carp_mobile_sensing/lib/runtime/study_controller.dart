@@ -400,7 +400,7 @@ class SmartphoneStudyController {
     }
 
     // Resume data sampling, if needed.
-    if (study.samplingStatus == ExecutorState.resumed) executor.resume();
+    if (study.samplingStatus == ExecutorState.Resumed) executor.resume();
   }
 
   /// Resume data sampling.

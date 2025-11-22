@@ -55,9 +55,9 @@ class StudyPageState extends State<StudyPage> {
     client.configure(enableNotifications: false, askForPermissions: true);
 
     // // Listening on all the measurements print them as json.
-    // SmartPhoneClientManager().measurements.listen(
-    //   (measurement) => print(toJsonString(measurement)),
-    // );
+    SmartPhoneClientManager().measurements.listen(
+      (measurement) => print(toJsonString(measurement)),
+    );
 
     super.initState();
   }
@@ -121,9 +121,9 @@ class StudyPageState extends State<StudyPage> {
               ),
               isThreeLine: true,
               leading: Icon(switch (study.samplingStatus) {
-                ExecutorState.paused ||
-                ExecutorState.initialized => Icons.play_arrow,
-                ExecutorState.resumed => Icons.pause,
+                ExecutorState.Paused ||
+                ExecutorState.Initialized => Icons.play_arrow,
+                ExecutorState.Resumed => Icons.pause,
                 _ => Icons.refresh,
               }, size: 40),
               title: Text('Study Deployment #$index'),
@@ -143,11 +143,11 @@ class StudyPageState extends State<StudyPage> {
 
   /// A set of icons to illustrate the [SmartphoneStudy.samplingStatus].
   static Map<ExecutorState, Icon> get executorStateIcon => {
-    ExecutorState.created: Icon(Icons.child_care),
-    ExecutorState.initialized: Icon(Icons.check),
-    ExecutorState.resumed: Icon(Icons.radio_button_checked),
-    ExecutorState.paused: Icon(Icons.radio_button_unchecked),
-    ExecutorState.undefined: Icon(Icons.error_outline),
+    ExecutorState.Created: Icon(Icons.child_care),
+    ExecutorState.Initialized: Icon(Icons.check),
+    ExecutorState.Resumed: Icon(Icons.radio_button_checked),
+    ExecutorState.Paused: Icon(Icons.radio_button_unchecked),
+    ExecutorState.Undefined: Icon(Icons.error_outline),
   };
 
   /// Add a new study to the client's list of studies based on the [protocol]

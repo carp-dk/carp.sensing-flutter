@@ -73,7 +73,7 @@ class Console extends State<ConsolePage> {
       tooltip: 'Start/Stop study',
       child: StreamBuilder<ExecutorState>(
         stream: Sensing().controller?.executor.stateEvents,
-        initialData: ExecutorState.created,
+        initialData: ExecutorState.Created,
         builder: (_, _) =>
             Sensing().isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
       ),
@@ -137,7 +137,7 @@ class Sensing {
 
   /// Is sensing running, i.e. has the study executor been started?
   // bool get isRunning => controller?.executor.state == ExecutorState.resumed;
-  bool get isRunning => study?.samplingStatus == ExecutorState.resumed;
+  bool get isRunning => study?.samplingStatus == ExecutorState.Resumed;
 
   /// Start sensing
   void resume() => controller?.resume();

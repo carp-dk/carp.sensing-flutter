@@ -61,7 +61,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
 
   /// Are all [probes] in a paused state?
   bool get haveAllProbesPaused =>
-      !probes.any((probe) => probe.state != ExecutorState.paused);
+      !probes.any((probe) => probe.state != ExecutorState.Paused);
 
   /// Connect all connectable devices used by the [probes] in this
   /// background task executor.
@@ -81,7 +81,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
     if (probes.isEmpty) return true;
 
     // Early out if already running (this is a background task)
-    if (state == ExecutorState.resumed) {
+    if (state == ExecutorState.Resumed) {
       warning(
         '$runtimeType - Trying to resume $this but it is already resumed. Ignoring this.',
       );
@@ -91,7 +91,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
     // Listen to pause this background executor when all of its underlying
     // probes have paused - Issue #384
     _subscription = states
-        .where((event) => event == ExecutorState.paused)
+        .where((event) => event == ExecutorState.Paused)
         .listen((_) {
           if (haveAllProbesPaused) {
             debug(

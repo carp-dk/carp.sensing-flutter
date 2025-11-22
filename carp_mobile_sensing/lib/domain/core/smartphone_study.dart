@@ -9,7 +9,7 @@ part of '../../domain.dart';
 
 /// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
 class SmartphoneStudy extends Study<SmartphoneDeployment> {
-  ExecutorState _samplingStatus = ExecutorState.created;
+  ExecutorState _samplingStatus = ExecutorState.Created;
 
   /// The unique id of the study in the deployment service.
   String? studyId;
@@ -37,7 +37,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   }
 
   /// Is this study sampling data?
-  bool get isSampling => samplingStatus == ExecutorState.resumed;
+  bool get isSampling => samplingStatus == ExecutorState.Resumed;
 
   @override
   Stream<SmartphoneStudyStatusEvent> get events => super.events.map(

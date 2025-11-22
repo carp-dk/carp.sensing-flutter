@@ -15,68 +15,67 @@ part of '../../runtime.dart';
 /// The runtime state has the following state machine:
 ///
 /// ```
-///    +---------------------------------------------------------------+      +-----------+
-///    |  +---------+    +-------------+    +---------+     +--------+ |   -> | undefined |
-///    |  | created | -> | initialized | -> | resumed | <-> | paused | |      +-----------+
-///    |  +---------+    +-------------+    +---------+     +--------+ |   -> | disposed  |
-///    +---------------------------------------------------------------+      +-----------+
+/// +---------------------------------------------------------------+      +-----------+
+/// |  +---------+    +-------------+    +---------+     +--------+ |   -> | undefined |
+/// |  | created | -> | initialized | -> | resumed | <-> | paused | |      +-----------+
+/// |  +---------+    +-------------+    +---------+     +--------+ |   -> | disposed  |
+/// +---------------------------------------------------------------+      +-----------+
 /// ```
 enum ExecutorState {
   /// Created and ready to be initialized.
-  created,
+  Created,
 
-  /// Initialized and ready to be started.
-  initialized,
+  /// Initialized and ready to be resumed.
+  Initialized,
 
-  /// Running and actively collecting data.
-  resumed,
+  /// Resumed and actively collecting data.
+  Resumed,
 
   /// Paused not collecting data. Can be resumed in this state.
-  paused,
+  Paused,
 
   /// Permanently disposed. Cannot be used anymore.
-  disposed,
+  Disposed,
 
   /// Undefined state.
   ///
   /// Typically an executor becomes undefined if it cannot be initialized
   /// or if this executor (probe) is not supported on the specific phone / OS.
-  undefined,
+  Undefined,
 }
 
 /// A [Executor] is responsible for executing data collection based on a
 /// configuration [TConfig].
 ///
 /// The behavior of an executor is controlled by its life-cycle methods: [initialize],
-/// [resume], [pause], and [pause]. A [restart] can be used to restart an executor
-/// (e.g., if its configuration has changed).
+/// [resume], [pause], and [dispose]. A [restart] can be used to restart an executor,
+/// if its configuration has changed.
 ///
-/// The [state] property reveals the probe's current runtime state.
-/// The [stateEvents] is a stream of state changes which can be listen to as a broadcast
-/// stream.
+/// The [state] property reveals the probe's current state.
+/// The [stateEvents] is a stream of state changes which can be listen to as a
+/// broadcast stream.
 ///
-/// If an error occurs the state of a probe becomes [undefined]. This is, for example,
-/// used when an exception occur.
+/// If an error occurs the state of a probe becomes undefined. This is, for example,
+/// used when an exception occurs.
 ///
-/// The executor returns collected data in the [measurements] stream. This is the main
-/// usage of an executor. For example, to listens to events and print them;
+/// An Executor returns collected data in the [measurements] stream.
+/// This is the main usage of an executor. For example, to listens to all
+/// measurements generated in all studies running in a client, use:
 ///
-///     executor.data.forEach(print);
-///
+/// ```
+/// SmartPhoneClientManager().measurements.listen(
+///    (measurement) => print(measurement),
+/// );
+/// ```
 abstract class Executor<TConfig> {
   /// The deployment that this executor is part of executing.
   SmartphoneDeployment? get deployment;
 
-  /// The configuration of this executor as set when [initialize]d.
+  /// The configuration of this executor as set in [initialize].
   TConfig? get configuration;
 
   /// The runtime state of this executor.
   ExecutorState get state;
-
-  /// Is this executor in the process of being resumed?
-  ///
-  /// This is true while the [resume] method is executing.
-  bool get isResuming;
 
   /// The runtime state changes of this executor.
   Stream<ExecutorState> get stateEvents;
@@ -84,7 +83,7 @@ abstract class Executor<TConfig> {
   /// The stream of [Measurement] collected by this executor.
   Stream<Measurement> get measurements;
 
-  /// Configure and initialize the executor before starting it.
+  /// Configure and initialize the executor before using it.
   void initialize(TConfig configuration, [SmartphoneDeployment? deployment]);
 
   /// Resume the executor.
@@ -96,13 +95,12 @@ abstract class Executor<TConfig> {
   /// accordingly. Any changes to the configuration must be specified via the
   /// [initialize] method before calling restart.
   ///
-  /// Only executors that has been started (i.e. in state [ExecutorState.resumed])
-  /// or stopped (state [ExecutorState.paused]) can be restarted.
+  /// Only executors that has been resumed or paused can be restarted.
   ///
   /// Calling restart automatically resumes the executor if possible.
   void restart();
 
-  /// Stop the executor. Stopped until [resume] or [restart] is called.
+  /// Pause the executor. Stopped until [resume] or [restart] is called.
   void pause();
 
   /// Dispose of this executor.
@@ -140,8 +138,8 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   @override
   ExecutorState get state => _stateMachine.state;
 
-  @override
-  bool get isResuming => _isResuming;
+  // @override
+  // bool get isResuming => _isResuming;
 
   AbstractExecutor() {
     _stateMachine = _CreatedState(this);
@@ -335,7 +333,7 @@ abstract class _AbstractExecutorState implements _ExecutorStateMachine {
   // Default dispose behavior. A Executor can be disposed in all states.
   @override
   void dispose() {
-    if (state == ExecutorState.resumed) {
+    if (state == ExecutorState.Resumed) {
       warning(
         "Trying to dispose a ${executor.runtimeType} in a 'resumed' state."
         "Consider pausing it first.",
@@ -385,7 +383,7 @@ class _CreatedState extends _AbstractExecutorState
     : super(executor as AbstractExecutor);
 
   @override
-  ExecutorState get state => ExecutorState.created;
+  ExecutorState get state => ExecutorState.Created;
 
   @override
   void initialize() {
@@ -406,7 +404,7 @@ class _InitializedState extends _AbstractExecutorState
     : super(executor as AbstractExecutor);
 
   @override
-  ExecutorState get state => ExecutorState.initialized;
+  ExecutorState get state => ExecutorState.Initialized;
 
   @override
   void resume() => _start();
@@ -417,7 +415,7 @@ class _ResumedState extends _AbstractExecutorState {
     : super(executor as AbstractExecutor);
 
   @override
-  ExecutorState get state => ExecutorState.resumed;
+  ExecutorState get state => ExecutorState.Resumed;
 
   @override
   void restart() {
@@ -439,7 +437,7 @@ class _PausedState extends _AbstractExecutorState {
     : super(executor as AbstractExecutor);
 
   @override
-  ExecutorState get state => ExecutorState.paused;
+  ExecutorState get state => ExecutorState.Paused;
 
   @override
   void resume() {
@@ -463,7 +461,7 @@ class _DisposedState extends _AbstractExecutorState
   _DisposedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
   @override
-  ExecutorState get state => ExecutorState.disposed;
+  ExecutorState get state => ExecutorState.Disposed;
 }
 
 class _UndefinedState extends _AbstractExecutorState
@@ -471,5 +469,5 @@ class _UndefinedState extends _AbstractExecutorState
   _UndefinedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
   @override
-  ExecutorState get state => ExecutorState.undefined;
+  ExecutorState get state => ExecutorState.Undefined;
 }
