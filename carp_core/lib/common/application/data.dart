@@ -4,8 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 // This file holds all the CARP Core defined data type.
 // In CARP Core Kotlin, this is the "dk.cachet.carp.common.application.data" domain.
@@ -216,10 +215,7 @@ class CompletedTask extends Data {
   /// The result of the completed task, if any.
   Data? taskData;
 
-  CompletedTask({
-    required this.taskName,
-    this.taskData,
-  }) : super();
+  CompletedTask({required this.taskName, this.taskData}) : super();
 
   @override
   bool equivalentTo(Data other) =>

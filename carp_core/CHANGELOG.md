@@ -1,5 +1,6 @@
-## 1.10.0
+## 2.0.0
 
+* upgrade to reflect the latest CARP Core Kotlin domain model in the 'client' sub-system
 * better support for `StudyStatus` in the client manager ( [#504](https://github.com/cph-cachet/carp.sensing-flutter/issues/504))
 
 ## 1.9.4

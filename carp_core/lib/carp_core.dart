@@ -1,18 +1,27 @@
-/// This library contains the entire carp_core API the CARP Mobile Sensing (CAMS)
+/// This library contains the core domain model for the Copenhagen Research
+/// Platform (CARP).
+/// This is used in the [CARP Mobile Sensing (CAMS)](https://pub.dev/packages/carp_mobile_sensing)
 /// framework implemented in Flutter.
+///
+/// This is a Dart implementation of the [Kotlin CARP Core Domain Model](https://github.com/carp-dk/carp.core-kotlin/tree/develop).
+///
+/// In order to ensure initialization of json serialization, call:
+///
+/// `Core.ensureInitialized();`
+///
 library;
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/deployment/carp_core_deployment.dart';
-import 'package:carp_core/common/carp_core_common.dart';
-import 'package:carp_core/protocols/carp_core_protocols.dart';
-import 'package:carp_core/data/carp_core_data.dart';
+import 'package:carp_core/deployment.dart';
+import 'package:carp_core/common.dart';
+import 'package:carp_core/protocols.dart';
+import 'package:carp_core/data.dart';
 
-export 'client/carp_core_client.dart';
-export 'common/carp_core_common.dart';
-export 'data/carp_core_data.dart';
-export 'deployment/carp_core_deployment.dart';
-export 'protocols/carp_core_protocols.dart';
+export 'client.dart';
+export 'common.dart';
+export 'data.dart';
+export 'deployment.dart';
+export 'protocols.dart';
 
 part 'carp_core.json.dart';
 
@@ -20,7 +29,7 @@ part 'carp_core.json.dart';
 ///
 /// In order to ensure initialization of json serialization, call:
 ///
-///    Core.ensureInitialized();
+/// `Core.ensureInitialized();`
 ///
 class Core {
   static final _instance = Core._();

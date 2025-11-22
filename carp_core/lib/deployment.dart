@@ -15,13 +15,13 @@ import 'package:carp_core/carp_core.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 
-part 'application/deployment_service.dart';
-part 'application/participation_service.dart';
-part 'application/device_deployment.dart';
-part 'domain/study_deployment.dart';
-part 'domain/participation.dart';
-part 'application/users.dart';
-part 'infrastructure/deployment_requests.dart';
-part 'infrastructure/participation_requests.dart';
+part 'deployment/application/deployment_service.dart';
+part 'deployment/application/participation_service.dart';
+part 'deployment/application/device_deployment.dart';
+part 'deployment/domain/study_deployment.dart';
+part 'deployment/domain/participation.dart';
+part 'deployment/application/users.dart';
+part 'deployment/infrastructure/deployment_requests.dart';
+part 'deployment/infrastructure/participation_requests.dart';
 
-part 'carp_core_deployment.g.dart';
+part 'deployment.g.dart';

@@ -5,7 +5,7 @@
  * can be found in the LICENSE file.
  */
 
-part of 'carp_core_client.dart';
+part of '../client.dart';
 
 /// A repository which handles persisting the state of studies.
 /// Used by a [ClientManager] to store and retrieve information about

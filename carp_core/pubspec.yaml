@@ -1,6 +1,6 @@
 name: carp_core
 description: The core domain model for the Copenhagen Research Platform (CARP) in Dart.
-version: 1.9.4
+version: 2.0.0
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 
 environment:

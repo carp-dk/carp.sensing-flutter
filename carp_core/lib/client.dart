@@ -5,8 +5,8 @@
  * can be found in the LICENSE file.
  */
 
-/// This is the runtime which performs the actual data collection on a device (e.g.,
-/// desktop computer or smartphone). This subsystem contains reusable components
+/// The runtime which performs the actual data collection on a device (e.g.,
+/// desktop computer or smartphone). The client subsystem contains reusable components
 /// which understand the runtime configuration derived from a study protocol by
 /// the ‘deployment’ subsystem. Integrations with sensors are loaded through a
 /// 'device data collector' plug-in system to decouple sensing — not part of core —
@@ -18,7 +18,7 @@
 /// [CARP Mobile Sensing](https://pub.dev/packages/carp_mobile_sensing).
 ///
 /// Contains the core client classes like [ClientManager], [DeviceDataCollectorFactory],
-/// [DeviceDataCollector], and [StudyRuntime].
+/// [DeviceDataCollector], and [ClientRepository].
 ///
 /// See the [`carp.clients`](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-clients.md)
 /// definition in Kotlin.
@@ -28,12 +28,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' show ChangeNotifier;
 import 'package:meta/meta.dart';
-import 'package:carp_core/common/carp_core_common.dart';
-import 'package:carp_core/deployment/carp_core_deployment.dart';
+import 'package:carp_core/common.dart';
+import 'package:carp_core/deployment.dart';
 
-part 'client_manager.dart';
-part 'study_runtime.dart';
-part 'study.dart';
-part 'device_data_collector.dart';
-part 'client_repository.dart';
-part 'study_deployment_proxy.dart';
+part 'client/client_manager.dart';
+part 'client/study.dart';
+part 'client/device_data_collector.dart';
+part 'client/client_repository.dart';
+part 'client/study_deployment_proxy.dart';

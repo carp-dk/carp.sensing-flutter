@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_protocols.dart';
+part of '../../protocols.dart';
 
 /// A description of how a study is to be executed, defining the type(s) of
 /// primary device(s) ([PrimaryDeviceConfiguration]) responsible for

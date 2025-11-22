@@ -5,7 +5,7 @@
  * can be found in the LICENSE file.
  */
 
-part of 'carp_core_client.dart';
+part of '../client.dart';
 
 /// Provides a [localDataCollector] to collect data locally on the primary device
 /// and supports creating [ConnectedDeviceDataCollector] instances for connected

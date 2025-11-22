@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// Defines data that needs to be measured/collected passively as part of a
 /// task defined by [TaskConfiguration].
@@ -26,7 +26,7 @@ class Measure extends Serializable {
   /// Create a measure by specifying its [type] and optionally a
   /// [samplingConfiguration] to override the default sampling configuration.
   Measure({required this.type, SamplingConfiguration? samplingConfiguration})
-      : super() {
+    : super() {
     overrideSamplingConfiguration = samplingConfiguration;
   }
 

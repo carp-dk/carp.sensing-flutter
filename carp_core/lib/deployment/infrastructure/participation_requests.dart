@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 // -----------------------------------------------------
 // Participation Service Requests
@@ -45,8 +45,8 @@ class GetActiveParticipationInvitations extends ParticipationServiceRequest {
   @override
   Function get fromJsonFunction => _$GetActiveParticipationInvitationsFromJson;
   factory GetActiveParticipationInvitations.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<GetActiveParticipationInvitations>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<GetActiveParticipationInvitations>(json);
   @override
   Map<String, dynamic> toJson() =>
       _$GetActiveParticipationInvitationsToJson(this);

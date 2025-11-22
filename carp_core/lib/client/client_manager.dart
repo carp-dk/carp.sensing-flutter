@@ -5,7 +5,7 @@
  * can be found in the LICENSE file.
  */
 
-part of 'carp_core_client.dart';
+part of '../client.dart';
 
 /// Allows managing studies on a client device.
 abstract class ClientManager<

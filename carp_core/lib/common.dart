@@ -7,28 +7,28 @@ import 'package:iso_duration_parser/iso_duration_parser.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 
-part 'application/account.dart';
-part 'infrastructure/service_request.dart';
-part 'application/users.dart';
-part 'application/measure.dart';
-part 'application/tasks.dart';
-part 'application/task_control.dart';
-part 'application/devices/device_configuration.dart';
-part 'application/devices/device_registration.dart';
-part 'application/devices/smartphone.dart';
-part 'application/devices/personal_computer.dart';
-part 'application/devices/web_browser.dart';
-part 'application/devices/alt_beacon.dart';
-part 'application/devices/heart_rate_device.dart';
-part 'application/triggers.dart';
-part 'application/sampling/configurations.dart';
-part 'application/sampling/schemes.dart';
-part 'application/data_type.dart';
-part 'application/data_types.dart';
-part 'application/data.dart';
-part 'application/input_data.dart';
+part 'common/application/account.dart';
+part 'common/infrastructure/service_request.dart';
+part 'common/application/users.dart';
+part 'common/application/measure.dart';
+part 'common/application/tasks.dart';
+part 'common/application/task_control.dart';
+part 'common/application/devices/device_configuration.dart';
+part 'common/application/devices/device_registration.dart';
+part 'common/application/devices/smartphone.dart';
+part 'common/application/devices/personal_computer.dart';
+part 'common/application/devices/web_browser.dart';
+part 'common/application/devices/alt_beacon.dart';
+part 'common/application/devices/heart_rate_device.dart';
+part 'common/application/triggers.dart';
+part 'common/application/sampling/configurations.dart';
+part 'common/application/sampling/schemes.dart';
+part 'common/application/data_type.dart';
+part 'common/application/data_types.dart';
+part 'common/application/data.dart';
+part 'common/application/input_data.dart';
 
-part 'carp_core_common.g.dart';
+part 'common.g.dart';
 
 /// Exception thrown when the application is in an illegal state.
 class IllegalStateException implements Exception {

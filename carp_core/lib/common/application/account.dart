@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// Uniquely identifies an account and its associated identity.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -19,11 +19,11 @@ class Account {
 
   /// Create a new [Account] uniquely identified by the specified [emailAddress].
   Account.withEmailIdentity(String emailAddress)
-      : this(identity: EmailAccountIdentity(emailAddress));
+    : this(identity: EmailAccountIdentity(emailAddress));
 
   /// Create a new [Account] uniquely identified by the specified [username].
   Account.withUsernameIdentity(String username)
-      : this(identity: UsernameAccountIdentity(username));
+    : this(identity: UsernameAccountIdentity(username));
 
   /// Determines whether this account has the same [identity] as [otherAccount].
   bool hasSameIdentity(Account otherAccount) =>

@@ -4,8 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// Custom input data as requested by a researcher.
 abstract class InputType {

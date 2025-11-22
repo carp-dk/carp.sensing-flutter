@@ -13,11 +13,11 @@ library;
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/common/carp_core_common.dart';
+import 'package:carp_core/common.dart';
 
-part 'domain/study_protocol.dart';
-part 'application/protocol_classes.dart';
-part 'application/protocol_service.dart';
-part 'infrastructure/protocol_requests.dart';
+part 'protocols/domain/study_protocol.dart';
+part 'protocols/application/protocol_classes.dart';
+part 'protocols/application/protocol_service.dart';
+part 'protocols/infrastructure/protocol_requests.dart';
 
-part 'carp_core_protocols.g.dart';
+part 'protocols.g.dart';

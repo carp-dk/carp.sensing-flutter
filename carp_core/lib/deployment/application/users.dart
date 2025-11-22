@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 /// The information which needs to be provided when inviting a participant to
 /// a deployment.
@@ -49,7 +49,7 @@ class Participation {
   AssignedTo assignedRoles;
 
   Participation(this.studyDeploymentId, this.participantId, this.assignedRoles)
-      : super();
+    : super();
 
   factory Participation.fromJson(Map<String, dynamic> json) =>
       _$ParticipationFromJson(json);
@@ -77,11 +77,8 @@ class StudyInvitation {
   /// outside of scope or not yet supported by CARP core.
   dynamic applicationData;
 
-  StudyInvitation(
-    this.name, [
-    this.description,
-    this.applicationData,
-  ]) : super();
+  StudyInvitation(this.name, [this.description, this.applicationData])
+    : super();
 
   factory StudyInvitation.fromJson(Map<String, dynamic> json) =>
       _$StudyInvitationFromJson(json);
@@ -164,9 +161,11 @@ class ParticipantStatus {
   AssignedTo assignedParticipantRoles;
   Set<String> assignedPrimaryDeviceRoleNames;
 
-  ParticipantStatus(this.participantId, this.assignedParticipantRoles,
-      this.assignedPrimaryDeviceRoleNames)
-      : super();
+  ParticipantStatus(
+    this.participantId,
+    this.assignedParticipantRoles,
+    this.assignedPrimaryDeviceRoleNames,
+  ) : super();
   factory ParticipantStatus.fromJson(Map<String, dynamic> json) =>
       _$ParticipantStatusFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantStatusToJson(this);

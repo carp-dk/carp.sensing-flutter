@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_data.dart';
+part of '../../data.dart';
 
 /// Configures the set of [ExpectedDataStream] for a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -28,10 +28,7 @@ class ExpectedDataStream {
   String deviceRoleName;
   String dataType;
 
-  ExpectedDataStream({
-    required this.deviceRoleName,
-    required this.dataType,
-  });
+  ExpectedDataStream({required this.deviceRoleName, required this.dataType});
   factory ExpectedDataStream.fromJson(Map<String, dynamic> json) =>
       _$ExpectedDataStreamFromJson(json);
   Map<String, dynamic> toJson() => _$ExpectedDataStreamToJson(this);
@@ -130,9 +127,10 @@ class Measurement {
   /// time stamp as microseconds since epoch is used.
   factory Measurement.fromData(Data data, [int? sensorStartTime]) =>
       Measurement(
-          sensorStartTime:
-              sensorStartTime ?? DateTime.now().microsecondsSinceEpoch,
-          data: data);
+        sensorStartTime:
+            sensorStartTime ?? DateTime.now().microsecondsSinceEpoch,
+        data: data,
+      );
 
   factory Measurement.fromJson(Map<String, dynamic> json) =>
       _$MeasurementFromJson(json);

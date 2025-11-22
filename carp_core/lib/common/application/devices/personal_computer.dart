@@ -4,8 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../../carp_core_common.dart';
+part of '../../../common.dart';
 
 /// Configuration of an internet-connected personal computer with no built-in [sensors].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -20,9 +19,7 @@ class PersonalComputer
 
   /// Create a new personal computer device descriptor.
   /// If [roleName] is not specified, then the [DEFAULT_ROLE_NAME] is used.
-  PersonalComputer({
-    super.roleName = PersonalComputer.DEFAULT_ROLE_NAME,
-  });
+  PersonalComputer({super.roleName = PersonalComputer.DEFAULT_ROLE_NAME});
 
   @override
   PersonalComputerRegistration createRegistration({
@@ -34,17 +31,16 @@ class PersonalComputer
     String? deviceModel,
     String? operatingSystem,
     String? version,
-  }) =>
-      PersonalComputerRegistration(
-        deviceId: deviceId,
-        deviceDisplayName: deviceDisplayName,
-        platform: platform,
-        computerName: computerName,
-        memorySize: memorySize,
-        deviceModel: deviceModel,
-        operatingSystem: operatingSystem,
-        version: version,
-      );
+  }) => PersonalComputerRegistration(
+    deviceId: deviceId,
+    deviceDisplayName: deviceDisplayName,
+    platform: platform,
+    computerName: computerName,
+    memorySize: memorySize,
+    deviceModel: deviceModel,
+    operatingSystem: operatingSystem,
+    version: version,
+  );
 
   @override
   Function get fromJsonFunction => _$PersonalComputerFromJson;

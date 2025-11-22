@@ -10,10 +10,10 @@ library;
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/common/carp_core_common.dart';
+import 'package:carp_core/common.dart';
 
-part 'application/data_stream.dart';
-part 'application/data_stream_service.dart';
-part 'infrastructure/data_stream_requests.dart';
+part 'data/application/data_stream.dart';
+part 'data/application/data_stream_service.dart';
+part 'data/infrastructure/data_stream_requests.dart';
 
-part 'carp_core_data.g.dart';
+part 'data.g.dart';

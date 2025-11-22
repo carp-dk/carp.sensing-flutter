@@ -4,8 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../../carp_core_common.dart';
+part of '../../../common.dart';
 
 /// Configuration of an internet-connected smartphone with built-in [sensors].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)

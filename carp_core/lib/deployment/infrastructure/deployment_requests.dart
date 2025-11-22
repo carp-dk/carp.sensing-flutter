@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 // -----------------------------------------------------
 // Deployment Service Requests
@@ -97,7 +97,10 @@ class GetStudyDeploymentStatusList extends DeploymentServiceRequest {
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class RegisterDevice extends DeploymentServiceRequest {
   RegisterDevice(
-      super.studyDeploymentId, this.deviceRoleName, this.registration);
+    super.studyDeploymentId,
+    this.deviceRoleName,
+    this.registration,
+  );
 
   /// The role name of this device.
   String deviceRoleName;

@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_protocols.dart';
+part of '../../protocols.dart';
 
 /// Serializable application service requests to [ProtocolService].
 abstract class ProtocolServiceRequest extends ServiceRequest {
@@ -66,8 +66,8 @@ class UpdateParticipantDataConfiguration extends ProtocolServiceRequest {
   @override
   Function get fromJsonFunction => _$UpdateParticipantDataConfigurationFromJson;
   factory UpdateParticipantDataConfiguration.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<UpdateParticipantDataConfiguration>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<UpdateParticipantDataConfiguration>(json);
   @override
   Map<String, dynamic> toJson() =>
       _$UpdateParticipantDataConfigurationToJson(this);

@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 /// Contains the entire description and configuration for how a single primary
 /// device participates in running a study.

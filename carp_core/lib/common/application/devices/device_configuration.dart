@@ -4,8 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../../carp_core_common.dart';
+part of '../../../common.dart';
 
 /// Describes any type of electronic device, such as a sensor, video camera,
 /// desktop computer, or smartphone that collects data which can be incorporated
@@ -41,10 +40,7 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
   /// The set of data types which can be collected on this device.
   Set<String>? get supportedDataTypes => dataTypeSamplingSchemes?.types;
 
-  DeviceConfiguration({
-    required this.roleName,
-    this.isOptional,
-  }) : super();
+  DeviceConfiguration({required this.roleName, this.isOptional}) : super();
 
   /// Create a [DeviceRegistration] which can be used to configure this device
   /// for deployment.
@@ -55,8 +51,10 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
     String? deviceDisplayName,
   }) =>
       DefaultDeviceRegistration(
-          deviceId: deviceId,
-          deviceDisplayName: deviceDisplayName) as TRegistration;
+            deviceId: deviceId,
+            deviceDisplayName: deviceDisplayName,
+          )
+          as TRegistration;
 
   @override
   String toString() =>
@@ -77,18 +75,16 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DefaultDeviceConfiguration
     extends DeviceConfiguration<DefaultDeviceRegistration> {
-  DefaultDeviceConfiguration({
-    required super.roleName,
-    super.isOptional,
-  });
+  DefaultDeviceConfiguration({required super.roleName, super.isOptional});
 
   @override
   DefaultDeviceRegistration createRegistration({
     String? deviceId,
     String? deviceDisplayName,
-  }) =>
-      DefaultDeviceRegistration(
-          deviceId: deviceId, deviceDisplayName: deviceDisplayName);
+  }) => DefaultDeviceRegistration(
+    deviceId: deviceId,
+    deviceDisplayName: deviceDisplayName,
+  );
 
   @override
   Function get fromJsonFunction => _$DefaultDeviceConfigurationFromJson;
@@ -103,9 +99,8 @@ class DefaultDeviceConfiguration
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
     extends DeviceConfiguration<TRegistration> {
-  PrimaryDeviceConfiguration({
-    required super.roleName,
-  }) : super(isOptional: false);
+  PrimaryDeviceConfiguration({required super.roleName})
+    : super(isOptional: false);
 
   // This property is only here for (de)serialization purposes.
   // For unknown types we need to know whether to treat them as primary
@@ -114,15 +109,16 @@ class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
 
   /// A trigger which fires immediately at the start of a study deployment.
   TriggerConfiguration get atStartOfStudy => ElapsedTimeTrigger(
-        sourceDeviceRoleName: roleName,
-        elapsedTime: const Duration(),
-      );
+    sourceDeviceRoleName: roleName,
+    elapsedTime: const Duration(),
+  );
 
   @override
   Function get fromJsonFunction => _$PrimaryDeviceConfigurationFromJson;
   factory PrimaryDeviceConfiguration.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory()
-          .fromJson<PrimaryDeviceConfiguration<TRegistration>>(json);
+      FromJsonFactory().fromJson<PrimaryDeviceConfiguration<TRegistration>>(
+        json,
+      );
   @override
   Map<String, dynamic> toJson() => _$PrimaryDeviceConfigurationToJson(this);
 }
