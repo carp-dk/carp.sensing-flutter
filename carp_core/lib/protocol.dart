@@ -20,4 +20,4 @@ part 'protocols/application/protocol_classes.dart';
 part 'protocols/application/protocol_service.dart';
 part 'protocols/infrastructure/protocol_requests.dart';
 
-part 'protocols.g.dart';
+part 'protocol.g.dart';

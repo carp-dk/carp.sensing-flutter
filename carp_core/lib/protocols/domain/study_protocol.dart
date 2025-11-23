@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../../protocols.dart';
+part of '../../protocol.dart';
 
 /// A description of how a study is to be executed, defining the type(s) of
 /// primary device(s) ([PrimaryDeviceConfiguration]) responsible for
