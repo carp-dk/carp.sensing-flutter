@@ -108,9 +108,6 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   }
 
   @override
-  Future<bool> onRestart() async => await onPause();
-
-  @override
   Future<bool> onPause() async {
     // stop the trigger executor so it don't trigger any more.
     triggerExecutor?.pause();

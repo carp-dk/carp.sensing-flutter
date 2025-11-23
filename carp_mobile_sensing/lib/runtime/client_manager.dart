@@ -13,6 +13,7 @@ enum ClientManagerState { created, configured, disposed }
 /// The singleton `SmartPhoneClientManager()` is the main entry point for CARP
 /// Mobile Sensing.
 ///
+/// Call [configure] before using this client.
 /// It holds a set of [Smartphone] [studies], which can been added, removed,
 /// started, and stopped via the [addStudy], [removeStudy], [startStudy],
 /// and [stopStudy] methods.
@@ -20,6 +21,23 @@ enum ClientManagerState { created, configured, disposed }
 /// A [SmartPhoneClientManager] is also a [ChangeNotifier] which notifies its
 /// listeners on any changes to its list of [studies]. The [events] stream emits
 /// and event when the state of the client changes.
+///
+/// Assuming a `protocol` as a [StudyProtocol], this will configure and run a study
+/// in a client manager:
+///
+/// ```
+///   // Create and configure a client manager for this phone.
+///   await SmartPhoneClientManager().configure();
+///
+///   // Create a study based on a protocol.
+///   await SmartPhoneClientManager().addStudyFromProtocol(protocol);
+///
+///   // Start sampling.
+///   SmartPhoneClientManager().start();
+/// ```
+///
+/// Note that 'starting' a study does not start data collection. Use the methods
+/// [resume] and [pause] to resume and pause data collection.
 class SmartPhoneClientManager
     extends ClientManager<Smartphone, DeviceRegistration, SmartphoneStudy>
     with ChangeNotifier {

@@ -54,7 +54,7 @@ class StudyPageState extends State<StudyPage> {
     // Configure the client.
     client.configure(enableNotifications: false, askForPermissions: true);
 
-    // // Listening on all the measurements print them as json.
+    // Listen on all the measurements and print them as json.
     SmartPhoneClientManager().measurements.listen(
       (measurement) => print(toJsonString(measurement)),
     );

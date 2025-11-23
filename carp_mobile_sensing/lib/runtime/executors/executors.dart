@@ -48,8 +48,7 @@ enum ExecutorState {
 /// configuration [TConfig].
 ///
 /// The behavior of an executor is controlled by its life-cycle methods: [initialize],
-/// [resume], [pause], and [dispose]. A [restart] can be used to restart an executor,
-/// if its configuration has changed.
+/// [resume], [pause], and [dispose]. A paused executor can be resumed again.
 ///
 /// The [state] property reveals the probe's current state.
 /// The [stateEvents] is a stream of state changes which can be listen to as a
@@ -89,23 +88,12 @@ abstract class Executor<TConfig> {
   /// Resume the executor.
   void resume();
 
-  /// Restart the executor.
-  ///
-  /// This forces the executor to reload its [configuration] and initialize sampling
-  /// accordingly. Any changes to the configuration must be specified via the
-  /// [initialize] method before calling restart.
-  ///
-  /// Only executors that has been resumed or paused can be restarted.
-  ///
-  /// Calling restart automatically resumes the executor if possible.
-  void restart();
-
-  /// Pause the executor. Stopped until [resume] or [restart] is called.
+  /// Pause the executor. Paused until [resume] is called.
   void pause();
 
   /// Dispose of this executor.
   ///
-  /// If not stopped, [pause] will be called first.
+  /// If not already paused, [pause] will be called first.
   ///
   /// Once disposed, the executor cannot be used anymore and nothing will happen
   /// if any of the life cycle methods are called.
@@ -137,9 +125,6 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
 
   @override
   ExecutorState get state => _stateMachine.state;
-
-  // @override
-  // bool get isResuming => _isResuming;
 
   AbstractExecutor() {
     _stateMachine = _CreatedState(this);
@@ -177,13 +162,6 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
 
   @override
   @nonVirtual
-  void restart() {
-    info('Restarting $this - $configuration');
-    _stateMachine.restart();
-  }
-
-  @override
-  @nonVirtual
   void pause() {
     info('Pausing $this - $configuration');
     _stateMachine.pause();
@@ -210,14 +188,6 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   /// Returns true if successfully resumed, false otherwise.
   @protected
   Future<bool> onResume();
-
-  /// Callback when this executor is to be restarted.
-  /// Returns true if the executor is ready to restart (default), false otherwise.
-  ///
-  /// Subclasses should override this, to implement any configuration to be
-  /// done before restarting.
-  @protected
-  Future<bool> onRestart() async => true;
 
   /// Callback when this executor is paused.
   /// Returns true if successfully paused, false otherwise.
@@ -275,14 +245,6 @@ abstract class AggregateExecutor<TConfig> extends AbstractExecutor<TConfig> {
   }
 
   @override
-  Future<bool> onRestart() async {
-    for (var executor in _executors) {
-      executor.restart();
-    }
-    return true;
-  }
-
-  @override
   Future<bool> onPause() async {
     for (var executor in _executors) {
       executor.pause();
@@ -307,7 +269,6 @@ abstract class _ExecutorStateMachine {
 
   void initialize();
   void resume();
-  void restart();
   void pause();
   void dispose();
   void error();
@@ -323,10 +284,10 @@ abstract class _AbstractExecutorState implements _ExecutorStateMachine {
 
   @override
   void initialize() => _printWarning('initialize');
+
   @override
   void resume() => _printWarning('resume');
-  @override
-  void restart() => _printWarning('restart');
+
   @override
   void pause() => _printWarning('pause');
 
@@ -352,21 +313,7 @@ abstract class _AbstractExecutorState implements _ExecutorStateMachine {
     executor._setState(_UndefinedState(executor));
   }
 
-  /// Internal helper function to start the executor.
-  /// Used below for both resume and restart.
-  void _start() {
-    executor.onResume().then((resumed) {
-      if (resumed) {
-        executor._setState(_ResumedState(executor));
-      } else {
-        // if we can't start the executor, then put it in stopped state
-        executor._setState(_PausedState(executor));
-      }
-      executor._isResuming = false;
-    });
-  }
-
-  /// Print default warning if calling an operation in a wrong state.
+  // Print default warning if calling an operation in a wrong state.
   void _printWarning(String operation) => warning(
     "Trying to $operation a ${executor.runtimeType}[${executor.hashCode}] "
     "in a state where this cannot be done - state: '${state.name}'. "
@@ -398,29 +345,17 @@ class _CreatedState extends _AbstractExecutorState
   }
 }
 
-class _InitializedState extends _AbstractExecutorState
+/// States which are "Runnable", i.e., can be either resumed or paused.
+abstract class _RunnableExecutorState extends _AbstractExecutorState
     implements _ExecutorStateMachine {
-  _InitializedState(Executor<dynamic> executor)
+  _RunnableExecutorState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
 
   @override
-  ExecutorState get state => ExecutorState.Initialized;
-
-  @override
-  void resume() => _start();
-}
-
-class _ResumedState extends _AbstractExecutorState {
-  _ResumedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
-
-  @override
-  ExecutorState get state => ExecutorState.Resumed;
-
-  @override
-  void restart() {
-    executor.onRestart().then((restarted) {
-      if (restarted) _start();
+  void resume() {
+    executor.onResume().then((resumed) {
+      if (resumed) executor._setState(_ResumedState(executor));
+      executor._isResuming = false;
     });
   }
 
@@ -432,28 +367,29 @@ class _ResumedState extends _AbstractExecutorState {
   }
 }
 
-class _PausedState extends _AbstractExecutorState {
+class _InitializedState extends _RunnableExecutorState
+    implements _ExecutorStateMachine {
+  _InitializedState(Executor<dynamic> executor)
+    : super(executor as AbstractExecutor);
+
+  @override
+  ExecutorState get state => ExecutorState.Initialized;
+}
+
+class _ResumedState extends _RunnableExecutorState {
+  _ResumedState(Executor<dynamic> executor)
+    : super(executor as AbstractExecutor);
+
+  @override
+  ExecutorState get state => ExecutorState.Resumed;
+}
+
+class _PausedState extends _RunnableExecutorState {
   _PausedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Paused;
-
-  @override
-  void resume() {
-    executor.onResume().then((resumed) {
-      if (resumed) executor._setState(_ResumedState(executor));
-      executor._isResuming = false;
-    });
-  }
-
-  @override
-  void restart() {
-    executor.onRestart().then((restarted) {
-      // if we can restart, then just resume the executor
-      if (restarted) executor.resume();
-    });
-  }
 }
 
 class _DisposedState extends _AbstractExecutorState

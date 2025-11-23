@@ -11,6 +11,7 @@
 ///  * [runtime] - contains the business logic for executing a sensing study (normally
 ///              called 'application' in DDD).
 ///  * [infrastructure] - contains specific implementation of the services used.
+///  * [sampling_packages] - contains the build-in sampling packages.
 ///
 /// Domain-driven design (DDD) is a software design approach that focuses on modeling
 /// the software to match the domain, or the subject area, that the software is

@@ -348,7 +348,8 @@ void example_2() async {
   // Restart the light probe(s) in order to load the new configuration
   controller.executor
       .lookupProbe(SensorSamplingPackage.AMBIENT_LIGHT)
-      .forEach((probe) => probe.restart());
+      // .forEach((probe) => probe.restart());
+      .forEach((probe) => probe.resume());
 
   // Once the sampling has to stop, e.g. in a Flutter dispose() method,
   // call the controller's dispose method.

@@ -45,10 +45,6 @@ abstract class TriggerExecutor<TConfig extends TriggerConfiguration>
 
   @override
   @mustCallSuper
-  Future<bool> onRestart() async => await onPause();
-
-  @override
-  @mustCallSuper
   Future<bool> onPause() async {
     timer?.cancel();
     return true;

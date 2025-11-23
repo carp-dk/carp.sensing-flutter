@@ -117,12 +117,6 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   }
 
   @override
-  Future<bool> onRestart() async {
-    _subscription?.cancel();
-    return super.onRestart();
-  }
-
-  @override
   Future<bool> onPause() async {
     _subscription?.cancel();
     return super.onPause();

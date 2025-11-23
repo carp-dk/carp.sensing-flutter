@@ -230,7 +230,7 @@ abstract class IntervalProbe extends MeasurementProbe {
 ///
 /// Sub-classes must implement the
 ///
-///     Stream<Measurement>? get stream => ...
+///  `Stream<Measurement>? get stream => ...`
 ///
 /// method in order to provide the stream of measurements.
 ///
@@ -268,13 +268,6 @@ abstract class StreamProbe extends Probe {
 
   @override
   Future<bool> onPause() async {
-    await _subscription?.cancel();
-    _stream = null;
-    return true;
-  }
-
-  @override
-  Future<bool> onRestart() async {
     await _subscription?.cancel();
     _stream = null;
     return true;

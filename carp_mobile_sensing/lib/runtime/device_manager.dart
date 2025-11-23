@@ -228,10 +228,10 @@ abstract class DeviceManager<
   /// type is restarted. This method is useful after the device is (re)connected.
   @nonVirtual
   void restart() {
-    info('$runtimeType - Restarting sampling...');
+    info('$runtimeType - Resuming sampling...');
 
     for (var executor in executors) {
-      executor.restart();
+      executor.resume();
     }
   }
 
