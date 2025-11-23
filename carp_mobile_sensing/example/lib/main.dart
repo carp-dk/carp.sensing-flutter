@@ -121,8 +121,9 @@ class StudyPageState extends State<StudyPage> {
               ),
               isThreeLine: true,
               leading: Icon(switch (study.samplingStatus) {
-                ExecutorState.Paused ||
-                ExecutorState.Initialized => Icons.play_arrow,
+                ExecutorState.Created ||
+                ExecutorState.Initialized ||
+                ExecutorState.Paused => Icons.play_arrow,
                 ExecutorState.Resumed => Icons.pause,
                 _ => Icons.refresh,
               }, size: 40),
@@ -201,18 +202,18 @@ class StudyPageState extends State<StudyPage> {
     protocol.addParticipantRole(ParticipantRole('Participant'));
 
     var trigger_1 = PeriodicTrigger(period: Duration(seconds: 10));
-    var trigger_2 = PeriodicTrigger(period: Duration(seconds: 20));
+    var trigger_2 = AppLifecycleTrigger();
     var task_1 = BackgroundTask(
-      measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
     );
     var task_2 = BackgroundTask(
-      measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
+      measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
     );
 
     protocol.addTaskControl(trigger_1, task_1, phone);
-    protocol.addTaskControl(trigger_1, task_2, phone);
+    // protocol.addTaskControl(trigger_1, task_2, phone);
     // protocol.addTaskControl(trigger_1, task_1, phone);
-    protocol.addTaskControl(trigger_2, task_1, phone);
+    protocol.addTaskControl(trigger_2, task_2, phone);
 
     // protocol.addTaskControl(
     //   PeriodicTrigger(period: Duration(seconds: 10)),

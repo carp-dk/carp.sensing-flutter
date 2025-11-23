@@ -345,12 +345,31 @@ class _CreatedState extends _AbstractExecutorState
   }
 }
 
-/// States which are "Runnable", i.e., can be either resumed or paused.
-abstract class _RunnableExecutorState extends _AbstractExecutorState
+class _InitializedState extends _AbstractExecutorState
     implements _ExecutorStateMachine {
-  _RunnableExecutorState(Executor<dynamic> executor)
+  _InitializedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
 
+  @override
+  ExecutorState get state => ExecutorState.Initialized;
+
+  @override
+  void resume() {
+    executor.onResume().then((resumed) {
+      if (resumed) executor._setState(_ResumedState(executor));
+      executor._isResuming = false;
+    });
+  }
+}
+
+class _ResumedState extends _AbstractExecutorState {
+  _ResumedState(Executor<dynamic> executor)
+    : super(executor as AbstractExecutor);
+
+  @override
+  ExecutorState get state => ExecutorState.Resumed;
+
+  // it is ok to re-resume an executor
   @override
   void resume() {
     executor.onResume().then((resumed) {
@@ -367,29 +386,20 @@ abstract class _RunnableExecutorState extends _AbstractExecutorState
   }
 }
 
-class _InitializedState extends _RunnableExecutorState
-    implements _ExecutorStateMachine {
-  _InitializedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
-
-  @override
-  ExecutorState get state => ExecutorState.Initialized;
-}
-
-class _ResumedState extends _RunnableExecutorState {
-  _ResumedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
-
-  @override
-  ExecutorState get state => ExecutorState.Resumed;
-}
-
-class _PausedState extends _RunnableExecutorState {
+class _PausedState extends _AbstractExecutorState {
   _PausedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Paused;
+
+  @override
+  void resume() {
+    executor.onResume().then((resumed) {
+      if (resumed) executor._setState(_ResumedState(executor));
+      executor._isResuming = false;
+    });
+  }
 }
 
 class _DisposedState extends _AbstractExecutorState

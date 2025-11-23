@@ -137,6 +137,7 @@ class SmartphoneTriggerFactory implements TriggerFactory {
     ),
     UserTaskTrigger(taskName: 'ignored', triggerCondition: UserTaskState.done),
     NoUserTaskTrigger(taskName: 'ignored'),
+    AppLifecycleTrigger(),
   };
 
   @override
@@ -182,6 +183,7 @@ class SmartphoneTriggerFactory implements TriggerFactory {
     if (trigger is PassiveTrigger) return PassiveTriggerExecutor();
     if (trigger is UserTaskTrigger) return UserTaskTriggerExecutor();
     if (trigger is NoUserTaskTrigger) return NoUserTaskTriggerExecutor();
+    if (trigger is AppLifecycleTrigger) return AppLifecycleTriggerExecutor();
 
     warning(
       "Unknown trigger used - cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'. "

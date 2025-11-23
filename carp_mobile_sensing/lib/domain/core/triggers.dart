@@ -612,6 +612,34 @@ class RandomRecurrentTrigger extends TriggerConfiguration
   Map<String, dynamic> toJson() => _$RandomRecurrentTriggerToJson(this);
 }
 
+/// A trigger that triggers when the life cycle of an app changes.
+///
+/// The state changes that triggers are specified in [states].
+/// If not specified (default) this trigger will trigger
+/// on all [AppLifecycleState] changes.
+///
+/// Typically used to make sure to collect measures when the app life
+/// cycle is changing, e.g., moved to the background or foreground.
+/// Some measures - like audio, bluetooth, and health - can only be collected
+/// when the app is in the foreground.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class AppLifecycleTrigger extends TriggerConfiguration {
+  Set<AppLifecycleState> states = {};
+
+  /// Create a [AppLifecycleTrigger] that triggers whenever the app state changes.
+  /// If [states] is not specified, it will trigger on all state change events.
+  AppLifecycleTrigger([Set<AppLifecycleState>? states]) : super() {
+    this.states = states ?? AppLifecycleState.values.toSet();
+  }
+
+  @override
+  Function get fromJsonFunction => _$AppLifecycleTriggerFromJson;
+  factory AppLifecycleTrigger.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<AppLifecycleTrigger>(json);
+  @override
+  Map<String, dynamic> toJson() => _$AppLifecycleTriggerToJson(this);
+}
+
 /// A trigger that triggers based on the state of a [UserTask].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class UserTaskTrigger extends TriggerConfiguration {

@@ -566,3 +566,23 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
     return super.onPause();
   }
 }
+
+/// Executes an [AppLifecycleTrigger].
+class AppLifecycleTriggerExecutor extends TriggerExecutor<AppLifecycleTrigger>
+    with WidgetsBindingObserver {
+  @override
+  Future<bool> onResume() async {
+    WidgetsBinding.instance.addObserver(this);
+    return await super.onResume();
+  }
+
+  @override
+  Future<bool> onPause() async {
+    WidgetsBinding.instance.removeObserver(this);
+    return await super.onPause();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) =>
+      (configuration?.states.contains(state) ?? false) ? onTrigger() : null;
+}

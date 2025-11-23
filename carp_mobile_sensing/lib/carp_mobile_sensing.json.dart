@@ -44,6 +44,7 @@ void _registerFromJsonFunctions() {
     ),
     UserTaskTrigger(taskName: 'ignored', triggerCondition: UserTaskState.done),
     NoUserTaskTrigger(taskName: 'ignored'),
+    AppLifecycleTrigger(),
   ]);
 
   // Data classes

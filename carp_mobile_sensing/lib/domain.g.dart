@@ -693,6 +693,32 @@ Map<String, dynamic> _$RandomRecurrentTriggerToJson(
   'lastTriggerTimestamp': ?instance.lastTriggerTimestamp?.toIso8601String(),
 };
 
+AppLifecycleTrigger _$AppLifecycleTriggerFromJson(Map<String, dynamic> json) =>
+    AppLifecycleTrigger(
+        (json['states'] as List<dynamic>?)
+                ?.map((e) => $enumDecode(_$AppLifecycleStateEnumMap, e))
+                .toSet() ??
+            const {},
+      )
+      ..$type = json['__type'] as String?
+      ..sourceDeviceRoleName = json['sourceDeviceRoleName'] as String?;
+
+Map<String, dynamic> _$AppLifecycleTriggerToJson(
+  AppLifecycleTrigger instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'sourceDeviceRoleName': ?instance.sourceDeviceRoleName,
+  'states': instance.states.map((e) => _$AppLifecycleStateEnumMap[e]!).toList(),
+};
+
+const _$AppLifecycleStateEnumMap = {
+  AppLifecycleState.detached: 'detached',
+  AppLifecycleState.resumed: 'resumed',
+  AppLifecycleState.inactive: 'inactive',
+  AppLifecycleState.hidden: 'hidden',
+  AppLifecycleState.paused: 'paused',
+};
+
 UserTaskTrigger _$UserTaskTriggerFromJson(Map<String, dynamic> json) =>
     UserTaskTrigger(
         taskName: json['taskName'] as String,
