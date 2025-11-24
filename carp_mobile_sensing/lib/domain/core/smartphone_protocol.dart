@@ -196,6 +196,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
       Measure(type: CarpDataTypes.COMPLETED_TASK_TYPE_NAME),
       Measure(type: CamsDataTypes.HEARTBEAT_TYPE_NAME),
     ];
+    // issue #521
     if (device is PrimaryDeviceConfiguration) {
       // For primary devices, also add the [CompletedAppTask] measure
       measures.add(Measure(type: CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME));
