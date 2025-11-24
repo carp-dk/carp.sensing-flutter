@@ -121,7 +121,7 @@ class StudyPageState extends State<StudyPage> {
               ),
               isThreeLine: true,
               leading: Icon(switch (study.samplingStatus) {
-                ExecutorState.Created ||
+                ExecutorState.Created => Icons.refresh,
                 ExecutorState.Initialized ||
                 ExecutorState.Paused => Icons.play_arrow,
                 ExecutorState.Resumed => Icons.pause,

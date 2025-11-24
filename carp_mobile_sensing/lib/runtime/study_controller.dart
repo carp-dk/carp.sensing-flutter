@@ -18,22 +18,26 @@ class SmartphoneStudyController {
   /// Create a new [SmartphoneStudyController] to control the runtime behavior
   /// of a [study].
   SmartphoneStudyController(SmartphoneStudy study) : _study = study {
+    // listen to study events and handle deployment updates
     study.events.listen((event) {
+      debug('$runtimeType >> event: ${event.event}');
       switch (event.event) {
         case StudyStatusEventTypes.DeploymentStatusReceived:
           _deploymentStatusReceived();
           break;
         case StudyStatusEventTypes.DeviceDeploymentReceived:
-          // case StudyStatusEventTypes.DeploymentUpdated:
           _deviceDeploymentReceived();
           break;
         default:
+          break;
       }
-      debug('$runtimeType - Created.');
     });
 
     // Keep the sampling status updated.
     executor.stateEvents.listen((state) => study.samplingStatus = state);
+    debug(
+      '$runtimeType created for study deployment: ${study.deployment?.studyDeploymentId}',
+    );
   }
 
   /// The study that this [SmartphoneStudyController] controls
@@ -135,6 +139,9 @@ class SmartphoneStudyController {
   /// ready to handle sampling of data. Data sampling is started if the
   /// [SmartphoneStudy.samplingStatus] is in a resumed state.
   Future<void> _deviceDeploymentReceived() async {
+    debug(
+      '$runtimeType >> Received device deployment: ${deployment?.studyDeploymentId}',
+    );
     // fast out if study has been stopped
     if (study.status == StudyStatus.Stopped) {
       info('$runtimeType - Study has been stopped and cannot be started.');

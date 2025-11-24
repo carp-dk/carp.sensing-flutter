@@ -109,7 +109,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   late _ExecutorStateMachine _stateMachine;
   SmartphoneDeployment? _deployment;
   TConfig? _configuration;
-  bool _isResuming = false;
+  // bool _isResuming = false;
 
   @override
   SmartphoneDeployment? get deployment => _deployment;
@@ -155,7 +155,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   @override
   @nonVirtual
   void resume() {
-    _isResuming = true;
+    // _isResuming = true;
     info('Resuming $this - $configuration');
     _stateMachine.resume();
   }
@@ -357,7 +357,7 @@ class _InitializedState extends _AbstractExecutorState
   void resume() {
     executor.onResume().then((resumed) {
       if (resumed) executor._setState(_ResumedState(executor));
-      executor._isResuming = false;
+      // executor._isResuming = false;
     });
   }
 }
@@ -374,7 +374,7 @@ class _ResumedState extends _AbstractExecutorState {
   void resume() {
     executor.onResume().then((resumed) {
       if (resumed) executor._setState(_ResumedState(executor));
-      executor._isResuming = false;
+      // executor._isResuming = false;
     });
   }
 
@@ -397,7 +397,7 @@ class _PausedState extends _AbstractExecutorState {
   void resume() {
     executor.onResume().then((resumed) {
       if (resumed) executor._setState(_ResumedState(executor));
-      executor._isResuming = false;
+      // executor._isResuming = false;
     });
   }
 }

@@ -206,7 +206,9 @@ class SmartPhoneClientManager
       await addStudy(study);
 
       study.deploymentStatusReceived();
-      study.deviceDeploymentReceived(); // will also start sampling
+      if (study.deployment != null) {
+        study.deviceDeploymentReceived(); // will also start sampling
+      }
     }
 
     state = ClientManagerState.configured;
@@ -220,7 +222,9 @@ class SmartPhoneClientManager
     // Will create a fresh controller, if this is a new study.
     getStudyController(study);
 
-    info('$runtimeType - Adding study: $study');
+    info(
+      '$runtimeType - Adding study, deployment: ${study.deployment?.studyDeploymentId}',
+    );
     notifyListeners();
     return study;
   }

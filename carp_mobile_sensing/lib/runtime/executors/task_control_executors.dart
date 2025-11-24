@@ -100,8 +100,9 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
         '$runtimeType - no TriggerExecutor defined - cannot start this task control executor.',
       );
       return false;
-    } else if (triggerExecutor?.state != ExecutorState.Resumed &&
-        !triggerExecutor!._isResuming) {
+    } else if (triggerExecutor?.state != ExecutorState.Resumed
+    // && !triggerExecutor!._isResuming
+    ) {
       triggerExecutor?.resume();
     }
     return true;

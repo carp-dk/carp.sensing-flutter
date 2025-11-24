@@ -73,8 +73,8 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   void createEvent(StudyStatusEvent event) => _eventController.add(event);
 
   /// An updated [deploymentStatus] has been received.
-  /// If [deploymentStatus] is not specified, the previously status is marked
-  /// as updated.
+  /// If [deploymentStatus] is not specified, the previously received status is
+  /// marked as updated.
   void deploymentStatusReceived([StudyDeploymentStatus? deploymentStatus]) {
     _deploymentStatus ??= deploymentStatus;
     createEvent(
@@ -85,8 +85,8 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
 
   /// A new primary device [deployment] determining what data to collect for
   /// this study has been received.
-  /// If [deployment] is not specified, the previously deployment is marked
-  /// as updated.
+  /// If [deployment] is not specified, the previously received deployment is
+  /// marked as updated.
   void deviceDeploymentReceived([TDeviceDeployment? deployment]) {
     if (deploymentStatus == null) {
       deploymentError(
@@ -97,13 +97,16 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
 
     _deployment ??= deployment;
 
-    if (this.deployment?.deviceConfiguration.roleName != deviceRoleName) {
-      deploymentError(
-        "$runtimeType - The deployment is intended for a device with a different role name."
-        "Was expecting '$deviceRoleName' but got '${this.deployment?.deviceConfiguration.roleName}'.",
-      );
+    // if this is a new deployment, check that the role name matches
+    if (deployment != null) {
+      if (this.deployment?.deviceConfiguration.roleName != deviceRoleName) {
+        deploymentError(
+          "$runtimeType - The deployment is intended for a device with a different role name."
+          "Was expecting '$deviceRoleName' but got '${this.deployment?.deviceConfiguration.roleName}'.",
+        );
+        return;
+      }
     }
-
     createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
     );
