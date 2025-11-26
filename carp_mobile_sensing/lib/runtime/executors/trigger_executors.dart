@@ -7,13 +7,10 @@
 
 part of '../../runtime.dart';
 
+/// An event streamed from a [TriggerExecutor] when it triggers.
 class TriggerEvent {
   // TriggerConfiguration? trigger;
 }
-
-// ---------------------------------------------------------------------------------------------------------
-// TRIGGER EXECUTORS
-// ---------------------------------------------------------------------------------------------------------
 
 /// Responsible for handling the execution of a trigger.
 ///

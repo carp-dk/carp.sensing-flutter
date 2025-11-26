@@ -8,22 +8,29 @@ part of 'domain.dart';
 
 SmartphoneApplicationData _$SmartphoneApplicationDataFromJson(
   Map<String, dynamic> json,
-) => SmartphoneApplicationData(
-  studyDescription: json['studyDescription'] == null
-      ? null
-      : StudyDescription.fromJson(
-          json['studyDescription'] as Map<String, dynamic>,
-        ),
-  dataEndPoint: json['dataEndPoint'] == null
-      ? null
-      : DataEndPoint.fromJson(json['dataEndPoint'] as Map<String, dynamic>),
-  privacySchemaName: json['privacySchemaName'] as String?,
-  applicationData: json['applicationData'] as Map<String, dynamic>?,
-);
+) =>
+    SmartphoneApplicationData(
+        studyDescription: json['studyDescription'] == null
+            ? null
+            : StudyDescription.fromJson(
+                json['studyDescription'] as Map<String, dynamic>,
+              ),
+        dataEndPoint: json['dataEndPoint'] == null
+            ? null
+            : DataEndPoint.fromJson(
+                json['dataEndPoint'] as Map<String, dynamic>,
+              ),
+        privacySchemaName: json['privacySchemaName'] as String?,
+        applicationData: json['applicationData'] as Map<String, dynamic>?,
+      )
+      ..protocolVersionTag = json['protocolVersionTag'] as String?
+      ..protocolApiLevel = json['protocolApiLevel'] as String?;
 
 Map<String, dynamic> _$SmartphoneApplicationDataToJson(
   SmartphoneApplicationData instance,
 ) => <String, dynamic>{
+  'protocolVersionTag': ?instance.protocolVersionTag,
+  'protocolApiLevel': ?instance.protocolApiLevel,
   'studyDescription': ?instance.studyDescription?.toJson(),
   'dataEndPoint': ?instance.dataEndPoint?.toJson(),
   'privacySchemaName': ?instance.privacySchemaName,
@@ -518,7 +525,9 @@ Map<String, dynamic> _$PassiveTriggerToJson(PassiveTrigger instance) =>
 
 DelayedTrigger _$DelayedTriggerFromJson(Map<String, dynamic> json) =>
     DelayedTrigger(
-        delay: Duration(microseconds: (json['delay'] as num).toInt()),
+        delay: json['delay'] == null
+            ? const Duration()
+            : Duration(microseconds: (json['delay'] as num).toInt()),
       )
       ..$type = json['__type'] as String?
       ..sourceDeviceRoleName = json['sourceDeviceRoleName'] as String?;
@@ -560,8 +569,12 @@ RecurrentScheduledTrigger _$RecurrentScheduledTriggerFromJson(
   Map<String, dynamic> json,
 ) =>
     RecurrentScheduledTrigger(
-        type: $enumDecode(_$RecurrentTypeEnumMap, json['type']),
-        time: TimeOfDay.fromJson(json['time'] as Map<String, dynamic>),
+        type:
+            $enumDecodeNullable(_$RecurrentTypeEnumMap, json['type']) ??
+            RecurrentType.daily,
+        time: json['time'] == null
+            ? const TimeOfDay()
+            : TimeOfDay.fromJson(json['time'] as Map<String, dynamic>),
         end: json['end'] == null ? null : DateTime.parse(json['end'] as String),
         separationCount: (json['separationCount'] as num?)?.toInt() ?? 0,
         maxNumberOfSampling: (json['maxNumberOfSampling'] as num?)?.toInt(),
@@ -668,10 +681,12 @@ RandomRecurrentTrigger _$RandomRecurrentTriggerFromJson(
             (json['minNumberOfTriggers'] as num?)?.toInt() ?? 0,
         maxNumberOfTriggers:
             (json['maxNumberOfTriggers'] as num?)?.toInt() ?? 1,
-        startTime: TimeOfDay.fromJson(
-          json['startTime'] as Map<String, dynamic>,
-        ),
-        endTime: TimeOfDay.fromJson(json['endTime'] as Map<String, dynamic>),
+        startTime: json['startTime'] == null
+            ? const TimeOfDay(hour: 8)
+            : TimeOfDay.fromJson(json['startTime'] as Map<String, dynamic>),
+        endTime: json['endTime'] == null
+            ? const TimeOfDay(hour: 20)
+            : TimeOfDay.fromJson(json['endTime'] as Map<String, dynamic>),
       )
       ..$type = json['__type'] as String?
       ..sourceDeviceRoleName = json['sourceDeviceRoleName'] as String?
@@ -719,10 +734,12 @@ const _$AppLifecycleStateEnumMap = {
 UserTaskTrigger _$UserTaskTriggerFromJson(Map<String, dynamic> json) =>
     UserTaskTrigger(
         taskName: json['taskName'] as String,
-        triggerCondition: $enumDecode(
-          _$UserTaskStateEnumMap,
-          json['triggerCondition'],
-        ),
+        triggerCondition:
+            $enumDecodeNullable(
+              _$UserTaskStateEnumMap,
+              json['triggerCondition'],
+            ) ??
+            UserTaskState.done,
       )
       ..$type = json['__type'] as String?
       ..sourceDeviceRoleName = json['sourceDeviceRoleName'] as String?;

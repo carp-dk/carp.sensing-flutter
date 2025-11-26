@@ -60,6 +60,15 @@ mixin SmartphoneProtocolExtension {
 /// Holds application-specific configuration for a [SmartphoneStudyProtocol].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SmartphoneApplicationData {
+  /// The version tag of the study protocol snapshot.
+  /// This is typically set by the CAWS backend when a protocol is uploaded.
+  String? protocolVersionTag;
+
+  /// The API level used by this study protocol.
+  /// This reflects the version of the CARP Mobile Sensing framework as set in
+  /// the pubspec.yaml file.
+  String? protocolApiLevel = SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL;
+
   /// The description of this study protocol containing the title, description,
   /// purpose, and the responsible researcher for this study.
   StudyDescription? studyDescription;
@@ -130,6 +139,11 @@ class SmartphoneApplicationData {
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SmartphoneStudyProtocol extends StudyProtocol
     with SmartphoneProtocolExtension {
+  /// The API level used by study protocols.
+  /// This reflects the version of the CARP Mobile Sensing framework as set in
+  /// the pubspec.yaml file.
+  static const String CAMS_PROTOCOL_API_LEVEL = '2.0.0';
+
   /// Create a new [SmartphoneStudyProtocol].
   ///
   /// Provide a unique descriptive [name] for the protocol.
