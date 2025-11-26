@@ -570,8 +570,7 @@ RecurrentScheduledTrigger _$RecurrentScheduledTriggerFromJson(
         dayOfMonth: (json['dayOfMonth'] as num?)?.toInt(),
       )
       ..$type = json['__type'] as String?
-      ..sourceDeviceRoleName = json['sourceDeviceRoleName'] as String?
-      ..period = Duration(microseconds: (json['period'] as num).toInt());
+      ..sourceDeviceRoleName = json['sourceDeviceRoleName'] as String?;
 
 Map<String, dynamic> _$RecurrentScheduledTriggerToJson(
   RecurrentScheduledTrigger instance,
@@ -586,7 +585,6 @@ Map<String, dynamic> _$RecurrentScheduledTriggerToJson(
   'dayOfWeek': ?instance.dayOfWeek,
   'weekOfMonth': ?instance.weekOfMonth,
   'dayOfMonth': ?instance.dayOfMonth,
-  'period': instance.period.inMicroseconds,
 };
 
 const _$RecurrentTypeEnumMap = {
@@ -696,9 +694,8 @@ Map<String, dynamic> _$RandomRecurrentTriggerToJson(
 AppLifecycleTrigger _$AppLifecycleTriggerFromJson(Map<String, dynamic> json) =>
     AppLifecycleTrigger(
         (json['states'] as List<dynamic>?)
-                ?.map((e) => $enumDecode(_$AppLifecycleStateEnumMap, e))
-                .toSet() ??
-            const {},
+            ?.map((e) => $enumDecode(_$AppLifecycleStateEnumMap, e))
+            .toSet(),
       )
       ..$type = json['__type'] as String?
       ..sourceDeviceRoleName = json['sourceDeviceRoleName'] as String?;

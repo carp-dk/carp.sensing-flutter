@@ -165,10 +165,10 @@ class StudyPageState extends State<StudyPage> {
     if (study.status.index <= StudyStatus.Deployed.index) {
       print('>> STARTING study ${study.studyDeploymentId}');
       // Listening on all the measurements print them.
-      controller?.executor.measurements.listen(
-        (measurement) =>
-            print('>> ${study.studyDeploymentId} - ${measurement.dataType}'),
-      );
+      // controller?.executor.measurements.listen(
+      //   (measurement) =>
+      //       print('>> ${study.studyDeploymentId} - ${measurement.dataType}'),
+      // );
       controller?.start();
     } else {
       if (study.isSampling) {
@@ -203,6 +203,10 @@ class StudyPageState extends State<StudyPage> {
 
     var trigger_1 = PeriodicTrigger(period: Duration(seconds: 10));
     var trigger_2 = AppLifecycleTrigger();
+    var trigger_3 = RecurrentScheduledTrigger(
+      type: RecurrentType.daily,
+      time: const TimeOfDay(hour: 18, minute: 40),
+    );
     var task_1 = BackgroundTask(
       measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
     );
@@ -211,9 +215,11 @@ class StudyPageState extends State<StudyPage> {
     );
 
     protocol.addTaskControl(trigger_1, task_1, phone);
-    // protocol.addTaskControl(trigger_1, task_2, phone);
+    protocol.addTaskControl(trigger_1, task_2, phone);
     // protocol.addTaskControl(trigger_1, task_1, phone);
-    protocol.addTaskControl(trigger_2, task_2, phone);
+    // protocol.addTaskControl(trigger_2, task_2, phone);
+
+    // protocol.addTaskControl(trigger_3, task_1, phone);
 
     // protocol.addTaskControl(
     //   PeriodicTrigger(period: Duration(seconds: 10)),

@@ -90,16 +90,17 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
 
     // Listen to pause this background executor when all of its underlying
     // probes have paused - Issue #384
-    _subscription = states
-        .where((event) => event == ExecutorState.Paused)
-        .listen((_) {
-          if (haveAllProbesPaused) {
-            debug(
-              '$runtimeType - All probes are paused - pausing this $this too.',
-            );
-            pause();
-          }
-        });
+    _subscription = states.where((event) => event == ExecutorState.Paused).listen((
+      _,
+    ) {
+      if (haveAllProbesPaused && state == ExecutorState.Resumed) {
+        debug('$runtimeType - All probes are paused - pausing this $this too.');
+        // TODO: When pausing here, it will cascade pausing into the probes again
+        // causing warnings from all of them since they obviously are paused at this stage.
+        // We should be able to just pause this executor without cascading the pause again.
+        pause();
+      }
+    });
 
     // Check if the devices for this task is connected.
     await connectAllConnectableDevices();

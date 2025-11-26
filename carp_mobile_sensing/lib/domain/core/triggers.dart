@@ -90,7 +90,8 @@ class DelayedTrigger extends TriggerConfiguration {
   Duration delay;
 
   /// Create a trigger that delays for [delay] and then triggers.
-  DelayedTrigger({required this.delay}) : super();
+  /// Default is no delay.
+  DelayedTrigger({this.delay = const Duration()}) : super();
 
   @override
   Function get fromJsonFunction => _$DelayedTriggerFromJson;
@@ -168,7 +169,8 @@ class DateTimeTrigger extends TriggerConfiguration implements Schedulable {
 /// [Again and Again! Managing Recurring Events In a Data Model](https://www.vertabelo.com/blog/technical-articles/again-and-again-managing-recurring-events-in-a-data-model).
 /// We are, however, not using yearly recurrence.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class RecurrentScheduledTrigger extends PeriodicTrigger {
+class RecurrentScheduledTrigger extends TriggerConfiguration
+    implements Schedulable {
   static const int daysPerWeek = 7;
   static const int daysPerMonth = 30;
 
@@ -220,8 +222,8 @@ class RecurrentScheduledTrigger extends PeriodicTrigger {
 
   /// Create a trigger that triggers based on a recurrent scheduled date and time.
   RecurrentScheduledTrigger({
-    required this.type,
-    required this.time,
+    this.type = RecurrentType.daily,
+    this.time = const TimeOfDay(),
     this.end,
     this.separationCount = 0,
     this.maxNumberOfSampling,
@@ -229,7 +231,7 @@ class RecurrentScheduledTrigger extends PeriodicTrigger {
     this.weekOfMonth,
     this.dayOfMonth,
     Duration? duration,
-  }) : super(period: const Duration(seconds: 1)) {
+  }) : super() {
     assert(separationCount >= 0, 'Separation count must be zero or positive.');
     if (type == RecurrentType.weekly) {
       assert(
@@ -322,7 +324,6 @@ class RecurrentScheduledTrigger extends PeriodicTrigger {
   }
 
   /// The period between the recurring samplings.
-  @override
   Duration get period {
     switch (type) {
       case RecurrentType.daily:
@@ -591,12 +592,12 @@ class RandomRecurrentTrigger extends TriggerConfiguration
   /// [minNumberOfTriggers] and [maxNumberOfTriggers] specified the range of
   /// the random samples (e.g., between 3 and 8 times pr. day).
   /// [startTime] and [endTime] specified the period within a day the sampling
-  /// should take place (e.g., between 08:00 and 20:00).
+  /// should take place (default is between 08:00 and 20:00).
   RandomRecurrentTrigger({
     this.minNumberOfTriggers = 0,
     this.maxNumberOfTriggers = 1,
-    required this.startTime,
-    required this.endTime,
+    this.startTime = const TimeOfDay(hour: 8),
+    this.endTime = const TimeOfDay(hour: 20),
   }) : super() {
     assert(
       startTime.isBefore(endTime),
@@ -650,8 +651,11 @@ class UserTaskTrigger extends TriggerConfiguration {
   UserTaskState triggerCondition;
 
   /// Create a [UserTaskTrigger].
-  UserTaskTrigger({required this.taskName, required this.triggerCondition})
-    : super();
+  /// Default is to trigger when the task is marked as done.
+  UserTaskTrigger({
+    required this.taskName,
+    this.triggerCondition = UserTaskState.done,
+  }) : super();
 
   @override
   Function get fromJsonFunction => _$UserTaskTriggerFromJson;

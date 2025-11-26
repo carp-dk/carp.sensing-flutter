@@ -97,12 +97,11 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   Future<bool> onResume() async {
     if (triggerExecutor == null) {
       warning(
-        '$runtimeType - no TriggerExecutor defined - cannot start this task control executor.',
+        '$runtimeType - No TriggerExecutor found - cannot start this task control executor.',
       );
       return false;
-    } else if (triggerExecutor?.state != ExecutorState.Resumed
-    // && !triggerExecutor!._isResuming
-    ) {
+    } else if (triggerExecutor?.state != ExecutorState.Resumed &&
+        !triggerExecutor!._isResuming) {
       triggerExecutor?.resume();
     }
     return true;

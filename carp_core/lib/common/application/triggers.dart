@@ -64,7 +64,7 @@ class ElapsedTimeTrigger extends TriggerConfiguration implements Schedulable {
   ElapsedTimeTrigger({
     super.sourceDeviceRoleName,
     super.requiresPrimaryDevice = true,
-    required this.elapsedTime,
+    this.elapsedTime,
   });
 
   @override

@@ -116,80 +116,57 @@ class ExecutorFactory {
 
 /// A [TriggerFactory] for all triggers coming with CAMS.
 class SmartphoneTriggerFactory implements TriggerFactory {
-  final Set<Serializable> _triggers = {
-    NoOpTrigger(),
-    ImmediateTrigger(),
-    OneTimeTrigger(),
-    DelayedTrigger(delay: const Duration()),
-    PeriodicTrigger(period: const Duration()),
-    DateTimeTrigger(schedule: DateTime.now()),
-    RecurrentScheduledTrigger(
-      type: RecurrentType.daily,
-      time: const TimeOfDay(),
-    ),
-    SamplingEventTrigger(measureType: ''),
-    ConditionalPeriodicTrigger(period: const Duration()),
-    ConditionalSamplingEventTrigger(measureType: ''),
-    CronScheduledTrigger(),
-    RandomRecurrentTrigger(
-      startTime: const TimeOfDay(hour: 1),
-      endTime: const TimeOfDay(hour: 2),
-    ),
-    UserTaskTrigger(taskName: 'ignored', triggerCondition: UserTaskState.done),
-    NoUserTaskTrigger(taskName: 'ignored'),
-    AppLifecycleTrigger(),
+  /// Mapping of available [TriggerConfiguration] types to corresponding
+  /// [TriggerExecutor] constructors.
+  final Map<Type, TriggerExecutor Function()> _triggers = {
+    NoOpTrigger: () => NoOpTriggerExecutor(),
+    ImmediateTrigger: () => ImmediateTriggerExecutor(),
+    OneTimeTrigger: () => OneTimeTriggerExecutor(),
+    DelayedTrigger: () => DelayedTriggerExecutor(),
+    PeriodicTrigger: () => PeriodicTriggerExecutor(),
+    DateTimeTrigger: () => DateTimeTriggerExecutor(),
+    ScheduledTrigger: () => ImmediateTriggerExecutor(),
+    RecurrentScheduledTrigger: () => RecurrentScheduledTriggerExecutor(),
+    CronScheduledTrigger: () => CronScheduledTriggerExecutor(),
+    SamplingEventTrigger: () => SamplingEventTriggerExecutor(),
+    ConditionalSamplingEventTrigger: () =>
+        ConditionalSamplingEventTriggerExecutor(),
+    ConditionalPeriodicTrigger: () => ConditionalPeriodicTriggerExecutor(),
+    RandomRecurrentTrigger: () => RandomRecurrentTriggerExecutor(),
+    PassiveTrigger: () => PassiveTriggerExecutor(),
+    UserTaskTrigger: () => UserTaskTriggerExecutor(),
+    NoUserTaskTrigger: () => NoUserTaskTriggerExecutor(),
+    AppLifecycleTrigger: () => AppLifecycleTriggerExecutor(),
+    ElapsedTimeTrigger: () => ElapsedTimeTriggerExecutor(),
   };
 
   @override
-  Set<Type> get types => _triggers.map((e) => e.runtimeType).toSet();
+  Set<Type> get types => _triggers.keys.toSet();
 
   @override
-  void onRegister() {
-    FromJsonFactory().registerAll(_triggers.toList());
-  }
+  void onRegister() => {}; // All trigger are registered in carp_mobile_sensing.json.dart - so don't need to do anything here.
 
   @override
-  TriggerExecutor<TriggerConfiguration> create(TriggerConfiguration trigger) {
-    if (trigger is ElapsedTimeTrigger) return ElapsedTimeTriggerExecutor();
-
-    if (trigger is ScheduledTrigger) {
-      warning(
-        "ScheduledTrigger is not implemented yet. "
-        "Using an 'ImmediateTriggerExecutor' instead.",
-      );
-      return ImmediateTriggerExecutor();
-    }
-
-    if (trigger is NoOpTrigger) return NoOpTriggerExecutor();
-    if (trigger is ImmediateTrigger) return ImmediateTriggerExecutor();
-    if (trigger is OneTimeTrigger) return OneTimeTriggerExecutor();
-    if (trigger is DelayedTrigger) return DelayedTriggerExecutor();
-    if (trigger is PeriodicTrigger) return PeriodicTriggerExecutor();
-    if (trigger is DateTimeTrigger) return DateTimeTriggerExecutor();
-    if (trigger is RecurrentScheduledTrigger) {
-      return RecurrentScheduledTriggerExecutor();
-    }
-    if (trigger is CronScheduledTrigger) return CronScheduledTriggerExecutor();
-    if (trigger is SamplingEventTrigger) return SamplingEventTriggerExecutor();
-    if (trigger is ConditionalSamplingEventTrigger) {
-      return ConditionalSamplingEventTriggerExecutor();
-    }
-    if (trigger is ConditionalPeriodicTrigger) {
-      return ConditionalPeriodicTriggerExecutor();
-    }
-    if (trigger is RandomRecurrentTrigger) {
-      return RandomRecurrentTriggerExecutor();
-    }
-    if (trigger is PassiveTrigger) return PassiveTriggerExecutor();
-    if (trigger is UserTaskTrigger) return UserTaskTriggerExecutor();
-    if (trigger is NoUserTaskTrigger) return NoUserTaskTriggerExecutor();
-    if (trigger is AppLifecycleTrigger) return AppLifecycleTriggerExecutor();
-
-    warning(
-      "Unknown trigger used - cannot find a TriggerExecutor for the trigger of type '${trigger.runtimeType}'. "
-      "Using an 'ImmediateTriggerExecutor' instead.",
+  TriggerExecutor<TriggerConfiguration>? create(TriggerConfiguration trigger) {
+    debug(
+      '$runtimeType - Creating trigger executor for trigger type ${trigger.runtimeType}',
     );
-    return ImmediateTriggerExecutor();
+    // TODO: implement specific handling of ScheduledTrigger
+    if (trigger is ScheduledTrigger) {
+      warning("ScheduledTrigger is not implemented yet.");
+      return null;
+    }
+
+    try {
+      if (_triggers.containsKey(trigger.runtimeType)) {
+        return _triggers[trigger.runtimeType]!();
+      }
+    } catch (e) {
+      warning(
+        "$runtimeType - Failed to instantiate trigger executor for trigger type '${trigger.runtimeType}': $e",
+      );
+    }
+    return null;
   }
 }
 

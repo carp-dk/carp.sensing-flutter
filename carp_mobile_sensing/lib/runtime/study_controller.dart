@@ -9,9 +9,7 @@ part of '../runtime.dart';
 /// A [SmartphoneStudyController] controls the execution of a [SmartphoneStudy].
 class SmartphoneStudyController {
   final SmartphoneStudy _study;
-  int _samplingSize = 0;
   DataManager? _dataManager;
-  // DataEndPoint? _dataEndPoint;
   final SmartphoneDeploymentExecutor _executor = SmartphoneDeploymentExecutor();
   Map<Permission, PermissionStatus>? _permissions;
 
@@ -124,12 +122,6 @@ class SmartphoneStudyController {
     (measurement) => measurement.data.format.toString() == type,
   );
 
-  /// The sampling size of this [deployment] in terms of number of measurements
-  /// that has been collected since sampling was started.
-  /// Note that this number is not persistent, and the counter hence resets
-  /// across app restart.
-  int get samplingSize => _samplingSize;
-
   /// Handles updates of the [deployment] status.
   Future<void> _deploymentStatusReceived() async {}
 
@@ -189,8 +181,11 @@ class SmartphoneStudyController {
     // start heartbeat monitoring
     if (SmartPhoneClientManager().heartbeat) _startHeartbeatMonitoring();
 
-    // listen to all measurements to keep track of sampling size
-    measurements.listen((_) => _samplingSize++);
+    // debug print all measurements - TODO: remove this later
+    measurements.listen(
+      (measurement) =>
+          debugPrint('>> ${study.studyDeploymentId} - ${measurement.dataType}'),
+    );
 
     // start data sampling
     study.samplingStatus = existingSamplingStatus;
@@ -360,6 +355,16 @@ class SmartphoneStudyController {
     }
   }
 
+  /// Stop heartbeat monitoring for all devices, incl. the phone, for the
+  /// [deployment] controlled by this controller.
+  void _stopHeartbeatMonitoring() {
+    for (var configuration in deployment!.devices) {
+      _deviceController
+          .getDevice(configuration.type)
+          ?.stopHeartbeatMonitoring();
+    }
+  }
+
   /// Start connecting all connectable devices to be used in the [deployment]
   /// and which are available on this phone.
   Future<void> connectAllConnectableDevices() async {
@@ -406,8 +411,11 @@ class SmartphoneStudyController {
       await askForAllPermissions();
     }
 
-    // Resume data sampling, if needed.
-    if (study.samplingStatus == ExecutorState.Resumed) executor.resume();
+    // Resume data sampling, if needed. Wait for a few seconds to let devices
+    // connect before resuming sampling.
+    if (study.samplingStatus == ExecutorState.Resumed) {
+      Future.delayed(Duration(seconds: 5), () => executor.resume());
+    }
   }
 
   /// Resume data sampling.
@@ -420,6 +428,7 @@ class SmartphoneStudyController {
   ///
   /// This entails:
   ///   * pausing data sampling
+  ///   * stopping heartbeat monitoring
   ///   * closing the data manager (e.g., flushing data to a file)
   ///
   /// Note that all cached deployment information and any data sampled
@@ -431,6 +440,7 @@ class SmartphoneStudyController {
   void dispose() {
     info('$runtimeType - Disposing study from this smartphone...');
     pause();
+    _stopHeartbeatMonitoring();
     dataManager?.close();
   }
 }

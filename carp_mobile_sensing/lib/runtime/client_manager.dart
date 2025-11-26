@@ -281,6 +281,7 @@ class SmartPhoneClientManager
   }
 
   @override
+  @mustCallSuper
   Future<void> removeStudy(
     String studyDeploymentId,
     String deviceRoleName,
@@ -292,12 +293,15 @@ class SmartPhoneClientManager
     info('$runtimeType - Removing study: $study');
 
     // Disconnecting from all devices will stop sensing on each of them.
-    await deviceController.disconnectAllConnectedDevices();
+    // TODO: We should not disconnect all devices - a device may be used
+    // by multiple studies.
+    // await deviceController.disconnectAllConnectedDevices();
 
     AppTaskController().removeStudyDeployment(studyDeploymentId);
 
     var controller = _controllers[study];
     if (controller != null) _group.remove(controller.measurements);
+    controller?.dispose();
     _controllers.remove(study);
     await super.removeStudy(studyDeploymentId, deviceRoleName);
     notifyListeners();
@@ -306,7 +310,7 @@ class SmartPhoneClientManager
   /// Start the study with [studyDeploymentId] and [deviceRoleName] from this
   /// client manager.
   ///
-  /// Note that [start] only needs to be called once. Once started, data sampling
+  /// Note that [startStudy] only needs to be called once. Once started, data sampling
   /// can be resumed and paused via the controller's [resume] and [pause] methods.
   @mustCallSuper
   Future<void> startStudy(
@@ -326,6 +330,34 @@ class SmartPhoneClientManager
     for (var controller in _controllers.values) {
       controller.start();
     }
+  }
+
+  @override
+  @mustCallSuper
+  Future<StudyStatus> stopStudy(
+    String studyDeploymentId,
+    String deviceRoleName,
+  ) async {
+    var study = getStudy(studyDeploymentId, deviceRoleName);
+    // fast out if not a valid study
+    if (study == null) {
+      throw Exception(
+        '$runtimeType - Cannot stop study - no study with deployment id '
+        '$studyDeploymentId and device role name $deviceRoleName found.',
+      );
+    }
+
+    info('$runtimeType - Stopping study: $study');
+
+    AppTaskController().removeStudyDeployment(studyDeploymentId);
+
+    var controller = _controllers[study];
+    if (controller != null) _group.remove(controller.measurements);
+    controller?.dispose();
+    _controllers.remove(study);
+    var status = await super.stopStudy(studyDeploymentId, deviceRoleName);
+    notifyListeners();
+    return status;
   }
 
   /// Resume data sampling in all studies in this client manager.
