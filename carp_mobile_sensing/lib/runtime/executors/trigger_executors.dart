@@ -85,9 +85,10 @@ class OneTimeTriggerExecutor extends TriggerExecutor<OneTimeTrigger> {
   Future<bool> onResume() async {
     if (!configuration!.hasBeenTriggered) {
       // Note that the trigger stamp is saved in the deployment configuration.
-      // However, this is not persisted and if this deployment is re-deployed,
-      // any one-time triggers will trigger again.
+      // By notifying listeners, the deployment will be marked as updated and
+      // persisted with the new trigger timestamp.
       configuration!.triggerTimestamp = DateTime.now();
+      deployment?.hasBeenUpdated();
       onTrigger();
     } else {
       warning(

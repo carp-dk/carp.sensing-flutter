@@ -217,8 +217,8 @@ class StudyPageState extends State<StudyPage> {
       measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
     );
 
-    protocol.addTaskControl(trigger_1, task_1, phone);
-    protocol.addTaskControl(trigger_1, task_2, phone);
+    // protocol.addTaskControl(trigger_1, task_1, phone);
+    // protocol.addTaskControl(trigger_1, task_2, phone);
     // protocol.addTaskControl(trigger_1, task_1, phone);
     // protocol.addTaskControl(trigger_2, task_2, phone);
 
@@ -239,14 +239,14 @@ class StudyPageState extends State<StudyPage> {
     //   phone,
     // );
 
-    // // Collect device info only once, when this study is deployed.
-    // protocol.addTaskControl(
-    //   OneTimeTrigger(),
-    //   BackgroundTask(
-    //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-    //   ),
-    //   phone,
-    // );
+    // Collect device info only once, when this study is deployed.
+    protocol.addTaskControl(
+      OneTimeTrigger(),
+      BackgroundTask(
+        measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      ),
+      phone,
+    );
 
     // Add background measures from the [DeviceSamplingPackage] and
     // [SensorSamplingPackage] sampling packages.

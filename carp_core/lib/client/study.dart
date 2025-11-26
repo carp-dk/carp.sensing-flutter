@@ -107,6 +107,12 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
         return;
       }
     }
+
+    // Listen to updates to the deployment and notify listeners.
+    deployment?.addListener(() {
+      deploymentUpdated();
+    });
+
     createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
     );

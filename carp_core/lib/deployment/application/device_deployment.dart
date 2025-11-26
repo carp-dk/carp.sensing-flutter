@@ -10,7 +10,7 @@ part of '../../deployment.dart';
 /// Contains the entire description and configuration for how a single primary
 /// device participates in running a study.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class PrimaryDeviceDeployment {
+class PrimaryDeviceDeployment with ChangeNotifier {
   /// The configuration for the primary device this deployment is intended for.
   PrimaryDeviceConfiguration deviceConfiguration;
 
@@ -96,6 +96,9 @@ class PrimaryDeviceDeployment {
   /// This corresponds to the most recent device registration as part of this
   /// device deployment.
   DateTime get lastUpdatedOn => registration.registrationCreatedOn;
+
+  /// Notify listeners that this deployment has been updated.
+  void hasBeenUpdated() => notifyListeners();
 
   factory PrimaryDeviceDeployment.fromJson(Map<String, dynamic> json) =>
       _$PrimaryDeviceDeploymentFromJson(json);

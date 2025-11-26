@@ -11,6 +11,8 @@
 /// definition in Kotlin.
 library;
 
+import 'package:flutter/material.dart' show ChangeNotifier;
+
 import 'package:carp_core/carp_core.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:carp_serializable/carp_serializable.dart';
