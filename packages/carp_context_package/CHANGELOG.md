@@ -1,3 +1,7 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 1.12.0
 
 * removing the deprecated `CURRENT_LOCATION` - see [why](https://github.com/cph-cachet/carp.sensing-flutter/issues/471#issuecomment-2774787144)

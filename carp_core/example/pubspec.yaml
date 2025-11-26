@@ -4,11 +4,10 @@ publish_to: 'none'
 version: 1.8.0
 
 environment:
-  sdk: '>=3.8.0 <4.0.0'
-
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.19.0"
+  
 dependencies:
-  # carp_serializable:
-  #   path: ../../carp_serializable/
   carp_core:
     path: ../
 

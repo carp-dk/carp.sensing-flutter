@@ -25,13 +25,16 @@ class AirQualityProbe extends MeasurementProbe {
       } catch (err) {
         warning('$runtimeType - Error getting air quality - $err');
         return Measurement.fromData(
-            Error(message: '$runtimeType Exception: $err'));
+          Error(message: '$runtimeType Exception: $err'),
+        );
       }
     }
     warning(
-        '$runtimeType - no service available. Has the AirQualityService been added to the study protocol?');
+      '$runtimeType - no service available. Has the AirQualityService been added to the study protocol?',
+    );
 
     return Measurement.fromData(
-        Error(message: ('$runtimeType - no service available.')));
+      Error(message: ('$runtimeType - no service available.')),
+    );
   }
 }

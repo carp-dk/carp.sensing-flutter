@@ -1,4 +1,5 @@
 // ignore_for_file: unused_local_variable
+// ignore_for_file: depend_on_referenced_packages
 
 /*
  * Copyright 2018-2024 the Technical University of Denmark (DTU).

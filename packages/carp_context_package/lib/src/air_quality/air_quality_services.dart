@@ -9,7 +9,7 @@ part of '../../carp_context_package.dart';
 
 /// An [OnlineService] for the air quality service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class AirQualityService extends OnlineService {
+class AirQualityService extends OnlineService<DefaultDeviceRegistration> {
   /// The type of a air quality service.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.AirQualityService';
@@ -20,12 +20,8 @@ class AirQualityService extends OnlineService {
   /// API key for the WAQI API.
   String apiKey;
 
-  AirQualityService({
-    String? roleName,
-    required this.apiKey,
-  }) : super(
-          roleName: roleName ?? DEFAULT_ROLE_NAME,
-        );
+  AirQualityService({String? roleName, required this.apiKey})
+    : super(roleName: roleName ?? DEFAULT_ROLE_NAME);
 
   @override
   Function get fromJsonFunction => _$AirQualityServiceFromJson;
@@ -36,15 +32,16 @@ class AirQualityService extends OnlineService {
 }
 
 /// A [DeviceManager] for the [AirQualityService].
-class AirQualityServiceManager extends OnlineServiceManager<AirQualityService> {
+class AirQualityServiceManager
+    extends OnlineServiceManager<AirQualityService, DefaultDeviceRegistration> {
   waqi.AirQuality? _service;
 
   /// A handle to the [AirQuality] plugin.
   waqi.AirQuality? get service => (_service != null)
       ? _service
       : (configuration?.apiKey != null)
-          ? _service = waqi.AirQuality(configuration!.apiKey)
-          : null;
+      ? _service = waqi.AirQuality(configuration!.apiKey)
+      : null;
 
   @override
   String get id => configuration?.apiKey ?? 'N/A';
@@ -52,9 +49,12 @@ class AirQualityServiceManager extends OnlineServiceManager<AirQualityService> {
   @override
   String? get displayName => 'Air Quality Service (WAQI)';
 
-  AirQualityServiceManager([
-    AirQualityService? configuration,
-  ]) : super(AirQualityService.DEVICE_TYPE, configuration);
+  @override
+  DefaultDeviceRegistration get registration =>
+      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
+
+  AirQualityServiceManager([AirQualityService? configuration])
+    : super(AirQualityService.DEVICE_TYPE, configuration);
 
   @override
   // ignore: avoid_renaming_method_parameters
@@ -69,15 +69,7 @@ class AirQualityServiceManager extends OnlineServiceManager<AirQualityService> {
       await LocationManager().requestPermission();
 
   @override
-  Future<bool> canConnect() async {
-    try {
-      var data = await service?.feedFromGeoLocation(
-          40.63047005003576, -74.12938368359374);
-      return (data != null);
-    } catch (_) {
-      return false;
-    }
-  }
+  bool canConnect() => configuration?.apiKey != null;
 
   @override
   Future<DeviceStatus> onConnect() async =>

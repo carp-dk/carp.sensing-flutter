@@ -9,7 +9,7 @@ part of '../../carp_context_package.dart';
 
 /// An [OnlineService] for the [Open Weather](https://openweathermap.org/) service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class WeatherService extends OnlineService {
+class WeatherService extends OnlineService<DefaultDeviceRegistration> {
   /// The type of a air quality service.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.WeatherService';
@@ -20,10 +20,8 @@ class WeatherService extends OnlineService {
   /// API key for the Open Weather API.
   String apiKey;
 
-  WeatherService({
-    String? roleName,
-    required this.apiKey,
-  }) : super(roleName: roleName ?? DEFAULT_ROLE_NAME);
+  WeatherService({String? roleName, required this.apiKey})
+    : super(roleName: roleName ?? DEFAULT_ROLE_NAME);
 
   @override
   Function get fromJsonFunction => _$WeatherServiceFromJson;
@@ -34,7 +32,8 @@ class WeatherService extends OnlineService {
 }
 
 /// A [DeviceManager] for the [WeatherService].
-class WeatherServiceManager extends OnlineServiceManager<WeatherService> {
+class WeatherServiceManager
+    extends OnlineServiceManager<WeatherService, DefaultDeviceRegistration> {
   weather.WeatherFactory? _service;
 
   /// A handle to the [WeatherFactory] plugin.
@@ -42,8 +41,8 @@ class WeatherServiceManager extends OnlineServiceManager<WeatherService> {
   weather.WeatherFactory? get service => (_service != null)
       ? _service
       : (configuration?.apiKey != null)
-          ? _service = weather.WeatherFactory(configuration!.apiKey)
-          : null;
+      ? _service = weather.WeatherFactory(configuration!.apiKey)
+      : null;
 
   @override
   String get id => configuration?.apiKey ?? 'N/A';
@@ -51,9 +50,12 @@ class WeatherServiceManager extends OnlineServiceManager<WeatherService> {
   @override
   String? get displayName => 'Weather Service (OW)';
 
-  WeatherServiceManager([
-    WeatherService? configuration,
-  ]) : super(WeatherService.DEVICE_TYPE, configuration);
+  @override
+  DefaultDeviceRegistration get registration =>
+      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
+
+  WeatherServiceManager([WeatherService? configuration])
+    : super(WeatherService.DEVICE_TYPE, configuration);
 
   @override
   Future<bool> onHasPermissions() async =>
@@ -68,15 +70,7 @@ class WeatherServiceManager extends OnlineServiceManager<WeatherService> {
   void onInitialize(WeatherService service) {}
 
   @override
-  Future<bool> canConnect() async {
-    try {
-      var data = await service?.currentWeatherByLocation(
-          40.63047005003576, -74.12938368359374);
-      return (data != null);
-    } catch (_) {
-      return false;
-    }
-  }
+  bool canConnect() => configuration?.apiKey != null;
 
   @override
   Future<DeviceStatus> onConnect() async =>
