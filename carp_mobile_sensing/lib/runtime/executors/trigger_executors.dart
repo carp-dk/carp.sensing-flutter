@@ -157,7 +157,7 @@ class ElapsedTimeTriggerExecutor
     int delay =
         configuration!.elapsedTime!.inMilliseconds -
         (DateTime.now().millisecondsSinceEpoch -
-            deployment!.deployed.millisecondsSinceEpoch);
+            (deployment?.deployed.millisecondsSinceEpoch ?? 0));
 
     if (delay > 0) {
       timer = Timer(Duration(milliseconds: delay), () => onTrigger());

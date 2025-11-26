@@ -140,6 +140,12 @@ class SmartphoneStudyController {
       return;
     }
 
+    // fast out if no deployment information yet
+    if (deployment == null) {
+      info('$runtimeType - No deployment information available yet.');
+      return;
+    }
+
     info('$runtimeType - Configuring based on new deployment information...');
 
     // Try to register the remaining connected devices with the deployment service.
@@ -198,7 +204,7 @@ class SmartphoneStudyController {
         '  study status : ${study.status.name}\n'
         ' deployment id : ${deployment?.studyDeploymentId}\n'
         ' deployed time : ${deployment?.deployed}\n'
-        '     role name : ${deployment!.deviceConfiguration.roleName}\n'
+        '     role name : ${deployment?.deviceConfiguration.roleName}\n'
         '      platform : ${DeviceInfo().platform.toString()}\n'
         '     device ID : ${DeviceInfo().deviceID.toString()}\n'
         ' data endpoint : ${dataEndPoint?.type}\n'
@@ -284,7 +290,7 @@ class SmartphoneStudyController {
 
     Set<Permission> permissions = {};
 
-    for (var measure in deployment!.measures) {
+    for (var measure in deployment?.measures ?? <Measure>[]) {
       var schema = SamplingPackageRegistry().samplingSchemes[measure.type];
       if (schema != null && schema.dataType is CamsDataTypeMetaData) {
         permissions.addAll(
@@ -348,7 +354,7 @@ class SmartphoneStudyController {
   /// Start heartbeat monitoring for all devices, incl. the phone, for the
   /// [deployment] controlled by this controller.
   void _startHeartbeatMonitoring() {
-    for (var configuration in deployment!.devices) {
+    for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
       _deviceController
           .getDevice(configuration.type)
           ?.startHeartbeatMonitoring(this);
@@ -358,7 +364,7 @@ class SmartphoneStudyController {
   /// Stop heartbeat monitoring for all devices, incl. the phone, for the
   /// [deployment] controlled by this controller.
   void _stopHeartbeatMonitoring() {
-    for (var configuration in deployment!.devices) {
+    for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
       _deviceController
           .getDevice(configuration.type)
           ?.stopHeartbeatMonitoring();
@@ -373,7 +379,7 @@ class SmartphoneStudyController {
     debug('$runtimeType - Trying to connect to all connectable devices.');
 
     // connect all the connected devices and the primary device (i.e. this phone)
-    for (var configuration in deployment!.devices) {
+    for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
       var device = _deviceController.getDevice(configuration.type);
       if (device != null && device.canConnect()) await device.connect();
     }

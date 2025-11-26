@@ -14,6 +14,18 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 void main() => runApp(const MobileSensingApp());
 
+/// This demo app shows a list of studies in a client manager of CARP Mobile Sensing.
+/// Each list tile shows a study showing the study's description and runtime
+/// status using a StreamBuilder that listens on the `events` stream from
+/// the study.
+///
+/// You can add a new study using the floating action button (+) at the
+/// bottom right corner. This adds a new study based on the [protocol] defined
+/// below.
+/// You can remove a study by long-pressing on the study's list tile.
+///
+/// You can start, pause, and resume data sampling for a study by tapping
+/// on the study's list tile.
 class MobileSensingApp extends StatelessWidget {
   const MobileSensingApp({super.key});
 
@@ -84,15 +96,7 @@ class StudyPageState extends State<StudyPage> {
 
   /// Create a list tile for a study showing the study's description and runtime
   /// status using a StreamBuilder that listens on the `events` stream from
-  /// the study..
-  ///
-  /// Depending on the state of the study, pressing the leading icon can be used
-  /// to control the study in three different ways:
-  ///  * start the study
-  ///  * resume data sampling
-  ///  * pause data sampling
-  ///
-  /// This is handled in the [runStudy] method.
+  /// the study.
   Widget studyTileWithBorder(BuildContext context, int index) {
     var study = client.studies[index];
 
@@ -135,6 +139,7 @@ class StudyPageState extends State<StudyPage> {
               ),
               trailing: executorStateIcon[study.samplingStatus],
               onTap: () => runStudy(study),
+              onLongPress: () => removeStudy(study),
             ),
           );
         },
@@ -154,8 +159,11 @@ class StudyPageState extends State<StudyPage> {
   /// Add a new study to the client's list of studies based on the [protocol]
   /// specified below.
   /// Note that it is the same protocol and hence study we add every time.
-  void addStudy() =>
-      client.addStudyFromProtocol(protocol).then((_) => setState(() {}));
+  void addStudy() => client.addStudyFromProtocol(protocol);
+
+  /// Remove [study] from the client's list of studies.
+  void removeStudy(SmartphoneStudy study) =>
+      client.removeStudy(study.studyDeploymentId, study.deviceRoleName);
 
   /// Run (start, resume, pause) [study] based on its current state.
   void runStudy(SmartphoneStudy study) => setState(() {
@@ -164,11 +172,6 @@ class StudyPageState extends State<StudyPage> {
     // If the study has not been started (and deployed) yet, do this first
     if (study.status.index <= StudyStatus.Deployed.index) {
       print('>> STARTING study ${study.studyDeploymentId}');
-      // Listening on all the measurements print them.
-      // controller?.executor.measurements.listen(
-      //   (measurement) =>
-      //       print('>> ${study.studyDeploymentId} - ${measurement.dataType}'),
-      // );
       controller?.start();
     } else {
       if (study.isSampling) {

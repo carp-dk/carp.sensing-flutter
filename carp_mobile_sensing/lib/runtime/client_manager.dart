@@ -321,17 +321,6 @@ class SmartPhoneClientManager
     if (study != null) getStudyController(study)?.start();
   }
 
-  /// Start data sampling in all studies in this client manager.
-  ///
-  /// Note that [start] only needs to be called once. Once started,
-  /// data sampling can be resumed and paused via the [resume] and
-  /// [pause] methods.
-  void start() {
-    for (var controller in _controllers.values) {
-      controller.start();
-    }
-  }
-
   @override
   @mustCallSuper
   Future<StudyStatus> stopStudy(
@@ -360,6 +349,17 @@ class SmartPhoneClientManager
     return status;
   }
 
+  /// Start data sampling in all studies in this client manager.
+  ///
+  /// Note that [start] only needs to be called once. Once started,
+  /// data sampling can be resumed and paused via the [resume] and
+  /// [pause] methods.
+  void start() {
+    for (var controller in _controllers.values) {
+      controller.start();
+    }
+  }
+
   /// Resume data sampling in all studies in this client manager.
   void resume() async {
     for (var controller in _controllers.values) {
@@ -379,12 +379,19 @@ class SmartPhoneClientManager
   @override
   @mustCallSuper
   void dispose() {
-    pause(); // first pause all data sampling
+    debug('$runtimeType - Disposing client manager...');
+
+    // First pause all data sampling
+    pause();
+
+    // Then dispose all study controllers.
     for (var controller in _controllers.values) {
       controller.dispose();
     }
-    ExecutorFactory().dispose();
+    _controllers.clear();
 
+    // Finally dispose the client manager itself.
+    ExecutorFactory().dispose();
     _group.close();
     Persistence().close();
     _state = ClientManagerState.disposed;
