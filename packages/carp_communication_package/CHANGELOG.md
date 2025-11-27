@@ -1,3 +1,7 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 1.8.0
 
 * replacing the `telephony` plugin with the `another_telephony` plugin (issue [#464](https://github.com/cph-cachet/carp.sensing-flutter/issues/464))

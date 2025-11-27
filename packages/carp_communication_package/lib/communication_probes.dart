@@ -109,7 +109,7 @@ class TextMessageProbe extends StreamProbe {
   // }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     _telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
         _textMessageProbeController.add(
@@ -119,7 +119,7 @@ class TextMessageProbe extends StreamProbe {
       onBackgroundMessage: backgroundMessageHandler,
     );
 
-    return await super.onStart();
+    return await super.onResume();
   }
 }
 

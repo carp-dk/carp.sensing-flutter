@@ -61,6 +61,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
     if (samplingConfiguration is PersistentSamplingConfiguration) {
       (samplingConfiguration as PersistentSamplingConfiguration).lastTime =
           DateTime.now().toUtc();
+      deployment?.hasBeenUpdated();
     }
     super.addMeasurement(measurement);
   }
