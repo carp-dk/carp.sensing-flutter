@@ -1,3 +1,7 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 1.9.0
 
 * added support for scanning iBeacons using the [dchs_flutter_beacon](https://pub.dev/packages/dchs_flutter_beacon) plugin
