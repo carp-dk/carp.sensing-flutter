@@ -54,7 +54,7 @@ class App {
   ///  * xamarin,
   ///  * ionic,
   ///  * native_or_others,
-  String? builtWith;
+  String? framework;
 
   App({
     this.name,
@@ -71,7 +71,7 @@ class App {
     versionName = app.versionName;
     versionCode = app.versionCode;
     installTimeMillis = app.installedTimestamp;
-    builtWith = app.builtWith.name;
+    framework = app.platformType.name;
   }
 
   factory App.fromJson(Map<String, dynamic> json) => _$AppFromJson(json);
@@ -85,7 +85,7 @@ class App {
         'versionName: $versionName, '
         'versionCode: $versionCode, '
         'installTimeMillis: $installTimeMillis, '
-        'builtWith: $builtWith'
+        'builtWith: $framework'
         '}';
   }
 }
@@ -146,14 +146,14 @@ class AppUsageInfo {
   );
 
   AppUsageInfo.fromAppUsageInfo(app_usage.AppUsageInfo info)
-      : this(
-          info.appName,
-          info.packageName,
-          info.usage,
-          info.startDate,
-          info.endDate,
-          info.lastForeground,
-        );
+    : this(
+        info.appName,
+        info.packageName,
+        info.usage,
+        info.startDate,
+        info.endDate,
+        info.lastForeground,
+      );
 
   factory AppUsageInfo.fromJson(Map<String, dynamic> json) =>
       _$AppUsageInfoFromJson(json);

@@ -1,19 +1,16 @@
 name: carp_apps_package_example
 description: A simple example of using the CARP Apps Package
 publish_to: 'none' 
-version: 1.7.0
+version: 2.0.0
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  # carp_core:
-  #   path: ../../../carp_core/
-  # carp_mobile_sensing:
-  #   path: ../../../carp_mobile_sensing
+
   carp_apps_package:
     path: ../
 
