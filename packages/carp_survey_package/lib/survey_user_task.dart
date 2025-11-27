@@ -26,33 +26,34 @@ class SurveyUserTask extends UserTask {
 
   @override
   Widget? get widget => SurveyPage(
-        task: rpAppTask.rpTask,
-        resultCallback: _onSurveySubmit,
-        onSurveyCancel: _onSurveyCancel,
-      );
+    task: rpAppTask.rpTask,
+    resultCallback: _onSurveySubmit,
+    onSurveyCancel: _onSurveyCancel,
+  );
 
   @override
   void onStart() {
     super.onStart();
 
-    // start collecting sensor data in the background
-    backgroundTaskExecutor.start();
+    // resume collecting sensor data in the background
+    backgroundTaskExecutor.resume();
   }
 
   void _onSurveySubmit(RPTaskResult result) {
     // when we have the survey result, add it to the measurement stream
     var data = RPTaskResultData(SurveyStatus.submitted, result);
     backgroundTaskExecutor.addMeasurement(Measurement.fromData(data));
-    // and then stop the background executor
-    backgroundTaskExecutor.stop();
+    // and then pause the background executor
+    backgroundTaskExecutor.pause();
     super.onDone(result: data);
   }
 
   void _onSurveyCancel([RPTaskResult? result]) {
-    // also saved result even though it was canceled by the user
+    // also save result even though it was canceled by the user
     backgroundTaskExecutor.addMeasurement(
-        Measurement.fromData(RPTaskResultData(SurveyStatus.canceled, result)));
-    backgroundTaskExecutor.stop();
+      Measurement.fromData(RPTaskResultData(SurveyStatus.canceled, result)),
+    );
+    backgroundTaskExecutor.pause();
     super.onCancel();
   }
 }
