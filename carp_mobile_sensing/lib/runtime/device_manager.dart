@@ -292,7 +292,7 @@ abstract class OnlineServiceManager<
 >
     extends DeviceManager<TDeviceConfiguration, TRegistration> {
   OnlineServiceManager(
-    super.type,
+    super.deviceType,
     super.configuration, [
     super.restartOnReconnect,
   ]);
@@ -316,7 +316,7 @@ abstract class HardwareDeviceManager<
   Stream<int> get batteryEvents => const Stream.empty();
 
   HardwareDeviceManager(
-    super.type,
+    super.deviceType,
     super.configuration, [
     super.restartOnReconnect,
   ]);
@@ -391,18 +391,14 @@ abstract class BTLEDeviceManager<
   TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
   TRegistration extends DeviceRegistration
 >
-    extends DeviceManager<TDeviceConfiguration, TRegistration> {
-  String _btleAddress = '', _btleName = '';
-
+    extends HardwareDeviceManager<TDeviceConfiguration, TRegistration> {
   /// The Bluetooth address of this device in the form `00:04:79:00:0F:4D`.
   /// Returns empty string if unknown.
-  String get btleAddress => _btleAddress;
-  set btleAddress(String btleAddress) => _btleAddress = btleAddress;
+  String btleAddress = '';
 
   /// The Bluetooth name of this device.
   /// Returns empty string if unknown.
-  String get btleName => _btleName;
-  set btleName(String btleName) => _btleName = btleName;
+  String btleName = '';
 
   @override
   @mustCallSuper
@@ -428,7 +424,7 @@ abstract class BTLEDeviceManager<
   }
 
   BTLEDeviceManager(
-    super.type, [
+    super.deviceType, [
     super.configuration,
     super.restartOnReconnect,
   ]);

@@ -12,7 +12,7 @@ part of 'carp_movisens_package.dart';
 /// device, including the BTLE MAC [address], the [deviceName], the [sensorLocation]
 /// and the [weight], [height], [age], [sex] of the user using the device.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class MovisensDevice extends DeviceConfiguration {
+class MovisensDevice extends DeviceConfiguration<DefaultDeviceRegistration> {
   /// The type of a Movisens device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice';
@@ -53,10 +53,7 @@ class MovisensDevice extends DeviceConfiguration {
     this.height = 178,
     this.weight = 78,
     this.age = 25,
-  }) : super(
-          roleName: roleName ?? DEFAULT_ROLE_NAME,
-          isOptional: true,
-        );
+  }) : super(roleName: roleName ?? DEFAULT_ROLE_NAME, isOptional: true);
 
   @override
   Function get fromJsonFunction => _$MovisensDeviceFromJson;
@@ -67,7 +64,8 @@ class MovisensDevice extends DeviceConfiguration {
 }
 
 /// A Movisens [DeviceManager].
-class MovisensDeviceManager extends BTLEDeviceManager<MovisensDevice> {
+class MovisensDeviceManager
+    extends BTLEDeviceManager<MovisensDevice, DefaultDeviceRegistration> {
   // the last known voltage level of the Movisens device
   int _batteryLevel = -1;
   String? _connectionStatus;
@@ -89,12 +87,13 @@ class MovisensDeviceManager extends BTLEDeviceManager<MovisensDevice> {
   @override
   String? get displayName => device?.name;
 
+  @override
+  DefaultDeviceRegistration get registration =>
+      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
+
   String? get connectionStatus => _connectionStatus;
 
-  MovisensDeviceManager(
-    super.type, [
-    super.configuration,
-  ]);
+  MovisensDeviceManager(super.type, [super.configuration]);
 
   @override
   Future<void> onInitialize(MovisensDevice configuration) async {
@@ -109,7 +108,7 @@ class MovisensDeviceManager extends BTLEDeviceManager<MovisensDevice> {
   String get btleAddress => device?.id ?? super.btleAddress;
 
   @override
-  Future<bool> canConnect() async => device != null;
+  bool canConnect() => device != null;
 
   @override
   Future<DeviceStatus> onConnect() async {
@@ -144,19 +143,24 @@ class MovisensDeviceManager extends BTLEDeviceManager<MovisensDevice> {
 
       if (configuration != null) {
         // set user data parameters
-        await device?.userDataService
-            ?.setAgeFloat(configuration!.age.toDouble());
-        await device?.userDataService?.setSensorLocation(movisens
-            .SensorLocation.values[configuration!.sensorLocation.index]);
-        await device?.userDataService
-            ?.setWeight(configuration!.weight.toDouble());
+        await device?.userDataService?.setAgeFloat(
+          configuration!.age.toDouble(),
+        );
+        await device?.userDataService?.setSensorLocation(
+          movisens.SensorLocation.values[configuration!.sensorLocation.index],
+        );
+        await device?.userDataService?.setWeight(
+          configuration!.weight.toDouble(),
+        );
         await device?.userDataService?.setHeight(configuration!.height);
-        await device?.userDataService
-            ?.setGender(movisens.Gender.values[configuration!.sex.index]);
+        await device?.userDataService?.setGender(
+          movisens.Gender.values[configuration!.sex.index],
+        );
       }
     } catch (error) {
       warning(
-          "$runtimeType - could not connect to device of type '$type' - error: $error");
+        "$runtimeType - could not connect to device of type '$deviceType' - error: $error",
+      );
       return DeviceStatus.error;
     }
 
