@@ -45,13 +45,14 @@ class MovesenseDevice extends BLEHeartRateDevice {
   /// The type of Movesense device, if known.
   MovesenseDeviceType deviceType;
 
-  MovesenseDevice(
-      {super.roleName = MovesenseDevice.DEFAULT_ROLE_NAME,
-      super.isOptional = true,
-      this.name,
-      this.address,
-      this.serial,
-      this.deviceType = MovesenseDeviceType.UNKNOWN});
+  MovesenseDevice({
+    super.roleName = MovesenseDevice.DEFAULT_ROLE_NAME,
+    super.isOptional = true,
+    this.name,
+    this.address,
+    this.serial,
+    this.deviceType = MovesenseDeviceType.UNKNOWN,
+  });
 
   @override
   Function get fromJsonFunction => _$MovesenseDeviceFromJson;
@@ -61,7 +62,8 @@ class MovesenseDevice extends BLEHeartRateDevice {
   Map<String, dynamic> toJson() => _$MovesenseDeviceToJson(this);
 }
 
-class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
+class MovesenseDeviceManager
+    extends BTLEDeviceManager<MovesenseDevice, MACAddressDeviceRegistration> {
   int? _batteryLevel;
   final StreamController<int> _batteryEventController =
       StreamController.broadcast();
@@ -96,7 +98,14 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
   int? get batteryLevel => _batteryLevel;
 
   @override
-  Future<bool> canConnect() async => configuration?.address != null;
+  MACAddressDeviceRegistration get registration => MACAddressDeviceRegistration(
+    deviceId: id,
+    deviceDisplayName: displayName,
+    macAddress: btleAddress,
+  );
+
+  @override
+  bool canConnect() => configuration?.address != null;
 
   @override
   String? get displayName => btleName;
@@ -121,7 +130,8 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
     if (isConnected) return DeviceStatus.connected;
     if (btleAddress.isEmpty) {
       warning(
-          '$runtimeType - cannot connect to device, BLE address is missing.');
+        '$runtimeType - cannot connect to device, BLE address is missing.',
+      );
       return DeviceStatus.disconnected;
     }
 
@@ -169,7 +179,8 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
     configuration?.serial = serial;
 
     debug(
-        "$runtimeType - Successfully connected to Movesense device, serial: $serial");
+      "$runtimeType - Successfully connected to Movesense device, serial: $serial",
+    );
 
     _getDeviceInfo();
     _getBatteryStatus();
@@ -186,27 +197,22 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
 
     debug('$runtimeType - Getting device info.');
 
-    Mds.get(
-      Mds.createRequestUri(serial!, "/Info"),
-      "{}",
-      ((data, statusCode) {
-        debug('$runtimeType - Movesense Device Info:\n$data');
-        final dataContent = json.decode(data);
-        deviceInfo = dataContent["Content"] as Map<String, dynamic>;
-        String hw = (deviceInfo!["hw"] as String).toUpperCase();
-        debug('$runtimeType - HW: $hw');
+    Mds.get(Mds.createRequestUri(serial!, "/Info"), "{}", ((data, statusCode) {
+      debug('$runtimeType - Movesense Device Info:\n$data');
+      final dataContent = json.decode(data);
+      deviceInfo = dataContent["Content"] as Map<String, dynamic>;
+      String hw = (deviceInfo!["hw"] as String).toUpperCase();
+      debug('$runtimeType - HW: $hw');
 
-        // Try to figure out the type of device based on the "hw" property
-        // H3 is "HR+", H4 is "HR2", A1 is "MD"
-        configuration?.deviceType = switch (hw) {
-          'A1' => MovesenseDeviceType.MD,
-          'H3' => MovesenseDeviceType.HR_PLUS,
-          'H4' => MovesenseDeviceType.HR2,
-          _ => MovesenseDeviceType.UNKNOWN,
-        };
-      }),
-      (error, statusCode) => {},
-    );
+      // Try to figure out the type of device based on the "hw" property
+      // H3 is "HR+", H4 is "HR2", A1 is "MD"
+      configuration?.deviceType = switch (hw) {
+        'A1' => MovesenseDeviceType.MD,
+        'H3' => MovesenseDeviceType.HR_PLUS,
+        'H4' => MovesenseDeviceType.HR2,
+        _ => MovesenseDeviceType.UNKNOWN,
+      };
+    }), (error, statusCode) => {});
   }
 
   /// Setting up a request (GET) for battery status at a regular interval.
@@ -243,7 +249,8 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
       return false;
     }
     debug(
-        "$runtimeType - Disconnecting... address: '${configuration!.address}'");
+      "$runtimeType - Disconnecting... address: '${configuration!.address}'",
+    );
 
     Mds.disconnect(configuration!.address!);
     return true;

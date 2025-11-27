@@ -18,6 +18,7 @@ void main() {
 
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
+    CarpMobileSensing.ensureInitialized();
 
     // register the Movesense sampling package
     SamplingPackageRegistry().register(MovesenseSamplingPackage());
@@ -47,8 +48,7 @@ void main() {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask()
-        ..measures = SamplingPackageRegistry()
-            .dataTypes
+        ..measures = SamplingPackageRegistry().dataTypes
             .map((type) => Measure(type: type.type))
             .toList(),
       phone,
@@ -57,16 +57,19 @@ void main() {
     // Add a background task that immediately starts collecting data from the
     // Movesense device.
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: MovesenseSamplingPackage.DEVICE_INFO),
           Measure(type: MovesenseSamplingPackage.STATE),
           Measure(type: MovesenseSamplingPackage.HR),
           Measure(type: MovesenseSamplingPackage.ECG),
           Measure(type: MovesenseSamplingPackage.TEMPERATURE),
           Measure(type: MovesenseSamplingPackage.IMU),
-        ]),
-        movesense);
+        ],
+      ),
+      movesense,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () {
@@ -78,8 +81,9 @@ void main() {
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
   });
 
@@ -87,8 +91,9 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocol = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, phone.roleName);
@@ -115,31 +120,36 @@ void main() {
   test('Parsing Movesense JSON data format', () {
     String hrJson = File('test/json/hr.json').readAsStringSync();
     var hr = Measurement.fromData(
-        MovesenseHR.fromMovesenseData(json.decode(hrJson)));
+      MovesenseHR.fromMovesenseData(json.decode(hrJson)),
+    );
     expect(hr.dataType.toString(), MovesenseHR.dataType);
     print(_encode(hr.toJson()));
 
     String ecgJson = File('test/json/ecg.json').readAsStringSync();
     var ecg = Measurement.fromData(
-        MovesenseECG.fromMovesenseData(json.decode(ecgJson)));
+      MovesenseECG.fromMovesenseData(json.decode(ecgJson)),
+    );
     expect(ecg.dataType.toString(), MovesenseECG.dataType);
     print(_encode(ecg.toJson()));
 
     String imuJson = File('test/json/imu.json').readAsStringSync();
     var imu = Measurement.fromData(
-        MovesenseIMU.fromMovesenseData(json.decode(imuJson)));
+      MovesenseIMU.fromMovesenseData(json.decode(imuJson)),
+    );
     expect(imu.dataType.toString(), MovesenseIMU.dataType);
     print(_encode(imu.toJson()));
 
     String infoJson = File('test/json/info.json').readAsStringSync();
     var info = Measurement.fromData(
-        MovesenseDeviceInformation.fromMovesenseData(json.decode(infoJson)));
+      MovesenseDeviceInformation.fromMovesenseData(json.decode(infoJson)),
+    );
     expect(info.dataType.toString(), MovesenseDeviceInformation.dataType);
     print(_encode(info.toJson()));
 
     String stateJson = File('test/json/state.json').readAsStringSync();
     var state = Measurement.fromData(
-        MovesenseStateChange.fromMovesenseData(json.decode(stateJson)));
+      MovesenseStateChange.fromMovesenseData(json.decode(stateJson)),
+    );
     expect(state.dataType.toString(), MovesenseStateChange.dataType);
     print(_encode(state.toJson()));
   });
