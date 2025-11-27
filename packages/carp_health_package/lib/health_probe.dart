@@ -37,15 +37,17 @@ class HealthProbe extends Probe {
 
       if (!supported) {
         warning(
-            "$runtimeType - Health data type '$type' is not supported on this platform "
-            "(${Platform.operatingSystem}). "
-            "Type is ignored.");
+          "$runtimeType - Health data type '$type' is not supported on this platform "
+          "(${Platform.operatingSystem}). "
+          "Type is ignored.",
+        );
         toRemove.add(type);
       }
     }
     // remove all types we don't support on this platform
-    samplingConfiguration.healthDataTypes
-        .removeWhere((element) => toRemove.contains(element));
+    samplingConfiguration.healthDataTypes.removeWhere(
+      (element) => toRemove.contains(element),
+    );
   }
 
   @override
@@ -76,19 +78,21 @@ class HealthProbe extends Probe {
   Future<bool> requestPermissions() async {
     bool permission = await hasPermissions();
     if (!permission) {
-      permission = await deviceManager
-          .requestHealthPermissions(samplingConfiguration.healthDataTypes);
+      permission = await deviceManager.requestHealthPermissions(
+        samplingConfiguration.healthDataTypes,
+      );
     }
     return permission;
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     // Check if we have permissions to access health data and fast out if not.
     if (!await hasPermissions()) return false;
 
-    if (await super.onStart()) {
-      DateTime start = samplingConfiguration.lastTime ??
+    if (await super.onResume()) {
+      DateTime start =
+          samplingConfiguration.lastTime ??
           DateTime.now().subtract(samplingConfiguration.past);
       DateTime end = DateTime.now();
       List<HealthDataType> healthDataTypes =
@@ -96,32 +100,38 @@ class HealthProbe extends Probe {
 
       if (healthDataTypes.isEmpty) {
         warning(
-            "$runtimeType - Trying to collect health data but the list of health data type to collect is empty. "
-            "Did you add any types to the protocol which are available on this platform (iOS or Android)?");
+          "$runtimeType - Trying to collect health data but the list of health data type to collect is empty. "
+          "Did you add any types to the protocol which are available on this platform (iOS or Android)?",
+        );
       } else {
         debug(
-            '$runtimeType - Collecting health data, types: $healthDataTypes, start: ${start.toUtc()}, end: ${end.toUtc()}');
+          '$runtimeType - Collecting health data, types: $healthDataTypes, start: ${start.toUtc()}, end: ${end.toUtc()}',
+        );
         try {
           List<HealthDataPoint>? healthDataPoints =
               await deviceManager.service?.getHealthDataFromTypes(
-                    startTime: start,
-                    endTime: end,
-                    types: healthDataTypes,
-                  ) ??
-                  [];
+                startTime: start,
+                endTime: end,
+                types: healthDataTypes,
+              ) ??
+              [];
           debug(
-              '$runtimeType - Retrieved ${healthDataPoints.length} health data points of types: $healthDataTypes');
+            '$runtimeType - Retrieved ${healthDataPoints.length} health data points of types: $healthDataTypes',
+          );
 
           // Convert HealthDataPoint to measurements and add them the measurements stream.
           for (var data in healthDataPoints) {
-            addMeasurement(Measurement(
+            addMeasurement(
+              Measurement(
                 sensorStartTime: data.dateFrom.microsecondsSinceEpoch,
                 sensorEndTime: data.dateTo.microsecondsSinceEpoch,
-                data: HealthData.fromHealthDataPoint(data)));
+                data: HealthData.fromHealthDataPoint(data),
+              ),
+            );
           }
 
-          // Automatically stop this probe after it is done adding the measurements.
-          Future.delayed(const Duration(seconds: 5), () => stop());
+          // Automatically pause this probe after it is done adding the measurements.
+          Future.delayed(const Duration(seconds: 5), () => pause());
         } catch (exception) {
           warning("$runtimeType - Error collecting health data. $exception");
           _ctrl.addError(exception);

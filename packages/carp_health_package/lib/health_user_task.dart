@@ -21,13 +21,17 @@ class HealthUserTask extends UserTask {
 
     // then check for permission to access health data
     try {
-      var healthProbe = backgroundTaskExecutor.probes
-          .firstWhere((probe) => probe is HealthProbe) as HealthProbe;
+      var healthProbe =
+          backgroundTaskExecutor.probes.firstWhere(
+                (probe) => probe is HealthProbe,
+              )
+              as HealthProbe;
 
       healthProbe.hasPermissions().then((granted) {
         if (granted) {
           debug(
-              '$runtimeType - Already has permissions to access health data.');
+            '$runtimeType - Already has permissions to access health data.',
+          );
           _startProbeAndStopAgain();
         } else {
           healthProbe.requestPermissions().then((granted) {
@@ -36,7 +40,8 @@ class HealthUserTask extends UserTask {
               _startProbeAndStopAgain();
             } else {
               warning(
-                  '$runtimeType - Could not get permissions to access health data.');
+                '$runtimeType - Could not get permissions to access health data.',
+              );
               return;
             }
           });
@@ -46,28 +51,27 @@ class HealthUserTask extends UserTask {
       // if the health probe is not found in the list of probes, we cannot
       // access health data.
       warning(
-          '$runtimeType - No health probe found in list of probes. Does the '
-          'study protocol include any health data types?');
+        '$runtimeType - No health probe found in list of probes. Does the '
+        'study protocol include any health data types?',
+      );
     }
   }
 
   void _startProbeAndStopAgain() {
-    backgroundTaskExecutor.start();
+    backgroundTaskExecutor.resume();
     Timer(const Duration(seconds: 10), () => onDone());
   }
 
   @override
   void onDone({dequeue = false, Data? result}) {
     super.onDone(dequeue: dequeue, result: result);
-    backgroundTaskExecutor.stop();
+    backgroundTaskExecutor.pause();
   }
 }
 
 class HealthUserTaskFactory implements UserTaskFactory {
   @override
-  List<String> types = [
-    HealthUserTask.HEALTH_ASSESSMENT_TYPE,
-  ];
+  List<String> types = [HealthUserTask.HEALTH_ASSESSMENT_TYPE];
 
   // always create a [HealthUserTask]
   @override

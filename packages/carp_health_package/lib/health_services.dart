@@ -9,7 +9,7 @@ part of 'health_package.dart';
 ///
 /// On Android, this health package always uses Google [Health Connect](https://developer.android.com/health-and-fitness/guides/health-connect).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class HealthService extends OnlineService {
+class HealthService extends OnlineService<DefaultDeviceRegistration> {
   /// The type of the health service.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.HealthService';
@@ -29,7 +29,8 @@ class HealthService extends OnlineService {
 }
 
 /// A [DeviceManager] for the [HealthService].
-class HealthServiceManager extends OnlineServiceManager<HealthService> {
+class HealthServiceManager
+    extends OnlineServiceManager<HealthService, DefaultDeviceRegistration> {
   Health? _service;
 
   /// A handle to the [Health] plugin.
@@ -39,12 +40,16 @@ class HealthServiceManager extends OnlineServiceManager<HealthService> {
   @override
   String get id => (configuration != null)
       ? (Platform.isIOS)
-          ? "Apple Health"
-          : "Google Health Connect"
+            ? "Apple Health"
+            : "Google Health Connect"
       : 'N/A';
 
   @override
   String? get displayName => 'Health Service';
+
+  @override
+  DefaultDeviceRegistration get registration =>
+      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
 
   final List<HealthDataType> _types = [];
 
@@ -57,9 +62,8 @@ class HealthServiceManager extends OnlineServiceManager<HealthService> {
     _hasPermissions = false;
   }
 
-  HealthServiceManager([
-    HealthService? configuration,
-  ]) : super(HealthService.DEVICE_TYPE, configuration) {
+  HealthServiceManager([HealthService? configuration])
+    : super(HealthService.DEVICE_TYPE, configuration) {
     Health().configure();
   }
 
@@ -70,9 +74,10 @@ class HealthServiceManager extends OnlineServiceManager<HealthService> {
       var sdkLevel = int.parse(DeviceInfo().sdk ?? '-1');
       if (sdkLevel < 34) {
         warning(
-            '$runtimeType - Trying to use Google Health Connect on a phone with SDK level < 34 (SDK is $sdkLevel). '
-            'In order to use Health Connect on this phone, you need to install Health Connect as a separate app. '
-            'Please read more about Health Connect at https://developer.android.com/health-and-fitness/guides/health-connect/develop/get-started');
+          '$runtimeType - Trying to use Google Health Connect on a phone with SDK level < 34 (SDK is $sdkLevel). '
+          'In order to use Health Connect on this phone, you need to install Health Connect as a separate app. '
+          'Please read more about Health Connect at https://developer.android.com/health-and-fitness/guides/health-connect/develop/get-started',
+        );
       }
     }
   }
@@ -92,7 +97,8 @@ class HealthServiceManager extends OnlineServiceManager<HealthService> {
     if (types.isEmpty) return true;
 
     info(
-        '$runtimeType - Checking permissions for health types: $types on ${Platform.operatingSystem}');
+      '$runtimeType - Checking permissions for health types: $types on ${Platform.operatingSystem}',
+    );
 
     try {
       return await service?.hasPermissions(types) ?? false;
@@ -110,7 +116,8 @@ class HealthServiceManager extends OnlineServiceManager<HealthService> {
     if (types.isEmpty) return true;
 
     info(
-        '$runtimeType - Requesting permissions for health types: $types on ${Platform.operatingSystem}');
+      '$runtimeType - Requesting permissions for health types: $types on ${Platform.operatingSystem}',
+    );
 
     try {
       return await service?.requestAuthorization(types) ?? false;
@@ -132,7 +139,7 @@ class HealthServiceManager extends OnlineServiceManager<HealthService> {
       _hasPermissions = await requestHealthPermissions(types);
 
   @override
-  Future<bool> canConnect() async => true;
+  bool canConnect() => true;
 
   @override
   Future<DeviceStatus> onConnect() async => DeviceStatus.connected;
