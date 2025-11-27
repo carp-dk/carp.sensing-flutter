@@ -4,28 +4,20 @@ homepage: https://github.com/cph-cachet/carp.sensing-flutter
 publish_to: none
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  carp_serializable: ^2.0.0
-  carp_core: ^1.8.0
-  carp_mobile_sensing: ^1.11.0
-  carp_webservices: ^3.5.0
+  # carp_serializable: ^2.0.0
+  # carp_core: ^1.8.0
+  # carp_mobile_sensing: ^1.11.0
+  # carp_webservices: ^3.5.0
 
-  research_package: ^2.0.0
+  # research_package: ^2.0.0
 
-  # carp_core:
-  #   path: ../../../carp_core
-  # carp_mobile_sensing:
-  #   path: ../../../carp_mobile_sensing
-  # carp_webservices:
-  #   path: ../../carp_webservices
-  # research_package:
-  #   path: ../../../../../research.package/
   carp_backend:
     path: ../
 

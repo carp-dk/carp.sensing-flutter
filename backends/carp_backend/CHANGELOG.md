@@ -1,6 +1,10 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 1.11.0
 
-* upgrading research_package major version 
+* upgrading research_package major version
 
 ## 1.10.0
 

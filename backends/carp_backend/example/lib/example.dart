@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
@@ -13,15 +15,9 @@ void main() async {
 
   // Configure an app that points to the CARP web services (CAWS)
   // The URI of the CAWS server to connect to.
-  final Uri uri = Uri(
-    scheme: 'https',
-    host: 'dev.carp.dk',
-  );
+  final Uri uri = Uri(scheme: 'https', host: 'dev.carp.dk');
 
-  late CarpApp app = CarpApp(
-    name: "CAWS @ DTU",
-    uri: uri,
-  );
+  late CarpApp app = CarpApp(name: "CAWS @ DTU", uri: uri);
 
   // The authentication configuration
   late CarpAuthProperties authProperties = CarpAuthProperties(
@@ -29,11 +25,7 @@ void main() async {
     clientId: 'studies-app',
     redirectURI: Uri.parse('carp-studies-auth://auth'),
     // For authentication at CAWS the path is '/auth/realms/Carp'
-    discoveryURL: uri.replace(pathSegments: [
-      'auth',
-      'realms',
-      'Carp',
-    ]),
+    discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
   );
 
   // Configure the CAWS services
@@ -122,8 +114,9 @@ void main() async {
   );
 
   // Using the "old" DataPoint endpoint for uploading batches of data points.
-  var dataPointEndPoint =
-      CarpDataEndPoint(uploadMethod: CarpUploadMethod.datapoint);
+  var dataPointEndPoint = CarpDataEndPoint(
+    uploadMethod: CarpUploadMethod.datapoint,
+  );
 
   // var dataPointEndPoint = CarpDataEndPoint(
   //   uploadMethod: CarpUploadMethod.datapoint,
@@ -181,16 +174,18 @@ void main() async {
   icManager.initialize();
 
   // Create a simple informed consent...
-  final consent = RPOrderedTask(identifier: '12', steps: [
-    RPInstructionStep(
-      identifier: "1",
-      title: "Welcome!",
-    )..text = "Welcome to this study! ",
-    RPCompletionStep(
+  final consent = RPOrderedTask(
+    identifier: '12',
+    steps: [
+      RPInstructionStep(identifier: "1", title: "Welcome!")
+        ..text = "Welcome to this study! ",
+      RPCompletionStep(
         identifier: "2",
         title: "Thank You!",
-        text: "We saved your consent document."),
-  ]);
+        text: "We saved your consent document.",
+      ),
+    ],
+  );
   // .. and upload it to CAWS.
   await icManager.setInformedConsent(consent);
 
@@ -206,12 +201,14 @@ void main() async {
   messageManager.initialize();
 
   // Create a message and upload it to CAWS.
-  messageManager.setMessage(Message(
-    id: '123',
-    title: 'Great News!',
-    message: 'There are great news from CARP',
-    type: MessageType.news,
-  ));
+  messageManager.setMessage(
+    Message(
+      id: '123',
+      title: 'Great News!',
+      message: 'There are great news from CARP',
+      type: MessageType.news,
+    ),
+  );
 
   // Get all messages from CAWS.
   messageManager.getMessages().then((messages) {
