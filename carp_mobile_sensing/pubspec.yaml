@@ -1,6 +1,6 @@
 name: carp_mobile_sensing
 description: Mobile Sensing Framework for Flutter. A software framework for collecting sensor data from the phone and attached wearable devices via probes. Can be extended.
-version: 1.13.1
+version: 2.0.0
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 
 environment:

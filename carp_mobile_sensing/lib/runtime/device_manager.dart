@@ -389,7 +389,7 @@ class SmartphoneDeviceManager
 /// A device manager for a connectable Bluetooth device.
 abstract class BTLEDeviceManager<
   TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
-  TRegistration extends DeviceRegistration
+  TRegistration extends MACAddressDeviceRegistration
 >
     extends HardwareDeviceManager<TDeviceConfiguration, TRegistration> {
   /// The Bluetooth address of this device in the form `00:04:79:00:0F:4D`.

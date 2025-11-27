@@ -48,7 +48,7 @@ part of 'esense.dart';
 /// to use the right earbud to record only sound samples and the left earbud to
 /// record only IMU data.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class ESenseDevice extends DeviceConfiguration<DefaultDeviceRegistration> {
+class ESenseDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
   /// The type of an eSense device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.ESenseDevice';
@@ -81,7 +81,7 @@ class ESenseDevice extends DeviceConfiguration<DefaultDeviceRegistration> {
 
 /// A [DeviceManager] for the eSense device.
 class ESenseDeviceManager
-    extends BTLEDeviceManager<ESenseDevice, DefaultDeviceRegistration> {
+    extends BTLEDeviceManager<ESenseDevice, MACAddressDeviceRegistration> {
   Timer? _batteryTimer;
   StreamSubscription<ESenseEvent>? _batterySubscription;
   double? _voltageLevel;
@@ -98,8 +98,11 @@ class ESenseDeviceManager
   String? get displayName => btleName;
 
   @override
-  DefaultDeviceRegistration get registration =>
-      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
+  MACAddressDeviceRegistration get registration => MACAddressDeviceRegistration(
+    deviceId: id,
+    deviceDisplayName: displayName,
+    macAddress: btleAddress,
+  );
 
   @override
   String get btleName => configuration?.deviceName ?? 'eSense-????';

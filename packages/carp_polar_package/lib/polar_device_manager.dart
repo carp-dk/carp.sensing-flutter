@@ -73,7 +73,8 @@ class PolarDevice extends BLEHeartRateDevice {
 }
 
 /// A Polar [DeviceManager].
-class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
+class PolarDeviceManager
+    extends BTLEDeviceManager<PolarDevice, MACAddressDeviceRegistration> {
   int? _batteryLevel;
   bool _polarFeaturesAvailable = false;
   Polar? _polar;
@@ -146,13 +147,17 @@ class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
   @override
   set btleAddress(String btleAddress) => configuration?.address = btleAddress;
 
-  PolarDeviceManager(
-    super.type, [
-    super.configuration,
-  ]);
+  @override
+  MACAddressDeviceRegistration get registration => MACAddressDeviceRegistration(
+    deviceId: id,
+    deviceDisplayName: displayName,
+    macAddress: btleAddress,
+  );
+
+  PolarDeviceManager(super.type, [super.configuration]);
 
   @override
-  Future<bool> canConnect() async => configuration?.identifier != null;
+  bool canConnect() => configuration?.identifier != null;
 
   @override
   Future<DeviceStatus> onConnect() async {
@@ -205,9 +210,9 @@ class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
 
           if (configuration!.identifier == event.identifier &&
               event.feature == PolarSdkFeature.onlineStreaming) {
-            polar
-                .getAvailableOnlineStreamDataTypes(event.identifier)
-                .then((dataTypes) {
+            polar.getAvailableOnlineStreamDataTypes(event.identifier).then((
+              dataTypes,
+            ) {
               features = dataTypes.toList();
               debug('$runtimeType - features: $features');
               _polarFeaturesAvailable = true;
@@ -219,7 +224,8 @@ class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
         return DeviceStatus.connecting;
       } catch (error) {
         warning(
-            "$runtimeType - could not connect to device of type '$type' and id '$id' - error: $error");
+          "$runtimeType - could not connect to device of type '$deviceType' and id '$id' - error: $error",
+        );
         return DeviceStatus.error;
       }
     }
@@ -229,7 +235,8 @@ class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
   Future<bool> onDisconnect() async {
     if (configuration?.identifier == null) {
       warning(
-          '$runtimeType - cannot disconnect from device, identifier is null.');
+        '$runtimeType - cannot disconnect from device, identifier is null.',
+      );
       return false;
     }
 

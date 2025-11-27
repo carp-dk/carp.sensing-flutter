@@ -20,6 +20,7 @@ void main() {
 
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
+    CarpMobileSensing.ensureInitialized();
 
     // register the Polar sampling package
     SamplingPackageRegistry().register(PolarSamplingPackage());
@@ -45,22 +46,22 @@ void main() {
       ..addPrimaryDevice(phone)
       ..addConnectedDevice(polar, phone);
 
-    // adding all available measures to one one trigger and one task
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask()
-        ..measures = SamplingPackageRegistry()
-            .dataTypes
-            .map((type) => Measure(type: type.type))
-            .toList(),
-      phone,
-    );
+    // // adding all available measures to one one trigger and one task
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask()
+    //     ..measures = SamplingPackageRegistry().dataTypes
+    //         .map((type) => Measure(type: type.type))
+    //         .toList(),
+    //   phone,
+    // );
 
     // Add a background task that immediately starts collecting eSense button and
     // sensor events from the eSense device.
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: PolarSamplingPackage.ACCELEROMETER),
           Measure(type: PolarSamplingPackage.GYROSCOPE),
           Measure(type: PolarSamplingPackage.MAGNETOMETER),
@@ -68,8 +69,10 @@ void main() {
           Measure(type: PolarSamplingPackage.HR),
           Measure(type: PolarSamplingPackage.PPG),
           Measure(type: PolarSamplingPackage.PPI),
-        ]),
-        polar);
+        ],
+      ),
+      polar,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () async {
@@ -82,8 +85,9 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -92,8 +96,9 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocol = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, phone.roleName);
@@ -109,8 +114,9 @@ void main() {
 
     PolarAccData data = PolarAccData(samples: samples);
 
-    var measurement =
-        Measurement.fromData(PolarAccelerometer.fromPolarData(data));
+    var measurement = Measurement.fromData(
+      PolarAccelerometer.fromPolarData(data),
+    );
     expect(measurement.dataType.toString(), measurement.data.jsonType);
 
     print(_encode(measurement.toJson()));

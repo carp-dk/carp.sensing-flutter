@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     // Initialization of serialization
-    CarpMobileSensing();
+    CarpMobileSensing.ensureInitialized();
     ContextSamplingPackage().onRegister();
 
     // register the context sampling package
@@ -34,70 +34,81 @@ void main() {
 
     // Add a background task that collects activity data from the phone
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
-        phone);
+      ImmediateTrigger(),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
+      phone,
+    );
 
     // Define the online location service and add it as a 'device'
     LocationService locationService = LocationService(
-        accuracy: GeolocationAccuracy.low,
-        distance: 10,
-        interval: const Duration(minutes: 5));
+      accuracy: GeolocationAccuracy.low,
+      distance: 10,
+      interval: const Duration(minutes: 5),
+    );
     protocol.addConnectedDevice(locationService, phone);
 
     // Add a background task that collects location on a regular basis
     protocol.addTaskControl(
-        PeriodicTrigger(period: const Duration(minutes: 5)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION)),
-        locationService);
+      PeriodicTrigger(period: const Duration(minutes: 5)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION)),
+      locationService,
+    );
 
     // Add a background task that continuously collects location and mobility
     // patterns. Delays sampling by 5 minutes.
     protocol.addTaskControl(
-        DelayedTrigger(delay: const Duration(minutes: 5)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION))
-          ..addMeasure(Measure(type: ContextSamplingPackage.MOBILITY)),
-        locationService);
+      DelayedTrigger(delay: const Duration(minutes: 5)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION))
+        ..addMeasure(Measure(type: ContextSamplingPackage.MOBILITY)),
+      locationService,
+    );
 
     // Add a background task that collects geofence events using DTU as the
     // center for the geofence.
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.GEOFENCE)
-            ..overrideSamplingConfiguration = GeofenceSamplingConfiguration(
-                name: 'DTU',
-                center: GeoPosition(55.786025, 12.524159),
-                dwell: const Duration(minutes: 15),
-                radius: 10.0)),
-        locationService);
+      ImmediateTrigger(),
+      BackgroundTask()..addMeasure(
+        Measure(type: ContextSamplingPackage.GEOFENCE)
+          ..overrideSamplingConfiguration = GeofenceSamplingConfiguration(
+            name: 'DTU',
+            center: GeoPosition(55.786025, 12.524159),
+            dwell: const Duration(minutes: 15),
+            radius: 10.0,
+          ),
+      ),
+      locationService,
+    );
 
     // Define the online weather service and add it as a 'device'
-    WeatherService weatherService =
-        WeatherService(apiKey: 'OW_API_key_goes_here');
+    WeatherService weatherService = WeatherService(
+      apiKey: 'OW_API_key_goes_here',
+    );
     protocol.addConnectedDevice(weatherService, phone);
 
     // Add a background task that collects weather every 30 minutes.
     protocol.addTaskControl(
-        PeriodicTrigger(period: const Duration(minutes: 30)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
-        weatherService);
+      PeriodicTrigger(period: const Duration(minutes: 30)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
+      weatherService,
+    );
 
     // Define the online air quality service and add it as a 'device'
-    AirQualityService airQualityService =
-        AirQualityService(apiKey: 'WAQI_API_key_goes_here');
+    AirQualityService airQualityService = AirQualityService(
+      apiKey: 'WAQI_API_key_goes_here',
+    );
     protocol.addConnectedDevice(airQualityService, phone);
 
     // Add a background task that air quality every 30 minutes.
     protocol.addTaskControl(
-        PeriodicTrigger(period: const Duration(minutes: 30)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.AIR_QUALITY)),
-        airQualityService);
+      PeriodicTrigger(period: const Duration(minutes: 30)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.AIR_QUALITY)),
+      airQualityService,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () async {
@@ -110,8 +121,9 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -119,18 +131,16 @@ void main() {
   test('JSON File -> StudyProtocol', () async {
     String plainJson = File('test/json/protocol.json').readAsStringSync();
 
-    StudyProtocol protocolFromFile =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromFile = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocolFromFile.ownerId, protocol.ownerId);
     expect(
       protocolFromFile.primaryDevices.first.roleName,
       Smartphone.DEFAULT_ROLE_NAME,
     );
-    expect(
-      protocolFromFile.taskControls.length,
-      protocol.taskControls.length,
-    );
+    expect(protocolFromFile.taskControls.length, protocol.taskControls.length);
     print(toJsonString(protocolFromFile));
   });
 
@@ -197,9 +207,9 @@ void main() {
     expect(m_1.dataType.namespace, NameSpace.CARP);
     print(_encode(loc));
 
-    OMHGeopositionDataPoint geo = DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)!
-        .transform(loc) as OMHGeopositionDataPoint;
+    OMHGeopositionDataPoint geo =
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(loc)
+            as OMHGeopositionDataPoint;
     print(_encode(geo));
 
     Measurement m_2 = Measurement.fromData(geo);
@@ -217,9 +227,9 @@ void main() {
     expect(m_1.dataType.namespace, NameSpace.CARP);
     print(_encode(act));
 
-    OMHPhysicalActivityDataPoint phy = DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)!
-        .transform(act) as OMHPhysicalActivityDataPoint;
+    OMHPhysicalActivityDataPoint phy =
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(act)
+            as OMHPhysicalActivityDataPoint;
     print(_encode(phy));
 
     Measurement m_2 = Measurement.fromData(phy);
@@ -245,9 +255,9 @@ void main() {
       radius: 5,
     );
 
-    CircularGeofence f =
-        CircularGeofence.fromGeofenceSamplingConfiguration(config)
-          ..dwell = const Duration(seconds: 2); // dwell timeout 2 secs.
+    CircularGeofence f = CircularGeofence.fromGeofenceSamplingConfiguration(
+      config,
+    )..dwell = const Duration(seconds: 2); // dwell timeout 2 secs.
     print(f);
 
     d = f.moved(home);
