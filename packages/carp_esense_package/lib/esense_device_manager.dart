@@ -48,7 +48,7 @@ part of 'esense.dart';
 /// to use the right earbud to record only sound samples and the left earbud to
 /// record only IMU data.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class ESenseDevice extends DeviceConfiguration {
+class ESenseDevice extends DeviceConfiguration<DefaultDeviceRegistration> {
   /// The type of an eSense device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.ESenseDevice';
@@ -80,7 +80,8 @@ class ESenseDevice extends DeviceConfiguration {
 }
 
 /// A [DeviceManager] for the eSense device.
-class ESenseDeviceManager extends BTLEDeviceManager<ESenseDevice> {
+class ESenseDeviceManager
+    extends BTLEDeviceManager<ESenseDevice, DefaultDeviceRegistration> {
   Timer? _batteryTimer;
   StreamSubscription<ESenseEvent>? _batterySubscription;
   double? _voltageLevel;
@@ -95,6 +96,10 @@ class ESenseDeviceManager extends BTLEDeviceManager<ESenseDevice> {
 
   @override
   String? get displayName => btleName;
+
+  @override
+  DefaultDeviceRegistration get registration =>
+      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
 
   @override
   String get btleName => configuration?.deviceName ?? 'eSense-????';
@@ -131,20 +136,19 @@ class ESenseDeviceManager extends BTLEDeviceManager<ESenseDevice> {
   @override
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
-  ESenseDeviceManager(
-    super.type, [
-    super.configuration,
-  ]);
+  ESenseDeviceManager(super.type, [super.configuration]);
 
   @override
-  Future<bool> canConnect() async => (configuration?.deviceName != null &&
+  bool canConnect() =>
+      (configuration?.deviceName != null &&
       configuration!.deviceName!.isNotEmpty);
 
   @override
   void onInitialize(ESenseDevice configuration) {
     if (configuration.deviceName == null || configuration.deviceName!.isEmpty) {
       warning(
-          '$runtimeType - cannot connect to eSense device, device name is null.');
+        '$runtimeType - cannot connect to eSense device, device name is null.',
+      );
     }
     manager = ESenseManager(id);
 
@@ -201,7 +205,8 @@ class ESenseDeviceManager extends BTLEDeviceManager<ESenseDevice> {
       manager?.connect();
     } catch (error) {
       warning(
-          '$runtimeType - Error connecting to eSense device id: $id - $error');
+        '$runtimeType - Error connecting to eSense device id: $id - $error',
+      );
       return DeviceStatus.error;
     }
 

@@ -18,13 +18,16 @@ class ESenseButtonProbe extends _ESenseProbe {
   @override
   Stream<Measurement>? get stream => (deviceManager.isConnected)
       ? deviceManager.manager!.eSenseEvents
-          .where((event) => event.runtimeType == ButtonEventChanged)
-          .map((event) => Measurement.fromData(
+            .where((event) => event.runtimeType == ButtonEventChanged)
+            .map(
+              (event) => Measurement.fromData(
                 ESenseButton(
-                    deviceName: deviceManager.manager!.deviceName,
-                    pressed: (event as ButtonEventChanged).pressed),
-              ))
-          .asBroadcastStream()
+                  deviceName: deviceManager.manager!.deviceName,
+                  pressed: (event as ButtonEventChanged).pressed,
+                ),
+              ),
+            )
+            .asBroadcastStream()
       : null;
 }
 
@@ -37,14 +40,16 @@ class ESenseSensorProbe extends _ESenseProbe {
   Stream<Measurement>? get stream {
     _stream ??= (deviceManager.isConnected)
         ? deviceManager.manager!.sensorEvents
-            .map((event) => Measurement.fromData(
+              .map(
+                (event) => Measurement.fromData(
                   ESenseSensor.fromSensorEvent(
                     deviceName: deviceManager.manager!.deviceName,
                     event: event,
                   ),
                   event.timestamp.microsecondsSinceEpoch,
-                ))
-            .asBroadcastStream()
+                ),
+              )
+              .asBroadcastStream()
         : null;
 
     return _stream;

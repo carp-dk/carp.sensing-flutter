@@ -1,6 +1,7 @@
 ## 2.0.0 - BREAKING
 
-* Support for adding and running multiple studies to the client manager.
+This release has two main features: (i) to support adding, running, and removing multiple studies to the client manager, and (ii) to save runtime state persistently so that sampling of data in all studies will resume effortlessly across app restart. In addition, the following issues have been addressed:
+
 * Simplified configuration - now only the client and not the controller needs configuration.
 * Simplified deployment - now a study can be merely started and deployment happens automatically
 * Revised state machine model for executors, now using states 'resumed' and 'paused' instead of 'started' and 'stopped'
