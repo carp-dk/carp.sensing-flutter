@@ -33,7 +33,7 @@ class AirQualityService extends OnlineService<DefaultDeviceRegistration> {
 
 /// A [DeviceManager] for the [AirQualityService].
 class AirQualityServiceManager
-    extends OnlineServiceManager<AirQualityService, DefaultDeviceRegistration> {
+    extends ContextServiceManager<AirQualityService> {
   waqi.AirQuality? _service;
 
   /// A handle to the [AirQuality] plugin.
@@ -48,10 +48,6 @@ class AirQualityServiceManager
 
   @override
   String? get displayName => 'Air Quality Service (WAQI)';
-
-  @override
-  DefaultDeviceRegistration get registration =>
-      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
 
   AirQualityServiceManager([AirQualityService? configuration])
     : super(AirQualityService.DEVICE_TYPE, configuration);

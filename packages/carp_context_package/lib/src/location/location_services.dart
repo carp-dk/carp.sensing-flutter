@@ -74,8 +74,7 @@ class LocationService extends OnlineService<DefaultDeviceRegistration> {
 }
 
 /// A [DeviceManager] for the location service.
-class LocationServiceManager
-    extends OnlineServiceManager<LocationService, DefaultDeviceRegistration> {
+class LocationServiceManager extends ContextServiceManager<LocationService> {
   /// A handle to the [LocationManager].
   LocationManager manager = LocationManager();
 
@@ -85,19 +84,12 @@ class LocationServiceManager
   @override
   String? get displayName => 'Location Service';
 
-  @override
-  DefaultDeviceRegistration get registration =>
-      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
-
   LocationServiceManager([LocationService? configuration])
     : super(LocationService.DEVICE_TYPE, configuration);
 
   @override
   // ignore: avoid_renaming_method_parameters
   void onInitialize(LocationService service) => manager.configure(service);
-
-  @override
-  bool canConnect() => true;
 
   @override
   Future<DeviceStatus> onConnect() async => manager.enabled

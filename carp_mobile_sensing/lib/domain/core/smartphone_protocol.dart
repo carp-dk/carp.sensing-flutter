@@ -216,7 +216,11 @@ class SmartphoneStudyProtocol extends StudyProtocol
       measures.add(Measure(type: CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME));
     }
 
-    addTaskControl(NoOpTrigger(), MonitoringTask(measures: measures), device);
+    addTaskControl(
+      NoOpTrigger(),
+      MonitoringTask(name: "Sensing Monitoring", measures: measures),
+      device,
+    );
   }
 
   factory SmartphoneStudyProtocol.fromJson(Map<String, dynamic> json) =>

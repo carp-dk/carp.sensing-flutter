@@ -32,8 +32,7 @@ class WeatherService extends OnlineService<DefaultDeviceRegistration> {
 }
 
 /// A [DeviceManager] for the [WeatherService].
-class WeatherServiceManager
-    extends OnlineServiceManager<WeatherService, DefaultDeviceRegistration> {
+class WeatherServiceManager extends ContextServiceManager<WeatherService> {
   weather.WeatherFactory? _service;
 
   /// A handle to the [WeatherFactory] plugin.
@@ -49,10 +48,6 @@ class WeatherServiceManager
 
   @override
   String? get displayName => 'Weather Service (OW)';
-
-  @override
-  DefaultDeviceRegistration get registration =>
-      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
 
   WeatherServiceManager([WeatherService? configuration])
     : super(WeatherService.DEVICE_TYPE, configuration);

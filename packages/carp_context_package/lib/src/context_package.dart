@@ -66,7 +66,7 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
             timeType: DataTimeType.POINT,
             permissions: [Permission.activityRecognition],
           ),
-        )
+        ),
       ]);
 
   @override
@@ -79,14 +79,15 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
       LocationSamplingConfiguration(),
       MobilitySamplingConfiguration(),
       GeofenceSamplingConfiguration(
-          name: '',
-          center: GeoPosition(1.1, 1.1),
-          dwell: const Duration(),
-          radius: 1.0),
+        name: '',
+        center: GeoPosition(1.1, 1.1),
+        dwell: const Duration(),
+        radius: 1.0,
+      ),
       LocationService(),
       WeatherService(apiKey: ''),
       AirQualityService(apiKey: ''),
-      GeoPosition(1.1, 1.1)
+      GeoPosition(1.1, 1.1),
     ]);
 
     // register all data types
@@ -96,7 +97,7 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
       Geofence(type: GeofenceType.DWELL, name: ''),
       Location(),
       Mobility(),
-      Weather()
+      Weather(),
     ]);
 
     // registering the transformers from CARP to OMH for geolocation and physical activity
@@ -120,39 +121,45 @@ class LocationSamplingPackage extends SmartphoneSamplingPackage {
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(DataTypeMetaData(
-          type: ContextSamplingPackage.LOCATION,
-          displayName: "Location",
-          timeType: DataTimeType.POINT,
-          // permissions: [Permission.locationAlways],
-        )),
-        DataTypeSamplingScheme(DataTypeMetaData(
-          type: ContextSamplingPackage.GEOFENCE,
-          displayName: "Geofence",
-          timeType: DataTimeType.POINT,
-          // permissions: [Permission.locationAlways],
-        )),
         DataTypeSamplingScheme(
-            DataTypeMetaData(
-              type: ContextSamplingPackage.MOBILITY,
-              displayName: "Mobility",
-              timeType: DataTimeType.POINT,
-              // permissions: [Permission.locationAlways],
-            ),
-            MobilitySamplingConfiguration(
-                placeRadius: 50,
-                stopRadius: 5,
-                usePriorContexts: true,
-                stopDuration: const Duration(seconds: 30))),
+          DataTypeMetaData(
+            type: ContextSamplingPackage.LOCATION,
+            displayName: "Location",
+            timeType: DataTimeType.POINT,
+            // permissions: [Permission.locationAlways],
+          ),
+        ),
+        DataTypeSamplingScheme(
+          DataTypeMetaData(
+            type: ContextSamplingPackage.GEOFENCE,
+            displayName: "Geofence",
+            timeType: DataTimeType.POINT,
+            // permissions: [Permission.locationAlways],
+          ),
+        ),
+        DataTypeSamplingScheme(
+          DataTypeMetaData(
+            type: ContextSamplingPackage.MOBILITY,
+            displayName: "Mobility",
+            timeType: DataTimeType.POINT,
+            // permissions: [Permission.locationAlways],
+          ),
+          MobilitySamplingConfiguration(
+            placeRadius: 50,
+            stopRadius: 5,
+            usePriorContexts: true,
+            stopDuration: const Duration(seconds: 30),
+          ),
+        ),
       ]);
 
   @override
   Probe? create(String type) => switch (type) {
-        ContextSamplingPackage.LOCATION => ConfigurableLocationProbe(),
-        ContextSamplingPackage.GEOFENCE => GeofenceProbe(),
-        ContextSamplingPackage.MOBILITY => MobilityProbe(),
-        _ => null,
-      };
+    ContextSamplingPackage.LOCATION => ConfigurableLocationProbe(),
+    ContextSamplingPackage.GEOFENCE => GeofenceProbe(),
+    ContextSamplingPackage.MOBILITY => MobilityProbe(),
+    _ => null,
+  };
 
   @override
   String get deviceType => LocationService.DEVICE_TYPE;
@@ -174,7 +181,7 @@ class AirQualitySamplingPackage extends SmartphoneSamplingPackage {
             displayName: "Air Quality",
             timeType: DataTimeType.POINT,
           ),
-        )
+        ),
       ]);
 
   @override
@@ -201,7 +208,7 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
             displayName: "Weather",
             timeType: DataTimeType.POINT,
           ),
-        )
+        ),
       ]);
 
   @override
@@ -213,4 +220,27 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
 
   @override
   DeviceManager get deviceManager => _deviceManager;
+}
+
+/// A [DeviceManager] for the location service.
+abstract class ContextServiceManager<
+  TDeviceConfiguration extends OnlineService<DefaultDeviceRegistration>
+>
+    extends
+        OnlineServiceManager<TDeviceConfiguration, DefaultDeviceRegistration> {
+  ContextServiceManager(
+    super.type,
+    super.configuration, [
+    super.restartOnReconnect,
+  ]);
+
+  @override
+  DefaultDeviceRegistration get registration =>
+      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
+
+  @override
+  bool canConnect() => true; // most online services can connect
+
+  @override
+  Future<bool> onDisconnect() async => true;
 }
