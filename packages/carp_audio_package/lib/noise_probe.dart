@@ -66,22 +66,25 @@ class NoiseProbe extends BufferingPeriodicStreamProbe {
       Stats meanStats = Stats.fromData(meanList);
       Stats maxStats = Stats.fromData(maxList);
       // get statistics from the list of mean db's
-      num mean = meanStats.average;
-      num std = meanStats.standardDeviation;
+      num mean = meanStats.mean;
+      num std = meanStats.sampleValues.standardDeviation;
       num min = meanStats.min;
       // get the max db from the list of max db's
       num max = maxStats.max;
 
       if (mean.isFinite && std.isFinite && min.isFinite && max.isFinite) {
         return Measurement(
-            sensorStartTime: _startRecordingTime?.microsecondsSinceEpoch ??
-                DateTime.now().microsecondsSinceEpoch,
-            sensorEndTime: _endRecordingTime?.microsecondsSinceEpoch,
-            data: Noise(
-                meanDecibel: mean.toDouble(),
-                stdDecibel: std.toDouble(),
-                minDecibel: min.toDouble(),
-                maxDecibel: max.toDouble()));
+          sensorStartTime:
+              _startRecordingTime?.microsecondsSinceEpoch ??
+              DateTime.now().microsecondsSinceEpoch,
+          sensorEndTime: _endRecordingTime?.microsecondsSinceEpoch,
+          data: Noise(
+            meanDecibel: mean.toDouble(),
+            stdDecibel: std.toDouble(),
+            minDecibel: min.toDouble(),
+            maxDecibel: max.toDouble(),
+          ),
+        );
       }
     }
 
