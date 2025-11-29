@@ -36,6 +36,9 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
     );
   }
 
+  /// Is this study deployed?
+  bool get isDeployed => deployment != null;
+
   /// Is this study sampling data?
   bool get isSampling => samplingStatus == ExecutorState.Resumed;
 
@@ -119,7 +122,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
       'participant role: $participantRoleName';
 }
 
-/// An event related to a running [study]. including its runtime [state].
+/// An event related to a running [study], including its runtime [state].
 class SmartphoneStudyStatusEvent extends StudyStatusEvent<SmartphoneStudy> {
   final ExecutorState state;
   const SmartphoneStudyStatusEvent(super.study, super.event, this.state);

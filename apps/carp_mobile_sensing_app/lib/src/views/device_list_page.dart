@@ -1,6 +1,9 @@
 part of '../../main.dart';
 
 class DevicesListPage extends StatefulWidget {
+  final DeviceListViewModel _deviceListViewModel;
+  DevicesListPage(this._deviceListViewModel);
+
   @override
   DevicesListPageState createState() => DevicesListPageState();
 }
@@ -8,16 +11,15 @@ class DevicesListPage extends StatefulWidget {
 class DevicesListPageState extends State<DevicesListPage> {
   static final GlobalKey<ScaffoldState> scaffoldKey =
       GlobalKey<ScaffoldState>();
+  DeviceListViewModel get model => widget._deviceListViewModel;
 
   @override
   Widget build(BuildContext context) {
-    List<DeviceViewModel> devices = bloc.deployedDevices.toList();
+    List<DeviceViewModel> devices = model.deployedDevices.toList();
 
     return Scaffold(
       key: scaffoldKey,
-      appBar: AppBar(
-        title: Text('Devices'),
-      ),
+      appBar: AppBar(title: Text('Devices')),
       body: Scrollbar(
         child: ListView.builder(
           itemCount: devices.length,
@@ -52,34 +54,37 @@ class DevicesListPageState extends State<DevicesListPage> {
               //     child: const Text('How to use this device?'),
               //     onPressed: () => print('Use the $device')),
               FutureBuilder<bool>(
-                  future: device.deviceManager.hasPermissions(),
-                  builder: (
-                    BuildContext context,
-                    AsyncSnapshot<bool> snapshot,
-                  ) {
-                    Widget w = Text("");
+                future: device.deviceManager.hasPermissions(),
+                builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                  Widget w = Text("");
 
-                    if (snapshot.hasData && !snapshot.data!) {
-                      w = Column(children: [
+                  if (snapshot.hasData && !snapshot.data!) {
+                    w = Column(
+                      children: [
                         const Divider(),
                         TextButton(
                           child: const Text(
-                              'Request permissions to access this device'),
+                            'Request permissions to access this device',
+                          ),
                           onPressed: () =>
                               device.deviceManager.requestPermissions(),
                         ),
-                      ]);
-                    }
-                    return w;
-                  }),
+                      ],
+                    );
+                  }
+                  return w;
+                },
+              ),
               (device.status != DeviceStatus.connected)
-                  ? Column(children: [
-                      const Divider(),
-                      TextButton(
-                        child: const Text('Connect to this device'),
-                        onPressed: () => bloc.connectToDevice(device),
-                      ),
-                    ])
+                  ? Column(
+                      children: [
+                        const Divider(),
+                        TextButton(
+                          child: const Text('Connect to this device'),
+                          onPressed: () => device.connectToDevice(),
+                        ),
+                      ],
+                    )
                   : Text(""),
             ],
           ),

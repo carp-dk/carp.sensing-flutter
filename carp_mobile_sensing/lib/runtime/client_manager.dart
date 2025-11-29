@@ -358,6 +358,7 @@ class SmartPhoneClientManager
     for (var controller in _controllers.values) {
       controller.start();
     }
+    notifyListeners();
   }
 
   /// Resume data sampling in all studies in this client manager.
@@ -365,6 +366,7 @@ class SmartPhoneClientManager
     for (var controller in _controllers.values) {
       controller.resume();
     }
+    notifyListeners();
   }
 
   /// Pause data sampling in all studies in this client manager.
@@ -372,6 +374,7 @@ class SmartPhoneClientManager
     for (var controller in _controllers.values) {
       controller.pause();
     }
+    notifyListeners();
   }
 
   /// Called when this client is disposed. Will dispose all studies running

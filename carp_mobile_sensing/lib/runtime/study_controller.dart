@@ -400,7 +400,7 @@ class SmartphoneStudyController {
     }
 
     info(
-      '$runtimeType - Starting data sampling for study deployment: ${deployment?.studyDeploymentId}',
+      '$runtimeType - Starting data sampling for study deployment: ${study.studyDeploymentId}',
     );
 
     // If this study has not yet been deployed, do this first.

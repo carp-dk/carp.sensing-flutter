@@ -36,16 +36,6 @@ class LoadingPage extends StatelessWidget {
       await CarpBackend().initialize();
       // await CarpBackend().authenticate();
       await CarpBackend().authenticateWithUsernamePassword(username, password);
-
-      // Check if there is a local study.
-      // If not, get a study deployment based on an invitation.
-      if (bloc.study == null) {
-        await CarpBackend().getStudyInvitation(context);
-      }
-
-      // Make sure that CarpService knows the study deployment.
-      // This is useful when an app (like this one only handles one study at a time
-      CarpService().study = bloc.study;
     }
 
     await bloc.sensing.initialize();
@@ -61,10 +51,12 @@ class LoadingPage extends StatelessWidget {
           ? Scaffold(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: Center(
-                  child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [CircularProgressIndicator()],
-              )))
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [CircularProgressIndicator()],
+                ),
+              ),
+            )
           : CarpMobileSensingApp(),
     );
   }
@@ -72,6 +64,8 @@ class LoadingPage extends StatelessWidget {
 
 /// The main view of the app, shown once loading is done.
 class CarpMobileSensingApp extends StatefulWidget {
+  final AppViewModel appViewModel = AppViewModel();
+
   CarpMobileSensingApp({super.key});
   @override
   CarpMobileSensingAppState createState() => CarpMobileSensingAppState();
@@ -79,16 +73,25 @@ class CarpMobileSensingApp extends StatefulWidget {
 
 class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
   int _selectedIndex = 0;
+  List<Widget> _pages = [];
 
-  final _pages = [
-    StudyDeploymentPage(),
-    ProbesListPage(),
-    DevicesListPage(),
-  ];
+  AppViewModel get model => widget.appViewModel;
+
+  CarpMobileSensingAppState() : super();
+
+  @override
+  void initState() {
+    _pages = [
+      StudyPage(model.studyViewModel),
+      ProbesListPage(ProbeListViewModel()),
+      DevicesListPage(DeviceListViewModel()),
+    ];
+    super.initState();
+  }
 
   @override
   void dispose() {
-    bloc.dispose();
+    model.dispose();
     super.dispose();
   }
 
@@ -106,12 +109,14 @@ class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
         onTap: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _restart,
-        child: StreamBuilder<ExecutorState>(
-          stream: bloc.sensing.controller?.executor.stateEvents,
-          initialData: ExecutorState.created,
-          builder: (_, __) =>
-              bloc.isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
+        onPressed: _onButtonPressed,
+        child: ListenableBuilder(
+          listenable: bloc.sensing.client,
+          builder: (_, _) => bloc.sensing.client.studies.isEmpty
+              ? Icon(Icons.add)
+              : model.isRunning
+              ? Icon(Icons.pause)
+              : Icon(Icons.play_arrow),
         ),
       ),
     );
@@ -119,6 +124,10 @@ class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
-  void _restart() =>
-      setState(() => (bloc.isRunning) ? bloc.stop() : bloc.start());
+  /// Handle press on the floating action button.
+  /// If there is no study, add a study first.
+  /// Otherwise resume/pause sensing.
+  void _onButtonPressed() => bloc.sensing.client.studies.isEmpty
+      ? bloc.addStudy(context)
+      : bloc.runStudy();
 }

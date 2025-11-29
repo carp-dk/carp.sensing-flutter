@@ -25,23 +25,24 @@ import 'package:carp_movesense_package/carp_movesense_package.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_backend/carp_backend.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+// import 'package:package_info_plus/package_info_plus.dart';
 
 import 'config.dart';
 
 part 'src/app.dart';
-part 'src/blocs/sensing.dart';
-part 'src/view_models/probe_view_model.dart';
-part 'src/view_models/device_view_model.dart';
+part 'src/model/sensing.dart';
+part 'src/view_models/app_view_model.dart';
+part 'src/view_models/probe_view_models.dart';
+part 'src/view_models/device_view_models.dart';
 part 'src/view_models/probe_descriptions.dart';
 part 'src/view_models/device_descriptions.dart';
-part 'src/view_models/study_deployment_view_model.dart';
-part 'src/blocs/sensing_bloc.dart';
-part 'src/blocs/carp_backend.dart';
-part 'src/blocs/local_study_protocol_manager.dart';
+part 'src/view_models/study_view_model.dart';
+part 'src/model/bloc.dart';
+part 'src/model/carp_backend.dart';
+part 'src/model/local_study_protocol_manager.dart';
 part 'src/views/probe_list_page.dart';
 part 'src/views/device_list_page.dart';
-part 'src/views/study_deployment_page.dart';
+part 'src/views/study_page.dart';
 part 'src/views/cachet_colors.dart';
 
 void main() async {
@@ -54,11 +55,7 @@ void main() async {
   CarpMobileSensing.ensureInitialized();
 
   // Initialize the bloc, setting the deployment mode.
-  await bloc.initialize(
-    deploymentMode: DeploymentMode.dev,
-    useCachedStudyDeployment: false,
-    resumeSensingOnStartup: false,
-  );
+  await bloc.initialize(deploymentMode: DeploymentMode.local);
 
   runApp(App());
 }

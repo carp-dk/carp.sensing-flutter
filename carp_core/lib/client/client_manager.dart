@@ -117,6 +117,9 @@ abstract class ClientManager<
   }
 
   /// Get the status for the studies which run on this client device.
+  /// Note that is the current status, and reflects the latest known status.
+  /// If you want an updated status from the deployment service, use
+  /// [getStudyDeploymentStatus] for each study.
   List<StudyStatus> getStudyStatusList() =>
       studies.map((study) => study.status).toList();
 
@@ -145,6 +148,20 @@ abstract class ClientManager<
       await proxy?.getStudyDeploymentStatus(study);
     }
     return study;
+  }
+
+  /// Get the deployment status for the [study] from the deployment service.
+  /// This updates the study's deployment status and sets the study's status
+  /// accordingly.
+  /// Returns null if the deployment status could not be retrieved from the
+  /// deployment service or if the study has not been added to this client manager.
+  @mustCallSuper
+  Future<StudyDeploymentStatus?> getStudyDeploymentStatus(TStudy study) async {
+    _check();
+    if (repository.hasStudy(study)) {
+      return await proxy?.getStudyDeploymentStatus(study);
+    }
+    return null;
   }
 
   /// Verifies whether the device is ready for deployment of the study runtime

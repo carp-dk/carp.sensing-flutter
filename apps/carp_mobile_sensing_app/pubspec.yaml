@@ -1,13 +1,13 @@
 name: carp_mobile_sensing_app
 description: The CARP Mobile Sensing App
-version: 1.11.0
+version: 2.0.0
 homepage: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app
 publish_to: 'none' 
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
-
+  
 platforms:
   android:
   ios:

@@ -8,30 +8,17 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
   @override
   Future<SmartphoneStudyProtocol> getStudyProtocol(String protocolId) async =>
-      getSingleUserStudyProtocol(
-          'CAMS App - Sensing Coverage Study - Single User');
+      getSingleUserStudyProtocol('CAMS App - Demo Study - Single User');
 
   StudyDescription get studyDescription => StudyDescription(
-      title: 'CAMS App - Sensing Coverage Study',
-      description:
-          'The default study testing coverage of most measures. Used in the coverage tests.',
-      purpose: 'To test sensing coverage',
-      responsible: StudyResponsible(
-        id: 'abc',
-        title: 'professor',
-        address: 'Ørsteds Plads',
-        affiliation: 'Technical University of Denmark',
-        email: 'abc@dtu.dk',
-        name: 'Alex B. Christensen',
-      ));
+    title: 'CAMS App - Demo Study',
+    description:
+        'A study demonstrating most measures and probes. Used for the demo app.',
+  );
 
   DataEndPoint get dataEndPoint => (bloc.deploymentMode == DeploymentMode.local)
       ? SQLiteDataEndPoint()
-      : CarpDataEndPoint(
-          uploadMethod: CarpUploadMethod.stream,
-        )
-    // set the format of the data to upload - e.g. Open mHealth
-    ..dataFormat = bloc.dataFormat;
+      : CarpDataEndPoint(uploadMethod: CarpUploadMethod.stream);
 
   /// Create a study protocol for a single participant with examples from
   /// the different sampling packages.
@@ -43,7 +30,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
       ownerId: '979b408d-784e-4b1b-bb1e-ff9204e072f3',
       name: name,
       studyDescription: studyDescription,
-      dataEndPoint: dataEndPoint..dataFormat = bloc.dataFormat,
+      dataEndPoint: dataEndPoint,
     );
 
     // always add a participant role to the protocol
@@ -56,15 +43,18 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // build-in measure from sensor and device sampling packages
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: SensorSamplingPackage.STEP_COUNT),
           Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
           Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
           Measure(type: DeviceSamplingPackage.FREE_MEMORY),
           Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-        ]),
-        phone);
+        ],
+      ),
+      phone,
+    );
 
     // // a random trigger - 3-8 times during time period of 8-20
     // protocol.addTaskControl(
@@ -85,10 +75,12 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // activity measure using the phone
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(
-            measures: [Measure(type: ContextSamplingPackage.ACTIVITY)]),
-        phone);
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [Measure(type: ContextSamplingPackage.ACTIVITY)],
+      ),
+      phone,
+    );
 
     // Define the online location service and add it as a 'device'
     // final locationService = LocationService();
@@ -101,13 +93,17 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // Add a background task that collects location on a regular basis
     protocol.addTaskControl(
-        PeriodicTrigger(period: Duration(seconds: 20)),
-        BackgroundTask(measures: [
+      PeriodicTrigger(period: Duration(seconds: 20)),
+      BackgroundTask(
+        measures: [
           Measure(type: ContextSamplingPackage.LOCATION)
-            ..overrideSamplingConfiguration =
-                LocationSamplingConfiguration(once: true),
-        ]),
-        locationService);
+            ..overrideSamplingConfiguration = LocationSamplingConfiguration(
+              once: true,
+            ),
+        ],
+      ),
+      locationService,
+    );
 
     // // Add a background task that continuously collects location and mobility
     // protocol.addTaskControl(
@@ -147,15 +143,18 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // collect noise, but change the default sampling configuration
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: MediaSamplingPackage.NOISE)
             ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
               interval: const Duration(seconds: 23),
               duration: const Duration(seconds: 5),
             ),
-        ]),
-        phone);
+        ],
+      ),
+      phone,
+    );
 
     // // sample an audio recording
     // var audioTask = BackgroundTask(measures: [
@@ -182,8 +181,9 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //
 
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: ConnectivitySamplingPackage.CONNECTIVITY),
           Measure(type: ConnectivitySamplingPackage.WIFI),
           Measure(type: ConnectivitySamplingPackage.BLUETOOTH)
@@ -191,8 +191,10 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
               interval: const Duration(seconds: 33),
               duration: const Duration(seconds: 5),
             ),
-        ]),
-        phone);
+        ],
+      ),
+      phone,
+    );
 
     //
     // --------- COMMUNICATION PACKAGE EXAMPLES -------------
@@ -200,13 +202,12 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // Add an automatic task that collects SMS messages in/out
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(
-          measures: [
-            Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE),
-          ],
-        ),
-        phone);
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)],
+      ),
+      phone,
+    );
 
     // Add an automatic task that collects the logs for:
     //  * SMS log (in/out)
@@ -215,15 +216,16 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //
     // every 30 minutes.
     protocol.addTaskControl(
-        PeriodicTrigger(period: Duration(minutes: 30)),
-        BackgroundTask(
-          measures: [
-            Measure(type: CommunicationSamplingPackage.PHONE_LOG),
-            Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
-            Measure(type: CommunicationSamplingPackage.CALENDAR),
-          ],
-        ),
-        phone);
+      PeriodicTrigger(period: Duration(minutes: 30)),
+      BackgroundTask(
+        measures: [
+          Measure(type: CommunicationSamplingPackage.PHONE_LOG),
+          Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
+          Measure(type: CommunicationSamplingPackage.CALENDAR),
+        ],
+      ),
+      phone,
+    );
 
     //
     // --------- APP PACKAGE EXAMPLES -------------
@@ -232,13 +234,16 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     // Add a task that collects the list of installed apps
     // and a log of app usage activity
     protocol.addTaskControl(
-        // PeriodicTrigger(period: const Duration(minutes: 1)),
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      // PeriodicTrigger(period: const Duration(minutes: 1)),
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: AppsSamplingPackage.APPS),
           Measure(type: AppsSamplingPackage.APP_USAGE),
-        ]),
-        phone);
+        ],
+      ),
+      phone,
+    );
 
     //
     // --------- eSENSE PACKAGE EXAMPLES -------------
@@ -252,12 +257,15 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     protocol.addConnectedDevice(eSense, phone);
 
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: ESenseSamplingPackage.ESENSE_BUTTON),
-          Measure(type: ESenseSamplingPackage.ESENSE_SENSOR)
-        ]),
-        eSense);
+          Measure(type: ESenseSamplingPackage.ESENSE_SENSOR),
+        ],
+      ),
+      eSense,
+    );
 
     //
     // --------- POLAR PACKAGE EXAMPLES -------------
@@ -343,9 +351,10 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     protocol.addConnectedDevice(healthService, phone);
 
     protocol.addTaskControl(
-        // PeriodicTrigger(period: Duration(minutes: 60)),
-        PeriodicTrigger(period: Duration(minutes: 1)),
-        BackgroundTask(measures: [
+      // PeriodicTrigger(period: Duration(minutes: 60)),
+      PeriodicTrigger(period: Duration(minutes: 1)),
+      BackgroundTask(
+        measures: [
           HealthSamplingPackage.getHealthMeasure([
             HealthDataType.STEPS,
             HealthDataType.BASAL_ENERGY_BURNED,
@@ -354,9 +363,11 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
             HealthDataType.SLEEP_SESSION,
             // EDA is not available on Android - should be removed on runtime
             HealthDataType.ELECTRODERMAL_ACTIVITY,
-          ])
-        ]),
-        healthService);
+          ]),
+        ],
+      ),
+      healthService,
+    );
 
     return protocol;
   }
@@ -376,7 +387,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
       ownerId: 'abc@dtu.dk',
       name: name,
       studyDescription: studyDescription,
-      dataEndPoint: dataEndPoint..dataFormat = bloc.dataFormat,
+      dataEndPoint: dataEndPoint,
     );
 
     final father = 'Father';
@@ -397,54 +408,72 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     protocol.addPrimaryDevice(childPhone);
 
     protocol.changeDeviceAssignment(
-        fatherPhone, AssignedTo(roleNames: {father}));
+      fatherPhone,
+      AssignedTo(roleNames: {father}),
+    );
     protocol.changeDeviceAssignment(
-        motherPhone, AssignedTo(roleNames: {mother}));
+      motherPhone,
+      AssignedTo(roleNames: {mother}),
+    );
     protocol.changeDeviceAssignment(childPhone, AssignedTo(roleNames: {child}));
 
     // add expected participant data for all participants
-    protocol.addExpectedParticipantData(ExpectedParticipantData(
-        attribute: ParticipantAttribute(inputDataType: SexInput.type)));
-    protocol.addExpectedParticipantData(ExpectedParticipantData(
+    protocol.addExpectedParticipantData(
+      ExpectedParticipantData(
+        attribute: ParticipantAttribute(inputDataType: SexInput.type),
+      ),
+    );
+    protocol.addExpectedParticipantData(
+      ExpectedParticipantData(
         attribute: ParticipantAttribute(
-      inputDataType: InformedConsentInput.type,
-    )));
+          inputDataType: InformedConsentInput.type,
+        ),
+      ),
+    );
 
     // add expected participant data for the mother
-    protocol.addExpectedParticipantData(ExpectedParticipantData(
+    protocol.addExpectedParticipantData(
+      ExpectedParticipantData(
         attribute: ParticipantAttribute(inputDataType: FullNameInput.type),
-        assignedTo: AssignedTo(roleNames: {mother})));
+        assignedTo: AssignedTo(roleNames: {mother}),
+      ),
+    );
 
     // build-in measure from sensor and device sampling packages
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: SensorSamplingPackage.STEP_COUNT),
           Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
           Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
           Measure(type: DeviceSamplingPackage.FREE_MEMORY),
           Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-        ]),
-        fatherPhone);
+        ],
+      ),
+      fatherPhone,
+    );
 
     // a random trigger - 3-8 times during time period of 8-20
     protocol.addTaskControl(
-        RandomRecurrentTrigger(
-          startTime: TimeOfDay(hour: 8),
-          endTime: TimeOfDay(hour: 20),
-          minNumberOfTriggers: 3,
-          maxNumberOfTriggers: 8,
-        ),
-        BackgroundTask()
-          ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
-        fatherPhone);
+      RandomRecurrentTrigger(
+        startTime: TimeOfDay(hour: 8),
+        endTime: TimeOfDay(hour: 20),
+        minNumberOfTriggers: 3,
+        maxNumberOfTriggers: 8,
+      ),
+      BackgroundTask()
+        ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+      fatherPhone,
+    );
 
     // activity measure using the phone
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
-        motherPhone);
+      ImmediateTrigger(),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
+      motherPhone,
+    );
 
     // define the location service and add it as a 'device' to all three participants
     LocationService locationService = LocationService();
@@ -454,12 +483,15 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // add a background task that continuously collects location and mobility
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: ContextSamplingPackage.LOCATION),
           Measure(type: ContextSamplingPackage.MOBILITY),
-        ]),
-        locationService);
+        ],
+      ),
+      locationService,
+    );
 
     // define the online weather service and add it to the father's phone
     // WeatherService weatherService = WeatherService(apiKey: openWeatherApiKey);
@@ -487,21 +519,23 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // collect noise from the child's phone
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
-          Measure(type: MediaSamplingPackage.NOISE),
-        ]),
-        childPhone);
+      ImmediateTrigger(),
+      BackgroundTask(measures: [Measure(type: MediaSamplingPackage.NOISE)]),
+      childPhone,
+    );
 
     // collect connectivity info from the child's phone
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: ConnectivitySamplingPackage.CONNECTIVITY),
           Measure(type: ConnectivitySamplingPackage.WIFI),
           Measure(type: ConnectivitySamplingPackage.BLUETOOTH),
-        ]),
-        childPhone);
+        ],
+      ),
+      childPhone,
+    );
 
     // // Add an automatic task that collects SMS messages in/out
     // protocol.addTaskControl(
@@ -547,18 +581,16 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //     phone);
 
     // define the eSense device and add it to the mother's phone
-    var eSense = ESenseDevice(
-      deviceName: 'eSense-0332',
-      samplingRate: 10,
-    );
+    var eSense = ESenseDevice(deviceName: 'eSense-0332', samplingRate: 10);
     protocol.addConnectedDevice(eSense, motherPhone);
 
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_BUTTON))
-          ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_SENSOR)),
-        eSense);
+      ImmediateTrigger(),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_BUTTON))
+        ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_SENSOR)),
+      eSense,
+    );
 
     // define the Polar device and add it to the father's phone
 
@@ -576,12 +608,13 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     protocol.addConnectedDevice(polar, fatherPhone);
 
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()..addMeasure(Measure(type: PolarSamplingPackage.HR)),
-        // ..addMeasure(Measure(type: PolarSamplingPackage.ECG))
-        // ..addMeasure(Measure(type: PolarSamplingPackage.PPG))
-        // ..addMeasure(Measure(type: PolarSamplingPackage.PPI)),
-        polar);
+      ImmediateTrigger(),
+      BackgroundTask()..addMeasure(Measure(type: PolarSamplingPackage.HR)),
+      // ..addMeasure(Measure(type: PolarSamplingPackage.ECG))
+      // ..addMeasure(Measure(type: PolarSamplingPackage.PPG))
+      // ..addMeasure(Measure(type: PolarSamplingPackage.PPI)),
+      polar,
+    );
 
     return protocol;
   }

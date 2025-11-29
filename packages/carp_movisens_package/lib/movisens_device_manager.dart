@@ -12,7 +12,7 @@ part of 'carp_movisens_package.dart';
 /// device, including the BTLE MAC [address], the [deviceName], the [sensorLocation]
 /// and the [weight], [height], [age], [sex] of the user using the device.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class MovisensDevice extends DeviceConfiguration<DefaultDeviceRegistration> {
+class MovisensDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
   /// The type of a Movisens device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice';
@@ -65,7 +65,7 @@ class MovisensDevice extends DeviceConfiguration<DefaultDeviceRegistration> {
 
 /// A Movisens [DeviceManager].
 class MovisensDeviceManager
-    extends BTLEDeviceManager<MovisensDevice, DefaultDeviceRegistration> {
+    extends BTLEDeviceManager<MovisensDevice, MACAddressDeviceRegistration> {
   // the last known voltage level of the Movisens device
   int _batteryLevel = -1;
   String? _connectionStatus;
@@ -76,11 +76,6 @@ class MovisensDeviceManager
   /// [initialize] method.
   movisens.MovisensDevice? device;
 
-  // /// Movisens user data as specified in the [MovisensDevice] device descriptor.
-  // /// Only available after this device manger has been initialized via the
-  // /// [initialize] method.
-  // UserData? userData;
-
   @override
   String get id => device?.id ?? MovisensDevice.DEVICE_TYPE;
 
@@ -88,8 +83,11 @@ class MovisensDeviceManager
   String? get displayName => device?.name;
 
   @override
-  DefaultDeviceRegistration get registration =>
-      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
+  MACAddressDeviceRegistration get registration => MACAddressDeviceRegistration(
+    deviceId: id,
+    deviceDisplayName: displayName,
+    macAddress: id,
+  );
 
   String? get connectionStatus => _connectionStatus;
 

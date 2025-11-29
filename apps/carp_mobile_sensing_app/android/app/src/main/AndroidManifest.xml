@@ -208,12 +208,12 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Location service with foreground service type for Android 14+ -->
+        <!-- Location service with foreground service type for Android 14+
         <service
             android:name="com.lyokone.location.FlutterLocationService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location"
-            tools:replace="android:foregroundServiceType" />
+            tools:replace="android:foregroundServiceType" /> -->
     </application>
 </manifest>

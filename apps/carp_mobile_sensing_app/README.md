@@ -9,8 +9,8 @@ The UI of the app is shown below, showing (from left to right) the Study Deploym
 ![Probe List page](documentation/probe_list_3.jpg)__
 ![Device List page](documentation/device_list_3.jpg)
 
-The architecture of the app is illustrated below. It follows the [BLoC architecture](https://medium.com/flutterpub/architecting-your-flutter-project-bd04e144a8f1),
-which is recommended by the [Flutter Team](https://www.youtube.com/watch?v=PLHln7wHgPE).
+The architecture of the app is illustrated below. It follows the [Model-ViewModel-View](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel),
+which is the recommended [Flutter Architecture](https://docs.flutter.dev/app-architecture).
 
 ![Bloc Architecture](documentation/architecture_4.png)
 

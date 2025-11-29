@@ -218,7 +218,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
 
     addTaskControl(
       NoOpTrigger(),
-      MonitoringTask(name: "Sensing Monitoring", measures: measures),
+      MonitoringTask(name: "Monitoring ${device.roleName}", measures: measures),
       device,
     );
   }

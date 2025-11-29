@@ -1,7 +1,6 @@
 part of '../../main.dart';
 
 /// Handling communication to the CARP Web Services infrastructure.
-///
 /// Works as a singleton, and can be accessed by `CarpBackend()`.
 class CarpBackend {
   /// The URIs of the CARP Web Service (CAWS) host for each [DeploymentMode].
@@ -22,51 +21,31 @@ class CarpBackend {
   String? get username => CarpAuthService().currentUser.username;
 
   /// The URI of the CAWS server - depending on deployment mode.
-  Uri get uri => Uri(
-        scheme: 'https',
-        host: uris[bloc.deploymentMode],
-      );
-
-  /// The URI of the CAWS authentication service.
-  ///
-  /// Of the form:
-  ///    https://dev.carp.dk/auth/realms/Carp/
-  Uri get authUri => Uri(
-        scheme: 'https',
-        host: uris[bloc.deploymentMode],
-        pathSegments: [
-          'auth',
-          'realms',
-          'Carp',
-        ],
-      );
+  Uri get _uri => Uri(scheme: 'https', host: uris[bloc.deploymentMode]);
 
   /// The CAWS app configuration.
-  late final CarpApp _app = CarpApp(name: "CAWS @ DTU", uri: uri);
+  late final CarpApp _app = CarpApp(name: "CAWS @ DTU", uri: _uri);
 
   CarpApp get app => _app;
 
   /// The authentication configuration
-  CarpAuthProperties get authProperties => CarpAuthProperties(
-        authURL: uri,
-        clientId: 'studies-app',
-        redirectURI: Uri.parse('carp-studies-auth://auth'),
-        // For authentication at CAWS the path is '/auth/realms/Carp'
-        discoveryURL: uri.replace(pathSegments: [
-          'auth',
-          'realms',
-          'Carp',
-        ]),
-      );
+  CarpAuthProperties get _authProperties => CarpAuthProperties(
+    authURL: _uri,
+    clientId: 'studies-app',
+    redirectURI: Uri.parse('carp-studies-auth://auth'),
+    // For authentication at CAWS the path is '/auth/realms/Carp'
+    discoveryURL: _uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
+  );
 
   Future<void> initialize() async {
     debug('$runtimeType - initializing...');
-    await CarpAuthService().configure(authProperties);
+    await CarpAuthService().configure(_authProperties);
     debug('$runtimeType - AuthService configured ...');
 
     // Configure the CAWS services
     CarpService().configure(app);
     CarpParticipationService().configureFrom(CarpService());
+    CarpDeploymentService().configureFrom(CarpService());
 
     // register CARP as a data backend where data can be uploaded
     DataManagerRegistry().register(CarpDataManagerFactory());
@@ -82,25 +61,26 @@ class CarpBackend {
   Future<CarpUser> authenticateWithUsernamePassword(
     String username,
     String password,
-  ) async =>
-      await CarpAuthService().authenticateWithUsernamePassword(
-        username: username,
-        password: password,
-      );
+  ) async => await CarpAuthService().authenticateWithUsernamePassword(
+    username: username,
+    password: password,
+  );
 
-  /// Get the study invitation.
-  Future<void> getStudyInvitation(BuildContext context) async {
-    ActiveParticipationInvitation? invitation =
-        await CarpParticipationService().getStudyInvitation(context);
+  /// Get the study invitation by opening the CAWS study invitation page.
+  Future<SmartphoneStudy?> getStudyInvitation(BuildContext context) async {
+    ActiveParticipationInvitation? invitation = await CarpParticipationService()
+        .getStudyInvitation(context);
     debug('CAWS Study Invitation: $invitation');
 
     if (invitation != null) {
-      bloc.study = SmartphoneStudy.fromInvitation(invitation);
-
-      info('Invitation received - '
-          'study id: ${invitation.studyId}, '
-          'deployment id: ${invitation.studyDeploymentId}, '
-          'role name: ${invitation.deviceRoleName}');
+      info(
+        'Invitation received - '
+        'study id: ${invitation.studyId}, '
+        'deployment id: ${invitation.studyDeploymentId}, '
+        'role name: ${invitation.deviceRoleName}',
+      );
+      return SmartphoneStudy.fromInvitation(invitation);
     }
+    return null;
   }
 }
