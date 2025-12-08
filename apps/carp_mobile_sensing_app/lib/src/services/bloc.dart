@@ -26,10 +26,8 @@ class SensingBLoC {
   /// What kind of deployment are we running? Default is local.
   DeploymentMode deploymentMode = DeploymentMode.local;
 
-  /// The study for the currently running study deployment.
-  /// Returns `null` if no study is deployed (yet).
-  SmartphoneStudy? get study =>
-      sensing.client.studies.isEmpty ? null : sensing.client.studies.first;
+  /// The study running on this phone.
+  SmartphoneStudy? get study => sensing.study;
 
   /// Initialize the BLoC.
   Future<void> initialize({
@@ -54,7 +52,7 @@ class SensingBLoC {
             .getStudyProtocol('');
 
         // Deploy this protocol using the on-phone deployment service.
-        var status = await Sensing().deploymentService.createStudyDeployment(
+        var status = await sensing.deploymentService.createStudyDeployment(
           protocol,
         );
 
@@ -67,6 +65,7 @@ class SensingBLoC {
       case DeploymentMode.production:
       case DeploymentMode.test:
       case DeploymentMode.dev:
+        // Get the study invitation from CAWS.
         study = await CarpBackend().getStudyInvitation(context);
         break;
     }
@@ -76,24 +75,14 @@ class SensingBLoC {
 
   /// Run (start, resume, pause) [study] based on its current state.
   void runStudy() {
-    if (study == null) {
-      print('>> NO study deployed - cannot start sensing');
-      return;
-    }
+    if (study == null) return;
 
-    // If the study has not been started (and deployed) yet, do this first
-    if (!study!.isDeployed) {
-      print('>> STARTING study ${study!.studyDeploymentId}');
-      sensing.client.start();
-      // sensing.controller?.start();
-    } else {
-      if (study!.isSampling) {
-        print('>>  PAUSING study ${study!.studyDeploymentId}');
-        sensing.client.pause();
-      } else {
-        print('>> RESUMING study ${study!.studyDeploymentId}');
-        sensing.client.resume();
-      }
-    }
+    // If the study has not been started (and deployed) yet, do this before
+    // resuming or pausing.
+    !study!.isDeployed
+        ? sensing.client.start()
+        : study!.isSampling
+        ? sensing.client.pause()
+        : sensing.client.resume();
   }
 }

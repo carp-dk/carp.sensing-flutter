@@ -1,84 +1,73 @@
 part of '../../main.dart';
 
 class StudyPage extends StatefulWidget {
-  final StudyViewModel _studyViewModel;
-
-  StudyPage(this._studyViewModel);
+  final StudyViewModel studyViewModel;
+  StudyPage(this.studyViewModel);
 
   @override
   StudyPageState createState() => StudyPageState();
 }
 
 class StudyPageState extends State<StudyPage> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>();
-  final double _appBarHeight = 256.0;
-  StudyViewModel get model => widget._studyViewModel;
-
-  StudyPageState();
+  StudyViewModel get model => widget.studyViewModel;
 
   @override
-  Widget build(BuildContext context) =>
-      _buildStudyVisualization(context, model);
-  Widget _buildStudyVisualization(
-    BuildContext context,
-    StudyViewModel viewModel,
-  ) {
-    return Scaffold(
-      key: _scaffoldKey,
-      body: ListenableBuilder(
-        listenable: viewModel,
-        builder: (BuildContext context, Widget? child) => CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar(
-              expandedHeight: _appBarHeight,
-              pinned: true,
-              floating: false,
-              snap: false,
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.refresh, size: 30),
-                  tooltip: 'Refresh',
-                  onPressed: _refreshDeploymentStatus,
-                ),
-              ],
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(viewModel.title),
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[viewModel.image],
-                ),
+  Widget build(BuildContext context) => Scaffold(
+    body: ListenableBuilder(
+      listenable: model,
+      builder: (BuildContext context, Widget? child) => CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            expandedHeight: 256.0,
+            pinned: true,
+            floating: false,
+            snap: false,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.refresh, size: 30),
+                tooltip: 'Refresh',
+                onPressed: _refreshDeploymentStatus,
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(model.title),
+              background: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[model.image],
               ),
             ),
-            SliverList(
-              delegate: SliverChildListDelegate(
-                _studyPanel(context, viewModel),
-              ),
-            ),
-          ],
-        ),
+          ),
+          SliverList(delegate: SliverChildListDelegate(_studyPanel())),
+        ],
       ),
-    );
+    ),
+  );
+
+  /// Show an info [message] in a snackbar.
+  void _showInfo(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message, softWrap: true)));
   }
 
-  List<Widget> _studyPanel(BuildContext context, StudyViewModel viewModel) {
+  List<Widget> _studyPanel() {
     List<Widget> children = [];
 
     children.add(
       AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
-        child: _studyControllerPanel(context, viewModel),
+        child: _studyControllerPanel(),
       ),
     );
 
-    for (var task in viewModel.deployment?.tasks ?? <TaskConfiguration>[]) {
+    for (var task in model.deployment?.tasks ?? <TaskConfiguration>[]) {
       children.add(_TaskPanel(task: task));
     }
 
     return children;
   }
 
-  Widget _studyControllerPanel(BuildContext context, StudyViewModel viewModel) {
+  Widget _studyControllerPanel() {
     final ThemeData themeData = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -86,7 +75,7 @@ class StudyPageState extends State<StudyPage> {
         border: Border(bottom: BorderSide(color: themeData.dividerColor)),
       ),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.titleMedium!,
+        style: themeData.textTheme.titleMedium!,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -102,56 +91,55 @@ class StudyPageState extends State<StudyPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _StudyControllerLine(viewModel.title, heading: 'Title'),
-                    _StudyControllerLine(viewModel.description),
+                    _StudyControllerLine(model.title, heading: 'Title'),
+                    _StudyControllerLine(model.description),
                     _StudyControllerLine(
-                      viewModel.studyDeploymentId,
+                      model.studyDeploymentId,
                       heading: 'Deployment ID',
                     ),
                     _StudyControllerLine(
-                      viewModel.participantRoleName,
+                      model.participantRoleName,
                       heading: 'Participant Role',
                     ),
                     _StudyControllerLine(
-                      viewModel.deviceRoleName,
+                      model.deviceRoleName,
                       heading: 'Device Role',
                     ),
                     _StudyControllerLine(
-                      viewModel.dataEndpointType,
+                      model.dataEndpointType,
                       heading: 'Data Endpoint',
                     ),
                     StreamBuilder<StudyStatus>(
-                      stream: viewModel.studyStatusEvents,
+                      stream: model.studyStatusEvents,
                       initialData: StudyStatus.DeploymentNotStarted,
                       builder: (_, __) => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _StudyControllerLine(
-                            viewModel.studyDeploymentStatus?.name,
+                            model.studyDeploymentStatus?.name,
                             heading: 'Deployment Status',
                           ),
                           _StudyControllerLine(
-                            viewModel.studyStatus?.name,
+                            model.studyStatus?.name,
                             heading: 'Study Status',
                           ),
                         ],
                       ),
                     ),
                     StreamBuilder<ExecutorState>(
-                      stream: viewModel.executorStateEvents,
+                      stream: model.executorStateEvents,
                       initialData: ExecutorState.Created,
                       builder: (_, __) => _StudyControllerLine(
-                        viewModel.executorState.name,
+                        model.executorState.name,
                         heading: 'Executor State',
                       ),
                     ),
                     StreamBuilder<Measurement>(
-                      stream: viewModel.measurements,
-                      builder: (context, AsyncSnapshot<Measurement> _) =>
-                          _StudyControllerLine(
-                            '${viewModel.samplingSize}',
-                            heading: 'Sample Size',
-                          ),
+                      stream: model.measurements,
+                      builder: (_, _) => _StudyControllerLine(
+                        '${model.samplingSize}',
+                        heading: 'Sample Size',
+                      ),
                     ),
                   ],
                 ),
@@ -165,12 +153,7 @@ class StudyPageState extends State<StudyPage> {
 
   /// Refresh the deployment status from the deployment service.
   void _refreshDeploymentStatus() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Refreshing study deployment status...', softWrap: true),
-      ),
-    );
-
+    _showInfo('Refreshing study deployment status...');
     model.refreshStudyDeploymentStatus();
   }
 }
@@ -220,7 +203,7 @@ class _TaskPanel extends StatelessWidget {
         border: Border(bottom: BorderSide(color: themeData.dividerColor)),
       ),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.titleMedium!,
+        style: themeData.textTheme.titleMedium!,
         child: SafeArea(
           top: false,
           bottom: false,

@@ -9,8 +9,6 @@ class DevicesListPage extends StatefulWidget {
 }
 
 class DevicesListPageState extends State<DevicesListPage> {
-  static final GlobalKey<ScaffoldState> scaffoldKey =
-      GlobalKey<ScaffoldState>();
   DeviceListViewModel get model => widget._deviceListViewModel;
 
   @override
@@ -18,7 +16,6 @@ class DevicesListPageState extends State<DevicesListPage> {
     List<DeviceViewModel> devices = model.deployedDevices.toList();
 
     return Scaffold(
-      key: scaffoldKey,
       appBar: AppBar(title: Text('Devices')),
       body: Scrollbar(
         child: ListView.builder(

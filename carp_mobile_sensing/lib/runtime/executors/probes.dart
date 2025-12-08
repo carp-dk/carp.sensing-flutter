@@ -92,7 +92,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
         granted = granted && await permission.isGranted;
       }
     } catch (error) {
-      warning(
+      addError(
         '$runtimeType - Error trying to check permissions, error: $error',
       );
       return false;
@@ -123,7 +123,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
         (value, status) => value && status == PermissionStatus.granted,
       );
     } catch (error) {
-      warning(
+      addError(
         '$runtimeType - Error trying to request permissions, error: $error',
       );
       return false;
@@ -160,12 +160,15 @@ abstract class MeasurementProbe extends Probe {
   @override
   Future<bool> onResume() async {
     if (await requestPermissions()) {
-      getMeasurement().then((measurement) {
-        if (measurement != null) addMeasurement(measurement);
-        // automatically stop this probe after it is done collecting the measurement
-        Future.delayed(const Duration(seconds: 5), () => pause());
-      }, onError: (Object error) => addError(error));
-
+      getMeasurement().then(
+        (measurement) {
+          if (measurement != null) addMeasurement(measurement);
+          // automatically stop this probe after it is done collecting the measurement
+          Future.delayed(const Duration(seconds: 5), () => pause());
+        },
+        onError: (Object error, StackTrace? stackTrace) =>
+            addError(error, stackTrace),
+      );
       return true;
     } else {
       return false;

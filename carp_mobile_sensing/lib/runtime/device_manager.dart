@@ -203,12 +203,14 @@ abstract class DeviceManager<
         '$runtimeType has not the permissions required to connect. '
         'Call requestPermissions() before calling connect.',
       );
+      status = DeviceStatus.error;
       return status;
     }
 
     try {
       status = await onConnect();
     } catch (error) {
+      status = DeviceStatus.error;
       warning(
         '$runtimeType - Error connecting to device of type: $typeName. $error',
       );

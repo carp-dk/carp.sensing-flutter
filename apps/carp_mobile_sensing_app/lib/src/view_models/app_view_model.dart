@@ -15,14 +15,6 @@ class AppViewModel with ChangeNotifier {
   StudyViewModel get studyViewModel =>
       _studyViewModel ??= StudyViewModel(bloc.study);
 
-  /// Get a list of view models for the available devices.
-  Iterable<DeviceViewModel> get availableDevices =>
-      bloc.sensing.availableDevices.map((device) => DeviceViewModel(device));
-
-  /// Get a list of view models for connected devices.
-  Iterable<DeviceViewModel> get connectedDevices =>
-      bloc.sensing.connectedDevices.map((device) => DeviceViewModel(device));
-
   /// Is sensing running, i.e. has the study executor been started?
   bool get isRunning =>
       bloc.sensing.controller?.executor.state == ExecutorState.Resumed;

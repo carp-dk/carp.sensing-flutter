@@ -1,7 +1,7 @@
 part of '../../main.dart';
 
 /// A view model for [ProbesListPage]
-class ProbeListViewModel {
+class ProbeListViewModel with ChangeNotifier {
   /// Get a list of view models for the running probes.
   Iterable<ProbeViewModel> get runningProbes => bloc.sensing.runningProbes
       .toSet() // only unique probes
@@ -25,7 +25,7 @@ class ProbeViewModel {
           .displayName ??
       measure.runtimeType.toString();
 
-  ///A printer-friendly description of this probe.
+  /// A printer-friendly description of this probe.
   String? get description => ProbeDescription.descriptors[type]?.description;
 
   /// The icon for this type of probe.

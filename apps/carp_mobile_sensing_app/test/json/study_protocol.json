@@ -1,19 +1,10 @@
 {
     "applicationData": {
+        "protocolApiLevel": "2.0.0",
         "studyDescription": {
             "__type": "StudyDescription",
-            "title": "CAMS App - Sensing Coverage Study",
-            "description": "The default study testing coverage of most measures. Used in the coverage tests.",
-            "purpose": "To test sensing coverage",
-            "responsible": {
-                "__type": "StudyResponsible",
-                "id": "abc",
-                "name": "Alex B. Christensen",
-                "title": "professor",
-                "email": "abc@dtu.dk",
-                "address": "Ørsteds Plads",
-                "affiliation": "Technical University of Denmark"
-            }
+            "title": "CAMS App - Demo Study",
+            "description": "A study demonstrating most measures and probes. Used for the demo app."
         },
         "dataEndPoint": {
             "__type": "CarpDataEndPoint",
@@ -27,12 +18,12 @@
             "compress": true
         }
     },
-    "id": "d07154c1-22c1-441d-867c-9187c0c48a0f",
-    "createdOn": "2025-11-07T14:39:19.367005Z",
+    "id": "1054f493-4e4a-42e7-8c27-02816d8aad7e",
+    "createdOn": "2025-12-08T18:49:49.448229Z",
     "version": 0,
-    "description": "The default study testing coverage of most measures. Used in the coverage tests.",
+    "description": "A study demonstrating most measures and probes. Used for the demo app.",
     "ownerId": "979b408d-784e-4b1b-bb1e-ff9204e072f3",
-    "name": "CAMS App - Sensing Coverage Study",
+    "name": "CAMS App - Demo Study Protocol",
     "participantRoles": [
         {
             "role": "Participant",
@@ -91,8 +82,8 @@
     "assignedDevices": {},
     "tasks": [
         {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #8",
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Primary Phone",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -153,8 +144,8 @@
             ]
         },
         {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #11",
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Location Service",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -176,7 +167,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #12",
+            "name": "Task #11",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -190,7 +181,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #13",
+            "name": "Task #12",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -205,7 +196,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #14",
+            "name": "Task #13",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -228,7 +219,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #15",
+            "name": "Task #14",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -238,7 +229,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #16",
+            "name": "Task #15",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -256,7 +247,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #17",
+            "name": "Task #16",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -269,8 +260,8 @@
             ]
         },
         {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #18",
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring eSense",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -292,7 +283,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #19",
+            "name": "Task #17",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -305,8 +296,8 @@
             ]
         },
         {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #20",
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Health Service",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -328,7 +319,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #21",
+            "name": "Task #18",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -413,7 +404,7 @@
     "taskControls": [
         {
             "triggerId": 0,
-            "taskName": "Task #8",
+            "taskName": "Monitoring Primary Phone",
             "destinationDeviceRoleName": "Primary Phone",
             "control": "Start"
         },
@@ -431,67 +422,67 @@
         },
         {
             "triggerId": 3,
-            "taskName": "Task #11",
+            "taskName": "Monitoring Location Service",
             "destinationDeviceRoleName": "Location Service",
             "control": "Start"
         },
         {
             "triggerId": 4,
-            "taskName": "Task #12",
+            "taskName": "Task #11",
             "destinationDeviceRoleName": "Location Service",
             "control": "Start"
         },
         {
             "triggerId": 5,
-            "taskName": "Task #13",
+            "taskName": "Task #12",
             "destinationDeviceRoleName": "Primary Phone",
             "control": "Start"
         },
         {
             "triggerId": 6,
-            "taskName": "Task #14",
+            "taskName": "Task #13",
             "destinationDeviceRoleName": "Primary Phone",
             "control": "Start"
         },
         {
             "triggerId": 7,
-            "taskName": "Task #15",
+            "taskName": "Task #14",
             "destinationDeviceRoleName": "Primary Phone",
             "control": "Start"
         },
         {
             "triggerId": 8,
-            "taskName": "Task #16",
+            "taskName": "Task #15",
             "destinationDeviceRoleName": "Primary Phone",
             "control": "Start"
         },
         {
             "triggerId": 9,
-            "taskName": "Task #17",
+            "taskName": "Task #16",
             "destinationDeviceRoleName": "Primary Phone",
             "control": "Start"
         },
         {
             "triggerId": 10,
-            "taskName": "Task #18",
+            "taskName": "Monitoring eSense",
             "destinationDeviceRoleName": "eSense",
             "control": "Start"
         },
         {
             "triggerId": 11,
-            "taskName": "Task #19",
+            "taskName": "Task #17",
             "destinationDeviceRoleName": "eSense",
             "control": "Start"
         },
         {
             "triggerId": 12,
-            "taskName": "Task #20",
+            "taskName": "Monitoring Health Service",
             "destinationDeviceRoleName": "Health Service",
             "control": "Start"
         },
         {
             "triggerId": 13,
-            "taskName": "Task #21",
+            "taskName": "Task #18",
             "destinationDeviceRoleName": "Health Service",
             "control": "Start"
         }

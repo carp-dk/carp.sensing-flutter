@@ -73,7 +73,7 @@ class CarpMobileSensingApp extends StatefulWidget {
 
 class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
   int _selectedIndex = 0;
-  List<Widget> _pages = [];
+  final List<Widget> _pages = [];
 
   AppViewModel get model => widget.appViewModel;
 
@@ -81,11 +81,11 @@ class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
 
   @override
   void initState() {
-    _pages = [
+    _pages.addAll([
       StudyPage(model.studyViewModel),
       ProbesListPage(ProbeListViewModel()),
       DevicesListPage(DeviceListViewModel()),
-    ];
+    ]);
     super.initState();
   }
 
@@ -96,31 +96,29 @@ class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Study'),
-          BottomNavigationBarItem(icon: Icon(Icons.adb), label: 'Probes'),
-          BottomNavigationBarItem(icon: Icon(Icons.watch), label: 'Devices'),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+  Widget build(BuildContext context) => Scaffold(
+    body: _pages[_selectedIndex],
+    bottomNavigationBar: BottomNavigationBar(
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Study'),
+        BottomNavigationBarItem(icon: Icon(Icons.adb), label: 'Probes'),
+        BottomNavigationBarItem(icon: Icon(Icons.watch), label: 'Devices'),
+      ],
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: _onButtonPressed,
+      child: ListenableBuilder(
+        listenable: bloc.sensing.client,
+        builder: (_, _) => bloc.sensing.client.studies.isEmpty
+            ? Icon(Icons.add)
+            : model.isRunning
+            ? Icon(Icons.pause)
+            : Icon(Icons.play_arrow),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _onButtonPressed,
-        child: ListenableBuilder(
-          listenable: bloc.sensing.client,
-          builder: (_, _) => bloc.sensing.client.studies.isEmpty
-              ? Icon(Icons.add)
-              : model.isRunning
-              ? Icon(Icons.pause)
-              : Icon(Icons.play_arrow),
-        ),
-      ),
-    );
-  }
+    ),
+  );
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 

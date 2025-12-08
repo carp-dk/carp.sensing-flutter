@@ -1,7 +1,7 @@
 part of '../../main.dart';
 
 /// A view model for [DevicesListPage].
-class DeviceListViewModel {
+class DeviceListViewModel with ChangeNotifier {
   /// The list of all devices in this deployment.
   Iterable<DeviceViewModel> get deployedDevices =>
       bloc.sensing.deployedDevices!.map((device) => DeviceViewModel(device));

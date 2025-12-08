@@ -1,6 +1,7 @@
 part of '../../main.dart';
 
 /// Handling communication to the CARP Web Services infrastructure.
+/// Used when running in CAWS deployment modes.
 /// Works as a singleton, and can be accessed by `CarpBackend()`.
 class CarpBackend {
   /// The URIs of the CARP Web Service (CAWS) host for each [DeploymentMode].
@@ -47,7 +48,7 @@ class CarpBackend {
     CarpParticipationService().configureFrom(CarpService());
     CarpDeploymentService().configureFrom(CarpService());
 
-    // register CARP as a data backend where data can be uploaded
+    // Register CARP as a data backend where data can be uploaded
     DataManagerRegistry().register(CarpDataManagerFactory());
 
     info('$runtimeType initialized');

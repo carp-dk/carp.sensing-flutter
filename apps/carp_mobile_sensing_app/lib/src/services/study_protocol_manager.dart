@@ -2,42 +2,32 @@ part of '../../main.dart';
 
 /// This is a local [StudyProtocolManager] which provides a [SmartphoneStudyProtocol]
 /// when running in local mode.
+///
+/// It create a study protocol for a single participant with example measures
+/// from different sampling packages.
 class LocalStudyProtocolManager implements StudyProtocolManager {
   @override
   Future<void> initialize() async {}
 
   @override
-  Future<SmartphoneStudyProtocol> getStudyProtocol(String protocolId) async =>
-      getSingleUserStudyProtocol('CAMS App - Demo Study - Single User');
-
-  StudyDescription get studyDescription => StudyDescription(
-    title: 'CAMS App - Demo Study',
-    description:
-        'A study demonstrating most measures and probes. Used for the demo app.',
-  );
-
-  DataEndPoint get dataEndPoint => (bloc.deploymentMode == DeploymentMode.local)
-      ? SQLiteDataEndPoint()
-      : CarpDataEndPoint(uploadMethod: CarpUploadMethod.stream);
-
-  /// Create a study protocol for a single participant with examples from
-  /// the different sampling packages.
-  SmartphoneStudyProtocol getSingleUserStudyProtocol(String name) {
+  Future<SmartphoneStudyProtocol> getStudyProtocol(String protocolId) async {
     SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
-      // Note that CAWS require a UUID for ownerId.
-      // You can put anything here (as long as it is a valid UUID), and this will be replaced with
-      // the ID of the user uploading the protocol.
-      ownerId: '979b408d-784e-4b1b-bb1e-ff9204e072f3',
-      name: name,
-      studyDescription: studyDescription,
-      dataEndPoint: dataEndPoint,
+      name: 'CAMS App - Demo Study Protocol',
+      studyDescription: StudyDescription(
+        title: 'CAMS App - Demo Study',
+        description:
+            'A study demonstrating most measures and probes. Used for the demo app.',
+      ),
+      dataEndPoint: (bloc.deploymentMode == DeploymentMode.local)
+          ? SQLiteDataEndPoint()
+          : CarpDataEndPoint(uploadMethod: CarpUploadMethod.stream),
     );
 
-    // always add a participant role to the protocol
+    // always add at least one participant role to the protocol
     final participant = 'Participant';
     protocol.participantRoles?.add(ParticipantRole(participant, false));
 
-    // define the primary device(s)
+    // define the primary device
     Smartphone phone = Smartphone();
     protocol.addPrimaryDevice(phone);
 
@@ -367,253 +357,6 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
         ],
       ),
       healthService,
-    );
-
-    return protocol;
-  }
-
-  /// Create a study protocol for a family with several participants:
-  ///
-  ///   * father
-  ///   * mother
-  ///   * child
-  ///
-  /// Each participant is configured to sample different measures.
-  ///
-  /// Also illustrates how to add [ExpectedParticipantData]
-  /// to a study protocol.
-  SmartphoneStudyProtocol getFamilyStudyProtocol(String name) {
-    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
-      ownerId: 'abc@dtu.dk',
-      name: name,
-      studyDescription: studyDescription,
-      dataEndPoint: dataEndPoint,
-    );
-
-    final father = 'Father';
-    final mother = 'Mother';
-    final child = 'Child';
-
-    // add participant roles
-    protocol.addParticipantRole(ParticipantRole(father));
-    protocol.addParticipantRole(ParticipantRole(mother));
-    protocol.addParticipantRole(ParticipantRole(child));
-
-    // define and assign the primary device(s)
-    Smartphone fatherPhone = Smartphone(roleName: "$father's Phone");
-    protocol.addPrimaryDevice(fatherPhone);
-    Smartphone motherPhone = Smartphone(roleName: "$mother's Phone");
-    protocol.addPrimaryDevice(motherPhone);
-    Smartphone childPhone = Smartphone(roleName: "$child's Phone");
-    protocol.addPrimaryDevice(childPhone);
-
-    protocol.changeDeviceAssignment(
-      fatherPhone,
-      AssignedTo(roleNames: {father}),
-    );
-    protocol.changeDeviceAssignment(
-      motherPhone,
-      AssignedTo(roleNames: {mother}),
-    );
-    protocol.changeDeviceAssignment(childPhone, AssignedTo(roleNames: {child}));
-
-    // add expected participant data for all participants
-    protocol.addExpectedParticipantData(
-      ExpectedParticipantData(
-        attribute: ParticipantAttribute(inputDataType: SexInput.type),
-      ),
-    );
-    protocol.addExpectedParticipantData(
-      ExpectedParticipantData(
-        attribute: ParticipantAttribute(
-          inputDataType: InformedConsentInput.type,
-        ),
-      ),
-    );
-
-    // add expected participant data for the mother
-    protocol.addExpectedParticipantData(
-      ExpectedParticipantData(
-        attribute: ParticipantAttribute(inputDataType: FullNameInput.type),
-        assignedTo: AssignedTo(roleNames: {mother}),
-      ),
-    );
-
-    // build-in measure from sensor and device sampling packages
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: SensorSamplingPackage.STEP_COUNT),
-          Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-          Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-          Measure(type: DeviceSamplingPackage.FREE_MEMORY),
-          Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-        ],
-      ),
-      fatherPhone,
-    );
-
-    // a random trigger - 3-8 times during time period of 8-20
-    protocol.addTaskControl(
-      RandomRecurrentTrigger(
-        startTime: TimeOfDay(hour: 8),
-        endTime: TimeOfDay(hour: 20),
-        minNumberOfTriggers: 3,
-        maxNumberOfTriggers: 8,
-      ),
-      BackgroundTask()
-        ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
-      fatherPhone,
-    );
-
-    // activity measure using the phone
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask()
-        ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
-      motherPhone,
-    );
-
-    // define the location service and add it as a 'device' to all three participants
-    LocationService locationService = LocationService();
-    protocol.addConnectedDevice(locationService, fatherPhone);
-    protocol.addConnectedDevice(locationService, motherPhone);
-    protocol.addConnectedDevice(locationService, childPhone);
-
-    // add a background task that continuously collects location and mobility
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: ContextSamplingPackage.LOCATION),
-          Measure(type: ContextSamplingPackage.MOBILITY),
-        ],
-      ),
-      locationService,
-    );
-
-    // define the online weather service and add it to the father's phone
-    // WeatherService weatherService = WeatherService(apiKey: openWeatherApiKey);
-    // protocol.addConnectedDevice(weatherService, fatherPhone);
-
-    // // add a background task that collects weather every 30 minutes.
-    // protocol.addTaskControl(
-    //     PeriodicTrigger(period: Duration(minutes: 30)),
-    //     BackgroundTask()
-    //       ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
-    //     weatherService);
-
-    // // define the online air quality service and add it to the mother's phone
-    // AirQualityService airQualityService =
-    //     AirQualityService(apiKey: airQualityApiKey);
-    // protocol.addConnectedDevice(airQualityService, motherPhone);
-
-    // // add a background task that air quality every 30 minutes.
-    // protocol.addTaskControl(
-    //     PeriodicTrigger(period: Duration(minutes: 30)),
-    //     BackgroundTask(measures: [
-    //       Measure(type: ContextSamplingPackage.AIR_QUALITY),
-    //     ]),
-    //     airQualityService);
-
-    // collect noise from the child's phone
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [Measure(type: MediaSamplingPackage.NOISE)]),
-      childPhone,
-    );
-
-    // collect connectivity info from the child's phone
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: ConnectivitySamplingPackage.CONNECTIVITY),
-          Measure(type: ConnectivitySamplingPackage.WIFI),
-          Measure(type: ConnectivitySamplingPackage.BLUETOOTH),
-        ],
-      ),
-      childPhone,
-    );
-
-    // // Add an automatic task that collects SMS messages in/out
-    // protocol.addTaskControl(
-    //     ImmediateTrigger(),
-    //     AutomaticTask()
-    //       ..addMeasures(SamplingPackageRegistry().common.getMeasureList(
-    //         types: [
-    //           CommunicationSamplingPackage.TEXT_MESSAGE,
-    //         ],
-    //       )),
-    //     phone);
-
-    // // Add an automatic task that collects the logs for:
-    // //  * in/out SMS
-    // //  * in/out phone calls
-    // //  * calendar entries
-    // protocol.addTaskControl(
-    //     ImmediateTrigger(),
-    //     AutomaticTask()
-    //       ..addMeasures(SamplingPackageRegistry().common.getMeasureList(
-    //         types: [
-    //           CommunicationSamplingPackage.PHONE_LOG,
-    //           CommunicationSamplingPackage.TEXT_MESSAGE_LOG,
-    //           CommunicationSamplingPackage.CALENDAR,
-    //         ],
-    //       )),
-    //     phone);
-
-    // // Add an automatic task that collects the list of installed apps
-    // // and a log of app usage activity
-    // protocol.addTaskControl(
-    //     PeriodicTrigger(
-    //       period: const Duration(minutes: 1),
-    //       duration: const Duration(seconds: 10),
-    //     ),
-    //     AutomaticTask()
-    //       ..addMeasures(SamplingPackageRegistry().common.getMeasureList(
-    //         types: [
-    //           AppsSamplingPackage.APPS,
-    //           AppsSamplingPackage.APP_USAGE,
-    //         ],
-    //       )),
-    //     phone);
-
-    // define the eSense device and add it to the mother's phone
-    var eSense = ESenseDevice(deviceName: 'eSense-0332', samplingRate: 10);
-    protocol.addConnectedDevice(eSense, motherPhone);
-
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask()
-        ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_BUTTON))
-        ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_SENSOR)),
-      eSense,
-    );
-
-    // define the Polar device and add it to the father's phone
-
-    // PolarDevice polar = PolarDevice(
-    //   identifier: 'B5FC172F',
-    //   name: 'Polar H10 HR Monitor',
-    //   polarDeviceType: PolarDeviceType.H10,
-    // );
-    var polar = PolarDevice(
-      identifier: 'B36B5B21',
-      name: 'Polar PVS',
-      deviceType: PolarDeviceType.SENSE,
-    );
-
-    protocol.addConnectedDevice(polar, fatherPhone);
-
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask()..addMeasure(Measure(type: PolarSamplingPackage.HR)),
-      // ..addMeasure(Measure(type: PolarSamplingPackage.ECG))
-      // ..addMeasure(Measure(type: PolarSamplingPackage.PPG))
-      // ..addMeasure(Measure(type: PolarSamplingPackage.PPI)),
-      polar,
     );
 
     return protocol;

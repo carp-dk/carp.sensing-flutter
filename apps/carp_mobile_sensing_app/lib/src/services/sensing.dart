@@ -1,19 +1,13 @@
 part of '../../main.dart';
 
-/// This class implements the sensing layer.
+/// This class handles the sensing in the CARP Mobile Sensing framework.
 ///
-/// Call [initialize] to setup a deployment, either locally or using a CAWS
-/// deployment.
-///
-/// Once initialized, the runtime [controller] can be used to
-/// control the study execution (e.g., start and stop).
-///
-/// Collected data is available in the [measurements] stream.
+/// This class provides easy access to different part of the sensing framework,
+/// to be used in the views and view models of the app.
 ///
 /// Works as a singleton, and can be accessed by `Sensing()`.
 class Sensing {
   static final Sensing _instance = Sensing._();
-  factory Sensing() => _instance;
 
   Sensing._() : super() {
     CarpMobileSensing.ensureInitialized();
@@ -37,11 +31,17 @@ class Sensing {
     DataManagerRegistry().register(CarpDataManagerFactory());
   }
 
+  factory Sensing() => _instance;
+
   /// The client manager running on this smartphone.
   SmartPhoneClientManager client = SmartPhoneClientManager();
 
-  /// The study running on this phone.
-  SmartphoneStudy? get study => bloc.study;
+  /// The study for the currently running study deployment.
+  /// Returns `null` if no study is deployed (yet).
+  /// If multiple studies are deployed, returns the first one (this app only
+  /// supports a single study at a time).
+  SmartphoneStudy? get study =>
+      client.studies.isEmpty ? null : client.studies.first;
 
   /// The deployment service used to deploy studies.
   /// If in local deployment mode, this is a [SmartphoneDeploymentService],
@@ -54,24 +54,16 @@ class Sensing {
   /// The deployment running on this phone, if the study is deployed.
   SmartphoneDeployment? get deployment => study?.deployment;
 
-  /// The study runtime controller for this deployment
+  /// The study runtime controller for this [study], if deployed.
   SmartphoneStudyController? get controller =>
       (study != null) ? client.getStudyController(study!) : null;
 
   /// The total number of measurements sampled so far.
   int samplingSize = 0;
 
-  /// the list of running - i.e. used - probes in this study.
+  /// The list of running - i.e. used - probes in this study.
   List<Probe> get runningProbes =>
       (controller != null) ? controller!.executor.probes : [];
-
-  /// The list of available devices.
-  List<DeviceManager> get availableDevices =>
-      SmartPhoneClientManager().deviceController.devices.values.toList();
-
-  /// The list of connected devices.
-  List<DeviceManager> get connectedDevices =>
-      client.deviceController.connectedDevices.toList();
 
   /// The list of devices in the current deployment.
   List<DeviceManager>? get deployedDevices => deployment != null
@@ -89,7 +81,7 @@ class Sensing {
     info('Initializing $runtimeType - mode: ${bloc.deploymentMode}');
 
     // Configure the client manager with the deployment service selected above
-    // (local or CAWS), add the study, and deploy it.
+    // (local or CAWS).
     await client.configure(
       deploymentService: deploymentService,
       askForPermissions: true,

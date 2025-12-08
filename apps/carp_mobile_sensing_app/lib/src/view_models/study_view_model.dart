@@ -6,16 +6,13 @@ class StudyViewModel with ChangeNotifier {
 
   StudyViewModel(this._study) : super();
 
-  // SmartphoneStudy? get study => _study;
   set study(SmartphoneStudy study) {
     _study = study;
     study.addListener(() => notifyListeners()); // Notify when study changes
     notifyListeners();
   }
 
-  /// The deployment for the study.
   SmartphoneDeployment? get deployment => _study?.deployment;
-
   Image get image => Image.asset('assets/study.png');
   String get title => deployment?.studyDescription?.title ?? 'No Study';
   String get description => deployment?.studyDescription?.description ?? 'N/A';

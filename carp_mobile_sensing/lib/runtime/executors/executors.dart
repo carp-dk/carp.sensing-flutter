@@ -144,8 +144,10 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
       _measurementsController.add(measurement);
 
   /// Add [error] to the [measurements] stream.
-  void addError(Object error, [StackTrace? stacktrace]) =>
-      _measurementsController.addError(error, stacktrace);
+  void addError(Object error, [StackTrace? stacktrace]) {
+    warning('$error');
+    _measurementsController.addError(error, stacktrace);
+  }
 
   @override
   @nonVirtual
@@ -153,7 +155,13 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
     info('Initializing $this [$hashCode] - $configuration');
     _deployment = deployment;
     _configuration = configuration;
-    _stateMachine.initialize();
+
+    try {
+      _stateMachine.initialize();
+    } catch (error) {
+      addError('Error initializing $this: $error');
+      _setState(_UndefinedState(this));
+    }
   }
 
   @override
@@ -161,21 +169,39 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   void resume() {
     _isResuming = true;
     info('Resuming $this - $configuration');
-    _stateMachine.resume();
+
+    try {
+      _stateMachine.resume();
+    } catch (error) {
+      addError('Error resuming $this: $error');
+      _setState(_UndefinedState(this));
+    }
   }
 
   @override
   @nonVirtual
   void pause() {
     info('Pausing $this - $configuration');
-    _stateMachine.pause();
+
+    try {
+      _stateMachine.pause();
+    } catch (error) {
+      addError('Error pausing $this: $error');
+      _setState(_UndefinedState(this));
+    }
   }
 
   @override
   @nonVirtual
   void dispose() {
     info('Disposing $this - $configuration');
-    _stateMachine.dispose();
+
+    try {
+      _stateMachine.dispose();
+    } catch (error) {
+      addError('Error disposing $this: $error');
+      _setState(_UndefinedState(this));
+    }
   }
 
   void error() => _stateMachine.error();
