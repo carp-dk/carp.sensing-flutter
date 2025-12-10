@@ -77,6 +77,11 @@ class SensingBLoC {
   void runStudy() {
     if (study == null) return;
 
+    debug(
+      '$runtimeType - Running study - isDeployed: ${study!.isDeployed}, '
+      'isSampling: ${study!.isSampling}',
+    );
+
     // If the study has not been started (and deployed) yet, do this before
     // resuming or pausing.
     !study!.isDeployed

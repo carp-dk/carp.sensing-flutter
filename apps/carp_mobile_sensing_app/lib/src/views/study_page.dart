@@ -91,15 +91,18 @@ class StudyPageState extends State<StudyPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _StudyControllerLine(model.title, heading: 'Title'),
                     _StudyControllerLine(model.description),
+                    _StudyControllerLine(
+                      model.studyStatus?.name,
+                      heading: 'Study Status',
+                    ),
+                    _StudyControllerLine(
+                      bloc.deploymentMode.name.toUpperCase(),
+                      heading: 'Deployment Mode',
+                    ),
                     _StudyControllerLine(
                       model.studyDeploymentId,
                       heading: 'Deployment ID',
-                    ),
-                    _StudyControllerLine(
-                      model.participantRoleName,
-                      heading: 'Participant Role',
                     ),
                     _StudyControllerLine(
                       model.deviceRoleName,
@@ -108,23 +111,6 @@ class StudyPageState extends State<StudyPage> {
                     _StudyControllerLine(
                       model.dataEndpointType,
                       heading: 'Data Endpoint',
-                    ),
-                    StreamBuilder<StudyStatus>(
-                      stream: model.studyStatusEvents,
-                      initialData: StudyStatus.DeploymentNotStarted,
-                      builder: (_, __) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _StudyControllerLine(
-                            model.studyDeploymentStatus?.name,
-                            heading: 'Deployment Status',
-                          ),
-                          _StudyControllerLine(
-                            model.studyStatus?.name,
-                            heading: 'Study Status',
-                          ),
-                        ],
-                      ),
                     ),
                     StreamBuilder<ExecutorState>(
                       stream: model.executorStateEvents,

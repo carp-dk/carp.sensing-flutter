@@ -210,7 +210,7 @@ class ESenseDeviceManager
       warning(
         '$runtimeType - Error connecting to eSense device id: $id - $error',
       );
-      return DeviceStatus.error;
+      return DeviceStatus.disconnected;
     }
 
     return DeviceStatus.connecting;

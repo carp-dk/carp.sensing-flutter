@@ -194,7 +194,9 @@ abstract class ClientManager<
 
     // Early out in case this study has already received and validated
     // deployment information and is running.
-    if (study.status == StudyStatus.Running) return study.status;
+    // if (study.status == StudyStatus.Running) return study.status;
+    // TODO: Should not check for this? Allow for re-deployment?
+    // if (study.isDeployed) return study.status;
 
     // Try to deploy the study.
     // IllegalArgumentException's will be thrown here when deployment or role

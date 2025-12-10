@@ -14,9 +14,17 @@ class StudyViewModel with ChangeNotifier {
 
   SmartphoneDeployment? get deployment => _study?.deployment;
   Image get image => Image.asset('assets/study.png');
-  String get title => deployment?.studyDescription?.title ?? 'No Study';
-  String get description => deployment?.studyDescription?.description ?? 'N/A';
-  String get studyDeploymentId => _study?.studyDeploymentId ?? '';
+  String get title => _study == null
+      ? 'No Study'
+      : _study?.isDeployed == false
+      ? 'No Deployment'
+      : deployment?.studyDescription?.title ?? 'No Deployment';
+  String get description => _study == null
+      ? 'No study has yet been added. Press the "+" button to add a study.'
+      : deployment?.studyDescription?.description ??
+            'The study has not been deployed yet. Press the "Refresh" button to begin deployment. ';
+  String get studyDeploymentId =>
+      _study != null ? '...-${_study?.studyDeploymentId.split('-').last}' : '';
   String get deviceRoleName => _study?.deviceRoleName ?? '';
   String get participantRoleName => deployment?.participantRoleName ?? '';
   String? get dataEndpointType => deployment?.dataEndPoint?.type;

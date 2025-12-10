@@ -226,7 +226,7 @@ class PolarDeviceManager
         warning(
           "$runtimeType - could not connect to device of type '$deviceType' and id '$id' - error: $error",
         );
-        return DeviceStatus.error;
+        return DeviceStatus.disconnected;
       }
     }
   }

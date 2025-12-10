@@ -185,7 +185,6 @@ abstract class DeviceManager<
   Future<void> onRequestPermissions();
 
   /// Ask this [DeviceManager] to start connecting to the device.
-  ///
   /// Returns the [DeviceStatus] of the device.
   @nonVirtual
   Future<DeviceStatus> connect() async {
@@ -203,14 +202,14 @@ abstract class DeviceManager<
         '$runtimeType has not the permissions required to connect. '
         'Call requestPermissions() before calling connect.',
       );
-      status = DeviceStatus.error;
+      status = DeviceStatus.disconnected;
       return status;
     }
 
     try {
       status = await onConnect();
     } catch (error) {
-      status = DeviceStatus.error;
+      status = DeviceStatus.disconnected;
       warning(
         '$runtimeType - Error connecting to device of type: $typeName. $error',
       );
@@ -267,7 +266,7 @@ abstract class DeviceManager<
       stop();
 
       success = await onDisconnect();
-      status = (success) ? DeviceStatus.disconnected : DeviceStatus.error;
+      status = (success) ? DeviceStatus.disconnected : status;
 
       return success;
     } else {
@@ -440,11 +439,6 @@ abstract class BTLEDeviceManager<
 enum DeviceStatus {
   /// The state of the device is unknown.
   unknown,
-
-  /// The device is in an permanent error state.
-  /// Note that this means the the device cannot be reconnected before
-  /// is has been initialized (again).
-  error,
 
   /// The device manager has been initialized, but not yet connected.
   initialized,

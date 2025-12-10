@@ -159,7 +159,7 @@ class MovisensDeviceManager
       warning(
         "$runtimeType - could not connect to device of type '$deviceType' - error: $error",
       );
-      return DeviceStatus.error;
+      return DeviceStatus.disconnected;
     }
 
     return DeviceStatus.connecting;

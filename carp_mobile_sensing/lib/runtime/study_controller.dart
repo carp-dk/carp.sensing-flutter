@@ -404,7 +404,7 @@ class SmartphoneStudyController {
     );
 
     // If this study has not yet been deployed, do this first.
-    if (study.status.index < StudyStatus.Deployed.index) {
+    if (!study.isDeployed) {
       debug('$runtimeType - Study not yet deployed - trying to deploy...');
       await SmartPhoneClientManager().tryDeployment(
         study.studyDeploymentId,

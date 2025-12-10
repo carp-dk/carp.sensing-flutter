@@ -111,8 +111,10 @@ class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
       onPressed: _onButtonPressed,
       child: ListenableBuilder(
         listenable: bloc.sensing.client,
-        builder: (_, _) => bloc.sensing.client.studies.isEmpty
+        builder: (_, _) => !model.hasStudy
             ? Icon(Icons.add)
+            : !model.isDeployed
+            ? Icon(Icons.refresh)
             : model.isRunning
             ? Icon(Icons.pause)
             : Icon(Icons.play_arrow),
@@ -124,7 +126,8 @@ class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
 
   /// Handle press on the floating action button.
   /// If there is no study, add a study first.
-  /// Otherwise resume/pause sensing.
+  /// If the study is not yet deployed, deploy it.
+  /// Once deployed, resume/pause sensing.
   void _onButtonPressed() => bloc.sensing.client.studies.isEmpty
       ? bloc.addStudy(context)
       : bloc.runStudy();

@@ -15,6 +15,12 @@ class AppViewModel with ChangeNotifier {
   StudyViewModel get studyViewModel =>
       _studyViewModel ??= StudyViewModel(bloc.study);
 
+  /// Is the any study added yet?
+  bool get hasStudy => bloc.study != null;
+
+  /// Is the study deployed?
+  bool get isDeployed => bloc.study?.isDeployed ?? false;
+
   /// Is sensing running, i.e. has the study executor been started?
   bool get isRunning =>
       bloc.sensing.controller?.executor.state == ExecutorState.Resumed;

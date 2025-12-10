@@ -42,7 +42,7 @@ class DeviceViewModel {
 
   static Map<DeviceStatus, Icon> get deviceStateIcon => {
     DeviceStatus.unknown: Icon(Icons.error_outline, color: CachetColors.RED),
-    DeviceStatus.error: Icon(Icons.error_outline, color: CachetColors.RED),
+    // DeviceStatus.error: Icon(Icons.error_outline, color: CachetColors.RED),
     DeviceStatus.disconnected: Icon(Icons.close, color: CachetColors.YELLOW),
     DeviceStatus.connected: Icon(Icons.check, color: CachetColors.GREEN),
     DeviceStatus.paired: Icon(
