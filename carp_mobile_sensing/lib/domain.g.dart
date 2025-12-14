@@ -388,8 +388,6 @@ SmartphoneDeployment _$SmartphoneDeploymentFromJson(
                 )
                 .toSet() ??
             const {},
-        participantId: json['participantId'] as String?,
-        participantRoleName: json['participantRoleName'] as String?,
       )
       ..applicationData = json['applicationData'] as Map<String, dynamic>?
       ..deployed = DateTime.parse(json['deployed'] as String)
@@ -416,8 +414,6 @@ Map<String, dynamic> _$SmartphoneDeploymentToJson(
       .toList(),
   'studyId': ?instance.studyId,
   'studyDeploymentId': instance.studyDeploymentId,
-  'participantId': ?instance.participantId,
-  'participantRoleName': ?instance.participantRoleName,
   'deployed': instance.deployed.toIso8601String(),
   'status': _$StudyDeploymentStatusTypesEnumMap[instance.status]!,
 };

@@ -43,7 +43,6 @@ class SensingBLoC {
   /// If in local mode, the study protocol is loaded from the local study protocol
   /// manager. If in CAWS mode, the study invitation is retrieved from CAWS.
   Future<void> addStudy(BuildContext context) async {
-    SmartphoneStudy? study;
     switch (bloc.deploymentMode) {
       case DeploymentMode.local:
         // Get the protocol from the local study protocol manager.
@@ -51,26 +50,34 @@ class SensingBLoC {
         StudyProtocol protocol = await LocalStudyProtocolManager()
             .getStudyProtocol('');
 
-        // Deploy this protocol using the on-phone deployment service.
-        var status = await sensing.deploymentService.createStudyDeployment(
-          protocol,
-        );
+        // Add the study from the protocol to the sensing client.
+        await sensing.client.addStudyFromProtocol(protocol);
 
-        // Create the study using the deployment information.
-        study = SmartphoneStudy(
-          studyDeploymentId: status.studyDeploymentId,
-          deviceRoleName: protocol.primaryDevice.roleName,
-        );
+        // // Deploy this protocol using the on-phone deployment service.
+        // var status = await sensing.deploymentService.createStudyDeployment(
+        //   protocol,
+        // );
+
+        // // Create the study using the deployment information.
+        // study = SmartphoneStudy(
+        //   studyDeploymentId: status.studyDeploymentId,
+        //   deviceRoleName: protocol.primaryDevice.roleName,
+        // );
         break;
       case DeploymentMode.production:
       case DeploymentMode.test:
       case DeploymentMode.dev:
         // Get the study invitation from CAWS.
-        study = await CarpBackend().getStudyInvitation(context);
+        var invitation = await CarpBackend().getStudyInvitation(context);
+        debug('$runtimeType >> Study invitation: ${invitation?.toJson()}');
+        if (invitation != null) {
+          await sensing.client.addStudyFromInvitation(invitation);
+        }
+
         break;
     }
     // Now add the study to the sensing client.
-    if (study != null) sensing.client.addStudy(study);
+    // if (study != null) sensing.client.addStudy(study);
   }
 
   /// Run (start, resume, pause) [study] based on its current state.

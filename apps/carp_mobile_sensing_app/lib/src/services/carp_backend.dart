@@ -68,20 +68,7 @@ class CarpBackend {
   );
 
   /// Get the study invitation by opening the CAWS study invitation page.
-  Future<SmartphoneStudy?> getStudyInvitation(BuildContext context) async {
-    ActiveParticipationInvitation? invitation = await CarpParticipationService()
-        .getStudyInvitation(context);
-    debug('CAWS Study Invitation: $invitation');
-
-    if (invitation != null) {
-      info(
-        'Invitation received - '
-        'study id: ${invitation.studyId}, '
-        'deployment id: ${invitation.studyDeploymentId}, '
-        'role name: ${invitation.deviceRoleName}',
-      );
-      return SmartphoneStudy.fromInvitation(invitation);
-    }
-    return null;
-  }
+  Future<ActiveParticipationInvitation?> getStudyInvitation(
+    BuildContext context,
+  ) async => await CarpParticipationService().getStudyInvitation(context);
 }

@@ -26,7 +26,7 @@ class StudyViewModel with ChangeNotifier {
   String get studyDeploymentId =>
       _study != null ? '...-${_study?.studyDeploymentId.split('-').last}' : '';
   String get deviceRoleName => _study?.deviceRoleName ?? '';
-  String get participantRoleName => deployment?.participantRoleName ?? '';
+  String get participantRoleName => _study?.participantRoleName ?? '';
   String? get dataEndpointType => deployment?.dataEndPoint?.type;
 
   StudyDeploymentStatusTypes? get studyDeploymentStatus =>

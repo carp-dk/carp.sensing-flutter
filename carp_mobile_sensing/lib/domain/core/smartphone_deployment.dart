@@ -24,11 +24,11 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   /// The role name of this smartphone device.
   String get deviceRoleName => deviceConfiguration.roleName;
 
-  /// The ID of the participant in this deployment.
-  String? participantId;
+  // /// The ID of the participant in this deployment.
+  // String? participantId;
 
-  /// The role name of the participant in this deployment.
-  String? participantRoleName;
+  // /// The role name of the participant in this deployment.
+  // String? participantRoleName;
 
   /// All devices this deployment is using.
   ///
@@ -67,8 +67,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
     super.triggers,
     super.taskControls,
     super.expectedParticipantData,
-    this.participantId,
-    this.participantRoleName,
+    // this.participantId,
+    // this.participantRoleName,
     StudyDescription? studyDescription,
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,
@@ -85,8 +85,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   SmartphoneDeployment.fromPrimaryDeviceDeployment({
     this.studyId,
     String? studyDeploymentId,
-    this.participantId,
-    this.participantRoleName,
+    // this.participantId,
+    // this.participantRoleName,
     required PrimaryDeviceDeployment deployment,
   }) : super(
          deviceConfiguration: deployment.deviceConfiguration,
@@ -126,8 +126,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   SmartphoneDeployment.fromPrimaryDeviceDeploymentAndSmartphoneStudyProtocol({
     this.studyId,
     String? studyDeploymentId,
-    this.participantId,
-    this.participantRoleName,
+    // this.participantId,
+    // this.participantRoleName,
     required PrimaryDeviceDeployment deployment,
     required SmartphoneStudyProtocol protocol,
   }) : super(
@@ -157,8 +157,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   SmartphoneDeployment.fromSmartphoneStudyProtocol({
     this.studyId,
     String? studyDeploymentId,
-    this.participantId,
-    this.participantRoleName,
+    // this.participantId,
+    // this.participantRoleName,
     required String primaryDeviceRoleName,
     required SmartphoneStudyProtocol protocol,
   }) : super(
@@ -212,8 +212,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
       'studyId: $studyId, '
       'studyDeploymentId: $studyDeploymentId, '
       'device role: $deviceRoleName, '
-      'participant id: $participantId, '
-      'participant role: $participantRoleName, '
+      // 'participant id: $participantId, '
+      // 'participant role: $participantRoleName, '
       'title: ${studyDescription?.title}, '
       'responsible: ${responsible?.name}';
 }

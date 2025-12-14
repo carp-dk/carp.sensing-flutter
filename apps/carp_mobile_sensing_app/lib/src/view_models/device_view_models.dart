@@ -36,20 +36,9 @@ class DeviceViewModel {
   Icon? get icon => DeviceDescription.descriptors[type!]?.icon;
 
   /// The icon for the runtime state of this device.
-  Icon? get stateIcon => deviceStateIcon[status];
+  Icon? get stateIcon => DeviceDescription.deviceStateIcon[status];
 
   DeviceViewModel(this.deviceManager) : super();
-
-  static Map<DeviceStatus, Icon> get deviceStateIcon => {
-    DeviceStatus.unknown: Icon(Icons.error_outline, color: CachetColors.RED),
-    // DeviceStatus.error: Icon(Icons.error_outline, color: CachetColors.RED),
-    DeviceStatus.disconnected: Icon(Icons.close, color: CachetColors.YELLOW),
-    DeviceStatus.connected: Icon(Icons.check, color: CachetColors.GREEN),
-    DeviceStatus.paired: Icon(
-      Icons.bluetooth_connected,
-      color: CachetColors.DARK_BLUE,
-    ),
-  };
 
   /// Connect to this device.
   void connectToDevice() => bloc

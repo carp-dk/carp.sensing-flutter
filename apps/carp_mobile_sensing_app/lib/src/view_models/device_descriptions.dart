@@ -49,10 +49,11 @@ class DeviceDescription {
       'Movisens Sensor',
       Icon(Icons.watch, size: 50, color: CachetColors.CYAN),
     ),
-    // MovesenseDevice.DEVICE_TYPE: DeviceTypeDescriptor(
-    //     'Movesense',
-    //     'Movesense ECG Sensor',
-    //     Icon(Icons.watch, size: 50, color: CachetColors.CYAN)),
+    MovesenseDevice.DEVICE_TYPE: DeviceTypeDescriptor(
+      'Movesense',
+      'Movesense ECG Sensor',
+      Icon(Icons.watch, size: 50, color: CachetColors.CYAN),
+    ),
     // CortriumDevice.DEVICE_TYPE: DeviceTypeDescriptor(
     //     'Cortrium',
     //     'Cortrium ECG Holter Monitor',
@@ -60,10 +61,10 @@ class DeviceDescription {
   };
 
   static Map<DeviceStatus, Icon> get deviceStateIcon => {
-    DeviceStatus.unknown: Icon(Icons.error_outline, color: CachetColors.RED),
-    // DeviceStatus.error: Icon(Icons.error_outline, color: CachetColors.RED),
-    DeviceStatus.disconnected: Icon(Icons.close, color: CachetColors.YELLOW),
-    DeviceStatus.connected: Icon(Icons.check, color: CachetColors.GREEN),
+    DeviceStatus.unknown: Icon(Icons.question_mark, color: CachetColors.RED),
+    DeviceStatus.initialized: Icon(Icons.check, color: CachetColors.GREEN),
+    DeviceStatus.connected: Icon(Icons.link, color: CachetColors.GREEN),
+    DeviceStatus.disconnected: Icon(Icons.link_off, color: CachetColors.YELLOW),
     DeviceStatus.paired: Icon(
       Icons.bluetooth_connected,
       color: CachetColors.DARK_BLUE,

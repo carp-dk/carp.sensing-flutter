@@ -109,6 +109,10 @@ class StudyPageState extends State<StudyPage> {
                       heading: 'Device Role',
                     ),
                     _StudyControllerLine(
+                      model.participantRoleName,
+                      heading: 'Participant Role',
+                    ),
+                    _StudyControllerLine(
                       model.dataEndpointType,
                       heading: 'Data Endpoint',
                     ),

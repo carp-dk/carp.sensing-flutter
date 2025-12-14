@@ -195,8 +195,8 @@ class Persistence {
   Map<String, dynamic> _getMap(SmartphoneStudy study) => {
     STUDY_DEPLOYMENT_ID_COLUMN: study.studyDeploymentId,
     DEVICE_ROLE_NAME_COLUMN: study.deviceRoleName,
-    PARTICIPANT_ID_COLUMN: study.deployment?.participantId,
-    PARTICIPANT_ROLE_NAME_COLUMN: study.deployment?.participantRoleName,
+    PARTICIPANT_ID_COLUMN: study.participantId,
+    PARTICIPANT_ROLE_NAME_COLUMN: study.participantRoleName,
     CREATED_ON_COLUMN: study.createdOn.toUtc().toIso8601String(),
     UPDATED_ON_COLUMN: DateTime.now().toUtc().toIso8601String(),
     DEPLOYED_ON_COLUMN: study.deploymentStatus?.createdOn
