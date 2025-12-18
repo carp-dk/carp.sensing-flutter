@@ -4,7 +4,8 @@ allprojects {
         mavenCentral()
         flatDir{
             dirs "$rootDir/libs"
-        }    }
+        }    
+    }
 }
 
 rootProject.buildDir = "../build"

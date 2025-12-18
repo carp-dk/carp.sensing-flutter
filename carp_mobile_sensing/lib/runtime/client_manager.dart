@@ -123,9 +123,9 @@ class SmartPhoneClientManager
   /// automatically ask for permissions for all sampling packages at once.
   /// If you want the app to handle permissions itself, set this to false.
   ///
-  /// If [heartbeat] is true, a [Heartbeat] data point will be uploaded for all
-  /// devices (including the phone) in all studies running on this client.  Thi
-  /// happens every 5 minutes (default).
+  /// If [heartbeat] is true (default), a [Heartbeat] data point will be uploaded
+  /// for all devices (including the phone) in all studies running on this client.
+  /// This happens every 5 minutes.
   @override
   Future<void> configure({
     DeviceRegistration? registration,

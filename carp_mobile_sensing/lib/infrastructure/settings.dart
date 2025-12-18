@@ -1,6 +1,8 @@
 part of '../infrastructure.dart';
 
-/// Misc. settings for CAMS.
+/// Debugging levels.
+enum DebugLevel { none, info, warning, debug }
+
 ///
 /// This class is a singleton, access using `Settings()`.
 /// Must be initialized using the [init] method before used.
@@ -134,39 +136,6 @@ class Settings {
     '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_DATA_FILE_PATH',
   ).create(recursive: true)).path;
 
-  // /// The base path for storing all cached data.
-  // ///
-  // ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/cache`
-  // ///
-  // Future<String> getCacheBasePath(String studyDeploymentId) async {
-  //   var cachePath =
-  //       '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_CACHE_FILE_PATH';
-
-  //   var directory = Directory(cachePath);
-  //   await directory.exists().then((exists) {
-  //     debug('$runtimeType - Creating CACHE path: $cachePath');
-  //     if (!exists) directory.createSync(recursive: true);
-  //   });
-
-  //   return cachePath;
-  // }
-
-  // /// The base path for storing all data (e.g. media files).
-  // ///
-  // ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/data`
-  // ///
-  // Future<String> getDataBasePath(String studyDeploymentId) async {
-  //   var dataPath =
-  //       '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_DATA_FILE_PATH';
-
-  //   var directory = Directory(dataPath);
-  //   await directory.exists().then((exists) {
-  //     if (!exists) directory.createSync(recursive: true);
-  //   });
-
-  //   return dataPath;
-  // }
-
   /// The current time zone location of this app.
   String get timezoneLocation => _timezone;
 
@@ -177,17 +146,17 @@ class Settings {
 
     _preferences ??= await SharedPreferences.getInstance();
     _packageInfo ??= await PackageInfo.fromPlatform();
+    _appName = _packageInfo?.appName;
+    _packageName = _packageInfo?.packageName;
+    _version = _packageInfo?.version;
+    _buildNumber = _packageInfo?.buildNumber;
 
-    _appName = _packageInfo!.appName;
-    _packageName = _packageInfo!.packageName;
-    _version = _packageInfo!.version;
-    _buildNumber = _packageInfo!.buildNumber;
-
-    await localApplicationPath.then((_) => carpBasePath);
+    // ensure that the base carp path is created
+    localApplicationPath.then((_) async => await carpBasePath);
 
     debug('$runtimeType - Shared Preferences:');
-    _preferences!.getKeys().forEach(
-      (key) => debug('"$key" : ${_preferences!.get(key)}'),
+    _preferences?.getKeys().forEach(
+      (key) => debug('"$key" : ${_preferences?.get(key)}'),
     );
 
     // setting up time zone settings
@@ -219,15 +188,12 @@ class Settings {
       "Setting is not initialized. Call 'Setting().init()' first.",
     );
     if (_userId == null) {
-      _userId = preferences!.get(USER_ID_KEY) as String?;
+      _userId = preferences?.get(USER_ID_KEY) as String?;
       if (_userId == null) {
         _userId = const Uuid().v1;
-        await preferences!.setString(USER_ID_KEY, _userId!);
+        await preferences?.setString(USER_ID_KEY, _userId!);
       }
     }
     return _userId!;
   }
 }
-
-/// Debugging levels.
-enum DebugLevel { none, info, warning, debug }

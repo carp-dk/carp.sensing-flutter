@@ -258,7 +258,7 @@ abstract class StreamProbe extends Probe {
         );
         return false;
       } else {
-        _subscription = _stream!.listen(
+        _subscription = _stream?.listen(
           _onData,
           onError: _onError,
           onDone: _onDone,
@@ -318,7 +318,7 @@ abstract class PeriodicStreamProbe extends StreamProbe {
         if (interval != null && duration != null) {
           // create a recurrent timer that starts sampling
           _timer = Timer.periodic(interval, (timer) {
-            _subscription = stream!.listen(
+            _subscription = stream?.listen(
               _onData,
               onError: _onError,
               onDone: _onDone,
@@ -399,7 +399,8 @@ abstract class BufferingPeriodicProbe extends MeasurementProbe {
 
   @override
   Future<bool> onPause() async {
-    if (timer != null) timer!.cancel();
+    timer?.cancel();
+
     // check if there are some buffered data that needs to be collected before pausing
     try {
       Measurement? measurement = await getMeasurement();

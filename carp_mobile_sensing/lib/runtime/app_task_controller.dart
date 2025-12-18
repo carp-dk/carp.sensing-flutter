@@ -12,19 +12,20 @@ class AppTaskController {
   final StreamController<UserTask> _controller = StreamController.broadcast();
   Timer? _garbageCollector;
 
+  /// The map of all [UserTask]s by their id.
+  final Map<String, UserTask> _userTaskMap = {};
+
+  /// A buffer of tasks that are not yet scheduled.
+  final List<UserTaskBufferItem> _userTaskBuffer = [];
+
   /// Should this App Task Controller send notifications to the user.
   bool notificationsEnabled = true;
-
-  final Map<String, UserTask> _userTaskMap = {};
 
   /// The entire list of all [UserTask]s.
   ///
   /// Note that this list contains all tasks which has already triggered
   /// and which are planned to trigger in the future.
   List<UserTask> get userTasks => _userTaskMap.values.toList();
-
-  /// A buffer of tasks that are not yet scheduled.
-  final List<UserTaskBufferItem> _userTaskBuffer = [];
 
   /// The queue of [UserTask]s that the user need to attend to.
   List<UserTask> get userTaskQueue => _userTaskMap.values
@@ -70,11 +71,9 @@ class AppTaskController {
   /// [enqueue] method.
   Future<void> initialize({bool enableNotifications = true}) async {
     // set up a timer which cleans up in the queue once an hour
-    _garbageCollector = Timer.periodic(const Duration(hours: 1), (timer) {
+    _garbageCollector = Timer.periodic(const Duration(hours: 1), (_) {
       for (var task in userTasks) {
-        if (task.expiresIn != null && task.expiresIn!.isNegative) {
-          expire(task.id);
-        }
+        if (task.expiresIn?.isNegative ?? false) expire(task.id);
       }
     });
 
@@ -135,7 +134,7 @@ class AppTaskController {
       userTask.enqueued = DateTime.now();
       userTask.triggerTime = triggerTime ?? DateTime.now();
       _userTaskMap[userTask.id] = userTask;
-      _controller.sink.add(userTask);
+      _controller.add(userTask);
       debug('$runtimeType - Enqueued $userTask');
 
       if (notificationsEnabled && sendNotification) {
@@ -323,7 +322,6 @@ class AppTaskController {
         if (snapshot.studyDeploymentId != null &&
             snapshot.deviceRoleName != null) {
           // find the study and deployment based on the snapshot
-
           SmartphoneStudy? study = SmartPhoneClientManager().getStudy(
             snapshot.studyDeploymentId!,
             snapshot.deviceRoleName!,

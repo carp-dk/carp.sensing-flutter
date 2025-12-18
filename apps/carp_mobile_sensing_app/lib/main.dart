@@ -15,17 +15,16 @@ import 'package:carp_context_package/carp_context_package.dart';
 import 'package:carp_audio_package/media.dart';
 import 'package:carp_communication_package/communication.dart';
 import 'package:carp_apps_package/apps.dart';
-// import 'package:movisens_flutter/movisens_flutter.dart';
 import 'package:carp_movisens_package/carp_movisens_package.dart';
 import 'package:carp_health_package/health_package.dart';
 import 'package:health/health.dart';
 import 'package:carp_movesense_package/carp_movesense_package.dart';
 // import 'package:carp_cortrium_package/carp_cortrium_package.dart';
+// import 'package:movisens_flutter/movisens_flutter.dart';
 
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_backend/carp_backend.dart';
-// import 'package:package_info_plus/package_info_plus.dart';
 
 import 'config.dart';
 
@@ -54,10 +53,10 @@ void main() async {
   // Make sure to initialize CAMS incl. json serialization
   CarpMobileSensing.ensureInitialized();
 
-  // Initialize the bloc, setting the deployment mode.
-  await bloc.initialize(deploymentMode: DeploymentMode.dev);
-
   runApp(App());
 }
 
-final bloc = SensingBLoC();
+final bloc = SensingBLoC(
+  deploymentMode: DeploymentMode.dev,
+  debugLevel: DebugLevel.debug,
+);

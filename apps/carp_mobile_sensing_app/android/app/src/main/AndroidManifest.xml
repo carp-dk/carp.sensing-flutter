@@ -125,8 +125,8 @@
     <uses-permission android:name="android.permission.health.READ_NUTRITION"/>
 
    <application
-        android:label="CARP Mobile Sensing"
         android:name="${applicationName}"
+        android:label="CARP Mobile Sensing"
         android:icon="@mipmap/ic_launcher">
 
          <!-- Used by authentication redirect to/from web view -->

@@ -43,9 +43,11 @@ class Participation {
   /// The CARP study deployment ID.
   String studyDeploymentId;
 
-  /// Unique id for this participation.
+  /// Unique id for the participant in this participation.
   String participantId;
 
+  /// The participant roles in the study protocol which the participant
+  /// is assigned to.
   AssignedTo assignedRoles;
 
   Participation(this.studyDeploymentId, this.participantId, this.assignedRoles)
@@ -57,7 +59,7 @@ class Participation {
 
   @override
   String toString() =>
-      '${super.toString()}, id: $participantId, studyDeploymentId: $studyDeploymentId';
+      '${super.toString()}, participantId: $participantId, studyDeploymentId: $studyDeploymentId';
 }
 
 /// A description of a study, shared with participants once they are invited to a study.

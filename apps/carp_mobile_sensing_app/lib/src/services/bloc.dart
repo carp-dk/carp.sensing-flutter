@@ -20,6 +20,14 @@ enum DeploymentMode {
 /// mode, etc. It also provides methods to initialize the sensing,
 /// add a study, connect to devices, and start/pause/resume sensing.
 class SensingBLoC {
+  /// Create the BLoC, optionally specifying the [deploymentMode] and [debugLevel].
+  SensingBLoC({
+    this.deploymentMode = DeploymentMode.local,
+    DebugLevel debugLevel = DebugLevel.warning,
+  }) {
+    Settings().debugLevel = debugLevel;
+  }
+
   /// The [Sensing] layer used in the app.
   Sensing get sensing => Sensing();
 
@@ -28,16 +36,6 @@ class SensingBLoC {
 
   /// The study running on this phone.
   SmartphoneStudy? get study => sensing.study;
-
-  /// Initialize the BLoC.
-  Future<void> initialize({
-    DeploymentMode deploymentMode = DeploymentMode.local,
-  }) async {
-    Settings().debugLevel = DebugLevel.debug;
-    await Settings().init();
-    this.deploymentMode = deploymentMode;
-    info('$runtimeType initialized');
-  }
 
   /// Add a study to the app based on the current [deploymentMode].
   /// If in local mode, the study protocol is loaded from the local study protocol

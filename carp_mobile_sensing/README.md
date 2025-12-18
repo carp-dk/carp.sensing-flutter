@@ -63,6 +63,8 @@ Also specify the following between the `<application>` tags so that the plugin c
 </receiver>
 ```
 
+On Android, remember to update your `build.gradle` files and to "[desugar](https://pub.dev/packages/flutter_local_notifications#gradle-setup)" them and to add the `app_icon.png` to the `android/app/src/main/res/drawable/` folder.
+
 ### iOS Integration
 
 The pedometer (step count) probe uses `NSMotion` on iOS and the `NSMotionUsageDescription` needs to be specified in the app's `Info.plist` file located in `ios/Runner`:
