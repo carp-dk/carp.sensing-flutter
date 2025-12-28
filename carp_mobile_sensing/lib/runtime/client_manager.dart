@@ -292,13 +292,7 @@ class SmartPhoneClientManager
 
     info('$runtimeType - Removing study: $study');
 
-    // Disconnecting from all devices will stop sensing on each of them.
-    // TODO: We should not disconnect all devices - a device may be used
-    // by multiple studies.
-    // await deviceController.disconnectAllConnectedDevices();
-
-    AppTaskController().removeStudyDeployment(studyDeploymentId);
-
+    AppTaskController().removeStudy(study);
     var controller = _controllers[study];
     if (controller != null) _group.remove(controller.measurements);
     controller?.dispose();
@@ -338,7 +332,7 @@ class SmartPhoneClientManager
 
     info('$runtimeType - Stopping study: $study');
 
-    AppTaskController().removeStudyDeployment(studyDeploymentId);
+    AppTaskController().removeStudy(study);
 
     var controller = _controllers[study];
     if (controller != null) _group.remove(controller.measurements);

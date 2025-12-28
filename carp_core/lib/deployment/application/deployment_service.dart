@@ -48,7 +48,8 @@ abstract class DeploymentService {
   );
 
   /// Get the statuses for a set of deployments with the specified [studyDeploymentIds].
-  Future<List<StudyDeploymentStatus>> getStudyDeploymentStatusList(
+  /// Returns null for IDs in [studyDeploymentIds] for which no deployment exists.
+  Future<List<StudyDeploymentStatus?>> getStudyDeploymentStatusList(
     List<String> studyDeploymentIds,
   );
 

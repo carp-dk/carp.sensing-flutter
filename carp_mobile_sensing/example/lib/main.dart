@@ -171,14 +171,11 @@ class StudyPageState extends State<StudyPage> {
 
     // If the study has not been started (and deployed) yet, do this first
     if (study.status.index <= StudyStatus.Deployed.index) {
-      print('>> STARTING study ${study.studyDeploymentId}');
       controller?.start();
     } else {
       if (study.isSampling) {
-        print('>>  PAUSING study ${study.studyDeploymentId}');
         controller?.pause();
       } else {
-        print('>> RESUMING study ${study.studyDeploymentId}');
         controller?.resume();
       }
     }

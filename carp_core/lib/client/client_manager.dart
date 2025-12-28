@@ -69,7 +69,7 @@ abstract class ClientManager<
   bool get isConfigured => repository.deviceRegistration != null;
 
   /// Makes a check if this client manager is ready for requests.
-  void _check() {
+  void _checkConfiguration() {
     if (!isConfigured) {
       throw NotConfiguredException(
         'ClientManager has not been configured yet. Call configure() first.',
@@ -140,7 +140,7 @@ abstract class ClientManager<
   /// study if it was already added.
   @mustCallSuper
   Future<TStudy> addStudy(TStudy study) async {
-    _check();
+    _checkConfiguration();
     if (!repository.hasStudy(study)) {
       repository.addStudy(study);
 
@@ -157,7 +157,7 @@ abstract class ClientManager<
   /// deployment service or if the study has not been added to this client manager.
   @mustCallSuper
   Future<StudyDeploymentStatus?> getStudyDeploymentStatus(TStudy study) async {
-    _check();
+    _checkConfiguration();
     if (repository.hasStudy(study)) {
       return await proxy?.getStudyDeploymentStatus(study);
     }
@@ -179,7 +179,7 @@ abstract class ClientManager<
     String studyDeploymentId,
     String deviceRoleName,
   ) async {
-    _check();
+    _checkConfiguration();
 
     var study = getStudy(studyDeploymentId, deviceRoleName);
 
@@ -232,10 +232,12 @@ abstract class ClientManager<
     String studyDeploymentId,
     String deviceRoleName,
   ) async {
-    _check();
+    _checkConfiguration();
 
     var study = getStudy(studyDeploymentId, deviceRoleName);
-    if (study != null) repository.removeStudy(study);
+    if (study != null) {
+      repository.removeStudy(study);
+    }
   }
 
   /// Permanently stop collecting data for the study with id [studyDeploymentId]
@@ -244,14 +246,15 @@ abstract class ClientManager<
   /// Once a study is stopped it cannot be deployed anymore since it will
   /// be marked as permanently stopped in the deployment service.
   ///
-  /// If you only want to remove the study from this client and be able to
+  /// If you want to remove the study from this client and be able to
   /// redeploy it later, use the [removeStudy] method instead.
+  /// Note that stopping a study does not remove it from this client manager.
   @mustCallSuper
   Future<StudyStatus> stopStudy(
     String studyDeploymentId,
     String deviceRoleName,
   ) async {
-    _check();
+    _checkConfiguration();
 
     var study = getStudy(studyDeploymentId, deviceRoleName);
 

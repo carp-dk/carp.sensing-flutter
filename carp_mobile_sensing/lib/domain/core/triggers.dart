@@ -414,7 +414,18 @@ class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
   ///
   ///    `<minutes> <hours> <days> <months> <weekdays>`
   ///
-  /// For example `42 19 * * *` is "Everyday at 19:42".
+  /// For example:
+  ///  * `42 19 * * *` is "Everyday at 19:42".
+  ///  * `0 9 * * 1` is "Every Monday at 09:00".
+  ///  * `0 0 1 * *` is "The first day of every month at midnight".
+  ///
+  /// Note the following:
+  /// * the fields are separated by spaces
+  /// * that `*` is used to signify "match all"
+  /// * that the weekday field uses `0` for Sunday
+  /// * that the number fields are numbered from `0` (minutes, weekdays) or `1` (hours, days, months)
+  /// * that numbers are single values - ranges and lists are not supported
+  /// * that number are to be stated as integers, and not a string with leading zeros (e.g., use `9` and not `09` for 9 o'clock)
   ///
   /// See e.g. [crontab guru](https://crontab.guru/) for help in formatting cron jobs.
   factory CronScheduledTrigger.parse({

@@ -20,13 +20,15 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   final TriggerConfiguration _trigger;
   final TaskConfiguration _task;
   final TaskControl _taskControl;
-  TriggerExecutor? triggerExecutor;
-  TaskExecutor? taskExecutor;
+  TriggerExecutor? _triggerExecutor;
+  TaskExecutor? _taskExecutor;
 
   String get studyDeploymentId => deployment!.studyDeploymentId;
   TriggerConfiguration get trigger => _trigger;
   TaskConfiguration get task => _task;
   TaskControl get taskControl => _taskControl;
+  TriggerExecutor? get triggerExecutor => _triggerExecutor;
+  TaskExecutor? get taskExecutor => _taskExecutor;
 
   TaskControlExecutor(
     TaskControl taskControl,
@@ -41,32 +43,33 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   bool onInitialize() {
     _group.add(_controller.stream);
 
-    // get or create the trigger executor and initialize with this task control executor
-    triggerExecutor = ExecutorFactory().getTriggerExecutor(
+    // Get or create the trigger executor and initialize with this task control executor
+    _triggerExecutor = ExecutorFactory().getTriggerExecutor(
       studyDeploymentId,
       taskControl.triggerId,
     );
-    if (triggerExecutor == null) {
-      triggerExecutor = ExecutorFactory().createTriggerExecutor(
+    if (_triggerExecutor == null) {
+      _triggerExecutor = ExecutorFactory().createTriggerExecutor(
         studyDeploymentId,
         taskControl.triggerId,
         trigger,
       );
-      triggerExecutor?.initialize(trigger, deployment);
-    }
-    // now start listening on the trigger and trigger events
-    triggerExecutor?.triggerEvents.listen((_) => onTrigger());
 
+      _triggerExecutor?.initialize(trigger, deployment);
+    }
+
+    // now start listening on the trigger and trigger events
+    _triggerExecutor?.triggerEvents.listen((_) => onTrigger());
     // get the task executor and add the measurements it collects to the stream group
-    taskExecutor = ExecutorFactory().getTaskExecutor(studyDeploymentId, task);
-    if (taskExecutor == null) {
+    _taskExecutor = ExecutorFactory().getTaskExecutor(studyDeploymentId, task);
+    if (_taskExecutor == null) {
       warning(
         "$runtimeType - Cannot find a TaskExecutor for task type '${task.runtimeType}'.",
       );
       return false;
     }
-    taskExecutor?.initialize(task, deployment);
-    _group.add(taskExecutor!.measurements);
+    _taskExecutor?.initialize(task, deployment);
+    _group.add(_taskExecutor!.measurements);
 
     return true;
   }

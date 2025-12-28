@@ -231,10 +231,9 @@ abstract class DeviceManager<
   void restart() {
     info('$runtimeType - Resuming sampling...');
 
-    executors.forEach(
-      (executor) =>
-          executor.state == ExecutorState.Resumed ? executor.resume() : null,
-    );
+    for (var executor in executors) {
+      executor.state == ExecutorState.Resumed ? executor.resume() : null;
+    }
   }
 
   /// Stop sampling the measures using this device.

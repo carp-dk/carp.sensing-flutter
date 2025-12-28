@@ -33,6 +33,7 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   DeviceRegistration? deviceRegistration;
 
   Future<void> init() async {
+    // Load all studies from persistent storage.
     _repository = (await Persistence().getAllStudies()).toSet();
     for (var study in _repository) {
       _studyStatusEventGroup.add(study.events);

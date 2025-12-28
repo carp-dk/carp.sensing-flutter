@@ -70,6 +70,9 @@ class AppTaskController {
   /// the phone's notification system when a task is enqueued via the
   /// [enqueue] method.
   Future<void> initialize({bool enableNotifications = true}) async {
+    // Restore previous queue from persistent storage.
+    await _restoreQueue();
+
     // set up a timer which cleans up in the queue once an hour
     _garbageCollector = Timer.periodic(const Duration(hours: 1), (_) {
       for (var task in userTasks) {
@@ -168,8 +171,8 @@ class AppTaskController {
   }
 
   /// Enqueue all tasks buffered with [buffer].
-  /// This method is called by the [DeploymentExecutor] when a deployment is
-  /// finished.
+  /// This method is called by the [SmartphoneDeploymentExecutor] when a deployment
+  /// is finished.
   /// It will sort the tasks based on their trigger time and then schedule
   /// the first N tasks where N is the number of available notification slots.
   Future<void> enqueueBufferedTasks() async {
@@ -293,29 +296,31 @@ class AppTaskController {
     }
   }
 
-  /// Removes all tasks for a study deployment from the queue and cancels
+  /// Removes all tasks for a study from the queue and cancels
   /// all notifications generated for these tasks.
-  void removeStudyDeployment(String studyDeploymentId) {
+  void removeStudy(SmartphoneStudy study) {
     final userTasks = _userTaskMap.values
         .where(
           (task) =>
               task.appTaskExecutor.deployment?.studyDeploymentId ==
-              studyDeploymentId,
+              study.studyDeploymentId,
         )
         .toList();
 
-    for (var userTask in userTasks) {
-      dequeue(userTask.id);
+    for (var task in userTasks) {
+      dequeue(task.id);
     }
   }
 
-  /// Restore the queue from persistent storage. Returns `true` if successful.
-  Future<bool> restoreQueue() async {
+  /// Restore the queue from persistent storage for the specified
+  /// [study].
+  /// Returns true if successful.
+  Future<bool> _restoreQueue([SmartphoneStudy? study]) async {
     debug('$runtimeType - Restoring User Task Queue');
     bool success = true;
 
     try {
-      final snapshots = await Persistence().getUserTasks();
+      final snapshots = await Persistence().getUserTasks(study);
 
       // now create new AppTaskExecutors, initialize them, and add them to the queue
       for (var snapshot in snapshots) {

@@ -417,6 +417,9 @@ class SmartphoneStudyController {
       await askForAllPermissions();
     }
 
+    // Restore the app task controller state for this study.
+    await AppTaskController()._restoreQueue(study);
+
     // Resume data sampling, if needed. Wait for a few seconds to let devices
     // connect before resuming sampling.
     if (study.samplingStatus == ExecutorState.Resumed) {

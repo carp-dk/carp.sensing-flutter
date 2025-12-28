@@ -30,8 +30,10 @@ class SmartphoneDeploymentService implements DeploymentService {
     String? id,
     Map<String, DeviceRegistration>? connectedDevicePreregistrations,
   ]) async {
-    assert(protocol is SmartphoneStudyProtocol,
-        "$runtimeType only supports the deployment of protocols of type 'SmartphoneStudyProtocol'");
+    assert(
+      protocol is SmartphoneStudyProtocol,
+      "$runtimeType only supports the deployment of protocols of type 'SmartphoneStudyProtocol'",
+    );
 
     StudyDeployment deployment = StudyDeployment(protocol, id);
     _repository[deployment.studyDeploymentId] = deployment;
@@ -47,7 +49,8 @@ class SmartphoneDeploymentService implements DeploymentService {
 
   @override
   Future<Set<String>> removeStudyDeployments(
-      Set<String> studyDeploymentIds) async {
+    Set<String> studyDeploymentIds,
+  ) async {
     Set<String> removedKeys = {};
     for (var key in studyDeploymentIds) {
       if (_repository.containsKey(key)) {
@@ -60,8 +63,13 @@ class SmartphoneDeploymentService implements DeploymentService {
 
   @override
   Future<StudyDeploymentStatus?> getStudyDeploymentStatus(
-          String studyDeploymentId) async =>
-      _repository[studyDeploymentId]?.status;
+    String studyDeploymentId,
+  ) async => _repository[studyDeploymentId]?.status;
+
+  @override
+  Future<List<StudyDeploymentStatus?>> getStudyDeploymentStatusList(
+    List<String> studyDeploymentIds,
+  ) async => studyDeploymentIds.map((id) => _repository[id]?.status).toList();
 
   @override
   Future<StudyDeploymentStatus?> registerDevice(
@@ -75,8 +83,9 @@ class SmartphoneDeploymentService implements DeploymentService {
 
     // check if already registered - if not register device
     DeviceConfiguration device = deployment.registeredDevices.keys.firstWhere(
-        (configuration) => configuration.roleName == deviceRoleName,
-        orElse: () => DeviceConfiguration(roleName: deviceRoleName));
+      (configuration) => configuration.roleName == deviceRoleName,
+      orElse: () => DeviceConfiguration(roleName: deviceRoleName),
+    );
 
     deployment.registerDevice(device, registration);
 
@@ -91,7 +100,8 @@ class SmartphoneDeploymentService implements DeploymentService {
     if (_repository[studyDeploymentId] == null) return null;
     StudyDeployment deployment = _repository[studyDeploymentId]!;
     DeviceConfiguration device = deployment.registeredDevices.keys.firstWhere(
-        (configuration) => configuration.roleName == deviceRoleName);
+      (configuration) => configuration.roleName == deviceRoleName,
+    );
 
     deployment.unregisterDevice(device);
 
@@ -107,16 +117,18 @@ class SmartphoneDeploymentService implements DeploymentService {
 
     StudyDeployment deployment = _repository[studyDeploymentId]!;
     DeviceConfiguration device = deployment.registeredDevices.keys.firstWhere(
-        (configuration) => configuration.roleName == primaryDeviceRoleName);
+      (configuration) => configuration.roleName == primaryDeviceRoleName,
+    );
 
-    assert(device is PrimaryDeviceConfiguration,
-        "The specified '$primaryDeviceRoleName' device is not registered as a primary device");
+    assert(
+      device is PrimaryDeviceConfiguration,
+      "The specified '$primaryDeviceRoleName' device is not registered as a primary device",
+    );
 
-    PrimaryDeviceDeployment deviceDeployment =
-        deployment.getDeviceDeploymentFor(device as PrimaryDeviceConfiguration);
+    PrimaryDeviceDeployment deviceDeployment = deployment
+        .getDeviceDeploymentFor(device as PrimaryDeviceConfiguration);
 
-    return SmartphoneDeployment
-        .fromPrimaryDeviceDeploymentAndSmartphoneStudyProtocol(
+    return SmartphoneDeployment.fromPrimaryDeviceDeploymentAndSmartphoneStudyProtocol(
       studyDeploymentId: studyDeploymentId,
       deployment: deviceDeployment,
       protocol: deployment.protocol as SmartphoneStudyProtocol,
@@ -126,7 +138,8 @@ class SmartphoneDeploymentService implements DeploymentService {
   /// Get a smartphone deployment configuration for [studyDeploymentId] for
   /// this phone.
   Future<SmartphoneDeployment?> getDeviceDeployment(
-          String studyDeploymentId) async =>
+    String studyDeploymentId,
+  ) async =>
       await getDeviceDeploymentFor(studyDeploymentId, thisPhone.roleName);
 
   @override
@@ -140,11 +153,13 @@ class SmartphoneDeploymentService implements DeploymentService {
     deviceDeploymentLastUpdatedOn ??= DateTime.now();
     StudyDeployment deployment = _repository[studyDeploymentId]!;
     DeviceConfiguration device = deployment.registeredDevices.keys.firstWhere(
-        (configuration) => configuration.roleName == primaryDeviceRoleName);
+      (configuration) => configuration.roleName == primaryDeviceRoleName,
+    );
 
     if (device is! PrimaryDeviceConfiguration) {
       warning(
-          "The specified device with role name '$primaryDeviceRoleName' is not a primary device.");
+        "The specified device with role name '$primaryDeviceRoleName' is not a primary device.",
+      );
       return null;
     }
     deployment.deviceDeployed(device, deviceDeploymentLastUpdatedOn);
@@ -158,12 +173,11 @@ class SmartphoneDeploymentService implements DeploymentService {
   Future<StudyDeploymentStatus?> deployed(
     String studyDeploymentId, {
     DateTime? deviceDeploymentLastUpdateDate,
-  }) async =>
-      deviceDeployed(
-        studyDeploymentId,
-        thisPhone.roleName,
-        deviceDeploymentLastUpdateDate,
-      );
+  }) async => deviceDeployed(
+    studyDeploymentId,
+    thisPhone.roleName,
+    deviceDeploymentLastUpdateDate,
+  );
 
   /// Stop the study deployment with [studyDeploymentId].
   @override
@@ -173,13 +187,6 @@ class SmartphoneDeploymentService implements DeploymentService {
     StudyDeployment deployment = _repository[studyDeploymentId]!;
     deployment.stop();
     return deployment.status;
-  }
-
-  @override
-  Future<List<StudyDeploymentStatus>> getStudyDeploymentStatusList(
-      List<String> studyDeploymentIds) {
-    // TODO: implement getStudyDeploymentStatusList
-    throw UnimplementedError();
   }
 
   @override

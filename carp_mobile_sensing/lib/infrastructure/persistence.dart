@@ -94,8 +94,9 @@ class Persistence {
         await db.execute(
           'CREATE TABLE $TASK_QUEUE_TABLE_NAME ('
           '$ID_COLUMN INTEGER PRIMARY KEY, '
-          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
           '$TASK_ID_COLUMN TEXT, '
+          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
+          '$DEVICE_ROLE_NAME_COLUMN TEXT, '
           '$TASK_COLUMN TEXT)',
         );
 
@@ -248,8 +249,6 @@ class Persistence {
 
   /// Remove the [study] from local cache.
   Future<void> removeStudy(Study study) async {
-    final deploymentId = study.studyDeploymentId;
-    final deviceRoleName = study.deviceRoleName;
     info("$runtimeType - Erasing study, deploymentId: $study");
     try {
       await _database?.delete(
@@ -257,7 +256,7 @@ class Persistence {
         where:
             '$STUDY_DEPLOYMENT_ID_COLUMN = ? AND '
             '$DEVICE_ROLE_NAME_COLUMN = ?',
-        whereArgs: [deploymentId, deviceRoleName],
+        whereArgs: [study.studyDeploymentId, study.deviceRoleName],
       );
     } catch (exception) {
       warning('$runtimeType - Failed to erase deployment - $exception');
@@ -279,8 +278,9 @@ class Persistence {
         // all these cases we need to create or update the record
         var snapshot = UserTaskSnapshot.fromUserTask(task);
         final Map<String, dynamic> map = {
-          STUDY_DEPLOYMENT_ID_COLUMN: task.studyDeploymentId,
           TASK_ID_COLUMN: task.id,
+          STUDY_DEPLOYMENT_ID_COLUMN: snapshot.studyDeploymentId,
+          DEVICE_ROLE_NAME_COLUMN: snapshot.deviceRoleName,
           TASK_COLUMN: jsonEncode(snapshot),
         };
         int count =
@@ -311,14 +311,21 @@ class Persistence {
     }
   }
 
-  /// Get the entire list of [UserTaskSnapshot].
-  Future<List<UserTaskSnapshot>> getUserTasks() async {
+  /// Get the list of [UserTaskSnapshot] for [study].
+  /// If [study] is null, all user tasks are returned.
+  Future<List<UserTaskSnapshot>> getUserTasks([SmartphoneStudy? study]) async {
     List<UserTaskSnapshot> result = [];
     try {
       final List<Map<String, Object?>> list =
           await _database?.query(
             TASK_QUEUE_TABLE_NAME,
             columns: [TASK_COLUMN],
+            where: study != null
+                ? '$STUDY_DEPLOYMENT_ID_COLUMN = ? AND $DEVICE_ROLE_NAME_COLUMN = ?'
+                : null,
+            whereArgs: study != null
+                ? [study.studyDeploymentId, study.deviceRoleName]
+                : null,
           ) ??
           [];
 
@@ -337,5 +344,24 @@ class Persistence {
     }
 
     return result;
+  }
+
+  /// Remove the list of user tasks for [study].
+  /// If [study] is null, all user tasks are removed.
+  Future<void> removeUserTasks([Study? study]) async {
+    info("$runtimeType - Erasing user tasks for study: $study");
+    try {
+      await _database?.delete(
+        TASK_QUEUE_TABLE_NAME,
+        where: study != null
+            ? '$STUDY_DEPLOYMENT_ID_COLUMN = ? AND $DEVICE_ROLE_NAME_COLUMN = ?'
+            : null,
+        whereArgs: study != null
+            ? [study.studyDeploymentId, study.deviceRoleName]
+            : null,
+      );
+    } catch (exception) {
+      warning('$runtimeType - Failed to erase deployment - $exception');
+    }
   }
 }
