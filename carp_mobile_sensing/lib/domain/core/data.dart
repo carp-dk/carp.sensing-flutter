@@ -42,3 +42,62 @@ class FileData extends Data {
   @override
   Map<String, dynamic> toJson() => _$FileDataToJson(this);
 }
+
+/// Data about a completed [AppTask].
+///
+/// [taskName] is the name of the completed app task.
+/// [taskType] indicates the type of app task completed.
+/// [completedAt] is the time this task was completed (in UTC).
+/// [taskData] holds the result of the task, or null if no result is collected.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class CompletedAppTask extends CompletedTask {
+  static const dataType = CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME;
+
+  // note that the format is overridden to include the task type
+  // in the form of 'completed_app_task.<taskType>'
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  DataType get format => DataType.fromString(
+    '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$taskType',
+  );
+
+  /// The type of [AppTask] which was completed, if specified.
+  ///
+  /// Known types are:
+  ///  - informed_consent - a task collecting informed consent from the user
+  ///  - survey - a survey task
+  ///  - cognition - a cognitive assessment task
+  ///  - audio - an audio task
+  ///  - video - a video task
+  ///  - image - an image task
+  ///  - health - a task collecting health data
+  ///  - sensing - a task collecting sensing data
+  String taskType;
+
+  /// The time when the task was completed in UTC.
+  late DateTime completedAt;
+
+  CompletedAppTask({
+    required super.taskName,
+    required this.taskType,
+    super.taskData,
+  }) : super() {
+    completedAt = DateTime.now().toUtc();
+  }
+
+  @override
+  bool equivalentTo(Data other) =>
+      other is CompletedAppTask &&
+      taskName == other.taskName &&
+      taskType == other.taskType;
+
+  @override
+  String get jsonType => CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME;
+
+  @override
+  Function get fromJsonFunction => _$CompletedAppTaskFromJson;
+  factory CompletedAppTask.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<CompletedAppTask>(json);
+  @override
+  Map<String, dynamic> toJson() => _$CompletedAppTaskToJson(this);
+}

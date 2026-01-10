@@ -790,3 +790,23 @@ Map<String, dynamic> _$FileDataToJson(FileData instance) => <String, dynamic>{
   'upload': instance.upload,
   'metadata': ?instance.metadata,
 };
+
+CompletedAppTask _$CompletedAppTaskFromJson(Map<String, dynamic> json) =>
+    CompletedAppTask(
+        taskName: json['taskName'] as String,
+        taskType: json['taskType'] as String,
+        taskData: json['taskData'] == null
+            ? null
+            : Data.fromJson(json['taskData'] as Map<String, dynamic>),
+      )
+      ..$type = json['__type'] as String?
+      ..completedAt = DateTime.parse(json['completedAt'] as String);
+
+Map<String, dynamic> _$CompletedAppTaskToJson(CompletedAppTask instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'taskName': instance.taskName,
+      'taskData': ?instance.taskData?.toJson(),
+      'taskType': instance.taskType,
+      'completedAt': instance.completedAt.toIso8601String(),
+    };

@@ -76,7 +76,7 @@ class CamsDataTypes {
   static const String HEARTBEAT_TYPE_NAME =
       '${CarpDataTypes.CARP_NAMESPACE}.heartbeat';
   static const String COMPLETED_APP_TASK_TYPE_NAME =
-      '${CarpDataTypes.CARP_NAMESPACE}.completedapptask';
+      '${CarpDataTypes.CARP_NAMESPACE}.completed_app_task';
   static const String FILE_TYPE_NAME = '${CarpDataTypes.CARP_NAMESPACE}.file';
 
   CamsDataTypes._() {

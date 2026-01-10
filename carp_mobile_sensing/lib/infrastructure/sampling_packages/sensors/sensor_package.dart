@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -39,7 +38,7 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
   static const String ACCELERATION_FEATURES =
-      '${CarpDataTypes.CARP_NAMESPACE}.accelerationfeatures';
+      '${CarpDataTypes.CARP_NAMESPACE}.acceleration_features';
 
   /// Rotation of the phone in x,y,z (typically measured by a gyroscope).
   ///  * Event-based measure.
@@ -58,13 +57,15 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
   static const String AMBIENT_LIGHT =
-      '${CarpDataTypes.CARP_NAMESPACE}.ambientlight';
+      '${CarpDataTypes.CARP_NAMESPACE}.ambient_light';
 
-  /// Step count events from the phone's pedometer.
-  ///  * Event-based measure.
+  /// Step event from the phone's pedometer.
+  /// Note that this measure type is different from the "stepcount" measure type,
+  /// which provides aggregated step counts over a time period.
+  ///  * Event-based measure (one event per step).
   ///  * Uses the [Smartphone] device for data collection.
   ///  * No sampling configuration needed.
-  static const String STEP_COUNT = CarpDataTypes.STEP_COUNT_TYPE_NAME;
+  static const String STEP_EVENT = '${CarpDataTypes.CARP_NAMESPACE}.step_event';
 
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
@@ -106,9 +107,10 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
           ),
         ),
         DataTypeSamplingScheme(
-          CamsDataTypeMetaData.fromDataTypeMetaData(
-            dataTypeMetaData:
-                CarpDataTypes().types[CarpDataTypes.STEP_COUNT_TYPE_NAME]!,
+          CamsDataTypeMetaData(
+            type: STEP_EVENT,
+            displayName: "Step Events",
+            timeType: DataTimeType.POINT,
             permissions: [Permission.activityRecognition],
           ),
         ),
@@ -138,7 +140,7 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
         return MagnetometerProbe();
       case ROTATION:
         return GyroscopeProbe();
-      case STEP_COUNT:
+      case STEP_EVENT:
         return PedometerProbe();
       case AMBIENT_LIGHT:
         return (Platform.isAndroid) ? LightProbe() : null;

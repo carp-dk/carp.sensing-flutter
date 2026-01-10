@@ -28,20 +28,23 @@ class RPAppTask extends AppTask {
     List<Measure>? measures,
     required this.rpTask,
   }) {
-    measures ??= [];
+    measures ??= <Measure>[];
 
-    // Add the survey as a measure type to be collected and later uploaded, if not already added.
-    //   - issue #342
-    if (measures
-            .firstWhere(
-              (Measure measure) => measure.type == SurveySamplingPackage.SURVEY,
-              orElse: () => Measure(type: 'none'),
-            )
-            .type !=
-        SurveySamplingPackage.SURVEY) {
+    // Add the survey as a measure type to be collected and later uploaded,
+    // if not already added - issue #342.
+    if (!measures.contains(Measure(type: SurveySamplingPackage.SURVEY))) {
       measures.add(Measure(type: SurveySamplingPackage.SURVEY));
     }
-    super.measures = measures;
+    // Ensure that the completed app task data type is included in the measures.
+    if (!measures.contains(
+      Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$type'),
+    )) {
+      measures.add(
+        Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$type'),
+      );
+    }
+
+    super.measures = measures.toSet().toList();
   }
 
   @override

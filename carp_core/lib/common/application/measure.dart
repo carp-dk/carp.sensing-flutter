@@ -11,6 +11,9 @@ part of '../../common.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Measure extends Serializable {
   /// The type of measure to do.
+  ///
+  /// Specifies the full name space of the data to be collected, e.g.,
+  /// "dk.cachet.carp.measure.location".
   String type;
 
   /// The type of measure as a [DataType].
@@ -39,6 +42,12 @@ class Measure extends Serializable {
   @override
   String get jsonType =>
       'dk.cachet.carp.common.application.tasks.Measure.DataStream';
+
+  @override
+  int get hashCode => type.hashCode;
+
+  @override
+  bool operator ==(Object other) => other is Measure && other.type == type;
 
   @override
   String toString() => '$runtimeType - type: $type';

@@ -177,18 +177,6 @@ class SmartphoneStudyProtocol extends StudyProtocol
     return true;
   }
 
-  /// Get the [DeviceConfiguration] for the device with the given [roleName].
-  /// This can be either a primary device or a connected device.
-  /// Returns `null` if no such device is found.
-  DeviceConfiguration? getDeviceByRoleName(String roleName) {
-    for (var device in devices) {
-      if (device.roleName == roleName) {
-        return device;
-      }
-    }
-    return null;
-  }
-
   @override
   bool addConnectedDevice(
     DeviceConfiguration device,
@@ -202,7 +190,6 @@ class SmartphoneStudyProtocol extends StudyProtocol
 
   /// Add the trigger, task completed, error, and heartbeat measures to the protocol
   /// since CAMS always collects and upload this data from any device.
-  /// If the device is a primary device, also add the [CompletedAppTask] measure.
   void _addSamplingTaskControl(DeviceConfiguration device) {
     var measures = [
       Measure(type: CarpDataTypes.ERROR_TYPE_NAME),
@@ -210,17 +197,24 @@ class SmartphoneStudyProtocol extends StudyProtocol
       Measure(type: CarpDataTypes.COMPLETED_TASK_TYPE_NAME),
       Measure(type: CamsDataTypes.HEARTBEAT_TYPE_NAME),
     ];
-    // issue #521
-    if (device is PrimaryDeviceConfiguration) {
-      // For primary devices, also add the [CompletedAppTask] measure
-      measures.add(Measure(type: CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME));
-    }
 
     addTaskControl(
       NoOpTrigger(),
       MonitoringTask(name: "Monitoring ${device.roleName}", measures: measures),
       device,
     );
+  }
+
+  /// Get the [DeviceConfiguration] for the device with the given [roleName].
+  /// This can be either a primary device or a connected device.
+  /// Returns `null` if no such device is found.
+  DeviceConfiguration? getDeviceByRoleName(String roleName) {
+    for (var device in devices) {
+      if (device.roleName == roleName) {
+        return device;
+      }
+    }
+    return null;
   }
 
   factory SmartphoneStudyProtocol.fromJson(Map<String, dynamic> json) =>

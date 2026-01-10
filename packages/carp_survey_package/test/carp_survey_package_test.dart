@@ -33,8 +33,7 @@ void main() {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask()
-        ..measures = SamplingPackageRegistry()
-            .dataTypes
+        ..measures = SamplingPackageRegistry().dataTypes
             .map((type) => Measure(type: type.type))
             .toList(),
       phone,
@@ -43,16 +42,18 @@ void main() {
     // add a WHO-5 survey as an app task
     // plus collect device and ambient light information when survey is done
     protocol.addTaskControl(
-        DelayedTrigger(delay: const Duration(seconds: 30)),
-        RPAppTask(
-            type: SurveyUserTask.SURVEY_TYPE,
-            name: 'WHO-5 Survey',
-            rpTask: who5Task,
-            measures: [
-              Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
-              Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-            ]),
-        phone);
+      DelayedTrigger(delay: const Duration(seconds: 30)),
+      RPAppTask(
+        type: AppTask.SURVEY_TYPE,
+        name: 'WHO-5 Survey',
+        rpTask: who5Task,
+        measures: [
+          Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
+          Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+        ],
+      ),
+      phone,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () async {
@@ -65,8 +66,9 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -75,12 +77,13 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocol = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, Smartphone.DEFAULT_ROLE_NAME);
-    expect((protocol.tasks.last as RPAppTask).type, SurveyUserTask.SURVEY_TYPE);
+    expect((protocol.tasks.last as RPAppTask).type, AppTask.SURVEY_TYPE);
     print(toJsonString(protocol));
   });
 }

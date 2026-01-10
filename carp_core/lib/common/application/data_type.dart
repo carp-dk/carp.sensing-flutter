@@ -46,10 +46,8 @@ class DataType {
   String toString() => '$namespace.$name';
 
   @override
-  bool operator ==(other) {
-    if (other is! DataType) return false;
-    return (other.namespace == namespace && other.name == name);
-  }
+  bool operator ==(other) =>
+      other is DataType && (other.namespace == namespace && other.name == name);
 
   // taken from https://dart.dev/guides/libraries/library-tour#implementing-map-keys
   @override

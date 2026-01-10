@@ -7,12 +7,15 @@
 
 part of '../../common.dart';
 
-/// Describes requested measures and/or output to be presented on a device.
+/// Describes requested measures to be collected by a device.
 ///
 /// A [TaskConfiguration] holds information about each task to be triggered by
-/// a [TriggerConfiguration] as part of a [StudyProtocol].
+/// a [TriggerConfiguration] as part of a [TaskControl].
 /// Each task holds a list of [Measure]s to be done as part of this task.
 /// A [TaskConfiguration] is hence an aggregation of [Measure]s.
+///
+/// Note that the [name] of the task identifies the task and has to be unique
+/// within a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TaskConfiguration extends Serializable {
   static int _counter = 0;
@@ -41,11 +44,13 @@ class TaskConfiguration extends Serializable {
   /// Remove [measure] from this task.
   void removeMeasure(Measure measure) => measures!.remove(measure);
 
-  /// Create a task. If [name] is not specified, a name is generated.
+  /// Create a task. The [name] uniquely identifies the task.
+  /// If [name] is not specified, a name is generated.
   TaskConfiguration({String? name, this.description, List<Measure>? measures})
     : super() {
     this.name = name ?? 'Task #${_counter++}';
-    this.measures = measures ?? [];
+    // Remove duplicates by converting to a set and back to a list.
+    this.measures = measures?.toSet().toList() ?? [];
   }
 
   @override
@@ -68,7 +73,7 @@ class TaskConfiguration extends Serializable {
 /// of such monitoring measure to be added to a protocol.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MonitoringTask extends TaskConfiguration {
-  /// Create a new task which can run in the background.
+  /// Create a new monitoring task.
   MonitoringTask({super.name, super.description, super.measures});
 
   @override

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020-2022 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2020 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -12,6 +11,27 @@ part of '../../domain.dart';
 /// See [AppTaskExecutor] on how this work on runtime.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AppTask extends TaskConfiguration {
+  /// A background sensing user task which can be started and stopped by the user.
+  static const String SENSING_TYPE = 'sensing';
+
+  /// A survey app task. Used in the carp_survey_package for `RPAppTask`s.
+  static const String SURVEY_TYPE = 'survey';
+
+  /// A cognitive assessment app task. Used in the carp_survey_package for `RPAppTask`s.
+  static const String COGNITIVE_ASSESSMENT_TYPE = 'cognition';
+
+  /// An audio app task. Used in the carp_audio_package.
+  static const String AUDIO_TYPE = 'audio';
+
+  /// A video app task. Used in the carp_audio_package.
+  static const String VIDEO_TYPE = 'video';
+
+  /// An image app task. Used in the carp_audio_package.
+  static const String IMAGE_TYPE = 'image';
+
+  /// An informed consent app task.
+  static const String INFORMED_CONSENT_TYPE = 'informed_consent';
+
   /// Type of task. For example a `survey`.
   String type;
 
@@ -50,7 +70,7 @@ class AppTask extends TaskConfiguration {
   /// [type] provide a unique type for this kind of app task.
   AppTask({
     super.name,
-    super.measures,
+    List<Measure>? measures,
     required this.type,
     this.title = '',
     super.description = '',
@@ -58,7 +78,20 @@ class AppTask extends TaskConfiguration {
     this.minutesToComplete,
     this.expire,
     this.notification = false,
-  });
+  }) : super() {
+    measures ??= <Measure>[];
+
+    // Ensure that the completed app task data type is included in the measures.
+    if (!measures.contains(
+      Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$type'),
+    )) {
+      measures.add(
+        Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$type'),
+      );
+    }
+
+    super.measures = measures.toSet().toList();
+  }
 
   @override
   Function get fromJsonFunction => _$AppTaskFromJson;

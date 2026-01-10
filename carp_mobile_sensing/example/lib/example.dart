@@ -31,7 +31,7 @@ Future<void> minimalExample() async {
           DelayedTrigger(delay: const Duration(seconds: 10)),
           BackgroundTask(
             measures: [
-              Measure(type: SensorSamplingPackage.STEP_COUNT),
+              Measure(type: SensorSamplingPackage.STEP_EVENT),
               Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
               Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
               Measure(type: DeviceSamplingPackage.BATTERY_STATE),
@@ -102,7 +102,7 @@ Future<void> example_0() async {
     DelayedTrigger(delay: const Duration(seconds: 10)),
     BackgroundTask(
       measures: [
-        Measure(type: SensorSamplingPackage.STEP_COUNT),
+        Measure(type: SensorSamplingPackage.STEP_EVENT),
         Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
         Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
         Measure(type: DeviceSamplingPackage.BATTERY_STATE),
@@ -160,7 +160,7 @@ void example_1() async {
     ImmediateTrigger(),
     BackgroundTask(
       measures: [
-        Measure(type: SensorSamplingPackage.STEP_COUNT),
+        Measure(type: SensorSamplingPackage.STEP_EVENT),
         Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
         Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
         Measure(type: DeviceSamplingPackage.BATTERY_STATE),

@@ -1,6 +1,6 @@
 {
-    "id": "faf40280-3485-1f8e-90e5-c7f5b019674d",
-    "createdOn": "2024-04-24T11:58:44.380332Z",
+    "id": "da0335c9-c0af-4615-997e-3b6205da63d8",
+    "createdOn": "2026-01-07T17:23:53.009925Z",
     "version": 0,
     "ownerId": "979b408d-784e-4b1b-bb1e-ff9204e072f3",
     "name": "Test Study Protocol",
@@ -79,6 +79,10 @@
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.stepcount"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedtask"
                 }
             ],
             "duration": "PT3600S"
@@ -98,6 +102,10 @@
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.heartrate"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedtask"
                 }
             ],
             "duration": "PT3600S"
@@ -113,6 +121,10 @@
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.signalstrength"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedtask"
                 }
             ],
             "duration": "PT3600S"

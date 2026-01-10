@@ -214,7 +214,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
           Measure(type: DeviceSamplingPackage.BATTERY_STATE),
           Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
           Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
-          Measure(type: SensorSamplingPackage.STEP_COUNT),
+          Measure(type: SensorSamplingPackage.STEP_EVENT),
           Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
             ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
               interval: const Duration(seconds: 20),
