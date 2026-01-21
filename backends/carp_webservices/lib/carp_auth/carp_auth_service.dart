@@ -172,6 +172,7 @@ class CarpAuthService {
     String? code;
     String? clientId = _authProperties?.clientId;
     String? redirectUri = _authProperties?.anonymousRedirectURI?.toString();
+    uri = _constructAuthUri(uri);
 
     TokenResponse tokenResponse = await FlutterWebAuth2.authenticate(
       url: uri,
@@ -182,6 +183,7 @@ class CarpAuthService {
       ),
     ).then((result) async {
       code = Uri.parse(result).queryParameters['code'];
+
       if ((_currentUser == null || _currentUser!.isAuthenticated) &&
           code != null) {
         return await FlutterAppAuth().token(
@@ -235,6 +237,11 @@ class CarpAuthService {
       httpStatus: HTTPStatus(401),
       message: 'Authentication failed.',
     );
+  }
+
+  String _constructAuthUri(String uri) {
+    String secondPart = uri.split('action-token').last;
+    return '${authProperties.discoveryURL}/login-actions/action-token$secondPart';
   }
 
   /// Authenticate to this CARP service using a [username] and [password].
