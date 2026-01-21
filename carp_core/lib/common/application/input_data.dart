@@ -349,13 +349,13 @@ class OnboardingResearcherInput extends InputData {
   /// Full name of the onboarding researcher.
   String researcherName;
 
-  /// The institution of the onboarding researcher (optional).
-  String? institution;
+  /// The name of the institution of the onboarding researcher (optional).
+  String? institutionName;
 
   OnboardingResearcherInput({
     required this.researcherId,
     required this.researcherName,
-    this.institution,
+    this.institutionName,
   }) : super();
 
   @override

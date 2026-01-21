@@ -49,13 +49,6 @@ class FileData extends Data {
 /// [taskData] holds the result of the task, or null if no result is collected.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CompletedAppTask extends CompletedTask {
-  // note that the dataType is overridden to include the task type
-  // in the form of 'completedapptask.<taskType>'
-  // @override
-  // @JsonKey(includeFromJson: false, includeToJson: false)
-  // DataType get dataType =>
-  //     DataType.fromString('${CamsDataTypes.COMPLETED_APP_TASK}.$taskType');
-
   /// The type of [AppTask] which was completed, if specified.
   ///
   /// Known types are:

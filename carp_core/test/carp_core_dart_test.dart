@@ -530,7 +530,7 @@ void main() {
         OnboardingResearcherInput(
           researcherId: 'res-123',
           researcherName: 'Dr. Smith',
-          institution: 'University X',
+          institutionName: 'University X',
         ),
         PreferredLanguageInput(languageCode: 'en', region: 'UK'),
         OccupationInput(

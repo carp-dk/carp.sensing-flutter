@@ -1208,7 +1208,7 @@ OnboardingResearcherInput _$OnboardingResearcherInputFromJson(
 ) => OnboardingResearcherInput(
   researcherId: json['researcherId'] as String,
   researcherName: json['researcherName'] as String,
-  institution: json['institution'] as String?,
+  institutionName: json['institutionName'] as String?,
 )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$OnboardingResearcherInputToJson(
@@ -1217,7 +1217,7 @@ Map<String, dynamic> _$OnboardingResearcherInputToJson(
   '__type': ?instance.$type,
   'researcherId': instance.researcherId,
   'researcherName': instance.researcherName,
-  'institution': ?instance.institution,
+  'institutionName': ?instance.institutionName,
 };
 
 PreferredLanguageInput _$PreferredLanguageInputFromJson(
