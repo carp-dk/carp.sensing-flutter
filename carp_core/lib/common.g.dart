@@ -1167,3 +1167,87 @@ Map<String, dynamic> _$DiagnosisInputToJson(DiagnosisInput instance) =>
       'icd11Code': instance.icd11Code,
       'conclusion': ?instance.conclusion,
     };
+
+NoteInput _$NoteInputFromJson(Map<String, dynamic> json) =>
+    NoteInput(note: json['note'] as String)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$NoteInputToJson(NoteInput instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'note': instance.note,
+};
+
+EducationalDegreeInput _$EducationalDegreeInputFromJson(
+  Map<String, dynamic> json,
+) => EducationalDegreeInput(
+  level: $enumDecode(_$IscedLevelEnumMap, json['level']),
+  details: json['details'] as String?,
+)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$EducationalDegreeInputToJson(
+  EducationalDegreeInput instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'level': _$IscedLevelEnumMap[instance.level]!,
+  'details': ?instance.details,
+};
+
+const _$IscedLevelEnumMap = {
+  IscedLevel.ISCED_0: 'ISCED_0',
+  IscedLevel.ISCED_1: 'ISCED_1',
+  IscedLevel.ISCED_2: 'ISCED_2',
+  IscedLevel.ISCED_3: 'ISCED_3',
+  IscedLevel.ISCED_4: 'ISCED_4',
+  IscedLevel.ISCED_5: 'ISCED_5',
+  IscedLevel.ISCED_6: 'ISCED_6',
+  IscedLevel.ISCED_7: 'ISCED_7',
+  IscedLevel.ISCED_8: 'ISCED_8',
+};
+
+OnboardingResearcherInput _$OnboardingResearcherInputFromJson(
+  Map<String, dynamic> json,
+) => OnboardingResearcherInput(
+  researcherId: json['researcherId'] as String,
+  researcherName: json['researcherName'] as String,
+  institution: json['institution'] as String?,
+)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$OnboardingResearcherInputToJson(
+  OnboardingResearcherInput instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'researcherId': instance.researcherId,
+  'researcherName': instance.researcherName,
+  'institution': ?instance.institution,
+};
+
+PreferredLanguageInput _$PreferredLanguageInputFromJson(
+  Map<String, dynamic> json,
+) => PreferredLanguageInput(
+  languageCode: json['languageCode'] as String,
+  region: json['region'] as String?,
+  displayName: json['displayName'] as String?,
+)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$PreferredLanguageInputToJson(
+  PreferredLanguageInput instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'languageCode': instance.languageCode,
+  'region': ?instance.region,
+  'displayName': ?instance.displayName,
+};
+
+OccupationInput _$OccupationInputFromJson(Map<String, dynamic> json) =>
+    OccupationInput(
+      roles: (json['roles'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      other: json['other'] as String?,
+    )..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$OccupationInputToJson(OccupationInput instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'roles': instance.roles,
+      'other': ?instance.other,
+    };

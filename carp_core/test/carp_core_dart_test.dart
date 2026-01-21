@@ -522,6 +522,21 @@ void main() {
           consent: 'true',
           signatureImage: 'blob',
         ),
+        NoteInput(note: 'This is a note.'),
+        EducationalDegreeInput(
+          level: IscedLevel.ISCED_6,
+          details: 'BSc in Computer Science',
+        ),
+        OnboardingResearcherInput(
+          researcherId: 'res-123',
+          researcherName: 'Dr. Smith',
+          institution: 'University X',
+        ),
+        PreferredLanguageInput(languageCode: 'en', region: 'UK'),
+        OccupationInput(
+          roles: ['Software Developer', 'Tester', 'Manager'],
+          other: '',
+        ),
       ];
 
       for (var data in allData) {

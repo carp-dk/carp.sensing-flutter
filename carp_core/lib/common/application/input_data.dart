@@ -20,10 +20,19 @@ abstract class InputType {
       '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.informed_consent';
   static const ADDRESS = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.address';
   static const DIAGNOSIS = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.diagnosis';
+
+  static const NOTE = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.note';
+  static const EDUCATIONAL_DEGREE =
+      '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.educational_degree';
+  static const ONBOARDING_RESEARCHER =
+      '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.onboarding_researcher';
+  static const LANGUAGE = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.language';
+  static const OCCUPATION = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.occupation';
 }
 
 /// Base class for all input data types.
 abstract class InputData extends Data {
+  /// The type of this input data.
   String get type;
 
   @override
@@ -33,7 +42,6 @@ abstract class InputData extends Data {
 /// Custom input data as requested by a researcher.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CustomInput extends InputData {
-  /// The type of this input data.
   @override
   String get type => InputType.CUSTOM;
 
@@ -254,4 +262,159 @@ class DiagnosisInput extends InputData {
       FromJsonFactory().fromJson<DiagnosisInput>(json);
   @override
   Map<String, dynamic> toJson() => _$DiagnosisInputToJson(this);
+}
+
+/// A general note about the participant.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class NoteInput extends InputData {
+  @override
+  String get type => InputType.NOTE;
+
+  /// Free-text note tied to the participant.
+  String note;
+
+  NoteInput({required this.note}) : super();
+
+  @override
+  Function get fromJsonFunction => _$NoteInputFromJson;
+  factory NoteInput.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<NoteInput>(json);
+  @override
+  Map<String, dynamic> toJson() => _$NoteInputToJson(this);
+}
+
+/// Highest completed educational degree, mapped to the [ISCED](https://www.uis.unesco.org/en/methods-and-tools/isced)
+/// framework for cross-country comparability.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class EducationalDegreeInput extends InputData {
+  @override
+  String get type => InputType.EDUCATIONAL_DEGREE;
+
+  /// The ISCED level of the completed degree.
+  IscedLevel level;
+
+  /// Optional free-text details (e.g., subject, institution).
+  String? details;
+
+  EducationalDegreeInput({required this.level, this.details}) : super();
+
+  @override
+  Function get fromJsonFunction => _$EducationalDegreeInputFromJson;
+  factory EducationalDegreeInput.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<EducationalDegreeInput>(json);
+  @override
+  Map<String, dynamic> toJson() => _$EducationalDegreeInputToJson(this);
+}
+
+/// The [ISCED](https://www.uis.unesco.org/en/methods-and-tools/isced)
+/// framework education levels.
+enum IscedLevel {
+  /// No formal education
+  ISCED_0,
+
+  /// Primary education
+  ISCED_1,
+
+  /// Lower secondary education
+  ISCED_2,
+
+  /// Upper secondary education
+  ISCED_3,
+
+  /// Post-secondary non-tertiary education
+  ISCED_4,
+
+  /// Short-cycle tertiary education
+  ISCED_5,
+
+  /// Bachelor or equivalent
+  ISCED_6,
+
+  /// Master or equivalent
+  ISCED_7,
+
+  /// Doctoral or equivalent
+  ISCED_8,
+}
+
+/// Information about the researcher who onboarded the participant.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class OnboardingResearcherInput extends InputData {
+  @override
+  String get type => InputType.ONBOARDING_RESEARCHER;
+
+  /// Identifier for the onboarding researcher.
+  String researcherId;
+
+  /// Full name of the onboarding researcher.
+  String researcherName;
+
+  /// The institution of the onboarding researcher (optional).
+  String? institution;
+
+  OnboardingResearcherInput({
+    required this.researcherId,
+    required this.researcherName,
+    this.institution,
+  }) : super();
+
+  @override
+  Function get fromJsonFunction => _$OnboardingResearcherInputFromJson;
+  factory OnboardingResearcherInput.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<OnboardingResearcherInput>(json);
+  @override
+  Map<String, dynamic> toJson() => _$OnboardingResearcherInputToJson(this);
+}
+
+/// Preferred language of the participant.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class PreferredLanguageInput extends InputData {
+  @override
+  String get type => InputType.LANGUAGE;
+
+  /// ISO 639-1 or 639-3 code (e.g., "en", "da").
+  String languageCode;
+
+  /// Optional locale/region qualifier (e.g., "US", "DK").
+  String? region;
+
+  /// Human-readable language name, if needed.
+  String? displayName;
+
+  PreferredLanguageInput({
+    required this.languageCode,
+    this.region,
+    this.displayName,
+  }) : super();
+
+  @override
+  Function get fromJsonFunction => _$PreferredLanguageInputFromJson;
+  factory PreferredLanguageInput.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<PreferredLanguageInput>(json);
+  @override
+  Map<String, dynamic> toJson() => _$PreferredLanguageInputToJson(this);
+}
+
+/// Occupation details of a participant (supports multiple selections).
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class OccupationInput extends InputData {
+  @override
+  String get type => InputType.OCCUPATION;
+
+  /// ISO 639-1 or 639-3 code (e.g., "en", "da").
+  List<String> roles = [];
+
+  /// Free-text occupation if none of the predefined roles fit.
+  String? other;
+
+  OccupationInput({List<String>? roles, this.other}) : super() {
+    this.roles = roles ?? [];
+  }
+
+  @override
+  Function get fromJsonFunction => _$OccupationInputFromJson;
+  factory OccupationInput.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<OccupationInput>(json);
+  @override
+  Map<String, dynamic> toJson() => _$OccupationInputToJson(this);
 }
