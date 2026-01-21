@@ -128,7 +128,7 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
 }
 
 /// A Probe that constantly scans for nearby and visible iBeacon devices and collects a
-/// [BeaconData] measurement that lists each [BeaconDevice] found during the scan.
+/// [Beacon] measurement that lists each [BeaconDevice] found during the scan.
 ///
 /// Uses a [BeaconRangingPeriodicSamplingConfiguration] for configuration the
 /// [beaconRegions] to include and the [beaconDistance].

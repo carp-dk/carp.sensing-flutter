@@ -50,7 +50,7 @@ void main() async {
   // See https://stackoverflow.com/questions/63873338/what-does-widgetsflutterbinding-ensureinitialized-do/63873689
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Make sure to initialize CAMS incl. json serialization
+  // Make sure to initialize CAMS incl. JSON serialization
   CarpMobileSensing.ensureInitialized();
 
   runApp(App());

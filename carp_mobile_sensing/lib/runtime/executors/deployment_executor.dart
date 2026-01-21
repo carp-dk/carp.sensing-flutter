@@ -64,19 +64,7 @@ class SmartphoneDeploymentExecutor
         .where((userTask) => userTask.state == UserTaskState.done)
         .listen(
           (userTask) => addMeasurement(
-            Measurement.fromData(
-              CompletedAppTask(
-                taskName: userTask.name,
-                taskType:
-                    // this is a temporary workaround to support the old one_time_sensing task type
-                    // see issue #488
-                    userTask.type ==
-                        BackgroundSensingUserTask.ONE_TIME_SENSING_TYPE
-                    ? BackgroundSensingUserTask.SENSING_TYPE
-                    : userTask.type,
-                taskData: userTask.result,
-              ),
-            ),
+            Measurement.fromData(CompletedAppTask.fromUserTask(userTask)),
           ),
         );
 

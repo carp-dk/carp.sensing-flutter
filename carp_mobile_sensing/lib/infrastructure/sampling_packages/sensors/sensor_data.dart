@@ -11,8 +11,6 @@ part of '../../../sampling_packages.dart';
 /// Typically collected from the light sensor on the front of the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AmbientLight extends SensorData {
-  static const dataType = SensorSamplingPackage.AMBIENT_LIGHT;
-
   num meanLux;
   num stdLux;
   num minLux;
@@ -73,8 +71,6 @@ class AmbientLight extends SensorData {
 ///
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AccelerationFeatures extends SensorData {
-  static const dataType = SensorSamplingPackage.ACCELERATION_FEATURES;
-
   int count = 0;
   num? xMean,
       yMean,
@@ -240,4 +236,25 @@ class AccelerationFeatures extends SensorData {
       FromJsonFactory().fromJson<AccelerationFeatures>(json);
   @override
   Map<String, dynamic> toJson() => _$AccelerationFeaturesToJson(this);
+}
+
+/// Step event data as sensed by the phone's built-in pedometer.
+///
+/// Normally, a step event is sent for each step taken by the user.
+/// But note that this depends on the underlying OS and hardware capabilities.
+/// [steps] is the number of steps taken since last reboot of the device.
+/// This number is accumulated by the OS and not reset when the app is restarted.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class StepEvent extends SensorData {
+  /// Number of steps accumulated since last reboot of the device.
+  int steps;
+
+  StepEvent({this.steps = 0}) : super();
+
+  @override
+  Function get fromJsonFunction => _$StepEventFromJson;
+  factory StepEvent.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<StepEvent>(json);
+  @override
+  Map<String, dynamic> toJson() => _$StepEventToJson(this);
 }

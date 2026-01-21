@@ -71,7 +71,7 @@ void main() {
           dataStream: DataStreamId(
             studyDeploymentId: testDeploymentId,
             deviceRoleName: testPhoneRoleName,
-            dataType: Geolocation.dataType,
+            dataType: CarpDataTypes.GEOLOCATION,
           ),
           firstSequenceId: 0,
           measurements: [m1, m2],
@@ -81,7 +81,7 @@ void main() {
           dataStream: DataStreamId(
             studyDeploymentId: testDeploymentId,
             deviceRoleName: testPhoneRoleName,
-            dataType: StepCount.dataType,
+            dataType: CarpDataTypes.STEP_COUNT,
           ),
           firstSequenceId: 0,
           measurements: [m3, m4],
@@ -117,7 +117,7 @@ void main() {
           dataStream: DataStreamId(
             studyDeploymentId: testDeploymentId,
             deviceRoleName: testPhoneRoleName,
-            dataType: BatteryState.dataType,
+            dataType: DeviceSamplingPackage.BATTERY_STATE,
           ),
           firstSequenceId: 0,
           measurements: [m1, m2],
@@ -154,7 +154,7 @@ void main() {
           dataStream: DataStreamId(
             studyDeploymentId: stoppedDeploymentId,
             deviceRoleName: stoppedPhoneRoleName,
-            dataType: BatteryState.dataType,
+            dataType: DeviceSamplingPackage.BATTERY_STATE,
           ),
           firstSequenceId: 0,
           measurements: [m1, m2],
@@ -194,7 +194,7 @@ void main() {
           dataStream: DataStreamId(
             studyDeploymentId: testDeploymentId,
             deviceRoleName: testPhoneRoleName,
-            dataType: BatteryState.dataType,
+            dataType: DeviceSamplingPackage.BATTERY_STATE,
           ),
           firstSequenceId: 0,
           measurements: upload,
@@ -235,7 +235,7 @@ void main() {
           dataStream: DataStreamId(
             studyDeploymentId: stoppedDeploymentId,
             deviceRoleName: stoppedPhoneRoleName,
-            dataType: BatteryState.dataType,
+            dataType: DeviceSamplingPackage.BATTERY_STATE,
           ),
           firstSequenceId: 0,
           measurements: upload,
@@ -257,7 +257,7 @@ void main() {
         DataStreamId(
           studyDeploymentId: testDeploymentId,
           deviceRoleName: testPhoneRoleName,
-          dataType: BatteryState.dataType,
+          dataType: DeviceSamplingPackage.BATTERY_STATE,
         ),
         0,
         10,
@@ -277,7 +277,7 @@ void main() {
         DataStreamId(
           studyDeploymentId: testDeploymentId,
           deviceRoleName: testPhoneRoleName,
-          dataType: BatteryState.dataType,
+          dataType: DeviceSamplingPackage.BATTERY_STATE,
         ),
         0,
       );
@@ -312,7 +312,7 @@ void main() {
           DataStreamId(
             studyDeploymentId: testDeploymentId,
             deviceRoleName: testPhoneRoleName,
-            dataType: DeviceInformation.dataType,
+            dataType: DeviceSamplingPackage.DEVICE_INFORMATION,
           ),
           0,
           100,
@@ -327,7 +327,7 @@ void main() {
         dataStream: DataStreamId(
           studyDeploymentId: testDeploymentId,
           deviceRoleName: testPhoneRoleName,
-          dataType: Geolocation.dataType,
+          dataType: CarpDataTypes.GEOLOCATION,
         ),
         firstSequenceId: 0,
         measurements: [
@@ -355,7 +355,7 @@ void main() {
           DataStreamId(
             studyDeploymentId: testDeploymentId,
             deviceRoleName: testPhoneRoleName,
-            dataType: Geolocation.dataType,
+            dataType: CarpDataTypes.GEOLOCATION,
           ),
           0,
           100,

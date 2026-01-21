@@ -27,7 +27,7 @@ void main() {
 
   StudyProtocol? protocol;
 
-  setUp(() async {
+  setUpAll(() async {
     // Initialization of serialization
     CarpMobileSensing.ensureInitialized();
 
@@ -90,17 +90,6 @@ void main() {
       p.createdOn = protocol!.createdOn;
 
       expect(toJsonString(protocol), toJsonString(p));
-    });
-  });
-
-  group("Resource Generator Scripts", () {
-    setUp(() async {});
-
-    /// Generates and prints the local study protocol as json
-    test('protocol -> JSON', () async {
-      StudyProtocol? protocol = await LocalStudyProtocolManager()
-          .getStudyProtocol('1234');
-      print(toJsonString(protocol));
     });
   });
 }

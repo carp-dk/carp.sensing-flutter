@@ -15,7 +15,7 @@ class AltBeacon extends DeviceConfiguration<AltBeaconDeviceRegistration> {
   DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.SIGNAL_STRENGTH_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.SIGNAL_STRENGTH]!,
         ),
       ]);
 

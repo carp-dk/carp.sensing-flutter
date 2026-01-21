@@ -11,9 +11,9 @@ void main() {
   late StudyProtocol protocol;
   Smartphone phone;
 
-  setUp(() {
+  setUpAll(() {
     // Initialization of serialization
-    CarpMobileSensing();
+    CarpMobileSensing.ensureInitialized();
 
     // register the survey sampling package
     SamplingPackageRegistry().register(SurveySamplingPackage());

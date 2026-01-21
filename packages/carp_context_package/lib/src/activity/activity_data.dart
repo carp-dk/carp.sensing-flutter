@@ -16,22 +16,6 @@ class Activity extends Data {
     ar.ActivityConfidence.LOW: 40,
   };
 
-  static const dataType = ContextSamplingPackage.ACTIVITY;
-
-  Activity({required this.type, required this.confidence}) : super();
-
-  factory Activity.fromActivity(ar.Activity activity) => Activity(
-        type: ActivityType.values[activity.type.index],
-        confidence: _confidenceLevelMap[activity.confidence] ?? 0,
-      );
-
-  @override
-  Function get fromJsonFunction => _$ActivityFromJson;
-  factory Activity.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Activity>(json);
-  @override
-  Map<String, dynamic> toJson() => _$ActivityToJson(this);
-
   /// Confidence in activity recognition.
   int confidence;
 
@@ -59,6 +43,20 @@ class Activity extends Data {
   ///  * Activities with a low confidence level (<50%)
   ActivityType type;
 
+  Activity({required this.type, required this.confidence}) : super();
+
+  factory Activity.fromActivity(ar.Activity activity) => Activity(
+    type: ActivityType.values[activity.type.index],
+    confidence: _confidenceLevelMap[activity.confidence] ?? 0,
+  );
+
+  @override
+  Function get fromJsonFunction => _$ActivityFromJson;
+  factory Activity.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<Activity>(json);
+  @override
+  Map<String, dynamic> toJson() => _$ActivityToJson(this);
+
   /// Activity [type] as a string.
   String get typeString => type.name;
 }
@@ -81,5 +79,5 @@ enum ActivityType {
   WALKING,
 
   /// Unable to detect the current activity.
-  UNKNOWN
+  UNKNOWN,
 }

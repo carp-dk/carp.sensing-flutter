@@ -15,7 +15,9 @@ void main() {
   late Smartphone phone;
   late ESenseDevice eSense;
 
-  setUp(() {
+  setUpAll(() {
+    CarpMobileSensing.ensureInitialized();
+
     // register the eSense sampling package
     SamplingPackageRegistry().register(ESenseSamplingPackage());
 
@@ -43,8 +45,7 @@ void main() {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask()
-        ..measures = SamplingPackageRegistry()
-            .dataTypes
+        ..measures = SamplingPackageRegistry().dataTypes
             .map((type) => Measure(type: type.type))
             .toList(),
       phone,
@@ -53,11 +54,12 @@ void main() {
     // Add a background task that immediately starts collecting eSense button and
     // sensor events from the eSense device.
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_BUTTON))
-          ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_SENSOR)),
-        eSense);
+      ImmediateTrigger(),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_BUTTON))
+        ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_SENSOR)),
+      eSense,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () async {
@@ -70,9 +72,10 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
-    expect(toJsonString(protocolFromJson), equals(studyJson));
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
+    expect(toJsonString(protocolFromJson), studyJson);
     print('#2 : $protocolFromJson');
   });
 
@@ -80,8 +83,9 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocol = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, phone.roleName);
@@ -93,8 +97,10 @@ void main() {
     final data = ESenseButton(pressed: true, deviceName: 'eSense-123');
 
     final measurement = Measurement.fromData(data);
-    expect(measurement.data.format.namespace,
-        ESenseSamplingPackage.ESENSE_NAMESPACE);
+    expect(
+      measurement.data.dataType.namespace,
+      ESenseSamplingPackage.ESENSE_NAMESPACE,
+    );
 
     print(_encode(measurement.toJson()));
   });

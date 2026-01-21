@@ -61,7 +61,7 @@ class ProbeDescription {
       'Battery level and charging status.',
       Icon(Icons.battery_charging_full, size: 50, color: CachetColors.GREEN),
     ),
-    SensorSamplingPackage.STEP_COUNT: ProbeDescriptor(
+    SensorSamplingPackage.STEP_EVENT: ProbeDescriptor(
       'Pedometer',
       'Step count events as steps are detected by the phone.',
       Icon(Icons.directions_walk, size: 50, color: CachetColors.LIGHT_PURPLE),

@@ -18,8 +18,8 @@
             "compress": true
         }
     },
-    "id": "1054f493-4e4a-42e7-8c27-02816d8aad7e",
-    "createdOn": "2025-12-08T18:49:49.448229Z",
+    "id": "b4a0ae96-91e5-49ef-951b-e9776a68cfde",
+    "createdOn": "2026-01-20T16:41:46.131285Z",
     "version": 0,
     "description": "A study demonstrating most measures and probes. Used for the demo app.",
     "ownerId": "979b408d-784e-4b1b-bb1e-ff9204e072f3",
@@ -100,10 +100,6 @@
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.heartbeat"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.completedapptask"
                 }
             ]
         },
@@ -113,29 +109,48 @@
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.stepcount"
+                    "type": "dk.cachet.carp.step_event"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.ambientlight"
+                    "type": "dk.cachet.carp.ambient_light"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.screenevent"
+                    "type": "dk.cachet.carp.screen_event"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.freememory"
+                    "type": "dk.cachet.carp.free_memory"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.batterystate"
+                    "type": "dk.cachet.carp.battery_state"
                 }
             ]
         },
         {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+            "__type": "dk.cachet.carp.common.application.tasks.AppTask",
             "name": "Task #10",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.device_information"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedapptask.sensing"
+                }
+            ],
+            "type": "sensing",
+            "title": "User Task",
+            "description": "Please click here to collect Device Information.",
+            "instructions": "",
+            "notification": true
+        },
+        {
+            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+            "name": "Task #11",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -167,7 +182,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #11",
+            "name": "Task #12",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -181,7 +196,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #12",
+            "name": "Task #13",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -196,7 +211,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #13",
+            "name": "Task #14",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -219,7 +234,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #14",
+            "name": "Task #15",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -229,7 +244,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #15",
+            "name": "Task #16",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -247,7 +262,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #16",
+            "name": "Task #17",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -283,7 +298,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #17",
+            "name": "Task #18",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -319,7 +334,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #18",
+            "name": "Task #19",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -350,21 +365,22 @@
             "sourceDeviceRoleName": "Primary Phone"
         },
         "2": {
+            "__type": "dk.cachet.carp.common.application.triggers.DelayedTrigger",
+            "sourceDeviceRoleName": "Primary Phone",
+            "delay": 20000000
+        },
+        "3": {
             "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
             "sourceDeviceRoleName": "Primary Phone"
         },
-        "3": {
+        "4": {
             "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
             "sourceDeviceRoleName": "Location Service"
         },
-        "4": {
+        "5": {
             "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
             "sourceDeviceRoleName": "Location Service",
             "period": 20000000
-        },
-        "5": {
-            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
         },
         "6": {
             "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
@@ -375,27 +391,31 @@
             "sourceDeviceRoleName": "Primary Phone"
         },
         "8": {
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Primary Phone"
+        },
+        "9": {
             "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
             "sourceDeviceRoleName": "Primary Phone",
             "period": 1800000000
         },
-        "9": {
+        "10": {
             "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
             "sourceDeviceRoleName": "Primary Phone"
         },
-        "10": {
-            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-            "sourceDeviceRoleName": "eSense"
-        },
         "11": {
-            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
             "sourceDeviceRoleName": "eSense"
         },
         "12": {
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "eSense"
+        },
+        "13": {
             "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
             "sourceDeviceRoleName": "Health Service"
         },
-        "13": {
+        "14": {
             "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
             "sourceDeviceRoleName": "Health Service",
             "period": 60000000
@@ -422,20 +442,20 @@
         },
         {
             "triggerId": 3,
-            "taskName": "Monitoring Location Service",
-            "destinationDeviceRoleName": "Location Service",
+            "taskName": "Task #11",
+            "destinationDeviceRoleName": "Primary Phone",
             "control": "Start"
         },
         {
             "triggerId": 4,
-            "taskName": "Task #11",
+            "taskName": "Monitoring Location Service",
             "destinationDeviceRoleName": "Location Service",
             "control": "Start"
         },
         {
             "triggerId": 5,
             "taskName": "Task #12",
-            "destinationDeviceRoleName": "Primary Phone",
+            "destinationDeviceRoleName": "Location Service",
             "control": "Start"
         },
         {
@@ -464,25 +484,31 @@
         },
         {
             "triggerId": 10,
+            "taskName": "Task #17",
+            "destinationDeviceRoleName": "Primary Phone",
+            "control": "Start"
+        },
+        {
+            "triggerId": 11,
             "taskName": "Monitoring eSense",
             "destinationDeviceRoleName": "eSense",
             "control": "Start"
         },
         {
-            "triggerId": 11,
-            "taskName": "Task #17",
+            "triggerId": 12,
+            "taskName": "Task #18",
             "destinationDeviceRoleName": "eSense",
             "control": "Start"
         },
         {
-            "triggerId": 12,
+            "triggerId": 13,
             "taskName": "Monitoring Health Service",
             "destinationDeviceRoleName": "Health Service",
             "control": "Start"
         },
         {
-            "triggerId": 13,
-            "taskName": "Task #18",
+            "triggerId": 14,
+            "taskName": "Task #19",
             "destinationDeviceRoleName": "Health Service",
             "control": "Start"
         }

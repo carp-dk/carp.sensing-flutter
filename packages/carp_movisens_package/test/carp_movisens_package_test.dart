@@ -14,9 +14,9 @@ void main() {
   late StudyProtocol protocol;
   Smartphone phone;
 
-  setUp(() {
+  setUpAll(() {
     // Initialization of serialization
-    CarpMobileSensing();
+    CarpMobileSensing.ensureInitialized();
 
     // register the context sampling package
     SamplingPackageRegistry().register(MovisensSamplingPackage());
@@ -46,8 +46,7 @@ void main() {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask()
-        ..measures = SamplingPackageRegistry()
-            .dataTypes
+        ..measures = SamplingPackageRegistry().dataTypes
             .map((type) => Measure(type: type.type))
             .toList(),
       phone,
@@ -55,15 +54,18 @@ void main() {
 
     // add a background task that immediately starts collecting Movisens events
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: [
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
           Measure(type: MovisensSamplingPackage.ACTIVITY),
           Measure(type: MovisensSamplingPackage.HR),
           Measure(type: MovisensSamplingPackage.EDA),
           Measure(type: MovisensSamplingPackage.SKIN_TEMPERATURE),
           Measure(type: MovisensSamplingPackage.TAP_MARKER),
-        ]),
-        movisens);
+        ],
+      ),
+      movisens,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () async {
@@ -76,8 +78,9 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -86,13 +89,16 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocol = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, Smartphone.DEFAULT_ROLE_NAME);
-    expect(protocol.connectedDevices?.first.roleName,
-        MovisensDevice.DEFAULT_ROLE_NAME);
+    expect(
+      protocol.connectedDevices?.first.roleName,
+      MovisensDevice.DEFAULT_ROLE_NAME,
+    );
 
     print(toJsonString(protocol));
   });
@@ -108,9 +114,9 @@ void main() {
     print(toJsonString(dp_1));
     expect(dp_1.dataType.namespace, MovisensSamplingPackage.HR);
 
-    final omhHR = DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)!
-        .transform(hr) as OMHHeartRateDataPoint;
+    final omhHR =
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(hr)
+            as OMHHeartRateDataPoint;
     ;
     final dp_2 = Measurement.fromData(omhHR);
     print(toJsonString(dp_2));
@@ -133,9 +139,9 @@ void main() {
     print(toJsonString(m_1));
     expect(m_1.dataType.namespace, MovisensSamplingPackage.ACTIVITY);
 
-    final omhSteps = DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)!
-        .transform(steps) as OMHStepCountDataPoint;
+    final omhSteps =
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(steps)
+            as OMHStepCountDataPoint;
     final m_2 = Measurement.fromData(omhSteps);
     print(toJsonString(m_2));
 
@@ -156,9 +162,9 @@ void main() {
     print(toJsonString(m_1));
     expect(m_1.dataType.namespace, MovisensSamplingPackage.HR);
 
-    final fhirHR = DataTransformerSchemaRegistry()
-        .lookup(NameSpace.FHIR)!
-        .transform(hr) as FHIRHeartRateObservation;
+    final fhirHR =
+        DataTransformerSchemaRegistry().lookup(NameSpace.FHIR)!.transform(hr)
+            as FHIRHeartRateObservation;
     final m_2 = Measurement.fromData(fhirHR);
     print(toJsonString(m_2));
 
@@ -174,19 +180,27 @@ void main() {
       type: 'hrMean',
     );
 
-    var transformedData =
-        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(data);
+    var transformedData = DataTransformerSchemaRegistry()
+        .lookup(NameSpace.OMH)!
+        .transform(data);
     print(toJsonString(transformedData));
 
     Stream<Data> dataStream = StreamController<Data>().stream;
 
-    Stream<Data> transformedDataStream = dataStream.map((data) => data =
-        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(data));
+    Stream<Data> transformedDataStream = dataStream.map(
+      (data) => data = DataTransformerSchemaRegistry()
+          .lookup(NameSpace.OMH)!
+          .transform(data),
+    );
 
-    Stream<Data> transformedPrivateDataStream = dataStream.map((data) => data =
-        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(
+    Stream<Data> transformedPrivateDataStream = dataStream.map(
+      (data) => data = DataTransformerSchemaRegistry()
+          .lookup(NameSpace.OMH)!
+          .transform(
             DataTransformerSchemaRegistry()
                 .lookup("privacySchemaName")!
-                .transform(data)));
+                .transform(data),
+          ),
+    );
   });
 }

@@ -88,12 +88,12 @@ void main() {
       // but this is what is in the protocol
       final data = await CarpParticipationService().setParticipantData(
         testDeploymentId,
-        {SexInput.type: SexInput(value: Sex.Male)},
+        {InputType.SEX: SexInput(value: Sex.Male)},
       );
       debugPrint(toJsonString(data));
 
-      expect(data.common[SexInput.type], isA<SexInput>());
-      expect((data.common[SexInput.type] as SexInput).value, Sex.Male);
+      expect(data.common[InputType.SEX], isA<SexInput>());
+      expect((data.common[InputType.SEX] as SexInput).value, Sex.Male);
     }, skip: false);
   });
 
@@ -109,13 +109,13 @@ void main() {
       final participation = CarpParticipationService().participation();
 
       ParticipantData data = await participation.setParticipantData({
-        AddressInput.type: AddressInput(address1: 'Test Address'),
+        InputType.ADDRESS: AddressInput(address1: 'Test Address'),
       });
       debugPrint(toJsonString(data));
 
-      expect(data.common[AddressInput.type], isA<AddressInput>());
+      expect(data.common[InputType.ADDRESS], isA<AddressInput>());
       expect(
-        (data.common[AddressInput.type] as AddressInput).address1,
+        (data.common[InputType.ADDRESS] as AddressInput).address1,
         'Test Address',
       );
     }, skip: false);

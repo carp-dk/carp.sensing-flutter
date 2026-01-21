@@ -22,11 +22,23 @@ abstract class TaskExecutor<TConfig extends TaskConfiguration>
   TConfig get task => configuration!;
 
   /// Returns a list of the probes in this task executor.
-  List<Probe> get probes =>
-      executors.map((executor) => executor as Probe).toList();
+  List<Probe> get probes;
 
   /// The combines state event from all [probes] in this task executor.
   Stream<ExecutorState> get states => _statesGroup.stream;
+}
+
+/// Executes a [BackgroundTask].
+class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
+  StreamSubscription<ExecutorState>? _subscription;
+
+  @override
+  List<Probe> get probes =>
+      executors.map((executor) => executor as Probe).toList();
+
+  /// Are all [probes] in a paused state?
+  bool get haveAllProbesPaused =>
+      !probes.any((probe) => probe.state != ExecutorState.Paused);
 
   @override
   bool onInitialize() {
@@ -52,27 +64,6 @@ abstract class TaskExecutor<TConfig extends TaskConfiguration>
       }
     }
     return true;
-  }
-}
-
-/// Executes a [BackgroundTask].
-class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
-  StreamSubscription<ExecutorState>? _subscription;
-
-  /// Are all [probes] in a paused state?
-  bool get haveAllProbesPaused =>
-      !probes.any((probe) => probe.state != ExecutorState.Paused);
-
-  /// Connect all connectable devices used by the [probes] in this
-  /// background task executor.
-  Future<void> connectAllConnectableDevices() async {
-    debug(
-      '$runtimeType - Trying to connect to all connectable devices for this background executor.',
-    );
-
-    probes
-        .where((probe) => !probe.deviceManager.isConnecting)
-        .forEach((probe) async => await probe.deviceManager.connect());
   }
 
   @override
@@ -117,6 +108,18 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
     return await super.onResume();
   }
 
+  /// Connect all connectable devices used by the [probes] in this
+  /// background task executor.
+  Future<void> connectAllConnectableDevices() async {
+    debug(
+      '$runtimeType - Trying to connect to all connectable devices for this background executor.',
+    );
+
+    probes
+        .where((probe) => !probe.deviceManager.isConnecting)
+        .forEach((probe) async => await probe.deviceManager.connect());
+  }
+
   @override
   Future<bool> onPause() async {
     _subscription?.cancel();
@@ -126,6 +129,12 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
 
 /// Executes a [FunctionTask].
 class FunctionTaskExecutor extends TaskExecutor<FunctionTask> {
+  @override
+  List<Probe> get probes => [];
+
+  @override
+  bool onInitialize() => true;
+
   @override
   Future<bool> onResume() async {
     if (configuration?.function != null) {
@@ -139,7 +148,7 @@ class FunctionTaskExecutor extends TaskExecutor<FunctionTask> {
 ///
 /// This executor works closely with the singleton [AppTaskController].
 /// Whenever an [AppTaskExecutor] is started (e.g. in a [PeriodicTrigger]),
-/// this executor is wrapped in a [UserTask] and put on a queue in
+/// this executor is wrapped in a [UserTask] and put on the queue in
 /// the [AppTaskController].
 ///
 /// Later, the app (user) can start, cancel, or finalize a [UserTask]
@@ -150,6 +159,9 @@ class FunctionTaskExecutor extends TaskExecutor<FunctionTask> {
 /// and such factories can be registered in the [AppTaskController]
 /// using the `registerUserTaskFactory` method.
 class AppTaskExecutor<TConfig extends AppTask> extends TaskExecutor<TConfig> {
+  @override
+  List<Probe> get probes => []; // an AppTask itself does not have probes.
+
   @override
   bool onInitialize() => true;
 

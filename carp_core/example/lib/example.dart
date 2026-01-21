@@ -24,7 +24,7 @@ void carpCoreProtocolExample() async {
 
   // Define which devices are used for data collection.
   var phone = Smartphone(roleName: "Patient's phone")
-    ..defaultSamplingConfiguration?[CarpDataTypes.GEOLOCATION_TYPE_NAME] =
+    ..defaultSamplingConfiguration?[CarpDataTypes.GEOLOCATION] =
         GranularitySamplingConfiguration(Granularity.Balanced);
 
   protocol.addPrimaryDevice(phone);
@@ -33,8 +33,8 @@ void carpCoreProtocolExample() async {
   var trackMovement = BackgroundTask(
     name: "Track movement",
     measures: [
-      phone.dataTypeSamplingSchemes![Geolocation.dataType]!.measure,
-      phone.dataTypeSamplingSchemes![StepCount.dataType]!.measure,
+      phone.dataTypeSamplingSchemes![CarpDataTypes.GEOLOCATION]!.measure,
+      phone.dataTypeSamplingSchemes![CarpDataTypes.STEP_COUNT]!.measure,
     ],
     description: "Track activity level and number of places visited per day.",
   );
@@ -135,12 +135,12 @@ void carpCoreDataExample() async {
 
   var geolocation = ExpectedDataStream(
     deviceRoleName: device,
-    dataType: Geolocation.dataType,
+    dataType: CarpDataTypes.GEOLOCATION,
   );
 
   var stepCount = ExpectedDataStream(
     deviceRoleName: device,
-    dataType: StepCount.dataType,
+    dataType: CarpDataTypes.STEP_COUNT,
   );
 
   var configuration = DataStreamsConfiguration(
@@ -159,7 +159,7 @@ void carpCoreDataExample() async {
     dataStream: DataStreamId(
       studyDeploymentId: studyDeploymentId,
       deviceRoleName: device,
-      dataType: Geolocation.dataType,
+      dataType: CarpDataTypes.GEOLOCATION,
     ),
     firstSequenceId: 0,
     measurements: [measurement],

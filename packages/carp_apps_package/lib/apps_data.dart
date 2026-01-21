@@ -9,8 +9,6 @@ part of 'apps.dart';
 /// Holds a list of names of apps installed on the device.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Apps extends Data {
-  static const dataType = AppsSamplingPackage.APPS;
-
   /// List of of installed apps.
   List<App> installedApps = [];
 
@@ -93,8 +91,6 @@ class App {
 /// Holds a map of names of apps and their usage, as defined in [AppUsageInfo].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AppUsage extends Data {
-  static const dataType = AppsSamplingPackage.APP_USAGE;
-
   DateTime start, end;
 
   /// A map from the full package name of an app and its usage.

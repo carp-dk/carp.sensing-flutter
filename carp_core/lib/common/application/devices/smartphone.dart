@@ -20,19 +20,18 @@ class Smartphone extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
   DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.GEOLOCATION_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.GEOLOCATION]!,
           GranularitySamplingConfiguration(Granularity.Balanced),
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.STEP_COUNT_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.STEP_COUNT]!,
           NoOptionsSamplingConfiguration(),
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes
-              .NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION]!,
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ACCELERATION_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.ACCELERATION]!,
         ),
       ]);
 

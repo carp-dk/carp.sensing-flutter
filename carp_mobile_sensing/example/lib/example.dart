@@ -293,7 +293,7 @@ void example_2() async {
   // listen only on CARP measurements
   controller?.measurements
       .where(
-        (measurement) => measurement.data.format.namespace == NameSpace.CARP,
+        (measurement) => measurement.data.dataType.namespace == NameSpace.CARP,
       )
       .listen((event) => print(event));
 
@@ -301,7 +301,7 @@ void example_2() async {
   controller?.measurements
       .where(
         (measurement) =>
-            measurement.data.format.toString() ==
+            measurement.data.dataType.toString() ==
             SensorSamplingPackage.AMBIENT_LIGHT,
       )
       .listen((measurement) => print(measurement));
@@ -320,7 +320,7 @@ void example_2() async {
 
   // Listen to a specific probe(s)
   controller.executor
-      .lookupProbe(CarpDataTypes.ACCELERATION_TYPE_NAME)
+      .lookupProbe(CarpDataTypes.ACCELERATION)
       .forEach(
         (probe) =>
             probe.measurements.listen((measurement) => print(measurement)),
@@ -332,7 +332,7 @@ void example_2() async {
 
   // Stop specific probe(s)
   controller.executor
-      .lookupProbe(CarpDataTypes.ACCELERATION_TYPE_NAME)
+      .lookupProbe(CarpDataTypes.ACCELERATION)
       .forEach((probe) => probe.pause());
 
   // Adapt a measure
@@ -512,7 +512,7 @@ void protocolExample() async {
         Measure(type: DeviceSamplingPackage.FREE_MEMORY),
         Measure(type: DeviceSamplingPackage.BATTERY_STATE),
         Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-        Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME),
+        Measure(type: SensorSamplingPackage.STEP_EVENT),
         Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
       ],
     ),
@@ -524,8 +524,8 @@ void protocolExample() async {
     PeriodicTrigger(period: const Duration(seconds: 10)),
     BackgroundTask(
       measures: [
-        Measure(type: CarpDataTypes.ACCELERATION_TYPE_NAME),
-        Measure(type: CarpDataTypes.ROTATION_TYPE_NAME),
+        Measure(type: SensorSamplingPackage.ACCELERATION),
+        Measure(type: SensorSamplingPackage.ROTATION),
       ],
       duration: const Duration(seconds: 1),
     ),

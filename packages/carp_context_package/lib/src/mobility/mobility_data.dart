@@ -3,8 +3,6 @@ part of '../../carp_context_package.dart';
 /// Holds mobility features information.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Mobility extends Data {
-  static const dataType = ContextSamplingPackage.MOBILITY;
-
   /// The time this data was collected.
   DateTime? timestamp;
 

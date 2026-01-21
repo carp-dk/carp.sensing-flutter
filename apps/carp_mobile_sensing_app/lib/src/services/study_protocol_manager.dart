@@ -36,7 +36,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
       ImmediateTrigger(),
       BackgroundTask(
         measures: [
-          Measure(type: SensorSamplingPackage.STEP_COUNT),
+          Measure(type: SensorSamplingPackage.STEP_EVENT),
           Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
           Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
           Measure(type: DeviceSamplingPackage.FREE_MEMORY),
@@ -58,6 +58,28 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //       Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)
     //     ]),
     //     phone);
+
+    // Add an app task triggering 20 secs after start of study and
+    // make a notification.
+    //
+    // This AppTask is added for demo purpose and you should see a notification
+    // on the phone. Since this app task is a background sensing task, it will
+    // not require any user interaction, but simply start the sensing in the
+    // background when the user clicks the notification.
+    //
+    // See the PulmonaryMonitor demo app for a full-scale example of how to use
+    // the App Task model.
+    protocol.addTaskControl(
+      DelayedTrigger(delay: const Duration(seconds: 20)),
+      AppTask(
+        type: BackgroundSensingUserTask.SENSING_TYPE,
+        title: "User Task",
+        description: 'Please click here to collect Device Information.',
+        measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+        notification: true,
+      ),
+      phone,
+    );
 
     //
     // --------- CONTEXT PACKAGE EXAMPLES -------------

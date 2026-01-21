@@ -192,10 +192,10 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// since CAMS always collects and upload this data from any device.
   void _addSamplingTaskControl(DeviceConfiguration device) {
     var measures = [
-      Measure(type: CarpDataTypes.ERROR_TYPE_NAME),
-      Measure(type: CarpDataTypes.TRIGGERED_TASK_TYPE_NAME),
-      Measure(type: CarpDataTypes.COMPLETED_TASK_TYPE_NAME),
-      Measure(type: CamsDataTypes.HEARTBEAT_TYPE_NAME),
+      Measure(type: CarpDataTypes.ERROR),
+      Measure(type: CarpDataTypes.TRIGGERED_TASK),
+      Measure(type: CarpDataTypes.COMPLETED_TASK),
+      Measure(type: CamsDataTypes.HEARTBEAT),
     ];
 
     addTaskControl(

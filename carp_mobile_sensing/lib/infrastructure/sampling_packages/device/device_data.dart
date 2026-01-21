@@ -14,8 +14,6 @@ part of '../../../sampling_packages.dart';
 ///   * [IosDeviceInfo](https://pub.dev/documentation/device_info/latest/device_info/IosDeviceInfo-class.html)
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceInformation extends Data {
-  static const dataType = DeviceSamplingPackage.DEVICE_INFORMATION;
-
   ///The platform type of the device.
   /// * `Android`
   /// * `IOS`
@@ -76,8 +74,6 @@ class DeviceInformation extends Data {
 /// Holds battery level and charging status collected from the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BatteryState extends Data {
-  static const dataType = DeviceSamplingPackage.BATTERY_STATE;
-
   static const String STATE_FULL = 'full';
   static const String STATE_CHARGING = 'charging';
   static const String STATE_DISCHARGING = 'discharging';
@@ -128,8 +124,6 @@ class BatteryState extends Data {
 /// Holds information about free memory on the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class FreeMemory extends Data {
-  static const dataType = DeviceSamplingPackage.FREE_MEMORY;
-
   /// Amount of free physical memory in bytes.
   int? freePhysicalMemory;
 
@@ -149,8 +143,6 @@ class FreeMemory extends Data {
 /// Holds a screen event collected from the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ScreenEvent extends Data {
-  static const dataType = DeviceSamplingPackage.SCREEN_EVENT;
-
   /// A screen event:
   /// - SCREEN_OFF
   /// - SCREEN_ON
@@ -195,8 +187,6 @@ class ScreenEvent extends Data {
 /// for an overview of timezones.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class Timezone extends Data {
-  static const dataType = DeviceSamplingPackage.TIMEZONE;
-
   /// The timezone as a string.
   String timezone;
 
@@ -227,8 +217,6 @@ class Timezone extends Data {
 /// See [AppLifecycleState] for details.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class AppLifecycleEvent extends Data {
-  static const dataType = DeviceSamplingPackage.APP_LIFECYCLE_EVENT;
-
   /// The app lifecycle state.
   String state;
 

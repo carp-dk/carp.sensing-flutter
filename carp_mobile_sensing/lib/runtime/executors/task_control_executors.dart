@@ -145,12 +145,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
 /// the [AppTaskController]. This means that the [trigger] has to be
 /// [Schedulable].
 class AppTaskControlExecutor extends TaskControlExecutor {
-  AppTaskControlExecutor(
-    // super.deploymentExecutor,
-    super.taskControl,
-    super.trigger,
-    super.task,
-  );
+  AppTaskControlExecutor(super.taskControl, super.trigger, super.task);
 
   @override
   AppTaskExecutor get taskExecutor => super.taskExecutor as AppTaskExecutor;
@@ -171,10 +166,13 @@ class AppTaskControlExecutor extends TaskControlExecutor {
 
     if (schedule.isEmpty) {
       // Stop since the schedule is empty and there is not more to schedule.
+      info(
+        '$runtimeType - No scheduled app tasks for task ${taskExecutor.task.name} - pausing executor again.',
+      );
       pause();
     } else {
       info(
-        '$runtimeType Buffering ${schedule.length} app tasks ($schedule) for task ${taskExecutor.task.name}',
+        '$runtimeType - Buffering ${schedule.length} app tasks ($schedule) for task ${taskExecutor.task.name}',
       );
 
       Iterator<DateTime> it = schedule.iterator;

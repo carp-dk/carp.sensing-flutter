@@ -140,6 +140,19 @@ Map<String, dynamic> _$AccelerationFeaturesToJson(
   'signalMagnitudeArea': ?instance.signalMagnitudeArea,
 };
 
+StepEvent _$StepEventFromJson(Map<String, dynamic> json) =>
+    StepEvent(steps: (json['steps'] as num?)?.toInt() ?? 0)
+      ..$type = json['__type'] as String?
+      ..sensorSpecificData = json['sensorSpecificData'] == null
+          ? null
+          : Data.fromJson(json['sensorSpecificData'] as Map<String, dynamic>);
+
+Map<String, dynamic> _$StepEventToJson(StepEvent instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'sensorSpecificData': ?instance.sensorSpecificData?.toJson(),
+  'steps': instance.steps,
+};
+
 DeviceInformation _$DeviceInformationFromJson(Map<String, dynamic> json) =>
     DeviceInformation(
         deviceData: json['deviceData'] as Map<String, dynamic>? ?? const {},

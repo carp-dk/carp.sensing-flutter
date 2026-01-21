@@ -27,7 +27,7 @@ void sensing() async {
         Measure(type: DeviceSamplingPackage.FREE_MEMORY),
         Measure(type: DeviceSamplingPackage.BATTERY_STATE),
         Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-        Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME),
+        Measure(type: SensorSamplingPackage.STEP_EVENT),
         Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
       ],
     ),

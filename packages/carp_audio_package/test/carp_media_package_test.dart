@@ -11,9 +11,9 @@ void main() {
   late StudyProtocol protocol;
   Smartphone phone;
 
-  setUp(() {
+  setUpAll(() {
     // Initialization of serialization
-    CarpMobileSensing();
+    CarpMobileSensing.ensureInitialized();
 
     // register the context sampling package
     SamplingPackageRegistry().register(MediaSamplingPackage());
@@ -32,8 +32,7 @@ void main() {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask()
-        ..measures = SamplingPackageRegistry()
-            .dataTypes
+        ..measures = SamplingPackageRegistry().dataTypes
             .map((type) => Measure(type: type.type))
             .toList(),
       phone,
@@ -50,8 +49,9 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -59,8 +59,9 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocol = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, Smartphone.DEFAULT_ROLE_NAME);

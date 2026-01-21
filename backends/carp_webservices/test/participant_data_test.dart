@@ -110,7 +110,7 @@ void main() {
       // add expected participant data which can be set by ALL participants
       protocol.addExpectedParticipantData(
         ExpectedParticipantData(
-          attribute: ParticipantAttribute(inputDataType: AddressInput.type),
+          attribute: ParticipantAttribute(inputDataType: InputType.ADDRESS),
         ),
       );
 
@@ -118,20 +118,20 @@ void main() {
       protocol
         ..addExpectedParticipantData(
           ExpectedParticipantData(
-            attribute: ParticipantAttribute(inputDataType: FullNameInput.type),
+            attribute: ParticipantAttribute(inputDataType: InputType.FULL_NAME),
             assignedTo: AssignedTo(roleNames: {father, mother, child}),
           ),
         )
         ..addExpectedParticipantData(
           ExpectedParticipantData(
-            attribute: ParticipantAttribute(inputDataType: SexInput.type),
+            attribute: ParticipantAttribute(inputDataType: InputType.SEX),
             assignedTo: AssignedTo(roleNames: {father, mother, child}),
           ),
         )
         ..addExpectedParticipantData(
           ExpectedParticipantData(
             attribute: ParticipantAttribute(
-              inputDataType: InformedConsentInput.type,
+              inputDataType: InputType.INFORMED_CONSENT,
             ),
             assignedTo: AssignedTo(roleNames: {father, mother}),
           ),
@@ -143,7 +143,7 @@ void main() {
           ImmediateTrigger(),
           BackgroundTask(
             measures: [
-              Measure(type: SensorSamplingPackage.STEP_COUNT),
+              Measure(type: SensorSamplingPackage.STEP_EVENT),
               Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
             ],
           ),
@@ -236,19 +236,19 @@ void main() {
       final participation = CarpParticipationService().participation();
 
       ParticipantData data = await participation.setParticipantData({
-        SexInput.type: SexInput(value: Sex.Male),
+        InputType.SEX: SexInput(value: Sex.Male),
       });
       debugPrint(toJsonString(data));
 
-      expect(data.common[SexInput.type], isA<SexInput>());
-      expect((data.common[SexInput.type] as SexInput).value, Sex.Male);
+      expect(data.common[InputType.SEX], isA<SexInput>());
+      expect((data.common[InputType.SEX] as SexInput).value, Sex.Male);
     });
 
     test('- set role-specific data (Name of Mother)', () async {
       final participation = CarpParticipationService().participation();
 
       final data = await participation.setParticipantData({
-        FullNameInput.type: FullNameInput(
+        InputType.FULL_NAME: FullNameInput(
           firstName: 'Anna',
           middleName: 'K.',
           lastName: 'Doe',
@@ -258,7 +258,7 @@ void main() {
 
       final sex = data.roles
           .firstWhere((role) => role.roleName == mother)
-          .data[SexInput.type];
+          .data[InputType.SEX];
 
       expect(sex, isA<SexInput>());
       expect((sex as SexInput).value, Sex.Male);
@@ -268,13 +268,13 @@ void main() {
       final participation = CarpParticipationService().participation();
 
       final data = await participation.setParticipantData({
-        SexInput.type: SexInput(value: Sex.Female),
+        InputType.SEX: SexInput(value: Sex.Female),
       }, mother);
       debugPrint(toJsonString(data));
 
       final sex = data.roles
           .firstWhere((role) => role.roleName == mother)
-          .data[SexInput.type];
+          .data[InputType.SEX];
 
       expect(sex, isA<SexInput>());
       expect((sex as SexInput).value, Sex.Female);
@@ -284,7 +284,7 @@ void main() {
       final participation = CarpParticipationService().participation();
 
       final data = await participation.setParticipantData({
-        InformedConsentInput.type: InformedConsentInput(
+        InputType.INFORMED_CONSENT: InformedConsentInput(
           userId: 'ec44c84d-3acd-45d5-83ef-1511e0c39e48',
           name: father,
           consent: 'I agree!',
@@ -295,7 +295,7 @@ void main() {
 
       final consent = data.roles
           .firstWhere((role) => role.roleName == father)
-          .data[InformedConsentInput.type];
+          .data[InputType.INFORMED_CONSENT];
 
       expect(consent, isA<InformedConsentInput>());
       expect((consent as InformedConsentInput).name, father);
@@ -305,7 +305,7 @@ void main() {
       final participation = CarpParticipationService().participation();
 
       final data = await participation.setParticipantData({
-        FullNameInput.type: FullNameInput(
+        InputType.FULL_NAME: FullNameInput(
           firstName: 'Jakob',
           middleName: 'E.',
           lastName: 'Bardram',
@@ -315,7 +315,7 @@ void main() {
 
       final name = data.roles
           .firstWhere((role) => role.roleName == father)
-          .data[FullNameInput.type];
+          .data[InputType.FULL_NAME];
 
       expect(name, isA<FullNameInput>());
       expect((name as FullNameInput).firstName, 'Jakob');

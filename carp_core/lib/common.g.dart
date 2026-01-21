@@ -958,7 +958,15 @@ Map<String, dynamic> _$HeartRateToJson(HeartRate instance) => <String, dynamic>{
 };
 
 ECG _$ECGFromJson(Map<String, dynamic> json) =>
-    ECG(milliVolt: (json['milliVolt'] as num?)?.toDouble() ?? 0)
+    ECG(
+        samplingFrequencyHz:
+            (json['samplingFrequencyHz'] as num?)?.toInt() ?? 250,
+        milliVolt:
+            (json['milliVolt'] as List<dynamic>?)
+                ?.map((e) => (e as num).toDouble())
+                .toList() ??
+            const [],
+      )
       ..$type = json['__type'] as String?
       ..sensorSpecificData = json['sensorSpecificData'] == null
           ? null
@@ -967,6 +975,7 @@ ECG _$ECGFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ECGToJson(ECG instance) => <String, dynamic>{
   '__type': ?instance.$type,
   'sensorSpecificData': ?instance.sensorSpecificData?.toJson(),
+  'samplingFrequencyHz': instance.samplingFrequencyHz,
   'milliVolt': instance.milliVolt,
 };
 

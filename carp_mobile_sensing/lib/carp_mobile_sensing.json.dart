@@ -44,7 +44,6 @@ void _registerFromJsonFunctions() {
   // Data classes
   FromJsonFactory().registerAll([
     Heartbeat(period: 1, deviceRoleName: '', deviceType: ''),
-    CompletedAppTask(taskName: '', taskType: ''),
     FileData(filename: ''),
     DeviceInformation(),
     BatteryState(),
@@ -52,6 +51,17 @@ void _registerFromJsonFunctions() {
     ScreenEvent(),
     Timezone(''),
     AmbientLight(3, 5, 7, 3),
+  ]);
+
+  // CompletedAppTask sub-classes for different AppTask types
+  FromJsonFactory().registerAll([
+    CompletedAppTask(taskName: '', taskType: AppTask.AUDIO_TYPE),
+    CompletedAppTask(taskName: '', taskType: AppTask.COGNITIVE_ASSESSMENT_TYPE),
+    CompletedAppTask(taskName: '', taskType: AppTask.IMAGE_TYPE),
+    CompletedAppTask(taskName: '', taskType: AppTask.INFORMED_CONSENT_TYPE),
+    CompletedAppTask(taskName: '', taskType: AppTask.SENSING_TYPE),
+    CompletedAppTask(taskName: '', taskType: AppTask.SURVEY_TYPE),
+    CompletedAppTask(taskName: '', taskType: AppTask.VIDEO_TYPE),
   ]);
 
   // Sampling Configuration classes

@@ -11,8 +11,6 @@ part of '../../carp_context_package.dart';
 /// [World's Air Quality Index (WAQI)](https://waqi.info) API.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AirQuality extends Data {
-  static const dataType = ContextSamplingPackage.AIR_QUALITY;
-
   int airQualityIndex;
   String? source, place;
   double latitude, longitude;
@@ -28,14 +26,14 @@ class AirQuality extends Data {
   }) : super();
 
   AirQuality.fromAirQualityData(waqi.AirQualityData airQualityData)
-      : latitude = airQualityData.latitude,
-        longitude = airQualityData.longitude,
-        airQualityIndex = airQualityData.airQualityIndex,
-        source = airQualityData.source,
-        place = airQualityData.place,
-        airQualityLevel =
-            AirQualityLevel.values[airQualityData.airQualityLevel.index],
-        super();
+    : latitude = airQualityData.latitude,
+      longitude = airQualityData.longitude,
+      airQualityIndex = airQualityData.airQualityIndex,
+      source = airQualityData.source,
+      place = airQualityData.place,
+      airQualityLevel =
+          AirQualityLevel.values[airQualityData.airQualityLevel.index],
+      super();
 
   @override
   Function get fromJsonFunction => _$AirQualityFromJson;
@@ -43,6 +41,9 @@ class AirQuality extends Data {
       FromJsonFactory().fromJson<AirQuality>(json);
   @override
   Map<String, dynamic> toJson() => _$AirQualityToJson(this);
+
+  @override
+  String get jsonType => ContextSamplingPackage.AIR_QUALITY;
 }
 
 /// Level of air quality.
@@ -53,5 +54,5 @@ enum AirQualityLevel {
   UNHEALTHY_FOR_SENSITIVE_GROUPS,
   UNHEALTHY,
   VERY_UNHEALTHY,
-  HAZARDOUS
+  HAZARDOUS,
 }

@@ -10,8 +10,6 @@ part of '../../carp_context_package.dart';
 /// Holds location information using the GPS format from the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Location extends Geolocation {
-  static const dataType = ContextSamplingPackage.LOCATION;
-
   /// In meters above the WGS 84 reference ellipsoid.
   /// Derived from GPS information.
   double? altitude;

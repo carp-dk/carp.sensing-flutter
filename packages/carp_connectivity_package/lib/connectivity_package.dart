@@ -40,25 +40,25 @@ class ConnectivitySamplingPackage extends SmartphoneSamplingPackage {
           ),
         ),
         DataTypeSamplingScheme(
-            CamsDataTypeMetaData(
-              type: BLUETOOTH,
-              displayName: "Bluetooth Scan of Nearby Devices",
-              timeType: DataTimeType.TIME_SPAN,
-              permissions: [Permission.bluetoothScan],
-            ),
-            PeriodicSamplingConfiguration(
-              interval: const Duration(minutes: 10),
-              duration: const Duration(seconds: 10),
-            )),
+          CamsDataTypeMetaData(
+            type: BLUETOOTH,
+            displayName: "Bluetooth Scan of Nearby Devices",
+            timeType: DataTimeType.TIME_SPAN,
+            permissions: [Permission.bluetoothScan],
+          ),
+          PeriodicSamplingConfiguration(
+            interval: const Duration(minutes: 10),
+            duration: const Duration(seconds: 10),
+          ),
+        ),
         DataTypeSamplingScheme(
-            CamsDataTypeMetaData(
-              type: WIFI,
-              displayName: "Wifi Connectivity Status",
-              timeType: DataTimeType.POINT,
-            ),
-            IntervalSamplingConfiguration(
-              interval: const Duration(minutes: 10),
-            )),
+          CamsDataTypeMetaData(
+            type: WIFI,
+            displayName: "Wifi Connectivity Status",
+            timeType: DataTimeType.POINT,
+          ),
+          IntervalSamplingConfiguration(interval: const Duration(minutes: 10)),
+        ),
         DataTypeSamplingScheme(
           CamsDataTypeMetaData(
             type: BEACON,
@@ -99,7 +99,9 @@ class ConnectivitySamplingPackage extends SmartphoneSamplingPackage {
         duration: const Duration(seconds: 10),
       ),
       BeaconRangingPeriodicSamplingConfiguration(
-          beaconDistance: 2, beaconRegions: [])
+        beaconDistance: 2,
+        beaconRegions: [],
+      ),
     ]);
 
     // registering default privacy functions
@@ -145,9 +147,10 @@ class BluetoothScanPeriodicSamplingConfiguration
   Function get fromJsonFunction =>
       _$BluetoothScanPeriodicSamplingConfigurationFromJson;
   factory BluetoothScanPeriodicSamplingConfiguration.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory()
-          .fromJson<BluetoothScanPeriodicSamplingConfiguration>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<BluetoothScanPeriodicSamplingConfiguration>(
+    json,
+  );
 }
 
 /// A sampling configuration specifying how to scan for iBeacon devices.
@@ -175,9 +178,10 @@ class BeaconRangingPeriodicSamplingConfiguration extends SamplingConfiguration {
   Function get fromJsonFunction =>
       _$BeaconRangingPeriodicSamplingConfigurationFromJson;
   factory BeaconRangingPeriodicSamplingConfiguration.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory()
-          .fromJson<BeaconRangingPeriodicSamplingConfiguration>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<BeaconRangingPeriodicSamplingConfiguration>(
+    json,
+  );
 }
 
 /// Beacon region to use when scanning for beacons.

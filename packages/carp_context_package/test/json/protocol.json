@@ -1,13 +1,15 @@
 {
-  "id": "717eec10-29ef-11ee-a1c3-db41b709561e",
-  "createdOn": "2023-07-24T06:58:07.313059Z",
+  "id": "ff0811d6-65f1-4be4-83ba-58c6e9f70fc1",
+  "createdOn": "2026-01-18T14:15:19.715981Z",
   "version": 0,
   "ownerId": "owner@dtu.dk",
   "name": "Context Sensing Example",
+  "participantRoles": [],
   "primaryDevices": [
     {
       "__type": "dk.cachet.carp.common.application.devices.Smartphone",
       "roleName": "Primary Phone",
+      "isOptional": false,
       "defaultSamplingConfiguration": {},
       "isPrimaryDevice": true
     }
@@ -20,7 +22,8 @@
       "defaultSamplingConfiguration": {},
       "accuracy": "low",
       "distance": 10.0,
-      "interval": 300000000
+      "interval": 300000000,
+      "notificationOnTapBringToFront": false
     },
     {
       "__type": "dk.cachet.carp.common.application.devices.WeatherService",
@@ -51,10 +54,11 @@
       "connectedToRoleName": "Primary Phone"
     }
   ],
+  "assignedDevices": {},
   "tasks": [
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #7",
+      "name": "Task #8",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -64,7 +68,7 @@
     },
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #8",
+      "name": "Task #9",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -74,7 +78,7 @@
     },
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #9",
+      "name": "Task #10",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -88,7 +92,7 @@
     },
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #10",
+      "name": "Task #11",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -109,7 +113,7 @@
     },
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #11",
+      "name": "Task #12",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -119,7 +123,7 @@
     },
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #12",
+      "name": "Task #13",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -161,42 +165,40 @@
   "taskControls": [
     {
       "triggerId": 0,
-      "taskName": "Task #7",
+      "taskName": "Task #8",
       "destinationDeviceRoleName": "Primary Phone",
       "control": "Start"
     },
     {
       "triggerId": 1,
-      "taskName": "Task #8",
-      "destinationDeviceRoleName": "Location Service",
-      "control": "Start"
-    },
-    {
-      "triggerId": 2,
       "taskName": "Task #9",
       "destinationDeviceRoleName": "Location Service",
       "control": "Start"
     },
     {
-      "triggerId": 3,
+      "triggerId": 2,
       "taskName": "Task #10",
       "destinationDeviceRoleName": "Location Service",
       "control": "Start"
     },
     {
-      "triggerId": 4,
+      "triggerId": 3,
       "taskName": "Task #11",
+      "destinationDeviceRoleName": "Location Service",
+      "control": "Start"
+    },
+    {
+      "triggerId": 4,
+      "taskName": "Task #12",
       "destinationDeviceRoleName": "Weather Service",
       "control": "Start"
     },
     {
       "triggerId": 5,
-      "taskName": "Task #12",
+      "taskName": "Task #13",
       "destinationDeviceRoleName": "Air Quality Service",
       "control": "Start"
     }
   ],
-  "participantRoles": [],
-  "assignedDevices": {},
   "expectedParticipantData": []
 }

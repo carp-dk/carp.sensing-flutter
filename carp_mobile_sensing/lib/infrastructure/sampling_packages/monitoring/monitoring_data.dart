@@ -10,8 +10,6 @@ part of '../../../sampling_packages.dart';
 /// Useful for calculating sampling coverage over time.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Heartbeat extends Data {
-  static const dataType = CamsDataTypes.HEARTBEAT_TYPE_NAME;
-
   /// The period of heartbeats per minute.
   int period;
 

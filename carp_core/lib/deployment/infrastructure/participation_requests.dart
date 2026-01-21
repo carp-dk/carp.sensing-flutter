@@ -98,27 +98,6 @@ class SetParticipantData extends ParticipationServiceRequest {
   /// The data to be set.
   Map<String, Data?>? data;
 
-  // /// The data to be set.
-  // @JsonKey(includeFromJson: false, includeToJson: false)
-  // InputData? inputData;
-
-  // set data(Map<String, dynamic> data) {
-  //   inputData = ParticipantData(
-  //     studyDeploymentId: studyDeploymentId!,
-  //     data: data,
-  //   );
-  // }
-
-  // Map<String, dynamic> get data {
-  //   Map<String, dynamic> data = {};
-  //   inputData?.data.forEach((key, value) {
-  //     data['\$type'] = key;
-  //     data['value'] = value;
-  //   });
-
-  //   return data;
-  // }
-
   @override
   Function get fromJsonFunction => _$SetParticipantDataFromJson;
   factory SetParticipantData.fromJson(Map<String, dynamic> json) =>

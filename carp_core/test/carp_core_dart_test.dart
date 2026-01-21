@@ -43,9 +43,9 @@ void main() {
         name: 'Start measures',
         duration: const Duration(hours: 1),
         measures: [
-          Measure(type: Acceleration.dataType),
-          Measure(type: Geolocation.dataType),
-          Measure(type: StepCount.dataType),
+          Measure(type: CarpDataTypes.ACCELERATION),
+          Measure(type: CarpDataTypes.GEOLOCATION),
+          Measure(type: CarpDataTypes.STEP_COUNT),
         ],
       ),
       phone_1,
@@ -61,9 +61,9 @@ void main() {
         // name: 'Start Heart Monitor',
         duration: const Duration(hours: 1),
         measures: [
-          Measure(type: ECG.dataType),
-          Measure(type: EDA.dataType),
-          Measure(type: HeartRate.dataType),
+          Measure(type: CarpDataTypes.ECG),
+          Measure(type: CarpDataTypes.EDA),
+          Measure(type: CarpDataTypes.HEART_RATE),
         ],
       ),
       phone_1,
@@ -79,8 +79,8 @@ void main() {
         // name: 'Start Heart Monitor',
         duration: const Duration(hours: 1),
         measures: [
-          Measure(type: Acceleration.dataType),
-          Measure(type: SignalStrength.dataType),
+          Measure(type: CarpDataTypes.ACCELERATION),
+          Measure(type: CarpDataTypes.SIGNAL_STRENGTH),
         ],
       ),
       phone_2,
@@ -470,105 +470,68 @@ void main() {
     expect(configuration.expectedDataStreams, isNotEmpty);
   });
 
-  group('InputData - deep assert', () {
-    test('- CustomInput', () async {
-      final dataJson = toJsonString(CustomInput(value: {'key': 'value'}));
+  group('Data Types', () {
+    test('- Data', () async {
+      final allData = [
+        Acceleration(x: 1, y: 2, z: 3),
+        Rotation(x: 4, y: 5, z: 6),
+        MagneticField(x: 7, y: 8, z: 9),
+        Geolocation(latitude: 55.6808, longitude: 12.5818),
+        Geolocation(latitude: 55.6808, longitude: 12.5818),
+        SignalStrength(rssi: -65),
+        EDA(microSiemens: 0.5),
+        StepCount(steps: 12),
+        ECG(milliVolt: [0, 1, 0, -1]),
+        HeartRate(bpm: 72),
+        StepCount(steps: 1000),
+        CompletedTask(taskName: 'Test Task'),
+        TriggeredTask(
+          triggerId: 1,
+          taskName: 'Test Task',
+          destinationDeviceRoleName: 'phone',
+          control: Control.Start,
+        ),
+        Error(message: 'An error occurred'),
+      ];
 
-      final dataFromJson = CustomInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
     });
 
-    test('- SexInput', () async {
-      final dataJson = toJsonString(SexInput(value: Sex.Male));
-
-      final dataFromJson = SexInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
-    });
-
-    test('- PhoneNumberInput', () async {
-      final dataJson = toJsonString(
+    test('- InputData', () async {
+      final allData = [
+        CustomInput(value: {'key': 'value'}),
+        SexInput(value: Sex.Female),
         PhoneNumberInput(countryCode: '+45', number: '12345678'),
-      );
-
-      final dataFromJson = PhoneNumberInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
-    });
-
-    test('- SocialSecurityNumberInput', () async {
-      final dataJson = toJsonString(
         SocialSecurityNumberInput(
-          country: '45',
+          country: 'DK',
           socialSecurityNumber: '123456-7890',
         ),
-      );
-
-      final dataFromJson = SocialSecurityNumberInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
-    });
-
-    test('- FullNameInput', () async {
-      final dataJson = toJsonString(
         FullNameInput(firstName: 'John', middleName: 'A.', lastName: 'Doe'),
-      );
-
-      final dataFromJson = FullNameInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
-    });
-
-    test('- AddressInput', () async {
-      final dataJson = toJsonString(
         AddressInput(street: 'Main St', city: 'Anytown'),
-      );
-
-      final dataFromJson = AddressInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
-    });
-
-    test('- DiagnosisInput', () async {
-      final dataJson = toJsonString(
         DiagnosisInput(diagnosis: 'Flu', icd11Code: '123456'),
-      );
-
-      final dataFromJson = DiagnosisInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
-    });
-
-    test('- InformedConsentInput', () async {
-      final dataJson = toJsonString(
         InformedConsentInput(
           userId: '12345',
           name: 'John Doe',
           consent: 'true',
           signatureImage: 'blob',
         ),
-      );
+      ];
 
-      final dataFromJson = InformedConsentInput.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
-      print(toJsonString(dataFromJson));
-      expect(toJsonString(dataFromJson), equals(dataJson));
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
     });
   });
 }

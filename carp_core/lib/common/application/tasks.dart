@@ -33,7 +33,7 @@ class TaskConfiguration extends Serializable {
   /// of task measures, or as the result of user interactions, for this task.
   Set<String> getAllExpectedDataTypes() =>
       (measures?.map((measure) => measure.type).toSet() ?? {})
-        ..add(CarpDataTypes.COMPLETED_TASK_TYPE_NAME);
+        ..add(CarpDataTypes.COMPLETED_TASK);
 
   /// Add [measure] to this task.
   void addMeasure(Measure measure) => measures!.add(measure);

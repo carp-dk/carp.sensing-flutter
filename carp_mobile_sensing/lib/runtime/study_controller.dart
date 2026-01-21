@@ -119,7 +119,7 @@ class SmartphoneStudyController {
 
   /// A stream of all [measurements] of a specific data [type].
   Stream<Measurement> measurementsByType(String type) => measurements.where(
-    (measurement) => measurement.data.format.toString() == type,
+    (measurement) => measurement.data.dataType.toString() == type,
   );
 
   /// Handles updates of the [deployment] status.

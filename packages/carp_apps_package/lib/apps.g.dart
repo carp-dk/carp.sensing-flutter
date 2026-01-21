@@ -23,7 +23,7 @@ App _$AppFromJson(Map<String, dynamic> json) => App(
   versionName: json['versionName'] as String?,
   versionCode: (json['versionCode'] as num?)?.toInt(),
   installTimeMillis: (json['installTimeMillis'] as num?)?.toInt(),
-)..framework = json['builtWith'] as String?;
+)..framework = json['framework'] as String?;
 
 Map<String, dynamic> _$AppToJson(App instance) => <String, dynamic>{
   'name': ?instance.name,
@@ -31,7 +31,7 @@ Map<String, dynamic> _$AppToJson(App instance) => <String, dynamic>{
   'versionName': ?instance.versionName,
   'versionCode': ?instance.versionCode,
   'installTimeMillis': ?instance.installTimeMillis,
-  'builtWith': ?instance.framework,
+  'framework': ?instance.framework,
 };
 
 AppUsage _$AppUsageFromJson(Map<String, dynamic> json) => AppUsage(

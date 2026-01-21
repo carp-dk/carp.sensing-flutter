@@ -31,8 +31,6 @@ abstract class MediaData extends FileData {
 /// An audio data.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AudioMedia extends MediaData {
-  static const dataType = MediaSamplingPackage.AUDIO;
-
   AudioMedia({
     required super.filename,
     super.startRecordingTime,
@@ -40,7 +38,7 @@ class AudioMedia extends MediaData {
   }) : super(mediaType: MediaType.audio);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MediaSamplingPackage.AUDIO;
 
   @override
   Function get fromJsonFunction => _$AudioMediaFromJson;
@@ -54,8 +52,6 @@ class AudioMedia extends MediaData {
 /// An image data.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ImageMedia extends MediaData {
-  static const dataType = MediaSamplingPackage.IMAGE;
-
   ImageMedia({
     required super.filename,
     super.startRecordingTime,
@@ -63,7 +59,7 @@ class ImageMedia extends MediaData {
   }) : super(mediaType: MediaType.image);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MediaSamplingPackage.IMAGE;
 
   @override
   Function get fromJsonFunction => _$ImageMediaFromJson;
@@ -77,8 +73,6 @@ class ImageMedia extends MediaData {
 /// An video data.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class VideoMedia extends MediaData {
-  static const dataType = MediaSamplingPackage.VIDEO;
-
   VideoMedia({
     required super.filename,
     super.startRecordingTime,
@@ -86,7 +80,7 @@ class VideoMedia extends MediaData {
   }) : super(mediaType: MediaType.video);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MediaSamplingPackage.VIDEO;
 
   @override
   Function get fromJsonFunction => _$VideoMediaFromJson;
@@ -100,8 +94,6 @@ class VideoMedia extends MediaData {
 /// Holds the noise level in decibel of a noise sampling.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Noise extends Data {
-  static const dataType = MediaSamplingPackage.NOISE;
-
   // The sound intensity [dB] measurement statistics for a given sampling window.
 
   /// Mean decibel of sampling window.

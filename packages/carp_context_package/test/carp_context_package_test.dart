@@ -144,6 +144,72 @@ void main() {
     print(toJsonString(protocolFromFile));
   });
 
+  group('Data Types', () {
+    test('- Context Data', () async {
+      final allData = [
+        Activity(type: ActivityType.WALKING, confidence: 100),
+        AirQuality(
+          airQualityIndex: 42,
+          source: 'DMI',
+          place: 'Copenhagen',
+          latitude: 12.34,
+          longitude: 56.78,
+          airQualityLevel: AirQualityLevel.MODERATE,
+        ),
+        Geofence(type: GeofenceType.ENTER, name: 'DTU'),
+        Location(longitude: 12.524159, latitude: 55.786025, altitude: 50.0),
+        Mobility(numberOfPlaces: 5, homeStay: 80, distanceTraveled: 12000),
+        Weather()
+          ..areaName = 'Copenhagen'
+          ..country = 'Denmark'
+          ..temperature = 20.5
+          ..weatherMain = 'Clear'
+          ..weatherDescription = 'clear sky',
+      ];
+
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
+    });
+
+    test('- OMH Data', () async {
+      final allData = [
+        OMHContextDataPoint(
+          omh.DataPoint(
+            body: omh.Measure(
+              effectiveTimeFrame: omh.TimeFrame(dateTime: DateTime.now()),
+            ),
+          ),
+        ),
+
+        // The following does not work, since the omh package does not support
+        // fromJson factory methods as polymorphic constructors.
+
+        // OMHGeopositionDataPoint.fromLocationData(
+        //   Location(longitude: 12.524159, latitude: 55.786025),
+        // ),
+        // OMHPhysicalActivityDataPoint.fromActivityData(
+        //   Activity(type: ActivityType.RUNNING, confidence: 95),
+        // ),
+      ];
+
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        print(dataJson);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
+    });
+  });
+
   test('CARP Activity', () {
     Activity act = Activity(type: ActivityType.ON_BICYCLE, confidence: 90);
     Measurement m_1 = Measurement.fromData(act);

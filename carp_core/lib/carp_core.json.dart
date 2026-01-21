@@ -150,7 +150,7 @@ void _registerFromJsonFunctions() {
 
   // DATA TYPES
   FromJsonFactory().registerAll([
-    Data(),
+    // Data(),
     // SensorData(),
     Acceleration(),
     Rotation(),

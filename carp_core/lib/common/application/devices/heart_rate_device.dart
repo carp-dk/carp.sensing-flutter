@@ -17,13 +17,13 @@ class BLEHeartRateDevice
   DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.HEART_RATE_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.HEART_RATE]!,
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.INTERBEAT_INTERVAL_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.INTERBEAT_INTERVAL]!,
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.SENSOR_SKIN_CONTACT_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.SENSOR_SKIN_CONTACT]!,
         ),
       ]);
 

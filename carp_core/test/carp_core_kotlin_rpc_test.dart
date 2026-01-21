@@ -538,8 +538,10 @@ void main() {
         '$path/deployments/ParticipationService/setParticipantData.json',
       ).readAsStringSync();
 
+      var data = SexInput(value: Sex.Male);
+
       var request = SetParticipantData('c9cc5317-48da-45f2-958e-58bc07f34681', {
-        SexInput.type: SexInput(value: Sex.Male),
+        data.type: data,
       }, 'Participant');
 
       var expected = SetParticipantData.fromJson(

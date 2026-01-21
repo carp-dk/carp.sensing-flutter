@@ -25,10 +25,7 @@ enum DasesHealthDataType {
 }
 
 /// Types of health platforms.
-enum HealthPlatform {
-  APPLE_HEALTH,
-  GOOGLE_HEALTH_CONNECT,
-}
+enum HealthPlatform { APPLE_HEALTH, GOOGLE_HEALTH_CONNECT }
 
 /// Map a [DasesHealthDataType] to a [HealthDataUnit].
 const Map<DasesHealthDataType, HealthDataUnit> dasesDataTypeToUnit = {
@@ -90,7 +87,7 @@ class HealthData extends Data {
 
   /// The type of health data -- see [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType.html).
   /// Note that the uppercase version is used, e.g. `STEPS`.
-  String dataType;
+  String healthDataType;
 
   /// The platform from which this health data point came from
   HealthPlatform platform;
@@ -109,7 +106,7 @@ class HealthData extends Data {
     this.uuid,
     this.value,
     this.unit,
-    this.dataType,
+    this.healthDataType,
     DateTime dateFrom,
     DateTime dateTo,
     this.platform,
@@ -124,16 +121,17 @@ class HealthData extends Data {
   /// Create a [HealthData] from a [HealthDataPoint] health data object.
   factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) =>
       HealthData(
-          const Uuid().v1,
-          healthDataPoint.value,
-          healthDataPoint.unitString,
-          healthDataPoint.typeString,
-          healthDataPoint.dateFrom.toUtc(),
-          healthDataPoint.dateTo.toUtc(),
-          HealthPlatform.values[healthDataPoint.sourcePlatform.index],
-          healthDataPoint.sourceDeviceId,
-          healthDataPoint.sourceId,
-          healthDataPoint.sourceName);
+        const Uuid().v1,
+        healthDataPoint.value,
+        healthDataPoint.unitString,
+        healthDataPoint.typeString,
+        healthDataPoint.dateFrom.toUtc(),
+        healthDataPoint.dateTo.toUtc(),
+        HealthPlatform.values[healthDataPoint.sourcePlatform.index],
+        healthDataPoint.sourceDeviceId,
+        healthDataPoint.sourceId,
+        healthDataPoint.sourceName,
+      );
 
   @override
   Function get fromJsonFunction => _$HealthDataFromJson;
@@ -145,14 +143,15 @@ class HealthData extends Data {
   Map<String, dynamic> toJson() => _$HealthDataToJson(this);
 
   /// The json type of this health data is `dk.cachet.carp.health.<healthdatatype>`,
-  /// where `<healthdatatype>` is the lowercase version of the [dataType].
+  /// where `<healthdatatype>` is the lowercase version of the [healthDataType].
   @override
   String get jsonType =>
-      '${HealthSamplingPackage.HEALTH}.${dataType.toLowerCase()}';
+      '${HealthSamplingPackage.HEALTH}.${healthDataType.toLowerCase()}';
 
   @override
-  String toString() => '${super.toString()}'
-      ', dataType: $dataType'
+  String toString() =>
+      '${super.toString()}'
+      ', healthDataType: $healthDataType'
       ', platform: $platform'
       ', value: $value'
       ', unit: $unit'

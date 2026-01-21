@@ -83,11 +83,9 @@ class AppTask extends TaskConfiguration {
 
     // Ensure that the completed app task data type is included in the measures.
     if (!measures.contains(
-      Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$type'),
+      Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'),
     )) {
-      measures.add(
-        Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$type'),
-      );
+      measures.add(Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'));
     }
 
     super.measures = measures.toSet().toList();

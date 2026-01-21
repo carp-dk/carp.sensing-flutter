@@ -88,10 +88,10 @@ class ParticipationReference extends RPCCarpReference {
     );
 
     for (var roleData in data.roles) {
-      if (roleData.data.containsKey(InformedConsentInput.type)) {
+      if (roleData.data.containsKey(InputType.INFORMED_CONSENT)) {
         map[roleData.roleName] =
-            roleData.data[InformedConsentInput.type] != null
-            ? roleData.data[InformedConsentInput.type] as InformedConsentInput
+            roleData.data[InputType.INFORMED_CONSENT] != null
+            ? roleData.data[InputType.INFORMED_CONSENT] as InformedConsentInput
             : null;
       } else {
         map[roleData.roleName] = null;
@@ -123,7 +123,7 @@ class ParticipationReference extends RPCCarpReference {
     ParticipantData.fromJson(
       await _rpc(
             SetParticipantData(studyDeploymentId, {
-              InformedConsentInput.type: consent,
+              InputType.INFORMED_CONSENT: consent,
             }, getParticipantRoleName(inputByParticipantRole)),
           )
           as Map<String, dynamic>,
@@ -138,7 +138,7 @@ class ParticipationReference extends RPCCarpReference {
     ParticipantData.fromJson(
       await _rpc(
             SetParticipantData(studyDeploymentId, {
-              InformedConsentInput.type: null,
+              InputType.INFORMED_CONSENT: null,
             }, getParticipantRoleName(inputByParticipantRole)),
           )
           as Map<String, dynamic>,

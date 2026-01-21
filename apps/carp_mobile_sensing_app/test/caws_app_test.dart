@@ -49,16 +49,10 @@ void main() {
     CarpDataManager();
 
     /// The URI of the CAWS server
-    final uri = Uri(
-      scheme: 'https',
-      host: 'dev.carp.dk',
-    );
+    final uri = Uri(scheme: 'https', host: 'dev.carp.dk');
 
     /// The CAWS app configuration.
-    final app = CarpApp(
-      name: "CAWS @ DTU",
-      uri: uri,
-    );
+    final app = CarpApp(name: "CAWS @ DTU", uri: uri);
 
     /// The authentication configuration
     CarpAuthProperties authProperties = CarpAuthProperties(
@@ -66,11 +60,7 @@ void main() {
       clientId: 'studies-app',
       redirectURI: Uri.parse('carp-studies-auth://auth'),
       // For authentication at CAWS the path is '/auth/realms/Carp'
-      discoveryURL: uri.replace(pathSegments: [
-        'auth',
-        'realms',
-        'Carp',
-      ]),
+      discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
     );
 
     await CarpAuthService().configure(authProperties);
@@ -94,37 +84,42 @@ void main() {
     });
 
     test('- get study deployment status', () async {
-      final status = await CarpDeploymentService()
-          .getStudyDeploymentStatus(testDeploymentId);
+      final status = await CarpDeploymentService().getStudyDeploymentStatus(
+        testDeploymentId,
+      );
       print(toJsonString(status));
     });
 
     test("- register Primary Phone", () async {
       final status = await CarpDeploymentService().registerDevice(
-          testDeploymentId,
-          "Primary Phone",
-          DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'));
+        testDeploymentId,
+        "Primary Phone",
+        DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'),
+      );
       print(toJsonString(status));
     });
     test("- register Father's device", () async {
       final status = await CarpDeploymentService().registerDevice(
-          testDeploymentId,
-          "Father's Phone",
-          DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'));
+        testDeploymentId,
+        "Father's Phone",
+        DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'),
+      );
       print(toJsonString(status));
     });
 
     test("- register Mother's device", () async {
       final status = await CarpDeploymentService().registerDevice(
-          testDeploymentId,
-          "Mother's Phone",
-          DefaultDeviceRegistration(deviceDisplayName: 'Samsung A20'));
+        testDeploymentId,
+        "Mother's Phone",
+        DefaultDeviceRegistration(deviceDisplayName: 'Samsung A20'),
+      );
       print(toJsonString(status));
     });
 
     test('- get study deployment ', () async {
-      final status = await CarpDeploymentService()
-          .getStudyDeploymentStatus(testDeploymentId);
+      final status = await CarpDeploymentService().getStudyDeploymentStatus(
+        testDeploymentId,
+      );
 
       final study = await CarpDeploymentService().getDeviceDeploymentFor(
         status.studyDeploymentId,
@@ -147,25 +142,22 @@ void main() {
     test('- set participant data - SEX', () async {
       var participation = CarpParticipationService().participation();
 
-      var data = await participation.setParticipantData(
-        {SexInput.type: SexInput(value: Sex.Male)},
-      );
+      var data = await participation.setParticipantData({
+        InputType.SEX: SexInput(value: Sex.Male),
+      });
 
       print(toJsonString(data));
     });
 
     test('- set participant data - NAME', () async {
-      var data = await CarpParticipationService().setParticipantData(
-        testDeploymentId,
-        {
-          FullNameInput.type: FullNameInput(
-            firstName: 'Eva',
-            middleName: 'G.',
-            lastName: 'Olsen',
-          )
-        },
-        "Mother",
-      );
+      var data = await CarpParticipationService()
+          .setParticipantData(testDeploymentId, {
+            InputType.FULL_NAME: FullNameInput(
+              firstName: 'Eva',
+              middleName: 'G.',
+              lastName: 'Olsen',
+            ),
+          }, "Mother");
       print(toJsonString(data));
     });
 
@@ -173,13 +165,14 @@ void main() {
       var participation = CarpParticipationService().participation();
 
       await participation.setInformedConsent(
-          InformedConsentInput(
-            userId: 'jakba@dtu.dk',
-            name: 'JEB',
-            consent: 'I agree',
-            signatureImage: 'blob',
-          ),
-          '');
+        InformedConsentInput(
+          userId: 'jakba@dtu.dk',
+          name: 'JEB',
+          consent: 'I agree',
+          signatureImage: 'blob',
+        ),
+        '',
+      );
     });
 
     test('- get ALL participant data', () async {

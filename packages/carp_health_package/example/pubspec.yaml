@@ -13,5 +13,15 @@ dependencies:
   carp_health_package:
     path: ../
 
+# Overriding carp libraries to use the local copy
+# Remove this before release of package
+dependency_overrides:
+  # carp_serializable:
+  #   path: ../../carp_serializable/
+  carp_core:
+    path: ../../../carp_core/
+  carp_mobile_sensing:
+    path: ../../../carp_mobile_sensing/
+
 flutter:
   uses-material-design: true

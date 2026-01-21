@@ -16,7 +16,7 @@ void main() {
   late StudyProtocol protocol;
   Smartphone phone;
 
-  setUp(() {
+  setUpAll(() {
     WidgetsFlutterBinding.ensureInitialized();
     // Initialization of serialization
     CarpMobileSensing.ensureInitialized();
@@ -38,38 +38,45 @@ void main() {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask()
-        ..measures = SamplingPackageRegistry()
-            .dataTypes
+        ..measures = SamplingPackageRegistry().dataTypes
             .map((type) => Measure(type: type.type))
             .toList(),
       phone,
     );
 
     protocol.addTaskControl(
-        // collect every hour
-        PeriodicTrigger(period: Duration(minutes: 60)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: HealthSamplingPackage.HEALTH)
-            ..overrideSamplingConfiguration =
-                HealthSamplingConfiguration(healthDataTypes: [
+      // collect every hour
+      PeriodicTrigger(period: Duration(minutes: 60)),
+      BackgroundTask()..addMeasure(
+        Measure(type: HealthSamplingPackage.HEALTH)
+          ..overrideSamplingConfiguration = HealthSamplingConfiguration(
+            healthDataTypes: [
               HealthDataType.BLOOD_GLUCOSE,
               HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
               HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
               HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
               HealthDataType.HEART_RATE,
               HealthDataType.STEPS,
-            ])),
-        phone);
+            ],
+          ),
+      ),
+      phone,
+    );
 
     protocol.addTaskControl(
-        // collect every day at 23:00
-        RecurrentScheduledTrigger(
-            type: RecurrentType.daily, time: TimeOfDay(hour: 23, minute: 00)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: HealthSamplingPackage.HEALTH)
-            ..overrideSamplingConfiguration = HealthSamplingConfiguration(
-                healthDataTypes: [HealthDataType.WEIGHT])),
-        phone);
+      // collect every day at 23:00
+      RecurrentScheduledTrigger(
+        type: RecurrentType.daily,
+        time: TimeOfDay(hour: 23, minute: 00),
+      ),
+      BackgroundTask()..addMeasure(
+        Measure(type: HealthSamplingPackage.HEALTH)
+          ..overrideSamplingConfiguration = HealthSamplingConfiguration(
+            healthDataTypes: [HealthDataType.WEIGHT],
+          ),
+      ),
+      phone,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () async {
@@ -82,8 +89,9 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -92,8 +100,9 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocol = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, Smartphone.DEFAULT_ROLE_NAME);
@@ -140,8 +149,10 @@ void main() {
 
       final dp_1 = Measurement.fromData(hd);
       expect(
-          dp_1.data.format.namespace, HealthSamplingPackage.HEALTH_NAMESPACE);
-      expect(dp_1.data.format.name, "calories_intake");
+        dp_1.data.dataType.namespace,
+        HealthSamplingPackage.HEALTH_NAMESPACE,
+      );
+      expect(dp_1.data.dataType.name, "calories_intake");
       print(_encode(dp_1));
     });
 
@@ -149,21 +160,24 @@ void main() {
       DateTime to = DateTime.now();
       DateTime from = to.subtract(Duration(milliseconds: 10000));
       HealthData hd = HealthData(
-          '4321',
-          NumericHealthValue(numericValue: 6),
-          dasesDataTypeToUnit[DasesHealthDataType.ALCOHOL]?.name ?? '',
-          DasesHealthDataType.ALCOHOL.name,
-          from,
-          to,
-          HealthPlatform.APPLE_HEALTH,
-          '1234',
-          '4321',
-          '4321');
+        '4321',
+        NumericHealthValue(numericValue: 6),
+        dasesDataTypeToUnit[DasesHealthDataType.ALCOHOL]?.name ?? '',
+        DasesHealthDataType.ALCOHOL.name,
+        from,
+        to,
+        HealthPlatform.APPLE_HEALTH,
+        '1234',
+        '4321',
+        '4321',
+      );
 
       final dp_1 = Measurement.fromData(hd);
       expect(
-          dp_1.data.format.namespace, HealthSamplingPackage.HEALTH_NAMESPACE);
-      expect(dp_1.data.format.name, "alcohol");
+        dp_1.data.dataType.namespace,
+        HealthSamplingPackage.HEALTH_NAMESPACE,
+      );
+      expect(dp_1.data.dataType.name, "alcohol");
       print(_encode(dp_1));
     });
 
@@ -171,21 +185,24 @@ void main() {
       DateTime to = DateTime.now();
       DateTime from = to.subtract(Duration(hours: 8));
       HealthData hd = HealthData(
-          '4321',
-          NumericHealthValue(numericValue: 6),
-          dasesDataTypeToUnit[DasesHealthDataType.SLEEP]?.name ?? '',
-          DasesHealthDataType.SLEEP.name,
-          from,
-          to,
-          HealthPlatform.APPLE_HEALTH,
-          '1234',
-          '4321',
-          '4321');
+        '4321',
+        NumericHealthValue(numericValue: 6),
+        dasesDataTypeToUnit[DasesHealthDataType.SLEEP]?.name ?? '',
+        DasesHealthDataType.SLEEP.name,
+        from,
+        to,
+        HealthPlatform.APPLE_HEALTH,
+        '1234',
+        '4321',
+        '4321',
+      );
 
       final dp_1 = Measurement.fromData(hd);
       expect(
-          dp_1.data.format.namespace, HealthSamplingPackage.HEALTH_NAMESPACE);
-      expect(dp_1.data.format.name, "sleep");
+        dp_1.data.dataType.namespace,
+        HealthSamplingPackage.HEALTH_NAMESPACE,
+      );
+      expect(dp_1.data.dataType.name, "sleep");
       print(_encode(dp_1));
     });
 
@@ -194,24 +211,26 @@ void main() {
       DateTime from = to.subtract(Duration(hours: 8));
 
       HealthData smoking = HealthData(
-          '4321',
-          NumericHealthValue(numericValue: 12),
-          dasesDataTypeToUnit[DasesHealthDataType.SMOKED_CIGARETTES]?.name ??
-              '',
-          DasesHealthDataType.SMOKED_CIGARETTES.name,
-          from,
-          to,
-          (Platform.isAndroid)
-              ? HealthPlatform.GOOGLE_HEALTH_CONNECT
-              : HealthPlatform.APPLE_HEALTH,
-          '1234',
-          '4321',
-          '4321');
+        '4321',
+        NumericHealthValue(numericValue: 12),
+        dasesDataTypeToUnit[DasesHealthDataType.SMOKED_CIGARETTES]?.name ?? '',
+        DasesHealthDataType.SMOKED_CIGARETTES.name,
+        from,
+        to,
+        (Platform.isAndroid)
+            ? HealthPlatform.GOOGLE_HEALTH_CONNECT
+            : HealthPlatform.APPLE_HEALTH,
+        '1234',
+        '4321',
+        '4321',
+      );
 
       final dp_1 = Measurement.fromData(smoking);
       expect(
-          dp_1.data.format.namespace, HealthSamplingPackage.HEALTH_NAMESPACE);
-      expect(dp_1.data.format.name, "smoked_cigarettes");
+        dp_1.data.dataType.namespace,
+        HealthSamplingPackage.HEALTH_NAMESPACE,
+      );
+      expect(dp_1.data.dataType.name, "smoked_cigarettes");
       print(_encode(dp_1));
     });
 
@@ -220,26 +239,30 @@ void main() {
       DateTime from = to.subtract(Duration(hours: 8));
 
       HealthData audiogram = HealthData(
-          '4321',
-          AudiogramHealthValue(
-              frequencies: [12, 32],
-              leftEarSensitivities: [1, 2, 3, 4],
-              rightEarSensitivities: [1, 4, 7]),
-          HealthDataUnit.NO_UNIT.name,
-          HealthDataType.AUDIOGRAM.name,
-          from,
-          to,
-          (Platform.isAndroid)
-              ? HealthPlatform.GOOGLE_HEALTH_CONNECT
-              : HealthPlatform.APPLE_HEALTH,
-          '1234',
-          '4321',
-          '4321');
+        '4321',
+        AudiogramHealthValue(
+          frequencies: [12, 32],
+          leftEarSensitivities: [1, 2, 3, 4],
+          rightEarSensitivities: [1, 4, 7],
+        ),
+        HealthDataUnit.NO_UNIT.name,
+        HealthDataType.AUDIOGRAM.name,
+        from,
+        to,
+        (Platform.isAndroid)
+            ? HealthPlatform.GOOGLE_HEALTH_CONNECT
+            : HealthPlatform.APPLE_HEALTH,
+        '1234',
+        '4321',
+        '4321',
+      );
 
       final dp_1 = Measurement.fromData(audiogram);
       expect(
-          dp_1.data.format.namespace, HealthSamplingPackage.HEALTH_NAMESPACE);
-      expect(dp_1.data.format.name, "audiogram");
+        dp_1.data.dataType.namespace,
+        HealthSamplingPackage.HEALTH_NAMESPACE,
+      );
+      expect(dp_1.data.dataType.name, "audiogram");
       print(_encode(dp_1));
     });
 
@@ -248,28 +271,32 @@ void main() {
       DateTime from = to.subtract(Duration(hours: 8));
 
       HealthData workout = HealthData(
-          '4321',
-          WorkoutHealthValue(
-              workoutActivityType: HealthWorkoutActivityType.MARTIAL_ARTS,
-              totalEnergyBurned: 8,
-              totalEnergyBurnedUnit: HealthDataUnit.KILOCALORIE,
-              totalDistance: 1000,
-              totalDistanceUnit: HealthDataUnit.METER),
-          HealthDataUnit.NO_UNIT.name,
-          HealthDataType.WORKOUT.name,
-          from,
-          to,
-          (Platform.isAndroid)
-              ? HealthPlatform.GOOGLE_HEALTH_CONNECT
-              : HealthPlatform.APPLE_HEALTH,
-          '1234',
-          '4321',
-          '4321');
+        '4321',
+        WorkoutHealthValue(
+          workoutActivityType: HealthWorkoutActivityType.MARTIAL_ARTS,
+          totalEnergyBurned: 8,
+          totalEnergyBurnedUnit: HealthDataUnit.KILOCALORIE,
+          totalDistance: 1000,
+          totalDistanceUnit: HealthDataUnit.METER,
+        ),
+        HealthDataUnit.NO_UNIT.name,
+        HealthDataType.WORKOUT.name,
+        from,
+        to,
+        (Platform.isAndroid)
+            ? HealthPlatform.GOOGLE_HEALTH_CONNECT
+            : HealthPlatform.APPLE_HEALTH,
+        '1234',
+        '4321',
+        '4321',
+      );
 
       final dp_1 = Measurement.fromData(workout);
       expect(
-          dp_1.data.format.namespace, HealthSamplingPackage.HEALTH_NAMESPACE);
-      expect(dp_1.data.format.name, "workout");
+        dp_1.data.dataType.namespace,
+        HealthSamplingPackage.HEALTH_NAMESPACE,
+      );
+      expect(dp_1.data.dataType.name, "workout");
       print(_encode(dp_1));
     });
   });

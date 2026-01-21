@@ -9,8 +9,6 @@ part of '../../domain.dart';
 /// A [Data] object holding a link to a file.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class FileData extends Data {
-  static const dataType = CamsDataTypes.FILE_TYPE_NAME;
-
   /// The local path to the attached file on the phone where it is sampled.
   /// This is used by e.g. a data manager to get and manage the file on
   /// the phone.
@@ -51,15 +49,12 @@ class FileData extends Data {
 /// [taskData] holds the result of the task, or null if no result is collected.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CompletedAppTask extends CompletedTask {
-  static const dataType = CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME;
-
-  // note that the format is overridden to include the task type
-  // in the form of 'completed_app_task.<taskType>'
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  DataType get format => DataType.fromString(
-    '${CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME}.$taskType',
-  );
+  // note that the dataType is overridden to include the task type
+  // in the form of 'completedapptask.<taskType>'
+  // @override
+  // @JsonKey(includeFromJson: false, includeToJson: false)
+  // DataType get dataType =>
+  //     DataType.fromString('${CamsDataTypes.COMPLETED_APP_TASK}.$taskType');
 
   /// The type of [AppTask] which was completed, if specified.
   ///
@@ -77,6 +72,8 @@ class CompletedAppTask extends CompletedTask {
   /// The time when the task was completed in UTC.
   late DateTime completedAt;
 
+  /// Create a completed app task with the given [taskName] and [taskType],
+  /// and optional [taskData].
   CompletedAppTask({
     required super.taskName,
     required this.taskType,
@@ -85,14 +82,24 @@ class CompletedAppTask extends CompletedTask {
     completedAt = DateTime.now().toUtc();
   }
 
+  /// Create a completed app task based on the given [userTask].
+  CompletedAppTask.fromUserTask(UserTask userTask)
+    : this(
+        taskName: userTask.name,
+        taskType: userTask.type,
+        taskData: userTask.result,
+      );
+
   @override
   bool equivalentTo(Data other) =>
       other is CompletedAppTask &&
       taskName == other.taskName &&
       taskType == other.taskType;
 
+  // note that the jsonType is overridden to include the task type
+  // in the form of 'completedapptask.<taskType>'
   @override
-  String get jsonType => CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME;
+  String get jsonType => '${CamsDataTypes.COMPLETED_APP_TASK}.$taskType';
 
   @override
   Function get fromJsonFunction => _$CompletedAppTaskFromJson;

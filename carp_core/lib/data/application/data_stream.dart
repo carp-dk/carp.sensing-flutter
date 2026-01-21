@@ -106,7 +106,7 @@ class Measurement {
 
   /// The type of the [data].
   @JsonKey(includeFromJson: false, includeToJson: false)
-  DataType get dataType => data.format;
+  DataType get dataType => data.dataType;
 
   /// The [TaskControl] which triggered the collection of this measurement.
   @JsonKey(includeFromJson: false, includeToJson: false)

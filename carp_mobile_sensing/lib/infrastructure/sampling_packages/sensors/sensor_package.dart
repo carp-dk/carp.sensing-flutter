@@ -22,7 +22,7 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [IntervalSamplingConfiguration] sampling configuration.
-  static const String ACCELERATION = CarpDataTypes.ACCELERATION_TYPE_NAME;
+  static const String ACCELERATION = CarpDataTypes.ACCELERATION;
 
   /// Rate of change in velocity, excluding gravity, along perpendicular x, y,
   /// and z axes in the phone's coordinate system.
@@ -30,7 +30,7 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [IntervalSamplingConfiguration] sampling configuration.
   static const String NON_GRAVITATIONAL_ACCELERATION =
-      CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME;
+      CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION;
 
   /// A set of acceleration (non-gravitational) features calculated over a
   /// specific sampling period.
@@ -38,26 +38,26 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
   static const String ACCELERATION_FEATURES =
-      '${CarpDataTypes.CARP_NAMESPACE}.acceleration_features';
+      '${CarpDataTypes.CARP_NAMESPACE}.accelerationfeatures';
 
   /// Rotation of the phone in x,y,z (typically measured by a gyroscope).
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [IntervalSamplingConfiguration] sampling configuration.
-  static const String ROTATION = CarpDataTypes.ROTATION_TYPE_NAME;
+  static const String ROTATION = CarpDataTypes.ROTATION;
 
   /// Magnetic field around the phone in x,y,z (typically measured by a magnetometer).
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [IntervalSamplingConfiguration] sampling configuration.
-  static const String MAGNETIC_FIELD = CarpDataTypes.MAGNETIC_FIELD_TYPE_NAME;
+  static const String MAGNETIC_FIELD = CarpDataTypes.MAGNETIC_FIELD;
 
   /// Ambient light from the phone's light sensor.
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
   static const String AMBIENT_LIGHT =
-      '${CarpDataTypes.CARP_NAMESPACE}.ambient_light';
+      '${CarpDataTypes.CARP_NAMESPACE}.ambientlight';
 
   /// Step event from the phone's pedometer.
   /// Note that this measure type is different from the "stepcount" measure type,
@@ -65,32 +65,31 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure (one event per step).
   ///  * Uses the [Smartphone] device for data collection.
   ///  * No sampling configuration needed.
-  static const String STEP_EVENT = '${CarpDataTypes.CARP_NAMESPACE}.step_event';
+  static const String STEP_EVENT = '${CarpDataTypes.CARP_NAMESPACE}.stepevent';
 
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ACCELERATION_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.ACCELERATION]!,
           IntervalSamplingConfiguration(
             interval: const Duration(milliseconds: 200),
           ),
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes
-              .NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION]!,
           IntervalSamplingConfiguration(
             interval: const Duration(milliseconds: 200),
           ),
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ROTATION_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.ROTATION]!,
           IntervalSamplingConfiguration(
             interval: const Duration(milliseconds: 200),
           ),
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.MAGNETIC_FIELD_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.MAGNETIC_FIELD]!,
           IntervalSamplingConfiguration(
             interval: const Duration(milliseconds: 200),
           ),

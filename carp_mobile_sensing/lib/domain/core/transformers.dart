@@ -78,7 +78,7 @@ abstract class DataTransformerSchema {
   /// Transform the [data] using a transformer for its data format.
   /// If no transformer is found, returns [data] unchanged.
   Data transform(Data data) {
-    DataTransformer? transformer = transformers[data.format.toString()];
+    DataTransformer? transformer = transformers[data.dataType.toString()];
     return (transformer != null) ? transformer(data) : data;
   }
 }

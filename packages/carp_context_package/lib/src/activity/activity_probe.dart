@@ -20,7 +20,9 @@ class ActivityProbe extends StreamProbe {
 
   @override
   Stream<Measurement> get stream => _stream ??= ar
-      .FlutterActivityRecognition.instance.activityStream
+      .FlutterActivityRecognition
+      .instance
+      .activityStream
       .where((event) => event.type != ar.ActivityType.UNKNOWN)
       .where((event) => event.confidence != ar.ActivityConfidence.LOW)
       .map((activity) => Measurement.fromData(Activity.fromActivity(activity)))

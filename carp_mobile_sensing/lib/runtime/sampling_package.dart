@@ -183,20 +183,16 @@ class NoOpSamplingPackage extends SmartphoneSamplingPackage {
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
+        DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.ERROR]!),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ERROR_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.TRIGGERED_TASK]!,
         ),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.TRIGGERED_TASK_TYPE_NAME]!,
+          CarpDataTypes().types[CarpDataTypes.COMPLETED_TASK]!,
         ),
+        DataTypeSamplingScheme(CarpDataTypes().types[CamsDataTypes.HEARTBEAT]!),
         DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.COMPLETED_TASK_TYPE_NAME]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CamsDataTypes.HEARTBEAT_TYPE_NAME]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CamsDataTypes.COMPLETED_APP_TASK_TYPE_NAME]!,
+          CarpDataTypes().types[CamsDataTypes.COMPLETED_APP_TASK]!,
         ),
       ]);
 

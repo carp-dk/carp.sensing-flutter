@@ -264,7 +264,8 @@ void main() {
         // String query =
         //     'carp_header.user_id==$userId;carp_body.timestamp>2019-11-02T12:53:40.219598Z';
         //String query = 'carp_header.data_format.namespace==test';
-        String query = 'carp_header.data_format.name==${lightData.format.name}';
+        String query =
+            'carp_header.data_format.name==${lightData.dataType.name}';
         // String query = 'carp_header.user_id==$userId';
         //String query = 'carp_body.timestamp>2019-11-02T12:53:40.219598Z';
         //String query = 'carp_header.data_format.namespace=in=(carp,omh)';

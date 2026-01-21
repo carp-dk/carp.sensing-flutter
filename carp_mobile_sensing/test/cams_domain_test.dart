@@ -45,9 +45,9 @@ void main() {
 
     // Define what needs to be measured, on which device, when.
     List<Measure> measures = [
-      Measure(type: const DataType(NameSpace.CARP, 'light').toString()),
-      Measure(type: const DataType(NameSpace.CARP, 'gps').toString()),
-      Measure(type: const DataType(NameSpace.CARP, 'steps').toString()),
+      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+      Measure(type: SensorSamplingPackage.ACCELERATION),
+      Measure(type: SensorSamplingPackage.STEP_EVENT),
     ];
 
     var task = BackgroundTask(name: 'Start measures')..addMeasures(measures);
@@ -85,7 +85,7 @@ void main() {
           description: "Collect location, weather and air quality",
         )..addMeasures([
           Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-          Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME),
+          Measure(type: SensorSamplingPackage.STEP_EVENT),
         ]);
 
     primaryProtocol.addTaskControl(
@@ -126,143 +126,224 @@ void main() {
     primaryProtocol.addApplicationData('uiTheme', 'black');
   });
 
-  test('Measurement -> JSON', () async {
-    final device = Measurement.fromData(
-      DeviceInformation(platform: 'iOS', deviceId: '1234abcd'),
-    );
-    print(toJsonString(device));
-    final timezone = Measurement.fromData(Timezone('CPH'));
-    print(toJsonString(timezone));
+  group('Data Type', () {
+    test('- monitor data types', () async {
+      final allData = [
+        Heartbeat(period: 1, deviceRoleName: '', deviceType: ''),
+        Error(message: 'An error occurred'),
+        TriggeredTask(
+          triggerId: 0,
+          taskName: '',
+          destinationDeviceRoleName: '',
+          control: Control.Start,
+        ),
+        CompletedTask(taskName: 'task1'),
+      ];
+
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
+    });
+    test('- sensor data types', () async {
+      final allData = [
+        FileData(filename: 'file.txt'),
+        DeviceInformation(platform: 'Android', deviceId: 'abcd1234'),
+        BatteryState(50, BatteryState.STATE_CHARGING),
+        FreeMemory(2048000),
+        ScreenEvent('SCREEN_ON'),
+        Timezone('Europe/Copenhagen'),
+        AppLifecycleEvent('resumed'),
+        Heartbeat(period: 5, deviceType: 'Smartphone', deviceRoleName: 'phone'),
+        AmbientLight.fromLuxReadings([10, 20, 30, 40, 50]),
+        AccelerationFeatures()..avgResultAcceleration = 9.81,
+      ];
+
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
+    });
+
+    test('- completed app task data types', () async {
+      final allData = [
+        CompletedAppTask(taskName: 'audio', taskType: AppTask.AUDIO_TYPE),
+        CompletedAppTask(
+          taskName: '',
+          taskType: AppTask.COGNITIVE_ASSESSMENT_TYPE,
+        ),
+        CompletedAppTask(taskName: 'image', taskType: AppTask.IMAGE_TYPE),
+        CompletedAppTask(
+          taskName: 'informed consent',
+          taskType: AppTask.INFORMED_CONSENT_TYPE,
+        ),
+        CompletedAppTask(taskName: 'sensing', taskType: AppTask.SENSING_TYPE),
+        CompletedAppTask(taskName: 'survey', taskType: AppTask.SURVEY_TYPE),
+        CompletedAppTask(taskName: 'video', taskType: AppTask.VIDEO_TYPE),
+      ];
+
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
+    });
   });
 
-  test('SmartphoneStudyProtocol -> JSON', () async {
-    print(primaryProtocol.applicationData);
-    print(toJsonString(primaryProtocol));
-    expect(primaryProtocol.ownerId, 'user@dtu.dk');
-    expect(primaryProtocol.primaryDevices.length, 1);
-    expect(primaryProtocol.connectedDevices?.length, 1);
-    expect(primaryProtocol.triggers.length, 8);
-    expect(primaryProtocol.triggers.keys.first, '0');
-    expect(primaryProtocol.tasks.length, 7);
-    expect(primaryProtocol.taskControls.length, 8);
-    expect(primaryProtocol.expectedParticipantData?.length, 1);
+  group('Measurement', () {
+    test('Measurement -> JSON', () async {
+      final measurement = Measurement.fromData(
+        DeviceInformation(platform: 'iOS', deviceId: '1234abcd'),
+      );
+      expect(measurement.data, isA<DeviceInformation>());
+      expect(measurement.dataType, DeviceInformation().dataType);
+      print(toJsonString(measurement));
+    });
+
+    test('JSON File -> Measurement', () async {
+      final plainJson = File('test/json/measurement.json').readAsStringSync();
+
+      final measurement = Measurement.fromJson(
+        json.decode(plainJson) as Map<String, dynamic>,
+      );
+
+      expect(measurement.data, isA<Timezone>());
+      print(toJsonString(measurement));
+    });
   });
 
-  test(
-    'SmartphoneStudyProtocol -> JSON -> SmartphoneStudyProtocol :: deep assert',
-    () async {
+  group('StudyProtocol', () {
+    test('SmartphoneStudyProtocol -> JSON', () async {
+      print(primaryProtocol.applicationData);
       print(toJsonString(primaryProtocol));
-      final studyJson = toJsonString(primaryProtocol);
+      expect(primaryProtocol.ownerId, 'user@dtu.dk');
+      expect(primaryProtocol.primaryDevices.length, 1);
+      expect(primaryProtocol.connectedDevices?.length, 1);
+      expect(primaryProtocol.triggers.length, 8);
+      expect(primaryProtocol.triggers.keys.first, '0');
+      expect(primaryProtocol.tasks.length, 7);
+      expect(primaryProtocol.taskControls.length, 8);
+      expect(primaryProtocol.expectedParticipantData?.length, 1);
+    });
 
-      SmartphoneStudyProtocol protocolFromJson =
-          SmartphoneStudyProtocol.fromJson(
-            json.decode(studyJson) as Map<String, dynamic>,
-          );
-      print(toJsonString(protocolFromJson));
-      expect(toJsonString(protocolFromJson), equals(studyJson));
-    },
-  );
+    test(
+      'SmartphoneStudyProtocol -> JSON -> SmartphoneStudyProtocol :: deep assert',
+      () async {
+        print(toJsonString(primaryProtocol));
+        final studyJson = toJsonString(primaryProtocol);
 
-  test('JSON File -> SmartphoneStudyProtocol', () async {
-    String plainJson = File('test/json/study_protocol.json').readAsStringSync();
-
-    final protocol = SmartphoneStudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
+        SmartphoneStudyProtocol protocolFromJson =
+            SmartphoneStudyProtocol.fromJson(
+              json.decode(studyJson) as Map<String, dynamic>,
+            );
+        print(toJsonString(protocolFromJson));
+        expect(toJsonString(protocolFromJson), equals(studyJson));
+      },
     );
 
-    expect(protocol.ownerId, primaryProtocol.ownerId);
-    expect(
-      protocol.primaryDevices.first.roleName,
-      Smartphone.DEFAULT_ROLE_NAME,
-    );
-    expect(protocol.dataEndPoint?.type, DataEndPointTypes.SQLITE);
-    expect(protocol.expectedParticipantData?.length, 1);
-    expect(protocol.getApplicationData('uiTheme'), 'black');
+    test('JSON File -> SmartphoneStudyProtocol', () async {
+      String plainJson = File(
+        'test/json/study_protocol.json',
+      ).readAsStringSync();
 
-    print(toJsonString(protocol));
-  });
+      final protocol = SmartphoneStudyProtocol.fromJson(
+        json.decode(plainJson) as Map<String, dynamic>,
+      );
 
-  test('SmartphoneDeployment -> JSON', () async {
-    final deployment = SmartphoneDeployment.fromSmartphoneStudyProtocol(
-      studyDeploymentId: '1234',
-      primaryDeviceRoleName: 'phone',
-      protocol: primaryProtocol,
-    );
+      expect(protocol.ownerId, primaryProtocol.ownerId);
+      expect(
+        protocol.primaryDevices.first.roleName,
+        Smartphone.DEFAULT_ROLE_NAME,
+      );
+      expect(protocol.dataEndPoint?.type, DataEndPointTypes.SQLITE);
+      expect(protocol.expectedParticipantData?.length, 1);
+      expect(protocol.getApplicationData('uiTheme'), 'black');
 
-    print(toJsonString(deployment));
-    expect(deployment.deviceConfiguration.roleName, 'phone');
-    expect(deployment.connectedDevices.length, 1);
-    expect(deployment.triggers.length, 8);
-    expect(deployment.triggers.keys.first, '0');
-    expect(deployment.tasks.length, 7);
-    expect(deployment.taskControls.length, 8);
-    expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
-    expect(deployment.expectedParticipantData.length, 1);
-    expect(deployment.getApplicationData('uiTheme'), 'black');
-  });
+      print(toJsonString(protocol));
+    });
 
-  test(
-    'SmartphoneDeployment -> JSON -> SmartphoneDeployment :: deep assert',
-    () async {
+    test('SmartphoneDeployment -> JSON', () async {
       final deployment = SmartphoneDeployment.fromSmartphoneStudyProtocol(
         studyDeploymentId: '1234',
         primaryDeviceRoleName: 'phone',
         protocol: primaryProtocol,
       );
+
       print(toJsonString(deployment));
+      expect(deployment.deviceConfiguration.roleName, 'phone');
+      expect(deployment.connectedDevices.length, 1);
+      expect(deployment.triggers.length, 8);
+      expect(deployment.triggers.keys.first, '0');
+      expect(deployment.tasks.length, 7);
+      expect(deployment.taskControls.length, 8);
       expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
       expect(deployment.expectedParticipantData.length, 1);
       expect(deployment.getApplicationData('uiTheme'), 'black');
+    });
 
-      final studyJson = toJsonString(deployment);
-      final deploymentFromJson = SmartphoneDeployment.fromJson(
-        json.decode(studyJson) as Map<String, dynamic>,
+    test(
+      'SmartphoneDeployment -> JSON -> SmartphoneDeployment :: deep assert',
+      () async {
+        final deployment = SmartphoneDeployment.fromSmartphoneStudyProtocol(
+          studyDeploymentId: '1234',
+          primaryDeviceRoleName: 'phone',
+          protocol: primaryProtocol,
+        );
+        print(toJsonString(deployment));
+        expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
+        expect(deployment.expectedParticipantData.length, 1);
+        expect(deployment.getApplicationData('uiTheme'), 'black');
+
+        final studyJson = toJsonString(deployment);
+        final deploymentFromJson = SmartphoneDeployment.fromJson(
+          json.decode(studyJson) as Map<String, dynamic>,
+        );
+        print(toJsonString(deploymentFromJson));
+        expect(toJsonString(deploymentFromJson), equals(studyJson));
+      },
+    );
+
+    test('JSON File -> SmartphoneDeployment', () async {
+      final plainJson = File(
+        'test/json/study_deployment.json',
+      ).readAsStringSync();
+
+      final deployment = SmartphoneDeployment.fromJson(
+        json.decode(plainJson) as Map<String, dynamic>,
       );
-      print(toJsonString(deploymentFromJson));
-      expect(toJsonString(deploymentFromJson), equals(studyJson));
-    },
-  );
 
-  test('JSON File -> SmartphoneDeployment', () async {
-    final plainJson = File(
-      'test/json/study_deployment.json',
-    ).readAsStringSync();
+      print(toJsonString(deployment));
 
-    final deployment = SmartphoneDeployment.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
-
-    print(toJsonString(deployment));
-
-    expect(
-      deployment.deviceConfiguration.roleName,
-      Smartphone.DEFAULT_ROLE_NAME,
-    );
-    expect(deployment.connectedDevices.length, 0);
-    expect(deployment.triggers.length, 2);
-    expect(deployment.triggers.keys.first, '0');
-    expect(deployment.tasks.length, 2);
-    expect(deployment.taskControls.length, 2);
-    expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
-    expect(deployment.expectedParticipantData.length, 0);
-  });
-
-  test('JSON File -> Measurement', () async {
-    final plainJson = File('test/json/measurement.json').readAsStringSync();
-
-    final measurement = Measurement.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
-
-    expect(measurement.data, isA<Timezone>());
-    print(toJsonString(measurement));
+      expect(
+        deployment.deviceConfiguration.roleName,
+        Smartphone.DEFAULT_ROLE_NAME,
+      );
+      expect(deployment.connectedDevices.length, 0);
+      expect(deployment.triggers.length, 2);
+      expect(deployment.triggers.keys.first, '0');
+      expect(deployment.tasks.length, 2);
+      expect(deployment.taskControls.length, 2);
+      expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
+      expect(deployment.expectedParticipantData.length, 0);
+    });
   });
 
   test('Triggers -> JSON -> Triggers', () async {
     primaryProtocol.addTaskControl(
       DelayedTrigger(delay: const Duration(seconds: 10)),
       BackgroundTask()
-        ..addMeasure(Measure(type: CarpDataTypes.STEP_COUNT_TYPE_NAME))
+        ..addMeasure(Measure(type: SensorSamplingPackage.STEP_EVENT))
         ..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT)),
       primaryPhone,
       Control.Start,
