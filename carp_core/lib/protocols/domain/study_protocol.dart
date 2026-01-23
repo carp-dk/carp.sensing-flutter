@@ -180,12 +180,14 @@ class StudyProtocol extends Snapshot {
     return index;
   }
 
-  /// Add a [task] to be started or stopped (determined by [control]) on a
+  /// Add a [task] to be started (default) or stopped (determined by [control]) on a
   /// [destinationDevice] once a [trigger] within this protocol is initiated.
   /// In case the [trigger] or [task] are not yet included in this study protocol,
   /// it will be added.
   /// The [destinationDevice] needs to be added prior to this call since it needs
   /// to be set up as either a primary device or connected device.
+  /// If [destinationDevice] is not specified, the default primary device
+  /// (i.e., [primaryDevice]) is used.
   ///
   /// Throws an error if the [destinationDevice] is not included in this
   /// study protocol.

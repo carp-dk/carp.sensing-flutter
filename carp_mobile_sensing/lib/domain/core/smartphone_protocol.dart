@@ -176,7 +176,8 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// The data is stored locally using a [SQLiteDataEndPoint].
   ///
   /// Optionally, a list of [measures] can be provided which will be collected
-  /// as part of the default background sampling task by this smartphone.
+  /// as part of a default background sampling task by this smartphone.
+  /// Additional measures can be added later using [addTaskControl], if needed.
   factory SmartphoneStudyProtocol.local([List<Measure>? measures]) =>
       SmartphoneStudyProtocol(
           name: 'Local Smartphone Study Protocol',
