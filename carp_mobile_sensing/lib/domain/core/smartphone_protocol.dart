@@ -169,6 +169,26 @@ class SmartphoneStudyProtocol extends StudyProtocol
     );
   }
 
+  /// Create a [SmartphoneStudyProtocol] for local data collection
+  /// using this smartphone as the primary device and with just one
+  /// participant role called "Participant".
+  ///
+  /// The data is stored locally using a [SQLiteDataEndPoint].
+  ///
+  /// Optionally, a list of [measures] can be provided which will be collected
+  /// as part of the default background sampling task by this smartphone.
+  factory SmartphoneStudyProtocol.local([List<Measure>? measures]) =>
+      SmartphoneStudyProtocol(
+          name: 'Local Smartphone Study Protocol',
+          dataEndPoint: SQLiteDataEndPoint(),
+        )
+        ..addPrimaryDevice(Smartphone())
+        ..addParticipantRole(ParticipantRole('Participant'))
+        ..addTaskControl(
+          ImmediateTrigger(),
+          BackgroundTask(measures: measures),
+        );
+
   @override
   bool addPrimaryDevice(PrimaryDeviceConfiguration primaryDevice) {
     super.addPrimaryDevice(primaryDevice);

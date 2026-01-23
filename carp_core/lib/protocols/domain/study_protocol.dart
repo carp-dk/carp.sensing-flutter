@@ -193,10 +193,12 @@ class StudyProtocol extends Snapshot {
   /// is already present.
   bool addTaskControl(
     TriggerConfiguration trigger,
-    TaskConfiguration task,
-    DeviceConfiguration destinationDevice, [
+    TaskConfiguration task, [
+    DeviceConfiguration? destinationDevice,
     Control control = Control.Start,
   ]) {
+    destinationDevice ??= primaryDevice;
+
     assert(
       primaryDevices.contains(destinationDevice) ||
           connectedDevices!.contains(destinationDevice),

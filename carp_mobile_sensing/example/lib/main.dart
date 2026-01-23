@@ -119,10 +119,6 @@ class StudyPageState extends State<StudyPage> {
               ],
             ),
             child: ListTile(
-              titleTextStyle: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
               isThreeLine: true,
               leading: Icon(switch (study.samplingStatus) {
                 ExecutorState.Created => Icons.refresh,
@@ -131,7 +127,10 @@ class StudyPageState extends State<StudyPage> {
                 ExecutorState.Resumed => Icons.pause,
                 _ => Icons.refresh,
               }, size: 40),
-              title: Text('Study Deployment #$index'),
+              title: Text(
+                'Study Deployment #$index',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               subtitle: Text(
                 'ID: ...-${study.studyDeploymentId.split('-').last}\n'
                 'Status: ${study.status.name}\n'
@@ -156,11 +155,11 @@ class StudyPageState extends State<StudyPage> {
     ExecutorState.Undefined: Icon(Icons.error_outline),
   };
 
-  /// Add a new study to the client's list of studies based on the [protocol]
-  /// specified below.
+  /// Add a new study to the client's list of studies based on the either the
+  /// [simpleProtocol] or [protocol] specified below.
   /// Note that we use the same protocol every time we add a study.
   /// Thus, all studies will be identical in terms of data collection.
-  void addStudy() => client.addStudyFromProtocol(protocol);
+  void addStudy() => client.addStudyFromProtocol(simpleProtocol);
 
   /// Remove [study] from the client's list of studies.
   void removeStudy(SmartphoneStudy study) =>
@@ -182,9 +181,20 @@ class StudyPageState extends State<StudyPage> {
     }
   });
 
+  /// A simple study protocol that collects a few basic measures
+  /// using this smartphone as the primary device.
+  SmartphoneStudyProtocol get simpleProtocol => SmartphoneStudyProtocol.local([
+    Measure(type: DeviceSamplingPackage.FREE_MEMORY),
+    Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+    Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+    Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
+    Measure(type: SensorSamplingPackage.STEP_EVENT),
+    Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+  ]);
+
   SmartphoneStudyProtocol? _protocol;
 
-  /// Create a new study protocol.
+  /// Create a new study protocol - advanced version.
   ///
   /// The code below shows many examples of how to add various types of
   /// measures and tasks to the protocol. Most of these are commented out,
