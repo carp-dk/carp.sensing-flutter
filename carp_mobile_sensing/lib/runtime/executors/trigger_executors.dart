@@ -132,7 +132,7 @@ class ElapsedTimeTriggerExecutor
   List<DateTime> getSchedule(DateTime from, DateTime to, [int? max]) {
     if (deployment?.deployed == null) return [];
     if (configuration?.elapsedTime == null) return [];
-    final dd = deployment!.deployed.add(configuration!.elapsedTime!);
+    final dd = deployment!.deployed.add(configuration!.elapsedTime!).toLocal();
     return (dd.isAfter(from) && dd.isBefore(to)) ? [dd] : [];
   }
 

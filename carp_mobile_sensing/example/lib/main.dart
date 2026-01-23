@@ -64,7 +64,7 @@ class StudyPageState extends State<StudyPage> {
     Settings().debugLevel = DebugLevel.debug;
 
     // Configure the client.
-    client.configure(enableNotifications: false, askForPermissions: true);
+    client.configure();
 
     // Listen on all the measurements and print them as json.
     SmartPhoneClientManager().measurements.listen(
@@ -185,6 +185,10 @@ class StudyPageState extends State<StudyPage> {
   SmartphoneStudyProtocol? _protocol;
 
   /// Create a new study protocol.
+  ///
+  /// The code below shows many examples of how to add various types of
+  /// measures and tasks to the protocol. Most of these are commented out,
+  /// but you can uncomment them to see how they work.
   SmartphoneStudyProtocol get protocol {
     if (_protocol == null) {
       _protocol = SmartphoneStudyProtocol(
@@ -200,48 +204,37 @@ class StudyPageState extends State<StudyPage> {
       // use connected devices (e.g., a Polar heart rate monitor) and online
       // services (e.g., a weather service).
       var phone = Smartphone();
-      protocol.addPrimaryDevice(phone);
+      _protocol?.addPrimaryDevice(phone);
 
       // Add a participant role
-      protocol.addParticipantRole(ParticipantRole('Participant'));
+      _protocol?.addParticipantRole(ParticipantRole('Participant'));
 
-      var trigger_1 = PeriodicTrigger(period: Duration(seconds: 10));
-      var trigger_2 = AppLifecycleTrigger();
-      var trigger_3 = RecurrentScheduledTrigger(
-        type: RecurrentType.daily,
-        time: const TimeOfDay(hour: 18, minute: 40),
-      );
-      var task_1 = BackgroundTask(
-        measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
-      );
-      var task_2 = BackgroundTask(
-        measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      // Now add tasks and measures to the protocol.
+
+      // Collect timezone info every time the app restarts.
+      _protocol?.addTaskControl(
+        ImmediateTrigger(),
+        BackgroundTask(
+          measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
+        ),
+        phone,
       );
 
-      // protocol.addTaskControl(trigger_1, task_1, phone);
-      // protocol.addTaskControl(trigger_1, task_2, phone);
-      // protocol.addTaskControl(trigger_1, task_1, phone);
-      // protocol.addTaskControl(trigger_2, task_2, phone);
-
-      // protocol.addTaskControl(trigger_3, task_1, phone);
-
-      // protocol.addTaskControl(
+      // // Collect timezone info every 10 seconds.
+      // // Note that timezone is a one-time measure, so this can be collected
+      // // using a periodic trigger. Collecting it periodically does, however,
+      // // not make much sense. This is just to demonstrate the use of a periodic
+      // // trigger, which is useful for many other types of measures.
+      // _protocol?.addTaskControl(
       //   PeriodicTrigger(period: Duration(seconds: 10)),
       //   BackgroundTask(
-      //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      //     measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
       //   ),
       //   phone,
       // );
 
-      // // Collect timezone info every time the app restarts.
-      // protocol.addTaskControl(
-      //   ImmediateTrigger(),
-      //   BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
-      //   phone,
-      // );
-
       // Collect device info only once, when this study is deployed.
-      protocol.addTaskControl(
+      _protocol?.addTaskControl(
         OneTimeTrigger(),
         BackgroundTask(
           measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
@@ -251,33 +244,32 @@ class StudyPageState extends State<StudyPage> {
 
       // Add background measures from the [DeviceSamplingPackage] and
       // [SensorSamplingPackage] sampling packages.
-
+      //
       // Note that some of these measures only works on Android:
       //  * screen events
       //  * ambient light
       //  * free memory (there seems to be a bug in the underlying sysinfo plugin)
-
-      // protocol.addTaskControl(
-      //   ImmediateTrigger(),
-      //   BackgroundTask(
-      //     measures: [
-      //       Measure(type: DeviceSamplingPackage.FREE_MEMORY)
-      //         ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-      //           interval: const Duration(seconds: 10),
-      //         ),
-      //       Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-      //       Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-      //       Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
-      //       Measure(type: SensorSamplingPackage.STEP_COUNT),
-      //       Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
-      //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-      //           interval: const Duration(seconds: 20),
-      //           duration: const Duration(seconds: 5),
-      //         ),
-      //     ],
-      //   ),
-      //   phone,
-      // );
+      _protocol?.addTaskControl(
+        ImmediateTrigger(),
+        BackgroundTask(
+          measures: [
+            Measure(type: DeviceSamplingPackage.FREE_MEMORY)
+              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+                interval: const Duration(seconds: 10),
+              ),
+            Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+            Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+            Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
+            Measure(type: SensorSamplingPackage.STEP_EVENT),
+            Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
+              ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+                interval: const Duration(seconds: 20),
+                duration: const Duration(seconds: 5),
+              ),
+          ],
+        ),
+        phone,
+      );
 
       // // Collect IMU data every 10 secs for 1 sec.
       // // Also shows how the sampling interval can be specified ("overridden").
@@ -285,7 +277,7 @@ class StudyPageState extends State<StudyPage> {
       // // sampling interval does NOT work on Android (see also the docs on the
       // // sensor_plus package and on the Android sensor documentation:
       // //   https://developer.android.com/reference/android/hardware/SensorManager#registerListener(android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int)
-      // protocol.addTaskControl(
+      // _protocol?.addTaskControl(
       //   PeriodicTrigger(period: const Duration(seconds: 10)),
       //   BackgroundTask(
       //     measures: [
@@ -300,7 +292,7 @@ class StudyPageState extends State<StudyPage> {
       // );
 
       // // Extract acceleration features every minute over 10 seconds
-      // protocol.addTaskControl(
+      // _protocol?.addTaskControl(
       //   ImmediateTrigger(),
       //   BackgroundTask(
       //     measures: [
@@ -328,7 +320,7 @@ class StudyPageState extends State<StudyPage> {
       // );
 
       // // Start both task_1 and task_2
-      // protocol.addTaskControls(
+      // _protocol?.addTaskControls(
       //   ImmediateTrigger(),
       //   [task_1, task_2],
       //   phone,
@@ -336,15 +328,15 @@ class StudyPageState extends State<StudyPage> {
       // );
 
       // // After a while, stop task_1 again
-      // protocol.addTaskControl(
+      // _protocol?.addTaskControl(
       //   DelayedTrigger(delay: const Duration(seconds: 10)),
       //   task_1,
       //   phone,
       //   Control.Stop,
       // );
 
-      // // add a random trigger to collect device info at random times
-      // protocol.addTaskControl(
+      // Add a random trigger to collect device info at random times
+      // _protocol?.addTaskControl(
       //   RandomRecurrentTrigger(
       //     startTime: TimeOfDay(hour: 07, minute: 45),
       //     endTime: TimeOfDay(hour: 22, minute: 30),
@@ -357,8 +349,8 @@ class StudyPageState extends State<StudyPage> {
       //   Control.Start,
       // );
 
-      // // add a ConditionalPeriodicTrigger to check periodically
-      // protocol.addTaskControl(
+      // Add a ConditionalPeriodicTrigger to check periodically
+      // _protocol?.addTaskControl(
       //     ConditionalPeriodicTrigger(
       //         period: const Duration(seconds: 20),
       //         triggerCondition: () => ('Jakob'.length == 5)),
@@ -367,8 +359,8 @@ class StudyPageState extends State<StudyPage> {
       //     phone,
       //     Control.Start);
 
-      // // Collect device info after 30 secs
-      // protocol.addTaskControl(
+      // Collect device info after 30 secs
+      // _protocol?.addTaskControl(
       //   ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 30)),
       //   BackgroundTask(
       //     measures: [
@@ -378,28 +370,33 @@ class StudyPageState extends State<StudyPage> {
       //   phone,
       // );
 
-      // Add app tasks with notifications.
+      // Add app task with notifications.
       //
-      // These App Tasks are added for demo purpose and you should see notifications
-      // on the phone. However, nothing will happen when you click on it.
+      // This App Task is added for demo purpose and you should see  a notification
+      // on the phone. When you click on it, the app task is started and collects
+      // device information.
       // See the PulmonaryMonitor demo app for a full-scale example of how to use
       // the App Task model.
+      //
+      // Note that by design, iOS applications do not display notifications while
+      // the app is in the foreground. So to see the notification, please
+      // background the app after deploying the study.
 
-      // // Add a task after deployment and make a notification.
-      // protocol.addTaskControl(
-      //   ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 10)),
-      //   AppTask(
-      //     type: BackgroundSensingUserTask.SENSING_TYPE,
-      //     title: "Elapsed Time Trigger - App Task",
-      //     description: 'Collection of Device Information.',
-      //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-      //     notification: true,
-      //   ),
-      //   phone,
-      // );
+      // Add a app task 20 secs after deployment and make a notification.
+      _protocol?.addTaskControl(
+        ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 20)),
+        AppTask(
+          type: BackgroundSensingUserTask.SENSING_TYPE,
+          title: "User Task",
+          description: 'Please click here to collect Device Information.',
+          measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+          notification: true,
+        ),
+        phone,
+      );
 
       // // Add a cron job every day at 11:45
-      // protocol.addTaskControl(
+      // _protocol?.addTaskControl(
       //     CronScheduledTrigger.parse(cronExpression: '45 11 * * *'),
       //     AppTask(
       //       type: BackgroundSensingUserTask.SENSING_TYPE,
