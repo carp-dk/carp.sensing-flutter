@@ -20,7 +20,7 @@ void main() => runApp(const MobileSensingApp());
 /// the study.
 ///
 /// You can add a new study using the floating action button (+) at the
-/// bottom right corner. This adds a new study based on the [protocol] defined
+/// bottom right corner. This adds a new study based on the protocol defined
 /// below.
 /// You can remove a study by long-pressing on the study's list tile.
 ///
@@ -158,7 +158,8 @@ class StudyPageState extends State<StudyPage> {
 
   /// Add a new study to the client's list of studies based on the [protocol]
   /// specified below.
-  /// Note that it is the same protocol and hence study we add every time.
+  /// Note that we use the same protocol every time we add a study.
+  /// Thus, all studies will be identical in terms of data collection.
   void addStudy() => client.addStudyFromProtocol(protocol);
 
   /// Remove [study] from the client's list of studies.
@@ -181,230 +182,234 @@ class StudyPageState extends State<StudyPage> {
     }
   });
 
+  SmartphoneStudyProtocol? _protocol;
+
   /// Create a new study protocol.
   SmartphoneStudyProtocol get protocol {
-    var protocol = SmartphoneStudyProtocol(
-      ownerId: 'AB',
-      name: 'Demo Protocol',
-      dataEndPoint: SQLiteDataEndPoint(),
-    );
+    if (_protocol == null) {
+      _protocol = SmartphoneStudyProtocol(
+        ownerId: 'AB',
+        name: 'Demo Protocol',
+        dataEndPoint: SQLiteDataEndPoint(),
+      );
 
-    // Define which devices are used for data collection.
-    //
-    // In this case, its only this phone.
-    // See the CARP Mobile Sensing app for a full-blown example of how to
-    // use connected devices (e.g., a Polar heart rate monitor) and online
-    // services (e.g., a weather service).
-    var phone = Smartphone();
-    protocol.addPrimaryDevice(phone);
+      // Define which devices are used for data collection.
+      //
+      // In this case, its only this phone.
+      // See the CARP Mobile Sensing app for a full-blown example of how to
+      // use connected devices (e.g., a Polar heart rate monitor) and online
+      // services (e.g., a weather service).
+      var phone = Smartphone();
+      protocol.addPrimaryDevice(phone);
 
-    // Add a participant role
-    protocol.addParticipantRole(ParticipantRole('Participant'));
+      // Add a participant role
+      protocol.addParticipantRole(ParticipantRole('Participant'));
 
-    var trigger_1 = PeriodicTrigger(period: Duration(seconds: 10));
-    var trigger_2 = AppLifecycleTrigger();
-    var trigger_3 = RecurrentScheduledTrigger(
-      type: RecurrentType.daily,
-      time: const TimeOfDay(hour: 18, minute: 40),
-    );
-    var task_1 = BackgroundTask(
-      measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
-    );
-    var task_2 = BackgroundTask(
-      measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-    );
-
-    // protocol.addTaskControl(trigger_1, task_1, phone);
-    // protocol.addTaskControl(trigger_1, task_2, phone);
-    // protocol.addTaskControl(trigger_1, task_1, phone);
-    // protocol.addTaskControl(trigger_2, task_2, phone);
-
-    // protocol.addTaskControl(trigger_3, task_1, phone);
-
-    // protocol.addTaskControl(
-    //   PeriodicTrigger(period: Duration(seconds: 10)),
-    //   BackgroundTask(
-    //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-    //   ),
-    //   phone,
-    // );
-
-    // // Collect timezone info every time the app restarts.
-    // protocol.addTaskControl(
-    //   ImmediateTrigger(),
-    //   BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
-    //   phone,
-    // );
-
-    // Collect device info only once, when this study is deployed.
-    protocol.addTaskControl(
-      OneTimeTrigger(),
-      BackgroundTask(
+      var trigger_1 = PeriodicTrigger(period: Duration(seconds: 10));
+      var trigger_2 = AppLifecycleTrigger();
+      var trigger_3 = RecurrentScheduledTrigger(
+        type: RecurrentType.daily,
+        time: const TimeOfDay(hour: 18, minute: 40),
+      );
+      var task_1 = BackgroundTask(
+        measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
+      );
+      var task_2 = BackgroundTask(
         measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-      ),
-      phone,
-    );
+      );
 
-    // Add background measures from the [DeviceSamplingPackage] and
-    // [SensorSamplingPackage] sampling packages.
+      // protocol.addTaskControl(trigger_1, task_1, phone);
+      // protocol.addTaskControl(trigger_1, task_2, phone);
+      // protocol.addTaskControl(trigger_1, task_1, phone);
+      // protocol.addTaskControl(trigger_2, task_2, phone);
 
-    // Note that some of these measures only works on Android:
-    //  * screen events
-    //  * ambient light
-    //  * free memory (there seems to be a bug in the underlying sysinfo plugin)
+      // protocol.addTaskControl(trigger_3, task_1, phone);
 
-    // protocol.addTaskControl(
-    //   ImmediateTrigger(),
-    //   BackgroundTask(
-    //     measures: [
-    //       Measure(type: DeviceSamplingPackage.FREE_MEMORY)
-    //         ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-    //           interval: const Duration(seconds: 10),
-    //         ),
-    //       Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-    //       Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-    //       Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
-    //       Measure(type: SensorSamplingPackage.STEP_COUNT),
-    //       Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
-    //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-    //           interval: const Duration(seconds: 20),
-    //           duration: const Duration(seconds: 5),
-    //         ),
-    //     ],
-    //   ),
-    //   phone,
-    // );
+      // protocol.addTaskControl(
+      //   PeriodicTrigger(period: Duration(seconds: 10)),
+      //   BackgroundTask(
+      //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      //   ),
+      //   phone,
+      // );
 
-    // // Collect IMU data every 10 secs for 1 sec.
-    // // Also shows how the sampling interval can be specified ("overridden").
-    // // Default sampling interval is 200 ms. Note that it seems like setting the
-    // // sampling interval does NOT work on Android (see also the docs on the
-    // // sensor_plus package and on the Android sensor documentation:
-    // //   https://developer.android.com/reference/android/hardware/SensorManager#registerListener(android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int)
-    // protocol.addTaskControl(
-    //   PeriodicTrigger(period: const Duration(seconds: 10)),
-    //   BackgroundTask(
-    //     measures: [
-    //       Measure(type: SensorSamplingPackage.ACCELERATION)
-    //         ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-    //             interval: const Duration(milliseconds: 500)),
-    //       Measure(type: SensorSamplingPackage.ROTATION),
-    //     ],
-    //     duration: const Duration(seconds: 1),
-    //   ),
-    //   phone,
-    // );
+      // // Collect timezone info every time the app restarts.
+      // protocol.addTaskControl(
+      //   ImmediateTrigger(),
+      //   BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
+      //   phone,
+      // );
 
-    // // Extract acceleration features every minute over 10 seconds
-    // protocol.addTaskControl(
-    //   ImmediateTrigger(),
-    //   BackgroundTask(
-    //     measures: [
-    //       Measure(type: SensorSamplingPackage.ACCELERATION_FEATURES)
-    //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-    //           interval: const Duration(minutes: 1),
-    //           duration: const Duration(seconds: 10),
-    //         ),
-    //     ],
-    //   ),
-    //   phone,
-    // );
+      // Collect device info only once, when this study is deployed.
+      protocol.addTaskControl(
+        OneTimeTrigger(),
+        BackgroundTask(
+          measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+        ),
+        phone,
+      );
 
-    // // Example of how to start and stop sampling using the Control.Start and
-    // // Control.Stop method
-    // var task_1 = BackgroundTask(
-    //   measures: [
-    //     Measure(type: CarpDataTypes.ACCELERATION_TYPE_NAME),
-    //     Measure(type: CarpDataTypes.ROTATION_TYPE_NAME),
-    //   ],
-    // );
+      // Add background measures from the [DeviceSamplingPackage] and
+      // [SensorSamplingPackage] sampling packages.
 
-    // var task_2 = BackgroundTask(
-    //   measures: [Measure(type: DeviceSamplingPackage.BATTERY_STATE)],
-    // );
+      // Note that some of these measures only works on Android:
+      //  * screen events
+      //  * ambient light
+      //  * free memory (there seems to be a bug in the underlying sysinfo plugin)
 
-    // // Start both task_1 and task_2
-    // protocol.addTaskControls(
-    //   ImmediateTrigger(),
-    //   [task_1, task_2],
-    //   phone,
-    //   Control.Start,
-    // );
+      // protocol.addTaskControl(
+      //   ImmediateTrigger(),
+      //   BackgroundTask(
+      //     measures: [
+      //       Measure(type: DeviceSamplingPackage.FREE_MEMORY)
+      //         ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+      //           interval: const Duration(seconds: 10),
+      //         ),
+      //       Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+      //       Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+      //       Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
+      //       Measure(type: SensorSamplingPackage.STEP_COUNT),
+      //       Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
+      //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+      //           interval: const Duration(seconds: 20),
+      //           duration: const Duration(seconds: 5),
+      //         ),
+      //     ],
+      //   ),
+      //   phone,
+      // );
 
-    // // After a while, stop task_1 again
-    // protocol.addTaskControl(
-    //   DelayedTrigger(delay: const Duration(seconds: 10)),
-    //   task_1,
-    //   phone,
-    //   Control.Stop,
-    // );
+      // // Collect IMU data every 10 secs for 1 sec.
+      // // Also shows how the sampling interval can be specified ("overridden").
+      // // Default sampling interval is 200 ms. Note that it seems like setting the
+      // // sampling interval does NOT work on Android (see also the docs on the
+      // // sensor_plus package and on the Android sensor documentation:
+      // //   https://developer.android.com/reference/android/hardware/SensorManager#registerListener(android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int)
+      // protocol.addTaskControl(
+      //   PeriodicTrigger(period: const Duration(seconds: 10)),
+      //   BackgroundTask(
+      //     measures: [
+      //       Measure(type: SensorSamplingPackage.ACCELERATION)
+      //         ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+      //             interval: const Duration(milliseconds: 500)),
+      //       Measure(type: SensorSamplingPackage.ROTATION),
+      //     ],
+      //     duration: const Duration(seconds: 1),
+      //   ),
+      //   phone,
+      // );
 
-    // // add a random trigger to collect device info at random times
-    // protocol.addTaskControl(
-    //   RandomRecurrentTrigger(
-    //     startTime: TimeOfDay(hour: 07, minute: 45),
-    //     endTime: TimeOfDay(hour: 22, minute: 30),
-    //     minNumberOfTriggers: 2,
-    //     maxNumberOfTriggers: 8,
-    //   ),
-    //   BackgroundTask()
-    //     ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
-    //   phone,
-    //   Control.Start,
-    // );
+      // // Extract acceleration features every minute over 10 seconds
+      // protocol.addTaskControl(
+      //   ImmediateTrigger(),
+      //   BackgroundTask(
+      //     measures: [
+      //       Measure(type: SensorSamplingPackage.ACCELERATION_FEATURES)
+      //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+      //           interval: const Duration(minutes: 1),
+      //           duration: const Duration(seconds: 10),
+      //         ),
+      //     ],
+      //   ),
+      //   phone,
+      // );
 
-    // // add a ConditionalPeriodicTrigger to check periodically
-    // protocol.addTaskControl(
-    //     ConditionalPeriodicTrigger(
-    //         period: const Duration(seconds: 20),
-    //         triggerCondition: () => ('Jakob'.length == 5)),
-    //     BackgroundTask()
-    //       ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
-    //     phone,
-    //     Control.Start);
+      // // Example of how to start and stop sampling using the Control.Start and
+      // // Control.Stop method
+      // var task_1 = BackgroundTask(
+      //   measures: [
+      //     Measure(type: CarpDataTypes.ACCELERATION_TYPE_NAME),
+      //     Measure(type: CarpDataTypes.ROTATION_TYPE_NAME),
+      //   ],
+      // );
 
-    // // Collect device info after 30 secs
-    // protocol.addTaskControl(
-    //   ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 30)),
-    //   BackgroundTask(
-    //     measures: [
-    //       Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
-    //     ],
-    //   ),
-    //   phone,
-    // );
+      // var task_2 = BackgroundTask(
+      //   measures: [Measure(type: DeviceSamplingPackage.BATTERY_STATE)],
+      // );
 
-    // Add app tasks with notifications.
-    //
-    // These App Tasks are added for demo purpose and you should see notifications
-    // on the phone. However, nothing will happen when you click on it.
-    // See the PulmonaryMonitor demo app for a full-scale example of how to use
-    // the App Task model.
+      // // Start both task_1 and task_2
+      // protocol.addTaskControls(
+      //   ImmediateTrigger(),
+      //   [task_1, task_2],
+      //   phone,
+      //   Control.Start,
+      // );
 
-    // // Add a task after deployment and make a notification.
-    // protocol.addTaskControl(
-    //   ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 10)),
-    //   AppTask(
-    //     type: BackgroundSensingUserTask.SENSING_TYPE,
-    //     title: "Elapsed Time Trigger - App Task",
-    //     description: 'Collection of Device Information.',
-    //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-    //     notification: true,
-    //   ),
-    //   phone,
-    // );
+      // // After a while, stop task_1 again
+      // protocol.addTaskControl(
+      //   DelayedTrigger(delay: const Duration(seconds: 10)),
+      //   task_1,
+      //   phone,
+      //   Control.Stop,
+      // );
 
-    // // Add a cron job every day at 11:45
-    // protocol.addTaskControl(
-    //     CronScheduledTrigger.parse(cronExpression: '45 11 * * *'),
-    //     AppTask(
-    //       type: BackgroundSensingUserTask.SENSING_TYPE,
-    //       title: "Cron - every day at 11:45",
-    //       measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-    //       notification: true,
-    //     ),
-    //     phone);
+      // // add a random trigger to collect device info at random times
+      // protocol.addTaskControl(
+      //   RandomRecurrentTrigger(
+      //     startTime: TimeOfDay(hour: 07, minute: 45),
+      //     endTime: TimeOfDay(hour: 22, minute: 30),
+      //     minNumberOfTriggers: 2,
+      //     maxNumberOfTriggers: 8,
+      //   ),
+      //   BackgroundTask()
+      //     ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+      //   phone,
+      //   Control.Start,
+      // );
 
-    return protocol;
+      // // add a ConditionalPeriodicTrigger to check periodically
+      // protocol.addTaskControl(
+      //     ConditionalPeriodicTrigger(
+      //         period: const Duration(seconds: 20),
+      //         triggerCondition: () => ('Jakob'.length == 5)),
+      //     BackgroundTask()
+      //       ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+      //     phone,
+      //     Control.Start);
+
+      // // Collect device info after 30 secs
+      // protocol.addTaskControl(
+      //   ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 30)),
+      //   BackgroundTask(
+      //     measures: [
+      //       Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
+      //     ],
+      //   ),
+      //   phone,
+      // );
+
+      // Add app tasks with notifications.
+      //
+      // These App Tasks are added for demo purpose and you should see notifications
+      // on the phone. However, nothing will happen when you click on it.
+      // See the PulmonaryMonitor demo app for a full-scale example of how to use
+      // the App Task model.
+
+      // // Add a task after deployment and make a notification.
+      // protocol.addTaskControl(
+      //   ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 10)),
+      //   AppTask(
+      //     type: BackgroundSensingUserTask.SENSING_TYPE,
+      //     title: "Elapsed Time Trigger - App Task",
+      //     description: 'Collection of Device Information.',
+      //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      //     notification: true,
+      //   ),
+      //   phone,
+      // );
+
+      // // Add a cron job every day at 11:45
+      // protocol.addTaskControl(
+      //     CronScheduledTrigger.parse(cronExpression: '45 11 * * *'),
+      //     AppTask(
+      //       type: BackgroundSensingUserTask.SENSING_TYPE,
+      //       title: "Cron - every day at 11:45",
+      //       measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      //       notification: true,
+      //     ),
+      //     phone);
+    }
+
+    return _protocol!;
   }
 }
