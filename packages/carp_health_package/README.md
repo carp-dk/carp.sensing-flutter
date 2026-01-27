@@ -189,7 +189,7 @@ Background sensing of health data is done by the `HealthService` specified in th
 > [!NOTE]  
 > Background collection of health data **does not** ask for permissions (this will cause the app to show the Health permission dialogue at an arbitrary time to the user, which is not compliant to [the UX guidelines from Google](https://developer.android.com/health-and-fitness/guides/health-connect/design/permissions-and-data) and Apple to only show this dialogue in the context where the collection of health data is explained to the user). Handling of permissions is done via the `HealthService` by using the `hasPermissions()` and `requestPermissions(()` methods.
 
-> [!NOTE]  
+> [!IMPORTANT]  
 > Health data can only be collected when the app is in the foreground and the phone is unlocked. This applies both for Android and iOS. Hence, the term "background sensing" should be taken with a gran of salt.
 
 One way to ensure that health data is collected while the app is in foreground, is to add the collection of health measures to an App Task (e.g., a survey):
@@ -238,55 +238,53 @@ See the `example.dart` file for a full example of how to set up a CAMS study pro
 
 ## Collected Data
 
-The data collected is contained in a [`HealthData`](https://pub.dev/documentation/carp_health_package/latest/health_package/HealthData-class.html) object, which wraps the data collected from a [`HealthDataPoint`](https://pub.dev/documentation/health/latest/health/HealthDataPoint-class.html). For example, workout collected from Apple Health serialized to JSON may looks like this:
+The data collected is contained in a [`HealthData`](https://pub.dev/documentation/carp_health_package/latest/health_package/HealthData-class.html) object, which wraps the data collected from a [`HealthDataPoint`](https://pub.dev/documentation/health/latest/health/HealthDataPoint-class.html). For example, "BASAL_ENERGY_BURNED" collected from Apple Health serialized to JSON may looks like this:
 
 ```json
 {
- "sensorStartTime": 1700415799841973,
- "data": {
-  "__type": "dk.cachet.carp.health.workout",
-  "uuid": "4321",
-  "value": {
-   "workoutActivityType": "AEROBICS",
-   "totalEnergyBurned": 8,
-   "totalEnergyBurnedUnit": "KILOCALORIE",
-   "totalDistance": 1000,
-   "totalDistanceUnit": "METER"
-  },
-  "unit": "NO_UNIT",
-  "date_from": "2023-11-19T09:43:19.841907Z",
-  "date_to": "2023-11-19T17:43:19.841907Z",
-  "data_type": "WORKOUT",
-  "platform": "APPLE_HEALTH",
-  "device_id": "1234",
-  "source_id": "4321",
-  "source_name": "4321"
- }
+  "sensorStartTime": 1769431186373000,
+  "sensorEndTime": 1769432063152000,
+  "data": {
+    "__type": "dk.cachet.carp.health",
+    "uuid": "236c6441-be81-4231-8cb2-25f9483b4967",
+    "value": {
+      "__type": "NumericHealthValue",
+      "numericValue": 17.770999999999997
+    },
+    "unit": "KILOCALORIE",
+    "dateFrom": "2026-01-26T12:39:46.373Z",
+    "dateTo": "2026-01-26T12:54:23.152Z",
+    "healthDataType": "BASAL_ENERGY_BURNED",
+    "platform": "APPLE_HEALTH",
+    "deviceId": "unknown",
+    "sourceId": "com.apple.health.4B76DB4C-F19C-4D05-8766-FC7EC4DEF393",
+    "sourceName": "Jakob’s Apple Watch"
+  }
 }
 ```
 
-Similarly, step counts collected from Google Health Connect would look like this.
+Similarly, "STEPS" collected from Google Health Connect would look like this.
 
 ```json
 {
   "sensorStartTime": 1704582000000000,
   "sensorEndTime": 1704668399999000,
   "data": {
-   "__type": "dk.cachet.carp.health.steps",
+   "__type": "dk.cachet.carp.health",
    "uuid": "85328732-41d3-53b2-a81e-007f33bee353",
    "value": {
     "numericValue": "1982"
    },
    "unit": "COUNT",
-   "date_from": "2024-01-06T23:00:00.000Z",
-   "date_to": "2024-01-07T22:59:59.999Z",
-   "data_type": "STEPS",
+   "dateFrom": "2024-01-06T23:00:00.000Z",
+   "dateTo": "2024-01-07T22:59:59.999Z",
+   "healthDataType": "STEPS",
    "platform": "GOOGLE_HEALTH_CONNECT",
-   "device_id": "SP1A.210812.016",
-   "source_id": "",
-   "source_name": "com.sec.android.app.shealth"
+   "deviceId": "SP1A.210812.016",
+   "sourceId": "",
+   "sourceName": "com.sec.android.app.shealth"
   }
 }
 ```
 
-The type of the collected health data is `dk.cachet.carp.health.workout` or `dk.cachet.carp.health.steps`. In general, the collected health data has the type of `dk.cachet.carp.health.<health_type>`, where `health_type` is the lower-case version of the [`HealthDataType`](https://pub.dev/documentation/health/latest/health/HealthDataType.html).
+The type of the collected health data is the `healthDataType` which is always the uppercase version of the [`HealthDataType`](https://pub.dev/documentation/health/latest/health/HealthDataType.html) collected.

@@ -41,7 +41,6 @@ class CarpBackend {
   Future<void> initialize() async {
     debug('$runtimeType - initializing...');
     await CarpAuthService().configure(_authProperties);
-    debug('$runtimeType - AuthService configured ...');
 
     // Configure the CAWS services
     CarpService().configure(app);

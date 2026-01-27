@@ -189,12 +189,12 @@ class SmartPhoneClientManager
         '===========================================================\n'
         '  CARP Mobile Sensing (CAMS) - $runtimeType\n'
         '===========================================================\n'
-        '             device : ${registration.deviceDisplayName}\n'
-        '         repository : $repository\n'
-        ' deployment service : $deploymentService\n'
-        '  device controller : $deviceController\n'
-        '  available devices : ${deviceController.devicesToString()}\n'
-        '        persistence : ${Persistence().databaseName.split('/').last}\n'
+        '             Device : ${registration.deviceDisplayName}\n'
+        '         Repository : $repository\n'
+        ' Deployment Service : $deploymentService\n'
+        '  Device Controller : $deviceController\n'
+        // '  Available Devices : ${deviceController.devicesToString()}\n'
+        '        Persistence : ${Persistence().databaseName.split('/').last}\n'
         '===========================================================\n';
     debugPrint(statusMsg);
 

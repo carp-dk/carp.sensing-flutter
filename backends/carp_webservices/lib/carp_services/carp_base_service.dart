@@ -58,6 +58,9 @@ abstract class CarpBaseService {
   /// Has this service been configured?
   bool get isConfigured => (_app != null);
 
+  @override
+  String toString() => '$runtimeType - ${app.name} [${app.uri}]';
+
   /// Configure the this instance of a Carp Service.
   ///
   /// The [app] specifies the CAWS instance used.

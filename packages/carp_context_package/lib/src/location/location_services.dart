@@ -100,7 +100,7 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
   Future<bool> onDisconnect() async => true;
 
   @override
-  Future<bool> onHasPermissions() async => await manager.isGranted();
+  Future<bool> onHasPermissions() async => await manager.hasPermission();
 
   @override
   Future<void> onRequestPermissions() async =>

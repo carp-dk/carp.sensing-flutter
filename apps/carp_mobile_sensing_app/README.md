@@ -302,7 +302,7 @@ More sophisticated (reactive) UI implementation can also be done by listening to
 
 The CARP Mobile Sensing Demo app makes use of many of the CAMS Sampling Packages. Each of these have their own requirements to work, which entails modification on how to configure and build the app on iOS and Android. You should pay special attention to the requirements described in the README of each sampling package. This often entails editing and modifying:
 
-* the `info.plist` on iOS
+* the `Info.plist` on iOS
 * the `AndroidManifest.xml` file on Android
 * the `MainActivity.kt` or `MainActivity.java` on Android
 * the different `build.gradle` and `settings.gradle` files on Android

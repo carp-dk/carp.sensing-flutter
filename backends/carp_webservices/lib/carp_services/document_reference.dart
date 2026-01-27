@@ -138,7 +138,7 @@ class DocumentReference extends CarpReference {
       _id = responseJson['id'] as int;
       return DocumentSnapshot._(path, responseJson);
     } on CarpNotFoundException catch (error) {
-      debug("$runtimeType - Document ´$id´not found: $error");
+      warning("$runtimeType - Document ´$id´not found: $error");
       return null;
     }
   }

@@ -59,11 +59,8 @@ class HealthSamplingConfiguration extends HistoricSamplingConfiguration {
       FromJsonFactory().fromJson<HealthSamplingConfiguration>(json);
 }
 
-/// A no-op function for deserializing a HealthValue - never used.
-HealthValue _healthValueFromJson(json) => NumericHealthValue(numericValue: -1);
-
 /// A [Data] object that holds health data from a [HealthDataPoint].
-@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HealthData extends Data {
   /// A unique UUID of this data point.
   String uuid;
@@ -71,7 +68,7 @@ class HealthData extends Data {
   /// The value of the health data.
   ///
   /// See [HealthValue](https://pub.dev/documentation/health/latest/health/HealthValue-class.html)
-  @JsonKey(fromJson: _healthValueFromJson)
+  // @JsonKey(fromJson: _healthValueFromJson)
   HealthValue value;
 
   /// Unit of health data.
@@ -145,8 +142,9 @@ class HealthData extends Data {
   /// The json type of this health data is `dk.cachet.carp.health.<healthdatatype>`,
   /// where `<healthdatatype>` is the lowercase version of the [healthDataType].
   @override
-  String get jsonType =>
-      '${HealthSamplingPackage.HEALTH}.${healthDataType.toLowerCase()}';
+  // String get jsonType =>
+  //     '${HealthSamplingPackage.HEALTH}.${healthDataType.toLowerCase()}';
+  String get jsonType => HealthSamplingPackage.HEALTH;
 
   @override
   String toString() =>

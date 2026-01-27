@@ -123,7 +123,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   @override
   Future<bool> onPause() async {
     _subscription?.cancel();
-    return super.onPause();
+    return await super.onPause();
   }
 }
 

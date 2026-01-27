@@ -20,7 +20,10 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
       ),
       dataEndPoint: (bloc.deploymentMode == DeploymentMode.local)
           ? SQLiteDataEndPoint()
-          : CarpDataEndPoint(uploadMethod: CarpUploadMethod.stream),
+          : CarpDataEndPoint(
+              uploadMethod: CarpUploadMethod.stream,
+              deleteWhenUploaded: false,
+            ),
     );
 
     // always add at least one participant role to the protocol
@@ -109,6 +112,8 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
       BackgroundTask(
         measures: [
           Measure(type: ContextSamplingPackage.LOCATION)
+            // Override the default sampling configuration to just get
+            // a single location sample each time the task is triggered.
             ..overrideSamplingConfiguration = LocationSamplingConfiguration(
               once: true,
             ),
@@ -362,6 +367,14 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     final healthService = HealthService();
     protocol.addConnectedDevice(healthService, phone);
 
+    // Add a periodic task that collects health data on a regular basis.
+    //
+    // Note that we are using the HealthSamplingPackage.getHealthMeasure()
+    // method to create a measure that collects multiple health data types.
+    //
+    // Also note that health measures are collected using a [HealthSamplingConfiguration]
+    // which is a [HistoricSamplingConfiguration], meaning that data is collected
+    // going back in time until the last collected data point.
     protocol.addTaskControl(
       // PeriodicTrigger(period: Duration(minutes: 60)),
       PeriodicTrigger(period: Duration(minutes: 1)),

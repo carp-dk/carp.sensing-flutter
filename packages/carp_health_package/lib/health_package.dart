@@ -75,24 +75,30 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
   /// Data will be collected [days] days back in time. If not specified,
   /// data will be collected for the last 30 days, which is the maximum
   /// that Google Health Connect allow.
-  static Measure getHealthMeasure(List<HealthDataType> types,
-          [int days = 30]) =>
+  static Measure getHealthMeasure(
+    List<HealthDataType> types, [
+    int days = 30,
+  ]) =>
       Measure(type: HealthSamplingPackage.HEALTH)
         ..overrideSamplingConfiguration = HealthSamplingConfiguration(
-            past: Duration(days: days), healthDataTypes: types);
+          past: Duration(days: days),
+          healthDataTypes: types,
+        );
 
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-            DataTypeMetaData(
-              type: HEALTH,
-              displayName: "Health Data",
-              timeType: DataTimeType.TIME_SPAN,
-            ),
-            HealthSamplingConfiguration(
-                past: Duration(days: 30),
-                healthDataTypes: [HealthDataType.STEPS]))
+          DataTypeMetaData(
+            type: HEALTH,
+            displayName: "Health Data",
+            timeType: DataTimeType.TIME_SPAN,
+          ),
+          HealthSamplingConfiguration(
+            past: Duration(days: 30),
+            healthDataTypes: [HealthDataType.STEPS],
+          ),
+        ),
       ]);
 
   @override
@@ -105,16 +111,17 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
       HealthSamplingConfiguration(healthDataTypes: []),
       HealthAppTask(type: ''),
       HealthData(
-          '',
-          NumericHealthValue(numericValue: 6),
-          '',
-          '',
-          DateTime.now(),
-          DateTime.now(),
-          HealthPlatform.APPLE_HEALTH,
-          '',
-          '',
-          ''),
+        '',
+        NumericHealthValue(numericValue: 6),
+        '',
+        '',
+        DateTime.now(),
+        DateTime.now(),
+        HealthPlatform.APPLE_HEALTH,
+        '',
+        '',
+        '',
+      ),
     ]);
     AppTaskController().registerUserTaskFactory(HealthUserTaskFactory());
   }

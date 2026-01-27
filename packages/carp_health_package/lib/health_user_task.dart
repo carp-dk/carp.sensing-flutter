@@ -27,24 +27,19 @@ class HealthUserTask extends UserTask {
               )
               as HealthProbe;
 
-      healthProbe.hasPermissions().then((granted) {
+      // Always request permissions when starting the health user task.
+      healthProbe.requestPermissions().then((granted) {
         if (granted) {
           debug(
-            '$runtimeType - Already has permissions to access health data.',
+            '$runtimeType - Got permissions to access health data. Now starting data collection.',
           );
-          _startProbeAndStopAgain();
+          backgroundTaskExecutor.resume();
+          Timer(const Duration(seconds: 30), () => onDone());
         } else {
-          healthProbe.requestPermissions().then((granted) {
-            if (granted) {
-              debug('$runtimeType - Got permissions to access health data.');
-              _startProbeAndStopAgain();
-            } else {
-              warning(
-                '$runtimeType - Could not get permissions to access health data.',
-              );
-              return;
-            }
-          });
+          warning(
+            '$runtimeType - Could not get permissions to access health data.',
+          );
+          return;
         }
       });
     } catch (error) {
@@ -55,11 +50,6 @@ class HealthUserTask extends UserTask {
         'study protocol include any health data types?',
       );
     }
-  }
-
-  void _startProbeAndStopAgain() {
-    backgroundTaskExecutor.resume();
-    Timer(const Duration(seconds: 10), () => onDone());
   }
 
   @override
@@ -73,7 +63,6 @@ class HealthUserTaskFactory implements UserTaskFactory {
   @override
   List<String> types = [HealthUserTask.HEALTH_ASSESSMENT_TYPE];
 
-  // always create a [HealthUserTask]
   @override
   UserTask create(AppTaskExecutor executor) => HealthUserTask(executor);
 }

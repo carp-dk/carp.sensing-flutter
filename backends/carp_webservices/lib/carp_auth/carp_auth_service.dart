@@ -105,9 +105,10 @@ class CarpAuthService {
     );
 
     await initManager();
+    info('$runtimeType configured with $authProperties');
   }
 
-  /// Initialize the [manager]. This service must be configured before calling this
+  /// Initialize the OidcUserManager. This service must be configured before calling this
   /// method.
   Future<void> initManager() async {
     assert(_manager != null, 'Manager not configured. Call configure() first.');

@@ -16,8 +16,11 @@ class SurveySamplingPackage extends SmartphoneSamplingPackage {
     CognitionPackage.ensureInitialized();
 
     FromJsonFactory().registerAll([
-      RPAppTask(type: '', rpTask: RPTask(identifier: 'ignored')),
-      RPTaskResultData()
+      RPAppTask(
+        type: '',
+        rpTask: RPTask(identifier: 'ignored'),
+      ),
+      RPTaskResultData(),
     ]);
     AppTaskController().registerUserTaskFactory(SurveyUserTaskFactory());
   }
@@ -25,19 +28,21 @@ class SurveySamplingPackage extends SmartphoneSamplingPackage {
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(CamsDataTypeMetaData(
-          type: SURVEY,
-          displayName: "User Survey",
-          timeType: DataTimeType.POINT,
-          dataEventType: DataEventType.ONE_TIME,
-        )),
+        DataTypeSamplingScheme(
+          CamsDataTypeMetaData(
+            type: SURVEY,
+            displayName: "User Survey",
+            timeType: DataTimeType.POINT,
+            dataEventType: DataEventType.ONE_TIME,
+          ),
+        ),
       ]);
 
   @override
   Probe? create(String type) => switch (type) {
-        SURVEY => SurveyProbe(),
-        _ => null,
-      };
+    SURVEY => SurveyProbe(),
+    _ => null,
+  };
 }
 
 /// A simple no-op probe that does nothing.

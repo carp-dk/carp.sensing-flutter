@@ -76,8 +76,9 @@ The pedometer (step count) probe uses `NSMotion` on iOS and the `NSMotionUsageDe
 
 -------------------------------------
 
-> **NOTE:** Other CAMS sampling packages require additional permissions in the `manifest.xml` or `Info.plist` files.
-> See the documentation for each package.
+> [!NOTE]  
+> Other CAMS sampling packages require additional permissions in the `manifest.xml` or `Info.plist` files.
+> See the **documentation** for each package.
 
 ## Documentation
 

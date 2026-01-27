@@ -375,38 +375,40 @@ class _CreatedState extends _AbstractExecutorState
   }
 }
 
-class _InitializedState extends _AbstractExecutorState
+/// Any state that can be resumed - initialized, resumed, paused states.
+abstract class _ResumableState extends _AbstractExecutorState
+    implements _ExecutorStateMachine {
+  _ResumableState(Executor<dynamic> executor)
+    : super(executor as AbstractExecutor);
+
+  @override
+  void resume() {
+    executor.onResume().then((resumed) {
+      if (resumed) {
+        executor._setState(_ResumedState(executor));
+      } else {
+        executor._setState(_PausedState(executor));
+      }
+      executor._isResuming = false;
+    });
+  }
+}
+
+class _InitializedState extends _ResumableState
     implements _ExecutorStateMachine {
   _InitializedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Initialized;
-
-  @override
-  void resume() {
-    executor.onResume().then((resumed) {
-      if (resumed) executor._setState(_ResumedState(executor));
-      executor._isResuming = false;
-    });
-  }
 }
 
-class _ResumedState extends _AbstractExecutorState {
+class _ResumedState extends _ResumableState implements _ExecutorStateMachine {
   _ResumedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Resumed;
-
-  // it is ok to re-resume an executor
-  @override
-  void resume() {
-    executor.onResume().then((resumed) {
-      if (resumed) executor._setState(_ResumedState(executor));
-      executor._isResuming = false;
-    });
-  }
 
   @override
   void pause() {
@@ -416,20 +418,12 @@ class _ResumedState extends _AbstractExecutorState {
   }
 }
 
-class _PausedState extends _AbstractExecutorState {
+class _PausedState extends _ResumedState implements _ExecutorStateMachine {
   _PausedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Paused;
-
-  @override
-  void resume() {
-    executor.onResume().then((resumed) {
-      if (resumed) executor._setState(_ResumedState(executor));
-      executor._isResuming = false;
-    });
-  }
 }
 
 class _DisposedState extends _AbstractExecutorState

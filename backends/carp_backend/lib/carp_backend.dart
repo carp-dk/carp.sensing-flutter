@@ -46,6 +46,9 @@ class CarpDataEndPoint extends DataEndPoint {
   bool onlyUploadOnWiFi = false;
 
   /// How often should data be uploaded. In minutes.
+  ///
+  /// Default is every 10 minutes. If running in debug mode, the interval is set to
+  /// 1 minute regardless of this setting.
   int uploadInterval = 10;
 
   /// Should the local buffered data on the phone be deleted once uploaded?

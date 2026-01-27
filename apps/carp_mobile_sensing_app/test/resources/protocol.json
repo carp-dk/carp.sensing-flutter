@@ -14,15 +14,15 @@
       "name": "CARP Web Services",
       "onlyUploadOnWiFi": false,
       "uploadInterval": 10,
-      "deleteWhenUploaded": true,
+      "deleteWhenUploaded": false,
       "compress": true
     }
   },
-  "id": "70f3b260-6200-4f58-86ff-7ace6394677b",
-  "createdOn": "2026-01-20T20:03:21.951855Z",
+  "id": "1b44e0e4-e9f1-4eaf-a7c1-6767e63dd0a0",
+  "createdOn": "2026-01-26T10:20:43.554957Z",
   "version": 0,
   "description": "A study demonstrating most measures and probes. Used for the demo app.",
-  "ownerId": "7f99c9e7-6ba0-4a1c-bd89-e92b60ed1d3f",
+  "ownerId": "2cabce03-35da-4e18-bf18-d83452665a4f",
   "name": "CAMS App - Demo Study Protocol",
   "participantRoles": [
     {

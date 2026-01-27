@@ -91,7 +91,10 @@ class Sensing {
     // .. and print them as json.
     client.measurements.listen((measurement) {
       samplingSize++;
-      print(toJsonString(measurement));
+
+      if (Settings().debugLevel == DebugLevel.debug) {
+        debugPrint(toJsonString(measurement));
+      }
     });
 
     info('$runtimeType initialized');

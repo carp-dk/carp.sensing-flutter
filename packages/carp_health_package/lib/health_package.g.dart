@@ -124,6 +124,7 @@ const _$HealthDataTypeEnumMap = {
   HealthDataType.SLEEP_UNKNOWN: 'SLEEP_UNKNOWN',
   HealthDataType.EXERCISE_TIME: 'EXERCISE_TIME',
   HealthDataType.WORKOUT: 'WORKOUT',
+  HealthDataType.WORKOUT_ROUTE: 'WORKOUT_ROUTE',
   HealthDataType.HEADACHE_NOT_PRESENT: 'HEADACHE_NOT_PRESENT',
   HealthDataType.HEADACHE_MILD: 'HEADACHE_MILD',
   HealthDataType.HEADACHE_MODERATE: 'HEADACHE_MODERATE',
@@ -143,34 +144,35 @@ const _$HealthDataTypeEnumMap = {
   HealthDataType.ELECTRODERMAL_ACTIVITY: 'ELECTRODERMAL_ACTIVITY',
   HealthDataType.ELECTROCARDIOGRAM: 'ELECTROCARDIOGRAM',
   HealthDataType.TOTAL_CALORIES_BURNED: 'TOTAL_CALORIES_BURNED',
+  HealthDataType.ACTIVITY_INTENSITY: 'ACTIVITY_INTENSITY',
 };
 
 HealthData _$HealthDataFromJson(Map<String, dynamic> json) => HealthData(
   json['uuid'] as String,
-  _healthValueFromJson(json['value']),
+  HealthValue.fromJson(json['value'] as Map<String, dynamic>),
   json['unit'] as String,
-  json['health_data_type'] as String,
-  DateTime.parse(json['date_from'] as String),
-  DateTime.parse(json['date_to'] as String),
+  json['healthDataType'] as String,
+  DateTime.parse(json['dateFrom'] as String),
+  DateTime.parse(json['dateTo'] as String),
   $enumDecode(_$HealthPlatformEnumMap, json['platform']),
-  json['device_id'] as String,
-  json['source_id'] as String,
-  json['source_name'] as String,
+  json['deviceId'] as String,
+  json['sourceId'] as String,
+  json['sourceName'] as String,
 )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$HealthDataToJson(HealthData instance) =>
     <String, dynamic>{
       '__type': ?instance.$type,
       'uuid': instance.uuid,
-      'value': instance.value,
+      'value': instance.value.toJson(),
       'unit': instance.unit,
-      'date_from': instance.dateFrom.toIso8601String(),
-      'date_to': instance.dateTo.toIso8601String(),
-      'health_data_type': instance.healthDataType,
+      'dateFrom': instance.dateFrom.toIso8601String(),
+      'dateTo': instance.dateTo.toIso8601String(),
+      'healthDataType': instance.healthDataType,
       'platform': _$HealthPlatformEnumMap[instance.platform]!,
-      'device_id': instance.deviceId,
-      'source_id': instance.sourceId,
-      'source_name': instance.sourceName,
+      'deviceId': instance.deviceId,
+      'sourceId': instance.sourceId,
+      'sourceName': instance.sourceName,
     };
 
 const _$HealthPlatformEnumMap = {

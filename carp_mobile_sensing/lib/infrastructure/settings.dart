@@ -154,10 +154,10 @@ class Settings {
     // ensure that the base carp path is created
     localApplicationPath.then((_) async => await carpBasePath);
 
-    debug('$runtimeType - Shared Preferences:');
-    _preferences?.getKeys().forEach(
-      (key) => debug('"$key" : ${_preferences?.get(key)}'),
-    );
+    debug('$runtimeType - Shared Preferences: ${_preferences?.getKeys()}');
+    // _preferences?.getKeys().forEach(
+    //   (key) => debug('"$key" : ${_preferences?.get(key)}'),
+    // );
 
     // setting up time zone settings
     tz.initializeTimeZones();
@@ -166,7 +166,6 @@ class Settings {
     } catch (error) {
       _timezone = tz.local.name;
       warning('$runtimeType - Could not get the local timezone - $error');
-      warning('$runtimeType - Setting timezone to $timezoneLocation');
     }
     info('Time zone set to $timezoneLocation');
     info('$runtimeType initialized');
