@@ -126,7 +126,7 @@
 
    <application
         android:name="${applicationName}"
-        android:label="CARP Mobile Sensing"
+        android:label="CARP"
         android:icon="@mipmap/ic_launcher">
 
          <!-- Used by authentication redirect to/from web view -->
