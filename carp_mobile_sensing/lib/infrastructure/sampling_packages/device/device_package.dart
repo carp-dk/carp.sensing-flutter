@@ -26,6 +26,14 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   static const String DEVICE_INFORMATION =
       '${CarpDataTypes.CARP_NAMESPACE}.deviceinformation';
 
+  /// Measure type for collection of basic application information like app name,
+  /// package name, version, etc.
+  ///  * One-time measure.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * No sampling configuration needed.
+  static const String APPLICATION_INFORMATION =
+      '${CarpDataTypes.CARP_NAMESPACE}.applicationinformation';
+
   /// Measure type for collection of free physical and virtual memory.
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] primary device for data collection.
@@ -76,6 +84,14 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
         ),
         DataTypeSamplingScheme(
           CamsDataTypeMetaData(
+            type: APPLICATION_INFORMATION,
+            displayName: "Application Information",
+            timeType: DataTimeType.POINT,
+            dataEventType: DataEventType.ONE_TIME,
+          ),
+        ),
+        DataTypeSamplingScheme(
+          CamsDataTypeMetaData(
             type: FREE_MEMORY,
             displayName: "Free Memory",
             timeType: DataTimeType.POINT,
@@ -116,6 +132,7 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   @override
   Probe? create(String type) => switch (type) {
     DEVICE_INFORMATION => DeviceProbe(),
+    APPLICATION_INFORMATION => ApplicationProbe(),
     FREE_MEMORY => MemoryProbe(),
     BATTERY_STATE => BatteryProbe(),
     TIMEZONE => TimezoneProbe(),

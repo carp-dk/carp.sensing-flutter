@@ -19,6 +19,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:light/light.dart';
 import 'package:pedometer/pedometer.dart' as pedometer;
 import 'package:statistics/statistics.dart';

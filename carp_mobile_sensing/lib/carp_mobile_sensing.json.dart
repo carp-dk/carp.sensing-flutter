@@ -46,6 +46,12 @@ void _registerFromJsonFunctions() {
     Heartbeat(period: 1, deviceRoleName: '', deviceType: ''),
     FileData(filename: ''),
     DeviceInformation(),
+    ApplicationInformation(
+      appName: '',
+      packageName: '',
+      version: '',
+      buildNumber: '',
+    ),
     BatteryState(),
     FreeMemory(),
     ScreenEvent(),

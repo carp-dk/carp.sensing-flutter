@@ -183,6 +183,37 @@ Map<String, dynamic> _$DeviceInformationToJson(DeviceInformation instance) =>
       'deviceData': instance.deviceData,
     };
 
+ApplicationInformation _$ApplicationInformationFromJson(
+  Map<String, dynamic> json,
+) => ApplicationInformation(
+  appName: json['appName'] as String,
+  packageName: json['packageName'] as String,
+  version: json['version'] as String,
+  buildNumber: json['buildNumber'] as String,
+  buildSignature: json['buildSignature'] as String? ?? '',
+  installerStore: json['installerStore'] as String?,
+  installTime: json['installTime'] == null
+      ? null
+      : DateTime.parse(json['installTime'] as String),
+  updateTime: json['updateTime'] == null
+      ? null
+      : DateTime.parse(json['updateTime'] as String),
+)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$ApplicationInformationToJson(
+  ApplicationInformation instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'appName': instance.appName,
+  'packageName': instance.packageName,
+  'version': instance.version,
+  'buildNumber': instance.buildNumber,
+  'buildSignature': instance.buildSignature,
+  'installerStore': ?instance.installerStore,
+  'installTime': ?instance.installTime?.toIso8601String(),
+  'updateTime': ?instance.updateTime?.toIso8601String(),
+};
+
 BatteryState _$BatteryStateFromJson(Map<String, dynamic> json) => BatteryState(
   (json['batteryLevel'] as num?)?.toInt(),
   json['batteryStatus'] as String?,

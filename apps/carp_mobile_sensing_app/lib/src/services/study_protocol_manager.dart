@@ -34,6 +34,18 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     Smartphone phone = Smartphone();
     protocol.addPrimaryDevice(phone);
 
+    // collect device and application information every time sensing starts
+    protocol.addTaskControl(
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
+          Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
+          Measure(type: DeviceSamplingPackage.APPLICATION_INFORMATION),
+        ],
+      ),
+      phone,
+    );
+
     // build-in measure from sensor and device sampling packages
     protocol.addTaskControl(
       ImmediateTrigger(),

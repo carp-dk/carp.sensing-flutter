@@ -56,6 +56,6 @@ void main() async {
 }
 
 final bloc = SensingBLoC(
-  deploymentMode: DeploymentMode.dev,
+  deploymentMode: DeploymentMode.local,
   debugLevel: DebugLevel.debug,
 );

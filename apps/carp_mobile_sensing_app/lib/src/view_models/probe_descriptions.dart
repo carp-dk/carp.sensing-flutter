@@ -45,16 +45,20 @@ class ProbeDescription {
         color: CachetColors.GREY_4,
       ),
     ),
-
     DeviceSamplingPackage.FREE_MEMORY: ProbeDescriptor(
       'Memory',
       'Free physical and virtual memory.',
-      Icon(Icons.memory, size: 50, color: CachetColors.GREY_4),
+      Icon(Icons.memory, size: 50, color: CachetColors.GREY_2),
     ),
     DeviceSamplingPackage.DEVICE_INFORMATION: ProbeDescriptor(
       'Device',
-      'Basic Device (Phone) Information.',
-      Icon(Icons.phone_android, size: 50, color: CachetColors.GREY_4),
+      'Information about this device (phone).',
+      Icon(Icons.phone_android, size: 50, color: CachetColors.GREY_2),
+    ),
+    DeviceSamplingPackage.APPLICATION_INFORMATION: ProbeDescriptor(
+      'Application',
+      'Information about this application, incl. name.',
+      Icon(Icons.settings_applications, size: 50, color: CachetColors.GREY_2),
     ),
     DeviceSamplingPackage.BATTERY_STATE: ProbeDescriptor(
       'Battery',
@@ -69,12 +73,12 @@ class ProbeDescription {
     SensorSamplingPackage.ACCELERATION: ProbeDescriptor(
       'Accelerometer',
       "Sensor data from the phone's onboard accelerometer.",
-      Icon(Icons.adb, size: 50, color: CachetColors.GREY_4),
+      Icon(Icons.adb, size: 50, color: CachetColors.GREY_2),
     ),
     SensorSamplingPackage.ROTATION: ProbeDescriptor(
       'Gyroscope',
       "Sensor data from the phone's onboard gyroscope.",
-      Icon(Icons.adb, size: 50, color: CachetColors.GREY_4),
+      Icon(Icons.adb, size: 50, color: CachetColors.GREY_2),
     ),
     SensorSamplingPackage.AMBIENT_LIGHT: ProbeDescriptor(
       'Light',

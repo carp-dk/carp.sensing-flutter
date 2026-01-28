@@ -7,6 +7,39 @@
 
 part of '../../../sampling_packages.dart';
 
+/// A probe that collects the device info about this device.
+class DeviceProbe extends MeasurementProbe {
+  @override
+  Future<Measurement?> getMeasurement() async {
+    await DeviceInfo().init();
+
+    return Measurement.fromData(
+      DeviceInformation(
+        deviceData: DeviceInfo().deviceData,
+        platform: DeviceInfo().platform,
+        deviceId: DeviceInfo().deviceID,
+        deviceName: DeviceInfo().deviceName,
+        deviceModel: DeviceInfo().deviceModel,
+        deviceManufacturer: DeviceInfo().deviceManufacturer,
+        operatingSystem: DeviceInfo().operatingSystemName,
+        hardware: DeviceInfo().hardware,
+      ),
+    );
+  }
+}
+
+/// A probe that collects the device info about this device.
+class ApplicationProbe extends MeasurementProbe {
+  @override
+  Future<Measurement?> getMeasurement() async {
+    if (!Settings().initialized) return null;
+
+    return Measurement.fromData(
+      ApplicationInformation.fromPackageInfo(Settings().packageInfo!),
+    );
+  }
+}
+
 /// The [BatteryProbe] listens to the hardware battery and collect a [BatteryState]
 /// every time the battery state changes. For example, battery level or charging mode.
 class BatteryProbe extends StreamProbe {
@@ -75,27 +108,6 @@ class MemoryProbe extends IntervalProbe {
   Future<Measurement?> getMeasurement() async => Measurement.fromData(
     FreeMemory(SysInfo.getFreePhysicalMemory(), SysInfo.getFreeVirtualMemory()),
   );
-}
-
-/// A probe that collects the device info about this device.
-class DeviceProbe extends MeasurementProbe {
-  @override
-  Future<Measurement?> getMeasurement() async {
-    await DeviceInfo().init();
-
-    return Measurement.fromData(
-      DeviceInformation(
-        deviceData: DeviceInfo().deviceData,
-        platform: DeviceInfo().platform,
-        deviceId: DeviceInfo().deviceID,
-        deviceName: DeviceInfo().deviceName,
-        deviceModel: DeviceInfo().deviceModel,
-        deviceManufacturer: DeviceInfo().deviceManufacturer,
-        operatingSystem: DeviceInfo().operatingSystemName,
-        hardware: DeviceInfo().hardware,
-      ),
-    );
-  }
 }
 
 /// A probe that collects the device's current timezone.

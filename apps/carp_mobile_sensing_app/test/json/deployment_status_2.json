@@ -1,0 +1,79 @@
+{
+  "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.DeployingDevices",
+  "status": "DeployingDevices",
+  "createdOn": "2026-01-26T10:31:04.089004Z",
+  "studyDeploymentId": "2bcd96d6-9a4f-488b-bd60-f1509f5cb853",
+  "deviceStatusList": [
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+        "roleName": "Primary Phone",
+        "isPrimaryDevice": true
+      },
+      "canBeDeployed": true,
+      "remainingDevicesToRegisterToObtainDeployment": [],
+      "remainingDevicesToRegisterBeforeDeployment": []
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.LocationService",
+        "roleName": "Location Service",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {},
+        "accuracy": "balanced",
+        "distance": 0.0,
+        "interval": 60000000,
+        "notificationOnTapBringToFront": false
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [],
+      "remainingDevicesToRegisterBeforeDeployment": []
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.ESenseDevice",
+        "roleName": "eSense",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {},
+        "deviceName": "eSense-0332",
+        "samplingRate": 10
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [
+        "eSense"
+      ],
+      "remainingDevicesToRegisterBeforeDeployment": [
+        "eSense"
+      ]
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.HealthService",
+        "roleName": "Health Service",
+        "isOptional": true,
+        "defaultSamplingConfiguration": {}
+      },
+      "canBeDeployed": false,
+      "remainingDevicesToRegisterToObtainDeployment": [],
+      "remainingDevicesToRegisterBeforeDeployment": []
+    }
+  ],
+  "participantStatusList": [
+    {
+      "participantId": "75b49dd1-f0c2-48fa-a211-4913c9d31543",
+      "assignedParticipantRoles": {
+        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+        "roleNames": [
+          "Participant"
+        ]
+      },
+      "assignedPrimaryDeviceRoleNames": [
+        "Primary Phone"
+      ]
+    }
+  ]
+}

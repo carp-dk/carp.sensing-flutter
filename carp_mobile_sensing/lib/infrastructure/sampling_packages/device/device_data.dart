@@ -71,6 +71,97 @@ class DeviceInformation extends Data {
   Map<String, dynamic> toJson() => _$DeviceInformationToJson(this);
 }
 
+/// Holds basic information about the app from where the data is collected.
+///
+/// Uses the same data structure as the [package_info_plus](https://pub.dev/packages/package_info_plus) package.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class ApplicationInformation extends Data {
+  /// The app name.
+  ///
+  /// - `CFBundleDisplayName` on iOS - falls back to `CFBundleName`.
+  ///   Defined in the `info.plist` and/or product target in xcode.
+  /// - `application/label` on Android.
+  ///   Defined in `AndroidManifest.xml` or String resources.
+  final String appName;
+
+  /// The package name.
+  ///
+  /// - `bundleIdentifier` on iOS and macOS. Defined in the product target in xcode.
+  /// - `packageName` on Android. Defined in `build.gradle` as `applicationId`.
+  final String packageName;
+
+  /// The package version.
+  /// Generated from the version in `pubspec.yaml`.
+  ///
+  /// - `CFBundleShortVersionString` on iOS.
+  /// - `versionName` on Android.
+  final String version;
+
+  /// The build number.
+  /// Generated from the version in `pubspec.yaml`.
+  ///
+  /// - `CFBundleVersion` on iOS.
+  /// - `versionCode` on Android.
+  ///
+  /// Note, on iOS if an app has no buildNumber specified this property will return version
+  /// Docs about CFBundleVersion: https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleversion
+  final String buildNumber;
+
+  /// The build signature.
+  /// SHA-256 signing key signature (hex) on Android.
+  /// Empty string on iOS.
+  final String buildSignature;
+
+  /// The installer store. Indicates through which store this application was installed.
+  final String? installerStore;
+
+  /// The time when the application was installed.
+  ///
+  /// - On Android, returns `PackageManager.firstInstallTime`
+  /// - On iOS, return the creation date of the app default `NSDocumentDirectory`
+  final DateTime? installTime;
+
+  /// The time when the application was last updated.
+  ///
+  /// - On Android, returns `PackageManager.lastUpdateTime`
+  /// - On iOS return the last modified date of the app main bundle
+  final DateTime? updateTime;
+
+  ApplicationInformation({
+    required this.appName,
+    required this.packageName,
+    required this.version,
+    required this.buildNumber,
+    this.buildSignature = '',
+    this.installerStore,
+    this.installTime,
+    this.updateTime,
+  }) : super();
+
+  ApplicationInformation.fromPackageInfo(PackageInfo info)
+    : appName = info.appName,
+      packageName = info.packageName,
+      version = info.version,
+      buildNumber = info.buildNumber,
+      buildSignature = info.buildSignature,
+      installerStore = info.installerStore,
+      installTime = info.installTime,
+      updateTime = info.updateTime,
+      super();
+
+  /// Returns `true` if the [appName] is equal.
+  @override
+  bool equivalentTo(Data other) =>
+      (other is ApplicationInformation) ? appName == other.appName : false;
+
+  @override
+  Function get fromJsonFunction => _$ApplicationInformationFromJson;
+  factory ApplicationInformation.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<ApplicationInformation>(json);
+  @override
+  Map<String, dynamic> toJson() => _$ApplicationInformationToJson(this);
+}
+
 /// Holds battery level and charging status collected from the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BatteryState extends Data {

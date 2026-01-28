@@ -175,20 +175,41 @@ class SmartphoneStudyProtocol extends StudyProtocol
   ///
   /// The data is stored locally using a [SQLiteDataEndPoint].
   ///
+  /// This protocol also includes a default background sampling task of
+  /// collecting device and application information every time sensing starts.
+  ///
   /// Optionally, a list of [measures] can be provided which will be collected
   /// as part of a default background sampling task by this smartphone.
   /// Additional measures can be added later using [addTaskControl], if needed.
-  factory SmartphoneStudyProtocol.local([List<Measure>? measures]) =>
-      SmartphoneStudyProtocol(
-          name: 'Local Smartphone Study Protocol',
-          dataEndPoint: SQLiteDataEndPoint(),
-        )
-        ..addPrimaryDevice(Smartphone())
-        ..addParticipantRole(ParticipantRole('Participant'))
-        ..addTaskControl(
-          ImmediateTrigger(),
-          BackgroundTask(measures: measures),
-        );
+  factory SmartphoneStudyProtocol.local([List<Measure>? measures]) {
+    var protocol =
+        SmartphoneStudyProtocol(
+            name: 'Local Smartphone Study Protocol',
+            dataEndPoint: SQLiteDataEndPoint(),
+          )
+          ..addPrimaryDevice(Smartphone())
+          ..addParticipantRole(ParticipantRole('Participant'));
+
+    // collect device and application information every time sensing starts
+    protocol.addTaskControl(
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
+          Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
+          Measure(type: DeviceSamplingPackage.APPLICATION_INFORMATION),
+        ],
+      ),
+    );
+
+    // add measures, if any, as a background sampling task
+    if (measures != null && measures.isNotEmpty) {
+      protocol.addTaskControl(
+        ImmediateTrigger(),
+        BackgroundTask(measures: measures),
+      );
+    }
+    return protocol;
+  }
 
   @override
   bool addPrimaryDevice(PrimaryDeviceConfiguration primaryDevice) {

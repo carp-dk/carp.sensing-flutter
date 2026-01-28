@@ -31,7 +31,7 @@ class CarpParticipationService extends CarpBaseService
   ///
   /// Note that the [accountId] is the unique CARP account id (and not the
   /// username).
-  /// If [accountId] is not specified, then the account id of the currently
+  /// If [accountId] is not specified, the account id of the currently
   /// authenticated [CarpUser] is used.
   @override
   Future<List<ActiveParticipationInvitation>>
@@ -65,8 +65,6 @@ class CarpParticipationService extends CarpBaseService
   ///
   /// [allowClose] specifies whether the user can close the window without
   /// selecting an invitation.
-  ///
-  /// Throws a [CarpServiceException] if not successful.
   Future<ActiveParticipationInvitation?> getStudyInvitation(
     BuildContext context, {
     bool showInvitations = true,
