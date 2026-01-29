@@ -183,7 +183,7 @@ void carpCoreClientExample() async {
   Account account = Account.withEmailIdentity('jakba@dtu.dk');
   ActiveParticipationInvitation? invitation =
       (await participationService?.getActiveParticipationInvitations(
-        account.id,
+        accountId: account.id,
       ))?.first;
   String? studyDeploymentId = invitation?.studyDeploymentId;
   String? deviceToUse = invitation?.assignedDevices?.first.device.roleName;

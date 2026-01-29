@@ -148,6 +148,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
          expectedParticipantData: protocol.expectedParticipantData ?? {},
        ) {
     _studyDeploymentId = studyDeploymentId ?? const Uuid().v1;
+    _data.protocolVersionTag = protocol.protocolVersionTag;
+    _data.protocolApiLevel = protocol.protocolApiLevel;
     _data.studyDescription = protocol.studyDescription;
     _data.dataEndPoint = protocol.dataEndPoint;
     _data.privacySchemaName = protocol.privacySchemaName;

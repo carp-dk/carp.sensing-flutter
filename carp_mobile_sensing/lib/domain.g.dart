@@ -103,9 +103,9 @@ Map<String, dynamic> _$SmartphoneStudyProtocolToJson(
   'id': instance.id,
   'createdOn': instance.createdOn.toIso8601String(),
   'version': instance.version,
-  'description': instance.description,
   'ownerId': instance.ownerId,
   'name': instance.name,
+  'description': instance.description,
   'participantRoles': ?instance.participantRoles
       ?.map((e) => e.toJson())
       .toList(),
@@ -322,6 +322,35 @@ Map<String, dynamic> _$OnlineServiceToJson<
   'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration?.map(
     (k, e) => MapEntry(k, e.toJson()),
   ),
+};
+
+MobileSensingSmartphone _$MobileSensingSmartphoneFromJson(
+  Map<String, dynamic> json,
+) =>
+    MobileSensingSmartphone(
+        roleName: json['roleName'] as String? ?? Smartphone.DEFAULT_ROLE_NAME,
+      )
+      ..$type = json['__type'] as String?
+      ..isOptional = json['isOptional'] as bool?
+      ..defaultSamplingConfiguration =
+          (json['defaultSamplingConfiguration'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              SamplingConfiguration.fromJson(e as Map<String, dynamic>),
+            ),
+          )
+      ..isPrimaryDevice = json['isPrimaryDevice'] as bool;
+
+Map<String, dynamic> _$MobileSensingSmartphoneToJson(
+  MobileSensingSmartphone instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'roleName': instance.roleName,
+  'isOptional': ?instance.isOptional,
+  'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration?.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
+  'isPrimaryDevice': instance.isPrimaryDevice,
 };
 
 SmartphoneDeployment _$SmartphoneDeploymentFromJson(

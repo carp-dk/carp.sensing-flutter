@@ -56,6 +56,8 @@ void main() async {
 }
 
 final bloc = SensingBLoC(
-  deploymentMode: DeploymentMode.local,
+  deploymentMode: DeploymentMode.dev,
   debugLevel: DebugLevel.debug,
+  // primaryDeviceType: MobileSensingSmartphone.DEVICE_TYPE,
+  primaryDeviceType: Smartphone.DEVICE_TYPE,
 );

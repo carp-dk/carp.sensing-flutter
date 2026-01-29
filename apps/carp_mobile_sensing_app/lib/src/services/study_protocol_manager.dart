@@ -30,8 +30,8 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     final participant = 'Participant';
     protocol.participantRoles?.add(ParticipantRole(participant, false));
 
-    // define the primary device
-    Smartphone phone = Smartphone();
+    // define the primary device as a mobile sensing smartphone (i.e., this app)
+    final phone = MobileSensingSmartphone();
     protocol.addPrimaryDevice(phone);
 
     // collect device and application information every time sensing starts

@@ -18,6 +18,14 @@ mixin SmartphoneProtocolExtension {
       ? SmartphoneApplicationData.fromJson(data)
       : SmartphoneApplicationData();
 
+  /// The version tag of the study protocol snapshot.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  String? get protocolVersionTag => _data.protocolVersionTag;
+
+  /// The API level used by this study protocol.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  String? get protocolApiLevel => _data.protocolApiLevel;
+
   /// The description of this study protocol containing the title, description,
   /// purpose, and the responsible researcher for this study.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -140,9 +148,9 @@ class SmartphoneApplicationData {
 class SmartphoneStudyProtocol extends StudyProtocol
     with SmartphoneProtocolExtension {
   /// The API level used by study protocols.
-  /// This reflects the version of the CARP Mobile Sensing framework as set in
-  /// the pubspec.yaml file.
-  static const String CAMS_PROTOCOL_API_LEVEL = '2.0.0';
+  /// This reflects the **major** version of the CARP Mobile Sensing framework
+  /// as set in the pubspec.yaml file.
+  static const String CAMS_PROTOCOL_API_LEVEL = '2.0';
 
   /// Create a new [SmartphoneStudyProtocol].
   ///
@@ -154,6 +162,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
   SmartphoneStudyProtocol({
     String? ownerId,
     required super.name,
+    String? appName,
     StudyDescription? studyDescription,
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,

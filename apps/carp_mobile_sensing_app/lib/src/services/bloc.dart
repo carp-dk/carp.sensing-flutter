@@ -20,12 +20,15 @@ enum DeploymentMode {
 /// mode, etc. It also provides methods to initialize the sensing,
 /// add a study, connect to devices, and start/pause/resume sensing.
 class SensingBLoC {
-  /// Create the BLoC, optionally specifying the [deploymentMode] and [debugLevel].
+  /// Create the BLoC, optionally specifying the [deploymentMode], [debugLevel],
+  /// and [primaryDeviceType].
   SensingBLoC({
     this.deploymentMode = DeploymentMode.local,
     DebugLevel debugLevel = DebugLevel.warning,
+    String primaryDeviceType = Smartphone.DEVICE_TYPE,
   }) {
     Settings().debugLevel = debugLevel;
+    Settings().primaryDeviceType = primaryDeviceType;
   }
 
   /// The [Sensing] layer used in the app.
@@ -51,16 +54,6 @@ class SensingBLoC {
         // Add the study from the protocol to the sensing client.
         await sensing.client.addStudyFromProtocol(protocol);
 
-        // // Deploy this protocol using the on-phone deployment service.
-        // var status = await sensing.deploymentService.createStudyDeployment(
-        //   protocol,
-        // );
-
-        // // Create the study using the deployment information.
-        // study = SmartphoneStudy(
-        //   studyDeploymentId: status.studyDeploymentId,
-        //   deviceRoleName: protocol.primaryDevice.roleName,
-        // );
         break;
       case DeploymentMode.production:
       case DeploymentMode.test:
@@ -74,8 +67,6 @@ class SensingBLoC {
 
         break;
     }
-    // Now add the study to the sensing client.
-    // if (study != null) sensing.client.addStudy(study);
   }
 
   /// Run (start, resume, pause) [study] based on its current state.

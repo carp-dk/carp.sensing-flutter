@@ -189,6 +189,7 @@ class StudyDeployment {
     }
 
     Set<TaskConfiguration> tasks = {};
+
     // get all tasks which need to be executed on this primary device
     tasks.addAll(protocol.getTasksForDeviceRoleName(device.roleName));
 

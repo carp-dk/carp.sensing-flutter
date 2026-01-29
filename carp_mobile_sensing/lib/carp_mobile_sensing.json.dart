@@ -15,6 +15,12 @@ void _registerFromJsonFunctions() {
     StudyDescription(title: ''),
   ]);
 
+  // DeviceConfiguration classes
+  FromJsonFactory().registerAll([
+    MobileSensingSmartphone(),
+    OnlineService(roleName: ''),
+  ]);
+
   // Task classes
   FromJsonFactory().registerAll([
     AppTask(type: ''),

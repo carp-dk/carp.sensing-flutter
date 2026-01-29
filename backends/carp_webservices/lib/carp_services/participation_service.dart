@@ -26,31 +26,54 @@ class CarpParticipationService extends CarpBaseService
   ParticipationReference participation([String? studyDeploymentId]) =>
       ParticipationReference._(this, getStudyDeploymentId(studyDeploymentId));
 
-  /// Get the list of active participation invitations for an [accountId].
-  /// This will return all deployments that this account (user) is invited to.
+  /// Get the list of active participation invitations for an [accountId]
+  /// and for a primary [device].
   ///
   /// Note that the [accountId] is the unique CARP account id (and not the
-  /// username).
+  /// username). The [device] is the full namespace of the device, e.g.,
+  /// "dk.cachet.carp.common.application.devices.Smartphone".
+  ///
   /// If [accountId] is not specified, the account id of the currently
   /// authenticated [CarpUser] is used.
+  /// If [device] is not specified, the [Settings.primaryDeviceType] is used,
+  /// if set. If not set, all devices are considered.
   @override
   Future<List<ActiveParticipationInvitation>>
-  getActiveParticipationInvitations([String? accountId]) async {
+  getActiveParticipationInvitations({String? accountId, String? device}) async {
     accountId ??= CarpAuthService().currentUser.id;
+    device ??= Settings().primaryDeviceType;
+
+    debug(
+      "$runtimeType - Getting invitations for '$accountId' for device: '$device'.",
+    );
 
     dynamic responseJson = await _rpc(
       GetActiveParticipationInvitations(accountId),
     );
 
     // we expect a list of invitations
-    List<dynamic> invitations = responseJson as List<dynamic>;
-    return invitations
+    List<dynamic> list = responseJson as List<dynamic>;
+    List<ActiveParticipationInvitation> invitations = list
         .map(
-          (invitation) => ActiveParticipationInvitation.fromJson(
-            invitation as Map<String, dynamic>,
+          (item) => ActiveParticipationInvitation.fromJson(
+            item as Map<String, dynamic>,
           ),
         )
         .toList();
+
+    // if a device is specified, filter on that
+    if (device != null) {
+      invitations = invitations
+          .where(
+            (invitation) =>
+                (invitation.assignedDevices ?? <AssignedPrimaryDevice>[]).any(
+                  (assigned) => assigned.device.jsonType == device,
+                ),
+          )
+          .toList();
+    }
+
+    return invitations;
   }
 
   /// Get a study invitation from CARP by allowing the user to select from
@@ -62,12 +85,16 @@ class CarpParticipationService extends CarpBaseService
   /// If the user is invited to more than one study and [showInvitations] is `true`,
   /// a user-interface dialog for selecting amongst the invitations is shown.
   /// If not, the study id of the first invitation is returned.
+  /// If [device] is specified, only invitations for that device are considered.
+  /// The [device] is the full namespace of the device, e.g.,
+  /// "dk.cachet.carp.common.application.devices.Smartphone".
   ///
   /// [allowClose] specifies whether the user can close the window without
   /// selecting an invitation.
   Future<ActiveParticipationInvitation?> getStudyInvitation(
     BuildContext context, {
     bool showInvitations = true,
+    String? device,
     bool allowClose = false,
   }) async {
     if (!isConfigured) {
@@ -83,7 +110,7 @@ class CarpParticipationService extends CarpBaseService
     }
 
     List<ActiveParticipationInvitation> invitations =
-        await getActiveParticipationInvitations();
+        await getActiveParticipationInvitations(device: device);
 
     ActiveParticipationInvitation? invitation;
 

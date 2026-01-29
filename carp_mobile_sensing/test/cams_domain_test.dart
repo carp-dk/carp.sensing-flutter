@@ -19,6 +19,7 @@ void main() {
     primaryProtocol = SmartphoneStudyProtocol(
       ownerId: 'user@dtu.dk',
       name: 'patient_tracking',
+      appName: 'CAMS Test App',
       studyDescription: StudyDescription(
         title: 'A Test',
         purpose: 'Testing',
@@ -225,8 +226,11 @@ void main() {
 
   group('StudyProtocol', () {
     test('SmartphoneStudyProtocol -> JSON', () async {
-      print(primaryProtocol.applicationData);
       print(toJsonString(primaryProtocol));
+      expect(
+        primaryProtocol.protocolApiLevel,
+        SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL,
+      );
       expect(primaryProtocol.ownerId, 'user@dtu.dk');
       expect(primaryProtocol.primaryDevices.length, 1);
       expect(primaryProtocol.connectedDevices?.length, 1);
@@ -261,6 +265,10 @@ void main() {
         json.decode(plainJson) as Map<String, dynamic>,
       );
 
+      expect(
+        primaryProtocol.protocolApiLevel,
+        SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL,
+      );
       expect(protocol.ownerId, primaryProtocol.ownerId);
       expect(
         protocol.primaryDevices.first.roleName,
@@ -326,16 +334,18 @@ void main() {
       print(toJsonString(deployment));
 
       expect(
-        deployment.deviceConfiguration.roleName,
-        Smartphone.DEFAULT_ROLE_NAME,
+        primaryProtocol.protocolApiLevel,
+        SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL,
       );
-      expect(deployment.connectedDevices.length, 0);
-      expect(deployment.triggers.length, 2);
+      expect(deployment.deviceConfiguration.roleName, 'phone');
+      expect(deployment.connectedDevices.length, 1);
+      expect(deployment.triggers.length, 8);
       expect(deployment.triggers.keys.first, '0');
-      expect(deployment.tasks.length, 2);
-      expect(deployment.taskControls.length, 2);
+      expect(deployment.tasks.length, 7);
+      expect(deployment.taskControls.length, 8);
       expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
-      expect(deployment.expectedParticipantData.length, 0);
+      expect(deployment.expectedParticipantData.length, 1);
+      expect(deployment.getApplicationData('uiTheme'), 'black');
     });
   });
 

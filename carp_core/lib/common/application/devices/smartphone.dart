@@ -6,7 +6,7 @@
  */
 part of '../../../common.dart';
 
-/// Configuration of an internet-connected smartphone with built-in [sensors].
+/// Configuration of an internet-connected smartphone with built-in sensors.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Smartphone extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
   /// The type of a smartphone device.
@@ -32,6 +32,9 @@ class Smartphone extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
         ),
         DataTypeSamplingScheme(
           CarpDataTypes().types[CarpDataTypes.ACCELERATION]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.ANGULAR_VELOCITY]!,
         ),
       ]);
 
