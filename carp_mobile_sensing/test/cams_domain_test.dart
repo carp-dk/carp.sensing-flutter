@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:test/test.dart';
@@ -11,9 +11,17 @@ void main() {
   late Smartphone primaryPhone;
   DeviceConfiguration eSense;
 
+  Future<void> writeToFile(String json, String fileName) async {
+    File file = File('test/json/$fileName');
+    await file.writeAsString(json);
+    print("Done writing '$fileName'");
+  }
+
   setUp(() {
     // Initialization of serialization
     CarpMobileSensing();
+
+    DeviceInfo().init();
 
     // Create a new study protocol.
     primaryProtocol = SmartphoneStudyProtocol(
@@ -239,6 +247,9 @@ void main() {
       expect(primaryProtocol.tasks.length, 7);
       expect(primaryProtocol.taskControls.length, 8);
       expect(primaryProtocol.expectedParticipantData?.length, 1);
+
+      // used in the test below
+      await writeToFile(toJsonString(primaryProtocol), 'study_protocol.json');
     });
 
     test(
@@ -298,6 +309,8 @@ void main() {
       expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
       expect(deployment.expectedParticipantData.length, 1);
       expect(deployment.getApplicationData('uiTheme'), 'black');
+
+      await writeToFile(toJsonString(deployment), 'study_deployment.json');
     });
 
     test(
@@ -521,6 +534,8 @@ void main() {
   });
 
   test('Register Device', () async {
+    await DeviceInfo().init();
+
     StudyDeploymentStatus status_1 = await (SmartphoneDeploymentService()
         .createStudyDeployment(primaryProtocol));
     print(status_1);

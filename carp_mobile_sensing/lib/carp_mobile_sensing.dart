@@ -22,7 +22,7 @@
 library;
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 
 import 'domain.dart';
 import 'runtime.dart';

@@ -1,4 +1,4 @@
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:test/test.dart';
 import 'package:carp_serializable/carp_serializable.dart';
@@ -11,7 +11,7 @@ void main() {
   group('Sampling Configurations', () {
     test('Sampling Packages.', () {
       var schemes = DeviceSamplingPackage().samplingSchemes;
-      expect(schemes.configurations.length, 6);
+      expect(schemes.configurations.length, 7);
 
       print(schemes);
     });

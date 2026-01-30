@@ -67,6 +67,7 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
 
   @override
   Map<String, dynamic> toJson() => _$DeviceConfigurationToJson(this);
+
   @override
   String get jsonType => '$DEVICE_NAMESPACE.$runtimeType';
 }

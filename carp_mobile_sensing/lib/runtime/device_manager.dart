@@ -57,7 +57,7 @@ abstract class DeviceManager<
 
   /// The registration used for this device when registering it in the
   /// deployment service.
-  TRegistration get registration;
+  TRegistration? get registration => configuration?.createRegistration();
 
   /// Is data sampling resumed when this device is (re)connected?
   bool get restartOnReconnect => _restartOnReconnect;
@@ -325,7 +325,7 @@ abstract class HardwareDeviceManager<
 
 /// A device manager for a smartphone.
 class SmartphoneDeviceManager
-    extends HardwareDeviceManager<Smartphone, DefaultDeviceRegistration> {
+    extends HardwareDeviceManager<Smartphone, SmartphoneRegistration> {
   int _batteryLevel = 0;
   Battery battery = Battery();
   final Set<DataType> _supportedDataTypes = {};
@@ -343,12 +343,15 @@ class SmartphoneDeviceManager
   String? get displayName => DeviceInfo().toString();
 
   @override
-  DefaultDeviceRegistration get registration => DefaultDeviceRegistration(
-    deviceId: id,
-    deviceDisplayName: ((Platform.isAndroid)
-        ? '${DeviceInfo().platform} (${DeviceInfo().deviceManufacturer?.toUpperCase()}) - ${DeviceInfo().deviceModel} [SDK: ${DeviceInfo().sdk}]'
-        : '${DeviceInfo().platform} - ${DeviceInfo().hardware} [SDK: ${DeviceInfo().sdk}]'),
-  );
+  SmartphoneRegistration get registration =>
+      configuration!.createRegistration();
+
+  // SmartphoneDeviceRegistration(
+  //   deviceId: id,
+  //   deviceDisplayName: ((Platform.isAndroid)
+  //       ? '${DeviceInfo().platform} (${DeviceInfo().deviceManufacturer?.toUpperCase()}) - ${DeviceInfo().deviceModel} [SDK: ${DeviceInfo().sdk}]'
+  //       : '${DeviceInfo().platform} - ${DeviceInfo().hardware} [SDK: ${DeviceInfo().sdk}]'),
+  // );
 
   @override
   void onInitialize(Smartphone configuration) {

@@ -111,7 +111,7 @@ class SmartphoneDeploymentExecutor
 
     var targetDevice = configuration?.getDeviceFromRoleName(roleName);
     return (targetDevice != null)
-        ? DeviceController().getDevice(targetDevice.type)
+        ? DeviceController().getDeviceManager(targetDevice.type)
         : null;
   }
 

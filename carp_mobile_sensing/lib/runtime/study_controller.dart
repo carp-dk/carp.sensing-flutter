@@ -228,13 +228,15 @@ class SmartphoneStudyController {
 
     // Check if this phone has this type of device.
     if (_deviceController.hasDevice(deviceType)) {
-      DeviceManager deviceManager = _deviceController.getDevice(deviceType)!;
+      DeviceManager deviceManager = _deviceController.getDeviceManager(
+        deviceType,
+      )!;
 
       try {
         await _deploymentService.registerDevice(
           study.studyDeploymentId,
           deviceRoleName,
-          deviceManager.registration,
+          deviceManager.registration!,
         );
       } catch (error) {
         warning(
@@ -356,7 +358,7 @@ class SmartphoneStudyController {
   void _startHeartbeatMonitoring() {
     for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
       _deviceController
-          .getDevice(configuration.type)
+          .getDeviceManager(configuration.type)
           ?.startHeartbeatMonitoring(this);
     }
   }
@@ -366,7 +368,7 @@ class SmartphoneStudyController {
   void _stopHeartbeatMonitoring() {
     for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
       _deviceController
-          .getDevice(configuration.type)
+          .getDeviceManager(configuration.type)
           ?.stopHeartbeatMonitoring();
     }
   }
@@ -380,7 +382,7 @@ class SmartphoneStudyController {
 
     // connect all the connected devices and the primary device (i.e. this phone)
     for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
-      var device = _deviceController.getDevice(configuration.type);
+      var device = _deviceController.getDeviceManager(configuration.type);
       if (device != null && device.canConnect()) await device.connect();
     }
   }

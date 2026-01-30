@@ -10,7 +10,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 
@@ -426,12 +426,12 @@ void example_4() async {
     String deviceRoleName = deviceStatus.device.roleName;
 
     // create and register the device in the CAMS DeviceRegistry
-    DeviceController().getDevice(type);
+    DeviceController().getDeviceManager(type);
 
     // if the device manager is created successfully on the phone
     if (DeviceController().hasDevice(type)) {
       // ask the device manager for a unique id of the device
-      String deviceId = DeviceController().getDevice(type)!.id;
+      String deviceId = DeviceController().getDeviceManager(type)!.id;
       DeviceRegistration registration = DeviceRegistration(deviceId: deviceId);
       // (all of the above can actually be handled directly by the SmartphoneDeploymentService.registerDevice() method)
 

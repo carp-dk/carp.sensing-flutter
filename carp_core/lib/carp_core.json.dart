@@ -10,7 +10,6 @@ void _registerFromJsonFunctions() {
   FromJsonFactory().registerAll([
     DefaultDeviceRegistration(),
     AltBeaconDeviceRegistration(),
-    SmartphoneDeviceRegistration(),
   ]);
 
   // register all the different device deployment status types - see [DeviceDeploymentStatusTypes]

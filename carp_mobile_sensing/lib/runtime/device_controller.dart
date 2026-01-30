@@ -23,7 +23,7 @@ class DeviceController extends DeviceDataCollectorFactory {
   /// Get the singleton [DeviceController].
   factory DeviceController() => _instance;
 
-  /// The list of devices registered in this controller.
+  /// The map of device managers registered in this controller.
   Map<String, DeviceManager> get devices => _devices;
 
   @override
@@ -52,13 +52,13 @@ class DeviceController extends DeviceDataCollectorFactory {
   DeviceManager? createConnectedDataCollector(
     String deviceType,
     DeviceRegistration deviceRegistration,
-  ) => getDevice(deviceType);
+  ) => getDeviceManager(deviceType);
 
   /// Get a device manger for the specified [deviceType].
   /// If a device manager is not yet available, it is created from the
   /// sampling packages.
   /// Returns null if no device manager for [deviceType] is found.
-  DeviceManager? getDevice(String deviceType) {
+  DeviceManager? getDeviceManager(String deviceType) {
     // early out if already registered
     if (devices.containsKey(deviceType)) return devices[deviceType];
 

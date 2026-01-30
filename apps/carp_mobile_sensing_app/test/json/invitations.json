@@ -61,6 +61,32 @@
     },
     {
       "participation": {
+        "studyDeploymentId": "68434137-ffbb-4a59-9078-0383a1e36e02",
+        "assignedRoles": {
+          "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+          "roleNames": [
+            "Participant"
+          ]
+        },
+        "participantId": "b2c3d895-4292-40d5-99af-c572b1378d88"
+      },
+      "invitation": {
+        "name": "CARP Demo 2.0",
+        "description": "Study testing data upload, especially the surveys due to issue #342 ",
+        "applicationData": "694890b1-f42f-4263-8296-3bfaff9ff190"
+      },
+      "assignedDevices": [
+        {
+          "device": {
+            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+            "isPrimaryDevice": true,
+            "roleName": "Primary Phone"
+          }
+        }
+      ]
+    },
+    {
+      "participation": {
         "studyDeploymentId": "59b39435-e3ef-47cd-b841-fdb842319b98",
         "assignedRoles": {
           "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
@@ -86,6 +112,66 @@
             "registrationCreatedOn": "2024-11-04T20:48:03.201162Z",
             "deviceDisplayName": "SP1A.210812.016 - SM-G970F SAMSUNG [SDK 31]",
             "deviceId": "SP1A.210812.016"
+          }
+        }
+      ]
+    },
+    {
+      "participation": {
+        "studyDeploymentId": "fa49b11d-f146-4913-98cf-20a9d1ed492d",
+        "assignedRoles": {
+          "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+          "roleNames": [
+            "Participant"
+          ]
+        },
+        "participantId": "37a071f9-b604-4f1b-b009-8488cfa6e792"
+      },
+      "invitation": {
+        "name": "dk.carp.cams.devices.Smartphone",
+        "applicationData": {
+          "studyId": "5b39f81d-d40d-47e1-a9a9-1178f0a7dd7d"
+        }
+      },
+      "assignedDevices": [
+        {
+          "device": {
+            "__type": "dk.carp.cams.devices.Smartphone",
+            "roleName": "Primary Phone",
+            "isOptional": false,
+            "isPrimaryDevice": true,
+            "defaultSamplingConfiguration": {}
+          }
+        }
+      ]
+    },
+    {
+      "participation": {
+        "studyDeploymentId": "0d4566c4-c2d3-4080-b0a4-acd45ab6982e",
+        "assignedRoles": {
+          "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+          "roleNames": [
+            "Participant"
+          ]
+        },
+        "participantId": "3f7f48ad-09d6-4723-aa0c-d4df7306f4c3"
+      },
+      "invitation": {
+        "name": "Neuropathy testing at Roskilde Hospital",
+        "applicationData": "ff2477ef-1146-4715-a4e8-1be315a18661"
+      },
+      "assignedDevices": [
+        {
+          "device": {
+            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+            "isPrimaryDevice": true,
+            "roleName": "Primary Phone"
+          },
+          "registration": {
+            "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
+            "registrationCreatedOn": "2025-05-18T17:56:39.898804Z",
+            "deviceDisplayName": "UP1A.231005.007 - SM-A546B SAMSUNG [SDK 34]",
+            "deviceId": "UP1A.231005.007"
           }
         }
       ]
@@ -124,19 +210,20 @@
     },
     {
       "participation": {
-        "studyDeploymentId": "68434137-ffbb-4a59-9078-0383a1e36e02",
+        "studyDeploymentId": "e3af90b5-de98-4733-a7f6-14026e8c05de",
         "assignedRoles": {
           "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
           "roleNames": [
             "Participant"
           ]
         },
-        "participantId": "b2c3d895-4292-40d5-99af-c572b1378d88"
+        "participantId": "05eb2f5c-e9d8-4e13-b352-b3278447f008"
       },
       "invitation": {
-        "name": "CARP Demo 2.0",
-        "description": "Study testing data upload, especially the surveys due to issue #342 ",
-        "applicationData": "694890b1-f42f-4263-8296-3bfaff9ff190"
+        "name": "Passive Sensing",
+        "applicationData": {
+          "studyId": "a70b286b-1c68-4e74-a5f8-27203eff7c48"
+        }
       },
       "assignedDevices": [
         {
@@ -144,6 +231,12 @@
             "__type": "dk.cachet.carp.common.application.devices.Smartphone",
             "isPrimaryDevice": true,
             "roleName": "Primary Phone"
+          },
+          "registration": {
+            "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
+            "registrationCreatedOn": "2025-12-10T11:04:45.273229Z",
+            "deviceDisplayName": "Android (SAMSUNG) - SM-A546B [SDK: 36]",
+            "deviceId": "BP2A.250605.031.A3"
           }
         }
       ]
@@ -174,37 +267,6 @@
           "registration": {
             "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
             "registrationCreatedOn": "2025-01-08T11:30:47.739854Z",
-            "deviceDisplayName": "UP1A.231005.007 - SM-A546B SAMSUNG [SDK 34]",
-            "deviceId": "UP1A.231005.007"
-          }
-        }
-      ]
-    },
-    {
-      "participation": {
-        "studyDeploymentId": "0d4566c4-c2d3-4080-b0a4-acd45ab6982e",
-        "assignedRoles": {
-          "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-          "roleNames": [
-            "Participant"
-          ]
-        },
-        "participantId": "3f7f48ad-09d6-4723-aa0c-d4df7306f4c3"
-      },
-      "invitation": {
-        "name": "Neuropathy testing at Roskilde Hospital",
-        "applicationData": "ff2477ef-1146-4715-a4e8-1be315a18661"
-      },
-      "assignedDevices": [
-        {
-          "device": {
-            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-            "isPrimaryDevice": true,
-            "roleName": "Primary Phone"
-          },
-          "registration": {
-            "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
-            "registrationCreatedOn": "2025-05-18T17:56:39.898804Z",
             "deviceDisplayName": "UP1A.231005.007 - SM-A546B SAMSUNG [SDK 34]",
             "deviceId": "UP1A.231005.007"
           }
@@ -316,39 +378,6 @@
     },
     {
       "participation": {
-        "studyDeploymentId": "e3af90b5-de98-4733-a7f6-14026e8c05de",
-        "assignedRoles": {
-          "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-          "roleNames": [
-            "Participant"
-          ]
-        },
-        "participantId": "05eb2f5c-e9d8-4e13-b352-b3278447f008"
-      },
-      "invitation": {
-        "name": "Passive Sensing",
-        "applicationData": {
-          "studyId": "a70b286b-1c68-4e74-a5f8-27203eff7c48"
-        }
-      },
-      "assignedDevices": [
-        {
-          "device": {
-            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-            "isPrimaryDevice": true,
-            "roleName": "Primary Phone"
-          },
-          "registration": {
-            "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
-            "registrationCreatedOn": "2025-12-10T11:04:45.273229Z",
-            "deviceDisplayName": "Android (SAMSUNG) - SM-A546B [SDK: 36]",
-            "deviceId": "BP2A.250605.031.A3"
-          }
-        }
-      ]
-    },
-    {
-      "participation": {
         "studyDeploymentId": "2bcd96d6-9a4f-488b-bd60-f1509f5cb853",
         "assignedRoles": {
           "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
@@ -371,12 +400,6 @@
             "__type": "dk.cachet.carp.common.application.devices.Smartphone",
             "isPrimaryDevice": true,
             "roleName": "Primary Phone"
-          },
-          "registration": {
-            "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
-            "registrationCreatedOn": "2026-01-26T11:07:43.239473Z",
-            "deviceDisplayName": "iOS - iPhone16,1 [SDK: 25.2.0]",
-            "deviceId": "2CB349FB-F589-4CF3-AAD5-5CC3FB05A03F"
           }
         }
       ]

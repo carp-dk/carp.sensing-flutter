@@ -167,14 +167,7 @@ class SmartPhoneClientManager
     );
 
     // Create the device registration using the [Smartphone] registration builder.
-    registration ??= Smartphone().createRegistration(
-      deviceId: DeviceInfo().deviceID,
-      platform: DeviceInfo().platform,
-      deviceManufacturer: DeviceInfo().deviceManufacturer,
-      hardware: DeviceInfo().hardware,
-      deviceModel: DeviceInfo().deviceModel,
-      sdk: DeviceInfo().sdk,
-    );
+    registration ??= Smartphone().createRegistration();
 
     super.configure(
       registration: registration,

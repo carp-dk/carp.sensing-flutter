@@ -15,10 +15,12 @@ void _registerFromJsonFunctions() {
     StudyDescription(title: ''),
   ]);
 
-  // DeviceConfiguration classes
+  // Device Configuration & Registration classes
   FromJsonFactory().registerAll([
-    MobileSensingSmartphone(),
+    // MobileSensingSmartphone(),
+    Smartphone(),
     OnlineService(roleName: ''),
+    SmartphoneRegistration(),
   ]);
 
   // Task classes

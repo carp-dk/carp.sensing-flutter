@@ -39,7 +39,7 @@ class SmartphoneDeploymentService implements DeploymentService {
     _repository[deployment.studyDeploymentId] = deployment;
 
     // always register this phone as a primary device
-    deployment.registerDevice(thisPhone, SmartphoneDeviceRegistration());
+    deployment.registerDevice(thisPhone, thisPhone.createRegistration());
 
     // set the deployment status to "invited" as the initial status.
     deployment.status.status = StudyDeploymentStatusTypes.Invited;

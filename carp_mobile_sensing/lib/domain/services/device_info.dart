@@ -70,10 +70,13 @@ class DeviceInfo {
   /// See [BaseDeviceInfo.data].
   Map<String, dynamic> deviceData = {};
 
+  /// Has the device info been initialized?
+  bool get initialized => deviceData.isNotEmpty;
+
   /// Initialize the device info using the [DeviceInfoPlugin].
   Future<void> init() async {
     // early out if already initialized
-    if (deviceData.isNotEmpty) return;
+    if (initialized) return;
 
     try {
       if (Platform.isAndroid) {

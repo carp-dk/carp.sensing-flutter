@@ -31,7 +31,7 @@ class CarpParticipationService extends CarpBaseService
   ///
   /// Note that the [accountId] is the unique CARP account id (and not the
   /// username). The [device] is the full namespace of the device, e.g.,
-  /// "dk.cachet.carp.common.application.devices.Smartphone".
+  /// "dk.carp.cams.devices.Smartphone".
   ///
   /// If [accountId] is not specified, the account id of the currently
   /// authenticated [CarpUser] is used.
@@ -87,7 +87,7 @@ class CarpParticipationService extends CarpBaseService
   /// If not, the study id of the first invitation is returned.
   /// If [device] is specified, only invitations for that device are considered.
   /// The [device] is the full namespace of the device, e.g.,
-  /// "dk.cachet.carp.common.application.devices.Smartphone".
+  /// "dk.carp.cams.devices.Smartphone".
   ///
   /// [allowClose] specifies whether the user can close the window without
   /// selecting an invitation.

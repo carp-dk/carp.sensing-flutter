@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_connectivity_package/connectivity.dart';
 import 'package:carp_esense_package/esense.dart';
@@ -90,14 +90,23 @@ void main() {
       print(toJsonString(status));
     });
 
-    test("- register Primary Phone", () async {
+    test("- register Smartphone", () async {
       final status = await CarpDeploymentService().registerDevice(
         testDeploymentId,
-        "Primary Phone",
+        "Smartphone",
         DefaultDeviceRegistration(deviceDisplayName: 'Samsung A10'),
       );
       print(toJsonString(status));
     });
+
+    test("- unregister Smartphone", () async {
+      final status = await CarpDeploymentService().unregisterDevice(
+        testDeploymentId,
+        "Smartphone",
+      );
+      print(toJsonString(status));
+    });
+
     test("- register Father's device", () async {
       final status = await CarpDeploymentService().registerDevice(
         testDeploymentId,
@@ -116,6 +125,15 @@ void main() {
       print(toJsonString(status));
     });
 
+    test("- register smartphone device", () async {
+      final status = await CarpDeploymentService().registerDevice(
+        testDeploymentId,
+        "Smartphone",
+        SmartphoneRegistration(deviceDisplayName: 'Samsung A20'),
+      );
+      print(toJsonString(status));
+    });
+
     test('- get study deployment ', () async {
       final status = await CarpDeploymentService().getStudyDeploymentStatus(
         testDeploymentId,
@@ -123,7 +141,7 @@ void main() {
 
       final study = await CarpDeploymentService().getDeviceDeploymentFor(
         status.studyDeploymentId,
-        "Primary Phone",
+        "Smartphone",
       );
       print(toJsonString(study));
     });

@@ -430,41 +430,6 @@ Map<String, dynamic> _$SmartphoneToJson(Smartphone instance) =>
       'isPrimaryDevice': instance.isPrimaryDevice,
     };
 
-SmartphoneDeviceRegistration _$SmartphoneDeviceRegistrationFromJson(
-  Map<String, dynamic> json,
-) => SmartphoneDeviceRegistration(
-  deviceId: json['deviceId'] as String?,
-  deviceDisplayName: json['deviceDisplayName'] as String?,
-  registrationCreatedOn: json['registrationCreatedOn'] == null
-      ? null
-      : DateTime.parse(json['registrationCreatedOn'] as String),
-  platform: json['platform'] as String?,
-  hardware: json['hardware'] as String?,
-  deviceName: json['deviceName'] as String?,
-  deviceManufacturer: json['deviceManufacturer'] as String?,
-  deviceModel: json['deviceModel'] as String?,
-  operatingSystem: json['operatingSystem'] as String?,
-  sdk: json['sdk'] as String?,
-  release: json['release'] as String?,
-)..$type = json['__type'] as String?;
-
-Map<String, dynamic> _$SmartphoneDeviceRegistrationToJson(
-  SmartphoneDeviceRegistration instance,
-) => <String, dynamic>{
-  '__type': instance.$type,
-  'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
-  'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
-  'platform': instance.platform,
-  'hardware': instance.hardware,
-  'deviceName': instance.deviceName,
-  'deviceManufacturer': instance.deviceManufacturer,
-  'deviceModel': instance.deviceModel,
-  'operatingSystem': instance.operatingSystem,
-  'sdk': instance.sdk,
-  'release': instance.release,
-};
-
 PersonalComputer _$PersonalComputerFromJson(Map<String, dynamic> json) =>
     PersonalComputer(
         roleName:

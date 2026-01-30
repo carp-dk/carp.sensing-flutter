@@ -109,9 +109,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
     }
 
     // Listen to updates to the deployment and notify listeners.
-    deployment?.addListener(() {
-      deploymentUpdated();
-    });
+    deployment?.addListener(() => deploymentUpdated());
 
     createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
@@ -129,7 +127,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
     }
   }
 
-  /// The deployment is i an error state.
+  /// The deployment is in an error state.
   void deploymentError([String? message]) {
     if (message != null) print(message);
     createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentError));
