@@ -90,6 +90,13 @@ void main() {
       print(toJsonString(status));
     });
 
+    test('- get study deployment status list', () async {
+      final status = await CarpDeploymentService().getStudyDeploymentStatusList(
+        [testDeploymentId],
+      );
+      print(toJsonString(status));
+    });
+
     test("- register Smartphone", () async {
       final status = await CarpDeploymentService().registerDevice(
         testDeploymentId,
@@ -125,11 +132,34 @@ void main() {
       print(toJsonString(status));
     });
 
+    // You can only register the same primary device once - an IllegalArgumentException is thrown.
     test("- register smartphone device", () async {
       final status = await CarpDeploymentService().registerDevice(
         testDeploymentId,
         "Smartphone",
         SmartphoneRegistration(deviceDisplayName: 'Samsung A20'),
+      );
+      print(toJsonString(status));
+    });
+
+    // You can register the same connected device multiple times - no exception is thrown.
+    test("- register location service", () async {
+      final status = await CarpDeploymentService().registerDevice(
+        testDeploymentId,
+        "Location Service",
+        LocationService().createRegistration(
+          deviceId: 'location-service-001',
+          deviceDisplayName: 'Android Location Service',
+        ),
+      );
+      print(toJsonString(status));
+    });
+
+    // You can unregister the same device multiple times - no exception is thrown.
+    test("- unregister Location Service", () async {
+      final status = await CarpDeploymentService().unregisterDevice(
+        testDeploymentId,
+        "Location Service",
       );
       print(toJsonString(status));
     });

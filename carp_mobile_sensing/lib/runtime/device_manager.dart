@@ -9,7 +9,12 @@
 
 part of '../runtime.dart';
 
-/// A [DeviceManager] handles a hardware device or online service on runtime.
+/// A [DeviceManager] handles the runtime of any type of device or service used
+/// for data  collection.
+///
+/// Examples include a hardware device like a smartwatch or fitness band,
+/// an onboard service on the smartphone like a location service, or an
+/// online service, like a weather service.
 abstract class DeviceManager<
   TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
   TRegistration extends DeviceRegistration
@@ -309,11 +314,11 @@ abstract class HardwareDeviceManager<
   TRegistration extends DeviceRegistration
 >
     extends DeviceManager<TDeviceConfiguration, TRegistration> {
-  /// The runtime battery level of this hardware device.
+  /// The runtime battery level of this hardware device in percent (0-100).
   /// Returns null if unknown.
   int? get batteryLevel;
 
-  /// The stream of battery level events.
+  /// The stream of battery level events (0-100) from this hardware device.
   Stream<int> get batteryEvents => const Stream.empty();
 
   HardwareDeviceManager(
@@ -327,7 +332,7 @@ abstract class HardwareDeviceManager<
 class SmartphoneDeviceManager
     extends HardwareDeviceManager<Smartphone, SmartphoneRegistration> {
   int _batteryLevel = 0;
-  Battery battery = Battery();
+  final _battery = Battery();
   final Set<DataType> _supportedDataTypes = {};
 
   SmartphoneDeviceManager([Smartphone? configuration])
@@ -356,8 +361,8 @@ class SmartphoneDeviceManager
   @override
   void onInitialize(Smartphone configuration) {
     // listen to the battery
-    battery.onBatteryStateChanged.listen(
-      (state) async => _batteryLevel = await battery.batteryLevel,
+    _battery.onBatteryStateChanged.listen(
+      (state) async => _batteryLevel = await _battery.batteryLevel,
     );
 
     // find the supported data types
@@ -375,7 +380,7 @@ class SmartphoneDeviceManager
 
   @override
   Stream<int> get batteryEvents =>
-      battery.onBatteryStateChanged.map((_) => _batteryLevel);
+      _battery.onBatteryStateChanged.map((_) => _batteryLevel);
 
   @override
   bool canConnect() => true; // can always connect to the phone

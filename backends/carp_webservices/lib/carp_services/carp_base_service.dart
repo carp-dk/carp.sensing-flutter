@@ -281,18 +281,9 @@ abstract class CarpBaseService {
   /// Returns the JSON body if the response indicates success.
   /// Note that this can be both a JSON map or a JSON list.
   ///
-  /// Throws exceptions based on the status code, if not.
+  /// Throws exceptions based on the status code, if not a success response.
   dynamic _handleResponse(http.Response response) {
     final status = response.statusCode;
-
-    // // Check if this is a json list or an empty string
-    // // If so turn it into a valid json map
-    // final body = response.body.isEmpty
-    //     ? '{}'
-    //     : response.body.startsWith('[')
-    //     ? '{"items":${response.body}}'
-    //     : response.body;
-
     final body = response.body.isEmpty ? '{}' : response.body;
     final responseJson = json.decode(body);
     if (status >= HttpStatus.ok && status < 300) return responseJson;

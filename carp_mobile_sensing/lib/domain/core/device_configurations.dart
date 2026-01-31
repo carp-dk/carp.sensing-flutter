@@ -32,7 +32,7 @@ abstract class PrimaryDevice<TRegistration extends DeviceRegistration>
   String get jsonType => '${CamsDevice.CAMS_DEVICE_NAMESPACE}.$runtimeType';
 }
 
-/// Configuration of a CAMS-specific smartphone that can be part of mobile
+/// Configuration of a smartphone that can be part of CAMS mobile
 /// sensing study protocols.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
