@@ -29,6 +29,8 @@ import 'dart:io';
 import 'dart:math' hide log;
 import 'dart:developer' show log;
 
+import 'package:flutter/foundation.dart' show kDebugMode;
+
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';

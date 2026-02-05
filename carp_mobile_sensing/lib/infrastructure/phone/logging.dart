@@ -20,7 +20,8 @@ void warning(String message) =>
     : 0;
 
 /// Add a debug messages to the system log.
+/// Only logged if the Flutter app is in debug mode (kDebugMode).
 void debug(String message) =>
-    (Settings().debugLevel.index >= DebugLevel.debug.index)
+    (kDebugMode && Settings().debugLevel.index >= DebugLevel.debug.index)
     ? log('\x1B[35m[CAMS DEBUG]\x1B[0m $message')
     : 0;

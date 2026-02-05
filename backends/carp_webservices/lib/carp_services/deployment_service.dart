@@ -52,8 +52,10 @@ class CarpDeploymentService extends CarpBaseService
   ///  - a deployment with [id] already exists
   ///  - [protocol] is invalid
   ///  - [invitations] is empty
-  ///  - any of the assigned device roles in [invitations] is not part of the study [protocol]
-  ///  - not all necessary primary devices part of the study [protocol] have been assigned a participant
+  ///  - any of the assigned device roles in [invitations] is not part of the
+  ///    study [protocol]
+  ///  - not all necessary primary devices part of the study [protocol] have
+  ///    been assigned a participant
   ///
   /// Return The [StudyDeploymentStatus] of the newly created study deployment.
   @override
@@ -171,7 +173,8 @@ class CarpDeploymentService extends CarpBaseService
   /// - [primaryDeviceRoleName] is not present in the deployment
   /// - the device with [primaryDeviceRoleName] has not yet been registered
   ///
-  /// CAWS throws IllegalStateException when the deployment for the requested primary device is not yet available.
+  /// CAWS throws IllegalStateException when the deployment for the requested
+  /// primary device is not yet available.
   @override
   Future<SmartphoneDeployment> getDeviceDeploymentFor(
     String studyDeploymentId,
@@ -195,7 +198,8 @@ class CarpDeploymentService extends CarpBaseService
   /// Indicate to stakeholders in the study deployment with [studyDeploymentId]
   /// that the device with [primaryDeviceRoleName] was deployed successfully,
   /// using the device deployment with timestamp [deviceDeploymentLastUpdatedOn],
-  /// i.e., that the study deployment was loaded on the device and that the necessary runtime is available to run it.
+  /// i.e., that the study deployment was loaded on the device and that the necessary
+  /// runtime is available to run it.
   ///
   /// CAWS throws IllegalArgumentException when:
   /// - a deployment with [studyDeploymentId] does not exist
