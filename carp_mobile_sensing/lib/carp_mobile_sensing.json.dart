@@ -17,8 +17,9 @@ void _registerFromJsonFunctions() {
 
   // Device Configuration & Registration classes
   FromJsonFactory().registerAll([
-    // MobileSensingSmartphone(),
     Smartphone(),
+    BLEDevice(roleName: ''),
+    BLEHeartRateDevice(roleName: ''),
     OnlineService(roleName: ''),
     SmartphoneRegistration(),
   ]);

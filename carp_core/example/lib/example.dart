@@ -67,7 +67,7 @@ void carpCoreDeploymentExample() async {
 
   // This is called by `StudyService` when deploying a participant group.
   var invitation = ParticipantInvitation(
-    participantId: Uuid().v1,
+    participantId: const Uuid().v1,
     assignedRoles: AssignedTo.all(),
     identity: EmailAccountIdentity("test@test.com"),
     invitation: StudyInvitation(
@@ -76,7 +76,7 @@ void carpCoreDeploymentExample() async {
     ),
   );
 
-  String studyDeploymentId = Uuid().v1;
+  String studyDeploymentId = const Uuid().v1;
   await deploymentService?.createStudyDeployment(trackPatientStudy, [
     invitation,
   ], studyDeploymentId);

@@ -48,8 +48,8 @@ dependencies:
 # Overriding carp core libraries to use the local copy
 # Remove this before release of package
 dependency_overrides:
-#   carp_serializable:
-#     path: ../carp_serializable/
+  # carp_serializable:
+  #   path: ../carp_serializable/
   carp_core:
     path: ../carp_core/
 

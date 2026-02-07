@@ -172,7 +172,7 @@ class SmartphoneStudyController {
     );
 
     // Initialize all devices from the deployment, incl. this smartphone.
-    _initializeDevices();
+    _configureAllDevices();
 
     // Initialize the executor, which recursively initializes all executors and probes.
     // But before doing this, save any existing sampling status which might have
@@ -187,7 +187,8 @@ class SmartphoneStudyController {
     // start heartbeat monitoring
     if (SmartPhoneClientManager().heartbeat) _startHeartbeatMonitoring();
 
-    // debug print all measurements - TODO: remove this later
+    // TODO: remove this later
+    // debug print all measurements
     measurements.listen(
       (measurement) =>
           debugPrint('>> ${study.studyDeploymentId} - ${measurement.dataType}'),
@@ -214,17 +215,15 @@ class SmartphoneStudyController {
   }
 
   /// Tries to register the connected [device] with the deployment service.
-  /// The [device] must be available in this [SmartPhoneClientManager] device controller.
+  /// The [device] must be available in the device controller.
   Future<void> tryRegisterConnectedDevice(DeviceConfiguration device) async {
-    if (device is PrimaryDeviceConfiguration) {
-      warning(
-        '$runtimeType - Trying to register a primary device as a connected device. Skipping this.',
-      );
-      return;
-    }
+    final deviceType = device.type;
+    final deviceRoleName = device.roleName;
 
-    String deviceType = device.type;
-    String? deviceRoleName = device.roleName;
+    info(
+      "$runtimeType - Trying to register device with role name "
+      "'$deviceRoleName' for study deployment '${study.studyDeploymentId}'.",
+    );
 
     // Check if this phone has this type of device.
     if (_deviceController.hasDevice(deviceType)) {
@@ -232,12 +231,22 @@ class SmartphoneStudyController {
         deviceType,
       )!;
 
+      DeviceRegistration registration = deviceManager.createRegistration();
+
       try {
-        await _deploymentService.registerDevice(
+        final deploymentStatus = await _deploymentService.registerDevice(
           study.studyDeploymentId,
           deviceRoleName,
-          deviceManager.registration!,
+          registration,
         );
+
+        // Also update local deployment information about the connected device registrations,
+        // so that it is in sync with the deployment service.
+        if (device is! PrimaryDeviceConfiguration) {
+          deployment?.connectedDeviceRegistrations[deviceRoleName] =
+              registration;
+        }
+        study.deploymentStatusReceived(deploymentStatus);
       } catch (error) {
         warning(
           "$runtimeType - Failed to register device with role name "
@@ -266,6 +275,53 @@ class SmartphoneStudyController {
       remainingDevicesToRegister.forEach((device) async {
         await tryRegisterConnectedDevice(device);
       });
+
+  /// Tries to unregister the disconnected [device] with the deployment service.
+  Future<void> tryUnregisterDisconnectedDevice(
+    DeviceConfiguration device,
+  ) async {
+    final deviceRoleName = device.roleName;
+
+    info(
+      "$runtimeType - Trying to unregister device with role name "
+      "'$deviceRoleName' for study deployment '${study.studyDeploymentId}'.",
+    );
+
+    try {
+      final deploymentStatus = await _deploymentService.unregisterDevice(
+        study.studyDeploymentId,
+        deviceRoleName,
+      );
+
+      // Also update local deployment information about the connected device registrations,
+      // so that it is in sync with the deployment service.
+      if (device is! PrimaryDeviceConfiguration) {
+        deployment?.connectedDeviceRegistrations.remove(deviceRoleName);
+      }
+      study.deploymentStatusReceived(deploymentStatus);
+    } catch (error) {
+      warning(
+        "$runtimeType - Failed to unregister device with role name "
+        "'$deviceRoleName' for study deployment '${study.studyDeploymentId}' "
+        "at deployment service '$_deploymentService'.\n"
+        "Error: $error\n"
+        "Continuing without un-registration.",
+      );
+    }
+  }
+
+  /// Tries to re-register the [device] with the deployment service.
+  /// This entails trying to unregister the device and then trying to register
+  /// it again.
+  Future<void> tryReregisterDevice(DeviceConfiguration device) async {
+    await tryUnregisterDisconnectedDevice(device);
+    // Wait for a few seconds before trying to register the device again,
+    // to give the deployment service some time to process the un-registration.
+    Future.delayed(
+      Duration(seconds: 5),
+      () async => await tryRegisterConnectedDevice(device),
+    );
+  }
 
   /// Asking for permissions for all the measures included in this
   /// [study].
@@ -330,26 +386,66 @@ class SmartphoneStudyController {
     }
   }
 
-  /// Initialize all devices in this [deployment].
-  void _initializeDevices() {
+  /// Configure all devices in this [deployment].
+  void _configureAllDevices() {
     assert(deployment != null, 'Deployment is null.');
 
     for (var configuration in deployment!.devices) {
-      _initializeDevice(configuration);
+      _configureDevice(configuration);
     }
   }
 
-  /// Initialize the device specified in the [configuration].
-  void _initializeDevice(DeviceConfiguration configuration) {
-    if (_deviceController.hasDevice(configuration.type)) {
-      _deviceController.devices[configuration.type]?.initialize(configuration);
-    } else {
+  /// Configure the device specified in the [configuration].
+  void _configureDevice(DeviceConfiguration configuration) {
+    // Fast out if this device is not available on this phone.
+    if (!_deviceController.hasDevice(configuration.type)) {
       warning(
         "$runtimeType - A device of type '${configuration.type}' is not available on this device. "
         "This may be because this device is not available on this operating system. "
         "Or it may be because the sampling package containing this device has not been "
         "registered in the SamplingPackageRegistry.",
       );
+      return;
+    }
+
+    var manager = _deviceController.devices[configuration.type];
+
+    // Listen to status events for this device and try to register/unregister
+    // the device with the deployment service when the device is connected/disconnected.
+    manager?.statusEvents.listen((status) {
+      debug(
+        '$runtimeType - Device ${configuration.roleName} (${configuration.type}) status: $status',
+      );
+      switch (status) {
+        case DeviceStatus.connected:
+          tryReregisterDevice(configuration);
+          break;
+        case DeviceStatus.disconnected:
+          // TODO - I am not sure if we want to unregister a device when it is disconnected,
+          // since it might just be temporarily disconnected.
+          // We want to keep the device registration information to be used for
+          // re-connecting the device on app restart or when the device is re-connected.
+          // So maybe we should not unregister the device when it is disconnected.
+          // But - when do we then need to unregister the device?
+          tryUnregisterDisconnectedDevice(configuration);
+          break;
+        default:
+      }
+    });
+
+    // Now configure the device. If the device is already configured, then we skip
+    // this step, since it is not needed to re-configure an already configured device.
+    if (manager?.isConfigured ?? false) {
+      warning(
+        '$runtimeType - Device of type ${configuration.type} is already configured. '
+        'Skipping this configuration, but still registering the device for this study, if connected.',
+      );
+
+      if (manager?.isConnected ?? false) {
+        tryReregisterDevice(configuration);
+      }
+    } else {
+      manager?.configure(configuration);
     }
   }
 

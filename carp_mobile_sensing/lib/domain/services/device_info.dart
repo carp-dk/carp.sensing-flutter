@@ -92,8 +92,9 @@ class DeviceInfo {
   }
 
   @override
-  String toString() =>
-      '$deviceID - $deviceModel ${deviceManufacturer?.toUpperCase()} [SDK $sdk]';
+  String toString() => ((Platform.isAndroid)
+      ? '$platform (${deviceManufacturer?.toUpperCase()}) - $deviceModel [SDK: $sdk]'
+      : '$platform - $hardware [SDK: $sdk]');
 
   Map<String, dynamic> _parseAndroidDeviceInfo(AndroidDeviceInfo info) {
     platform = 'Android';

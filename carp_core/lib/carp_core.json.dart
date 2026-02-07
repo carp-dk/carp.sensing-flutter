@@ -105,6 +105,7 @@ void _registerFromJsonFunctions() {
     Smartphone(),
     WebBrowser(),
     AltBeacon(),
+    // BLEHeartRateDevice(),
     ParticipantAttribute(inputDataType: ''),
     AssignedTo(),
     AssignedTo(roleNames: {'AA'}),

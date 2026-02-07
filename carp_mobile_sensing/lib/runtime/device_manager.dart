@@ -9,6 +9,28 @@
 
 part of '../runtime.dart';
 
+/// Runtime status for a [DeviceManager].
+enum DeviceStatus {
+  /// The state of the device is unknown.
+  unknown,
+
+  /// The device manager has been configured, but not yet connected.
+  configured,
+
+  /// The device is paired with this phone.
+  /// This status is mainly used in Bluetooth devices (via a [BLEDeviceManager]).
+  paired,
+
+  /// The phone is trying to connect to the device.
+  connecting,
+
+  /// The device is connected to the phone and ready to be used.
+  connected,
+
+  /// The device is disconnected from the phone.
+  disconnected,
+}
+
 /// A [DeviceManager] handles the runtime of any type of device or service used
 /// for data  collection.
 ///
@@ -33,7 +55,7 @@ abstract class DeviceManager<
   /// Create a new [DeviceManager] specifying its [deviceType].
   ///
   /// Its [configuration] can be specified on creation here, or specified later
-  /// in the [initialize] method.
+  /// in the [configure] method.
   DeviceManager(
     String deviceType, [
     TDeviceConfiguration? configuration,
@@ -60,9 +82,15 @@ abstract class DeviceManager<
   /// The configuration for this device.
   TDeviceConfiguration? get configuration => _configuration;
 
-  /// The registration used for this device when registering it in the
-  /// deployment service.
-  TRegistration? get registration => configuration?.createRegistration();
+  /// Create a device registration which can be used to configure this device
+  /// for deployment.
+  ///
+  /// This method is used when a device is connected and a registration for this
+  /// device is needed in the deployment and hence in the deployment service.
+  /// The registration is typically created from the device information of the
+  /// real device, e.g., the ID, name, and BLE address of the smartphone or a
+  /// connected Bluetooth device.
+  TRegistration createRegistration();
 
   /// Is data sampling resumed when this device is (re)connected?
   bool get restartOnReconnect => _restartOnReconnect;
@@ -86,8 +114,8 @@ abstract class DeviceManager<
   /// The stream of status events for this device.
   Stream<DeviceStatus> get statusEvents => _eventController.stream;
 
-  /// Has this device manager been initialized?
-  bool get isInitialized => status.index >= DeviceStatus.initialized.index;
+  /// Has this device manager been configured?
+  bool get isConfigured => status.index >= DeviceStatus.configured.index;
 
   /// Is this device manager connecting or connected to the real device?
   bool get isConnecting =>
@@ -96,14 +124,14 @@ abstract class DeviceManager<
   /// Is this device manager connected to the real device?
   bool get isConnected => status == DeviceStatus.connected;
 
-  /// Initialize the device manager by specifying its [configuration].
+  /// Configure this device manager by specifying its [configuration].
   @nonVirtual
-  void initialize(TDeviceConfiguration configuration) {
+  void configure(TDeviceConfiguration configuration) {
     info(
-      '$runtimeType - Initializing, type: $typeName, configuration: $configuration',
+      '$runtimeType - Configuring, type: $typeName, configuration: $configuration',
     );
     _configuration = configuration;
-    onInitialize(configuration);
+    onConfigure(configuration);
 
     // Listen to status events and when this device is (re)connected, restart sampling.
     if (restartOnReconnect) {
@@ -111,19 +139,19 @@ abstract class DeviceManager<
           .where((status) => status == DeviceStatus.connected)
           .listen((_) => restart());
     }
-    status = DeviceStatus.initialized;
+    status = DeviceStatus.configured;
   }
 
-  /// Callback on [initialize].
+  /// Callback on [configure].
   ///
   /// Is to be overridden in sub-classes. Note, however, that it must not be
   /// doing a lot of work on startup.
-  void onInitialize(TDeviceConfiguration configuration);
+  void onConfigure(TDeviceConfiguration configuration);
 
   /// Start heartbeat monitoring for this device for the deployment controlled
   /// by [controller].
   void startHeartbeatMonitoring(SmartphoneStudyController controller) {
-    if (!isInitialized) {
+    if (!isConfigured) {
       warning(
         '$runtimeType - Trying to start heartbeat monitoring before device is initialized. '
         'Please initialize device first.',
@@ -197,7 +225,7 @@ abstract class DeviceManager<
       '$runtimeType - Trying to connect to device of type: $typeName and id: $id',
     );
 
-    if (!isInitialized) {
+    if (!isConfigured) {
       warning('$runtimeType has not been initialized - cannot connect to it.');
       return status;
     }
@@ -348,18 +376,23 @@ class SmartphoneDeviceManager
   String? get displayName => DeviceInfo().toString();
 
   @override
-  SmartphoneRegistration get registration =>
-      configuration!.createRegistration();
-
-  // SmartphoneDeviceRegistration(
-  //   deviceId: id,
-  //   deviceDisplayName: ((Platform.isAndroid)
-  //       ? '${DeviceInfo().platform} (${DeviceInfo().deviceManufacturer?.toUpperCase()}) - ${DeviceInfo().deviceModel} [SDK: ${DeviceInfo().sdk}]'
-  //       : '${DeviceInfo().platform} - ${DeviceInfo().hardware} [SDK: ${DeviceInfo().sdk}]'),
-  // );
+  SmartphoneRegistration createRegistration() => SmartphoneRegistration(
+    deviceId: id,
+    deviceDisplayName: displayName,
+    platform: DeviceInfo().platform,
+    batteryChargingState: HardwareDeviceRegistration.parseBatteryLevel(
+      batteryLevel,
+    ),
+    hardwareName: DeviceInfo().hardware,
+    deviceManufacturer: DeviceInfo().deviceManufacturer,
+    deviceModel: DeviceInfo().deviceModel,
+    operatingSystem: DeviceInfo().operatingSystemName,
+    sdk: DeviceInfo().sdk,
+    release: DeviceInfo().release,
+  );
 
   @override
-  void onInitialize(Smartphone configuration) {
+  void onConfigure(Smartphone configuration) {
     // listen to the battery
     _battery.onBatteryStateChanged.listen(
       (state) async => _batteryLevel = await _battery.batteryLevel,
@@ -395,19 +428,25 @@ class SmartphoneDeviceManager
   Future<bool> onDisconnect() async => true;
 }
 
-/// A device manager for a connectable Bluetooth device.
-abstract class BTLEDeviceManager<
+/// A device manager for a connectable Bluetooth Low Energy (BLE) device.
+abstract class BLEDeviceManager<
   TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
-  TRegistration extends MACAddressDeviceRegistration
+  // TODO - why can't we use:
+  // TDeviceConfiguration extends BLEDevice<BLEDeviceRegistration>,
+  TRegistration extends BLEDeviceRegistration
 >
     extends HardwareDeviceManager<TDeviceConfiguration, TRegistration> {
-  /// The Bluetooth address of this device in the form `00:04:79:00:0F:4D`.
-  /// Returns empty string if unknown.
-  String btleAddress = '';
+  /// The BLE address of this device.
+  ///
+  /// The format of the BLE address is platform-specific.
+  /// On Android, it is typically a MAC address of the form `00:04:79:00:0F:4D`.
+  /// On iOS, it may be a UUID string on the form `E2C56DB5-DFFB-48D2-B060-D0F5A71096E0`.
+  ///
+  /// Returns null string if unknown.
+  String? bleAddress;
 
-  /// The Bluetooth name of this device.
-  /// Returns empty string if unknown.
-  String btleName = '';
+  /// The BLE name of this device, if known.
+  String? bleName;
 
   @override
   @mustCallSuper
@@ -432,34 +471,12 @@ abstract class BTLEDeviceManager<
     }
   }
 
-  BTLEDeviceManager(
+  BLEDeviceManager(
     super.deviceType, [
     super.configuration,
     super.restartOnReconnect,
   ]);
 
   @override
-  void onInitialize(TDeviceConfiguration configuration) {}
-}
-
-/// Runtime status for a [DeviceManager].
-enum DeviceStatus {
-  /// The state of the device is unknown.
-  unknown,
-
-  /// The device manager has been initialized, but not yet connected.
-  initialized,
-
-  /// The device is paired with this phone.
-  /// This status is mainly used in Bluetooth devices (via a [BTLEDeviceManager]).
-  paired,
-
-  /// The phone is trying to connect to the device.
-  connecting,
-
-  /// The device is connected to the phone and ready to be used.
-  connected,
-
-  /// The device is disconnected from the phone.
-  disconnected,
+  void onConfigure(TDeviceConfiguration configuration) {}
 }

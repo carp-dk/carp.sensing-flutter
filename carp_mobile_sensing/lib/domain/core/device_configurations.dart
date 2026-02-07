@@ -6,6 +6,8 @@
 
 part of '../../domain.dart';
 
+// This file contains device configurations used in CAMS protocols.
+
 /// Root class for all CAMS device configurations.
 ///
 /// Note that we define a new CAMS-specific device namespace which is
@@ -50,7 +52,7 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
         ..addSamplingSchema(DeviceSamplingPackage().samplingSchemes)
         ..addSamplingSchema(SensorSamplingPackage().samplingSchemes);
 
-  /// Create a new Smartphone device.
+  /// Create a new [Smartphone] device.
   /// If [roleName] is not specified, then the [Smartphone.DEFAULT_ROLE_NAME] is used.
   Smartphone({super.roleName = Smartphone.DEFAULT_ROLE_NAME});
 
@@ -82,7 +84,7 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
       deviceId: id,
       deviceDisplayName: displayName,
       platform: platform,
-      hardware: hardware,
+      hardwareName: hardware,
       deviceManufacturer: deviceManufacturer,
       deviceModel: deviceModel,
       operatingSystem: DeviceInfo().operatingSystemName,
@@ -102,9 +104,96 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
   Map<String, dynamic> toJson() => _$SmartphoneToJson(this);
 }
 
+/// A Bluetooth Low Energy (BLE) device configuration.
+///
+/// Holds high-level scan configuration for BLE devices.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class BLEDevice<TRegistration extends BLEDeviceRegistration>
+    extends CamsDevice<BLEDeviceRegistration> {
+  /// Advertised service UUIDs to filter for.
+  /// String representation of UUIDs, for example: "0000180D-0000-1000-8000-00805f9b34fb"
+  List<String> serviceUuids = [];
+
+  /// Optional device name filter (substring match, case-insensitive).
+  /// Applied AFTER discovery, not at the BLE controller level.
+  String? namePrefix;
+
+  /// Minimum RSSI (dBm) to accept, for example: -80.
+  int? minRssi;
+
+  /// Whether to receive repeated scan results for the same device.
+  /// Useful for RSSI updates.
+  bool allowDuplicates = true;
+
+  /// Scan timeout.
+  Duration? timeout;
+
+  BLEDevice({
+    required super.roleName,
+    super.isOptional = true,
+    List<String>? serviceUuids,
+    this.namePrefix,
+    this.minRssi,
+    this.allowDuplicates = true,
+    this.timeout,
+  }) {
+    serviceUuids = serviceUuids ?? [];
+  }
+
+  @override
+  Function get fromJsonFunction => _$BLEDeviceFromJson;
+  factory BLEDevice.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<BLEDevice<TRegistration>>(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$BLEDeviceToJson(this);
+}
+
+/// A Bluetooth Low Energy (BLE) device which implements a GATT Heart
+/// Rate service (https://www.bluetooth.com/specifications/gatt/services/).
+///
+/// If no service UUIDs are specified, then the standard Heart Rate service UUID
+/// is used.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class BLEHeartRateDevice extends BLEDevice<BLEDeviceRegistration> {
+  BLEHeartRateDevice({
+    required super.roleName,
+    super.isOptional = true,
+    List<String>? serviceUuids,
+    super.namePrefix,
+    super.minRssi,
+    super.allowDuplicates = true,
+    super.timeout,
+  }) {
+    this.serviceUuids =
+        serviceUuids ?? ["0000180D-0000-1000-8000-00805F9B34FB"];
+  }
+
+  @override
+  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
+      DataTypeSamplingSchemeMap.from([
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.HEART_RATE]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.INTERBEAT_INTERVAL]!,
+        ),
+        DataTypeSamplingScheme(
+          CarpDataTypes().types[CarpDataTypes.SENSOR_SKIN_CONTACT]!,
+        ),
+      ]);
+
+  @override
+  Function get fromJsonFunction => _$BLEHeartRateDeviceFromJson;
+  factory BLEHeartRateDevice.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<BLEHeartRateDevice>(json);
+  @override
+  Map<String, dynamic> toJson() => _$BLEHeartRateDeviceToJson(this);
+}
+
 /// An online service which works as a "software device" in a protocol.
 ///
-/// This is typically a connected device which the phone app connects to
+/// This is typically a 'connected device' which the phone app connects to
 /// via the internet, e.g., a weather service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class OnlineService<TRegistration extends DeviceRegistration>

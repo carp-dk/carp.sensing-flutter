@@ -26,7 +26,7 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
 
   /// All devices this deployment is using.
   ///
-  /// This set combines the [deviceConfiguration] with all [connectedDevices].
+  /// This set combines the primary [deviceConfiguration] with all [connectedDevices].
   Set<DeviceConfiguration> get devices =>
       Set.from(connectedDevices)..add(deviceConfiguration);
 

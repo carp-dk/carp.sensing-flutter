@@ -22,7 +22,7 @@
 library;
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart' hide Smartphone;
+import 'package:carp_core/carp_core.dart' hide Smartphone, BLEHeartRateDevice;
 
 import 'domain.dart';
 import 'runtime.dart';

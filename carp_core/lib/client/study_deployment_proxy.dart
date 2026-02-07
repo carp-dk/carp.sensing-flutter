@@ -43,19 +43,19 @@ class StudyDeploymentProxy {
   }
 
   /// Tries to deploy the [study] if it's ready to be deployed by registering
-  /// the client device using [deviceRegistration] and verifying the study is
+  /// the client device using [registration] and verifying the study is
   /// ready for deployment on this device.
   /// In case already deployed, nothing happens.
   ///
   /// Throws [IllegalArgumentException] if:
   /// - a deployment with study deployment ID matching this [study] does not exist
   /// - device role name of [study] is not present in the deployment
-  ///   or is already registered and a different [deviceRegistration] is specified
-  /// - [deviceRegistration] of this client is invalid for the expected device role name
+  ///   or is already registered and a different [registration] is specified
+  /// - [registration] of this client is invalid for the expected device role name
   ///   or has a device ID which is already in use by the registration of a different device.
   Future<void> tryDeployment(
     Study study,
-    DeviceRegistration deviceRegistration,
+    DeviceRegistration registration,
   ) async {
     final studyDeploymentId = study.studyDeploymentId;
     final deviceRoleName = study.deviceRoleName;
@@ -66,7 +66,7 @@ class StudyDeploymentProxy {
       deploymentStatus = await deploymentService.registerDevice(
         studyDeploymentId,
         deviceRoleName,
-        deviceRegistration,
+        registration,
       );
     } catch (error) {
       // Note that this device may already be registered which will throw an

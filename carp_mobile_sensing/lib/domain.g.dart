@@ -322,6 +322,84 @@ Map<String, dynamic> _$SmartphoneToJson(Smartphone instance) =>
       'isPrimaryDevice': instance.isPrimaryDevice,
     };
 
+BLEDevice<TRegistration> _$BLEDeviceFromJson<
+  TRegistration extends BLEDeviceRegistration
+>(Map<String, dynamic> json) =>
+    BLEDevice<TRegistration>(
+        roleName: json['roleName'] as String,
+        isOptional: json['isOptional'] as bool? ?? true,
+        serviceUuids: (json['serviceUuids'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList(),
+        namePrefix: json['namePrefix'] as String?,
+        minRssi: (json['minRssi'] as num?)?.toInt(),
+        allowDuplicates: json['allowDuplicates'] as bool? ?? true,
+        timeout: json['timeout'] == null
+            ? null
+            : Duration(microseconds: (json['timeout'] as num).toInt()),
+      )
+      ..$type = json['__type'] as String?
+      ..defaultSamplingConfiguration =
+          (json['defaultSamplingConfiguration'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              SamplingConfiguration.fromJson(e as Map<String, dynamic>),
+            ),
+          );
+
+Map<String, dynamic> _$BLEDeviceToJson<
+  TRegistration extends BLEDeviceRegistration
+>(BLEDevice<TRegistration> instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'roleName': instance.roleName,
+  'isOptional': ?instance.isOptional,
+  'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration?.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
+  'serviceUuids': instance.serviceUuids,
+  'namePrefix': ?instance.namePrefix,
+  'minRssi': ?instance.minRssi,
+  'allowDuplicates': instance.allowDuplicates,
+  'timeout': ?instance.timeout?.inMicroseconds,
+};
+
+BLEHeartRateDevice _$BLEHeartRateDeviceFromJson(Map<String, dynamic> json) =>
+    BLEHeartRateDevice(
+        roleName: json['roleName'] as String,
+        isOptional: json['isOptional'] as bool? ?? true,
+        serviceUuids: (json['serviceUuids'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList(),
+        namePrefix: json['namePrefix'] as String?,
+        minRssi: (json['minRssi'] as num?)?.toInt(),
+        allowDuplicates: json['allowDuplicates'] as bool? ?? true,
+        timeout: json['timeout'] == null
+            ? null
+            : Duration(microseconds: (json['timeout'] as num).toInt()),
+      )
+      ..$type = json['__type'] as String?
+      ..defaultSamplingConfiguration =
+          (json['defaultSamplingConfiguration'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              SamplingConfiguration.fromJson(e as Map<String, dynamic>),
+            ),
+          );
+
+Map<String, dynamic> _$BLEHeartRateDeviceToJson(BLEHeartRateDevice instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'roleName': instance.roleName,
+      'isOptional': ?instance.isOptional,
+      'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration
+          ?.map((k, e) => MapEntry(k, e.toJson())),
+      'serviceUuids': instance.serviceUuids,
+      'namePrefix': ?instance.namePrefix,
+      'minRssi': ?instance.minRssi,
+      'allowDuplicates': instance.allowDuplicates,
+      'timeout': ?instance.timeout?.inMicroseconds,
+    };
+
 OnlineService<TRegistration> _$OnlineServiceFromJson<
   TRegistration extends DeviceRegistration
 >(Map<String, dynamic> json) =>
@@ -349,6 +427,45 @@ Map<String, dynamic> _$OnlineServiceToJson<
   ),
 };
 
+HardwareDeviceRegistration _$HardwareDeviceRegistrationFromJson(
+  Map<String, dynamic> json,
+) => HardwareDeviceRegistration(
+  deviceId: json['deviceId'] as String?,
+  deviceDisplayName: json['deviceDisplayName'] as String?,
+  registrationCreatedOn: json['registrationCreatedOn'] == null
+      ? null
+      : DateTime.parse(json['registrationCreatedOn'] as String),
+  isConnected: json['isConnected'] as bool? ?? false,
+  batteryChargingState:
+      $enumDecodeNullable(
+        _$BatteryChargingStateEnumMap,
+        json['batteryChargingState'],
+      ) ??
+      BatteryChargingState.unknown,
+  hardwareName: json['hardwareName'] as String?,
+)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$HardwareDeviceRegistrationToJson(
+  HardwareDeviceRegistration instance,
+) => <String, dynamic>{
+  '__type': instance.$type,
+  'deviceId': instance.deviceId,
+  'deviceDisplayName': instance.deviceDisplayName,
+  'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
+  'isConnected': instance.isConnected,
+  'batteryChargingState':
+      _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
+  'hardwareName': instance.hardwareName,
+};
+
+const _$BatteryChargingStateEnumMap = {
+  BatteryChargingState.unknown: 'unknown',
+  BatteryChargingState.full: 'full',
+  BatteryChargingState.normal: 'normal',
+  BatteryChargingState.low: 'low',
+  BatteryChargingState.critical: 'critical',
+};
+
 SmartphoneRegistration _$SmartphoneRegistrationFromJson(
   Map<String, dynamic> json,
 ) => SmartphoneRegistration(
@@ -357,8 +474,15 @@ SmartphoneRegistration _$SmartphoneRegistrationFromJson(
   registrationCreatedOn: json['registrationCreatedOn'] == null
       ? null
       : DateTime.parse(json['registrationCreatedOn'] as String),
+  isConnected: json['isConnected'] as bool? ?? false,
+  batteryChargingState:
+      $enumDecodeNullable(
+        _$BatteryChargingStateEnumMap,
+        json['batteryChargingState'],
+      ) ??
+      BatteryChargingState.unknown,
+  hardwareName: json['hardwareName'] as String?,
   platform: json['platform'] as String?,
-  hardware: json['hardware'] as String?,
   deviceName: json['deviceName'] as String?,
   deviceManufacturer: json['deviceManufacturer'] as String?,
   deviceModel: json['deviceModel'] as String?,
@@ -374,14 +498,54 @@ Map<String, dynamic> _$SmartphoneRegistrationToJson(
   'deviceId': instance.deviceId,
   'deviceDisplayName': instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
+  'isConnected': instance.isConnected,
+  'batteryChargingState':
+      _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
+  'hardwareName': instance.hardwareName,
   'platform': instance.platform,
-  'hardware': instance.hardware,
   'deviceName': instance.deviceName,
   'deviceManufacturer': instance.deviceManufacturer,
   'deviceModel': instance.deviceModel,
   'operatingSystem': instance.operatingSystem,
   'sdk': instance.sdk,
   'release': instance.release,
+};
+
+BLEDeviceRegistration _$BLEDeviceRegistrationFromJson(
+  Map<String, dynamic> json,
+) =>
+    BLEDeviceRegistration(
+        deviceDisplayName: json['deviceDisplayName'] as String?,
+        registrationCreatedOn: json['registrationCreatedOn'] == null
+            ? null
+            : DateTime.parse(json['registrationCreatedOn'] as String),
+        isConnected: json['isConnected'] as bool? ?? false,
+        batteryChargingState:
+            $enumDecodeNullable(
+              _$BatteryChargingStateEnumMap,
+              json['batteryChargingState'],
+            ) ??
+            BatteryChargingState.unknown,
+        hardwareName: json['hardwareName'] as String?,
+        bleAddress: json['bleAddress'] as String,
+        bleName: json['bleName'] as String?,
+      )
+      ..$type = json['__type'] as String?
+      ..deviceId = json['deviceId'] as String;
+
+Map<String, dynamic> _$BLEDeviceRegistrationToJson(
+  BLEDeviceRegistration instance,
+) => <String, dynamic>{
+  '__type': instance.$type,
+  'deviceId': instance.deviceId,
+  'deviceDisplayName': instance.deviceDisplayName,
+  'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
+  'isConnected': instance.isConnected,
+  'batteryChargingState':
+      _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
+  'hardwareName': instance.hardwareName,
+  'bleAddress': instance.bleAddress,
+  'bleName': instance.bleName,
 };
 
 SmartphoneDeployment _$SmartphoneDeploymentFromJson(

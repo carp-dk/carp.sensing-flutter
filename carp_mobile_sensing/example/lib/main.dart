@@ -170,6 +170,7 @@ class StudyPageState extends State<StudyPage> {
     var controller = client.getStudyController(study);
 
     // If the study has not been started (and deployed) yet, do this first
+    // isDeployed
     if (study.status.index <= StudyStatus.Deployed.index) {
       controller?.start();
     } else {

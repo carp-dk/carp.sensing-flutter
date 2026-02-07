@@ -37,7 +37,9 @@ class BLEHeartRateDevice
     deviceId: deviceId,
     deviceDisplayName: deviceDisplayName,
     registrationCreatedOn: registrationCreatedOn,
-    macAddress: address ?? '??????',
+    macAddress:
+        address ??
+        '00-1B-44-11-3A-B7', // Random MAC address for testing purposes.
   );
 
   @override

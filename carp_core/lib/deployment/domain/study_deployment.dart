@@ -19,15 +19,15 @@ class StudyDeployment {
   late StudyDeploymentStatus _status;
   late StudyProtocol _protocol;
 
-  // the list of all registered devices, mapped to their role name
+  /// The list of all registered devices, mapped to their role name
   final Map<String, DeviceRegistration> _registeredDevices = {};
 
-  // the list of registered devices' configurations, mapped to their role names
+  /// The list of registered devices' configurations, mapped to their role names
   final Map<String, DeviceConfiguration> _registeredDeviceConfigurations = {};
   final Map<DeviceConfiguration, List<DeviceRegistration>>
   _deviceRegistrationHistory = {};
 
-  // the list of deployed devices, organized by role name
+  /// The list of deployed devices, organized by role name
   final Set<String> _deployedDevices = {};
   final Set<DeviceConfiguration> _invalidatedDeployedDevices = {};
   DateTime? _startTime;
@@ -135,7 +135,9 @@ class StudyDeployment {
     DeviceConfiguration device,
     DeviceRegistration registration,
   ) {
-    _status.status = StudyDeploymentStatusTypes.DeployingDevices;
+    // Removing this - device re-registration should be allowed after deployment,
+    // e.g., to update the device registration.
+    // _status.status = StudyDeploymentStatusTypes.DeployingDevices;
 
     // Add device to currently registered devices and also store it in registration history.
     _registeredDeviceConfigurations[device.roleName] = device;
@@ -172,7 +174,7 @@ class StudyDeployment {
 
     // TODO - Verify whether the specified device is ready to be deployed.
 
-    DeviceRegistration configuration = _registeredDevices[device.roleName]!;
+    DeviceRegistration registration = _registeredDevices[device.roleName]!;
 
     // mark all registered devices as deployed
     _deployedDevices.addAll(_registeredDevices.keys);
@@ -209,7 +211,7 @@ class StudyDeployment {
 
     return PrimaryDeviceDeployment(
       deviceConfiguration: device,
-      registration: configuration,
+      registration: registration,
       connectedDevices: connectedDevices,
       connectedDeviceRegistrations: connectedDeviceConfigurations,
       tasks: tasks,

@@ -107,7 +107,7 @@ class SmartPhoneClientManager
   ///
   /// If the [deploymentService] is not specified, the local
   /// [SmartphoneDeploymentService] will be used.
-  /// If the [deviceController] is not specified, the default [DeviceController]
+  /// If the [dataCollectorFactory] is not specified, the default [DeviceController]
   /// is used.
   /// The [registration] is a unique device registration for this client device.
   /// If not specified, a registration is created from the [Smartphone] factory
@@ -153,9 +153,19 @@ class SmartPhoneClientManager
     DataManagerRegistry().register(FileDataManagerFactory());
     DataManagerRegistry().register(SQLiteDataManagerFactory());
 
-    // Initialize default services, if not specified
+    // Initialize default registration and services and configure this client manager.
+    registration ??= Smartphone().createRegistration();
     deploymentService ??= SmartphoneDeploymentService();
     dataCollectorFactory ??= DeviceController();
+    super.configure(
+      registration: registration,
+      deploymentService: deploymentService,
+      dataCollectorFactory: dataCollectorFactory,
+    );
+
+    // Register all primary and connected device and service managers available in this client.
+    deviceController.registerAllAvailableDevices();
+
     if (enableNotifications) {
       _notificationController =
           notificationController ?? FlutterLocalNotificationController();
@@ -166,18 +176,6 @@ class SmartPhoneClientManager
       enableNotifications: enableNotifications,
     );
 
-    // Create the device registration using the [Smartphone] registration builder.
-    registration ??= Smartphone().createRegistration();
-
-    super.configure(
-      registration: registration,
-      deploymentService: deploymentService,
-      dataCollectorFactory: dataCollectorFactory,
-    );
-
-    // Register all connected devices and services available in this client.
-    deviceController.registerAllAvailableDevices();
-
     var statusMsg =
         '===========================================================\n'
         '  CARP Mobile Sensing (CAMS) - $runtimeType\n'
@@ -186,7 +184,7 @@ class SmartPhoneClientManager
         '         Repository : $repository\n'
         ' Deployment Service : $deploymentService\n'
         '  Device Controller : $deviceController\n'
-        // '  Available Devices : ${deviceController.devicesToString()}\n'
+        '  Available Devices : ${deviceController.devicesToString()}\n'
         '        Persistence : ${Persistence().databaseName.split('/').last}\n'
         '===========================================================\n';
     debugPrint(statusMsg);

@@ -112,21 +112,5 @@ class DeviceController extends DeviceDataCollectorFactory {
       _devices.keys.map((key) => key.split('.').last).toString();
 
   @override
-  String toString() => '$runtimeType (${_devices.length} services registered)';
-}
-
-/// Runtime battery status of a device.
-class BatteryStatus {
-  final String deviceId;
-  final String deviceType;
-  final int batteryLevel;
-
-  BatteryStatus(this.deviceId, this.deviceType, this.batteryLevel);
-
-  @override
-  String toString() =>
-      '$runtimeType - '
-      'device id: $deviceId, '
-      'type: $deviceType, '
-      'battery level: $batteryLevel ';
+  String toString() => '$runtimeType (${_devices.length} devices registered)';
 }

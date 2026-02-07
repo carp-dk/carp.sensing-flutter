@@ -46,6 +46,10 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
   /// for deployment.
   ///
   /// Override this method to configure device-specific registration options, if any.
+  @Deprecated(
+    'Use createRegistration on a DeviceManager instead, '
+    'which allows for hardware-specific runtime registration options.',
+  )
   TRegistration createRegistration({
     String? deviceId,
     String? deviceDisplayName,
@@ -127,7 +131,8 @@ class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
 /// A general-purpose primary device for custom protocols.
 /// Only used when downloading custom protocols from the CARP web service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class CustomProtocolDevice extends PrimaryDeviceConfiguration {
+class CustomProtocolDevice
+    extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
   /// The default role name for a custom protocol device.
   static const String DEFAULT_ROLE_NAME = 'Custom device';
 
