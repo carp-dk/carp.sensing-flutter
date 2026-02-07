@@ -47,10 +47,6 @@ class HealthServiceManager
   @override
   String? get displayName => 'Health Service';
 
-  @override
-  DefaultDeviceRegistration get registration =>
-      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
-
   final List<HealthDataType> _types = [];
 
   /// Which health data types should this service access.
@@ -69,7 +65,7 @@ class HealthServiceManager
 
   @override
   // ignore: avoid_renaming_method_parameters
-  void onInitialize(HealthService service) {
+  void onConfigure(HealthService service) {
     if (Platform.isAndroid) {
       var sdkLevel = int.parse(DeviceInfo().sdk ?? '-1');
       if (sdkLevel < 34) {
@@ -81,6 +77,12 @@ class HealthServiceManager
       }
     }
   }
+
+  @override
+  DefaultDeviceRegistration createRegistration() => DefaultDeviceRegistration(
+    deviceId: service?.deviceId,
+    deviceDisplayName: id,
+  );
 
   // There is an issue with Apple Health.
   // When asking for "hasPermissions" on the service, it always return "null".
