@@ -191,20 +191,20 @@ class BLEHeartRateDevice extends BLEDevice<BLEDeviceRegistration> {
   Map<String, dynamic> toJson() => _$BLEHeartRateDeviceToJson(this);
 }
 
-/// An online service which works as a "software device" in a protocol.
+/// An 'connected device' which is a service.
 ///
-/// This is typically a 'connected device' which the phone app connects to
-/// via the internet, e.g., a weather service.
+/// Examples include online services, like a weather service, which the phone
+/// app connects to via the internet, or a local service running on the phone,
+/// where data can be collected from the service directly, like a health service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class OnlineService<TRegistration extends DeviceRegistration>
+class ServiceConfiguration<TRegistration extends ServiceRegistration>
     extends CamsDevice<TRegistration> {
-  OnlineService({required super.roleName, super.isOptional = true});
+  ServiceConfiguration({required super.roleName, super.isOptional = true});
   @override
-  Function get fromJsonFunction => _$OnlineServiceFromJson;
-
-  factory OnlineService.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<OnlineService<TRegistration>>(json);
+  Function get fromJsonFunction => _$ServiceConfigurationFromJson;
+  factory ServiceConfiguration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<ServiceConfiguration<TRegistration>>(json);
 
   @override
-  Map<String, dynamic> toJson() => _$OnlineServiceToJson(this);
+  Map<String, dynamic> toJson() => _$ServiceConfigurationToJson(this);
 }

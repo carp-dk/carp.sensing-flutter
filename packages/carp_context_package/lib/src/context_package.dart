@@ -224,10 +224,9 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
 
 /// A [DeviceManager] for the location service.
 abstract class ContextServiceManager<
-  TDeviceConfiguration extends OnlineService<DefaultDeviceRegistration>
+  TDeviceConfiguration extends ServiceConfiguration<ServiceRegistration>
 >
-    extends
-        OnlineServiceManager<TDeviceConfiguration, DefaultDeviceRegistration> {
+    extends ServiceManager<TDeviceConfiguration, ServiceRegistration> {
   ContextServiceManager(
     super.type,
     super.configuration, [
@@ -235,8 +234,10 @@ abstract class ContextServiceManager<
   ]);
 
   @override
-  DefaultDeviceRegistration get registration =>
-      DefaultDeviceRegistration(deviceId: id, deviceDisplayName: displayName);
+  ServiceRegistration createRegistration() {
+    // TODO: implement createRegistration
+    throw UnimplementedError();
+  }
 
   @override
   bool canConnect() => true; // most online services can connect

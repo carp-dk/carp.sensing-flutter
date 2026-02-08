@@ -9,7 +9,7 @@ part of 'health_package.dart';
 ///
 /// On Android, this health package always uses Google [Health Connect](https://developer.android.com/health-and-fitness/guides/health-connect).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class HealthService extends OnlineService<DefaultDeviceRegistration> {
+class HealthService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of the health service.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.HealthService';
@@ -30,7 +30,7 @@ class HealthService extends OnlineService<DefaultDeviceRegistration> {
 
 /// A [DeviceManager] for the [HealthService].
 class HealthServiceManager
-    extends OnlineServiceManager<HealthService, DefaultDeviceRegistration> {
+    extends ServiceManager<HealthService, ServiceRegistration> {
   Health? _service;
 
   /// A handle to the [Health] plugin.
@@ -79,9 +79,10 @@ class HealthServiceManager
   }
 
   @override
-  DefaultDeviceRegistration createRegistration() => DefaultDeviceRegistration(
+  ServiceRegistration createRegistration() => ServiceRegistration(
     deviceId: service?.deviceId,
     deviceDisplayName: id,
+    isConnected: isConnected,
   );
 
   // There is an issue with Apple Health.

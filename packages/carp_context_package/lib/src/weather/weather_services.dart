@@ -9,7 +9,7 @@ part of '../../carp_context_package.dart';
 
 /// An [OnlineService] for the [Open Weather](https://openweathermap.org/) service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class WeatherService extends OnlineService<DefaultDeviceRegistration> {
+class WeatherService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a air quality service.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.WeatherService';
@@ -62,7 +62,7 @@ class WeatherServiceManager extends ContextServiceManager<WeatherService> {
 
   @override
   // ignore: avoid_renaming_method_parameters
-  void onInitialize(WeatherService service) {}
+  void onConfigure(WeatherService service) {}
 
   @override
   bool canConnect() => configuration?.apiKey != null;

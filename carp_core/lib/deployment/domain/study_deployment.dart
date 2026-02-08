@@ -135,9 +135,10 @@ class StudyDeployment {
     DeviceConfiguration device,
     DeviceRegistration registration,
   ) {
-    // Removing this - device re-registration should be allowed after deployment,
-    // e.g., to update the device registration.
-    // _status.status = StudyDeploymentStatusTypes.DeployingDevices;
+    // Mark this deployment as deploying if not already done.
+    if (_status.status == StudyDeploymentStatusTypes.Invited) {
+      _status.status = StudyDeploymentStatusTypes.DeployingDevices;
+    }
 
     // Add device to currently registered devices and also store it in registration history.
     _registeredDeviceConfigurations[device.roleName] = device;

@@ -76,41 +76,41 @@ class HealthData extends Data {
   /// Note that the uppercase version is used, e.g. `COUNT` in the case of step counts.
   String unit;
 
+  /// The type of health data -- see [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType.html).
+  /// Note that the uppercase version is used, e.g. `STEPS`.
+  String healthDataType;
+
   /// Start date-time for this health data.
   late DateTime dateFrom;
 
   /// End date-time for this health data.
   late DateTime dateTo;
 
-  /// The type of health data -- see [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType.html).
-  /// Note that the uppercase version is used, e.g. `STEPS`.
-  String healthDataType;
-
   /// The platform from which this health data point came from
   HealthPlatform platform;
 
   /// The device id of the phone.
-  String deviceId;
+  String? deviceId;
 
   /// The id of the source from which the data point was fetched.
-  String sourceId;
+  String? sourceId;
 
   /// The name of the source from which the data point was fetched.
-  String sourceName;
+  String? sourceName;
 
   /// Create a [HealthData] object.
-  HealthData(
-    this.uuid,
-    this.value,
-    this.unit,
-    this.healthDataType,
-    DateTime dateFrom,
-    DateTime dateTo,
-    this.platform,
+  HealthData({
+    required this.uuid,
+    required this.value,
+    required this.unit,
+    required this.healthDataType,
+    required DateTime dateFrom,
+    required DateTime dateTo,
+    required this.platform,
     this.deviceId,
     this.sourceId,
     this.sourceName,
-  ) : super() {
+  }) : super() {
     this.dateFrom = dateFrom.toUtc();
     this.dateTo = dateTo.toUtc();
   }
@@ -118,16 +118,16 @@ class HealthData extends Data {
   /// Create a [HealthData] from a [HealthDataPoint] health data object.
   factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) =>
       HealthData(
-        const Uuid().v1,
-        healthDataPoint.value,
-        healthDataPoint.unitString,
-        healthDataPoint.typeString,
-        healthDataPoint.dateFrom.toUtc(),
-        healthDataPoint.dateTo.toUtc(),
-        HealthPlatform.values[healthDataPoint.sourcePlatform.index],
-        healthDataPoint.sourceDeviceId,
-        healthDataPoint.sourceId,
-        healthDataPoint.sourceName,
+        uuid: const Uuid().v1,
+        value: healthDataPoint.value,
+        unit: healthDataPoint.unitString,
+        healthDataType: healthDataPoint.typeString,
+        dateFrom: healthDataPoint.dateFrom.toUtc(),
+        dateTo: healthDataPoint.dateTo.toUtc(),
+        platform: HealthPlatform.values[healthDataPoint.sourcePlatform.index],
+        deviceId: healthDataPoint.sourceDeviceId,
+        sourceId: healthDataPoint.sourceId,
+        sourceName: healthDataPoint.sourceName,
       );
 
   @override
@@ -141,9 +141,9 @@ class HealthData extends Data {
 
   /// The json type of this health data is `dk.cachet.carp.health.<healthdatatype>`,
   /// where `<healthdatatype>` is the lowercase version of the [healthDataType].
-  @override
   // String get jsonType =>
   //     '${HealthSamplingPackage.HEALTH}.${healthDataType.toLowerCase()}';
+  @override
   String get jsonType => HealthSamplingPackage.HEALTH;
 
   @override

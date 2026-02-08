@@ -20,8 +20,11 @@ void _registerFromJsonFunctions() {
     Smartphone(),
     BLEDevice(roleName: ''),
     BLEHeartRateDevice(roleName: ''),
-    OnlineService(roleName: ''),
+    ServiceConfiguration(roleName: ''),
+    HardwareDeviceRegistration(),
     SmartphoneRegistration(),
+    BLEDeviceRegistration(bleAddress: ''),
+    ServiceRegistration(),
   ]);
 
   // Task classes

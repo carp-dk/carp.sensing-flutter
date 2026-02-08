@@ -320,12 +320,12 @@ abstract class DeviceManager<
 }
 
 /// A [DeviceManager] for an online service, like a weather service.
-abstract class OnlineServiceManager<
-  TDeviceConfiguration extends OnlineService<TRegistration>,
-  TRegistration extends DeviceRegistration
+abstract class ServiceManager<
+  TDeviceConfiguration extends ServiceConfiguration<TRegistration>,
+  TRegistration extends ServiceRegistration
 >
     extends DeviceManager<TDeviceConfiguration, TRegistration> {
-  OnlineServiceManager(
+  ServiceManager(
     super.deviceType,
     super.configuration, [
     super.restartOnReconnect,

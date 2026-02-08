@@ -20,10 +20,11 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:health/health.dart';
 
 part 'health_domain.dart';
-part 'health_package.g.dart';
 part 'health_probe.dart';
 part 'health_services.dart';
 part 'health_user_task.dart';
+
+part 'health_package.g.dart';
 
 /// The health sampling package supports the following overall measure type:
 ///
@@ -111,16 +112,13 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
       HealthSamplingConfiguration(healthDataTypes: []),
       HealthAppTask(type: ''),
       HealthData(
-        '',
-        NumericHealthValue(numericValue: 6),
-        '',
-        '',
-        DateTime.now(),
-        DateTime.now(),
-        HealthPlatform.APPLE_HEALTH,
-        '',
-        '',
-        '',
+        uuid: '',
+        value: NumericHealthValue(numericValue: 6),
+        unit: '',
+        healthDataType: '',
+        dateFrom: DateTime.now(),
+        dateTo: DateTime.now(),
+        platform: HealthPlatform.APPLE_HEALTH,
       ),
     ]);
     AppTaskController().registerUserTaskFactory(HealthUserTaskFactory());

@@ -2,7 +2,7 @@ part of '../../carp_context_package.dart';
 
 /// An [OnlineService] for the location manager.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class LocationService extends OnlineService<DefaultDeviceRegistration> {
+class LocationService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a location service.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.LocationService';
@@ -89,7 +89,7 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
 
   @override
   // ignore: avoid_renaming_method_parameters
-  void onInitialize(LocationService service) => manager.configure(service);
+  void onConfigure(LocationService service) => manager.configure(service);
 
   @override
   Future<DeviceStatus> onConnect() async => manager.enabled

@@ -1,14 +1,14 @@
 {
-  "id": "ff0811d6-65f1-4be4-83ba-58c6e9f70fc1",
-  "createdOn": "2026-01-18T14:15:19.715981Z",
+  "id": "f376d902-7739-4958-81bf-4b82bcd2fb0d",
+  "createdOn": "2026-02-07T15:07:29.397331Z",
   "version": 0,
   "ownerId": "owner@dtu.dk",
   "name": "Context Sensing Example",
   "participantRoles": [],
   "primaryDevices": [
     {
-      "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-      "roleName": "Primary Phone",
+      "__type": "dk.carp.cams.devices.Smartphone",
+      "roleName": "Smartphone",
       "isOptional": false,
       "defaultSamplingConfiguration": {},
       "isPrimaryDevice": true
@@ -16,7 +16,7 @@
   ],
   "connectedDevices": [
     {
-      "__type": "dk.cachet.carp.common.application.devices.LocationService",
+      "__type": "dk.carp.cams.devices.LocationService",
       "roleName": "Location Service",
       "isOptional": true,
       "defaultSamplingConfiguration": {},
@@ -26,14 +26,14 @@
       "notificationOnTapBringToFront": false
     },
     {
-      "__type": "dk.cachet.carp.common.application.devices.WeatherService",
+      "__type": "dk.carp.cams.devices.WeatherService",
       "roleName": "Weather Service",
       "isOptional": true,
       "defaultSamplingConfiguration": {},
       "apiKey": "OW_API_key_goes_here"
     },
     {
-      "__type": "dk.cachet.carp.common.application.devices.AirQualityService",
+      "__type": "dk.carp.cams.devices.AirQualityService",
       "roleName": "Air Quality Service",
       "isOptional": true,
       "defaultSamplingConfiguration": {},
@@ -43,15 +43,15 @@
   "connections": [
     {
       "roleName": "Location Service",
-      "connectedToRoleName": "Primary Phone"
+      "connectedToRoleName": "Smartphone"
     },
     {
       "roleName": "Weather Service",
-      "connectedToRoleName": "Primary Phone"
+      "connectedToRoleName": "Smartphone"
     },
     {
       "roleName": "Air Quality Service",
-      "connectedToRoleName": "Primary Phone"
+      "connectedToRoleName": "Smartphone"
     }
   ],
   "assignedDevices": {},
@@ -135,7 +135,7 @@
   "triggers": {
     "0": {
       "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-      "sourceDeviceRoleName": "Primary Phone"
+      "sourceDeviceRoleName": "Smartphone"
     },
     "1": {
       "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
@@ -166,7 +166,7 @@
     {
       "triggerId": 0,
       "taskName": "Task #8",
-      "destinationDeviceRoleName": "Primary Phone",
+      "destinationDeviceRoleName": "Smartphone",
       "control": "Start"
     },
     {

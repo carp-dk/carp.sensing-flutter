@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart' hide TimeOfDay;
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -46,7 +47,6 @@ void main() {
       );
 
       protocol.addTaskControl(
-        // collect every hour
         PeriodicTrigger(period: Duration(minutes: 60)),
         BackgroundTask()..addMeasure(
           Measure(type: HealthSamplingPackage.HEALTH)
@@ -65,7 +65,6 @@ void main() {
       );
 
       protocol.addTaskControl(
-        // collect every day at 23:00
         RecurrentScheduledTrigger(
           type: RecurrentType.daily,
           time: TimeOfDay(hour: 23, minute: 00),
@@ -75,6 +74,24 @@ void main() {
             ..overrideSamplingConfiguration = HealthSamplingConfiguration(
               healthDataTypes: [HealthDataType.WEIGHT],
             ),
+        ),
+        phone,
+      );
+
+      protocol.addTaskControl(
+        PeriodicTrigger(period: Duration(hours: 24)),
+        HealthAppTask(
+          name: 'Health App Task',
+          title: "Press here to collect your physical health data",
+          description:
+              "This will collect your weight, exercise time, steps, and sleep "
+              "time from the Health database on the phone.",
+          types: [
+            HealthDataType.WEIGHT,
+            HealthDataType.STEPS,
+            HealthDataType.BASAL_ENERGY_BURNED,
+            HealthDataType.SLEEP_SESSION,
+          ],
         ),
         phone,
       );
@@ -111,15 +128,21 @@ void main() {
       print(toJsonString(protocol));
     });
 
-    test(' HealthSamplingConfiguration -> JSON', () async {
+    test(' HealthSamplingConfiguration -> JSON -> Object', () async {
       HealthSamplingConfiguration configuration = HealthSamplingConfiguration(
+        past: Duration(minutes: 60),
         healthDataTypes: [
           HealthDataType.STEPS,
           HealthDataType.ACTIVE_ENERGY_BURNED,
         ],
       );
-      print(configuration.toJson());
-      print(_encode(configuration));
+      final dataJson = toJsonString(configuration);
+      print(toJsonString(configuration));
+      final dataFromJson = HealthSamplingConfiguration.fromJson(
+        json.decode(dataJson) as Map<String, dynamic>,
+      );
+      print(toJsonString(dataFromJson));
+      expect(toJsonString(dataFromJson), equals(dataJson));
     });
   });
 
@@ -146,97 +169,84 @@ void main() {
       healthData
         ..add(
           HealthData(
-            uuid,
-            NumericHealthValue(numericValue: value),
-            unit,
-            type,
-            from,
-            to,
-            platform,
-            deviceId,
-            sourceId,
-            sourceName,
+            uuid: uuid,
+            value: NumericHealthValue(numericValue: value),
+            unit: unit,
+            healthDataType: type,
+            dateFrom: from,
+            dateTo: to,
+            platform: platform,
+            deviceId: deviceId,
+            sourceId: sourceId,
+            sourceName: sourceName,
           ),
         )
         ..add(
           HealthData(
-            '4321',
-            NumericHealthValue(numericValue: 6),
-            dasesDataTypeToUnit[DasesHealthDataType.ALCOHOL]?.name ?? '',
-            DasesHealthDataType.ALCOHOL.name,
-            from,
-            to,
-            platform,
-            '1234',
-            '4321',
-            '4321',
+            uuid: '4321',
+            value: NumericHealthValue(numericValue: 6),
+            unit: dasesDataTypeToUnit[DasesHealthDataType.ALCOHOL]?.name ?? '',
+            healthDataType: DasesHealthDataType.ALCOHOL.name,
+            dateFrom: from,
+            dateTo: to,
+            platform: platform,
           ),
         )
         ..add(
           HealthData(
-            '4321',
-            NumericHealthValue(numericValue: 6),
-            dasesDataTypeToUnit[DasesHealthDataType.SLEEP]?.name ?? '',
-            DasesHealthDataType.SLEEP.name,
-            from,
-            to,
-            platform,
-            '1234',
-            '4321',
-            '4321',
+            uuid: '4321',
+            value: NumericHealthValue(numericValue: 6),
+            unit: dasesDataTypeToUnit[DasesHealthDataType.SLEEP]?.name ?? '',
+            healthDataType: DasesHealthDataType.SLEEP.name,
+            dateFrom: from,
+            dateTo: to,
+            platform: platform,
           ),
         )
         ..add(
           HealthData(
-            '4321',
-            NumericHealthValue(numericValue: 12),
-            dasesDataTypeToUnit[DasesHealthDataType.SMOKED_CIGARETTES]?.name ??
+            uuid: '4321',
+            value: NumericHealthValue(numericValue: 12),
+            unit:
+                dasesDataTypeToUnit[DasesHealthDataType.SMOKED_CIGARETTES]
+                    ?.name ??
                 '',
-            DasesHealthDataType.SMOKED_CIGARETTES.name,
-            from,
-            to,
-            platform,
-            '1234',
-            '4321',
-            '4321',
+            healthDataType: DasesHealthDataType.SMOKED_CIGARETTES.name,
+            dateFrom: from,
+            dateTo: to,
+            platform: platform,
           ),
         )
         ..add(
           HealthData(
-            '4321',
-            AudiogramHealthValue(
+            uuid: '4321',
+            value: AudiogramHealthValue(
               frequencies: [12, 32],
               leftEarSensitivities: [1, 2, 3, 4],
               rightEarSensitivities: [1, 4, 7],
             ),
-            HealthDataUnit.NO_UNIT.name,
-            HealthDataType.AUDIOGRAM.name,
-            from,
-            to,
-            platform,
-            '1234',
-            '4321',
-            '4321',
+            unit: HealthDataUnit.NO_UNIT.name,
+            healthDataType: HealthDataType.AUDIOGRAM.name,
+            dateFrom: from,
+            dateTo: to,
+            platform: platform,
           ),
         )
         ..add(
           HealthData(
-            '4321',
-            WorkoutHealthValue(
+            uuid: '4321',
+            value: WorkoutHealthValue(
               workoutActivityType: HealthWorkoutActivityType.MARTIAL_ARTS,
               totalEnergyBurned: 8,
               totalEnergyBurnedUnit: HealthDataUnit.KILOCALORIE,
               totalDistance: 1000,
               totalDistanceUnit: HealthDataUnit.METER,
             ),
-            HealthDataUnit.NO_UNIT.name,
-            HealthDataType.WORKOUT.name,
-            from,
-            to,
-            platform,
-            '1234',
-            '4321',
-            '4321',
+            unit: HealthDataUnit.NO_UNIT.name,
+            healthDataType: HealthDataType.WORKOUT.name,
+            dateFrom: from,
+            dateTo: to,
+            platform: platform,
           ),
         );
     });
@@ -261,6 +271,7 @@ void main() {
       for (var data in healthData) {
         final measurement = Measurement.fromData(data);
         final dataJson = toJsonString(measurement);
+        print(dataJson);
         final dataFromJson = Measurement.fromJson(
           json.decode(dataJson) as Map<String, dynamic>,
         );

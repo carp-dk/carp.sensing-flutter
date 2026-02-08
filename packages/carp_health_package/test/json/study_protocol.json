@@ -1,6 +1,6 @@
 {
-  "id": "415f4873-9ff3-4ed1-a493-bc07e796c5d9",
-  "createdOn": "2026-02-07T14:09:28.950847Z",
+  "id": "459eadeb-c643-4aa8-8c8f-8b90d95f3cb7",
+  "createdOn": "2026-02-07T15:01:47.484530Z",
   "version": 0,
   "ownerId": "alex@uni.dk",
   "name": "Context package test",
@@ -112,9 +112,6 @@
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
           "type": "dk.cachet.carp.health",
           "overrideSamplingConfiguration": {
-            "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
-            "past": 86400000000,
-            "future": 86400000000,
             "healthDataTypes": [
               "BLOOD_GLUCOSE",
               "BLOOD_PRESSURE_DIASTOLIC",
@@ -135,9 +132,6 @@
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
           "type": "dk.cachet.carp.health",
           "overrideSamplingConfiguration": {
-            "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
-            "past": 86400000000,
-            "future": 86400000000,
             "healthDataTypes": [
               "WEIGHT"
             ]

@@ -161,3 +161,21 @@ class BLEDeviceRegistration extends HardwareDeviceRegistration {
   @override
   Map<String, dynamic> toJson() => _$BLEDeviceRegistrationToJson(this);
 }
+
+/// A [DeviceRegistration] for a [ServiceConfiguration].
+@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+class ServiceRegistration extends CamsDeviceRegistration {
+  ServiceRegistration({
+    super.deviceId,
+    super.deviceDisplayName,
+    super.registrationCreatedOn,
+    super.isConnected,
+  });
+
+  @override
+  Function get fromJsonFunction => _$ServiceRegistrationFromJson;
+  factory ServiceRegistration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<ServiceRegistration>(json);
+  @override
+  Map<String, dynamic> toJson() => _$ServiceRegistrationToJson(this);
+}

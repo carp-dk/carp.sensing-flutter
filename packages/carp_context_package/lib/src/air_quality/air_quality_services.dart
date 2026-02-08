@@ -7,9 +7,9 @@
 
 part of '../../carp_context_package.dart';
 
-/// An [OnlineService] for the air quality service.
+/// A service configuration for the air quality service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class AirQualityService extends OnlineService<DefaultDeviceRegistration> {
+class AirQualityService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a air quality service.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.AirQualityService';
@@ -54,7 +54,7 @@ class AirQualityServiceManager
 
   @override
   // ignore: avoid_renaming_method_parameters
-  void onInitialize(AirQualityService service) {}
+  void onConfigure(AirQualityService service) {}
 
   @override
   Future<bool> onHasPermissions() async =>
