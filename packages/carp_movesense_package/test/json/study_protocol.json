@@ -1,13 +1,13 @@
 {
-    "id": "5093e5a3-d1eb-48e9-860f-be06183f3d37",
-    "createdOn": "2026-01-18T12:56:58.037433Z",
+    "id": "f1a07c5e-ce2e-4e6f-a20f-87a170fda4bb",
+    "createdOn": "2026-02-09T16:43:31.070063Z",
     "version": 0,
     "ownerId": "alex@uni.dk",
     "name": "Context package test",
     "participantRoles": [],
     "primaryDevices": [
         {
-            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+            "__type": "dk.carp.cams.devices.Smartphone",
             "roleName": "SM-A320FL",
             "isOptional": false,
             "defaultSamplingConfiguration": {},
@@ -16,14 +16,12 @@
     ],
     "connectedDevices": [
         {
-            "__type": "dk.cachet.carp.common.application.devices.MovesenseDevice",
+            "__type": "dk.carp.cams.devices.MovesenseDevice",
             "roleName": "Movesense ECG Device",
             "isOptional": true,
             "defaultSamplingConfiguration": {},
-            "address": "0C:8C:DC:3F:B2:CD",
-            "serial": "220330000122",
-            "name": "Movesense Medical",
-            "deviceType": "MD"
+            "serviceUuids": [],
+            "allowDuplicates": true
         }
     ],
     "connections": [
@@ -40,23 +38,27 @@
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.device_information"
+                    "type": "dk.cachet.carp.deviceinformation"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.free_memory"
+                    "type": "dk.cachet.carp.applicationinformation"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.battery_state"
+                    "type": "dk.cachet.carp.freememory"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.screen_event"
+                    "type": "dk.cachet.carp.batterystate"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.app_lifecycle_event"
+                    "type": "dk.cachet.carp.screenevent"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.applifecycleevent"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -80,15 +82,15 @@
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.acceleration_features"
+                    "type": "dk.cachet.carp.accelerationfeatures"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.step_event"
+                    "type": "dk.cachet.carp.stepevent"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.ambient_light"
+                    "type": "dk.cachet.carp.ambientlight"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -108,7 +110,7 @@
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.completed_app_task"
+                    "type": "dk.cachet.carp.completedapptask"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",

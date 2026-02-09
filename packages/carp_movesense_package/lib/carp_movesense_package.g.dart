@@ -218,15 +218,6 @@ MovesenseDevice _$MovesenseDeviceFromJson(Map<String, dynamic> json) =>
         roleName:
             json['roleName'] as String? ?? MovesenseDevice.DEFAULT_ROLE_NAME,
         isOptional: json['isOptional'] as bool? ?? true,
-        name: json['name'] as String?,
-        address: json['address'] as String?,
-        serial: json['serial'] as String?,
-        deviceType:
-            $enumDecodeNullable(
-              _$MovesenseDeviceTypeEnumMap,
-              json['deviceType'],
-            ) ??
-            MovesenseDeviceType.UNKNOWN,
       )
       ..$type = json['__type'] as String?
       ..defaultSamplingConfiguration =
@@ -235,7 +226,16 @@ MovesenseDevice _$MovesenseDeviceFromJson(Map<String, dynamic> json) =>
               k,
               SamplingConfiguration.fromJson(e as Map<String, dynamic>),
             ),
-          );
+          )
+      ..serviceUuids = (json['serviceUuids'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList()
+      ..namePrefix = json['namePrefix'] as String?
+      ..minRssi = (json['minRssi'] as num?)?.toInt()
+      ..allowDuplicates = json['allowDuplicates'] as bool
+      ..timeout = json['timeout'] == null
+          ? null
+          : Duration(microseconds: (json['timeout'] as num).toInt());
 
 Map<String, dynamic> _$MovesenseDeviceToJson(MovesenseDevice instance) =>
     <String, dynamic>{
@@ -243,11 +243,69 @@ Map<String, dynamic> _$MovesenseDeviceToJson(MovesenseDevice instance) =>
       'roleName': instance.roleName,
       'isOptional': ?instance.isOptional,
       'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration,
-      'address': ?instance.address,
-      'serial': ?instance.serial,
-      'name': ?instance.name,
-      'deviceType': _$MovesenseDeviceTypeEnumMap[instance.deviceType]!,
+      'serviceUuids': instance.serviceUuids,
+      'namePrefix': ?instance.namePrefix,
+      'minRssi': ?instance.minRssi,
+      'allowDuplicates': instance.allowDuplicates,
+      'timeout': ?instance.timeout?.inMicroseconds,
     };
+
+MovesenseDeviceRegistration _$MovesenseDeviceRegistrationFromJson(
+  Map<String, dynamic> json,
+) =>
+    MovesenseDeviceRegistration(
+        deviceDisplayName: json['deviceDisplayName'] as String?,
+        registrationCreatedOn: json['registrationCreatedOn'] == null
+            ? null
+            : DateTime.parse(json['registrationCreatedOn'] as String),
+        isConnected: json['isConnected'] as bool? ?? false,
+        batteryChargingState:
+            $enumDecodeNullable(
+              _$BatteryChargingStateEnumMap,
+              json['batteryChargingState'],
+            ) ??
+            BatteryChargingState.unknown,
+        hardwareName: json['hardwareName'] as String?,
+        bleAddress: json['bleAddress'] as String,
+        bleName: json['bleName'] as String?,
+        movesenseDeviceType:
+            $enumDecodeNullable(
+              _$MovesenseDeviceTypeEnumMap,
+              json['movesenseDeviceType'],
+            ) ??
+            MovesenseDeviceType.UNKNOWN,
+        deviceInfo: json['deviceInfo'] as Map<String, dynamic>?,
+      )
+      ..$type = json['__type'] as String?
+      ..deviceId = json['deviceId'] as String
+      ..serial = json['serial'] as String?;
+
+Map<String, dynamic> _$MovesenseDeviceRegistrationToJson(
+  MovesenseDeviceRegistration instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'deviceId': instance.deviceId,
+  'deviceDisplayName': ?instance.deviceDisplayName,
+  'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
+  'isConnected': instance.isConnected,
+  'batteryChargingState':
+      _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
+  'hardwareName': ?instance.hardwareName,
+  'bleAddress': instance.bleAddress,
+  'bleName': ?instance.bleName,
+  'serial': ?instance.serial,
+  'movesenseDeviceType':
+      _$MovesenseDeviceTypeEnumMap[instance.movesenseDeviceType]!,
+  'deviceInfo': ?instance.deviceInfo,
+};
+
+const _$BatteryChargingStateEnumMap = {
+  BatteryChargingState.unknown: 'unknown',
+  BatteryChargingState.full: 'full',
+  BatteryChargingState.normal: 'normal',
+  BatteryChargingState.low: 'low',
+  BatteryChargingState.critical: 'critical',
+};
 
 const _$MovesenseDeviceTypeEnumMap = {
   MovesenseDeviceType.UNKNOWN: 'UNKNOWN',

@@ -448,14 +448,14 @@ HardwareDeviceRegistration _$HardwareDeviceRegistrationFromJson(
 Map<String, dynamic> _$HardwareDeviceRegistrationToJson(
   HardwareDeviceRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
   'isConnected': instance.isConnected,
   'batteryChargingState':
       _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
-  'hardwareName': instance.hardwareName,
+  'hardwareName': ?instance.hardwareName,
 };
 
 const _$BatteryChargingStateEnumMap = {
@@ -497,22 +497,22 @@ SmartphoneRegistration _$SmartphoneRegistrationFromJson(
 Map<String, dynamic> _$SmartphoneRegistrationToJson(
   SmartphoneRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
   'isConnected': instance.isConnected,
   'batteryChargingState':
       _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
-  'hardwareName': instance.hardwareName,
-  'platform': instance.platform,
-  'hardware': instance.hardware,
-  'deviceName': instance.deviceName,
-  'deviceManufacturer': instance.deviceManufacturer,
-  'deviceModel': instance.deviceModel,
-  'operatingSystem': instance.operatingSystem,
-  'sdk': instance.sdk,
-  'release': instance.release,
+  'hardwareName': ?instance.hardwareName,
+  'platform': ?instance.platform,
+  'hardware': ?instance.hardware,
+  'deviceName': ?instance.deviceName,
+  'deviceManufacturer': ?instance.deviceManufacturer,
+  'deviceModel': ?instance.deviceModel,
+  'operatingSystem': ?instance.operatingSystem,
+  'sdk': ?instance.sdk,
+  'release': ?instance.release,
 };
 
 BLEDeviceRegistration _$BLEDeviceRegistrationFromJson(
@@ -540,16 +540,16 @@ BLEDeviceRegistration _$BLEDeviceRegistrationFromJson(
 Map<String, dynamic> _$BLEDeviceRegistrationToJson(
   BLEDeviceRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
   'isConnected': instance.isConnected,
   'batteryChargingState':
       _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
-  'hardwareName': instance.hardwareName,
+  'hardwareName': ?instance.hardwareName,
   'bleAddress': instance.bleAddress,
-  'bleName': instance.bleName,
+  'bleName': ?instance.bleName,
 };
 
 ServiceRegistration _$ServiceRegistrationFromJson(Map<String, dynamic> json) =>
@@ -565,9 +565,9 @@ ServiceRegistration _$ServiceRegistrationFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ServiceRegistrationToJson(
   ServiceRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
   'isConnected': instance.isConnected,
 };

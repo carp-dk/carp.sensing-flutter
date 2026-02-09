@@ -430,8 +430,6 @@ class SmartphoneDeviceManager
 
 /// A device manager for a connectable Bluetooth Low Energy (BLE) device.
 abstract class BLEDeviceManager<
-  // TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
-  // TODO - why can't we use:
   TDeviceConfiguration extends BLEDevice<TRegistration>,
   TRegistration extends BLEDeviceRegistration
 >

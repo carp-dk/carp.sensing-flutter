@@ -11,7 +11,7 @@ part of '../../../common.dart';
 ///
 /// Note that this is an abstract class and should not be used. If a simple
 /// device registration is needed, use a [DefaultDeviceRegistration].
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceRegistration extends Serializable {
   /// An ID for the device, used to disambiguate between devices of the same type,
   /// as provided by the device itself.
@@ -54,7 +54,7 @@ class DeviceRegistration extends Serializable {
 
 /// A concrete [DeviceRegistration] which solely implements the base properties
 /// and nothing else.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DefaultDeviceRegistration extends DeviceRegistration {
   /// Create a new [DefaultDeviceRegistration]
   ///  * [deviceId] - a unique id for this device.
@@ -84,7 +84,7 @@ class DefaultDeviceRegistration extends DeviceRegistration {
 /// use as a network address in communications within a network segment.
 ///
 /// This is equivalent to the EUI-48 identifier.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MACAddressDeviceRegistration extends DeviceRegistration {
   /// The MAC address, represented according to the recommended IEEE 802 standard notation.
   /// Six groups of two upper case hexadecimal digits, separate by hyphens (-).

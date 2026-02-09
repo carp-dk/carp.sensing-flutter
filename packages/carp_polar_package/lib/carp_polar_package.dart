@@ -174,6 +174,11 @@ class PolarSamplingPackage implements SamplingPackage {
     // register all data types
     FromJsonFactory().registerAll([
       PolarDevice(),
+      PolarDeviceRegistration(
+        identifier: '',
+        bleAddress: '',
+        polarDeviceType: PolarDeviceType.H10,
+      ),
       PolarAccelerometer(samples: []),
       PolarGyroscope(samples: []),
       PolarMagnetometer(samples: []),

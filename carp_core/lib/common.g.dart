@@ -359,9 +359,9 @@ DeviceRegistration _$DeviceRegistrationFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DeviceRegistrationToJson(DeviceRegistration instance) =>
     <String, dynamic>{
-      '__type': instance.$type,
+      '__type': ?instance.$type,
       'deviceId': instance.deviceId,
-      'deviceDisplayName': instance.deviceDisplayName,
+      'deviceDisplayName': ?instance.deviceDisplayName,
       'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
     };
 
@@ -378,9 +378,9 @@ DefaultDeviceRegistration _$DefaultDeviceRegistrationFromJson(
 Map<String, dynamic> _$DefaultDeviceRegistrationToJson(
   DefaultDeviceRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
 };
 
@@ -398,9 +398,9 @@ MACAddressDeviceRegistration _$MACAddressDeviceRegistrationFromJson(
 Map<String, dynamic> _$MACAddressDeviceRegistrationToJson(
   MACAddressDeviceRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
   'macAddress': instance.macAddress,
 };
@@ -475,16 +475,16 @@ PersonalComputerRegistration _$PersonalComputerRegistrationFromJson(
 Map<String, dynamic> _$PersonalComputerRegistrationToJson(
   PersonalComputerRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
-  'platform': instance.platform,
-  'computerName': instance.computerName,
-  'memorySize': instance.memorySize,
-  'deviceModel': instance.deviceModel,
-  'operatingSystem': instance.operatingSystem,
-  'version': instance.version,
+  'platform': ?instance.platform,
+  'computerName': ?instance.computerName,
+  'memorySize': ?instance.memorySize,
+  'deviceModel': ?instance.deviceModel,
+  'operatingSystem': ?instance.operatingSystem,
+  'version': ?instance.version,
 };
 
 WebBrowser _$WebBrowserFromJson(Map<String, dynamic> json) =>
@@ -531,16 +531,16 @@ WebBrowserRegistration _$WebBrowserRegistrationFromJson(
 Map<String, dynamic> _$WebBrowserRegistrationToJson(
   WebBrowserRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
-  'browserName': instance.browserName,
-  'deviceMemory': instance.deviceMemory,
-  'language': instance.language,
-  'vendor': instance.vendor,
-  'maxTouchPoints': instance.maxTouchPoints,
-  'hardwareConcurrency': instance.hardwareConcurrency,
+  'browserName': ?instance.browserName,
+  'deviceMemory': ?instance.deviceMemory,
+  'language': ?instance.language,
+  'vendor': ?instance.vendor,
+  'maxTouchPoints': ?instance.maxTouchPoints,
+  'hardwareConcurrency': ?instance.hardwareConcurrency,
 };
 
 AltBeacon _$AltBeaconFromJson(Map<String, dynamic> json) =>
@@ -582,15 +582,15 @@ AltBeaconDeviceRegistration _$AltBeaconDeviceRegistrationFromJson(
 Map<String, dynamic> _$AltBeaconDeviceRegistrationToJson(
   AltBeaconDeviceRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
-  'manufacturerId': instance.manufacturerId,
-  'organizationId': instance.organizationId,
-  'majorId': instance.majorId,
-  'minorId': instance.minorId,
-  'referenceRssi': instance.referenceRssi,
+  'manufacturerId': ?instance.manufacturerId,
+  'organizationId': ?instance.organizationId,
+  'majorId': ?instance.majorId,
+  'minorId': ?instance.minorId,
+  'referenceRssi': ?instance.referenceRssi,
 };
 
 BLEHeartRateDevice _$BLEHeartRateDeviceFromJson(Map<String, dynamic> json) =>

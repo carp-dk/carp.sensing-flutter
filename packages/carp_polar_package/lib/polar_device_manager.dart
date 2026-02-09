@@ -49,7 +49,7 @@ class PolarDevice extends BLEDevice<PolarDeviceRegistration> {
 /// This device registration defines the basic configuration of the Polar
 /// device, including the device type, the identifier, and the name
 /// of the device.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PolarDeviceRegistration extends BLEDeviceRegistration {
   /// Polar device id printed on the sensor/device or UUID.
   String identifier;
@@ -75,6 +75,13 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
          deviceDisplayName: deviceDisplayName ?? bleName,
          hardwareName: hardwareName ?? polarDeviceType.name,
        );
+
+  @override
+  Function get fromJsonFunction => _$PolarDeviceRegistrationFromJson;
+  factory PolarDeviceRegistration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson(json) as PolarDeviceRegistration;
+  @override
+  Map<String, dynamic> toJson() => _$PolarDeviceRegistrationToJson(this);
 }
 
 /// A Polar [DeviceManager].

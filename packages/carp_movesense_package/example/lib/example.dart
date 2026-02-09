@@ -1,6 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_movesense_package/carp_movesense_package.dart';
 
@@ -24,12 +24,7 @@ void main() async {
 
   // define which devices are used for data collection - both phone and eSense
   var phone = Smartphone();
-  var movesense = MovesenseDevice(
-    serial: '220330000122',
-    address: '0C:8C:DC:3F:B2:CD',
-    name: 'Movesense Medical',
-    deviceType: MovesenseDeviceType.MD,
-  );
+  var movesense = MovesenseDevice();
 
   protocol
     ..addPrimaryDevice(phone)
@@ -38,21 +33,25 @@ void main() async {
   // Add a background task that immediately starts collecting step counts,
   //ambient light, screen activity, and battery level from the phone.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask()
-        ..addMeasure(Measure(type: SensorSamplingPackage.STEP_COUNT))
-        ..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT))
-        ..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT))
-        ..addMeasure(Measure(type: DeviceSamplingPackage.BATTERY_STATE)),
-      phone);
+    ImmediateTrigger(),
+    BackgroundTask()
+      ..addMeasure(Measure(type: SensorSamplingPackage.STEP_EVENT))
+      ..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT))
+      ..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT))
+      ..addMeasure(Measure(type: DeviceSamplingPackage.BATTERY_STATE)),
+    phone,
+  );
 
   // Add a background task that immediately starts collecting HR and ECG data
   // from the Movesense device.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
         Measure(type: MovesenseSamplingPackage.HR),
         Measure(type: MovesenseSamplingPackage.ECG),
-      ]),
-      movesense);
+      ],
+    ),
+    movesense,
+  );
 }

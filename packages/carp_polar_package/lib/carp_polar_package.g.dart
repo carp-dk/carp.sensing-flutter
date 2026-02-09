@@ -328,19 +328,19 @@ PolarDeviceRegistration _$PolarDeviceRegistrationFromJson(
 Map<String, dynamic> _$PolarDeviceRegistrationToJson(
   PolarDeviceRegistration instance,
 ) => <String, dynamic>{
-  '__type': instance.$type,
+  '__type': ?instance.$type,
   'deviceId': instance.deviceId,
-  'deviceDisplayName': instance.deviceDisplayName,
+  'deviceDisplayName': ?instance.deviceDisplayName,
   'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
   'isConnected': instance.isConnected,
   'batteryChargingState':
       _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
-  'hardwareName': instance.hardwareName,
+  'hardwareName': ?instance.hardwareName,
   'bleAddress': instance.bleAddress,
-  'bleName': instance.bleName,
+  'bleName': ?instance.bleName,
   'identifier': instance.identifier,
   'polarDeviceType': _$PolarDeviceTypeEnumMap[instance.polarDeviceType]!,
-  'rssi': instance.rssi,
+  'rssi': ?instance.rssi,
 };
 
 const _$BatteryChargingStateEnumMap = {

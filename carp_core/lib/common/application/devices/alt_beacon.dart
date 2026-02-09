@@ -50,7 +50,7 @@ class AltBeacon extends DeviceConfiguration<AltBeaconDeviceRegistration> {
 ///
 /// The beacon ID is 20 bytes, made up out of the recommended subdivision
 /// [organizationId], [majorId], and [minorId].
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AltBeaconDeviceRegistration extends DeviceRegistration {
   /// The beacon device manufacturer's company identifier code as maintained by
   /// the Bluetooth SIG assigned numbers database.

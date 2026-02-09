@@ -54,7 +54,7 @@ class WebBrowser extends PrimaryDeviceConfiguration<WebBrowserRegistration> {
 /// Takes inspiration from the device information available via the
 /// [device_info_plus](https://pub.dev/packages/device_info_plus) via the
 /// [WebBrowserInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/WebBrowserInfo-class.html) class.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class WebBrowserRegistration extends DeviceRegistration {
   String? browserName;
   int? deviceMemory;

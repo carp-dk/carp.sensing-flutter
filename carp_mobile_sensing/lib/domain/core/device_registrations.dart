@@ -32,7 +32,7 @@ abstract class CamsDeviceRegistration extends DeviceRegistration {
 enum BatteryChargingState { unknown, full, normal, low, critical }
 
 /// A [DeviceRegistration] for a hardware device.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HardwareDeviceRegistration extends CamsDeviceRegistration {
   /// The battery charging state of the device upon registration.
   BatteryChargingState batteryChargingState = BatteryChargingState.unknown;
@@ -75,7 +75,7 @@ class HardwareDeviceRegistration extends CamsDeviceRegistration {
 /// [device_info_plus](https://pub.dev/packages/device_info_plus) via the
 /// [AndroidDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/AndroidDeviceInfo-class.html)
 /// and [IosDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/IosDeviceInfo-class.html) classes.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SmartphoneRegistration extends HardwareDeviceRegistration {
   ///The platform type of the device - Android or iOS.
   String? platform;
@@ -127,7 +127,7 @@ class SmartphoneRegistration extends HardwareDeviceRegistration {
 
 /// A [DeviceRegistration] for Bluetooth Low Energy (BLE) devices which can
 /// connect to the smartphone via BLE, e.g., a heart rate monitor or a BLE beacon.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BLEDeviceRegistration extends HardwareDeviceRegistration {
   /// The BLE address of this device.
   ///
@@ -164,7 +164,7 @@ class BLEDeviceRegistration extends HardwareDeviceRegistration {
 }
 
 /// A [DeviceRegistration] for a [ServiceConfiguration].
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ServiceRegistration extends CamsDeviceRegistration {
   ServiceRegistration({
     super.deviceId,

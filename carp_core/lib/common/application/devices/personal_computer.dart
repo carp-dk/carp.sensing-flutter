@@ -56,7 +56,7 @@ class PersonalComputer
 /// [device_info_plus](https://pub.dev/packages/device_info_plus) via the
 /// [MacOsDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/MacOsDeviceInfo-class.html)
 /// and [WindowsDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/WindowsDeviceInfo-class.html) classes.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PersonalComputerRegistration extends DeviceRegistration {
   String? platform;
   String? computerName;

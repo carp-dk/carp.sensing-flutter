@@ -101,9 +101,9 @@ class MovesenseSamplingPackage implements SamplingPackage {
     STATE => MovesenseStateChangeProbe(),
     HR => MovesenseHRProbe(),
     ECG => MovesenseECGProbe(),
-    // only the MD device supports temperature
+    // Only the Movesense Medical (MD) device supports temperature measurement.
     TEMPERATURE =>
-      deviceManager.configuration?.deviceType == MovesenseDeviceType.MD
+      deviceManager.movesenseDeviceType == MovesenseDeviceType.MD
           ? MovesenseTemperatureProbe()
           : null,
     IMU => MovesenseIMUProbe(),

@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_movesense_package/carp_movesense_package.dart';
 
@@ -33,12 +33,7 @@ void main() {
     );
     // Define which devices are used for data collection.
     phone = Smartphone(roleName: 'SM-A320FL');
-    movesense = MovesenseDevice(
-      serial: '220330000122',
-      address: '0C:8C:DC:3F:B2:CD',
-      name: 'Movesense Medical',
-      deviceType: MovesenseDeviceType.MD,
-    );
+    movesense = MovesenseDevice();
 
     protocol
       ..addPrimaryDevice(phone)
@@ -152,5 +147,29 @@ void main() {
     );
     expect(state.dataType.toString(), MovesenseSamplingPackage.STATE);
     print(_encode(state.toJson()));
+  });
+
+  test('Parsing config types', () async {
+    String infoJson = File('test/json/info.json').readAsStringSync();
+    final dataContent = json.decode(infoJson);
+    var deviceInfo = dataContent["Content"] as Map<String, dynamic>;
+
+    final allData = [
+      MovesenseDevice(roleName: 'Movesense HR monitor'),
+      MovesenseDeviceRegistration(
+        bleAddress: '00:11:22:33:44:55',
+        movesenseDeviceType: MovesenseDeviceType.HR2,
+        deviceInfo: deviceInfo,
+      ),
+    ];
+
+    for (var data in allData) {
+      final dataJson = toJsonString(data);
+      final dataFromJson = Function.apply(data.fromJsonFunction, [
+        json.decode(dataJson) as Map<String, dynamic>,
+      ]);
+      print(toJsonString(dataFromJson));
+      expect(toJsonString(dataFromJson), equals(dataJson));
+    }
   });
 }
