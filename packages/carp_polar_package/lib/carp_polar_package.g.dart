@@ -265,12 +265,6 @@ PolarDevice _$PolarDeviceFromJson(Map<String, dynamic> json) =>
     PolarDevice(
         roleName: json['roleName'] as String? ?? PolarDevice.DEFAULT_ROLE_NAME,
         isOptional: json['isOptional'] as bool? ?? true,
-        deviceType: $enumDecodeNullable(
-          _$PolarDeviceTypeEnumMap,
-          json['deviceType'],
-        ),
-        identifier: json['identifier'] as String?,
-        name: json['name'] as String?,
       )
       ..$type = json['__type'] as String?
       ..defaultSamplingConfiguration =
@@ -280,13 +274,15 @@ PolarDevice _$PolarDeviceFromJson(Map<String, dynamic> json) =>
               SamplingConfiguration.fromJson(e as Map<String, dynamic>),
             ),
           )
-      ..settings = json['settings'] == null
+      ..serviceUuids = (json['serviceUuids'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList()
+      ..namePrefix = json['namePrefix'] as String?
+      ..minRssi = (json['minRssi'] as num?)?.toInt()
+      ..allowDuplicates = json['allowDuplicates'] as bool
+      ..timeout = json['timeout'] == null
           ? null
-          : PolarSensorSetting.fromJson(
-              json['settings'] as Map<String, dynamic>,
-            )
-      ..address = json['address'] as String?
-      ..rssi = (json['rssi'] as num?)?.toInt();
+          : Duration(microseconds: (json['timeout'] as num).toInt());
 
 Map<String, dynamic> _$PolarDeviceToJson(PolarDevice instance) =>
     <String, dynamic>{
@@ -294,13 +290,66 @@ Map<String, dynamic> _$PolarDeviceToJson(PolarDevice instance) =>
       'roleName': instance.roleName,
       'isOptional': ?instance.isOptional,
       'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration,
-      'settings': ?instance.settings,
-      'identifier': ?instance.identifier,
-      'address': ?instance.address,
-      'deviceType': ?_$PolarDeviceTypeEnumMap[instance.deviceType],
-      'name': ?instance.name,
-      'rssi': ?instance.rssi,
+      'serviceUuids': instance.serviceUuids,
+      'namePrefix': ?instance.namePrefix,
+      'minRssi': ?instance.minRssi,
+      'allowDuplicates': instance.allowDuplicates,
+      'timeout': ?instance.timeout?.inMicroseconds,
     };
+
+PolarDeviceRegistration _$PolarDeviceRegistrationFromJson(
+  Map<String, dynamic> json,
+) =>
+    PolarDeviceRegistration(
+        deviceDisplayName: json['deviceDisplayName'] as String?,
+        registrationCreatedOn: json['registrationCreatedOn'] == null
+            ? null
+            : DateTime.parse(json['registrationCreatedOn'] as String),
+        isConnected: json['isConnected'] as bool? ?? false,
+        batteryChargingState:
+            $enumDecodeNullable(
+              _$BatteryChargingStateEnumMap,
+              json['batteryChargingState'],
+            ) ??
+            BatteryChargingState.unknown,
+        hardwareName: json['hardwareName'] as String?,
+        identifier: json['identifier'] as String,
+        bleAddress: json['bleAddress'] as String,
+        bleName: json['bleName'] as String?,
+        polarDeviceType: $enumDecode(
+          _$PolarDeviceTypeEnumMap,
+          json['polarDeviceType'],
+        ),
+        rssi: (json['rssi'] as num?)?.toInt(),
+      )
+      ..$type = json['__type'] as String?
+      ..deviceId = json['deviceId'] as String;
+
+Map<String, dynamic> _$PolarDeviceRegistrationToJson(
+  PolarDeviceRegistration instance,
+) => <String, dynamic>{
+  '__type': instance.$type,
+  'deviceId': instance.deviceId,
+  'deviceDisplayName': instance.deviceDisplayName,
+  'registrationCreatedOn': instance.registrationCreatedOn.toIso8601String(),
+  'isConnected': instance.isConnected,
+  'batteryChargingState':
+      _$BatteryChargingStateEnumMap[instance.batteryChargingState]!,
+  'hardwareName': instance.hardwareName,
+  'bleAddress': instance.bleAddress,
+  'bleName': instance.bleName,
+  'identifier': instance.identifier,
+  'polarDeviceType': _$PolarDeviceTypeEnumMap[instance.polarDeviceType]!,
+  'rssi': instance.rssi,
+};
+
+const _$BatteryChargingStateEnumMap = {
+  BatteryChargingState.unknown: 'unknown',
+  BatteryChargingState.full: 'full',
+  BatteryChargingState.normal: 'normal',
+  BatteryChargingState.low: 'low',
+  BatteryChargingState.critical: 'critical',
+};
 
 const _$PolarDeviceTypeEnumMap = {
   PolarDeviceType.UNKNOWN: 'UNKNOWN',

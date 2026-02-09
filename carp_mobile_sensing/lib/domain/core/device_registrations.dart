@@ -125,7 +125,8 @@ class SmartphoneRegistration extends HardwareDeviceRegistration {
   Map<String, dynamic> toJson() => _$SmartphoneRegistrationToJson(this);
 }
 
-/// A [DeviceRegistration] for Bluetooth Low Energy (BLE) devices.
+/// A [DeviceRegistration] for Bluetooth Low Energy (BLE) devices which can
+/// connect to the smartphone via BLE, e.g., a heart rate monitor or a BLE beacon.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
 class BLEDeviceRegistration extends HardwareDeviceRegistration {
   /// The BLE address of this device.

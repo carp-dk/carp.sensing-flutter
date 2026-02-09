@@ -5,7 +5,7 @@ import 'package:polar/polar.dart';
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_polar_package/carp_polar_package.dart';
 
@@ -16,7 +16,6 @@ void main() {
   late StudyProtocol protocol;
   late Smartphone phone;
   late PolarDevice polar;
-  String deviceId = 'G24R';
 
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -35,26 +34,21 @@ void main() {
     );
     // Define which devices are used for data collection.
     phone = Smartphone(roleName: 'SM-A320FL');
-    polar = PolarDevice(
-      roleName: 'Polar H10 HR monitor',
-      identifier: deviceId,
-      name: 'H10',
-      deviceType: PolarDeviceType.H10,
-    );
+    polar = PolarDevice(roleName: 'Polar H10 HR monitor');
 
     protocol
       ..addPrimaryDevice(phone)
       ..addConnectedDevice(polar, phone);
 
-    // // adding all available measures to one one trigger and one task
-    // protocol.addTaskControl(
-    //   ImmediateTrigger(),
-    //   BackgroundTask()
-    //     ..measures = SamplingPackageRegistry().dataTypes
-    //         .map((type) => Measure(type: type.type))
-    //         .toList(),
-    //   phone,
-    // );
+    // adding all available measures to one one trigger and one task
+    protocol.addTaskControl(
+      ImmediateTrigger(),
+      BackgroundTask()
+        ..measures = SamplingPackageRegistry().dataTypes
+            .map((type) => Measure(type: type.type))
+            .toList(),
+      phone,
+    );
 
     // Add a background task that immediately starts collecting eSense button and
     // sensor events from the eSense device.
@@ -93,7 +87,6 @@ void main() {
   });
 
   test('JSON File -> StudyProtocol', () async {
-    // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
     StudyProtocol protocol = StudyProtocol.fromJson(
@@ -120,5 +113,52 @@ void main() {
     expect(measurement.dataType.toString(), measurement.data.jsonType);
 
     print(_encode(measurement.toJson()));
+  });
+
+  test('- config types', () async {
+    final allData = [
+      PolarDevice(roleName: 'Polar H10 HR monitor'),
+      PolarDeviceRegistration(
+        bleAddress: '00:11:22:33:44:55',
+        identifier: '1C709B20',
+        polarDeviceType: PolarDeviceType.H10,
+      ),
+    ];
+
+    for (var data in allData) {
+      final dataJson = toJsonString(data);
+      final dataFromJson = Function.apply(data.fromJsonFunction, [
+        json.decode(dataJson) as Map<String, dynamic>,
+      ]);
+      print(toJsonString(dataFromJson));
+      expect(toJsonString(dataFromJson), equals(dataJson));
+    }
+  });
+
+  test('- all data types', () async {
+    List<PolarAccSample> samples = [];
+
+    samples.add(PolarAccSample(timeStamp: DateTime.now(), x: 1, y: 2, z: 3));
+    samples.add(PolarAccSample(timeStamp: DateTime.now(), x: 1, y: 2, z: 3));
+    PolarAccData data = PolarAccData(samples: samples);
+
+    final allData = [
+      PolarAccelerometer.fromPolarData(data),
+      PolarGyroscope(samples: []),
+      PolarMagnetometer(samples: []),
+      PolarECG(samples: []),
+      PolarPPG(type: PpgDataType.unknown, samples: []),
+      PolarPPI(samples: []),
+      PolarHR(samples: []),
+    ];
+
+    for (var data in allData) {
+      final dataJson = toJsonString(data);
+      final dataFromJson = Function.apply(data.fromJsonFunction, [
+        json.decode(dataJson) as Map<String, dynamic>,
+      ]);
+      print(toJsonString(dataFromJson));
+      expect(toJsonString(dataFromJson), equals(dataJson));
+    }
   });
 }

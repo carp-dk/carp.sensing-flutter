@@ -109,7 +109,7 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
 /// Holds high-level scan configuration for BLE devices.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BLEDevice<TRegistration extends BLEDeviceRegistration>
-    extends CamsDevice<BLEDeviceRegistration> {
+    extends CamsDevice<TRegistration> {
   /// Advertised service UUIDs to filter for.
   /// String representation of UUIDs, for example: "0000180D-0000-1000-8000-00805f9b34fb"
   List<String> serviceUuids = [];
