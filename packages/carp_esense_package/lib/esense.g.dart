@@ -48,9 +48,8 @@ Map<String, dynamic> _$ESenseSensorToJson(ESenseSensor instance) =>
 
 ESenseDevice _$ESenseDeviceFromJson(Map<String, dynamic> json) =>
     ESenseDevice(
-        roleName: json['roleName'] as String? ?? ESenseDevice.DEFAULT_ROLENAME,
+        roleName: json['roleName'] as String? ?? ESenseDevice.DEFAULT_ROLE_NAME,
         isOptional: json['isOptional'] as bool? ?? true,
-        deviceName: json['deviceName'] as String?,
         samplingRate: (json['samplingRate'] as num?)?.toInt() ?? 10,
       )
       ..$type = json['__type'] as String?
@@ -60,7 +59,16 @@ ESenseDevice _$ESenseDeviceFromJson(Map<String, dynamic> json) =>
               k,
               SamplingConfiguration.fromJson(e as Map<String, dynamic>),
             ),
-          );
+          )
+      ..serviceUuids = (json['serviceUuids'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList()
+      ..namePrefix = json['namePrefix'] as String?
+      ..minRssi = (json['minRssi'] as num?)?.toInt()
+      ..allowDuplicates = json['allowDuplicates'] as bool
+      ..timeout = json['timeout'] == null
+          ? null
+          : Duration(microseconds: (json['timeout'] as num).toInt());
 
 Map<String, dynamic> _$ESenseDeviceToJson(ESenseDevice instance) =>
     <String, dynamic>{
@@ -68,6 +76,10 @@ Map<String, dynamic> _$ESenseDeviceToJson(ESenseDevice instance) =>
       'roleName': instance.roleName,
       'isOptional': ?instance.isOptional,
       'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration,
-      'deviceName': ?instance.deviceName,
+      'serviceUuids': instance.serviceUuids,
+      'namePrefix': ?instance.namePrefix,
+      'minRssi': ?instance.minRssi,
+      'allowDuplicates': instance.allowDuplicates,
+      'timeout': ?instance.timeout?.inMicroseconds,
       'samplingRate': instance.samplingRate,
     };

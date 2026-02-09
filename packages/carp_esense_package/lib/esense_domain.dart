@@ -52,7 +52,7 @@ class ESenseButton extends ESenseData {
 
 /// Holds information about an eSense button pressed event.
 ///
-/// This datum is a 1:1 mapping of the
+/// This data is a 1:1 mapping of the
 /// eSense [SensorEvent](https://pub.dev/documentation/esense/latest/esense/SensorEvent-class.html)
 /// event.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
@@ -100,6 +100,6 @@ class ESenseSensor extends ESenseData {
   String toString() =>
       '${super.toString()}'
       ', packetIndex: $packetIndex'
-      ', accl: [${accel![0]},${accel![1]},${accel![2]}]'
+      ', accel: [${accel![0]},${accel![1]},${accel![2]}]'
       ', gyro: [${gyro![0]},${gyro![1]},${gyro![2]}]';
 }

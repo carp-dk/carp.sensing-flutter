@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_esense_package/esense.dart';
 
@@ -31,11 +31,7 @@ void main() {
     );
     // Define which devices are used for data collection.
     phone = Smartphone(roleName: 'SM-A320FL');
-    eSense = ESenseDevice(
-      roleName: 'eSense earplug',
-      deviceName: 'eSense-0223',
-      samplingRate: 10,
-    );
+    eSense = ESenseDevice(roleName: 'eSense earplug', samplingRate: 10);
 
     protocol
       ..addPrimaryDevice(phone)
@@ -103,5 +99,45 @@ void main() {
     );
 
     print(_encode(measurement.toJson()));
+  });
+
+  test('Config types', () async {
+    final allData = [
+      ESenseDevice(roleName: 'eSense earplug', samplingRate: 10),
+      BLEDeviceRegistration(
+        bleAddress: '00:11:22:33:44:55',
+        bleName: 'eSense 1234',
+      ),
+    ];
+
+    for (var data in allData) {
+      final dataJson = toJsonString(data);
+      final dataFromJson = Function.apply(data.fromJsonFunction, [
+        json.decode(dataJson) as Map<String, dynamic>,
+      ]);
+      print(toJsonString(dataFromJson));
+      expect(toJsonString(dataFromJson), equals(dataJson));
+    }
+  });
+
+  test('Data types', () async {
+    final allData = [
+      ESenseButton(deviceName: 'deviceName', pressed: true),
+      ESenseSensor(
+        deviceName: 'deviceName',
+        packetIndex: 1,
+        accel: [1, 2, 3],
+        gyro: [4, 5, 6],
+      ),
+    ];
+
+    for (var data in allData) {
+      final dataJson = toJsonString(data);
+      final dataFromJson = Function.apply(data.fromJsonFunction, [
+        json.decode(dataJson) as Map<String, dynamic>,
+      ]);
+      print(toJsonString(dataFromJson));
+      expect(toJsonString(dataFromJson), equals(dataJson));
+    }
   });
 }

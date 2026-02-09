@@ -1,25 +1,27 @@
 {
-    "id": "baa4bdb0-d8c3-1cee-a289-99b89bbea49e",
-    "createdOn": "2023-09-18T18:47:44.456982Z",
+    "id": "c430a143-8e27-4358-8372-28a6c65c1669",
+    "createdOn": "2026-02-09T17:31:43.534015Z",
     "version": 0,
     "ownerId": "alex@uni.dk",
     "name": "Context package test",
     "participantRoles": [],
     "primaryDevices": [
         {
-            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+            "__type": "dk.carp.cams.devices.Smartphone",
             "roleName": "SM-A320FL",
+            "isOptional": false,
             "defaultSamplingConfiguration": {},
             "isPrimaryDevice": true
         }
     ],
     "connectedDevices": [
         {
-            "__type": "dk.cachet.carp.common.application.devices.ESenseDevice",
+            "__type": "dk.carp.cams.devices.ESenseDevice",
             "roleName": "eSense earplug",
             "isOptional": true,
             "defaultSamplingConfiguration": {},
-            "deviceName": "eSense-0223",
+            "serviceUuids": [],
+            "allowDuplicates": true,
             "samplingRate": 10
         }
     ],
@@ -33,11 +35,15 @@
     "tasks": [
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #7",
+            "name": "Task #8",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.deviceinformation"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.applicationinformation"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -50,6 +56,10 @@
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.screenevent"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.applifecycleevent"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -69,15 +79,39 @@
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.stepcount"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.magneticfield"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.accelerationfeatures"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.stepevent"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.ambientlight"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.error"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.triggeredtask"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedtask"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.heartbeat"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedapptask"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -91,7 +125,7 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #8",
+            "name": "Task #9",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -117,13 +151,13 @@
     "taskControls": [
         {
             "triggerId": 0,
-            "taskName": "Task #7",
+            "taskName": "Task #8",
             "destinationDeviceRoleName": "SM-A320FL",
             "control": "Start"
         },
         {
             "triggerId": 1,
-            "taskName": "Task #8",
+            "taskName": "Task #9",
             "destinationDeviceRoleName": "eSense earplug",
             "control": "Start"
         }

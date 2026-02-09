@@ -1,6 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_esense_package/esense.dart';
 
@@ -24,10 +24,7 @@ void main() async {
 
   // define which devices are used for data collection - both phone and eSense
   var phone = Smartphone();
-  var eSense = ESenseDevice(
-    deviceName: 'eSense-0223',
-    samplingRate: 10,
-  );
+  var eSense = ESenseDevice(samplingRate: 10);
 
   protocol
     ..addPrimaryDevice(phone)
@@ -36,22 +33,28 @@ void main() async {
   // Add a background task that immediately starts collecting step counts,
   // ambient light, screen activity, and battery level from the phone.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
-        Measure(type: SensorSamplingPackage.STEP_COUNT),
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
+        Measure(type: SensorSamplingPackage.STEP_EVENT),
         Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
         Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
         Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-      ]),
-      phone);
+      ],
+    ),
+    phone,
+  );
 
   // Add a background task that immediately starts collecting eSense button and
   // sensor events from the eSense device.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
         Measure(type: ESenseSamplingPackage.ESENSE_BUTTON),
         Measure(type: ESenseSamplingPackage.ESENSE_SENSOR),
-      ]),
-      eSense);
+      ],
+    ),
+    eSense,
+  );
 }

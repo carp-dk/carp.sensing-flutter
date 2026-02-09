@@ -48,26 +48,20 @@ part of 'esense.dart';
 /// to use the right earbud to record only sound samples and the left earbud to
 /// record only IMU data.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class ESenseDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
+class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of an eSense device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.ESenseDevice';
 
   /// The default role name for an eSense device.
-  static const String DEFAULT_ROLENAME = 'eSense';
-
-  /// The name of the eSense device.
-  /// Used for connecting to the eSense hardware device over BTLE.
-  /// eSense devices are typically named `eSense-xxxx`.
-  String? deviceName;
+  static const String DEFAULT_ROLE_NAME = 'eSense';
 
   /// The sampling rate in Hz of getting sensor data from the device.
   int samplingRate;
 
   ESenseDevice({
-    super.roleName = ESenseDevice.DEFAULT_ROLENAME,
+    super.roleName = ESenseDevice.DEFAULT_ROLE_NAME,
     super.isOptional = true,
-    this.deviceName,
     this.samplingRate = 10,
   });
 
@@ -80,8 +74,10 @@ class ESenseDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
 }
 
 /// A [DeviceManager] for the eSense device.
+///
+/// eSense devices are typically named `eSense-xxxx`.
 class ESenseDeviceManager
-    extends BTLEDeviceManager<ESenseDevice, MACAddressDeviceRegistration> {
+    extends BLEDeviceManager<ESenseDevice, BLEDeviceRegistration> {
   Timer? _batteryTimer;
   StreamSubscription<ESenseEvent>? _batterySubscription;
   double? _voltageLevel;
@@ -92,25 +88,10 @@ class ESenseDeviceManager
   ESenseManager? manager;
 
   @override
-  String get id => configuration?.deviceName ?? 'eSense-????';
+  String get id => bleName ?? 'eSense-????';
 
   @override
-  String? get displayName => btleName;
-
-  @override
-  MACAddressDeviceRegistration get registration => MACAddressDeviceRegistration(
-    deviceId: id,
-    deviceDisplayName: displayName,
-    macAddress: btleAddress,
-  );
-
-  @override
-  String get btleName => configuration?.deviceName ?? 'eSense-????';
-
-  /// Set the name of this device based on the Bluetooth name.
-  /// This name is used for connecting to the device.
-  @override
-  set btleName(String btleName) => configuration?.deviceName = btleName;
+  String? get displayName => bleName;
 
   /// An estimate of the battery level of the eSense device.
   ///
@@ -141,22 +122,51 @@ class ESenseDeviceManager
 
   ESenseDeviceManager(super.type, [super.configuration]);
 
-  @override
-  bool canConnect() =>
-      (configuration?.deviceName != null &&
-      configuration!.deviceName!.isNotEmpty);
+  String? _bleName;
 
+  /// The BLE name of the eSense device. Note that eSense use the **name**
+  /// (and not the BLE address) for connecting to it.
+  /// Typically of the form `eSense-xxxx`.
   @override
-  void onInitialize(ESenseDevice configuration) {
-    if (configuration.deviceName == null || configuration.deviceName!.isEmpty) {
-      warning(
-        '$runtimeType - cannot connect to eSense device, device name is null.',
-      );
+  set bleName(String? name) {
+    if (name == _bleName) return;
+
+    _bleName = name;
+
+    if (bleName == null) {
+      warning('$runtimeType - setting device address to null.');
+      return;
     }
-    manager = ESenseManager(id);
-
-    super.onInitialize(configuration);
+    manager = ESenseManager(bleName!);
   }
+
+  @override
+  String? get bleName => _bleName;
+
+  @Deprecated('Use bleName instead')
+  @override
+  String? get bleAddress => bleName;
+
+  @Deprecated('Use bleName instead')
+  @override
+  set bleAddress(String? address) {}
+
+  @override
+  bool canConnect() => bleName != null;
+
+  @override
+  void onConfigure(ESenseDevice configuration) {}
+
+  @override
+  BLEDeviceRegistration createRegistration() => BLEDeviceRegistration(
+    deviceDisplayName: bleName,
+    isConnected: isConnected,
+    batteryChargingState: batteryLevel != null
+        ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
+        : BatteryChargingState.unknown,
+    bleAddress: bleName ?? 'Unknown eSense Device',
+    bleName: bleName,
+  );
 
   @override
   Future<DeviceStatus> onConnect() async {
