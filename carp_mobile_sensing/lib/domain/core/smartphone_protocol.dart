@@ -26,6 +26,10 @@ mixin SmartphoneProtocolExtension {
   @JsonKey(includeFromJson: false, includeToJson: false)
   String? get protocolApiLevel => _data.protocolApiLevel;
 
+  /// The name of the application which will execute this protocol.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  String? applicationName;
+
   /// The description of this study protocol containing the title, description,
   /// purpose, and the responsible researcher for this study.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -77,6 +81,12 @@ class SmartphoneApplicationData {
   /// the pubspec.yaml file.
   String? protocolApiLevel = SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL;
 
+  /// The name of the application which will execute this protocol. This is the
+  /// Flutter application name as specified in the pubspec.yaml file of the app
+  /// executing this protocol. This is used to filter invitations to studies from
+  /// CAWS.
+  String? applicationName;
+
   /// The description of this study protocol containing the title, description,
   /// purpose, and the responsible researcher for this study.
   StudyDescription? studyDescription;
@@ -97,6 +107,7 @@ class SmartphoneApplicationData {
   Map<String, dynamic>? applicationData;
 
   SmartphoneApplicationData({
+    this.applicationName,
     this.studyDescription,
     this.dataEndPoint,
     this.privacySchemaName,
@@ -152,17 +163,45 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// as set in the pubspec.yaml file.
   static const String CAMS_PROTOCOL_API_LEVEL = '2.0';
 
-  /// Create a new [SmartphoneStudyProtocol].
+  @override
+  set description(String? description) {
+    if (studyDescription != null) {
+      studyDescription!.description = description;
+    } else {
+      studyDescription = StudyDescription(
+        title: name,
+        description: description,
+      );
+    }
+  }
+
+  /// Create a new [SmartphoneStudyProtocol] with a unique [name].
   ///
-  /// Provide a unique descriptive [name] for the protocol.
-  ///
+  /// The [ownerId] is typically the ID of the user uploading this protocol to CAWS.
   /// If [ownerId] is not specified, a UUID will be generated.
-  /// Note, however, that this will be replaced with the ID of the user uploading the protocol,
-  /// if uploaded to CAWS.
+  /// Note, however, that this will be replaced with the ID of the user uploading
+  /// the protocol, if uploaded to CAWS.
+  ///
+  /// The [applicationName] is the name of the application which will execute
+  /// this protocol. This is the Flutter application name as specified in the
+  /// pubspec.yaml file of the app executing this protocol. This is used to
+  /// filter invitations to studies from CAWS.
+  ///
+  /// The [studyDescription] contains the title, description, purpose, and the
+  /// responsible researcher for this study.
+  ///
+  /// The [dataEndPoint] specifies where and how to stored or upload the data
+  /// collected from this deployment. If `null`, the sensed data is not stored, but
+  /// may still be used in the app.
+  ///
+  /// The [privacySchemaName] is the name of a [PrivacySchema] to be used for
+  /// protecting sensitive data. Use [PrivacySchema.DEFAULT] for the default,
+  /// built-in schema. If  not specified, no privacy schema is used and data is
+  /// saved as collected.
   SmartphoneStudyProtocol({
     String? ownerId,
     required super.name,
-    String? appName,
+    String? applicationName,
     StudyDescription? studyDescription,
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,
@@ -172,6 +211,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
        ) {
     // add the smartphone specific protocol data as application-specific data
     _data = SmartphoneApplicationData(
+      applicationName: applicationName,
       studyDescription: studyDescription,
       dataEndPoint: dataEndPoint,
       privacySchemaName: privacySchemaName,

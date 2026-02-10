@@ -34,8 +34,8 @@
  },
  "registration": {
   "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
-  "deviceId": "ab79602a-1633-4441-9138-6b74b4df849f",
-  "registrationCreatedOn": "2026-02-09T16:58:50.332994Z"
+  "deviceId": "47085d72-7881-4a98-b7a6-85726f6f98ee",
+  "registrationCreatedOn": "2026-02-10T16:51:29.907133Z"
  },
  "connectedDevices": [
   {
@@ -339,6 +339,6 @@
   }
  ],
  "studyDeploymentId": "1234",
- "deployed": "2026-02-09T16:58:50.332985Z",
+ "deployed": "2026-02-10T16:51:29.907123Z",
  "status": "Invited"
 }

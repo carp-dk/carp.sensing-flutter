@@ -27,7 +27,8 @@ void main() {
     primaryProtocol = SmartphoneStudyProtocol(
       ownerId: 'user@dtu.dk',
       name: 'patient_tracking',
-      appName: 'CAMS Test App',
+      applicationName:
+          'carp_mobile_sensing_example', // this should match the app name in the pubspec.yaml file of the app executing this protocol
       studyDescription: StudyDescription(
         title: 'A Test',
         purpose: 'Testing',

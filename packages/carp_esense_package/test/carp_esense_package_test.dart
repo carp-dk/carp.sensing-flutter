@@ -15,6 +15,12 @@ void main() {
   late Smartphone phone;
   late ESenseDevice eSense;
 
+  Future<void> writeToFile(String json, String fileName) async {
+    File file = File('test/json/$fileName');
+    await file.writeAsString(json);
+    print("Done writing '$fileName'");
+  }
+
   setUpAll(() {
     CarpMobileSensing.ensureInitialized();
 
@@ -25,10 +31,14 @@ void main() {
     CarpMobileSensing();
 
     // Create a new study protocol.
-    protocol = StudyProtocol(
-      ownerId: 'alex@uni.dk',
-      name: 'Context package test',
-    );
+    protocol =
+        SmartphoneStudyProtocol(
+            ownerId: 'alex@uni.dk',
+            name: 'eSense package test',
+          )
+          ..description =
+              'Testing the eSense sampling package with a simple study protocol.';
+
     // Define which devices are used for data collection.
     phone = Smartphone(roleName: 'SM-A320FL');
     eSense = ESenseDevice(roleName: 'eSense earplug', samplingRate: 10);
@@ -62,17 +72,15 @@ void main() {
     print(protocol);
     print(toJsonString(protocol));
     expect(protocol.ownerId, 'alex@uni.dk');
+    await writeToFile(toJsonString(protocol), 'study_protocol.json');
   });
 
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
-    print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
-
-    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+    StudyProtocol protocolFromJson = SmartphoneStudyProtocol.fromJson(
       json.decode(studyJson) as Map<String, dynamic>,
     );
     expect(toJsonString(protocolFromJson), studyJson);
-    print('#2 : $protocolFromJson');
   });
 
   test('JSON File -> StudyProtocol', () async {

@@ -10,6 +10,7 @@ SmartphoneApplicationData _$SmartphoneApplicationDataFromJson(
   Map<String, dynamic> json,
 ) =>
     SmartphoneApplicationData(
+        applicationName: json['applicationName'] as String?,
         studyDescription: json['studyDescription'] == null
             ? null
             : StudyDescription.fromJson(
@@ -31,6 +32,7 @@ Map<String, dynamic> _$SmartphoneApplicationDataToJson(
 ) => <String, dynamic>{
   'protocolVersionTag': ?instance.protocolVersionTag,
   'protocolApiLevel': ?instance.protocolApiLevel,
+  'applicationName': ?instance.applicationName,
   'studyDescription': ?instance.studyDescription?.toJson(),
   'dataEndPoint': ?instance.dataEndPoint?.toJson(),
   'privacySchemaName': ?instance.privacySchemaName,
@@ -48,7 +50,6 @@ SmartphoneStudyProtocol _$SmartphoneStudyProtocolFromJson(
       ..id = json['id'] as String
       ..createdOn = DateTime.parse(json['createdOn'] as String)
       ..version = (json['version'] as num).toInt()
-      ..description = json['description'] as String
       ..participantRoles = (json['participantRoles'] as List<dynamic>?)
           ?.map((e) => ParticipantRole.fromJson(e as Map<String, dynamic>))
           .toSet()
@@ -105,7 +106,6 @@ Map<String, dynamic> _$SmartphoneStudyProtocolToJson(
   'version': instance.version,
   'ownerId': instance.ownerId,
   'name': instance.name,
-  'description': instance.description,
   'participantRoles': ?instance.participantRoles
       ?.map((e) => e.toJson())
       .toList(),
