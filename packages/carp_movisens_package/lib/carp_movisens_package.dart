@@ -104,27 +104,51 @@ class MovisensSamplingPackage implements SamplingPackage {
   static const String SKIN_TEMPERATURE = "$MOVISENS_NAMESPACE.skin_temperature";
   static const String TAP_MARKER = "$MOVISENS_NAMESPACE.tap_marker";
 
-  final DeviceManager _deviceManager =
-      MovisensDeviceManager(MovisensDevice.DEVICE_TYPE);
+  final DeviceManager _deviceManager = MovisensDeviceManager(
+    MovisensDevice.DEVICE_TYPE,
+  );
 
   @override
   void onRegister() {
-    FromJsonFactory().register(MovisensDevice(deviceName: ''));
+    FromJsonFactory().register(MovisensDevice());
+
+    // register all data types
+    FromJsonFactory().registerAll([
+      MovisensStepCount(deviceId: '', type: '', steps: 0),
+      MovisensBodyPosition(deviceId: '', type: '', bodyPosition: 'Chest'),
+      MovisensInclination(deviceId: '', type: '', x: 0, y: 0, z: 0),
+      MovisensMovementAcceleration(
+        deviceId: '',
+        type: '',
+        movementAcceleration: 0,
+      ),
+      MovisensMET(deviceId: '', type: '', met: 0),
+      MovisensMETLevel(
+        deviceId: '',
+        type: '',
+        sedentary: 0,
+        light: 0,
+        moderate: 0,
+        vigorous: 0,
+      ),
+      MovisensHR(deviceId: '', type: '', hr: 0),
+      MovisensEDA(deviceId: '', type: '', edaSclMean: 0),
+      MovisensSkinTemperature(deviceId: '', type: '', skinTemperature: 0),
+      MovisensRespiration(deviceId: '', type: '', value: 0),
+      MovisensTapMarker(deviceId: '', type: '', tapMarker: 1),
+    ]);
 
     // registering the transformers from CARP to OMH and FHIR for heart rate and step count.
     // we assume that there are OMH and FHIR schemas created and registered already...
-    DataTransformerSchemaRegistry().lookup(NameSpace.OMH)?.add(
-          MovisensData.HR_MEAN,
-          OMHHeartRateDataPoint.transformer,
-        );
-    DataTransformerSchemaRegistry().lookup(NameSpace.OMH)?.add(
-          MovisensData.STEPS,
-          OMHStepCountDataPoint.transformer,
-        );
-    DataTransformerSchemaRegistry().lookup(NameSpace.FHIR)?.add(
-          MovisensData.HR_MEAN,
-          FHIRHeartRateObservation.transformer,
-        );
+    DataTransformerSchemaRegistry()
+        .lookup(NameSpace.OMH)
+        ?.add(MovisensData.HR_MEAN, OMHHeartRateDataPoint.transformer);
+    DataTransformerSchemaRegistry()
+        .lookup(NameSpace.OMH)
+        ?.add(MovisensData.STEPS, OMHStepCountDataPoint.transformer);
+    DataTransformerSchemaRegistry()
+        .lookup(NameSpace.FHIR)
+        ?.add(MovisensData.HR_MEAN, FHIRHeartRateObservation.transformer);
   }
 
   @override

@@ -270,7 +270,6 @@ Map<String, dynamic> _$MovisensTapMarkerToJson(MovisensTapMarker instance) =>
 MovisensDevice _$MovisensDeviceFromJson(Map<String, dynamic> json) =>
     MovisensDevice(
         roleName: json['roleName'] as String?,
-        deviceName: json['deviceName'] as String,
         sensorLocation:
             $enumDecodeNullable(
               _$SensorLocationEnumMap,
@@ -290,7 +289,16 @@ MovisensDevice _$MovisensDeviceFromJson(Map<String, dynamic> json) =>
               k,
               SamplingConfiguration.fromJson(e as Map<String, dynamic>),
             ),
-          );
+          )
+      ..serviceUuids = (json['serviceUuids'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList()
+      ..namePrefix = json['namePrefix'] as String?
+      ..minRssi = (json['minRssi'] as num?)?.toInt()
+      ..allowDuplicates = json['allowDuplicates'] as bool
+      ..timeout = json['timeout'] == null
+          ? null
+          : Duration(microseconds: (json['timeout'] as num).toInt());
 
 Map<String, dynamic> _$MovisensDeviceToJson(MovisensDevice instance) =>
     <String, dynamic>{
@@ -298,7 +306,11 @@ Map<String, dynamic> _$MovisensDeviceToJson(MovisensDevice instance) =>
       'roleName': instance.roleName,
       'isOptional': ?instance.isOptional,
       'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration,
-      'deviceName': instance.deviceName,
+      'serviceUuids': instance.serviceUuids,
+      'namePrefix': ?instance.namePrefix,
+      'minRssi': ?instance.minRssi,
+      'allowDuplicates': instance.allowDuplicates,
+      'timeout': ?instance.timeout?.inMicroseconds,
       'sensorLocation': _$SensorLocationEnumMap[instance.sensorLocation]!,
       'weight': instance.weight,
       'height': instance.height,

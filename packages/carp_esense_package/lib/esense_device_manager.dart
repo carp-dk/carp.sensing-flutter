@@ -75,7 +75,8 @@ class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
 
 /// A [DeviceManager] for the eSense device.
 ///
-/// eSense devices are typically named `eSense-xxxx`.
+/// Note that eSense use the [bleName] (and not the BLE address) for connecting to it.
+/// Typically of the form `eSense-xxxx`.
 class ESenseDeviceManager
     extends BLEDeviceManager<ESenseDevice, BLEDeviceRegistration> {
   Timer? _batteryTimer;
@@ -84,8 +85,12 @@ class ESenseDeviceManager
   final StreamController<int> _batteryEventController =
       StreamController.broadcast();
 
-  /// A handle to the [ESenseManager] plugin.
-  ESenseManager? manager;
+  ESenseManager? _manager;
+
+  /// The eSense device handler.
+  /// Only available after [bleName] has been set.
+  ESenseManager? get manager =>
+      bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
 
   @override
   String get id => bleName ?? 'eSense-????';
@@ -121,27 +126,6 @@ class ESenseDeviceManager
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
   ESenseDeviceManager(super.type, [super.configuration]);
-
-  String? _bleName;
-
-  /// The BLE name of the eSense device. Note that eSense use the **name**
-  /// (and not the BLE address) for connecting to it.
-  /// Typically of the form `eSense-xxxx`.
-  @override
-  set bleName(String? name) {
-    if (name == _bleName) return;
-
-    _bleName = name;
-
-    if (bleName == null) {
-      warning('$runtimeType - setting device address to null.');
-      return;
-    }
-    manager = ESenseManager(bleName!);
-  }
-
-  @override
-  String? get bleName => _bleName;
 
   @Deprecated('Use bleName instead')
   @override

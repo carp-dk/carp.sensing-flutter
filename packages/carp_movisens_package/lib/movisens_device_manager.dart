@@ -9,22 +9,16 @@ part of 'carp_movisens_package.dart';
 /// A [DeviceConfiguration] for a Movisens device used in a [StudyProtocol].
 ///
 /// This device descriptor defined the basic configuration of the Movisens
-/// device, including the BTLE MAC [address], the [deviceName], the [sensorLocation]
+/// device, including [deviceName], the [sensorLocation]
 /// and the [weight], [height], [age], [sex] of the user using the device.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class MovisensDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
+class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of a Movisens device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice';
 
   /// The default role name for a Movisens device.
   static const String DEFAULT_ROLE_NAME = 'movisens';
-
-  /// The name of the device used for connecting to the device.
-  ///
-  /// The default Movisens names of devices are `MOVISENS Sensor <serial>`, where
-  /// `serial` is the 5-digit serial number written on the back of the device.
-  String deviceName;
 
   /// Sensor placement on body
   SensorLocation sensorLocation;
@@ -47,7 +41,6 @@ class MovisensDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
   /// 78 kg with the sensor place on the chest.
   MovisensDevice({
     String? roleName,
-    required this.deviceName,
     this.sensorLocation = SensorLocation.Chest,
     this.sex = Sex.Male,
     this.height = 178,
@@ -64,29 +57,47 @@ class MovisensDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
 }
 
 /// A Movisens [DeviceManager].
+///
+/// Note that the Movisens device manager uses the [devicename] to identify
+/// the Movisens device to connect to. The default Movisens names of devices
+/// are `MOVISENS Sensor <serial>`, where `serial` is the 5-digit serial number
+/// written on the back of the device.
 class MovisensDeviceManager
-    extends BTLEDeviceManager<MovisensDevice, MACAddressDeviceRegistration> {
-  // the last known voltage level of the Movisens device
-  int _batteryLevel = -1;
+    extends BLEDeviceManager<MovisensDevice, BLEDeviceRegistration> {
+  // the last known battery level of the Movisens device
+  int? _batteryLevel;
   String? _connectionStatus;
   StreamSubscription<BluetoothConnectionState>? _subscription;
 
-  /// The [Movisens] device handler.
-  /// Only available after this device manger has been initialized via the
-  /// [initialize] method.
-  movisens.MovisensDevice? device;
+  movisens.MovisensDevice? _device;
+
+  /// The Movisens device handler.
+  /// Only available after [deviceName] has been set.
+  movisens.MovisensDevice? get device => deviceName != null
+      ? _device ??= movisens.MovisensDevice(name: deviceName!)
+      : _device = null;
+
+  /// The name of the device used for connecting to the device.
+  ///
+  /// The default Movisens names of devices are `MOVISENS Sensor <serial>`, where
+  /// `serial` is the 5-digit serial number written on the back of the device.
+  String? deviceName;
 
   @override
   String get id => device?.id ?? MovisensDevice.DEVICE_TYPE;
 
   @override
-  String? get displayName => device?.name;
+  String? get displayName => deviceName;
 
   @override
-  MACAddressDeviceRegistration get registration => MACAddressDeviceRegistration(
-    deviceId: id,
+  BLEDeviceRegistration createRegistration() => BLEDeviceRegistration(
     deviceDisplayName: displayName,
-    macAddress: id,
+    isConnected: isConnected,
+    batteryChargingState: batteryLevel != null
+        ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
+        : BatteryChargingState.unknown,
+    bleAddress: deviceName ?? 'No Movisens device name specified',
+    bleName: deviceName ?? 'No Movisens device name specified',
   );
 
   String? get connectionStatus => _connectionStatus;
@@ -94,16 +105,10 @@ class MovisensDeviceManager
   MovisensDeviceManager(super.type, [super.configuration]);
 
   @override
-  Future<void> onInitialize(MovisensDevice configuration) async {
-    super.onInitialize(configuration);
-    device = movisens.MovisensDevice(name: configuration.deviceName);
-  }
+  Future<void> onConfigure(MovisensDevice configuration) async {}
 
   @override
-  int get batteryLevel => _batteryLevel;
-
-  @override
-  String get btleAddress => device?.id ?? super.btleAddress;
+  int? get batteryLevel => _batteryLevel;
 
   @override
   bool canConnect() => device != null;

@@ -6,13 +6,19 @@ import 'package:carp_movisens_package/carp_movisens_package.dart';
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:openmhealth_schemas/openmhealth_schemas.dart' as omh;
 
 void main() {
   late StudyProtocol protocol;
   Smartphone phone;
+
+  Future<void> writeToFile(String json, String fileName) async {
+    File file = File('test/json/$fileName');
+    await file.writeAsString(json);
+    print("Done writing '$fileName'");
+  }
 
   setUpAll(() {
     // Initialization of serialization
@@ -32,7 +38,6 @@ void main() {
     MovisensDevice movisens = MovisensDevice(
       sensorLocation: SensorLocation.Chest,
       sex: Sex.Male,
-      deviceName: 'Sensor 02655',
       height: 175,
       weight: 75,
       age: 25,
@@ -72,6 +77,9 @@ void main() {
     print(protocol);
     print(toJsonString(protocol));
     expect(protocol.ownerId, 'alex@uni.dk');
+
+    // used in the test below
+    await writeToFile(toJsonString(protocol), 'study_protocol.json');
   });
 
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
@@ -101,6 +109,50 @@ void main() {
     );
 
     print(toJsonString(protocol));
+  });
+
+  test('Data types', () async {
+    final allData = [
+      MovisensDevice(
+        age: 10,
+        height: 100,
+        weight: 50,
+        sensorLocation: SensorLocation.Chest,
+        sex: Sex.Male,
+      ),
+
+      MovisensStepCount(deviceId: '', type: '', steps: 0),
+      MovisensBodyPosition(deviceId: '', type: '', bodyPosition: 'Chest'),
+      MovisensInclination(deviceId: '', type: '', x: 0, y: 0, z: 0),
+      MovisensMovementAcceleration(
+        deviceId: '',
+        type: '',
+        movementAcceleration: 0,
+      ),
+      MovisensMET(deviceId: '', type: '', met: 0),
+      MovisensMETLevel(
+        deviceId: '',
+        type: '',
+        sedentary: 0,
+        light: 0,
+        moderate: 0,
+        vigorous: 0,
+      ),
+      MovisensHR(deviceId: '', type: '', hr: 0),
+      MovisensEDA(deviceId: '', type: '', edaSclMean: 0),
+      MovisensSkinTemperature(deviceId: '', type: '', skinTemperature: 0),
+      MovisensRespiration(deviceId: '', type: '', value: 0),
+      MovisensTapMarker(deviceId: '', type: '', tapMarker: 1),
+    ];
+
+    for (var data in allData) {
+      final dataJson = toJsonString(data);
+      final dataFromJson = Function.apply(data.fromJsonFunction, [
+        json.decode(dataJson) as Map<String, dynamic>,
+      ]);
+      print(toJsonString(dataFromJson));
+      expect(toJsonString(dataFromJson), equals(dataJson));
+    }
   });
 
   test('Movisens HR -> OMH HeartRate', () {
