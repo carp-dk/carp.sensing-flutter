@@ -4,7 +4,7 @@ part of '../../main.dart';
 class DeviceListViewModel with ChangeNotifier {
   /// The list of all devices in this deployment.
   Iterable<DeviceViewModel> get deployedDevices =>
-      bloc.sensing.deployedDevices!.map((device) => DeviceViewModel(device));
+      bloc.sensing.deployedDevices.map((device) => DeviceViewModel(device));
 }
 
 /// A view model for a [DeviceManager].
@@ -18,11 +18,12 @@ class DeviceViewModel {
   String get id => deviceManager.id;
 
   /// A printer-friendly name for this device.
-  String? get name => DeviceDescription.descriptors[type!]?.name;
+  String? get name => DeviceDescription.descriptors[type!]?.description;
 
-  /// A printer-friendly description of this device.
+  /// A longer description of this device.
   String get description =>
-      '${DeviceDescription.descriptors[type!]?.description} - $statusString'
+      '$id'
+      '${(deviceManager is BLEDeviceManager && isPaired) ? '\n${(deviceManager as BLEDeviceManager).bleName}' : ''}'
       '${(deviceManager is HardwareDeviceManager && batteryLevel != null) ? '\n$batteryLevel% battery remaining.' : ''}';
 
   String get statusString => status.name;
@@ -38,7 +39,31 @@ class DeviceViewModel {
   /// The icon for the runtime state of this device.
   Icon? get stateIcon => DeviceDescription.deviceStateIcon[status];
 
+  /// Is this device currently paired?
+  bool get isPaired =>
+      status == DeviceStatus.paired || status == DeviceStatus.connected;
+
+  /// Is this device currently connected?
+  bool get isConnected => status == DeviceStatus.connected;
+
+  /// Is this a BLE device?
+  bool get isBleDevice => deviceManager.configuration is BLEDevice;
+
   DeviceViewModel(this.deviceManager) : super();
+
+  /// Pair with the given [device] if this is a BLE device.
+  void pairWithDevice(ble.DiscoveredDevice device) {
+    if (isBleDevice) {
+      (deviceManager as BLEDeviceManager).pair(
+        bleAddress: device.id,
+        bleName: device.name,
+        serviceUuids: device.serviceUuids
+            .map((uuid) => uuid.toString())
+            .toList(),
+        manufacturerData: device.manufacturerData.toList(),
+      );
+    }
+  }
 
   /// Connect to this device.
   void connectToDevice() => bloc

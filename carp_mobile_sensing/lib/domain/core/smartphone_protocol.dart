@@ -28,7 +28,7 @@ mixin SmartphoneProtocolExtension {
 
   /// The name of the application which will execute this protocol.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  String? applicationName;
+  String? get applicationName => _data.applicationName;
 
   /// The description of this study protocol containing the title, description,
   /// purpose, and the responsible researcher for this study.
@@ -162,6 +162,21 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// This reflects the **major** version of the CARP Mobile Sensing framework
   /// as set in the pubspec.yaml file.
   static const String CAMS_PROTOCOL_API_LEVEL = '2.0';
+
+  // These static app names can be used as [applicationName] in the protocol.
+  // It is the name of the Flutter app as specified in the pubspec.yaml file.
+
+  // The example app included in the CARP Mobile Sensing framework.
+  static const String CAMS_EXAMPLE_APP_NAME = 'carp_mobile_sensing_example';
+
+  // The CARP Mobile Sensing framework demo app.
+  static const String CAMS_DEMO_APP_NAME = 'carp_mobile_sensing_app';
+
+  // The Pulmonary Monitor demo app.
+  static const String PULMONARY_MONITOR_APP_NAME = 'pulmonary_monitor_app';
+
+  // The CARP Studies app.
+  static const String CARP_STUDY_APP_NAME = 'carp_study_app';
 
   @override
   set description(String? description) {

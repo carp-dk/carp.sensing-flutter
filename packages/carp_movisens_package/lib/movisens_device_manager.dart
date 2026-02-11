@@ -15,7 +15,7 @@ part of 'carp_movisens_package.dart';
 class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of a Movisens device.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovisensDevice';
 
   /// The default role name for a Movisens device.
   static const String DEFAULT_ROLE_NAME = 'movisens';

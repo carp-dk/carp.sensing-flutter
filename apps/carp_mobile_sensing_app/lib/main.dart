@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as ble;
 
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart' hide Smartphone;
@@ -40,6 +41,7 @@ part 'src/services/carp_backend.dart';
 part 'src/services/study_protocol_manager.dart';
 part 'src/views/probe_list_page.dart';
 part 'src/views/device_list_page.dart';
+part 'src/views/ble_scanner_page.dart';
 part 'src/views/study_page.dart';
 part 'src/views/cachet_colors.dart';
 
@@ -56,8 +58,6 @@ void main() async {
 }
 
 final bloc = SensingBLoC(
-  deploymentMode: DeploymentMode.dev,
+  deploymentMode: DeploymentMode.local,
   debugLevel: DebugLevel.debug,
-  // primaryDeviceType: MobileSensingSmartphone.DEVICE_TYPE,
-  primaryDeviceType: Smartphone.DEVICE_TYPE,
 );

@@ -66,15 +66,15 @@ class Sensing {
       (controller != null) ? controller!.executor.probes : [];
 
   /// The list of devices in the current deployment.
-  List<DeviceManager>? get deployedDevices => deployment != null
+  List<DeviceManager> get deployedDevices => deployment != null
       ? client.deviceController.devices.values
             .where(
               (manager) => deployment!.devices.any(
-                (registration) => registration.type == manager.deviceType,
+                (configuration) => configuration.type == manager.deviceType,
               ),
             )
             .toList()
-      : [];
+      : <DeviceManager>[];
 
   /// Initialize and set up sensing.
   Future<void> initialize() async {

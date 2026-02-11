@@ -12,6 +12,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
   @override
   Future<SmartphoneStudyProtocol> getStudyProtocol(String protocolId) async {
     SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
+      applicationName: SmartphoneStudyProtocol.CAMS_DEMO_APP_NAME,
       name: 'CAMS App - Demo Study Protocol',
       studyDescription: StudyDescription(
         title: 'CAMS App - Demo Study',
@@ -47,19 +48,19 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     );
 
     // build-in measure from sensor and device sampling packages
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: SensorSamplingPackage.STEP_EVENT),
-          Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-          Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-          Measure(type: DeviceSamplingPackage.FREE_MEMORY),
-          Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-        ],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: SensorSamplingPackage.STEP_EVENT),
+    //       Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+    //       Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+    //       Measure(type: DeviceSamplingPackage.FREE_MEMORY),
+    //       Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+    //     ],
+    //   ),
+    //   phone,
+    // );
 
     // // a random trigger - 3-8 times during time period of 8-20
     // protocol.addTaskControl(
@@ -84,30 +85,30 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //
     // See the PulmonaryMonitor demo app for a full-scale example of how to use
     // the App Task model.
-    protocol.addTaskControl(
-      DelayedTrigger(delay: const Duration(seconds: 20)),
-      AppTask(
-        type: BackgroundSensingUserTask.SENSING_TYPE,
-        title: "User Task",
-        description: 'Please click here to collect Device Information.',
-        measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-        notification: true,
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   DelayedTrigger(delay: const Duration(seconds: 20)),
+    //   AppTask(
+    //     type: BackgroundSensingUserTask.SENSING_TYPE,
+    //     title: "User Task",
+    //     description: 'Please click here to collect Device Information.',
+    //     measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+    //     notification: true,
+    //   ),
+    //   phone,
+    // );
 
     //
     // --------- CONTEXT PACKAGE EXAMPLES -------------
     //
 
     // activity measure using the phone
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [Measure(type: ContextSamplingPackage.ACTIVITY)],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [Measure(type: ContextSamplingPackage.ACTIVITY)],
+    //   ),
+    //   phone,
+    // );
 
     // Define the online location service and add it as a 'device'
     // final locationService = LocationService();
@@ -119,20 +120,20 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     protocol.addConnectedDevice(locationService, phone);
 
     // Add a background task that collects location on a regular basis
-    protocol.addTaskControl(
-      PeriodicTrigger(period: Duration(seconds: 20)),
-      BackgroundTask(
-        measures: [
-          Measure(type: ContextSamplingPackage.LOCATION)
-            // Override the default sampling configuration to just get
-            // a single location sample each time the task is triggered.
-            ..overrideSamplingConfiguration = LocationSamplingConfiguration(
-              once: true,
-            ),
-        ],
-      ),
-      locationService,
-    );
+    // protocol.addTaskControl(
+    //   PeriodicTrigger(period: Duration(seconds: 20)),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: ContextSamplingPackage.LOCATION)
+    //         // Override the default sampling configuration to just get
+    //         // a single location sample each time the task is triggered.
+    //         ..overrideSamplingConfiguration = LocationSamplingConfiguration(
+    //           once: true,
+    //         ),
+    //     ],
+    //   ),
+    //   locationService,
+    // );
 
     // // Add a background task that continuously collects location and mobility
     // protocol.addTaskControl(
@@ -171,19 +172,19 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //
 
     // collect noise, but change the default sampling configuration
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: MediaSamplingPackage.NOISE)
-            ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-              interval: const Duration(seconds: 23),
-              duration: const Duration(seconds: 5),
-            ),
-        ],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: MediaSamplingPackage.NOISE)
+    //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+    //           interval: const Duration(seconds: 23),
+    //           duration: const Duration(seconds: 5),
+    //         ),
+    //     ],
+    //   ),
+    //   phone,
+    // );
 
     // // sample an audio recording
     // var audioTask = BackgroundTask(measures: [
@@ -209,34 +210,34 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     // --------- CONNECTIVITY PACKAGE EXAMPLES -------------
     //
 
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: ConnectivitySamplingPackage.CONNECTIVITY),
-          Measure(type: ConnectivitySamplingPackage.WIFI),
-          Measure(type: ConnectivitySamplingPackage.BLUETOOTH)
-            ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
-              interval: const Duration(seconds: 33),
-              duration: const Duration(seconds: 5),
-            ),
-        ],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: ConnectivitySamplingPackage.CONNECTIVITY),
+    //       Measure(type: ConnectivitySamplingPackage.WIFI),
+    //       Measure(type: ConnectivitySamplingPackage.BLUETOOTH)
+    //         ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+    //           interval: const Duration(seconds: 33),
+    //           duration: const Duration(seconds: 5),
+    //         ),
+    //     ],
+    //   ),
+    //   phone,
+    // );
 
     //
     // --------- COMMUNICATION PACKAGE EXAMPLES -------------
     //
 
     // Add an automatic task that collects SMS messages in/out
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)],
+    //   ),
+    //   phone,
+    // );
 
     // Add an automatic task that collects the logs for:
     //  * SMS log (in/out)
@@ -244,17 +245,17 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //  * calendar entries
     //
     // every 30 minutes.
-    protocol.addTaskControl(
-      PeriodicTrigger(period: Duration(minutes: 30)),
-      BackgroundTask(
-        measures: [
-          Measure(type: CommunicationSamplingPackage.PHONE_LOG),
-          Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
-          Measure(type: CommunicationSamplingPackage.CALENDAR),
-        ],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   PeriodicTrigger(period: Duration(minutes: 30)),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: CommunicationSamplingPackage.PHONE_LOG),
+    //       Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
+    //       Measure(type: CommunicationSamplingPackage.CALENDAR),
+    //     ],
+    //   ),
+    //   phone,
+    // );
 
     //
     // --------- APP PACKAGE EXAMPLES -------------
@@ -262,39 +263,36 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // Add a task that collects the list of installed apps
     // and a log of app usage activity
-    protocol.addTaskControl(
-      // PeriodicTrigger(period: const Duration(minutes: 1)),
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: AppsSamplingPackage.APPS),
-          Measure(type: AppsSamplingPackage.APP_USAGE),
-        ],
-      ),
-      phone,
-    );
+    // protocol.addTaskControl(
+    //   // PeriodicTrigger(period: const Duration(minutes: 1)),
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: AppsSamplingPackage.APPS),
+    //       Measure(type: AppsSamplingPackage.APP_USAGE),
+    //     ],
+    //   ),
+    //   phone,
+    // );
 
     //
     // --------- eSENSE PACKAGE EXAMPLES -------------
     //
 
-    // Define the sSense device and add its measures
-    ESenseDevice eSense = ESenseDevice(
-      deviceName: 'eSense-0332',
-      samplingRate: 10,
-    );
-    protocol.addConnectedDevice(eSense, phone);
+    // // Define the sSense device and add its measures
+    // ESenseDevice eSense = ESenseDevice(samplingRate: 10);
+    // protocol.addConnectedDevice(eSense, phone);
 
-    protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-        measures: [
-          Measure(type: ESenseSamplingPackage.ESENSE_BUTTON),
-          Measure(type: ESenseSamplingPackage.ESENSE_SENSOR),
-        ],
-      ),
-      eSense,
-    );
+    // protocol.addTaskControl(
+    //   ImmediateTrigger(),
+    //   BackgroundTask(
+    //     measures: [
+    //       Measure(type: ESenseSamplingPackage.ESENSE_BUTTON),
+    //       Measure(type: ESenseSamplingPackage.ESENSE_SENSOR),
+    //     ],
+    //   ),
+    //   eSense,
+    // );
 
     //
     // --------- POLAR PACKAGE EXAMPLES -------------
@@ -306,23 +304,21 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //   name: 'Polar H10 HR Monitor',
     //   deviceType: PolarDeviceType.H10,
     // );
-    // var polar = PolarDevice(
-    //   identifier: 'B36B5B21',
-    //   name: 'Polar HR Sense',
-    //   deviceType: PolarDeviceType.SENSE,
-    // );
+    var polar = PolarDevice();
+    protocol.addConnectedDevice(polar, phone);
 
-    // protocol.addConnectedDevice(polar, phone);
-
-    // protocol.addTaskControl(
-    //     ImmediateTrigger(),
-    //     BackgroundTask(measures: [
-    //       Measure(type: PolarSamplingPackage.HR),
-    //       // Measure(type: PolarSamplingPackage.ECG),
-    //       // Measure(type: PolarSamplingPackage.PPG),
-    //       // Measure(type: PolarSamplingPackage.PPI),
-    //     ]),
-    //     polar);
+    protocol.addTaskControl(
+      ImmediateTrigger(),
+      BackgroundTask(
+        measures: [
+          Measure(type: PolarSamplingPackage.HR),
+          // Measure(type: PolarSamplingPackage.ECG),
+          // Measure(type: PolarSamplingPackage.PPG),
+          // Measure(type: PolarSamplingPackage.PPI),
+        ],
+      ),
+      polar,
+    );
 
     //
     // --------- MOVESENSE PACKAGE EXAMPLES -------------

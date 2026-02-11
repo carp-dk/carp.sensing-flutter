@@ -12,7 +12,7 @@ part of 'health_package.dart';
 class HealthService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of the health service.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.HealthService';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.HealthService';
 
   /// The default role name for a health service.
   static const String DEFAULT_ROLE_NAME = 'Health Service';

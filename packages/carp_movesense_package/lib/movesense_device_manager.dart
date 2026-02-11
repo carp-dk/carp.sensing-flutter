@@ -27,7 +27,7 @@ enum MovesenseDeviceType {
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseDevice extends BLEDevice<MovesenseDeviceRegistration> {
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.MovesenseDevice';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovesenseDevice';
 
   static const String DEFAULT_ROLE_NAME = 'Movesense ECG Device';
 

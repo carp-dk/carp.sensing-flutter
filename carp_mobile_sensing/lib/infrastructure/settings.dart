@@ -46,16 +46,6 @@ class Settings {
   /// Can be changed on runtime.
   DebugLevel debugLevel = DebugLevel.warning;
 
-  /// The type of this primary device.
-  ///
-  /// Normally this is the full namespace of the device, e.g.,
-  /// "dk.cachet.carp.common.application.devices.Smartphone".
-  /// This is used to identify CARP apps (considered as primary devices) and
-  /// compare with the [ActiveParticipationInvitation.assignedDevices] in an
-  /// invitation and the [PrimaryDeviceDeployment.deviceConfiguration] in a
-  /// study deployment.
-  String? primaryDeviceType;
-
   /// Save the queue of [AppTask]s in the [AppTaskController] across
   /// app re-start?
   bool saveAppTaskQueue = true;

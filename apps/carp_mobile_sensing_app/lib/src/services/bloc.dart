@@ -25,10 +25,8 @@ class SensingBLoC {
   SensingBLoC({
     this.deploymentMode = DeploymentMode.local,
     DebugLevel debugLevel = DebugLevel.warning,
-    String primaryDeviceType = Smartphone.DEVICE_TYPE,
   }) {
     Settings().debugLevel = debugLevel;
-    Settings().primaryDeviceType = primaryDeviceType;
   }
 
   /// The [Sensing] layer used in the app.

@@ -12,7 +12,7 @@ part of '../../carp_context_package.dart';
 class WeatherService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a air quality service.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.WeatherService';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.WeatherService';
 
   /// The default role name for a weather service.
   static const String DEFAULT_ROLE_NAME = 'Weather Service';

@@ -25,7 +25,7 @@ enum PolarDeviceType {
 class PolarDevice extends BLEDevice<PolarDeviceRegistration> {
   /// The type of a Polar device.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.PolarDevice';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.PolarDevice';
 
   /// The default role name for a Polar device.
   static const String DEFAULT_ROLE_NAME = 'Polar HR Device';
@@ -108,12 +108,6 @@ class PolarDeviceManager
   /// The [Polar] device handler.
   Polar get polar => _polar ??= Polar();
 
-  /// List of [PolarDataType]s that are available in Polar devices for online
-  /// streaming or offline recording.
-  ///
-  /// Only available **after** a Polar device is successfully connected.
-  List<PolarDataType> features = [];
-
   @override
   String get id => polarIdentifier ?? bleAddress ?? 'Unknown Polar device';
 
@@ -122,7 +116,16 @@ class PolarDeviceManager
 
   /// Polar device id printed on the sensor/device or UUID.
   /// Typically on the form "B34B4B56".
+  ///
+  /// This identifier can be set directly if known, or can be extracted
+  /// from the [bleName] when the device is paired (e.g., "Polar H10 B36KB56").
+  ///
   /// This identifier is used for connecting to a Polar device.
+  /// It is typically the last part of the BLE name of the device,
+  /// which is on the form "Polar <type> <identifier>".
+  /// It is not the same as the BLE address, which is typically on the
+  /// form "00:11:22:33:44:55". Polar devices do not use the BLE address
+  /// for connecting.
   String? polarIdentifier;
 
   PolarDeviceType? get polarDeviceType {
@@ -151,6 +154,12 @@ class PolarDeviceManager
   /// RSSI (Received Signal Strength Indicator) value from advertisement
   int? rssi;
 
+  /// List of [PolarDataType]s that are available in Polar devices for online
+  /// streaming or offline recording.
+  ///
+  /// Only available **after** a Polar device is successfully connected.
+  List<PolarDataType> features = [];
+
   /// Are the [features] available (i.e., received from the device)?
   bool get polarFeaturesAvailable => _polarFeaturesAvailable;
 
@@ -178,6 +187,9 @@ class PolarDeviceManager
   );
 
   PolarDeviceManager(super.type, [super.configuration]);
+
+  @override
+  bool onPaired() => (polarIdentifier = bleName?.split(' ').last) != null;
 
   @override
   bool canConnect() => polarIdentifier != null;

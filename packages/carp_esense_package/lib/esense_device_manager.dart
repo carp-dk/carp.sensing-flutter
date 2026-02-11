@@ -51,7 +51,7 @@ part of 'esense.dart';
 class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of an eSense device.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.ESenseDevice';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.ESenseDevice';
 
   /// The default role name for an eSense device.
   static const String DEFAULT_ROLE_NAME = 'eSense';

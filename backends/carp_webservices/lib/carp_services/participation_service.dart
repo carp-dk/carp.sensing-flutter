@@ -27,24 +27,25 @@ class CarpParticipationService extends CarpBaseService
       ParticipationReference._(this, getStudyDeploymentId(studyDeploymentId));
 
   /// Get the list of active participation invitations for an [accountId]
-  /// and for a primary [device].
+  /// and for a app named [applicationName].
   ///
   /// Note that the [accountId] is the unique CARP account id (and not the
-  /// username). The [device] is the full namespace of the device, e.g.,
-  /// "dk.carp.cams.devices.Smartphone".
+  /// username). The [applicationName] is typically the Flutter application name
+  /// specified in the `pubspec.yaml` file.
   ///
   /// If [accountId] is not specified, the account id of the currently
   /// authenticated [CarpUser] is used.
-  /// If [device] is not specified, the [Settings.primaryDeviceType] is used,
-  /// if set. If not set, all devices are considered.
+  /// If [applicationName] is not specified, all types of applications are considered.
   @override
   Future<List<ActiveParticipationInvitation>>
-  getActiveParticipationInvitations({String? accountId, String? device}) async {
+  getActiveParticipationInvitations({
+    String? accountId,
+    String? applicationName,
+  }) async {
     accountId ??= CarpAuthService().currentUser.id;
-    device ??= Settings().primaryDeviceType;
 
     debug(
-      "$runtimeType - Getting invitations for '$accountId' for device: '$device'.",
+      "$runtimeType - Getting invitations for '$accountId' for application: '$applicationName'.",
     );
 
     dynamic responseJson = await _rpc(
@@ -61,14 +62,13 @@ class CarpParticipationService extends CarpBaseService
         )
         .toList();
 
-    // if a device is specified, filter on that
-    if (device != null) {
+    // if a applicationName is specified, filter on that
+    if (applicationName != null) {
       invitations = invitations
           .where(
             (invitation) =>
-                (invitation.assignedDevices ?? <AssignedPrimaryDevice>[]).any(
-                  (assigned) => assigned.device.jsonType == device,
-                ),
+                (invitation.invitation.applicationData?['applicationName'] ==
+                applicationName),
           )
           .toList();
     }
@@ -110,7 +110,7 @@ class CarpParticipationService extends CarpBaseService
     }
 
     List<ActiveParticipationInvitation> invitations =
-        await getActiveParticipationInvitations(device: device);
+        await getActiveParticipationInvitations(applicationName: device);
 
     ActiveParticipationInvitation? invitation;
 

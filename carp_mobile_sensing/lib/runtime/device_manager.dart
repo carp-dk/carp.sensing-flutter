@@ -446,6 +446,40 @@ abstract class BLEDeviceManager<
   /// The BLE name of this device, if known.
   String? bleName;
 
+  /// Advertised services of this device, if known.
+  List<String> serviceUuids = [];
+
+  /// Manufacturer specific data. The first 2 bytes are the Company Identifier Codes.
+  List<int> manufacturerData = [];
+
+  /// Pair this device manager with a BLE device by specifying the [bleAddress],
+  /// and optionally its [bleName], [serviceUuids], and [manufacturerData].
+  @nonVirtual
+  void pair({
+    required String bleAddress,
+    String? bleName,
+    List<String>? serviceUuids,
+    List<int>? manufacturerData,
+  }) {
+    this.bleAddress = bleAddress;
+    this.bleName = bleName;
+    this.serviceUuids = serviceUuids ?? [];
+    this.manufacturerData = manufacturerData ?? [];
+    if (onPaired()) {
+      status = DeviceStatus.paired;
+      info('$runtimeType - Paired with BLE device: $bleAddress');
+    } else {
+      warning('$runtimeType - Failed to pair with BLE device: $bleAddress');
+    }
+  }
+
+  /// Callback on [pair].
+  ///
+  // By default, pairing is successful, but can be overridden in sub-classes
+  // for device-specific pairing handling.
+  /// Called by the [pair] method after setting the BLE device information.
+  bool onPaired() => true;
+
   @override
   @mustCallSuper
   Future<bool> onHasPermissions() async => (Platform.isAndroid)
@@ -469,6 +503,7 @@ abstract class BLEDeviceManager<
     }
   }
 
+  @override
   BLEDeviceManager(
     super.deviceType, [
     super.configuration,

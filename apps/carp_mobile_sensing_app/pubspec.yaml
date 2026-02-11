@@ -27,7 +27,8 @@ dependencies:
   shared_preferences: ^2.5.3
   sqflite: ^2.4.2
   health: ^13.2.0
-  flutter_blue_plus: '>=1.29.0 <3.0.0'
+  # flutter_blue_plus: '>=1.29.0 <3.0.0'
+  flutter_reactive_ble: ^5.0.0
 
   #carp_serializable: ^1.1.0
   #carp_core: ^0.30.0
@@ -105,7 +106,7 @@ dependency_overrides:
   #     url: https://github.com/Panosfunk/mdsflutter.git
   #     ref: master
 
-  polar: 7.7.1
+  # polar: 7.7.1
   # load polar from https://github.com/iarata/polar due to device_info_plus conflict
   # polar:
   #   git:

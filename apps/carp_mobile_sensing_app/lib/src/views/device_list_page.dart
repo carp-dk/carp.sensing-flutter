@@ -42,47 +42,75 @@ class DevicesListPageState extends State<DevicesListPage> {
             children: <Widget>[
               ListTile(
                 leading: device.icon,
-                title: Text(device.id),
+                title: Text(device.name ?? device.id),
                 subtitle: Text(device.description),
                 trailing: device.stateIcon,
               ),
-              // const Divider(),
-              // TextButton(
-              //     child: const Text('How to use this device?'),
-              //     onPressed: () => print('Use the $device')),
               FutureBuilder<bool>(
                 future: device.deviceManager.hasPermissions(),
                 builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-                  Widget w = Text("");
+                  final hasPermissions = snapshot.data ?? true;
+                  final showPermissionButton = !hasPermissions;
+                  final showScanButton =
+                      hasPermissions &&
+                      device.isBleDevice &&
+                      device.status.index < DeviceStatus.paired.index;
+                  final showConnectButton =
+                      hasPermissions && !device.isConnected;
 
-                  if (snapshot.hasData && !snapshot.data!) {
-                    w = Column(
-                      children: [
-                        const Divider(),
-                        TextButton(
-                          child: const Text(
-                            'Request permissions to access this device',
-                          ),
-                          onPressed: () =>
-                              device.deviceManager.requestPermissions(),
-                        ),
-                      ],
-                    );
+                  if (!showPermissionButton &&
+                      !showScanButton &&
+                      !showConnectButton) {
+                    return const SizedBox.shrink();
                   }
-                  return w;
+
+                  return Column(
+                    children: [
+                      const Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: [
+                            if (showPermissionButton)
+                              ElevatedButton(
+                                onPressed: () =>
+                                    device.deviceManager.requestPermissions(),
+                                child: const Text('Request Permissions'),
+                              ),
+                            if (showScanButton)
+                              ElevatedButton(
+                                onPressed: () async {
+                                  final selectedDevice =
+                                      await Navigator.of(
+                                        context,
+                                      ).push<ble.DiscoveredDevice?>(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              BLEScannerPage(),
+                                        ),
+                                      );
+                                  if (selectedDevice != null) {
+                                    setState(() {
+                                      device.pairWithDevice(selectedDevice);
+                                    });
+                                  }
+                                },
+                                child: const Text('Scan for Devices'),
+                              ),
+                            if (showConnectButton)
+                              ElevatedButton(
+                                onPressed: () => device.connectToDevice(),
+                                child: const Text('Connect'),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
                 },
               ),
-              (device.status != DeviceStatus.connected)
-                  ? Column(
-                      children: [
-                        const Divider(),
-                        TextButton(
-                          child: const Text('Connect to this device'),
-                          onPressed: () => device.connectToDevice(),
-                        ),
-                      ],
-                    )
-                  : Text(""),
             ],
           ),
         ),

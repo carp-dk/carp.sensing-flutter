@@ -12,7 +12,7 @@ class DeviceDescription {
     Smartphone.DEVICE_TYPE: DeviceTypeDescriptor(
       'Phone',
       'This phone',
-      Icon(Icons.phone_android, size: 50, color: CachetColors.GREY_4),
+      Icon(Icons.phone_android, size: 50, color: CachetColors.DARK_BLUE),
     ),
     ESenseDevice.DEVICE_TYPE: DeviceTypeDescriptor(
       'eSense',
@@ -22,7 +22,7 @@ class DeviceDescription {
     PolarDevice.DEVICE_TYPE: DeviceTypeDescriptor(
       'Polar',
       'Polar HR Monitor',
-      Icon(Icons.monitor_heart, size: 50, color: CachetColors.LIGHT_GREEN),
+      Icon(Icons.monitor_heart, size: 50, color: CachetColors.ORANGE),
     ),
     LocationService.DEVICE_TYPE: DeviceTypeDescriptor(
       'Location',
@@ -41,7 +41,7 @@ class DeviceDescription {
     ),
     HealthService.DEVICE_TYPE: DeviceTypeDescriptor(
       'Health',
-      'Health data stored on the phone',
+      'Health database',
       Icon(Icons.heart_broken, size: 50, color: CachetColors.RED),
     ),
     MovisensDevice.DEVICE_TYPE: DeviceTypeDescriptor(
@@ -62,7 +62,7 @@ class DeviceDescription {
 
   static Map<DeviceStatus, Icon> get deviceStateIcon => {
     DeviceStatus.unknown: Icon(Icons.question_mark, color: CachetColors.RED),
-    DeviceStatus.initialized: Icon(Icons.check, color: CachetColors.GREEN),
+    DeviceStatus.configured: Icon(Icons.check, color: CachetColors.GREEN),
     DeviceStatus.connected: Icon(Icons.link, color: CachetColors.GREEN),
     DeviceStatus.disconnected: Icon(Icons.link_off, color: CachetColors.YELLOW),
     DeviceStatus.paired: Icon(

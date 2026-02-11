@@ -12,7 +12,7 @@ part of '../../carp_context_package.dart';
 class AirQualityService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a air quality service.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.AirQualityService';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.AirQualityService';
 
   /// The default role name for an air quality service.
   static const String DEFAULT_ROLE_NAME = 'Air Quality Service';

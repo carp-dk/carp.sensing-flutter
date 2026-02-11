@@ -5,7 +5,7 @@ part of '../../carp_context_package.dart';
 class LocationService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a location service.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.LocationService';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.LocationService';
 
   /// The default role name for a location service.
   static const String DEFAULT_ROLE_NAME = 'Location Service';
