@@ -42,7 +42,7 @@ class DevicesListPageState extends State<DevicesListPage> {
             children: <Widget>[
               ListTile(
                 leading: device.icon,
-                title: Text(device.name ?? device.id),
+                title: Text(device.typeName),
                 subtitle: Text(device.description),
                 trailing: device.stateIcon,
               ),

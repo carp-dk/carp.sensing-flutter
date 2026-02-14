@@ -1,6 +1,6 @@
 part of '../main.dart';
 
-class App extends StatelessWidget {
+class MobileSensingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -58,27 +58,27 @@ class LoadingPage extends StatelessWidget {
                 ),
               ),
             )
-          : CarpMobileSensingApp(),
+          : HomePage(),
     );
   }
 }
 
 /// The main view of the app, shown once loading is done.
-class CarpMobileSensingApp extends StatefulWidget {
+class HomePage extends StatefulWidget {
   final AppViewModel appViewModel = AppViewModel();
 
-  CarpMobileSensingApp({super.key});
+  HomePage({super.key});
   @override
-  CarpMobileSensingAppState createState() => CarpMobileSensingAppState();
+  HomePageState createState() => HomePageState();
 }
 
-class CarpMobileSensingAppState extends State<CarpMobileSensingApp> {
+class HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   final List<Widget> _pages = [];
 
   AppViewModel get model => widget.appViewModel;
 
-  CarpMobileSensingAppState() : super();
+  HomePageState() : super();
 
   @override
   void initState() {

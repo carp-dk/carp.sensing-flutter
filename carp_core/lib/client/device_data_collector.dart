@@ -39,5 +39,5 @@ abstract interface class ConnectedDeviceDataCollector<
 >
     extends DeviceDataCollector {
   /// Determines whether a connection can be made at this point in time to the device.
-  bool canConnect();
+  bool get canConnect;
 }

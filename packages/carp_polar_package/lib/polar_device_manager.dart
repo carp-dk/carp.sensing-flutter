@@ -57,6 +57,9 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
   /// The type of Polar device, if known.
   PolarDeviceType polarDeviceType;
 
+  /// List of [PolarDataType]s that are available in the connected Polar device.
+  List<PolarDataType>? supportedDataTypes;
+
   /// RSSI (Received Signal Strength Indicator) value from advertisement
   int? rssi;
 
@@ -70,6 +73,7 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
     required super.bleAddress,
     super.bleName,
     required this.polarDeviceType,
+    this.supportedDataTypes,
     this.rssi,
   }) : super(
          deviceDisplayName: deviceDisplayName ?? bleName,
@@ -95,7 +99,7 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
 class PolarDeviceManager
     extends BLEDeviceManager<PolarDevice, PolarDeviceRegistration> {
   int? _batteryLevel;
-  bool _polarFeaturesAvailable = false;
+  bool _polarDataTypesAvailable = false;
   Polar? _polar;
   final StreamController<int> _batteryEventController =
       StreamController.broadcast();
@@ -109,10 +113,7 @@ class PolarDeviceManager
   Polar get polar => _polar ??= Polar();
 
   @override
-  String get id => polarIdentifier ?? bleAddress ?? 'Unknown Polar device';
-
-  @override
-  String? get displayName => bleName;
+  String? get displayName => bleName ?? '';
 
   /// Polar device id printed on the sensor/device or UUID.
   /// Typically on the form "B34B4B56".
@@ -158,19 +159,16 @@ class PolarDeviceManager
   /// streaming or offline recording.
   ///
   /// Only available **after** a Polar device is successfully connected.
-  List<PolarDataType> features = [];
+  List<PolarDataType>? dataTypes;
 
   /// Are the [features] available (i.e., received from the device)?
-  bool get polarFeaturesAvailable => _polarFeaturesAvailable;
+  bool get polarFeaturesAvailable => _polarDataTypesAvailable;
 
   @override
   int? get batteryLevel => _batteryLevel;
 
   @override
   Stream<int> get batteryEvents => _batteryEventController.stream;
-
-  @override
-  void onConfigure(PolarDevice configuration) {}
 
   @override
   PolarDeviceRegistration createRegistration() => PolarDeviceRegistration(
@@ -183,6 +181,7 @@ class PolarDeviceManager
         : BatteryChargingState.unknown,
     identifier: polarIdentifier ?? 'Unknown',
     polarDeviceType: polarDeviceType ?? PolarDeviceType.UNKNOWN,
+    supportedDataTypes: dataTypes,
     rssi: rssi,
   );
 
@@ -192,11 +191,11 @@ class PolarDeviceManager
   bool onPaired() => (polarIdentifier = bleName?.split(' ').last) != null;
 
   @override
-  bool canConnect() => polarIdentifier != null;
+  bool get canConnect => polarIdentifier != null;
 
   @override
   Future<DeviceStatus> onConnect() async {
-    // fast out if already connected.
+    // fast out if already connected or if no identifier is available for connecting
     if (isConnected) return status;
 
     if (polarIdentifier == null) {
@@ -205,67 +204,80 @@ class PolarDeviceManager
       );
       // return status as configured, so we can try to reconnect with another identifier
       return DeviceStatus.configured;
-    } else {
-      try {
-        // listen for battery level events
-        _batterySubscription = polar.batteryLevel.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          _batteryLevel = event.level;
-          _batteryEventController.add(_batteryLevel!);
-        });
+    }
 
-        // listen for connection events
-        _connectingSubscription = polar.deviceConnecting.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          status = DeviceStatus.connecting;
-          bleAddress = event.address;
-          bleName = event.name;
-          rssi = event.rssi;
-        });
+    // Set listeners for Polar events and connect to the device.
+    // We do not mark the device as fully connected before the data types are
+    // available.
+    try {
+      // listen for battery level events
+      _batterySubscription = polar.batteryLevel.listen((event) {
+        debug('$runtimeType - Polar event : $event');
+        _batteryLevel = event.level;
+        _batteryEventController.add(_batteryLevel!);
+        // if we can get the battery level, we can consider the device as fully connected
+        status = DeviceStatus.connected;
+      });
 
-        _connectedSubscription = polar.deviceConnected.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          // we do not mark the device as fully connected before the features are available
-          status = DeviceStatus.connecting;
-          bleAddress = event.address;
-          bleName = event.name;
-          rssi = event.rssi;
-        });
+      // listen for connection events
+      _connectingSubscription = polar.deviceConnecting.listen((event) {
+        debug('$runtimeType - Polar event : $event');
+        status = DeviceStatus.connecting;
+        bleAddress = event.address;
+        bleName = event.name;
+        rssi = event.rssi;
+      });
 
-        _disconnectedSubscription = polar.deviceDisconnected.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          status = DeviceStatus.disconnected;
-          _batteryLevel = null;
-          rssi = null;
-        });
+      // listen for connected events
+      _connectedSubscription = polar.deviceConnected.listen((event) {
+        debug('$runtimeType - Polar event : $event');
+        // we do not mark the device as fully connected before the data types
+        // are available - see below
+        status = DeviceStatus.connecting;
+        bleAddress = event.address;
+        bleName = event.name;
+        rssi = event.rssi;
+      });
 
-        // connect to the device based on its identified
-        polar.connectToDevice(polarIdentifier!, requestPermissions: true);
+      // listen for disconnected events
+      _disconnectedSubscription = polar.deviceDisconnected.listen((event) {
+        debug('$runtimeType - Polar event : $event');
+        status = DeviceStatus.disconnected;
+        _batteryLevel = null;
+        rssi = null;
+      });
 
-        // listen for what features the connected Polar device supports
-        _sdkFeatureSubscription = polar.sdkFeatureReady.listen((event) {
-          debug('$runtimeType - Polar event : $event');
+      // find out what data types the connected Polar device supports in streaming mode,
+      // and mark the device as fully connected when the types are available
+      polar.sdkFeatureReady
+          .firstWhere(
+            (event) =>
+                event.identifier == polarIdentifier &&
+                event.feature == PolarSdkFeature.onlineStreaming,
+          )
+          .then((_) {
+            status = DeviceStatus.connected;
 
-          if (polarIdentifier != event.identifier &&
-              event.feature == PolarSdkFeature.onlineStreaming) {
-            polar.getAvailableOnlineStreamDataTypes(event.identifier).then((
-              dataTypes,
+            polar.getAvailableOnlineStreamDataTypes(polarIdentifier!).then((
+              availableDataTypes,
             ) {
-              features = dataTypes.toList();
-              debug('$runtimeType - features: $features');
-              _polarFeaturesAvailable = true;
-              status = DeviceStatus.connected;
+              debug(
+                '$runtimeType - available stream data types: $availableDataTypes',
+              );
+              dataTypes = availableDataTypes.toList();
+              _polarDataTypesAvailable = true;
             });
-          }
-        });
+          });
 
-        return DeviceStatus.connecting;
-      } catch (error) {
-        warning(
-          "$runtimeType - could not connect to device of type '$deviceType' and id '$id' - error: $error",
-        );
-        return DeviceStatus.disconnected;
-      }
+      // now finally, start connecting to the device based on its identifier
+      polar.connectToDevice(polarIdentifier!, requestPermissions: true);
+
+      return DeviceStatus.connecting;
+    } catch (error) {
+      warning(
+        "$runtimeType - could not connect to device of type '$deviceType' and id '$polarIdentifier' - error: $error",
+      );
+      return DeviceStatus.disconnected;
     }
   }
 

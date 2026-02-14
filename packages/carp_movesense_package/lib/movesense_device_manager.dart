@@ -92,9 +92,6 @@ class MovesenseDeviceManager
   MovesenseDeviceManager(super.type);
 
   @override
-  String get id => bleAddress ?? 'Unknown Movesense Device';
-
-  @override
   int? get batteryLevel => _batteryLevel;
 
   /// The device info for the connected Movesense device.
@@ -117,9 +114,6 @@ class MovesenseDeviceManager
   }
 
   @override
-  void onConfigure(MovesenseDevice configuration) {}
-
-  @override
   MovesenseDeviceRegistration createRegistration() =>
       MovesenseDeviceRegistration(
         deviceDisplayName: bleName,
@@ -134,7 +128,7 @@ class MovesenseDeviceManager
       );
 
   @override
-  bool canConnect() => bleAddress != null;
+  bool get canConnect => bleAddress != null;
 
   @override
   String? get displayName => bleName;

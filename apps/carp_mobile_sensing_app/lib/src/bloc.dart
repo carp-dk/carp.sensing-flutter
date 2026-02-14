@@ -1,4 +1,4 @@
-part of '../../main.dart';
+part of '../main.dart';
 
 /// How to deploy a study.
 enum DeploymentMode {

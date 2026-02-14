@@ -44,9 +44,6 @@ class WeatherServiceManager extends ContextServiceManager<WeatherService> {
       : null;
 
   @override
-  String get id => configuration?.apiKey ?? 'N/A';
-
-  @override
   String? get displayName => 'Weather Service (OW)';
 
   WeatherServiceManager([WeatherService? configuration])
@@ -61,11 +58,7 @@ class WeatherServiceManager extends ContextServiceManager<WeatherService> {
       await LocationManager().requestPermission();
 
   @override
-  // ignore: avoid_renaming_method_parameters
-  void onConfigure(WeatherService service) {}
-
-  @override
-  bool canConnect() => configuration?.apiKey != null;
+  bool get canConnect => configuration?.apiKey != null;
 
   @override
   Future<DeviceStatus> onConnect() async =>

@@ -233,14 +233,16 @@ abstract class ContextServiceManager<
   ]);
 
   @override
+  void onConfigure() {} // most services do not need further configuration
+
+  @override
   ServiceRegistration createRegistration() => ServiceRegistration(
-    deviceId: id,
     deviceDisplayName: displayName,
     isConnected: isConnected,
   );
 
   @override
-  bool canConnect() => true; // most online services can connect
+  bool get canConnect => true; // most online services can connect
 
   @override
   Future<bool> onDisconnect() async => true;

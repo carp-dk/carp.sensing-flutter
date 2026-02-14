@@ -36,7 +36,7 @@ part 'src/view_models/device_view_models.dart';
 part 'src/view_models/probe_descriptions.dart';
 part 'src/view_models/device_descriptions.dart';
 part 'src/view_models/study_view_model.dart';
-part 'src/services/bloc.dart';
+part 'src/bloc.dart';
 part 'src/services/carp_backend.dart';
 part 'src/services/study_protocol_manager.dart';
 part 'src/views/probe_list_page.dart';
@@ -54,7 +54,7 @@ void main() async {
   // Make sure to initialize CAMS incl. JSON serialization
   CarpMobileSensing.ensureInitialized();
 
-  runApp(App());
+  runApp(MobileSensingApp());
 }
 
 final bloc = SensingBLoC(

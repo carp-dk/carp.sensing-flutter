@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="dk.cachet.carp_mobile_sensing_app"
+    package="dk.carp.carp_mobile_sensing_app"
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Check whether Health Connect is installed or not -->

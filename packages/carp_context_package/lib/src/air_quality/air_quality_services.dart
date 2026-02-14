@@ -44,17 +44,10 @@ class AirQualityServiceManager
       : null;
 
   @override
-  String get id => configuration?.apiKey ?? 'N/A';
-
-  @override
   String? get displayName => 'Air Quality Service (WAQI)';
 
   AirQualityServiceManager([AirQualityService? configuration])
     : super(AirQualityService.DEVICE_TYPE, configuration);
-
-  @override
-  // ignore: avoid_renaming_method_parameters
-  void onConfigure(AirQualityService service) {}
 
   @override
   Future<bool> onHasPermissions() async =>
@@ -65,7 +58,7 @@ class AirQualityServiceManager
       await LocationManager().requestPermission();
 
   @override
-  bool canConnect() => configuration?.apiKey != null;
+  bool get canConnect => configuration?.apiKey != null;
 
   @override
   Future<DeviceStatus> onConnect() async =>

@@ -67,7 +67,7 @@ class BLEScannerPageState extends State<BLEScannerPage> {
 
             setState(() {});
           },
-          onError: (error) {
+          onError: (dynamic error) {
             _showErrorDialog(error.toString());
           },
         );

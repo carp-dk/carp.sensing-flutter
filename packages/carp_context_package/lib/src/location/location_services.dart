@@ -75,11 +75,8 @@ class LocationService extends ServiceConfiguration<ServiceRegistration> {
 
 /// A [DeviceManager] for the location service.
 class LocationServiceManager extends ContextServiceManager<LocationService> {
-  /// A handle to the [LocationManager].
+  /// A handle to the [LocationManager] used by this service.
   LocationManager manager = LocationManager();
-
-  @override
-  String get id => manager.hashCode.toString();
 
   @override
   String? get displayName => 'Location Service';
@@ -88,8 +85,7 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
     : super(LocationService.DEVICE_TYPE, configuration);
 
   @override
-  // ignore: avoid_renaming_method_parameters
-  void onConfigure(LocationService service) => manager.configure(service);
+  void onConfigure() => manager.configure(configuration!);
 
   @override
   Future<DeviceStatus> onConnect() async => manager.enabled

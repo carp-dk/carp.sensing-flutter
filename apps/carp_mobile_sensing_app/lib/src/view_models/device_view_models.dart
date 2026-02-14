@@ -15,16 +15,17 @@ class DeviceViewModel {
   Stream<DeviceStatus> get deviceEvents => deviceManager.statusEvents;
 
   /// The device id.
-  String get id => deviceManager.id;
+  // String get id => deviceManager.id;
 
-  /// A printer-friendly name for this device.
-  String? get name => DeviceDescription.descriptors[type!]?.description;
+  /// A printer-friendly type name for this device.
+  String get typeName =>
+      DeviceDescription.descriptors[type!]?.description ?? type!;
 
   /// A longer description of this device.
   String get description =>
-      '$id'
-      '${(deviceManager is BLEDeviceManager && isPaired) ? '\n${(deviceManager as BLEDeviceManager).bleName}' : ''}'
-      '${(deviceManager is HardwareDeviceManager && batteryLevel != null) ? '\n$batteryLevel% battery remaining.' : ''}';
+      '${deviceManager.displayName}'
+      '${(deviceManager is BLEDeviceManager && isPaired) ? '\n${(deviceManager as BLEDeviceManager).bleAddress}' : ''}'
+      '${(deviceManager is HardwareDeviceManager && batteryLevel != null) ? '\n$batteryLevel% battery.' : ''}';
 
   String get statusString => status.name;
 

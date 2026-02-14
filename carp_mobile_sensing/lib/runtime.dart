@@ -44,6 +44,7 @@ part 'runtime/client_repository.dart';
 part 'runtime/study_controller.dart';
 part 'runtime/device_controller.dart';
 part 'runtime/device_manager.dart';
+part 'runtime/device_managers.dart';
 part 'runtime/sampling_package.dart';
 part 'runtime/user_tasks.dart';
 

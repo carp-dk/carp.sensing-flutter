@@ -38,14 +38,11 @@ class HealthServiceManager
   Health? get service => configuration == null ? null : _service ??= Health();
 
   @override
-  String get id => (configuration != null)
+  String get displayName => (configuration != null)
       ? (Platform.isIOS)
             ? "Apple Health"
             : "Google Health Connect"
       : 'N/A';
-
-  @override
-  String? get displayName => 'Health Service';
 
   final List<HealthDataType> _types = [];
 
@@ -64,8 +61,7 @@ class HealthServiceManager
   }
 
   @override
-  // ignore: avoid_renaming_method_parameters
-  void onConfigure(HealthService service) {
+  void onConfigure() {
     if (Platform.isAndroid) {
       var sdkLevel = int.parse(DeviceInfo().sdk ?? '-1');
       if (sdkLevel < 34) {
@@ -81,7 +77,7 @@ class HealthServiceManager
   @override
   ServiceRegistration createRegistration() => ServiceRegistration(
     deviceId: service?.deviceId,
-    deviceDisplayName: id,
+    deviceDisplayName: displayName,
     isConnected: isConnected,
   );
 
@@ -142,7 +138,7 @@ class HealthServiceManager
       _hasPermissions = await requestHealthPermissions(types);
 
   @override
-  bool canConnect() => true;
+  bool get canConnect => true;
 
   @override
   Future<DeviceStatus> onConnect() async => DeviceStatus.connected;

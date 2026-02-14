@@ -395,7 +395,7 @@ class SmartphoneStudyController {
     }
   }
 
-  /// Configure the device specified in the [configuration].
+  /// Configure the device specified in [configuration].
   void _configureDevice(DeviceConfiguration configuration) {
     // Fast out if this device is not available on this phone.
     if (!_deviceController.hasDevice(configuration.type)) {
@@ -433,20 +433,10 @@ class SmartphoneStudyController {
       }
     });
 
-    // Now configure the device. If the device is already configured, then we skip
-    // this step, since it is not needed to re-configure an already configured device.
-    if (manager?.isConfigured ?? false) {
-      warning(
-        '$runtimeType - Device of type ${configuration.type} is already configured. '
-        'Skipping this configuration, but still registering the device for this study, if connected.',
-      );
-
-      if (manager?.isConnected ?? false) {
-        tryReregisterDevice(configuration);
-      }
-    } else {
-      manager?.configure(configuration);
-    }
+    // Now configure the device incl. any pre-registration information from the deployment
+    var registration =
+        deployment?.connectedDeviceRegistrations[configuration.roleName];
+    manager?.configure(configuration, registration);
   }
 
   /// Start heartbeat monitoring for all devices, incl. the phone, for the
@@ -479,7 +469,7 @@ class SmartphoneStudyController {
     // connect all the connected devices and the primary device (i.e. this phone)
     for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
       var device = _deviceController.getDeviceManager(configuration.type);
-      if (device != null && device.canConnect()) await device.connect();
+      if (device != null && device.canConnect) await device.connect();
     }
   }
 

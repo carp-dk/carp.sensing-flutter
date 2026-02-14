@@ -92,8 +92,8 @@ class ESenseDeviceManager
   ESenseManager? get manager =>
       bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
 
-  @override
-  String get id => bleName ?? 'eSense-????';
+  // @override
+  // String get id => bleName?.split('-').last ?? '????';
 
   @override
   String? get displayName => bleName;
@@ -133,13 +133,10 @@ class ESenseDeviceManager
 
   @Deprecated('Use bleName instead')
   @override
-  set bleAddress(String? address) {}
+  set bleAddress(String? address) => bleName = address;
 
   @override
-  bool canConnect() => bleName != null;
-
-  @override
-  void onConfigure(ESenseDevice configuration) {}
+  bool get canConnect => bleName != null;
 
   @override
   BLEDeviceRegistration createRegistration() => BLEDeviceRegistration(
@@ -157,8 +154,6 @@ class ESenseDeviceManager
     try {
       // listen for connection events
       manager?.connectionEvents.listen((event) async {
-        debug('$runtimeType - $event');
-
         switch (event.type) {
           case ConnectionType.connected:
             status = DeviceStatus.connected;
@@ -202,7 +197,7 @@ class ESenseDeviceManager
       manager?.connect();
     } catch (error) {
       warning(
-        '$runtimeType - Error connecting to eSense device id: $id - $error',
+        '$runtimeType - Error connecting to eSense device: $bleName - $error',
       );
       return DeviceStatus.disconnected;
     }

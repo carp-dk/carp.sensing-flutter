@@ -51,6 +51,7 @@ abstract class DeviceManager<
   DeviceStatus _status = DeviceStatus.unknown;
   final String _deviceType;
   TDeviceConfiguration? _configuration;
+  TRegistration? _registration;
 
   /// Create a new [DeviceManager] specifying its [deviceType].
   ///
@@ -73,14 +74,18 @@ abstract class DeviceManager<
   /// The type of the device managed by this device manager
   String get deviceType => _deviceType;
 
-  /// Get a unique id for this device.
-  String get id;
-
   // Get a printer-friendly display name for this device.
   String? get displayName;
 
   /// The configuration for this device.
   TDeviceConfiguration? get configuration => _configuration;
+
+  /// The latest registration for this device.
+  ///
+  /// Is set using the [configure] method and contains the latest registered
+  /// runtime information about the real device, e.g., the BLE address of a
+  /// Bluetooth device.
+  TRegistration? get registration => _registration;
 
   /// Create a device registration which can be used to configure this device
   /// for deployment.
@@ -106,9 +111,11 @@ abstract class DeviceManager<
 
   /// Change the runtime status of this device.
   set status(DeviceStatus newStatus) {
-    debug('$runtimeType - setting device status: ${newStatus.name}');
-    _status = newStatus;
-    _eventController.add(_status);
+    if (newStatus != _status) {
+      debug('$runtimeType - Setting device status: ${newStatus.name}');
+      _status = newStatus;
+      _eventController.add(_status);
+    }
   }
 
   /// The stream of status events for this device.
@@ -125,13 +132,19 @@ abstract class DeviceManager<
   bool get isConnected => status == DeviceStatus.connected;
 
   /// Configure this device manager by specifying its [configuration].
+  /// Optionally, a [registration] can be specified to provide runtime information
+  /// about the real device, e.g., the BLE address of a Bluetooth device.
   @nonVirtual
-  void configure(TDeviceConfiguration configuration) {
+  void configure(
+    TDeviceConfiguration configuration, [
+    TRegistration? registration,
+  ]) {
     info(
-      '$runtimeType - Configuring, type: $typeName, configuration: $configuration',
+      '$runtimeType - Configuring, type: $typeName, configuration: $configuration, registration: $registration',
     );
     _configuration = configuration;
-    onConfigure(configuration);
+    _registration = registration;
+    onConfigure();
 
     // Listen to status events and when this device is (re)connected, restart sampling.
     if (restartOnReconnect) {
@@ -144,9 +157,11 @@ abstract class DeviceManager<
 
   /// Callback on [configure].
   ///
+  /// When called, the [configuration] and the [registration] is available.
+  ///
   /// Is to be overridden in sub-classes. Note, however, that it must not be
   /// doing a lot of work on startup.
-  void onConfigure(TDeviceConfiguration configuration);
+  void onConfigure();
 
   /// Start heartbeat monitoring for this device for the deployment controlled
   /// by [controller].
@@ -185,7 +200,8 @@ abstract class DeviceManager<
   Future<bool> hasPermissions() async {
     if (!_hasPermissions) {
       info(
-        '$runtimeType - Checking permissions for device of type: $typeName and id: $id',
+        // '$runtimeType - Checking permissions for device of type: $typeName and id: $id',
+        '$runtimeType - Checking permissions for device of type: $typeName.',
       );
       _hasPermissions = true;
 
@@ -206,7 +222,7 @@ abstract class DeviceManager<
   @nonVirtual
   Future<void> requestPermissions() async {
     info(
-      '$runtimeType - Requesting permissions for device of type: $typeName and id: $id',
+      '$runtimeType - Requesting permissions for device of type: $typeName.',
     );
 
     await onRequestPermissions();
@@ -221,9 +237,7 @@ abstract class DeviceManager<
   /// Returns the [DeviceStatus] of the device.
   @nonVirtual
   Future<DeviceStatus> connect() async {
-    info(
-      '$runtimeType - Trying to connect to device of type: $typeName and id: $id',
-    );
+    info('$runtimeType - Trying to connect to device of type: $typeName.');
 
     if (!isConfigured) {
       warning('$runtimeType has not been initialized - cannot connect to it.');
@@ -291,7 +305,7 @@ abstract class DeviceManager<
     bool success = false;
     if (status == DeviceStatus.connected || status == DeviceStatus.connecting) {
       info(
-        '$runtimeType - Trying to disconnect from device of type: $typeName and id: $id',
+        '$runtimeType - Trying to disconnect from device of type: $typeName.',
       );
 
       // Stop all sampling on this device.
@@ -315,198 +329,5 @@ abstract class DeviceManager<
   Future<bool> onDisconnect();
 
   @override
-  String toString() =>
-      '$runtimeType - type: $typeName, id: $id, status: $status';
-}
-
-/// A [DeviceManager] for an online service, like a weather service.
-abstract class ServiceManager<
-  TDeviceConfiguration extends ServiceConfiguration<TRegistration>,
-  TRegistration extends ServiceRegistration
->
-    extends DeviceManager<TDeviceConfiguration, TRegistration> {
-  ServiceManager(
-    super.deviceType,
-    super.configuration, [
-    super.restartOnReconnect,
-  ]);
-}
-
-/// A [DeviceManager] for a hardware device.
-///
-/// The main assumption for a hardware device is that it has a battery and
-/// this hardware device manager allow for getting the battery level and
-/// listen to battery events.
-abstract class HardwareDeviceManager<
-  TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
-  TRegistration extends DeviceRegistration
->
-    extends DeviceManager<TDeviceConfiguration, TRegistration> {
-  /// The runtime battery level of this hardware device in percent (0-100).
-  /// Returns null if unknown.
-  int? get batteryLevel;
-
-  /// The stream of battery level events (0-100) from this hardware device.
-  Stream<int> get batteryEvents => const Stream.empty();
-
-  HardwareDeviceManager(
-    super.deviceType,
-    super.configuration, [
-    super.restartOnReconnect,
-  ]);
-}
-
-/// A device manager for a smartphone.
-class SmartphoneDeviceManager
-    extends HardwareDeviceManager<Smartphone, SmartphoneRegistration> {
-  int _batteryLevel = 0;
-  final _battery = Battery();
-  final Set<DataType> _supportedDataTypes = {};
-
-  SmartphoneDeviceManager([Smartphone? configuration])
-    : super(Smartphone.DEVICE_TYPE, configuration, false);
-
-  @override
-  Set<DataType> get supportedDataTypes => _supportedDataTypes;
-
-  @override
-  String get id => DeviceInfo().deviceID!;
-
-  @override
-  String? get displayName => DeviceInfo().toString();
-
-  @override
-  SmartphoneRegistration createRegistration() => SmartphoneRegistration(
-    deviceId: id,
-    deviceDisplayName: displayName,
-    platform: DeviceInfo().platform,
-    batteryChargingState: HardwareDeviceRegistration.parseBatteryLevel(
-      batteryLevel,
-    ),
-    hardwareName: DeviceInfo().hardware,
-    deviceManufacturer: DeviceInfo().deviceManufacturer,
-    deviceModel: DeviceInfo().deviceModel,
-    operatingSystem: DeviceInfo().operatingSystemName,
-    sdk: DeviceInfo().sdk,
-    release: DeviceInfo().release,
-  );
-
-  @override
-  void onConfigure(Smartphone configuration) {
-    // listen to the battery
-    _battery.onBatteryStateChanged.listen(
-      (state) async => _batteryLevel = await _battery.batteryLevel,
-    );
-
-    // find the supported data types
-    for (var package in SamplingPackageRegistry().packages) {
-      if (package is SmartphoneSamplingPackage) {
-        _supportedDataTypes.addAll(
-          package.dataTypes.map((type) => DataType.fromString(type.type)),
-        );
-      }
-    }
-  }
-
-  @override
-  int get batteryLevel => _batteryLevel;
-
-  @override
-  Stream<int> get batteryEvents =>
-      _battery.onBatteryStateChanged.map((_) => _batteryLevel);
-
-  @override
-  bool canConnect() => true; // can always connect to the phone
-
-  @override
-  Future<void> onRequestPermissions() async {}
-
-  @override
-  Future<DeviceStatus> onConnect() async => DeviceStatus.connected;
-
-  @override
-  Future<bool> onDisconnect() async => true;
-}
-
-/// A device manager for a connectable Bluetooth Low Energy (BLE) device.
-abstract class BLEDeviceManager<
-  TDeviceConfiguration extends BLEDevice<TRegistration>,
-  TRegistration extends BLEDeviceRegistration
->
-    extends HardwareDeviceManager<TDeviceConfiguration, TRegistration> {
-  /// The BLE address of this device.
-  ///
-  /// The format of the BLE address is platform-specific.
-  /// On Android, it is typically a MAC address of the form `00:04:79:00:0F:4D`.
-  /// On iOS, it may be a UUID string on the form `E2C56DB5-DFFB-48D2-B060-D0F5A71096E0`.
-  ///
-  /// Returns null string if unknown.
-  String? bleAddress;
-
-  /// The BLE name of this device, if known.
-  String? bleName;
-
-  /// Advertised services of this device, if known.
-  List<String> serviceUuids = [];
-
-  /// Manufacturer specific data. The first 2 bytes are the Company Identifier Codes.
-  List<int> manufacturerData = [];
-
-  /// Pair this device manager with a BLE device by specifying the [bleAddress],
-  /// and optionally its [bleName], [serviceUuids], and [manufacturerData].
-  @nonVirtual
-  void pair({
-    required String bleAddress,
-    String? bleName,
-    List<String>? serviceUuids,
-    List<int>? manufacturerData,
-  }) {
-    this.bleAddress = bleAddress;
-    this.bleName = bleName;
-    this.serviceUuids = serviceUuids ?? [];
-    this.manufacturerData = manufacturerData ?? [];
-    if (onPaired()) {
-      status = DeviceStatus.paired;
-      info('$runtimeType - Paired with BLE device: $bleAddress');
-    } else {
-      warning('$runtimeType - Failed to pair with BLE device: $bleAddress');
-    }
-  }
-
-  /// Callback on [pair].
-  ///
-  // By default, pairing is successful, but can be overridden in sub-classes
-  // for device-specific pairing handling.
-  /// Called by the [pair] method after setting the BLE device information.
-  bool onPaired() => true;
-
-  @override
-  @mustCallSuper
-  Future<bool> onHasPermissions() async => (Platform.isAndroid)
-      ? await Permission.bluetoothConnect.isGranted &&
-            await Permission.bluetoothScan.isGranted
-      // : (Platform.isIOS)
-      //     ? await Permission.bluetooth.isGranted
-      // for some reason it seems like Permission.bluetooth.isGranted always
-      // return false on iOS....?
-      : true;
-
-  @override
-  @mustCallSuper
-  Future<void> onRequestPermissions() async {
-    if (Platform.isAndroid) {
-      await Permission.bluetoothScan.request();
-      await Permission.bluetoothConnect.request();
-    }
-    if (Platform.isIOS) {
-      await Permission.bluetooth.request();
-    }
-  }
-
-  @override
-  BLEDeviceManager(
-    super.deviceType, [
-    super.configuration,
-    super.restartOnReconnect,
-  ]);
+  String toString() => '$runtimeType - type: $typeName, status: $status';
 }

@@ -29,6 +29,7 @@ dependencies:
   health: ^13.2.0
   # flutter_blue_plus: '>=1.29.0 <3.0.0'
   flutter_reactive_ble: ^5.0.0
+  polar: ^7.0.0
 
   #carp_serializable: ^1.1.0
   #carp_core: ^0.30.0

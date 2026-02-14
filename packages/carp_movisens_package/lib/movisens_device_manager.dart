@@ -84,9 +84,6 @@ class MovisensDeviceManager
   String? deviceName;
 
   @override
-  String get id => device?.id ?? MovisensDevice.DEVICE_TYPE;
-
-  @override
   String? get displayName => deviceName;
 
   @override
@@ -105,13 +102,10 @@ class MovisensDeviceManager
   MovisensDeviceManager(super.type, [super.configuration]);
 
   @override
-  Future<void> onConfigure(MovisensDevice configuration) async {}
-
-  @override
   int? get batteryLevel => _batteryLevel;
 
   @override
-  bool canConnect() => device != null;
+  bool get canConnect => device != null;
 
   @override
   Future<DeviceStatus> onConnect() async {
