@@ -45,7 +45,6 @@ abstract class DeviceManager<
   final StreamController<DeviceStatus> _eventController =
       StreamController.broadcast();
 
-  final bool _restartOnReconnect;
   bool _hasPermissions = false;
   Timer? _heartbeatTimer;
   DeviceStatus _status = DeviceStatus.unknown;
@@ -57,12 +56,9 @@ abstract class DeviceManager<
   ///
   /// Its [configuration] can be specified on creation here, or specified later
   /// in the [configure] method.
-  DeviceManager(
-    String deviceType, [
-    TDeviceConfiguration? configuration,
-    this._restartOnReconnect = true,
-  ]) : _deviceType = deviceType,
-       _configuration = configuration;
+  DeviceManager(String deviceType, {TDeviceConfiguration? configuration})
+    : _deviceType = deviceType,
+      _configuration = configuration;
 
   @override
   Set<DataType> get supportedDataTypes =>
@@ -97,8 +93,12 @@ abstract class DeviceManager<
   /// connected Bluetooth device.
   TRegistration createRegistration();
 
-  /// Is data sampling resumed when this device is (re)connected?
-  bool get restartOnReconnect => _restartOnReconnect;
+  /// Indicates whether this device manager should connect to the real device
+  /// based on the last known registration information.
+  /// Returns true (default) if no prior registration information is available,
+  bool get shouldConnect => registration is CamsDeviceRegistration
+      ? (registration as CamsDeviceRegistration).isConnected
+      : true;
 
   /// The set of task control executors that use this device manager.
   final Set<TaskControlExecutor> executors = {};
@@ -119,7 +119,7 @@ abstract class DeviceManager<
   }
 
   /// The stream of status events for this device.
-  Stream<DeviceStatus> get statusEvents => _eventController.stream;
+  Stream<DeviceStatus> get statusEvents => _eventController.stream.distinct();
 
   /// Has this device manager been configured?
   bool get isConfigured => status.index >= DeviceStatus.configured.index;
@@ -139,6 +139,9 @@ abstract class DeviceManager<
     TDeviceConfiguration configuration, [
     TRegistration? registration,
   ]) {
+    // fast out if already configured
+    if (isConfigured) return;
+
     info(
       '$runtimeType - Configuring, type: $typeName, configuration: $configuration, registration: $registration',
     );
@@ -146,12 +149,16 @@ abstract class DeviceManager<
     _registration = registration;
     onConfigure();
 
-    // Listen to status events and when this device is (re)connected, restart sampling.
-    if (restartOnReconnect) {
-      statusEvents
-          .where((status) => status == DeviceStatus.connected)
-          .listen((_) => restart());
-    }
+    // Listen to status events and when this device is dis- or re-connected,
+    // stop or restart sampling.
+    statusEvents
+        .where((status) => status == DeviceStatus.connected)
+        .listen((_) => restart());
+
+    statusEvents
+        .where((status) => status == DeviceStatus.disconnected)
+        .listen((_) => stop());
+
     status = DeviceStatus.configured;
   }
 
@@ -230,36 +237,39 @@ abstract class DeviceManager<
 
   /// Callback on [requestPermissions].
   ///
-  /// Is to be overridden in sub-classes for device-specific permission handling.
+  /// Can be overridden for device-specific permission handling.
   Future<void> onRequestPermissions();
 
   /// Ask this [DeviceManager] to start connecting to the device.
   /// Returns the [DeviceStatus] of the device.
   @nonVirtual
   Future<DeviceStatus> connect() async {
-    info('$runtimeType - Trying to connect to device of type: $typeName.');
+    // Fast out if already connecting or connected to the device.
+    if (isConnecting) return status;
 
     if (!isConfigured) {
       warning('$runtimeType has not been initialized - cannot connect to it.');
       return status;
     }
 
+    status = DeviceStatus.connecting;
+
     if (!(await hasPermissions())) {
       warning(
         '$runtimeType has not the permissions required to connect. '
         'Call requestPermissions() before calling connect.',
       );
-      status = DeviceStatus.disconnected;
-      return status;
+      return status = DeviceStatus.disconnected;
     }
 
+    info('$runtimeType - Trying to connect to device of type: $typeName.');
     try {
       status = await onConnect();
     } catch (error) {
-      status = DeviceStatus.disconnected;
       warning(
         '$runtimeType - Error connecting to device of type: $typeName. $error',
       );
+      status = DeviceStatus.disconnected;
     }
 
     return status;
@@ -267,7 +277,7 @@ abstract class DeviceManager<
 
   /// Callback on [connect]. Returns the [DeviceStatus] of the device.
   ///
-  /// Is to be overridden in sub-classes and implement device-specific connection.
+  /// Can be overridden for device-specific connection handling.
   Future<DeviceStatus> onConnect();
 
   /// Restart sampling of the measures using this device.
@@ -276,10 +286,27 @@ abstract class DeviceManager<
   /// type is restarted. This method is useful after the device is (re)connected.
   @nonVirtual
   void restart() {
-    info('$runtimeType - Resuming sampling...');
+    info('$runtimeType - Restarting sampling...');
+
+    // TODO - there is somethig wrong....
+    // Sampling is not restarted when the device is reconnected.
+    // But how do we know if the sampling should be restarted or not?
+    //
+    // The issue seems to be that the executors are not in a resumed state when this method is called,
+    // so the resume() method is not called on them.
+    // They have been paused by the disconnect event which pauses the sampling.
+    // It is a genera problem of comparing what state we want the executors to be in,
+    // and what state they are in when this method is called. Need to investigate this further.
+    //
+    // Similar issue as with the "samplingStatus" in the Study Controller,
+    // where the state of the executors is not in sync with the "samplingStatus" of the study controller.
+    //
+    // See issue #555.
 
     for (var executor in executors) {
-      executor.state == ExecutorState.Resumed ? executor.resume() : null;
+      if (executor.state == ExecutorState.Resumed) {
+        executor.resume();
+      }
     }
   }
 

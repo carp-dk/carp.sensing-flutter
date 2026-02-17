@@ -86,7 +86,7 @@ class Persistence {
           '$CREATED_ON_COLUMN TEXT, '
           '$UPDATED_ON_COLUMN TEXT, '
           '$DEPLOYED_ON_COLUMN TEXT, '
-          '$SAMPLING_STATUS_COLUMN INTEGER, '
+          '$SAMPLING_STATUS_COLUMN TEXT, '
           '$DEPLOYMENT_STATUS_COLUMN TEXT, '
           '$DEPLOYMENT_COLUMN TEXT)',
         );
@@ -203,7 +203,7 @@ class Persistence {
     DEPLOYED_ON_COLUMN: study.deploymentStatus?.createdOn
         .toUtc()
         .toIso8601String(),
-    SAMPLING_STATUS_COLUMN: study.samplingStatus.index,
+    SAMPLING_STATUS_COLUMN: jsonEncode(study.samplingState),
     DEPLOYMENT_STATUS_COLUMN: jsonEncode(study.deploymentStatus),
     DEPLOYMENT_COLUMN: jsonEncode(study.deployment),
   };

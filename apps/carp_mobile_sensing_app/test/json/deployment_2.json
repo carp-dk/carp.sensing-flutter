@@ -23,7 +23,7 @@
     "__type": "dk.carp.cams.devices.SmartphoneRegistration",
     "deviceId": "BP2A.250605.031.A3",
     "deviceDisplayName": "Android (SAMSUNG) - SM-A546B [SDK: 36]",
-    "registrationCreatedOn": "2026-02-11T10:32:16.261533Z",
+    "registrationCreatedOn": "2026-02-14T13:36:52.136336Z",
     "isConnected": true,
     "batteryChargingState": "unknown",
     "hardwareName": "s5e8835",
@@ -56,9 +56,25 @@
     {}
   ],
   "connectedDeviceRegistrations": {
-    "Location Service": null,
-    "Polar HR Device": null,
-    "Health Service": null
+    "Polar HR Device": {
+      "__type": "dk.carp.cams.devices.PolarDeviceRegistration",
+      "deviceId": "Null",
+      "deviceDisplayName": "Unknown",
+      "registrationCreatedOn": "2026-02-14T13:37:21.061874Z",
+      "isConnected": false,
+      "batteryChargingState": "unknown",
+      "hardwareName": "Unknown",
+      "bleAddress": "Null",
+      "identifier": "Unknown",
+      "polarDeviceType": "UNKNOWN"
+    },
+    "Location Service": {
+      "__type": "dk.carp.cams.devices.ServiceRegistration",
+      "deviceId": "8bf45a52-455d-4011-8ad5-46ca4b9a5993",
+      "deviceDisplayName": "Location Service",
+      "registrationCreatedOn": "2026-02-14T13:37:26.244906Z",
+      "isConnected": true
+    }
   },
   "tasks": [
     {
@@ -268,7 +284,7 @@
     }
   ],
   "expectedParticipantData": [],
-  "studyDeploymentId": "8bf45a52-455d-4011-8ad5-46ca4b9a5993",
-  "deployed": "2026-02-11T10:32:21.328428Z",
+  "studyDeploymentId": "8ee7494e-2f5e-4858-aaa9-5f517f48004b",
+  "deployed": "2026-02-14T13:37:21.042941Z",
   "status": "Invited"
 }

@@ -137,7 +137,7 @@ class Sensing {
 
   /// Is sensing running, i.e. has the study executor been started?
   // bool get isRunning => controller?.executor.state == ExecutorState.resumed;
-  bool get isRunning => study?.samplingStatus == ExecutorState.Resumed;
+  bool get isRunning => study?.samplingState == ExecutorState.Resumed;
 
   /// Start sensing
   void resume() => controller?.resume();

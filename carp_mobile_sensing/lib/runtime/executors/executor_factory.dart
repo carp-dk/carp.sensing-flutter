@@ -114,6 +114,20 @@ class ExecutorFactory {
   }
 }
 
+/// A factory which can [create] a [TriggerExecutor] based on the runtime type
+/// of an [TriggerConfiguration].
+abstract class TriggerFactory {
+  /// The set of supported [TriggerConfiguration] runtime types.
+  Set<Type> get types => {};
+
+  /// Callback method when this package is being registered.
+  void onRegister();
+
+  /// Create a [TriggerExecutor] based on [trigger].
+  /// Returns null if [trigger] is not supported by this factory.
+  TriggerExecutor? create(TriggerConfiguration trigger);
+}
+
 /// A [TriggerFactory] for all triggers coming with CAMS.
 class SmartphoneTriggerFactory implements TriggerFactory {
   /// Mapping of available [TriggerConfiguration] types to corresponding
@@ -168,18 +182,4 @@ class SmartphoneTriggerFactory implements TriggerFactory {
     }
     return null;
   }
-}
-
-/// A factory which can [create] a [TriggerExecutor] based on the runtime type
-/// of an [TriggerConfiguration].
-abstract class TriggerFactory {
-  /// The set of supported [TriggerConfiguration] runtime types.
-  Set<Type> get types => {};
-
-  /// Callback method when this package is being registered.
-  void onRegister();
-
-  /// Create a [TriggerExecutor] based on [trigger].
-  /// Returns null if [trigger] is not supported by this factory.
-  TriggerExecutor? create(TriggerConfiguration trigger);
 }

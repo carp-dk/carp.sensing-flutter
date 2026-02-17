@@ -120,7 +120,7 @@ class StudyPageState extends State<StudyPage> {
             ),
             child: ListTile(
               isThreeLine: true,
-              leading: Icon(switch (study.samplingStatus) {
+              leading: Icon(switch (study.samplingState?.state) {
                 ExecutorState.Created => Icons.refresh,
                 ExecutorState.Initialized ||
                 ExecutorState.Paused => Icons.play_arrow,
@@ -134,9 +134,9 @@ class StudyPageState extends State<StudyPage> {
               subtitle: Text(
                 'ID: ...-${study.studyDeploymentId.split('-').last}\n'
                 'Status: ${study.status.name}\n'
-                'Sampling: ${study.samplingStatus.name}',
+                'Sampling: ${study.samplingState?.state.name}',
               ),
-              trailing: executorStateIcon[study.samplingStatus],
+              trailing: executorStateIcon[study.samplingState],
               onTap: () => runStudy(study),
               onLongPress: () => removeStudy(study),
             ),
@@ -146,7 +146,7 @@ class StudyPageState extends State<StudyPage> {
     );
   }
 
-  /// A set of icons to illustrate the [SmartphoneStudy.samplingStatus].
+  /// A set of icons to illustrate the [SmartphoneStudy.samplingState].
   static Map<ExecutorState, Icon> get executorStateIcon => {
     ExecutorState.Created: Icon(Icons.child_care),
     ExecutorState.Initialized: Icon(Icons.check),
@@ -159,7 +159,7 @@ class StudyPageState extends State<StudyPage> {
   /// [simpleProtocol] or [protocol] specified below.
   /// Note that we use the same protocol every time we add a study.
   /// Thus, all studies will be identical in terms of data collection.
-  void addStudy() => client.addStudyFromProtocol(simpleProtocol);
+  void addStudy() => client.addStudyFromProtocol(protocol);
 
   /// Remove [study] from the client's list of studies.
   void removeStudy(SmartphoneStudy study) =>
@@ -226,6 +226,7 @@ class StudyPageState extends State<StudyPage> {
       _protocol?.addTaskControl(
         ImmediateTrigger(),
         BackgroundTask(
+          name: 'Timezone Task',
           measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
         ),
         phone,
@@ -248,6 +249,7 @@ class StudyPageState extends State<StudyPage> {
       _protocol?.addTaskControl(
         OneTimeTrigger(),
         BackgroundTask(
+          name: 'Device Info Task',
           measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
         ),
         phone,
@@ -263,6 +265,7 @@ class StudyPageState extends State<StudyPage> {
       _protocol?.addTaskControl(
         ImmediateTrigger(),
         BackgroundTask(
+          name: 'Background Measures Task',
           measures: [
             Measure(type: DeviceSamplingPackage.FREE_MEMORY)
               ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
@@ -397,6 +400,7 @@ class StudyPageState extends State<StudyPage> {
       _protocol?.addTaskControl(
         ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 20)),
         AppTask(
+          name: 'Device Info App Task',
           type: BackgroundSensingUserTask.SENSING_TYPE,
           title: "User Task",
           description: 'Please click here to collect Device Information.',

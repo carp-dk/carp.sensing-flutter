@@ -59,8 +59,9 @@ class BLEScannerPageState extends State<BLEScannerPage> {
               // Update existing device with new RSSI value
               _discoveredDevices[index] = device;
             } else {
-              if (device.rssi > (configuration?.minRssi ?? -80)) {
-                // Add new device
+              // Add new device if it matches the RSSI and name criteria
+              if (device.rssi > (configuration?.minRssi ?? -80) &&
+                  device.name.startsWith(configuration?.namePrefix ?? '')) {
                 _discoveredDevices.add(device);
               }
             }

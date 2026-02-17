@@ -227,10 +227,10 @@ abstract class ContextServiceManager<
 >
     extends ServiceManager<TDeviceConfiguration, ServiceRegistration> {
   ContextServiceManager(
-    super.type,
-    super.configuration, [
+    super.type, {
+    super.configuration,
     super.restartOnReconnect,
-  ]);
+  });
 
   @override
   void onConfigure() {} // most services do not need further configuration

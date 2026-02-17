@@ -125,7 +125,7 @@ class ESenseDeviceManager
   @override
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
-  ESenseDeviceManager(super.type, [super.configuration]);
+  ESenseDeviceManager(super.type, {super.configuration});
 
   @Deprecated('Use bleName instead')
   @override

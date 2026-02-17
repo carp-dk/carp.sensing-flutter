@@ -99,7 +99,7 @@ class MovisensDeviceManager
 
   String? get connectionStatus => _connectionStatus;
 
-  MovisensDeviceManager(super.type, [super.configuration]);
+  MovisensDeviceManager(super.type, {super.configuration});
 
   @override
   int? get batteryLevel => _batteryLevel;

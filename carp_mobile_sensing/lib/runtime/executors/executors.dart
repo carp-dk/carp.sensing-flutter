@@ -44,6 +44,21 @@ enum ExecutorState {
   Undefined,
 }
 
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class SamplingState extends Serializable {
+  /// The runtime state of this executor.
+  ExecutorState state;
+
+  SamplingState(this.state);
+
+  @override
+  Function get fromJsonFunction => _$SamplingStateFromJson;
+  factory SamplingState.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<SamplingState>(json);
+  @override
+  Map<String, dynamic> toJson() => _$SamplingStateToJson(this);
+}
+
 /// A [Executor] is responsible for executing data collection based on a
 /// configuration [TConfig].
 ///
@@ -78,6 +93,9 @@ abstract class Executor<TConfig> {
 
   /// The runtime state changes of this executor.
   Stream<ExecutorState> get stateEvents;
+
+  /// The runtime sampling state of this executor.
+  SamplingState get samplingState;
 
   /// The stream of [Measurement] collected by this executor.
   Stream<Measurement> get measurements;
@@ -122,13 +140,17 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   TConfig? get configuration => _configuration;
 
   @override
-  Stream<ExecutorState> get stateEvents => _stateEventController.stream;
+  Stream<ExecutorState> get stateEvents =>
+      _stateEventController.stream.distinct();
 
   @override
   Stream<Measurement> get measurements => _measurementsController.stream;
 
   @override
   ExecutorState get state => _stateMachine.state;
+
+  @override
+  SamplingState get samplingState => SamplingState(state);
 
   AbstractExecutor() {
     _stateMachine = _CreatedState(this);
@@ -244,6 +266,7 @@ abstract class AggregateExecutor<TConfig> extends AbstractExecutor<TConfig> {
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   final Set<Executor<dynamic>> _executors = {};
 
+  /// The set of underlying executors that this aggregate executor is managing.
   Set<Executor<dynamic>> get executors => _executors;
 
   AggregateExecutor() : super() {

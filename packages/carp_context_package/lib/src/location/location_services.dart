@@ -79,10 +79,11 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
   LocationManager manager = LocationManager();
 
   @override
-  String? get displayName => 'Location Service';
+  String? get displayName => manager.toString();
+  // String? get displayName => 'Location Service';
 
   LocationServiceManager([LocationService? configuration])
-    : super(LocationService.DEVICE_TYPE, configuration);
+    : super(LocationService.DEVICE_TYPE, configuration: configuration);
 
   @override
   void onConfigure() => manager.configure(configuration!);

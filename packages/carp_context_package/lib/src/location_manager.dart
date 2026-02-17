@@ -170,6 +170,9 @@ class LocationManager {
     );
   }
 
+  LocationService? _configuration;
+  LocationService? get configuration => _configuration;
+
   /// Configures the [LocationManager], incl. sending a notification to the
   /// Android notification system.
   ///
@@ -178,6 +181,7 @@ class LocationManager {
   Future<void> configure(LocationService configuration) async {
     // fast out if already configured
     if (configured) return;
+    _configuration = configuration;
 
     // ensured that this location manager is enable first
     await enable();
@@ -283,4 +287,9 @@ class LocationManager {
   Stream<Location> get onLocationChanged => _provider.onLocationChanged.map(
     (location) => _lastKnownLocation = Location.fromLocationData(location),
   );
+
+  @override
+  toString() => configuration != null
+      ? '$runtimeType\n${configuration!.accuracy.name} | ${configuration!.distance.toInt()} m | ${configuration!.interval.inSeconds} secs'
+      : '$runtimeType';
 }

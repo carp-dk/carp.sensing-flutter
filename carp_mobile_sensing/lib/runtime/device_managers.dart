@@ -15,11 +15,7 @@ abstract class ServiceManager<
   TRegistration extends ServiceRegistration
 >
     extends DeviceManager<TDeviceConfiguration, TRegistration> {
-  ServiceManager(
-    super.deviceType,
-    super.configuration, [
-    super.restartOnReconnect,
-  ]);
+  ServiceManager(super.deviceType, {super.configuration});
 }
 
 /// A [DeviceManager] for a hardware device.
@@ -39,11 +35,7 @@ abstract class HardwareDeviceManager<
   /// The stream of battery level events (0-100) from this hardware device.
   Stream<int> get batteryEvents => const Stream.empty();
 
-  HardwareDeviceManager(
-    super.deviceType,
-    super.configuration, [
-    super.restartOnReconnect,
-  ]);
+  HardwareDeviceManager(super.deviceType, {super.configuration});
 }
 
 /// A device manager for a connectable Bluetooth Low Energy (BLE) device.
@@ -75,6 +67,7 @@ abstract class BLEDeviceManager<
   String? get displayName => bleName ?? bleAddress;
 
   @override
+  @mustCallSuper
   void onConfigure() {
     bleAddress ??= registration?.bleAddress;
     bleName ??= registration?.bleName;
@@ -132,11 +125,7 @@ abstract class BLEDeviceManager<
   }
 
   @override
-  BLEDeviceManager(
-    super.deviceType, [
-    super.configuration,
-    super.restartOnReconnect,
-  ]);
+  BLEDeviceManager(super.deviceType, {super.configuration});
 }
 
 /// A device manager for a smartphone.
@@ -147,13 +136,10 @@ class SmartphoneDeviceManager
   final Set<DataType> _supportedDataTypes = {};
 
   SmartphoneDeviceManager([Smartphone? configuration])
-    : super(Smartphone.DEVICE_TYPE, configuration, false);
+    : super(Smartphone.DEVICE_TYPE, configuration: configuration);
 
   @override
   Set<DataType> get supportedDataTypes => _supportedDataTypes;
-
-  // @override
-  // String get id => DeviceInfo().deviceID!;
 
   @override
   String? get displayName => DeviceInfo().toString();

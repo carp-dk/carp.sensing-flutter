@@ -56,7 +56,7 @@ class HealthServiceManager
   }
 
   HealthServiceManager([HealthService? configuration])
-    : super(HealthService.DEVICE_TYPE, configuration) {
+    : super(HealthService.DEVICE_TYPE, configuration: configuration) {
     Health().configure();
   }
 

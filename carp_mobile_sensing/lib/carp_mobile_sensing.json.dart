@@ -98,8 +98,13 @@ void _registerFromJsonFunctions() {
     ),
   ]);
 
+  // Sampling State classes
+  FromJsonFactory().registerAll([
+    SmartphoneDeploymentExecutorSamplingState(ExecutorState.Resumed, '', []),
+    TaskControlExecutorSamplingState(ExecutorState.Resumed, 0, ''),
+  ]);
+
   // AppTaskController classes
-  // FromJsonFactory().register(UserTaskSnapshotList());
   FromJsonFactory().register(
     UserTaskSnapshot(
       '',

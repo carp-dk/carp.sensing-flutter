@@ -47,7 +47,7 @@ class WeatherServiceManager extends ContextServiceManager<WeatherService> {
   String? get displayName => 'Weather Service (OW)';
 
   WeatherServiceManager([WeatherService? configuration])
-    : super(WeatherService.DEVICE_TYPE, configuration);
+    : super(WeatherService.DEVICE_TYPE, configuration: configuration);
 
   @override
   Future<bool> onHasPermissions() async =>

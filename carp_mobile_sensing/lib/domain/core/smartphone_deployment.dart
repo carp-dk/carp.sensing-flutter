@@ -169,11 +169,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   /// This includes both the primary device and the connected devices.
   /// Returns null if no device with [roleName] is found.
   DeviceConfiguration? getDeviceFromRoleName(String roleName) {
-    if (deviceConfiguration.roleName == roleName) return deviceConfiguration;
     try {
-      return connectedDevices.firstWhere(
-        (device) => device.roleName == roleName,
-      );
+      return devices.firstWhere((device) => device.roleName == roleName);
     } catch (_) {
       return null;
     }

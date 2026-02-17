@@ -7,6 +7,23 @@
 
 part of '../../runtime.dart';
 
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class TaskControlExecutorSamplingState extends SamplingState {
+  int triggerId;
+  String taskName;
+
+  TaskControlExecutorSamplingState(super.state, this.triggerId, this.taskName);
+
+  @override
+  Function get fromJsonFunction => _$TaskControlExecutorSamplingStateFromJson;
+  factory TaskControlExecutorSamplingState.fromJson(
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<TaskControlExecutorSamplingState>(json);
+  @override
+  Map<String, dynamic> toJson() =>
+      _$TaskControlExecutorSamplingStateToJson(this);
+}
+
 /// Responsible for handling the execution of a [TaskControl].
 ///
 /// This executor runs in real-time and triggers the task using timers. This
@@ -20,6 +37,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   final TriggerConfiguration _trigger;
   final TaskConfiguration _task;
   final TaskControl _taskControl;
+  final DeviceConfiguration _targetDevice;
   TriggerExecutor? _triggerExecutor;
   TaskExecutor? _taskExecutor;
 
@@ -27,17 +45,44 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   TriggerConfiguration get trigger => _trigger;
   TaskConfiguration get task => _task;
   TaskControl get taskControl => _taskControl;
+  DeviceConfiguration get targetDevice => _targetDevice;
   TriggerExecutor? get triggerExecutor => _triggerExecutor;
   TaskExecutor? get taskExecutor => _taskExecutor;
+
+  DeviceManager? get targetDeviceManager => SmartPhoneClientManager()
+      .deviceController
+      .getDeviceManager(_targetDevice.type);
+
+  // DeviceManager? get deviceManager =>
+  //     SmartPhoneClientManager().deviceController.getDeviceManager(taskControl.destinationDeviceRoleName!) ??
+
+  //     DeviceController().getDeviceManager(targetDevice.type)
+
+  //        final deviceManager = getDeviceManagerFromRoleName(
+  //           executor.taskControl.destinationDeviceRoleName,
+  //         );
+
+  //     firstWhereOrNull(
+  //       (dm) => dm.deviceRoleName == taskControl.destinationDeviceRoleName,
+  //     );
 
   TaskControlExecutor(
     TaskControl taskControl,
     TriggerConfiguration trigger,
     TaskConfiguration task,
+    DeviceConfiguration targetDevice,
   ) : _taskControl = taskControl,
       _trigger = trigger,
       _task = task,
+      _targetDevice = targetDevice,
       super();
+
+  @override
+  SamplingState get samplingState => TaskControlExecutorSamplingState(
+    state,
+    taskControl.triggerId,
+    taskControl.taskName,
+  );
 
   @override
   bool onInitialize() {
@@ -100,10 +145,20 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   Future<bool> onResume() async {
     if (triggerExecutor == null) {
       warning(
-        '$runtimeType - No TriggerExecutor found - cannot start this task control executor.',
+        '$runtimeType - No TriggerExecutor found - cannot resume this task control executor.',
       );
       return false;
-    } else if (triggerExecutor?.state != ExecutorState.Resumed &&
+    }
+
+    if (!(targetDeviceManager?.isConnected ?? false)) {
+      warning(
+        '$runtimeType - Device for task control ${taskControl.taskName} is not connected. '
+        'Cannot resume sampling for this task control.',
+      );
+      return false;
+    }
+
+    if (triggerExecutor?.state != ExecutorState.Resumed &&
         !triggerExecutor!._isResuming) {
       triggerExecutor?.resume();
     }
@@ -145,7 +200,12 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
 /// the [AppTaskController]. This means that the [trigger] has to be
 /// [Schedulable].
 class AppTaskControlExecutor extends TaskControlExecutor {
-  AppTaskControlExecutor(super.taskControl, super.trigger, super.task);
+  AppTaskControlExecutor(
+    super.taskControl,
+    super.trigger,
+    super.task,
+    super.targetDevice,
+  );
 
   @override
   AppTaskExecutor get taskExecutor => super.taskExecutor as AppTaskExecutor;

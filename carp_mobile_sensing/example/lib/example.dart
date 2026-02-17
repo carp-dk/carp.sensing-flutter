@@ -430,10 +430,10 @@ void example_4() async {
 
     // if the device manager is created successfully on the phone
     if (DeviceController().hasDevice(type)) {
-      // ask the device manager for a unique id of the device
-      String deviceId = DeviceController().getDeviceManager(type)!.id;
-      DeviceRegistration registration = DeviceRegistration(deviceId: deviceId);
-      // (all of the above can actually be handled directly by the SmartphoneDeploymentService.registerDevice() method)
+      // create a registration for this device
+      var registration = DeviceController()
+          .getDeviceManager(type)!
+          .createRegistration();
 
       // register the device in the deployment service
       await SmartphoneDeploymentService().registerDevice(

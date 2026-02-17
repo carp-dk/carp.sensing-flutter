@@ -18,7 +18,6 @@ class SmartphoneStudyController {
   SmartphoneStudyController(SmartphoneStudy study) : _study = study {
     // listen to study events and handle deployment updates
     study.events.listen((event) {
-      debug('$runtimeType >> event: ${event.event}');
       switch (event.event) {
         case StudyStatusEventTypes.DeploymentStatusReceived:
           _deploymentStatusReceived();
@@ -31,8 +30,10 @@ class SmartphoneStudyController {
       }
     });
 
-    // Keep the sampling status updated.
-    executor.stateEvents.listen((state) => study.samplingStatus = state);
+    // Keep the sampling state updated.
+    executor.stateEvents.listen(
+      (state) => study.samplingState = executor.samplingState,
+    );
     debug(
       '$runtimeType created for study deployment: ${study.deployment?.studyDeploymentId}',
     );
@@ -129,10 +130,10 @@ class SmartphoneStudyController {
   ///
   /// This entails configuring devices, data manager, and executor to get
   /// ready to handle sampling of data. Data sampling is started if the
-  /// [SmartphoneStudy.samplingStatus] is in a resumed state.
+  /// [SmartphoneStudy.samplingState] is in a resumed state.
   Future<void> _deviceDeploymentReceived() async {
     debug(
-      '$runtimeType >> Received device deployment: ${deployment?.studyDeploymentId}',
+      '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
     );
     // fast out if study has been stopped
     if (study.status == StudyStatus.Stopped) {
@@ -177,25 +178,19 @@ class SmartphoneStudyController {
     // Initialize the executor, which recursively initializes all executors and probes.
     // But before doing this, save any existing sampling status which might have
     // been loaded, so that we can properly resume sampling.
-    var existingSamplingStatus = study.samplingStatus;
+    var existingSamplingStatus = study.samplingState;
     _executor.initialize(deployment!, deployment!);
+    _executor.setSamplingState(existingSamplingStatus);
 
     // Connect to all connectable devices, incl. this phone.
     // (Re-)connecting a device will trigger that sampling is (re)started
-    await connectAllConnectableDevices();
+    await _connectAllConnectableDevices();
 
     // start heartbeat monitoring
     if (SmartPhoneClientManager().heartbeat) _startHeartbeatMonitoring();
 
-    // TODO: remove this later
-    // debug print all measurements
-    measurements.listen(
-      (measurement) =>
-          debugPrint('>> ${study.studyDeploymentId} - ${measurement.dataType}'),
-    );
-
     // start data sampling
-    study.samplingStatus = existingSamplingStatus;
+    study.samplingState = existingSamplingStatus;
     start();
 
     var statusMsg =
@@ -332,7 +327,7 @@ class SmartphoneStudyController {
   ///
   /// This method is only relevant on Android, and does nothing on iOS.
   /// iOS automatically asks for permissions when a resource is accessed.
-  Future<void> askForAllPermissions() async {
+  Future<void> _askForAllPermissions() async {
     if (deployment == null) {
       warning(
         '$runtimeType - No deployment available. Skipping requesting permissions.',
@@ -461,7 +456,11 @@ class SmartphoneStudyController {
 
   /// Start connecting all connectable devices to be used in the [deployment]
   /// and which are available on this phone.
-  Future<void> connectAllConnectableDevices() async {
+  ///
+  /// Connecting a device will trigger that sampling is (re)started.
+  /// Note that this method is called in the [_deviceDeploymentReceived] method,
+  /// which is called when a new deployment is received.
+  Future<void> _connectAllConnectableDevices() async {
     assert(deployment != null, 'Deployment is null.');
 
     debug('$runtimeType - Trying to connect to all connectable devices.');
@@ -469,7 +468,13 @@ class SmartphoneStudyController {
     // connect all the connected devices and the primary device (i.e. this phone)
     for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
       var device = _deviceController.getDeviceManager(configuration.type);
-      if (device != null && device.canConnect) await device.connect();
+      debug(
+        '$runtimeType - Checking to connect to device $device with canConnect '
+        "'${device?.canConnect}' and shouldConnect '${device?.shouldConnect}'...",
+      );
+      if (device != null && device.canConnect && device.shouldConnect) {
+        await device.connect();
+      }
     }
   }
 
@@ -502,16 +507,17 @@ class SmartphoneStudyController {
 
     // Ask for permissions for all measures in this deployment
     if (SmartPhoneClientManager().askForPermissions) {
-      await askForAllPermissions();
+      await _askForAllPermissions();
     }
 
     // Restore the app task controller state for this study.
     await AppTaskController()._restoreQueue(study);
 
-    // Resume data sampling, if needed. Wait for a few seconds to let devices
-    // connect before resuming sampling.
-    if (study.samplingStatus == ExecutorState.Resumed) {
-      Future.delayed(Duration(seconds: 5), () => executor.resume());
+    // Resume data sampling, based on the current sampling state.
+    // Wait for a few seconds to let devices connect before resuming sampling.
+    if (study.samplingState?.state == ExecutorState.Resumed) {
+      debug('$runtimeType - Resuming sampling in 15 seconds...');
+      Future.delayed(Duration(seconds: 15), () => executor.resume());
     }
   }
 

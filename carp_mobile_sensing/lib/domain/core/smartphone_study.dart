@@ -9,7 +9,8 @@ part of '../../domain.dart';
 
 /// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
 class SmartphoneStudy extends Study<SmartphoneDeployment> {
-  ExecutorState _samplingStatus = ExecutorState.Created;
+  SmartphoneDeploymentExecutorSamplingState? _samplingState;
+  // SmartphoneDeploymentExecutorSamplingState? _samplingState;
 
   /// The unique id of the study in the deployment service.
   String? studyId;
@@ -20,10 +21,11 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   /// The role of the participant in this study.
   String? participantRoleName;
 
-  /// The status of the sampling of this study.
-  ExecutorState get samplingStatus => _samplingStatus;
-  set samplingStatus(ExecutorState state) {
-    _samplingStatus = state;
+  /// The sampling state of this study.
+  SmartphoneDeploymentExecutorSamplingState? get samplingState =>
+      _samplingState;
+  set samplingState(SmartphoneDeploymentExecutorSamplingState? state) {
+    _samplingState = state;
 
     debug('$runtimeType - Setting sampling state: $state');
 
@@ -31,7 +33,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
       SmartphoneStudyStatusEvent(
         this,
         StudyStatusEventTypes.DeploymentUpdated,
-        samplingStatus,
+        samplingState,
       ),
     );
   }
@@ -40,11 +42,11 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   bool get isDeployed => deployment != null;
 
   /// Is this study sampling data?
-  bool get isSampling => samplingStatus == ExecutorState.Resumed;
+  bool get isSampling => samplingState?.state == ExecutorState.Resumed;
 
   @override
   Stream<SmartphoneStudyStatusEvent> get events => super.events.map(
-    (event) => SmartphoneStudyStatusEvent(this, event.event, samplingStatus),
+    (event) => SmartphoneStudyStatusEvent(this, event.event, samplingState),
   );
 
   /// Create a [SmartphoneStudy].
@@ -92,24 +94,28 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
           )
         : null;
 
+    final samplingStateJson =
+        map[Persistence.SAMPLING_STATUS_COLUMN] as String?;
+    final samplingState =
+        samplingStateJson != null && samplingStateJson != 'null'
+        ? SmartphoneDeploymentExecutorSamplingState.fromJson(
+            json.decode(samplingStateJson) as Map<String, dynamic>,
+          )
+        : null;
+
     return SmartphoneStudy(
-        studyId: map[Persistence.STUDY_ID_COLUMN] as String?,
-        studyDeploymentId:
-            map[Persistence.STUDY_DEPLOYMENT_ID_COLUMN] as String,
-        deviceRoleName: map[Persistence.DEVICE_ROLE_NAME_COLUMN] as String,
-        participantId: map[Persistence.PARTICIPANT_ID_COLUMN] as String?,
-        participantRoleName:
-            map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String?,
-        createdOn: map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] != null
-            ? DateTime.tryParse(
-                map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String,
-              )
-            : null,
-        deploymentStatus: status,
-        deployment: deployment,
-      )
-      ..samplingStatus =
-          ExecutorState.values[map[Persistence.SAMPLING_STATUS_COLUMN] as int];
+      studyId: map[Persistence.STUDY_ID_COLUMN] as String?,
+      studyDeploymentId: map[Persistence.STUDY_DEPLOYMENT_ID_COLUMN] as String,
+      deviceRoleName: map[Persistence.DEVICE_ROLE_NAME_COLUMN] as String,
+      participantId: map[Persistence.PARTICIPANT_ID_COLUMN] as String?,
+      participantRoleName:
+          map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String?,
+      createdOn: map[Persistence.CREATED_ON_COLUMN] != null
+          ? DateTime.tryParse(map[Persistence.CREATED_ON_COLUMN] as String)
+          : null,
+      deploymentStatus: status,
+      deployment: deployment,
+    )..samplingState = samplingState;
   }
 
   @override
@@ -124,8 +130,8 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
 
 /// An event related to a running [study], including its runtime [state].
 class SmartphoneStudyStatusEvent extends StudyStatusEvent<SmartphoneStudy> {
-  final ExecutorState state;
-  const SmartphoneStudyStatusEvent(super.study, super.event, this.state);
+  final SmartphoneDeploymentExecutorSamplingState? state;
+  const SmartphoneStudyStatusEvent(super.study, super.event, [this.state]);
   @override
   String toString() => '${super.toString()}, state: $state';
 }

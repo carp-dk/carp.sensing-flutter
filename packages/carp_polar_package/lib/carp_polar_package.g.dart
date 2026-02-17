@@ -352,8 +352,8 @@ const _$BatteryChargingStateEnumMap = {
 };
 
 const _$PolarDeviceTypeEnumMap = {
-  PolarDeviceType.UNKNOWN: 'UNKNOWN',
+  PolarDeviceType.Unknown: 'UNKNOWN',
   PolarDeviceType.H9: 'H9',
   PolarDeviceType.H10: 'H10',
-  PolarDeviceType.SENSE: 'SENSE',
+  PolarDeviceType.Verity: 'SENSE',
 };

@@ -6,6 +6,29 @@
  */
 part of '../../runtime.dart';
 
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class SmartphoneDeploymentExecutorSamplingState extends SamplingState {
+  String studyDeploymentId;
+  List<TaskControlExecutorSamplingState> taskControlSamplingStates = [];
+  SmartphoneDeploymentExecutorSamplingState(
+    super.state,
+    this.studyDeploymentId,
+    this.taskControlSamplingStates,
+  );
+
+  @override
+  Function get fromJsonFunction =>
+      _$SmartphoneDeploymentExecutorSamplingStateFromJson;
+  factory SmartphoneDeploymentExecutorSamplingState.fromJson(
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<SmartphoneDeploymentExecutorSamplingState>(
+    json,
+  );
+  @override
+  Map<String, dynamic> toJson() =>
+      _$SmartphoneDeploymentExecutorSamplingStateToJson(this);
+}
+
 /// A [SmartphoneDeploymentExecutor] is responsible for executing a [SmartphoneDeployment].
 /// For each task control in this deployment, it starts a [TaskControlExecutor].
 ///
@@ -17,6 +40,28 @@ class SmartphoneDeploymentExecutor
     extends AggregateExecutor<SmartphoneDeployment> {
   final StreamController<Measurement> _manualMeasurementController =
       StreamController.broadcast();
+  SmartphoneDeploymentExecutorSamplingState? _samplingState;
+
+  @override
+  SmartphoneDeploymentExecutorSamplingState get samplingState =>
+      SmartphoneDeploymentExecutorSamplingState(
+        state,
+        configuration!.studyDeploymentId,
+        executors
+            .whereType<TaskControlExecutor>()
+            .map(
+              (executor) =>
+                  executor.samplingState as TaskControlExecutorSamplingState,
+            )
+            .toList(),
+      );
+
+  /// Set the [samplingState] of this [SmartphoneDeploymentExecutor].
+  /// This state is used to resume the deployment in the same state as it was before,
+  /// e.g. after a restart of the app.
+  void setSamplingState(
+    SmartphoneDeploymentExecutorSamplingState? samplingState,
+  ) => _samplingState = samplingState;
 
   @override
   bool onInitialize() {
@@ -34,6 +79,9 @@ class SmartphoneDeploymentExecutor
       // get the trigger and task based on the trigger id and task name
       final trigger = configuration!.triggers['${taskControl.triggerId}']!;
       final task = configuration!.getTaskByName(taskControl.taskName)!;
+      final targetDevice = configuration!.getDeviceFromRoleName(
+        taskControl.destinationDeviceRoleName!,
+      )!;
 
       // Only create an executor for "real" tasks
       if (task is! MonitoringTask) {
@@ -42,11 +90,21 @@ class SmartphoneDeploymentExecutor
         // A TriggeredAppTaskExecutor need BOTH a [Schedulable] trigger and an [AppTask]
         // to schedule
         if (trigger is Schedulable && task is AppTask) {
-          executor = AppTaskControlExecutor(taskControl, trigger, task);
+          executor = AppTaskControlExecutor(
+            taskControl,
+            trigger,
+            task,
+            targetDevice,
+          );
         } else {
           // All other cases we use the normal background triggering relying on the app
           // running in the background
-          executor = TaskControlExecutor(taskControl, trigger, task);
+          executor = TaskControlExecutor(
+            taskControl,
+            trigger,
+            task,
+            targetDevice,
+          );
         }
 
         executor.initialize(taskControl, deployment!);
@@ -71,17 +129,46 @@ class SmartphoneDeploymentExecutor
     return true;
   }
 
-  /// Run the deployment, and after the deployment is finished, enqueue all buffered tasks.
+  /// Resumes the deployment.
+  ///
+  /// If the prior [samplingState] is unknown (null), it simply resumes all executors.
+  /// If the prior [samplingState] is known, it resumes or pauses the executors based on
+  /// the state of each [TaskControlExecutor] in the [samplingState].
+  ///
+  /// After the deployment is finished, enqueue all buffered tasks.
   @override
   Future<bool> onResume() async {
-    bool val = await super.onResume();
+    bool success = false;
+
+    if (_samplingState == null) {
+      success = await super.onResume();
+    } else {
+      for (var executor in _executors) {
+        if (executor is TaskControlExecutor) {
+          var taskControlSamplingState = _samplingState!
+              .taskControlSamplingStates
+              .firstWhere(
+                (state) =>
+                    state.triggerId == executor.taskControl.triggerId &&
+                    state.taskName == executor.taskControl.taskName,
+              );
+
+          if (taskControlSamplingState.state == ExecutorState.Resumed) {
+            executor.resume();
+          } else if (taskControlSamplingState.state == ExecutorState.Paused) {
+            executor.pause();
+          }
+        }
+      }
+      success = true;
+    }
 
     await AppTaskController().enqueueBufferedTasks();
     debug(
-      '$runtimeType - Deployment finished - ${await SmartPhoneClientManager().notificationController?.pendingNotificationRequestsCount} notifications are currently pending.',
+      '$runtimeType resumed - ${await SmartPhoneClientManager().notificationController?.pendingNotificationRequestsCount} notifications are currently pending.',
     );
 
-    return val;
+    return success;
   }
 
   @override

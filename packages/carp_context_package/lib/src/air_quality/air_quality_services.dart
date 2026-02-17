@@ -47,7 +47,7 @@ class AirQualityServiceManager
   String? get displayName => 'Air Quality Service (WAQI)';
 
   AirQualityServiceManager([AirQualityService? configuration])
-    : super(AirQualityService.DEVICE_TYPE, configuration);
+    : super(AirQualityService.DEVICE_TYPE, configuration: configuration);
 
   @override
   Future<bool> onHasPermissions() async =>

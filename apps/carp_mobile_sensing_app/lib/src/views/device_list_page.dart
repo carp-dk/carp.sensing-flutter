@@ -44,7 +44,18 @@ class DevicesListPageState extends State<DevicesListPage> {
                 leading: device.icon,
                 title: Text(device.typeName),
                 subtitle: Text(device.description),
-                trailing: device.stateIcon,
+                trailing: device.status == DeviceStatus.connecting
+                    ? SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            CachetColors.BLUE,
+                          ),
+                        ),
+                      )
+                    : device.stateIcon,
               ),
               FutureBuilder<bool>(
                 future: device.deviceManager.hasPermissions(),
@@ -56,7 +67,9 @@ class DevicesListPageState extends State<DevicesListPage> {
                       device.isBleDevice &&
                       device.status.index < DeviceStatus.paired.index;
                   final showConnectButton =
-                      hasPermissions && !device.isConnected;
+                      hasPermissions &&
+                      (device.status == DeviceStatus.paired ||
+                          device.status == DeviceStatus.disconnected);
 
                   if (!showPermissionButton &&
                       !showScanButton &&

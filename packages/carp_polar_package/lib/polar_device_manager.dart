@@ -8,7 +8,7 @@ part of 'carp_polar_package.dart';
 /// Enumeration of supported Polar devices.
 enum PolarDeviceType {
   /// Unknown Polar type
-  UNKNOWN,
+  Unknown,
 
   /// Polar H9 Heart rate sensor
   H9,
@@ -17,7 +17,7 @@ enum PolarDeviceType {
   H10,
 
   /// Polar Verity Sense heart rate sensor
-  SENSE,
+  Verity,
 }
 
 /// A [DeviceConfiguration] for a Polar device used in a [StudyProtocol].
@@ -34,6 +34,7 @@ class PolarDevice extends BLEDevice<PolarDeviceRegistration> {
   PolarDevice({
     super.roleName = PolarDevice.DEFAULT_ROLE_NAME,
     super.isOptional = true,
+    super.namePrefix = 'Polar',
   });
 
   @override
@@ -99,7 +100,6 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
 class PolarDeviceManager
     extends BLEDeviceManager<PolarDevice, PolarDeviceRegistration> {
   int? _batteryLevel;
-  bool _polarDataTypesAvailable = false;
   Polar? _polar;
   final StreamController<int> _batteryEventController =
       StreamController.broadcast();
@@ -143,9 +143,9 @@ class PolarDeviceManager
         case 'H10':
           return PolarDeviceType.H10;
         case 'SENSE':
-          return PolarDeviceType.SENSE;
+          return PolarDeviceType.Verity;
         default:
-          return PolarDeviceType.UNKNOWN;
+          return PolarDeviceType.Unknown;
       }
     }
 
@@ -156,13 +156,13 @@ class PolarDeviceManager
   int? rssi;
 
   /// List of [PolarDataType]s that are available in Polar devices for online
-  /// streaming or offline recording.
+  /// streaming.
   ///
   /// Only available **after** a Polar device is successfully connected.
   List<PolarDataType>? dataTypes;
 
-  /// Are the [features] available (i.e., received from the device)?
-  bool get polarFeaturesAvailable => _polarDataTypesAvailable;
+  /// Are the [dataTypes] available (i.e., received from the device)?
+  bool get polarDataTypesAvailable => dataTypes != null;
 
   @override
   int? get batteryLevel => _batteryLevel;
@@ -180,12 +180,20 @@ class PolarDeviceManager
         ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
         : BatteryChargingState.unknown,
     identifier: polarIdentifier ?? 'Unknown',
-    polarDeviceType: polarDeviceType ?? PolarDeviceType.UNKNOWN,
+    polarDeviceType: polarDeviceType ?? PolarDeviceType.Unknown,
     supportedDataTypes: dataTypes,
     rssi: rssi,
   );
 
-  PolarDeviceManager(super.type, [super.configuration]);
+  PolarDeviceManager(super.type, {super.configuration});
+
+  @override
+  void onConfigure() {
+    super.onConfigure();
+    if (registration != null) {
+      polarIdentifier = registration!.identifier;
+    }
+  }
 
   @override
   bool onPaired() => (polarIdentifier = bleName?.split(' ').last) != null;
@@ -265,7 +273,6 @@ class PolarDeviceManager
                 '$runtimeType - available stream data types: $availableDataTypes',
               );
               dataTypes = availableDataTypes.toList();
-              _polarDataTypesAvailable = true;
             });
           });
 
