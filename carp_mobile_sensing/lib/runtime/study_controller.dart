@@ -34,9 +34,6 @@ class SmartphoneStudyController {
     executor.stateEvents.listen(
       (state) => study.samplingState = executor.samplingState,
     );
-    debug(
-      '$runtimeType created for study deployment: ${study.deployment?.studyDeploymentId}',
-    );
   }
 
   /// The study that this [SmartphoneStudyController] controls
@@ -189,7 +186,7 @@ class SmartphoneStudyController {
     // start heartbeat monitoring
     if (SmartPhoneClientManager().heartbeat) _startHeartbeatMonitoring();
 
-    // start data sampling
+    // start the study and restart data sampling
     study.samplingState = existingSamplingStatus;
     start();
 
@@ -405,28 +402,11 @@ class SmartphoneStudyController {
 
     var manager = _deviceController.devices[configuration.type];
 
-    // Listen to status events for this device and try to register/unregister
-    // the device with the deployment service when the device is connected/disconnected.
-    manager?.statusEvents.listen((status) {
-      debug(
-        '$runtimeType - Device ${configuration.roleName} (${configuration.type}) status: $status',
-      );
-      switch (status) {
-        case DeviceStatus.connected:
-          tryReregisterDevice(configuration);
-          break;
-        case DeviceStatus.disconnected:
-          // TODO - I am not sure if we want to unregister a device when it is disconnected,
-          // since it might just be temporarily disconnected.
-          // We want to keep the device registration information to be used for
-          // re-connecting the device on app restart or when the device is re-connected.
-          // So maybe we should not unregister the device when it is disconnected.
-          // But - when do we then need to unregister the device?
-          tryUnregisterDisconnectedDevice(configuration);
-          break;
-        default:
-      }
-    });
+    // Listen to status events for this device manager and try to re-register
+    // the device with the deployment service when a real device is connected.
+    manager?.statusEvents
+        .where((status) => status == DeviceStatus.connected)
+        .listen((_) => tryReregisterDevice(configuration));
 
     // Now configure the device incl. any pre-registration information from the deployment
     var registration =
@@ -510,18 +490,28 @@ class SmartphoneStudyController {
       await _askForAllPermissions();
     }
 
+    // TODO - why this model? The AppTaskController should be responsible for restoring itself... - just like sampling state
     // Restore the app task controller state for this study.
     await AppTaskController()._restoreQueue(study);
 
-    // Resume data sampling, based on the current sampling state.
-    // Wait for a few seconds to let devices connect before resuming sampling.
+    // Finally, resume/pause data sampling based on the current sampling state of this study.
     if (study.samplingState?.state == ExecutorState.Resumed) {
-      debug('$runtimeType - Resuming sampling in 15 seconds...');
-      Future.delayed(Duration(seconds: 15), () => executor.resume());
+      debug('$runtimeType - Restarting sampling in 15 seconds...');
+      Future.delayed(Duration(seconds: 15), () => resume());
+    } else if (study.samplingState?.state == ExecutorState.Paused) {
+      pause();
     }
   }
 
-  /// Resume data sampling.
+  // Restart data sampling, ignoring any previously stored sampling state.
+  void restart() => executor
+    ..clearSamplingStatus()
+    ..resume();
+
+  /// Resume data sampling for the [study] controlled by this controller.
+  /// Will resume data sampling based on the current sampling state of this study.
+  /// If you want to restart sampling and ignore any previously stored sampling state,
+  /// call the [restart] method instead.
   void resume() => executor.resume();
 
   /// Pause data sampling.

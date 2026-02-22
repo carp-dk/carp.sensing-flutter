@@ -203,14 +203,11 @@ class PolarDeviceManager
 
   @override
   Future<DeviceStatus> onConnect() async {
-    // fast out if already connected or if no identifier is available for connecting
-    if (isConnected) return status;
-
+    // fast out if no identifier is available for connecting
     if (polarIdentifier == null) {
       warning(
         '$runtimeType - cannot connect to device, the Polar identifier is null.',
       );
-      // return status as configured, so we can try to reconnect with another identifier
       return DeviceStatus.configured;
     }
 
@@ -220,28 +217,20 @@ class PolarDeviceManager
     try {
       // listen for battery level events
       _batterySubscription = polar.batteryLevel.listen((event) {
-        debug('$runtimeType - Polar event : $event');
         _batteryLevel = event.level;
         _batteryEventController.add(_batteryLevel!);
-        // if we can get the battery level, we can consider the device as fully connected
-        status = DeviceStatus.connected;
       });
 
-      // listen for connection events
-      _connectingSubscription = polar.deviceConnecting.listen((event) {
-        debug('$runtimeType - Polar event : $event');
-        status = DeviceStatus.connecting;
-        bleAddress = event.address;
-        bleName = event.name;
-        rssi = event.rssi;
-      });
+      // listen for connecting events
+      _connectingSubscription = polar.deviceConnecting.listen(
+        (_) => status = DeviceStatus.connecting,
+      );
 
       // listen for connected events
       _connectedSubscription = polar.deviceConnected.listen((event) {
-        debug('$runtimeType - Polar event : $event');
         // we do not mark the device as fully connected before the data types
         // are available - see below
-        status = DeviceStatus.connecting;
+        status = DeviceStatus.reconnected;
         bleAddress = event.address;
         bleName = event.name;
         rssi = event.rssi;
@@ -249,8 +238,7 @@ class PolarDeviceManager
 
       // listen for disconnected events
       _disconnectedSubscription = polar.deviceDisconnected.listen((event) {
-        debug('$runtimeType - Polar event : $event');
-        status = DeviceStatus.disconnected;
+        status = DeviceStatus.disconnecting;
         _batteryLevel = null;
         rssi = null;
       });
@@ -264,21 +252,16 @@ class PolarDeviceManager
                 event.feature == PolarSdkFeature.onlineStreaming,
           )
           .then((_) {
-            status = DeviceStatus.connected;
-
             polar.getAvailableOnlineStreamDataTypes(polarIdentifier!).then((
               availableDataTypes,
             ) {
-              debug(
-                '$runtimeType - available stream data types: $availableDataTypes',
-              );
               dataTypes = availableDataTypes.toList();
+              status = DeviceStatus.connected;
             });
           });
 
       // now finally, start connecting to the device based on its identifier
       polar.connectToDevice(polarIdentifier!, requestPermissions: true);
-
       return DeviceStatus.connecting;
     } catch (error) {
       warning(
@@ -290,17 +273,9 @@ class PolarDeviceManager
 
   @override
   Future<bool> onDisconnect() async {
-    if (polarIdentifier == null) {
-      warning(
-        '$runtimeType - cannot disconnect from device, identifier is null.',
-      );
-      return false;
-    }
-
-    stop();
+    if (polarIdentifier == null) return false;
 
     _batteryLevel = null;
-
     _batterySubscription?.cancel();
     _connectingSubscription?.cancel();
     _connectedSubscription?.cancel();

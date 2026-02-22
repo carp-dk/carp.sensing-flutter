@@ -27,6 +27,14 @@ enum DeviceStatus {
   /// The device is connected to the phone and ready to be used.
   connected,
 
+  /// The device is reconnected after a temporary disconnection, e.g., due to a
+  /// temporary loss of Bluetooth connection.
+  reconnected,
+
+  /// The device is temporarily disconnected, e.g., due to a temporary loss of
+  /// Bluetooth connection, but is expected to be reconnected again.
+  disconnecting,
+
   /// The device is disconnected from the phone.
   disconnected,
 }
@@ -124,12 +132,15 @@ abstract class DeviceManager<
   /// Has this device manager been configured?
   bool get isConfigured => status.index >= DeviceStatus.configured.index;
 
-  /// Is this device manager connecting or connected to the real device?
+  /// Is this device manager connecting or already connected to a device?
   bool get isConnecting =>
-      status == DeviceStatus.connected || status == DeviceStatus.connecting;
+      status == DeviceStatus.connected ||
+      status == DeviceStatus.reconnected ||
+      status == DeviceStatus.connecting;
 
   /// Is this device manager connected to the real device?
-  bool get isConnected => status == DeviceStatus.connected;
+  bool get isConnected =>
+      status == DeviceStatus.connected || status == DeviceStatus.reconnected;
 
   /// Configure this device manager by specifying its [configuration].
   /// Optionally, a [registration] can be specified to provide runtime information
@@ -149,15 +160,14 @@ abstract class DeviceManager<
     _registration = registration;
     onConfigure();
 
-    // Listen to status events and when this device is dis- or re-connected,
+    // Listen to status events and when this device is disconnecting or reconnected,
     // stop or restart sampling.
     statusEvents
-        .where((status) => status == DeviceStatus.connected)
-        .listen((_) => restart());
-
+        .where((status) => status == DeviceStatus.disconnecting)
+        .listen((_) => isDisconnecting());
     statusEvents
-        .where((status) => status == DeviceStatus.disconnected)
-        .listen((_) => stop());
+        .where((status) => status == DeviceStatus.reconnected)
+        .listen((_) => restart());
 
     status = DeviceStatus.configured;
   }
@@ -175,8 +185,8 @@ abstract class DeviceManager<
   void startHeartbeatMonitoring(SmartphoneStudyController controller) {
     if (!isConfigured) {
       warning(
-        '$runtimeType - Trying to start heartbeat monitoring before device is initialized. '
-        'Please initialize device first.',
+        '$runtimeType - Trying to start heartbeat monitoring before device is configured. '
+        'Please configure device first.',
       );
       return;
     }
@@ -207,7 +217,6 @@ abstract class DeviceManager<
   Future<bool> hasPermissions() async {
     if (!_hasPermissions) {
       info(
-        // '$runtimeType - Checking permissions for device of type: $typeName and id: $id',
         '$runtimeType - Checking permissions for device of type: $typeName.',
       );
       _hasPermissions = true;
@@ -248,7 +257,7 @@ abstract class DeviceManager<
     if (isConnecting) return status;
 
     if (!isConfigured) {
-      warning('$runtimeType has not been initialized - cannot connect to it.');
+      warning('$runtimeType has not been configured - cannot connect to it.');
       return status;
     }
 
@@ -280,44 +289,57 @@ abstract class DeviceManager<
   /// Can be overridden for device-specific connection handling.
   Future<DeviceStatus> onConnect();
 
+  /// Start sampling of all measures using this device.
+  ///
+  /// This entails that all task control executors using this device are resumed,
+  /// and hence all data collection for the measures using this device is started.
+  @nonVirtual
+  void start() {
+    info('$runtimeType - Starting sampling...');
+    executors.forEach((executor) => executor.resume());
+  }
+
   /// Restart sampling of the measures using this device.
   ///
-  /// This entails that all measures in the study protocol using this device's
-  /// type is restarted. This method is useful after the device is (re)connected.
+  /// This entails that all task control executors using this device are resumed,
+  /// if they are supposed to be resumed, e.g., if they were paused due to a temporary
+  /// disconnection (via [isDisconnecting]) of the device, but not if they were paused
+  /// due to a manual [stop] of the sampling.
   @nonVirtual
   void restart() {
     info('$runtimeType - Restarting sampling...');
 
-    // TODO - there is somethig wrong....
-    // Sampling is not restarted when the device is reconnected.
-    // But how do we know if the sampling should be restarted or not?
-    //
-    // The issue seems to be that the executors are not in a resumed state when this method is called,
-    // so the resume() method is not called on them.
-    // They have been paused by the disconnect event which pauses the sampling.
-    // It is a genera problem of comparing what state we want the executors to be in,
-    // and what state they are in when this method is called. Need to investigate this further.
-    //
-    // Similar issue as with the "samplingStatus" in the Study Controller,
-    // where the state of the executors is not in sync with the "samplingStatus" of the study controller.
-    //
-    // See issue #555.
-
     for (var executor in executors) {
-      if (executor.state == ExecutorState.Resumed) {
-        executor.resume();
+      debug(
+        '$runtimeType - Restarting executor: $executor, state: ${executor.state}',
+      );
+      if (executor.state == ExecutorState.PausedButShouldBeResumed) {
+        // resume data sampling with a delay to give the device some time to fully reconnect
+        Future.delayed(const Duration(seconds: 15), () => executor.resume());
       }
     }
   }
 
   /// Stop sampling the measures using this device.
   ///
-  /// This entails that all measures in the study protocol using this device's
-  /// type is stopped.
+  /// This entails that all task control executors using this device are paused,
+  /// and hence all data collection for the measures using this device is stopped.
+  /// This method is e.g. used when the device is disconnected.
+  ///
+  /// If [shouldBeResumed] is true, the executors are paused but marked to be
+  /// resumed later when the device is reconnected.
+  /// This is useful when the device is temporarily disconnected, e.g., due to
+  /// a temporary loss of Bluetooth connection, and we want to automatically resume
+  /// sampling when the device is reconnected.
   @nonVirtual
-  void stop() {
+  void stop({bool shouldBeResumed = false}) {
+    debug(
+      '$runtimeType - Stopping sampling - shouldResumeLater: $shouldBeResumed ...',
+    );
     for (var executor in executors) {
-      executor.pause();
+      executor.state == ExecutorState.Resumed && shouldBeResumed
+          ? executor.pauseButShouldBeResumed()
+          : executor.pause();
     }
   }
 
@@ -329,31 +351,55 @@ abstract class DeviceManager<
   /// Returns true if successful, false if not.
   @nonVirtual
   Future<bool> disconnect() async {
-    bool success = false;
-    if (status == DeviceStatus.connected || status == DeviceStatus.connecting) {
-      info(
-        '$runtimeType - Trying to disconnect from device of type: $typeName.',
-      );
-
-      // Stop all sampling on this device.
-      stop();
-
-      success = await onDisconnect();
-      status = (success) ? DeviceStatus.disconnected : status;
-
-      return success;
-    } else {
+    if (!isConnecting) {
       warning(
         '$runtimeType is not connected, so nothing to disconnect from....',
       );
       return true;
     }
+    bool success = false;
+    info('$runtimeType - Trying to disconnect from device of type: $typeName.');
+
+    stop();
+
+    try {
+      success = await onDisconnect();
+    } catch (error) {
+      warning(
+        '$runtimeType - Error disconnecting from device of type: $typeName. $error',
+      );
+    }
+    status = (success) ? DeviceStatus.disconnected : status;
+
+    // TODO - we should also try to unregister the device from the deployment
+    // service when it is disconnected by the user/app.
+    // Need to implement a "tryUnregisterDisconnectedDevice(configuration)"
+    // method somewhere, like in the ClientManager or DeviceController.
+
+    return success;
   }
 
   /// Callback on [disconnect].
   ///
+  /// This method is called **after** all sampling on this device has been stopped,
+  /// and the device manager is trying to disconnect from the real device.
+  ///
   /// Is to be overridden in sub-classes and implement device-specific disconnection.
   Future<bool> onDisconnect();
+
+  /// Callback when the physical device is disconnected due to e.g., a temporary
+  /// loss of Bluetooth connection.
+  ///
+  /// All sampling on this device will be stopped, but the sampling will be
+  /// marked to be restarted (via [restart]) when the device is reconnected,
+  /// e.g., when the Bluetooth connection is re-established.
+  @nonVirtual
+  Future<void> isDisconnecting() async {
+    info('$runtimeType - Was disconnected from device of type: $typeName.');
+
+    stop(shouldBeResumed: true);
+    status = DeviceStatus.disconnected;
+  }
 
   @override
   String toString() => '$runtimeType - type: $typeName, status: $status';

@@ -1,0 +1,19 @@
+{
+  "__type": "SmartphoneDeploymentExecutorSamplingState",
+  "state": "Resumed",
+  "studyDeploymentId": "e81a7d3a-c3b6-422e-865c-29035be6305a",
+  "taskControlSamplingStates": [
+    {
+      "__type": "TaskControlExecutorSamplingState",
+      "state": "Resumed",
+      "triggerId": 1,
+      "taskName": "Task #9"
+    },
+    {
+      "__type": "TaskControlExecutorSamplingState",
+      "state": "Initialized",
+      "triggerId": 4,
+      "taskName": "Task #10"
+    }
+  ]
+}

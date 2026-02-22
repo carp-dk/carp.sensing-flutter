@@ -34,6 +34,11 @@ enum ExecutorState {
   /// Paused not collecting data. Can be resumed in this state.
   Paused,
 
+  /// Paused and not collecting data, but should be resumed again when possible.
+  /// This is typically used when a device is disconnected by the OS and
+  /// the reconnected, and the executor should be resumed again when possible.
+  PausedButShouldBeResumed,
+
   /// Permanently disposed. Cannot be used anymore.
   Disposed,
 
@@ -108,6 +113,9 @@ abstract class Executor<TConfig> {
 
   /// Pause the executor. Paused until [resume] is called.
   void pause();
+
+  /// Pause the executor but mark it to be resumed when possible.
+  void pauseButShouldBeResumed();
 
   /// Dispose of this executor.
   ///
@@ -209,6 +217,18 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
       _stateMachine.pause();
     } catch (error) {
       addError('Error pausing $this: $error');
+      _setState(_UndefinedState(this));
+    }
+  }
+
+  @override
+  @nonVirtual
+  void pauseButShouldBeResumed() {
+    info('Paused (but should be resumed) $this - $configuration');
+    try {
+      _stateMachine.pausedButShouldBeResumed();
+    } catch (error) {
+      addError('Error pausing but should be resumed $this: $error');
       _setState(_UndefinedState(this));
     }
   }
@@ -323,6 +343,7 @@ abstract class _ExecutorStateMachine {
   void initialize();
   void resume();
   void pause();
+  void pausedButShouldBeResumed();
   void dispose();
   void error();
 }
@@ -343,6 +364,9 @@ abstract class _AbstractExecutorState implements _ExecutorStateMachine {
 
   @override
   void pause() => _printWarning('pause');
+
+  @override
+  void pausedButShouldBeResumed() => _printWarning('pausedButShouldBeResumed');
 
   // Default dispose behavior. A Executor can be disposed in all states.
   @override
@@ -407,12 +431,19 @@ abstract class _ResumableState extends _AbstractExecutorState
   @override
   void resume() {
     executor.onResume().then((resumed) {
-      if (resumed) {
-        executor._setState(_ResumedState(executor));
-      } else {
-        executor._setState(_PausedState(executor));
-      }
+      executor._setState(
+        resumed
+            ? _ResumedState(executor)
+            : _PausedButShouldBeResumedState(executor),
+      );
       executor._isResuming = false;
+    });
+  }
+
+  @override
+  void pausedButShouldBeResumed() {
+    executor.onPause().then((paused) {
+      if (paused) executor._setState(_PausedButShouldBeResumedState(executor));
     });
   }
 }
@@ -424,6 +455,13 @@ class _InitializedState extends _ResumableState
 
   @override
   ExecutorState get state => ExecutorState.Initialized;
+
+  @override
+  void pause() {
+    executor.onPause().then((paused) {
+      if (paused) executor._setState(_PausedState(executor));
+    });
+  }
 }
 
 class _ResumedState extends _ResumableState implements _ExecutorStateMachine {
@@ -449,10 +487,20 @@ class _PausedState extends _ResumedState implements _ExecutorStateMachine {
   ExecutorState get state => ExecutorState.Paused;
 }
 
+class _PausedButShouldBeResumedState extends _ResumedState
+    implements _ExecutorStateMachine {
+  _PausedButShouldBeResumedState(Executor<dynamic> executor)
+    : super(executor as AbstractExecutor);
+
+  @override
+  ExecutorState get state => ExecutorState.PausedButShouldBeResumed;
+}
+
 class _DisposedState extends _AbstractExecutorState
     implements _ExecutorStateMachine {
   _DisposedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
+
   @override
   ExecutorState get state => ExecutorState.Disposed;
 }
@@ -461,6 +509,7 @@ class _UndefinedState extends _AbstractExecutorState
     implements _ExecutorStateMachine {
   _UndefinedState(Executor<dynamic> executor)
     : super(executor as AbstractExecutor);
+
   @override
   ExecutorState get state => ExecutorState.Undefined;
 }

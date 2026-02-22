@@ -48,9 +48,10 @@ abstract class BLEDeviceManager<
   ///
   /// The format of the BLE address is platform-specific.
   /// On Android, it is typically a MAC address of the form `00:04:79:00:0F:4D`.
-  /// On iOS, it may be a UUID string on the form `E2C56DB5-DFFB-48D2-B060-D0F5A71096E0`.
+  /// On iOS, it is typically be a UUID string on the form `E2C56DB5-DFFB-48D2-B060-D0F5A71096E0`.
   ///
-  /// Returns null string if unknown.
+  /// Returns null if unknown. Typically, the BLE address is only known after
+  /// pairing with a specific BLE device.
   String? bleAddress;
 
   /// The BLE name of this device, if known.
@@ -65,6 +66,9 @@ abstract class BLEDeviceManager<
   /// Default display name for a BLE device is its BLE name or address.
   @override
   String? get displayName => bleName ?? bleAddress;
+
+  @override
+  BLEDeviceManager(super.deviceType, {super.configuration});
 
   @override
   @mustCallSuper
@@ -123,9 +127,6 @@ abstract class BLEDeviceManager<
       await Permission.bluetooth.request();
     }
   }
-
-  @override
-  BLEDeviceManager(super.deviceType, {super.configuration});
 }
 
 /// A device manager for a smartphone.

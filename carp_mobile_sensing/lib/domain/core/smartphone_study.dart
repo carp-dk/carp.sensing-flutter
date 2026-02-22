@@ -10,7 +10,6 @@ part of '../../domain.dart';
 /// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
 class SmartphoneStudy extends Study<SmartphoneDeployment> {
   SmartphoneDeploymentExecutorSamplingState? _samplingState;
-  // SmartphoneDeploymentExecutorSamplingState? _samplingState;
 
   /// The unique id of the study in the deployment service.
   String? studyId;
@@ -27,8 +26,6 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   set samplingState(SmartphoneDeploymentExecutorSamplingState? state) {
     _samplingState = state;
 
-    debug('$runtimeType - Setting sampling state: $state');
-
     createEvent(
       SmartphoneStudyStatusEvent(
         this,
@@ -42,7 +39,9 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   bool get isDeployed => deployment != null;
 
   /// Is this study sampling data?
-  bool get isSampling => samplingState?.state == ExecutorState.Resumed;
+  bool get isSampling =>
+      (samplingState?.state ?? ExecutorState.Undefined) ==
+      ExecutorState.Resumed;
 
   @override
   Stream<SmartphoneStudyStatusEvent> get events => super.events.map(

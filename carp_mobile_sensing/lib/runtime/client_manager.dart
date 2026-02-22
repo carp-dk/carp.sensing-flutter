@@ -349,7 +349,11 @@ class SmartPhoneClientManager
   /// Resume data sampling in all studies in this client manager.
   void resume() async {
     for (var controller in _controllers.values) {
-      controller.resume();
+      // controller.resume();
+      // Using restart instead of resume to make sure that sampling is restarted
+      // and not merely resumed based on the previous state.
+      // This is to make sure that sampling is restarted even if the study was paused or stopped before.
+      controller.restart();
     }
     notifyListeners();
   }

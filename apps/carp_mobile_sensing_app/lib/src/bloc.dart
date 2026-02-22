@@ -38,11 +38,16 @@ class SensingBLoC {
   /// The study running on this phone.
   SmartphoneStudy? get study => sensing.study;
 
+  /// Is sampling running, i.e. has the study executor been started?
+  bool get isSampling =>
+      // bloc.study?.isSampling ?? false;
+      sensing.controller?.executor.state == ExecutorState.Resumed;
+
   /// Add a study to the app based on the current [deploymentMode].
   /// If in local mode, the study protocol is loaded from the local study protocol
   /// manager. If in CAWS mode, the study invitation is retrieved from CAWS.
   Future<void> addStudy(BuildContext context) async {
-    switch (bloc.deploymentMode) {
+    switch (deploymentMode) {
       case DeploymentMode.local:
         // Get the protocol from the local study protocol manager.
         // Note that the study id is not used.
@@ -80,7 +85,8 @@ class SensingBLoC {
     // resuming or pausing.
     !study!.isDeployed
         ? sensing.client.start()
-        : study!.isSampling
+        // : study!.isSampling
+        : isSampling
         ? sensing.client.pause()
         : sensing.client.resume();
   }

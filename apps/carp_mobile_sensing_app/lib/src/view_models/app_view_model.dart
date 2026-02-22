@@ -22,8 +22,9 @@ class AppViewModel with ChangeNotifier {
   bool get isDeployed => bloc.study?.isDeployed ?? false;
 
   /// Is sensing running, i.e. has the study executor been started?
-  bool get isRunning =>
-      bloc.sensing.controller?.executor.state == ExecutorState.Resumed;
+  bool get isRunning => bloc.isSampling;
+  // bloc.study?.isSampling ?? false;
+  // bloc.sensing.controller?.executor.state == ExecutorState.Resumed;
 
   @override
   void dispose() {

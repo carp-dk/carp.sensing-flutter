@@ -37,6 +37,7 @@ const _$ExecutorStateEnumMap = {
   ExecutorState.Initialized: 'Initialized',
   ExecutorState.Resumed: 'Resumed',
   ExecutorState.Paused: 'Paused',
+  ExecutorState.PausedButShouldBeResumed: 'PausedButShouldBeResumed',
   ExecutorState.Disposed: 'Disposed',
   ExecutorState.Undefined: 'Undefined',
 };

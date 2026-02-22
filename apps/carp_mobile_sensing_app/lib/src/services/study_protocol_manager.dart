@@ -39,6 +39,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask(
+        name: 'Device Info Task',
         measures: [
           Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
           Measure(type: DeviceSamplingPackage.APPLICATION_INFORMATION),
@@ -310,6 +311,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask(
+        name: 'Polar Task',
         measures: [
           Measure(type: PolarSamplingPackage.HR),
           // Measure(type: PolarSamplingPackage.ECG),

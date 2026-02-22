@@ -39,6 +39,7 @@ part 'src/view_models/study_view_model.dart';
 part 'src/bloc.dart';
 part 'src/services/carp_backend.dart';
 part 'src/services/study_protocol_manager.dart';
+part 'src/views/home_page.dart';
 part 'src/views/probe_list_page.dart';
 part 'src/views/device_list_page.dart';
 part 'src/views/ble_scanner_page.dart';

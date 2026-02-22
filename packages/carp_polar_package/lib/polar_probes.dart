@@ -18,7 +18,7 @@ abstract class _PolarProbe extends StreamProbe {
     }
     if (!(deviceManager.dataTypes?.contains(dataType) ?? false)) {
       warning(
-        '$runtimeType - Polar device does not support data type $dataType',
+        "$runtimeType - Polar device does not support data type '$dataType'",
       );
       return false;
     }

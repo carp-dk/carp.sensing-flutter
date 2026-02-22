@@ -63,6 +63,9 @@ class SmartphoneDeploymentExecutor
     SmartphoneDeploymentExecutorSamplingState? samplingState,
   ) => _samplingState = samplingState;
 
+  /// Clear the [samplingState] of this [SmartphoneDeploymentExecutor].
+  void clearSamplingStatus() => _samplingState = null;
+
   @override
   bool onInitialize() {
     if (configuration == null) {
@@ -129,38 +132,34 @@ class SmartphoneDeploymentExecutor
     return true;
   }
 
-  /// Resumes the deployment.
+  /// Resumes sampling based on the [samplingState] of the deployment.
   ///
   /// If the prior [samplingState] is unknown (null), it simply resumes all executors.
   /// If the prior [samplingState] is known, it resumes or pauses the executors based on
   /// the state of each [TaskControlExecutor] in the [samplingState].
   ///
-  /// After the deployment is finished, enqueue all buffered tasks.
+  /// This method also enqueues any buffered tasks in the [AppTaskController].
   @override
   Future<bool> onResume() async {
-    bool success = false;
+    if (_samplingState == null) return await super.onResume();
 
-    if (_samplingState == null) {
-      success = await super.onResume();
-    } else {
-      for (var executor in _executors) {
-        if (executor is TaskControlExecutor) {
-          var taskControlSamplingState = _samplingState!
-              .taskControlSamplingStates
-              .firstWhere(
-                (state) =>
-                    state.triggerId == executor.taskControl.triggerId &&
-                    state.taskName == executor.taskControl.taskName,
-              );
+    for (var executor in _executors) {
+      if (executor is TaskControlExecutor) {
+        var taskControlSamplingState = _samplingState!.taskControlSamplingStates
+            .firstWhere(
+              (state) =>
+                  state.triggerId == executor.taskControl.triggerId &&
+                  state.taskName == executor.taskControl.taskName,
+            );
 
-          if (taskControlSamplingState.state == ExecutorState.Resumed) {
-            executor.resume();
-          } else if (taskControlSamplingState.state == ExecutorState.Paused) {
-            executor.pause();
-          }
+        if (taskControlSamplingState.state == ExecutorState.Resumed ||
+            taskControlSamplingState.state ==
+                ExecutorState.PausedButShouldBeResumed) {
+          executor.resume();
+        } else if (taskControlSamplingState.state == ExecutorState.Paused) {
+          executor.pause();
         }
       }
-      success = true;
     }
 
     await AppTaskController().enqueueBufferedTasks();
@@ -168,7 +167,7 @@ class SmartphoneDeploymentExecutor
       '$runtimeType resumed - ${await SmartPhoneClientManager().notificationController?.pendingNotificationRequestsCount} notifications are currently pending.',
     );
 
-    return success;
+    return true;
   }
 
   @override

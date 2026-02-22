@@ -64,7 +64,12 @@ class DeviceDescription {
     DeviceStatus.unknown: Icon(Icons.question_mark, color: CachetColors.RED),
     DeviceStatus.configured: Icon(Icons.check, color: CachetColors.GREEN),
     DeviceStatus.connected: Icon(Icons.link, color: CachetColors.GREEN),
+    DeviceStatus.reconnected: Icon(Icons.link, color: CachetColors.GREEN),
     DeviceStatus.disconnected: Icon(Icons.link_off, color: CachetColors.YELLOW),
+    DeviceStatus.disconnecting: Icon(
+      Icons.link_off,
+      color: CachetColors.YELLOW,
+    ),
     DeviceStatus.paired: Icon(
       Icons.bluetooth_connected,
       color: CachetColors.DARK_BLUE,

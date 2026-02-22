@@ -93,7 +93,8 @@ class Sensing {
       samplingSize++;
 
       if (Settings().debugLevel == DebugLevel.debug) {
-        debugPrint(toJsonString(measurement));
+        // debugPrint(toJsonString(measurement));
+        debugPrint('>> ${measurement.dataType}');
       }
     });
 

@@ -145,7 +145,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   Future<bool> onResume() async {
     if (triggerExecutor == null) {
       warning(
-        '$runtimeType - No TriggerExecutor found - cannot resume this task control executor.',
+        '$runtimeType - No TriggerExecutor found - call initialize() before resume this task control executor.',
       );
       return false;
     }

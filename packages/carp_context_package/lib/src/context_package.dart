@@ -226,11 +226,7 @@ abstract class ContextServiceManager<
   TDeviceConfiguration extends ServiceConfiguration<ServiceRegistration>
 >
     extends ServiceManager<TDeviceConfiguration, ServiceRegistration> {
-  ContextServiceManager(
-    super.type, {
-    super.configuration,
-    super.restartOnReconnect,
-  });
+  ContextServiceManager(super.type, {super.configuration});
 
   @override
   void onConfigure() {} // most services do not need further configuration
@@ -242,7 +238,10 @@ abstract class ContextServiceManager<
   );
 
   @override
-  bool get canConnect => true; // most online services can connect
+  bool get canConnect => true; // online services can always connect
+
+  @override
+  bool get shouldConnect => true; // online services should always connect
 
   @override
   Future<bool> onDisconnect() async => true;

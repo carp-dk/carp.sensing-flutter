@@ -23,7 +23,7 @@
     "__type": "dk.carp.cams.devices.SmartphoneRegistration",
     "deviceId": "BP2A.250605.031.A3",
     "deviceDisplayName": "Android (SAMSUNG) - SM-A546B [SDK: 36]",
-    "registrationCreatedOn": "2026-02-14T13:36:52.136336Z",
+    "registrationCreatedOn": "2026-02-22T09:26:35.037869Z",
     "isConnected": true,
     "batteryChargingState": "unknown",
     "hardwareName": "s5e8835",
@@ -51,28 +51,16 @@
       "isOptional": true,
       "defaultSamplingConfiguration": {},
       "serviceUuids": [],
+      "namePrefix": "Polar",
       "allowDuplicates": true
-    },
-    {}
+    }
   ],
   "connectedDeviceRegistrations": {
-    "Polar HR Device": {
-      "__type": "dk.carp.cams.devices.PolarDeviceRegistration",
-      "deviceId": "Null",
-      "deviceDisplayName": "Unknown",
-      "registrationCreatedOn": "2026-02-14T13:37:21.061874Z",
-      "isConnected": false,
-      "batteryChargingState": "unknown",
-      "hardwareName": "Unknown",
-      "bleAddress": "Null",
-      "identifier": "Unknown",
-      "polarDeviceType": "UNKNOWN"
-    },
     "Location Service": {
       "__type": "dk.carp.cams.devices.ServiceRegistration",
-      "deviceId": "8bf45a52-455d-4011-8ad5-46ca4b9a5993",
-      "deviceDisplayName": "Location Service",
-      "registrationCreatedOn": "2026-02-14T13:37:26.244906Z",
+      "deviceId": "e1a63e98-76f5-40e5-a529-bf065c025201",
+      "deviceDisplayName": "LocationManager\nbalanced | 0 m | 60 secs",
+      "registrationCreatedOn": "2026-02-22T09:55:53.783403Z",
       "isConnected": true
     }
   },
@@ -101,7 +89,7 @@
     },
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #9",
+      "name": "Device Info Task",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -159,51 +147,11 @@
     },
     {
       "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #10",
+      "name": "Polar Task",
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
           "type": "dk.cachet.carp.polar.hr"
-        }
-      ]
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
-      "name": "Monitoring Health Service",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.error"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.triggeredtask"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.completedtask"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.heartbeat"
-        }
-      ]
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #11",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.health",
-          "overrideSamplingConfiguration": {
-            "healthDataTypes": [
-              "STEPS",
-              "BASAL_ENERGY_BURNED",
-              "WEIGHT",
-              "SLEEP_SESSION"
-            ]
-          }
         }
       ]
     }
@@ -228,15 +176,6 @@
     "4": {
       "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
       "sourceDeviceRoleName": "Polar HR Device"
-    },
-    "5": {
-      "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-      "sourceDeviceRoleName": "Health Service"
-    },
-    "6": {
-      "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
-      "sourceDeviceRoleName": "Health Service",
-      "period": 60000000
     }
   },
   "taskControls": [
@@ -248,7 +187,7 @@
     },
     {
       "triggerId": 1,
-      "taskName": "Task #9",
+      "taskName": "Device Info Task",
       "destinationDeviceRoleName": "Smartphone",
       "control": "Start"
     },
@@ -266,25 +205,13 @@
     },
     {
       "triggerId": 4,
-      "taskName": "Task #10",
+      "taskName": "Polar Task",
       "destinationDeviceRoleName": "Polar HR Device",
-      "control": "Start"
-    },
-    {
-      "triggerId": 5,
-      "taskName": "Monitoring Health Service",
-      "destinationDeviceRoleName": "Health Service",
-      "control": "Start"
-    },
-    {
-      "triggerId": 6,
-      "taskName": "Task #11",
-      "destinationDeviceRoleName": "Health Service",
       "control": "Start"
     }
   ],
   "expectedParticipantData": [],
-  "studyDeploymentId": "8ee7494e-2f5e-4858-aaa9-5f517f48004b",
-  "deployed": "2026-02-14T13:37:21.042941Z",
+  "studyDeploymentId": "7bf0fe5a-283d-4f56-9240-b0eee0abcb59",
+  "deployed": "2026-02-22T09:26:48.893550Z",
   "status": "Invited"
 }
