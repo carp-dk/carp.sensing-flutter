@@ -43,7 +43,6 @@ class SmartPhoneClientManager
     with ChangeNotifier {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
   NotificationController? _notificationController;
-  bool _heartbeat = true;
   bool _askForPermissions = true;
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
@@ -82,9 +81,6 @@ class SmartPhoneClientManager
   /// which implies that only one client manager is used in an app.
   factory SmartPhoneClientManager() => _instance;
 
-  /// Is this client sending [Heartbeat] measurements for its studies?
-  bool get heartbeat => _heartbeat;
-
   DeviceController get deviceController =>
       super.dataCollectorFactory as DeviceController;
 
@@ -122,10 +118,6 @@ class SmartPhoneClientManager
   /// If [askForPermissions] is true (default), this client manager will
   /// automatically ask for permissions for all sampling packages at once.
   /// If you want the app to handle permissions itself, set this to false.
-  ///
-  /// If [heartbeat] is true (default), a [Heartbeat] data point will be uploaded
-  /// for all devices (including the phone) in all studies running on this client.
-  /// This happens every 5 minutes.
   @override
   Future<void> configure({
     DeviceRegistration? registration,
@@ -134,12 +126,10 @@ class SmartPhoneClientManager
     bool enableNotifications = true,
     NotificationController? notificationController,
     bool askForPermissions = true,
-    bool heartbeat = true,
   }) async {
     // Fast out if already configured
     if (state.index >= ClientManagerState.configured.index) return;
 
-    _heartbeat = heartbeat;
     _askForPermissions = askForPermissions;
 
     // Initialize infrastructure services and the repository.

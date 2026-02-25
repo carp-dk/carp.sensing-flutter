@@ -218,14 +218,11 @@ enum StudyStatusEventTypes {
   /// The deployment has been updated.
   DeploymentUpdated,
 
+  /// Data sampling state has changed.
+  SamplingStateChanged,
+
   /// An error has occurred during deployment.
   DeploymentError,
-
-  /// Data sampling is resumed.
-  Resumed,
-
-  /// Data sampling is paused.
-  Paused,
 }
 
 /// An event related to a running [study].

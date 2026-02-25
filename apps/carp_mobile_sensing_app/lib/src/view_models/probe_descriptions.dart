@@ -13,7 +13,7 @@ class ProbeDescription {
       'Error.',
       Icon(Icons.error, size: 50, color: CachetColors.GREY_4),
     ),
-    MonitoringSamplingPackage.HEARTBEAT: ProbeDescriptor(
+    DeviceSamplingPackage.HEARTBEAT: ProbeDescriptor(
       'Heartbeat',
       'Device heartbeat.',
       Icon(Icons.important_devices_sharp, size: 50, color: CachetColors.GREY_4),

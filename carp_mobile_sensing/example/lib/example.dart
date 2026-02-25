@@ -388,12 +388,8 @@ void example_3() async {
   // * notifications enabled
   await client.configure();
 
-  // disabling notifications, device heartbeat, and permissions handling
-  await client.configure(
-    enableNotifications: false,
-    heartbeat: false,
-    askForPermissions: false,
-  );
+  // disabling notifications and permissions handling
+  await client.configure(enableNotifications: false, askForPermissions: false);
 
   // add and deploy the protocol
   final study = await client.addStudyFromProtocol(protocol);

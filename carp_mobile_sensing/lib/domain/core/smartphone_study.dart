@@ -29,7 +29,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
     createEvent(
       SmartphoneStudyStatusEvent(
         this,
-        StudyStatusEventTypes.DeploymentUpdated,
+        StudyStatusEventTypes.SamplingStateChanged,
         samplingState,
       ),
     );

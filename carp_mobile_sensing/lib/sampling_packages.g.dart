@@ -6,19 +6,6 @@ part of 'sampling_packages.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Heartbeat _$HeartbeatFromJson(Map<String, dynamic> json) => Heartbeat(
-  period: (json['period'] as num).toInt(),
-  deviceType: json['deviceType'] as String,
-  deviceRoleName: json['deviceRoleName'] as String,
-)..$type = json['__type'] as String?;
-
-Map<String, dynamic> _$HeartbeatToJson(Heartbeat instance) => <String, dynamic>{
-  '__type': ?instance.$type,
-  'period': instance.period,
-  'deviceType': instance.deviceType,
-  'deviceRoleName': instance.deviceRoleName,
-};
-
 AmbientLight _$AmbientLightFromJson(Map<String, dynamic> json) =>
     AmbientLight(
         json['meanLux'] as num,
@@ -262,3 +249,14 @@ AppLifecycleEvent _$AppLifecycleEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AppLifecycleEventToJson(AppLifecycleEvent instance) =>
     <String, dynamic>{'__type': ?instance.$type, 'state': instance.state};
+
+Heartbeat _$HeartbeatFromJson(Map<String, dynamic> json) => Heartbeat(
+  deviceType: json['deviceType'] as String,
+  deviceRoleName: json['deviceRoleName'] as String,
+)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$HeartbeatToJson(Heartbeat instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'deviceType': instance.deviceType,
+  'deviceRoleName': instance.deviceRoleName,
+};

@@ -54,7 +54,6 @@ abstract class DeviceManager<
       StreamController.broadcast();
 
   bool _hasPermissions = false;
-  Timer? _heartbeatTimer;
   DeviceStatus _status = DeviceStatus.unknown;
   final String _deviceType;
   TDeviceConfiguration? _configuration;
@@ -179,38 +178,6 @@ abstract class DeviceManager<
   /// Is to be overridden in sub-classes. Note, however, that it must not be
   /// doing a lot of work on startup.
   void onConfigure();
-
-  /// Start heartbeat monitoring for this device for the deployment controlled
-  /// by [controller].
-  void startHeartbeatMonitoring(SmartphoneStudyController controller) {
-    if (!isConfigured) {
-      warning(
-        '$runtimeType - Trying to start heartbeat monitoring before device is configured. '
-        'Please configure device first.',
-      );
-      return;
-    }
-    debug(
-      '$runtimeType - Setting up heartbeat monitoring for device: $configuration',
-    );
-    _heartbeatTimer = Timer.periodic(
-      const Duration(minutes: DeviceController.HEARTBEAT_PERIOD),
-      (_) => (isConnected)
-          ? controller.executor.addMeasurement(
-              Measurement.fromData(
-                Heartbeat(
-                  period: DeviceController.HEARTBEAT_PERIOD,
-                  deviceType: deviceType,
-                  deviceRoleName: configuration?.roleName ?? "unknown",
-                ),
-              ),
-            )
-          : null,
-    );
-  }
-
-  /// Stop heartbeat monitoring for this device.
-  void stopHeartbeatMonitoring() => _heartbeatTimer?.cancel();
 
   /// Does this device manager have the [permissions] to run?
   @nonVirtual

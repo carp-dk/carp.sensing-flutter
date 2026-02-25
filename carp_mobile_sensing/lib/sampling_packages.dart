@@ -35,9 +35,6 @@ import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
-part 'infrastructure/sampling_packages/monitoring/monitoring_data.dart';
-part 'infrastructure/sampling_packages/monitoring/monitoring_package.dart';
-
 part 'infrastructure/sampling_packages/sensors/sensor_probes.dart';
 part 'infrastructure/sampling_packages/sensors/light_probe.dart';
 part 'infrastructure/sampling_packages/sensors/pedometer_probe.dart';

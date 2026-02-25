@@ -106,7 +106,7 @@ class Persistence {
 
     // Listen to changes to studies in the client repository so we can save them.
     SmartphoneClientRepository().studyStatusEvents.listen(
-      (study) => updateStudy(study.study),
+      (event) => updateStudy(event.study),
     );
 
     // Listen to changes to the app task queue so we can save them.

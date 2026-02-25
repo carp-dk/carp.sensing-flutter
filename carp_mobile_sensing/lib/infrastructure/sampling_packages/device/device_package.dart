@@ -38,6 +38,7 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] primary device for data collection.
   ///  * Use [IntervalSamplingConfiguration] for configuration.
+  ///    Default is 10 minutes interval.
   static const String FREE_MEMORY =
       '${CarpDataTypes.CARP_NAMESPACE}.freememory';
 
@@ -71,6 +72,13 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   ///  * No sampling configuration needed.
   static const String TIMEZONE = '${CarpDataTypes.CARP_NAMESPACE}.timezone';
 
+  /// Collect a heartbeat from the primary device.
+  ///  * Event-based measure.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use [IntervalSamplingConfiguration] for configuration.
+  ///    Default is 15 minutes interval.
+  static const String HEARTBEAT = '${CarpDataTypes.CARP_NAMESPACE}.heartbeat';
+
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
@@ -96,7 +104,7 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
             displayName: "Free Memory",
             timeType: DataTimeType.POINT,
           ),
-          IntervalSamplingConfiguration(interval: const Duration(minutes: 1)),
+          IntervalSamplingConfiguration(interval: const Duration(minutes: 10)),
         ),
         DataTypeSamplingScheme(
           CamsDataTypeMetaData(
@@ -121,6 +129,14 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
         ),
         DataTypeSamplingScheme(
           CamsDataTypeMetaData(
+            type: HEARTBEAT,
+            displayName: "Heartbeat",
+            timeType: DataTimeType.POINT,
+          ),
+          IntervalSamplingConfiguration(interval: const Duration(minutes: 15)),
+        ),
+        DataTypeSamplingScheme(
+          CamsDataTypeMetaData(
             type: TIMEZONE,
             displayName: "Device Timezone",
             timeType: DataTimeType.POINT,
@@ -138,6 +154,7 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
     TIMEZONE => TimezoneProbe(),
     APP_LIFECYCLE_EVENT => AppLifecycleProbe(),
     SCREEN_EVENT => (Platform.isAndroid) ? ScreenProbe() : null,
+    HEARTBEAT => HeartbeatProbe(),
     _ => null,
   };
 

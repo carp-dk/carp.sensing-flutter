@@ -259,40 +259,28 @@ Map<String, dynamic> _$HistoricSamplingConfigurationToJson(
 
 IntervalSamplingConfiguration _$IntervalSamplingConfigurationFromJson(
   Map<String, dynamic> json,
-) =>
-    IntervalSamplingConfiguration(
-        interval: Duration(microseconds: (json['interval'] as num).toInt()),
-      )
-      ..$type = json['__type'] as String?
-      ..lastTime = json['lastTime'] == null
-          ? null
-          : DateTime.parse(json['lastTime'] as String);
+) => IntervalSamplingConfiguration(
+  interval: Duration(microseconds: (json['interval'] as num).toInt()),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$IntervalSamplingConfigurationToJson(
   IntervalSamplingConfiguration instance,
 ) => <String, dynamic>{
   '__type': ?instance.$type,
-  'lastTime': ?instance.lastTime?.toIso8601String(),
   'interval': instance.interval.inMicroseconds,
 };
 
 PeriodicSamplingConfiguration _$PeriodicSamplingConfigurationFromJson(
   Map<String, dynamic> json,
-) =>
-    PeriodicSamplingConfiguration(
-        interval: Duration(microseconds: (json['interval'] as num).toInt()),
-        duration: Duration(microseconds: (json['duration'] as num).toInt()),
-      )
-      ..$type = json['__type'] as String?
-      ..lastTime = json['lastTime'] == null
-          ? null
-          : DateTime.parse(json['lastTime'] as String);
+) => PeriodicSamplingConfiguration(
+  interval: Duration(microseconds: (json['interval'] as num).toInt()),
+  duration: Duration(microseconds: (json['duration'] as num).toInt()),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$PeriodicSamplingConfigurationToJson(
   PeriodicSamplingConfiguration instance,
 ) => <String, dynamic>{
   '__type': ?instance.$type,
-  'lastTime': ?instance.lastTime?.toIso8601String(),
   'interval': instance.interval.inMicroseconds,
   'duration': instance.duration.inMicroseconds,
 };

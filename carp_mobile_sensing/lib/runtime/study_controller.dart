@@ -183,9 +183,6 @@ class SmartphoneStudyController {
     // (Re-)connecting a device will trigger that sampling is (re)started
     await _connectAllConnectableDevices();
 
-    // start heartbeat monitoring
-    if (SmartPhoneClientManager().heartbeat) _startHeartbeatMonitoring();
-
     // start the study and restart data sampling
     study.samplingState = existingSamplingStatus;
     start();
@@ -414,26 +411,6 @@ class SmartphoneStudyController {
     manager?.configure(configuration, registration);
   }
 
-  /// Start heartbeat monitoring for all devices, incl. the phone, for the
-  /// [deployment] controlled by this controller.
-  void _startHeartbeatMonitoring() {
-    for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
-      _deviceController
-          .getDeviceManager(configuration.type)
-          ?.startHeartbeatMonitoring(this);
-    }
-  }
-
-  /// Stop heartbeat monitoring for all devices, incl. the phone, for the
-  /// [deployment] controlled by this controller.
-  void _stopHeartbeatMonitoring() {
-    for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
-      _deviceController
-          .getDeviceManager(configuration.type)
-          ?.stopHeartbeatMonitoring();
-    }
-  }
-
   /// Start connecting all connectable devices to be used in the [deployment]
   /// and which are available on this phone.
   ///
@@ -521,7 +498,6 @@ class SmartphoneStudyController {
   ///
   /// This entails:
   ///   * pausing data sampling
-  ///   * stopping heartbeat monitoring
   ///   * closing the data manager (e.g., flushing data to a file)
   ///
   /// Note that all cached deployment information and any data sampled
@@ -533,7 +509,6 @@ class SmartphoneStudyController {
   void dispose() {
     info('$runtimeType - Disposing study from this smartphone...');
     pause();
-    _stopHeartbeatMonitoring();
     dataManager?.close();
   }
 }

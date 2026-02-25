@@ -55,7 +55,16 @@ void _registerFromJsonFunctions() {
 
   // Data classes
   FromJsonFactory().registerAll([
-    Heartbeat(period: 1, deviceRoleName: '', deviceType: ''),
+    Error(message: ''),
+    TriggeredTask(
+      triggerId: 0,
+      taskName: '',
+      destinationDeviceRoleName: '',
+      control: Control.Start,
+    ),
+    CompletedTask(taskName: ''),
+    CompletedAppTask(taskName: '', taskType: ''),
+    Heartbeat(deviceRoleName: '', deviceType: ''),
     FileData(filename: ''),
     DeviceInformation(),
     ApplicationInformation(

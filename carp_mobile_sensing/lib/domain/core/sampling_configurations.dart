@@ -52,7 +52,7 @@ class HistoricSamplingConfiguration extends PersistentSamplingConfiguration {
 /// A sampling configuration that allows configuring the time [interval] in
 /// between subsequent measurements.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class IntervalSamplingConfiguration extends PersistentSamplingConfiguration {
+class IntervalSamplingConfiguration extends SamplingConfiguration {
   /// Sampling interval (i.e., delay between sampling).
   Duration interval;
 

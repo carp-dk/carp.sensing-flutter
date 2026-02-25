@@ -199,21 +199,11 @@ abstract class ClientManager<
     // if (study.isDeployed) return study.status;
 
     // Try to deploy the study.
-
-    // var registration = repository.deviceRegistration;
-    // if (registration != null) {
     await proxy?.tryDeployment(study, registration);
 
     var newStatus = study.status;
     if (status != newStatus) repository.updateStudy(study);
-
     return newStatus;
-    // } else {
-    //   throw IllegalArgumentException(
-    //     'Device Registration information for the client is not available. '
-    //     'Set this before trying to deploy any studies.',
-    //   );
-    // }
   }
 
   /// Remove the study with [studyDeploymentId] and [deviceRoleName] from this

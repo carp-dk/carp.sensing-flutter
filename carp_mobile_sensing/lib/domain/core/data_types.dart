@@ -73,18 +73,12 @@ class CamsDataTypes {
   static final CamsDataTypes _instance = CamsDataTypes._();
   factory CamsDataTypes() => _instance;
 
-  static const String HEARTBEAT = '${CarpDataTypes.CARP_NAMESPACE}.heartbeat';
   static const String COMPLETED_APP_TASK =
       '${CarpDataTypes.CARP_NAMESPACE}.completedapptask';
   static const String FILE = '${CarpDataTypes.CARP_NAMESPACE}.file';
 
   CamsDataTypes._() {
     CarpDataTypes().add([
-      DataTypeMetaData(
-        type: HEARTBEAT,
-        displayName: "Heart Beat",
-        timeType: DataTimeType.POINT,
-      ),
       DataTypeMetaData(
         type: COMPLETED_APP_TASK,
         displayName: "Completed AppTask",

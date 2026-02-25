@@ -13,15 +13,21 @@ platforms:
   ios:
 
 dependencies:
+  flutter:
+    sdk: flutter
+
   # Packages used by CAMS. For some reason, we need to explicitly depend on them here.
   # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though 
   # it does compile. See issue #530
   flutter_timezone: ^5.0.0
+  path_provider: ^2.1.0
   battery_plus: ^7.0.0
-  device_calendar: ^4.3.1
+  screen_state: ^4.0.0
+  light: ^4.0.0
+  pedometer: ^4.2.0
+  flutter_activity_recognition: ^4.0.0
   device_info_plus: ^12.1.0
-  flutter:
-    sdk: flutter
+  device_calendar: ^4.3.1
   flutter_launcher_icons: ^0.14.0
   flutter_local_notifications: ^19.4.2
   location: ^8.0.1

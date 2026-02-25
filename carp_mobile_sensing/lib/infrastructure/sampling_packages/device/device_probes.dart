@@ -28,6 +28,21 @@ class DeviceProbe extends MeasurementProbe {
   }
 }
 
+/// A probe that collects heartbeat info about the master device on a regular basis
+/// as specified in [PeriodicMeasure.frequency].
+class HeartbeatProbe extends IntervalProbe {
+  @override
+  Future<Measurement?> getMeasurement() async => Measurement.fromData(
+    Heartbeat(
+      deviceType: SmartPhoneClientManager()
+          .deviceController
+          .smartphoneDeviceManager
+          .deviceType,
+      deviceRoleName: deployment?.deviceRoleName ?? 'unknown',
+    ),
+  );
+}
+
 /// A probe that collects the device info about this device.
 class ApplicationProbe extends MeasurementProbe {
   @override

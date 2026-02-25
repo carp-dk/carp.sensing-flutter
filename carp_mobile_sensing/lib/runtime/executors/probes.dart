@@ -199,8 +199,7 @@ abstract class IntervalProbe extends MeasurementProbe {
     if (await requestPermissions()) {
       Duration? interval = samplingConfiguration?.interval;
       if (interval != null) {
-        // create a recurrent timer that gets the data point every [frequency].
-        _timer ??= Timer.periodic(interval, (Timer t) async {
+        _timer ??= Timer.periodic(interval, (_) async {
           try {
             var measurement = await getMeasurement();
             if (measurement != null) addMeasurement(measurement);

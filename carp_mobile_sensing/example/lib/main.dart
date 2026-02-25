@@ -185,11 +185,16 @@ class StudyPageState extends State<StudyPage> {
   /// A simple study protocol that collects a few basic measures
   /// using this smartphone as the primary device.
   SmartphoneStudyProtocol get simpleProtocol => SmartphoneStudyProtocol.local([
-    Measure(type: DeviceSamplingPackage.FREE_MEMORY),
-    Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-    Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-    Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
-    Measure(type: SensorSamplingPackage.STEP_EVENT),
+    Measure(type: DeviceSamplingPackage.HEARTBEAT)
+      ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+        interval: const Duration(minutes: 1),
+      ),
+
+    // Measure(type: DeviceSamplingPackage.FREE_MEMORY),
+    // Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+    // Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+    // Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
+    // Measure(type: SensorSamplingPackage.STEP_EVENT),
     Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
   ]);
 
@@ -232,18 +237,18 @@ class StudyPageState extends State<StudyPage> {
         phone,
       );
 
-      // // Collect timezone info every 10 seconds.
-      // // Note that timezone is a one-time measure, so this can be collected
-      // // using a periodic trigger. Collecting it periodically does, however,
-      // // not make much sense. This is just to demonstrate the use of a periodic
-      // // trigger, which is useful for many other types of measures.
-      // _protocol?.addTaskControl(
-      //   PeriodicTrigger(period: Duration(seconds: 10)),
-      //   BackgroundTask(
-      //     measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
-      //   ),
-      //   phone,
-      // );
+      // Collect timezone info every 10 seconds.
+      // Note that timezone is a one-time measure, so this can be collected
+      // using a periodic trigger. Collecting it periodically does, however,
+      // not make much sense. This is just to demonstrate the use of a periodic
+      // trigger, which is useful for many other types of measures.
+      _protocol?.addTaskControl(
+        PeriodicTrigger(period: Duration(seconds: 10)),
+        BackgroundTask(
+          measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
+        ),
+        phone,
+      );
 
       // Collect device info only once, when this study is deployed.
       _protocol?.addTaskControl(

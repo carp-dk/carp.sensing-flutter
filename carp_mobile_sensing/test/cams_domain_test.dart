@@ -139,7 +139,7 @@ void main() {
   group('Data Type', () {
     test('- monitor data types', () async {
       final allData = [
-        Heartbeat(period: 1, deviceRoleName: '', deviceType: ''),
+        Heartbeat(deviceType: 'Smartphone', deviceRoleName: 'phone'),
         Error(message: 'An error occurred'),
         TriggeredTask(
           triggerId: 0,
@@ -168,7 +168,7 @@ void main() {
         ScreenEvent('SCREEN_ON'),
         Timezone('Europe/Copenhagen'),
         AppLifecycleEvent('resumed'),
-        Heartbeat(period: 5, deviceType: 'Smartphone', deviceRoleName: 'phone'),
+        Heartbeat(deviceType: 'Smartphone', deviceRoleName: 'phone'),
         AmbientLight.fromLuxReadings([10, 20, 30, 40, 50]),
         AccelerationFeatures()..avgResultAcceleration = 9.81,
       ];

@@ -179,7 +179,25 @@ abstract class SmartphoneSamplingPackage extends SamplingPackage {
   void onRegister() {}
 }
 
-class NoOpSamplingPackage extends SmartphoneSamplingPackage {
+/// A [SamplingPackage] containing data types, sampling schemas and probes
+/// for monitoring data sampling:
+///
+///  - errors
+///  - task triggering
+///  - task completion, including [AppTask] completion
+class MonitoringSamplingPackage extends SmartphoneSamplingPackage {
+  /// Collect errors occurring during data collection
+  static const String ERROR = CarpDataTypes.ERROR;
+
+  /// Collect data on a triggered [TaskConfiguration].
+  static const String TRIGGERED_TASK = CarpDataTypes.TRIGGERED_TASK;
+
+  /// Collect data whenever any [TaskConfiguration] has been completed.
+  static const String COMPLETED_TASK = CarpDataTypes.COMPLETED_TASK;
+
+  /// Collect data whenever an [AppTask] has been completed.
+  static const String COMPLETED_APP_TASK = CamsDataTypes.COMPLETED_APP_TASK;
+
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
@@ -190,12 +208,11 @@ class NoOpSamplingPackage extends SmartphoneSamplingPackage {
         DataTypeSamplingScheme(
           CarpDataTypes().types[CarpDataTypes.COMPLETED_TASK]!,
         ),
-        DataTypeSamplingScheme(CarpDataTypes().types[CamsDataTypes.HEARTBEAT]!),
         DataTypeSamplingScheme(
           CarpDataTypes().types[CamsDataTypes.COMPLETED_APP_TASK]!,
         ),
       ]);
 
   @override
-  Probe? create(String type) => null;
+  Probe? create(String type) => StubProbe(); // No probes created - these types of measures are handled in the core sampling logic
 }
