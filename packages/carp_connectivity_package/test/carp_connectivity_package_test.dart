@@ -5,7 +5,7 @@ import 'package:dchs_flutter_beacon/dchs_flutter_beacon.dart';
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 void main() {

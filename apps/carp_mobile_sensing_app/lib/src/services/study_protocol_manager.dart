@@ -373,36 +373,36 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     // --------- HEALTH PACKAGE EXAMPLES -------------
     //
 
-    // // Create and add a health service
-    // final healthService = HealthService();
-    // protocol.addConnectedDevice(healthService, phone);
+    // Create and add a health service
+    final healthService = HealthService();
+    protocol.addConnectedDevice(healthService, phone);
 
-    // // Add a periodic task that collects health data on a regular basis.
-    // //
-    // // Note that we are using the HealthSamplingPackage.getHealthMeasure()
-    // // method to create a measure that collects multiple health data types.
-    // //
-    // // Also note that health measures are collected using a [HealthSamplingConfiguration]
-    // // which is a [HistoricSamplingConfiguration], meaning that data is collected
-    // // going back in time until the last collected data point.
-    // protocol.addTaskControl(
-    //   // PeriodicTrigger(period: Duration(minutes: 60)),
-    //   PeriodicTrigger(period: Duration(minutes: 1)),
-    //   BackgroundTask(
-    //     measures: [
-    //       HealthSamplingPackage.getHealthMeasure([
-    //         HealthDataType.STEPS,
-    //         HealthDataType.BASAL_ENERGY_BURNED,
-    //         HealthDataType.WEIGHT,
-    //         // SLEEP_SESSION is not available on iOS - should be removed on runtime
-    //         HealthDataType.SLEEP_SESSION,
-    //         // EDA is not available on Android - should be removed on runtime
-    //         HealthDataType.ELECTRODERMAL_ACTIVITY,
-    //       ]),
-    //     ],
-    //   ),
-    //   healthService,
-    // );
+    // Add a periodic task that collects health data on a regular basis.
+    //
+    // Note that we are using the HealthSamplingPackage.getHealthMeasure()
+    // method to create a measure that collects multiple health data types.
+    //
+    // Also note that health measures are collected using a [HealthSamplingConfiguration]
+    // which is a [HistoricSamplingConfiguration], meaning that data is collected
+    // going back in time until the last collected data point.
+    protocol.addTaskControl(
+      // PeriodicTrigger(period: Duration(minutes: 60)),
+      PeriodicTrigger(period: Duration(minutes: 1)),
+      BackgroundTask(
+        measures: [
+          HealthSamplingPackage.getHealthMeasure([
+            HealthDataType.STEPS,
+            HealthDataType.BASAL_ENERGY_BURNED,
+            HealthDataType.WEIGHT,
+            // SLEEP_SESSION is not available on iOS - should be removed on runtime
+            HealthDataType.SLEEP_SESSION,
+            // EDA is not available on Android - should be removed on runtime
+            HealthDataType.ELECTRODERMAL_ACTIVITY,
+          ]),
+        ],
+      ),
+      healthService,
+    );
 
     return protocol;
   }

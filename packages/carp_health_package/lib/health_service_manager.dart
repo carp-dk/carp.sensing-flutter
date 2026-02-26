@@ -129,13 +129,24 @@ class HealthServiceManager
   bool _hasPermissions = false;
 
   @override
-  Future<bool> onHasPermissions() async => _hasPermissions
-      ? true
-      : _hasPermissions = await hasHealthPermissions(types);
+  Future<bool> onHasPermissions() async {
+    if (_hasPermissions) return true;
+    _hasPermissions = await hasHealthPermissions(types);
+    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
+    status = _hasPermissions
+        ? DeviceStatus.connected
+        : DeviceStatus.disconnected;
+    return _hasPermissions;
+  }
 
   @override
-  Future<void> onRequestPermissions() async =>
-      _hasPermissions = await requestHealthPermissions(types);
+  Future<void> onRequestPermissions() async {
+    _hasPermissions = await requestHealthPermissions(types);
+    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
+    status = _hasPermissions
+        ? DeviceStatus.connected
+        : DeviceStatus.disconnected;
+  }
 
   @override
   bool get canConnect => true;

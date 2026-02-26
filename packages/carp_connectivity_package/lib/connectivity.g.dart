@@ -127,31 +127,25 @@ const _$ProximityEnumMap = {
 BluetoothScanPeriodicSamplingConfiguration
 _$BluetoothScanPeriodicSamplingConfigurationFromJson(
   Map<String, dynamic> json,
-) =>
-    BluetoothScanPeriodicSamplingConfiguration(
-        interval: Duration(microseconds: (json['interval'] as num).toInt()),
-        duration: Duration(microseconds: (json['duration'] as num).toInt()),
-        withServices:
-            (json['withServices'] as List<dynamic>?)
-                ?.map((e) => e as String)
-                .toList() ??
-            const [],
-        withRemoteIds:
-            (json['withRemoteIds'] as List<dynamic>?)
-                ?.map((e) => e as String)
-                .toList() ??
-            const [],
-      )
-      ..$type = json['__type'] as String?
-      ..lastTime = json['lastTime'] == null
-          ? null
-          : DateTime.parse(json['lastTime'] as String);
+) => BluetoothScanPeriodicSamplingConfiguration(
+  interval: Duration(microseconds: (json['interval'] as num).toInt()),
+  duration: Duration(microseconds: (json['duration'] as num).toInt()),
+  withServices:
+      (json['withServices'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  withRemoteIds:
+      (json['withRemoteIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$BluetoothScanPeriodicSamplingConfigurationToJson(
   BluetoothScanPeriodicSamplingConfiguration instance,
 ) => <String, dynamic>{
   '__type': ?instance.$type,
-  'lastTime': ?instance.lastTime?.toIso8601String(),
   'interval': instance.interval.inMicroseconds,
   'duration': instance.duration.inMicroseconds,
   'withServices': instance.withServices,
