@@ -168,6 +168,12 @@ const _$HealthPlatformEnumMap = {
   HealthPlatform.GOOGLE_HEALTH_CONNECT: 'GOOGLE_HEALTH_CONNECT',
 };
 
+DummyHealthData _$DummyHealthDataFromJson(Map<String, dynamic> json) =>
+    DummyHealthData(uuid: json['uuid'] as String);
+
+Map<String, dynamic> _$DummyHealthDataToJson(DummyHealthData instance) =>
+    <String, dynamic>{'uuid': instance.uuid};
+
 HealthAppTask _$HealthAppTaskFromJson(Map<String, dynamic> json) =>
     HealthAppTask(
       types:

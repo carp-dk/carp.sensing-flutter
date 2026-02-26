@@ -45,7 +45,8 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for collection of battery level and charging status.
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] primary device for data collection.
-  ///  * No sampling configuration needed.
+  ///  * Use [IntervalSamplingConfiguration] for configuration.
+  ///    Default is 5 minutes interval.
   static const String BATTERY_STATE =
       '${CarpDataTypes.CARP_NAMESPACE}.batterystate';
 
@@ -112,6 +113,7 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
             displayName: "Battery State",
             timeType: DataTimeType.POINT,
           ),
+          IntervalSamplingConfiguration(interval: const Duration(seconds: 20)),
         ),
         DataTypeSamplingScheme(
           CamsDataTypeMetaData(

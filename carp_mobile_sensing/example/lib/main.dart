@@ -159,7 +159,7 @@ class StudyPageState extends State<StudyPage> {
   /// [simpleProtocol] or [protocol] specified below.
   /// Note that we use the same protocol every time we add a study.
   /// Thus, all studies will be identical in terms of data collection.
-  void addStudy() => client.addStudyFromProtocol(protocol);
+  void addStudy() => client.addStudyFromProtocol(simpleProtocol);
 
   /// Remove [study] from the client's list of studies.
   void removeStudy(SmartphoneStudy study) =>
@@ -185,17 +185,17 @@ class StudyPageState extends State<StudyPage> {
   /// A simple study protocol that collects a few basic measures
   /// using this smartphone as the primary device.
   SmartphoneStudyProtocol get simpleProtocol => SmartphoneStudyProtocol.local([
-    Measure(type: DeviceSamplingPackage.HEARTBEAT)
-      ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-        interval: const Duration(minutes: 1),
-      ),
+    // Measure(type: DeviceSamplingPackage.HEARTBEAT)
+    //   ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+    //     interval: const Duration(minutes: 1),
+    //   ),
 
     // Measure(type: DeviceSamplingPackage.FREE_MEMORY),
-    // Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+    Measure(type: DeviceSamplingPackage.BATTERY_STATE),
     // Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
     // Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
     // Measure(type: SensorSamplingPackage.STEP_EVENT),
-    Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+    // Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
   ]);
 
   SmartphoneStudyProtocol? _protocol;

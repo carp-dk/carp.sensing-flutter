@@ -55,39 +55,21 @@ class ApplicationProbe extends MeasurementProbe {
   }
 }
 
-/// The [BatteryProbe] listens to the hardware battery and collect a [BatteryState]
-/// every time the battery state changes. For example, battery level or charging mode.
-class BatteryProbe extends StreamProbe {
+/// Collects battery information (charging state and battery level) on a regular
+/// basis as specified by the [IntervalSamplingConfiguration.interval].
+class BatteryProbe extends IntervalProbe {
+  BatteryState _priorState = BatteryState(0, 'unknown');
+
   @override
-  Stream<Measurement>? get stream {
-    late StreamSubscription<battery.BatteryState> subscription;
-    late StreamController<Measurement> controller;
-
-    void onData(battery.BatteryState state) async {
-      try {
-        int level = await battery.Battery().batteryLevel;
-        controller.add(
-          Measurement.fromData(BatteryState.fromBatteryState(level, state)),
-        );
-      } catch (error) {
-        controller.addError(error);
-      }
+  Future<Measurement?> getMeasurement() async {
+    final level = await battery.Battery().batteryLevel;
+    final state = await battery.Battery().batteryState;
+    final batteryState = BatteryState.fromBatteryState(level, state);
+    if (batteryState != _priorState) {
+      _priorState = batteryState;
+      return Measurement.fromData(batteryState);
     }
-
-    controller = StreamController<Measurement>(
-      onListen: () => subscription.resume(),
-      onPause: () => subscription.pause(),
-      onResume: () => subscription.resume(),
-      onCancel: () => subscription.cancel(),
-    );
-
-    subscription = battery.Battery().onBatteryStateChanged.listen(
-      onData,
-      onError: (Object error) => controller.addError(error),
-      onDone: () => controller.close(),
-    );
-
-    return controller.stream.asBroadcastStream();
+    return null;
   }
 }
 
@@ -108,7 +90,7 @@ class ScreenProbe extends StreamProbe {
 }
 
 /// A probe that collects free virtual memory on a regular basis
-/// as specified in [PeriodicMeasure.frequency].
+/// as specified by the [IntervalSamplingConfiguration.interval].
 ///
 /// Only available on Android (it seems).
 class MemoryProbe extends IntervalProbe {

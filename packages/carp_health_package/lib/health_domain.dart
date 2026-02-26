@@ -157,6 +157,22 @@ class HealthData extends Data {
       ', dateTo: $dateTo';
 }
 
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class DummyHealthData extends Data {
+  /// A unique UUID of this data point.
+  String uuid;
+  DummyHealthData({required this.uuid}) : super();
+
+  @override
+  Function get fromJsonFunction => _$DummyHealthDataFromJson;
+
+  factory DummyHealthData.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<DummyHealthData>(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$DummyHealthDataToJson(this);
+}
+
 /// An [AppTask] that can be used  to collect health data.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HealthAppTask extends AppTask {

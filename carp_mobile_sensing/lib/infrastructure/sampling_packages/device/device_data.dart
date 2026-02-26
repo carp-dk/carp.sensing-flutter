@@ -205,6 +205,17 @@ class BatteryState extends Data {
       (other is BatteryState) ? batteryLevel == other.batteryLevel : false;
 
   @override
+  int get hashCode => Object.hash(batteryLevel, batteryStatus);
+
+  @override
+  operator ==(Object other) =>
+      identical(this, other) ||
+      other is BatteryState &&
+          runtimeType == other.runtimeType &&
+          batteryLevel == other.batteryLevel &&
+          batteryStatus == other.batteryStatus;
+
+  @override
   Function get fromJsonFunction => _$BatteryStateFromJson;
   factory BatteryState.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<BatteryState>(json);

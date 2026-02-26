@@ -8,7 +8,7 @@
 /// or Google Health Connect.
 /// Is using the [health](https://pub.dev/packages/health) plugin.
 /// Can be configured to collect the different [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType-class.html).
-library health_package;
+library;
 
 import 'dart:async';
 import 'dart:io';
