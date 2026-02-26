@@ -8,15 +8,28 @@ part of 'health_package.dart';
 
 HealthSamplingConfiguration _$HealthSamplingConfigurationFromJson(
   Map<String, dynamic> json,
-) => HealthSamplingConfiguration(
-  healthDataTypes: (json['healthDataTypes'] as List<dynamic>)
-      .map((e) => $enumDecode(_$HealthDataTypeEnumMap, e))
-      .toList(),
-);
+) =>
+    HealthSamplingConfiguration(
+        past: json['past'] == null
+            ? null
+            : Duration(microseconds: (json['past'] as num).toInt()),
+        healthDataTypes: (json['healthDataTypes'] as List<dynamic>)
+            .map((e) => $enumDecode(_$HealthDataTypeEnumMap, e))
+            .toList(),
+      )
+      ..$type = json['__type'] as String?
+      ..lastTime = json['lastTime'] == null
+          ? null
+          : DateTime.parse(json['lastTime'] as String)
+      ..future = Duration(microseconds: (json['future'] as num).toInt());
 
 Map<String, dynamic> _$HealthSamplingConfigurationToJson(
   HealthSamplingConfiguration instance,
 ) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'lastTime': ?instance.lastTime?.toIso8601String(),
+  'past': instance.past.inMicroseconds,
+  'future': instance.future.inMicroseconds,
   'healthDataTypes': instance.healthDataTypes
       .map((e) => _$HealthDataTypeEnumMap[e]!)
       .toList(),
@@ -147,10 +160,11 @@ HealthData _$HealthDataFromJson(Map<String, dynamic> json) => HealthData(
   deviceId: json['deviceId'] as String?,
   sourceId: json['sourceId'] as String?,
   sourceName: json['sourceName'] as String?,
-);
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$HealthDataToJson(HealthData instance) =>
     <String, dynamic>{
+      '__type': ?instance.$type,
       'uuid': instance.uuid,
       'value': instance.value.toJson(),
       'unit': instance.unit,
@@ -169,27 +183,69 @@ const _$HealthPlatformEnumMap = {
 };
 
 DummyHealthData _$DummyHealthDataFromJson(Map<String, dynamic> json) =>
-    DummyHealthData(uuid: json['uuid'] as String);
+    DummyHealthData(uuid: json['uuid'] as String)
+      ..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$DummyHealthDataToJson(DummyHealthData instance) =>
-    <String, dynamic>{'uuid': instance.uuid};
+    <String, dynamic>{'__type': ?instance.$type, 'uuid': instance.uuid};
 
 HealthAppTask _$HealthAppTaskFromJson(Map<String, dynamic> json) =>
     HealthAppTask(
+      type: json['type'] as String? ?? HealthUserTask.HEALTH_ASSESSMENT_TYPE,
+      name: json['name'] as String?,
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      instructions: json['instructions'] as String? ?? '',
+      minutesToComplete: (json['minutesToComplete'] as num?)?.toInt(),
+      expire: json['expire'] == null
+          ? null
+          : Duration(microseconds: (json['expire'] as num).toInt()),
+      notification: json['notification'] as bool? ?? false,
+      measures: (json['measures'] as List<dynamic>?)
+          ?.map((e) => Measure.fromJson(e as Map<String, dynamic>))
+          .toList(),
       types:
           (json['types'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$HealthDataTypeEnumMap, e))
               .toList() ??
           const [],
-    );
+    )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$HealthAppTaskToJson(HealthAppTask instance) =>
     <String, dynamic>{
+      '__type': ?instance.$type,
+      'name': instance.name,
+      'measures': ?instance.measures?.map((e) => e.toJson()).toList(),
+      'type': instance.type,
+      'title': instance.title,
+      'description': instance.description,
+      'instructions': instance.instructions,
+      'minutesToComplete': ?instance.minutesToComplete,
+      'expire': ?instance.expire?.inMicroseconds,
+      'notification': instance.notification,
       'types': instance.types.map((e) => _$HealthDataTypeEnumMap[e]!).toList(),
     };
 
 HealthService _$HealthServiceFromJson(Map<String, dynamic> json) =>
-    HealthService();
+    HealthService(
+        roleName:
+            json['roleName'] as String? ?? HealthService.DEFAULT_ROLE_NAME,
+      )
+      ..$type = json['__type'] as String?
+      ..isOptional = json['isOptional'] as bool?
+      ..defaultSamplingConfiguration =
+          (json['defaultSamplingConfiguration'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              SamplingConfiguration.fromJson(e as Map<String, dynamic>),
+            ),
+          );
 
 Map<String, dynamic> _$HealthServiceToJson(HealthService instance) =>
-    <String, dynamic>{};
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'roleName': instance.roleName,
+      'isOptional': ?instance.isOptional,
+      'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration
+          ?.map((k, e) => MapEntry(k, e.toJson())),
+    };

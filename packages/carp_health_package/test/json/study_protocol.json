@@ -1,6 +1,6 @@
 {
-  "id": "459eadeb-c643-4aa8-8c8f-8b90d95f3cb7",
-  "createdOn": "2026-02-07T15:01:47.484530Z",
+  "id": "e9977975-cac4-4955-a07f-787c03bdbba5",
+  "createdOn": "2026-02-26T19:59:56.042809Z",
   "version": 0,
   "ownerId": "alex@uni.dk",
   "name": "Context package test",
@@ -48,6 +48,10 @@
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+          "type": "dk.cachet.carp.heartbeat"
+        },
+        {
+          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
           "type": "dk.cachet.carp.timezone"
         },
         {
@@ -92,10 +96,6 @@
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.heartbeat"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
           "type": "dk.cachet.carp.completedapptask"
         },
         {
@@ -112,6 +112,9 @@
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
           "type": "dk.cachet.carp.health",
           "overrideSamplingConfiguration": {
+            "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
+            "past": 86400000000,
+            "future": 86400000000,
             "healthDataTypes": [
               "BLOOD_GLUCOSE",
               "BLOOD_PRESSURE_DIASTOLIC",
@@ -132,11 +135,46 @@
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
           "type": "dk.cachet.carp.health",
           "overrideSamplingConfiguration": {
+            "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
+            "past": 86400000000,
+            "future": 86400000000,
             "healthDataTypes": [
               "WEIGHT"
             ]
           }
         }
+      ]
+    },
+    {
+      "__type": "dk.cachet.carp.common.application.tasks.HealthAppTask",
+      "name": "Health App Task",
+      "measures": [
+        {
+          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+          "type": "dk.cachet.carp.health",
+          "overrideSamplingConfiguration": {
+            "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
+            "past": 2592000000000,
+            "future": 86400000000,
+            "healthDataTypes": [
+              "WEIGHT",
+              "STEPS",
+              "BASAL_ENERGY_BURNED",
+              "SLEEP_SESSION"
+            ]
+          }
+        }
+      ],
+      "type": "health",
+      "title": "Press here to collect your physical health data",
+      "description": "This will collect your weight, exercise time, steps, and sleep time from the Health database on the phone.",
+      "instructions": "",
+      "notification": false,
+      "types": [
+        "WEIGHT",
+        "STEPS",
+        "BASAL_ENERGY_BURNED",
+        "SLEEP_SESSION"
       ]
     }
   ],
@@ -160,6 +198,11 @@
         "second": 0
       },
       "separationCount": 0
+    },
+    "3": {
+      "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+      "sourceDeviceRoleName": "Smartphone",
+      "period": 86400000000
     }
   },
   "taskControls": [
@@ -178,6 +221,12 @@
     {
       "triggerId": 2,
       "taskName": "Task #11",
+      "destinationDeviceRoleName": "Smartphone",
+      "control": "Start"
+    },
+    {
+      "triggerId": 3,
+      "taskName": "Health App Task",
       "destinationDeviceRoleName": "Smartphone",
       "control": "Start"
     }
