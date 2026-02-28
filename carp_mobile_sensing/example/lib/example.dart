@@ -1,4 +1,4 @@
-// ignore_for_file: unused_local_variable
+// ignore_for_file: unused_local_variable, avoid_print
 // ignore_for_file: depend_on_referenced_packages
 
 /*
@@ -14,12 +14,11 @@ import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 
-/// This is an example of how to set up a the most minimal study.
+/// This is an example of how to set up a simple study.
 /// Used in the README file.
 Future<void> minimalExample() async {
   // Create a protocol.
   final phone = Smartphone();
-
   final protocol =
       SmartphoneStudyProtocol(
           ownerId: 'AB',
@@ -46,17 +45,11 @@ Future<void> minimalExample() async {
   // Create a study based on the protocol.
   await SmartPhoneClientManager().addStudyFromProtocol(protocol);
 
-  /// Start sampling.
+  /// Start the study.
   SmartPhoneClientManager().start();
 
-  // Alternatively: do it all in one line of code....!
-  // Create and configure a client manager for this phone, add the protocol,
-  // and start data sampling.
-  SmartPhoneClientManager().configure().then(
-    (_) => SmartPhoneClientManager()
-        .addStudyFromProtocol(protocol)
-        .then((_) => SmartPhoneClientManager().start()),
-  );
+  /// Resume sampling.
+  SmartPhoneClientManager().resume();
 
   // Listening on the measurements stream.
   SmartPhoneClientManager().measurements.listen((measurement) {
@@ -75,6 +68,31 @@ Future<void> minimalExample() async {
 
   // Dispose the client. Can not be used anymore.
   SmartPhoneClientManager().dispose();
+}
+
+/// Alternatively: do it all in one line of code....!
+/// Create and configure a client manager for this phone, add the protocol,
+/// start the study, and resume data sampling.
+Future<void> oneLineExample() async {
+  SmartPhoneClientManager().configure().then(
+    (_) => SmartPhoneClientManager()
+        .addStudyFromProtocol(
+          SmartphoneStudyProtocol.local(
+            name: 'Tracking steps, light, screen, and battery',
+            measures: [
+              Measure(type: SensorSamplingPackage.STEP_EVENT),
+              Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+              Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+              Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+            ],
+          ),
+        )
+        .then(
+          (_) => SmartPhoneClientManager()
+            ..start()
+            ..resume(),
+        ),
+  );
 }
 
 /// This is an example of how to set up a the most minimal study

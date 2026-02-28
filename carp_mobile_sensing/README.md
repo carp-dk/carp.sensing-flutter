@@ -92,34 +92,15 @@ More scientific documentation of CAMS is available in the following papers:
 * Bardram, Jakob E. "[The CARP Mobile Sensing Framework--A Cross-platform, Reactive, Programming Framework and Runtime Environment for Digital Phenotyping.](https://arxiv.org/abs/2006.11904)" arXiv preprint arXiv:2006.11904 (2020). [[pdf](https://arxiv.org/pdf/2006.11904.pdf)]
 * Bardram, Jakob E. "[Software Architecture Patterns for Extending Sensing Capabilities and Data Formatting in Mobile Sensing.](https://www.mdpi.com/1424-8220/22/7/2813)" Sensors 22.7 (2022). [[pdf]](https://www.mdpi.com/1424-8220/22/7/2813/pdf).
 
-```bibtex
-@article{bardram2020carp,
-  title={The CARP Mobile Sensing Framework--A Cross-platform, Reactive, Programming Framework and Runtime Environment for Digital Phenotyping},
-  author={Bardram, Jakob E},
-  journal={arXiv preprint arXiv:2006.11904},
-  year={2020}
-}
-
-@article{bardram2022software,
-  title={Software Architecture Patterns for Extending Sensing Capabilities and Data Formatting in Mobile Sensing},
-  author={Bardram, Jakob E},
-  journal={Sensors},
-  volume={22},
-  number={7},
-  year={2022},
-  publisher={MDPI}
-}
-```
-
 Please use these references in any scientific papers using CAMS.
 
-## Examples of configuring and using CAMS
+## Examples of Configuring and Using CAMS
 
-There is a **very simple** [example app](https://github.com/cph-cachet/carp.sensing-flutter/blob/master/carp_mobile_sensing/example/lib/main.dart) app which shows how a study can be created with different tasks and measures.
-This app just prints the sensing data to a console screen on the phone.
+There is a **very simple** [example app](https://github.com/cph-cachet/carp.sensing-flutter/blob/master/carp_mobile_sensing/example/lib/main.dart) app which shows how a study protocol can be configured and used to create, deploy, and run a study.
+This app just prints the collected data to the console.
 There is also a range of different [examples](https://github.com/cph-cachet/carp.sensing-flutter/blob/master/carp_mobile_sensing/example/lib/example.dart) on how to create a study to take inspiration from.
 
-However, the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) provides a **MUCH** better example of how to use the framework in a Flutter BLoC architecture, including good documentation of how to do this.
+However, the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) provides a **MUCH** better example of how to use the framework in a Flutter MVVM architecture, including good documentation of how to do this.
 
 Below is a small primer in the use of CAMS for a very simple sampling study running locally on the phone. This example is similar to the [example app](https://github.com/cph-cachet/carp.sensing-flutter/blob/master/carp_mobile_sensing/example/lib/main.dart) app.
 
@@ -137,26 +118,28 @@ Below is a simple example of how to set up a protocol that samples step counts, 
 
 ```dart
 final phone = Smartphone();
-final protocol = SmartphoneStudyProtocol(
-  ownerId: 'abc@dtu.dk',
-  name: 'Tracking steps, light, screen, and battery',
-  dataEndPoint: SQLiteDataEndPoint(),
-)
-  ..addPrimaryDevice(phone)
-  ..addTaskControl(
-    DelayedTrigger(delay: const Duration(seconds: 10)),
-    BackgroundTask(measures: [
-      Measure(type: SensorSamplingPackage.STEP_COUNT),
-      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-      Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-      Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-    ]),
-    phone,
-    Control.Start,
-  );
+final protocol =
+    SmartphoneStudyProtocol(
+        ownerId: 'AB',
+        name: 'Tracking steps, light, screen, and battery',
+        dataEndPoint: SQLiteDataEndPoint(),
+      )
+      ..addPrimaryDevice(phone)
+      ..addTaskControl(
+        DelayedTrigger(delay: const Duration(seconds: 10)),
+        BackgroundTask(
+          measures: [
+            Measure(type: SensorSamplingPackage.STEP_EVENT),
+            Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+            Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+            Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+          ],
+        ),
+        phone,
+      );
 ```
 
-The above example defines a simple [`SmartphoneStudyProtocol`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SmartphoneStudyProtocol-class.html) which will use a [`Smartphone`](https://pub.dev/documentation/carp_core/latest/carp_core_common/Smartphone-class.html) as a primary device for data collection and store data in a SQLite database locally on the phone using a [`SQLiteDataEndPoint`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SQLiteDataEndPoint-class.html).
+The above example defines a simple [`SmartphoneStudyProtocol`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SmartphoneStudyProtocol-class.html) which will use a [`Smartphone`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/Smartphone-class.html) as a primary device for data collection and store data in a SQLite database locally on the phone using a [`SQLiteDataEndPoint`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SQLiteDataEndPoint-class.html).
 Sampling is configured by adding a [`TaskControl`](https://pub.dev/documentation/carp_core/latest/carp_core_common/TaskControl-class.html) to the protocol using an [`DelayedTrigger`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DelayedTrigger-class.html) which triggers a [`BackgroundTask`](https://pub.dev/documentation/carp_core/latest/carp_core_common/BackgroundTask-class.html) containing four different [`Measure`](https://pub.dev/documentation/carp_core/latest/carp_core_common/Measure-class.html)s.
 When this task control is triggered (after a delay of 10 seconds), the sampling will start.
 
@@ -173,21 +156,40 @@ However, if we just want to define and deploy a study locally on the phone, this
 await SmartPhoneClientManager().configure();
 
 // Create a study based on the protocol.
-SmartPhoneClientManager().addStudyProtocol(protocol);
+await SmartPhoneClientManager().addStudyFromProtocol(protocol);
 
-/// Start sampling.
+/// Start the study.
 SmartPhoneClientManager().start();
+
+/// Resume sampling.
+SmartPhoneClientManager().resume();
 ```
 
 In this example, the client manager is configured, the protocol is added, and sampling is started. This can actually be done in one line of code, like this:
 
 ```dart
-SmartPhoneClientManager().configure().then((_) => SmartPhoneClientManager()
-    .addStudyProtocol(protocol)
-    .then((_) => SmartPhoneClientManager().start()));
+SmartPhoneClientManager().configure().then(
+  (_) => SmartPhoneClientManager()
+      .addStudyFromProtocol(
+        SmartphoneStudyProtocol.local(
+          name: 'Tracking steps, light, screen, and battery',
+          measures: [
+            Measure(type: SensorSamplingPackage.STEP_EVENT),
+            Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+            Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+            Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+          ],
+        ),
+      )
+      .then(
+        (_) => SmartPhoneClientManager()
+          ..start()
+          ..resume(),
+      ),
+);
 ```
 
-This will start the sampling, as specified in the protocol, and data is stored in the database.
+This will start the sampling immediately (and not delayed as above) and data is stored in the SQLite database.
 
 ### Using the generated data
 
@@ -202,16 +204,18 @@ SmartPhoneClientManager()
 
 Note that `measurements` is a Dart [Stream](https://api.dart.dev/stable/3.0.7/dart-async/Stream-class.html) and you can hence apply all the usual stream operations to the collected measurements, including sorting, mapping, reducing, and transforming measurements.
 
+Data stored in the SQLite database is accessed via the file system, as explain in the [SQLiteDataManager](https://pub.dev/documentation/carp_mobile_sensing/latest/infrastructure/SQLiteDataManager-class.html).
+
 ### Controlling the sampling of data
 
-The execution of sensing can be controlled on runtime by starting, stopping, and disposing sampling.
-For example, calling `SmartPhoneClientManager().stop()` would stop the study running on the client. Calling `start()` would (re)start it again.
+Data sampling can be controlled on runtime by resuming, pausing, and disposing sampling.
+For example, calling `SmartPhoneClientManager().pause()` would pause all data sampling running on the client. Calling `resume()` would resume it again.
 
-Calling `SmartPhoneClientManager().dispose()` would dispose of the client manager. Once dispose is called, you cannot call `start` or `stop` anymore. This methods is typically used in the Flutter `dispose()` method.
+Calling `SmartPhoneClientManager().dispose()` would dispose of the client manager. Once dispose is called, you cannot call `resume` or `pause` sampling anymore. This methods is typically used in the Flutter `dispose()` method.
 
 ## Extending CAMS
 
-CAMS is designed to be extended in many ways, including [adding new sampling capabilities](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-new-sampling-capabilities) by implementing a Sampling Package, [adding a new data management and backend support](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-a-new-data-manager) by creating a Data Manager, and [creating data and privacy transformer schemas](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-data-and-privacy-transformers) that can transform CARP data to other formats, including privacy protecting them, by implementing a [Transformer Schema](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DataTransformerSchema-class.html).
+CAMS is designed to be extended in at least three ways: (i) [adding new sampling capabilities](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-new-sampling-capabilities) by implementing a Sampling Package; (ii) [adding a new data management and backend support](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-a-new-data-manager) by creating a Data Manager; and (iii) [creating data and privacy transformer schemas](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-data-and-privacy-transformers) that can transform CARP data to other formats, including privacy protecting them, by implementing a [Transformer Schema](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DataTransformerSchema-class.html).
 
 For example, you can write your own `DataEndPoint` definitions and a corresponding [`DataManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/DataManager-class.html) class for uploading data to your own data endpoint. See the wiki on how to [add a new data manager](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#adding-a-new-data-manager).
 

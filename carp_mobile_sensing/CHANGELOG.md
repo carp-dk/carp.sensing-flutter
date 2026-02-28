@@ -1,14 +1,13 @@
 ## 2.0.0 - BREAKING
 
-This release has two new main features: (i) to support adding, running, and removing **multiple studies** to the client manager, and (ii) to **save runtime state persistently** so that sampling of data in all studies will resume effortlessly across app restart. In addition, the following issues have been addressed:
+This release has two new main features: (i) to support adding, running, and removing **multiple studies** to the client manager, and (ii) to **save runtime state persistently** so that sampling of data in all studies will resume effortlessly across app restart. In addition, a set of issues have been addressed, as listed in [Milestone 2.0.0](https://github.com/carp-dk/carp.sensing-flutter/milestone/3?closed=1). The important ones include:
 
 * Update of the client software architecture to reflect the CARP Core client architecture. This - amongst other things - provides better support for `StudyStatus` in the client manager ([#504](https://github.com/cph-cachet/carp.sensing-flutter/issues/504))
 * Simplified configuration - now only the client and not the controller needs configuration.
 * Simplified deployment - now a study can be merely started and deployment happens automatically
 * Revised state machine model for executors, now using states 'resumed' and 'paused' instead of 'started' and 'stopped'
 * Added `AppLifecycleEvent` measure to collect life-cycle event from the app
-* Fix of [#521](https://github.com/cph-cachet/carp.sensing-flutter/issues/521)
-* Fix of [#440](https://github.com/cph-cachet/carp.sensing-flutter/issues/440)
+* Correct device registration in the deployment service.
 
 ## 1.13.1
 

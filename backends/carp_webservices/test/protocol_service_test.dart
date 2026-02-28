@@ -72,7 +72,7 @@ void main() {
                   ),
             Measure(type: CarpDataTypes.STEP_COUNT),
             // the following measures are not part of carp-core, but should still be accepted.
-            Measure(type: CamsDataTypes.HEARTBEAT),
+            Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
             Measure(type: DeviceSamplingPackage.BATTERY_STATE),
           ],
         ),

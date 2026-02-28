@@ -245,10 +245,13 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// Optionally, a list of [measures] can be provided which will be collected
   /// as part of a default background sampling task by this smartphone.
   /// Additional measures can be added later using [addTaskControl], if needed.
-  factory SmartphoneStudyProtocol.local([List<Measure>? measures]) {
+  factory SmartphoneStudyProtocol.local({
+    String? name,
+    List<Measure>? measures,
+  }) {
     var protocol =
         SmartphoneStudyProtocol(
-            name: 'Local Smartphone Study Protocol',
+            name: name ?? 'Local Smartphone Study Protocol',
             dataEndPoint: SQLiteDataEndPoint(),
           )
           ..addPrimaryDevice(Smartphone())

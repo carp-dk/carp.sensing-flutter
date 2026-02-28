@@ -68,7 +68,7 @@ class StudyPageState extends State<StudyPage> {
 
     // Listen on all the measurements and print them as json.
     SmartPhoneClientManager().measurements.listen(
-      (measurement) => print(toJsonString(measurement)),
+      (measurement) => debugPrint(toJsonString(measurement)),
     );
 
     super.initState();
@@ -136,7 +136,7 @@ class StudyPageState extends State<StudyPage> {
                 'Status: ${study.status.name}\n'
                 'Sampling: ${study.samplingState?.state.name}',
               ),
-              trailing: executorStateIcon[study.samplingState],
+              trailing: executorStateIcon[study.samplingState?.state],
               onTap: () => runStudy(study),
               onLongPress: () => removeStudy(study),
             ),
@@ -184,19 +184,17 @@ class StudyPageState extends State<StudyPage> {
 
   /// A simple study protocol that collects a few basic measures
   /// using this smartphone as the primary device.
-  SmartphoneStudyProtocol get simpleProtocol => SmartphoneStudyProtocol.local([
-    // Measure(type: DeviceSamplingPackage.HEARTBEAT)
-    //   ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-    //     interval: const Duration(minutes: 1),
-    //   ),
-
-    // Measure(type: DeviceSamplingPackage.FREE_MEMORY),
-    Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-    // Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-    // Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
-    // Measure(type: SensorSamplingPackage.STEP_EVENT),
-    // Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-  ]);
+  SmartphoneStudyProtocol get simpleProtocol => SmartphoneStudyProtocol.local(
+    name: 'Simple Protocol',
+    measures: [
+      Measure(type: DeviceSamplingPackage.FREE_MEMORY),
+      Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+      Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+      Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
+      Measure(type: SensorSamplingPackage.STEP_EVENT),
+      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+    ],
+  );
 
   SmartphoneStudyProtocol? _protocol;
 
@@ -227,12 +225,20 @@ class StudyPageState extends State<StudyPage> {
 
       // Now add tasks and measures to the protocol.
 
-      // Collect timezone info every time the app restarts.
+      // Collect timezone info every time the app restarts and set up a heartbeat
+      // measure to check that the app is still alive. Override the default sampling
+      // interval for the heartbeat measure to 1 min (instead of 15 min).
       _protocol?.addTaskControl(
         ImmediateTrigger(),
         BackgroundTask(
           name: 'Timezone Task',
-          measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
+          measures: [
+            Measure(type: DeviceSamplingPackage.TIMEZONE),
+            Measure(type: DeviceSamplingPackage.HEARTBEAT)
+              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
+                interval: const Duration(minutes: 1),
+              ),
+          ],
         ),
         phone,
       );
