@@ -42,7 +42,7 @@ class SmartPhoneClientManager
     extends ClientManager<Smartphone, DeviceRegistration, SmartphoneStudy>
     with ChangeNotifier {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
-  NotificationController? _notificationController;
+  NotificationManager? _notificationController;
   bool _askForPermissions = true;
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
@@ -84,8 +84,8 @@ class SmartPhoneClientManager
   DeviceController get deviceController =>
       super.dataCollectorFactory as DeviceController;
 
-  /// The [NotificationController] responsible for sending notification on [AppTask]s.
-  NotificationController? get notificationController => _notificationController;
+  /// The [NotificationManager] responsible for sending notification on [AppTask]s.
+  NotificationManager? get notificationController => _notificationController;
 
   /// Get the study controller for a [study].
   /// If a study controller is not available, a fresh controller will be created.
@@ -111,8 +111,8 @@ class SmartPhoneClientManager
   ///
   /// If [enableNotifications] is true (default), notifications is created when
   /// an [AppTask] is triggered.
-  /// The [notificationController] specifies what [NotificationController] to
-  /// use for notifications. If not specified, the [FlutterLocalNotificationController]
+  /// The [notificationController] specifies what [NotificationManager] to
+  /// use for notifications. If not specified, the [FlutterLocalNotificationManager]
   /// is used.
   ///
   /// If [askForPermissions] is true (default), this client manager will
@@ -124,7 +124,7 @@ class SmartPhoneClientManager
     DeploymentService? deploymentService,
     DeviceDataCollectorFactory? dataCollectorFactory,
     bool enableNotifications = true,
-    NotificationController? notificationController,
+    NotificationManager? notificationController,
     bool askForPermissions = true,
   }) async {
     // Fast out if already configured
@@ -158,7 +158,7 @@ class SmartPhoneClientManager
 
     if (enableNotifications) {
       _notificationController =
-          notificationController ?? FlutterLocalNotificationController();
+          notificationController ?? FlutterLocalNotificationManager();
     }
 
     // Initialize the app task controller.

@@ -81,7 +81,7 @@ abstract class UserTask {
       _state == UserTaskState.canceled ||
       _state == UserTaskState.notified);
 
-  /// Has a notification been created via a [NotificationController] in the
+  /// Has a notification been created via a [NotificationManager] in the
   /// phone's notification system?
   bool hasNotificationBeenCreated = false;
 
@@ -128,19 +128,6 @@ abstract class UserTask {
 
     state = UserTaskState.started;
   }
-
-  // /// Listen to remove the background executor when all of its underlying
-  // /// probes have stopped.
-  // /// Issue => https://github.com/cph-cachet/carp_studies_app/issues/341
-  // void _removeExecutor() {
-  //   backgroundTaskExecutor.states
-  //       .where((event) => event == ExecutorState.stopped)
-  //       .listen((_) {
-  //     if (backgroundTaskExecutor.haveAllProbesStopped) {
-  //       _executor.removeExecutor(backgroundTaskExecutor);
-  //     }
-  //   });
-  // }
 
   /// Callback from the app if this task is canceled.
   ///

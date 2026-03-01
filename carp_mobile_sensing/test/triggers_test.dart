@@ -11,7 +11,7 @@ void main() {
   group('Sampling Configurations', () {
     test('Sampling Packages.', () {
       var schemes = DeviceSamplingPackage().samplingSchemes;
-      expect(schemes.configurations.length, 7);
+      expect(schemes.configurations.length, 8);
 
       print(schemes);
     });

@@ -83,7 +83,7 @@ class AppTaskController {
     // initialize notification controller if needed
     notificationsEnabled = enableNotifications;
     if (notificationsEnabled) {
-      await SmartPhoneClientManager().notificationController?.initialize();
+      await SmartPhoneClientManager().notificationController?.configure();
     }
   }
 
@@ -178,7 +178,7 @@ class AppTaskController {
   Future<void> enqueueBufferedTasks() async {
     _userTaskBuffer.sort((a, b) => a.triggerTime.compareTo(b.triggerTime));
     var remainingNotifications =
-        NotificationController.pendingNotificationLimit -
+        NotificationManager.pendingNotificationLimit -
         (await SmartPhoneClientManager()
                 .notificationController
                 ?.pendingNotificationRequestsCount ??

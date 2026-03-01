@@ -25,13 +25,13 @@ abstract class DataManager {
   /// The type of this data manager as enumerated in [DataEndPointTypes].
   String get type;
 
-  /// Initialize the data manager by specifying the study [deployment], the
+  /// Configure the data manager by specifying the study [deployment], the
   /// [dataEndPoint], and the stream of [measurements] events to handle.
-  Future<void> initialize(
-    DataEndPoint dataEndPoint,
-    SmartphoneDeployment deployment,
-    Stream<Measurement> measurements,
-  );
+  Future<void> configure({
+    required DataEndPoint dataEndPoint,
+    required SmartphoneDeployment deployment,
+    required Stream<Measurement> measurements,
+  });
 
   /// Flush any buffered data and close this data manager.
   /// After calling [close] the data manager can no longer be used.
@@ -70,7 +70,7 @@ class DataManagerEvent {
 
 /// An enumeration of data manager event types.
 class DataManagerEventTypes {
-  static const String initialized = 'initialized';
+  static const String configured = 'configured';
   static const String closed = 'closed';
 }
 
@@ -86,7 +86,7 @@ abstract class AbstractDataManager implements DataManager {
       StreamController.broadcast();
 
   /// The [DataEndPoint] that this data manager is handling.
-  /// Set in the [initialize] method.
+  /// Set in the [configure] method.
   DataEndPoint? get dataEndPoint => _dataEndPoint;
 
   @override
@@ -106,12 +106,12 @@ abstract class AbstractDataManager implements DataManager {
 
   @override
   @mustCallSuper
-  Future<void> initialize(
-    DataEndPoint dataEndPoint,
-    SmartphoneDeployment deployment,
-    Stream<Measurement> measurements,
-  ) async {
-    info('Initializing $runtimeType...');
+  Future<void> configure({
+    required DataEndPoint dataEndPoint,
+    required SmartphoneDeployment deployment,
+    required Stream<Measurement> measurements,
+  }) async {
+    info('Configuring $runtimeType...');
     _deployment = deployment;
     _dataEndPoint = dataEndPoint;
     _subscription = measurements.listen(
@@ -119,7 +119,7 @@ abstract class AbstractDataManager implements DataManager {
       onError: onError,
       onDone: onDone,
     );
-    addEvent(DataManagerEvent(DataManagerEventTypes.initialized));
+    addEvent(DataManagerEvent(DataManagerEventTypes.configured));
   }
 
   /// When the data stream closes, the [onDone] handler is called.

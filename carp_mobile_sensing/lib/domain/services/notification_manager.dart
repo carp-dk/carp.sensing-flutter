@@ -7,10 +7,10 @@
 
 part of '../../domain.dart';
 
-/// A controller of user notifications allow for creating, scheduling, and
-/// canceling user notifications.
+/// Manages user notifications, including creating, scheduling, and canceling
+/// notifications.
 ///
-/// This controller serves two purposes:
+/// This manager serves two purposes:
 ///
 /// 1. It is used by the [AppTaskController] to send notification about
 /// [UserTask]s (which are created based on [AppTask] in the [StudyProtocol]).
@@ -21,7 +21,7 @@ part of '../../domain.dart';
 /// notifications. This is done using the [createNotification], [scheduleNotification],
 /// and [scheduleRecurrentNotifications] methods, which
 /// creates an immediate, scheduled, or recurrent notification, respectively.
-abstract class NotificationController {
+abstract class NotificationManager {
   /// The upper limit of scheduled notification, platform dependent.
   static final pendingNotificationLimit = Platform.isIOS ? 64 : 500;
 
@@ -50,9 +50,9 @@ abstract class NotificationController {
   static const SCHEDULED_CHANNEL_DESCRIPTION =
       'Notifications about scheduled tasks that the user has to do.';
 
-  /// Initialize and set up the notification controller.
+  /// Configure and set up the notification manager.
   /// Also tries to get permissions to send notifications.
-  Future<void> initialize();
+  Future<void> configure();
 
   /// Create an immediate notification with [id], [title], and [body].
   /// If the [id] is not specified, a random id will be generated.
@@ -115,10 +115,10 @@ abstract class NotificationController {
   Future<int> get pendingNotificationRequestsCount;
 }
 
-/// A no-operation notification controller that does nothing.
-class NoOpNotificationController implements NotificationController {
+/// A no-operation notification manager that does nothing.
+class NoOpNotificationManager implements NotificationManager {
   @override
-  Future<void> initialize() async {}
+  Future<void> configure() async {}
 
   @override
   Future<int> createNotification({

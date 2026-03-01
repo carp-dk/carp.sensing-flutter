@@ -149,10 +149,10 @@ class SmartphoneStudyController {
       );
     }
 
-    await _dataManager?.initialize(
-      deployment!.dataEndPoint!,
-      deployment!,
-      measurements,
+    await _dataManager?.configure(
+      dataEndPoint: dataEndPoint!,
+      deployment: deployment!,
+      measurements: measurements,
     );
 
     // Initialize all devices from the deployment, incl. this smartphone.

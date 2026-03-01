@@ -51,13 +51,17 @@ class SQLiteDataManager extends AbstractDataManager {
   String get type => DataEndPointTypes.SQLITE;
 
   @override
-  Future<void> initialize(
-    DataEndPoint dataEndPoint,
-    SmartphoneDeployment deployment,
-    Stream<Measurement> measurements,
-  ) async {
+  Future<void> configure({
+    required DataEndPoint dataEndPoint,
+    required SmartphoneDeployment deployment,
+    required Stream<Measurement> measurements,
+  }) async {
     assert(dataEndPoint is SQLiteDataEndPoint);
-    await super.initialize(dataEndPoint, deployment, measurements);
+    await super.configure(
+      dataEndPoint: dataEndPoint,
+      deployment: deployment,
+      measurements: measurements,
+    );
 
     info('Initializing $runtimeType...');
 

@@ -49,6 +49,6 @@ part 'domain/core/data_types.dart';
 part 'domain/core/transformers.dart';
 part 'domain/services/device_info.dart';
 part 'domain/services/data_manager.dart';
-part 'domain/services/notification_controller.dart';
+part 'domain/services/notification_manager.dart';
 
 part 'domain.g.dart';

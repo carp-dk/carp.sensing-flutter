@@ -7,7 +7,7 @@
 
 part of '../../infrastructure.dart';
 
-/// A [NotificationController] based on the [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
+/// A [NotificationManager] based on the [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
 /// Flutter plugin.
 ///
 /// On iOS, remember to edit the AppDelegate.swift file.
@@ -15,19 +15,16 @@ part of '../../infrastructure.dart';
 ///
 /// On Android, add an `app_icon.png` square png picture in the
 /// `<<application_name>>/android/app/src/main/res/drawable/` folder.
-class FlutterLocalNotificationController implements NotificationController {
-  static final FlutterLocalNotificationController _instance =
-      FlutterLocalNotificationController._();
-  FlutterLocalNotificationController._() : super();
-
+class FlutterLocalNotificationManager implements NotificationManager {
+  static final FlutterLocalNotificationManager _instance =
+      FlutterLocalNotificationManager._();
+  FlutterLocalNotificationManager._() : super();
   final Random _random = Random();
 
-  /// The singleton [NotificationController].
-  factory FlutterLocalNotificationController() => _instance;
+  factory FlutterLocalNotificationManager() => _instance;
 
-  /// Initialize and set up the notification controller.
   @override
-  Future<void> initialize() async {
+  Future<void> configure() async {
     tz.initializeTimeZones();
 
     List<Permission> permissions = List.from([
@@ -47,15 +44,15 @@ class FlutterLocalNotificationController implements NotificationController {
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
     );
 
-    info('$runtimeType initialized.');
+    info('$runtimeType configured.');
   }
 
   final NotificationDetails _platformChannelSpecifics =
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          NotificationController.CHANNEL_ID,
-          NotificationController.CHANNEL_NAME,
-          channelDescription: NotificationController.CHANNEL_DESCRIPTION,
+          NotificationManager.CHANNEL_ID,
+          NotificationManager.CHANNEL_NAME,
+          channelDescription: NotificationManager.CHANNEL_DESCRIPTION,
           importance: Importance.max,
           priority: Priority.max,
           ongoing: true,
@@ -202,13 +199,13 @@ class FlutterLocalNotificationController implements NotificationController {
 @pragma('vm:entry-point')
 void onDidReceiveNotificationResponse(NotificationResponse response) {
   String? payload = response.payload;
-  debug('NotificationController - callback on notification, payload: $payload');
+  debug('NotificationManager - callback on notification, payload: $payload');
 
   if (payload != null) {
     AppTaskController().onNotification(payload);
   } else {
     warning(
-      "NotificationController - Error in callback from notification - payload is '$payload'",
+      "NotificationManager - Error in callback from notification - payload is '$payload'",
     );
   }
 }
