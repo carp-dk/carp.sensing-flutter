@@ -185,13 +185,14 @@ Map<String, dynamic> _$DataEndPointToJson(DataEndPoint instance) =>
 
 FileDataEndPoint _$FileDataEndPointFromJson(Map<String, dynamic> json) =>
     FileDataEndPoint(
-      type: json['type'] as String? ?? DataEndPointTypes.FILE,
-      dataFormat: json['dataFormat'] as String? ?? NameSpace.CARP,
-      bufferSize: (json['bufferSize'] as num?)?.toInt() ?? 500 * 1000,
-      zip: json['zip'] as bool? ?? true,
-      encrypt: json['encrypt'] as bool? ?? false,
-      publicKey: json['publicKey'] as String?,
-    )..$type = json['__type'] as String?;
+        dataFormat: json['dataFormat'] as String? ?? NameSpace.CARP,
+        bufferSize: (json['bufferSize'] as num?)?.toInt() ?? 500 * 1000,
+        zip: json['zip'] as bool? ?? true,
+        encrypt: json['encrypt'] as bool? ?? false,
+        publicKey: json['publicKey'] as String?,
+      )
+      ..$type = json['__type'] as String?
+      ..type = json['type'] as String;
 
 Map<String, dynamic> _$FileDataEndPointToJson(FileDataEndPoint instance) =>
     <String, dynamic>{
@@ -206,9 +207,10 @@ Map<String, dynamic> _$FileDataEndPointToJson(FileDataEndPoint instance) =>
 
 SQLiteDataEndPoint _$SQLiteDataEndPointFromJson(Map<String, dynamic> json) =>
     SQLiteDataEndPoint(
-      type: json['type'] as String? ?? DataEndPointTypes.SQLITE,
-      dataFormat: json['dataFormat'] as String? ?? NameSpace.CARP,
-    )..$type = json['__type'] as String?;
+        dataFormat: json['dataFormat'] as String? ?? NameSpace.CARP,
+      )
+      ..$type = json['__type'] as String?
+      ..type = json['type'] as String;
 
 Map<String, dynamic> _$SQLiteDataEndPointToJson(SQLiteDataEndPoint instance) =>
     <String, dynamic>{

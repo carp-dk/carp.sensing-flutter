@@ -82,37 +82,23 @@ class SmartphoneStudyController {
   String get privacySchemaName =>
       deployment?.privacySchemaName ?? NameSpace.CARP;
 
-  /// The transformer used to transform data before upload.
-  ///
-  /// The [transformer] is a generic [DataTransformer] function which transform
-  /// each collected measurement. If not specified, a 1:1 mapping is done,
-  /// i.e. no transformation.
-  DataTransformer get transformer => ((data) => data);
-
-  // TODO - create a new transformer configuration model
-  // _transformer = transformer ?? ((data) => data);
-
   /// The stream of all sampled measurements.
   ///
   /// Data in the [measurements] stream are transformed in the following order:
   ///   1. privacy schema as specified in the [privacySchemaName]
-  ///   2. preferred data format as specified by [dataFormat] in the
-  ///      [SmartphoneDeployment.dataEndPoint]
-  ///   3. any custom [transformer] provided in the [configure] method when
-  ///      configuring this controller
+  ///   2. preferred data format as specified by [DataEndPoint.dataFormat] in the
+  ///      original protocol.
   ///
   /// This is a broadcast stream and supports multiple subscribers.
   Stream<Measurement> get measurements => _executor.measurements.distinct().map(
     (measurement) => measurement
-      ..data = transformer(
-        DataTransformerSchemaRegistry()
-            .lookup(deployment?.dataEndPoint?.dataFormat ?? NameSpace.CARP)!
-            .transform(
-              DataTransformerSchemaRegistry()
-                  .lookup(privacySchemaName)!
-                  .transform(measurement.data),
-            ),
-      ),
+      ..data = DataTransformerSchemaRegistry()
+          .lookup(deployment?.dataEndPoint?.dataFormat ?? NameSpace.CARP)!
+          .transform(
+            DataTransformerSchemaRegistry()
+                .lookup(privacySchemaName)!
+                .transform(measurement.data),
+          ),
   );
 
   /// A stream of all [measurements] of a specific data [type].
