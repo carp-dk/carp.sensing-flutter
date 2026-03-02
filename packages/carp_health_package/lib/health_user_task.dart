@@ -5,8 +5,6 @@ part of 'health_package.dart';
 /// When started, it will ask for permission to access the health data listed
 /// in the [HealthAppTask].
 class HealthUserTask extends UserTask {
-  static const String HEALTH_ASSESSMENT_TYPE = 'health';
-
   // Health health = Health();
 
   /// The [HealthAppTask] which specifies which health data to collect.
@@ -61,7 +59,7 @@ class HealthUserTask extends UserTask {
 
 class HealthUserTaskFactory implements UserTaskFactory {
   @override
-  List<String> types = [HealthUserTask.HEALTH_ASSESSMENT_TYPE];
+  List<String> types = [AppTask.HEALTH_ASSESSMENT_TYPE];
 
   @override
   UserTask create(AppTaskExecutor executor) => HealthUserTask(executor);

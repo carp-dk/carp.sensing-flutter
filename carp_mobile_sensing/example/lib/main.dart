@@ -412,7 +412,7 @@ class StudyPageState extends State<StudyPage> {
         ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 20)),
         AppTask(
           name: 'Device Info App Task',
-          type: BackgroundSensingUserTask.SENSING_TYPE,
+          type: AppTask.SENSING_TYPE,
           title: "User Task",
           description: 'Please click here to collect Device Information.',
           measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],

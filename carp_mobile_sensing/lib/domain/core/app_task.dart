@@ -32,6 +32,9 @@ class AppTask extends TaskConfiguration {
   /// An informed consent app task.
   static const String INFORMED_CONSENT_TYPE = 'informed_consent';
 
+  /// An app task collecting health data. Used in the carp_health_package.
+  static const String HEALTH_ASSESSMENT_TYPE = 'health';
+
   /// Type of task. For example a `survey`.
   String type;
 

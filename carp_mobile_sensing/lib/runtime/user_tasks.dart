@@ -19,7 +19,7 @@ abstract class UserTaskFactory {
 /// A [UserTaskFactory] that can create a non-UI sensing task.
 class SensingUserTaskFactory implements UserTaskFactory {
   @override
-  List<String> types = [BackgroundSensingUserTask.SENSING_TYPE];
+  List<String> types = [AppTask.SENSING_TYPE];
 
   @override
   UserTask create(AppTaskExecutor executor) =>
@@ -212,9 +212,6 @@ enum UserTaskState {
 /// It starts when the [onStart] methods is called and stops when the
 /// [onDone] methods is called.
 class BackgroundSensingUserTask extends UserTask {
-  /// A background sensing user task which can be started and stopped.
-  static const String SENSING_TYPE = 'sensing';
-
   BackgroundSensingUserTask(super.executor);
 
   @override

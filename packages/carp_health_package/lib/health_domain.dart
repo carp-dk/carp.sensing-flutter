@@ -179,7 +179,7 @@ class HealthAppTask extends AppTask {
   List<HealthDataType> types;
 
   HealthAppTask({
-    super.type = HealthUserTask.HEALTH_ASSESSMENT_TYPE,
+    super.type = AppTask.HEALTH_ASSESSMENT_TYPE,
     super.name,
     super.title,
     super.description,

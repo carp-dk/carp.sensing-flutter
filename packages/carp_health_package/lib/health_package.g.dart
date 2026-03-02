@@ -191,7 +191,7 @@ Map<String, dynamic> _$DummyHealthDataToJson(DummyHealthData instance) =>
 
 HealthAppTask _$HealthAppTaskFromJson(Map<String, dynamic> json) =>
     HealthAppTask(
-      type: json['type'] as String? ?? HealthUserTask.HEALTH_ASSESSMENT_TYPE,
+      type: json['type'] as String? ?? AppTask.HEALTH_ASSESSMENT_TYPE,
       name: json['name'] as String?,
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',

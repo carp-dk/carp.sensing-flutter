@@ -623,7 +623,7 @@ void protocolExample() async {
   protocol.addTaskControl(
     ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 30)),
     AppTask(
-      type: BackgroundSensingUserTask.SENSING_TYPE,
+      type: AppTask.SENSING_TYPE,
       title: "Elapsed Time - App Task",
       measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
       notification: true,
@@ -635,7 +635,7 @@ void protocolExample() async {
   // protocol.addTaskControl(
   //     CronScheduledTrigger.parse(cronExpression: '45 11 * * *'),
   //     AppTask(
-  //       type: BackgroundSensingUserTask.SENSING_TYPE,
+  //       type: AppTask.SENSING_TYPE,
   //       title: "Cron - every day at 11:45",
   //       measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
   //       notification: true,
@@ -828,7 +828,7 @@ void appTaskExample() async {
         ..addTaskControl(
           ImmediateTrigger(),
           AppTask(
-            type: BackgroundSensingUserTask.SENSING_TYPE,
+            type: AppTask.SENSING_TYPE,
             title: 'Device',
             description: 'Collect device info',
           )..addMeasure(
@@ -841,7 +841,7 @@ void appTaskExample() async {
         ..addTaskControl(
           ImmediateTrigger(),
           AppTask(
-            type: BackgroundSensingUserTask.SENSING_TYPE,
+            type: AppTask.SENSING_TYPE,
             title: 'Screen',
             description: 'Collect screen events',
           )..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT)),
