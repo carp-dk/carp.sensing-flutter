@@ -124,7 +124,7 @@ class LocationManager {
       }
     }
 
-    debug('$runtimeType - permission: $permissionGranted');
+    debug('$runtimeType - Permission: $permissionGranted');
 
     return permissionGranted == location.PermissionStatus.granted
         ? PermissionStatus.granted

@@ -9,7 +9,7 @@
 
 part of '../runtime.dart';
 
-/// A [DeviceManager] for an online service, like a weather service.
+/// A [DeviceManager] for an onboard service, like a location service.
 abstract class ServiceManager<
   TDeviceConfiguration extends ServiceConfiguration<TRegistration>,
   TRegistration extends ServiceRegistration

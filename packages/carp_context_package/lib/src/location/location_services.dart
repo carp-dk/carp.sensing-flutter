@@ -80,7 +80,6 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
 
   @override
   String? get displayName => manager.toString();
-  // String? get displayName => 'Location Service';
 
   LocationServiceManager([LocationService? configuration])
     : super(LocationService.DEVICE_TYPE, configuration: configuration);

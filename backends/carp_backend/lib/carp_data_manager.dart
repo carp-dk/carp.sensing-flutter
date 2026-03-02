@@ -68,14 +68,18 @@ class CarpDataManager extends AbstractDataManager {
   }
 
   @override
-  Future<void> initialize(
-    DataEndPoint dataEndPoint,
-    SmartphoneDeployment deployment,
-    Stream<Measurement> measurements,
-  ) async {
+  Future<void> configure({
+    required DataEndPoint dataEndPoint,
+    required SmartphoneDeployment deployment,
+    required Stream<Measurement> measurements,
+  }) async {
     info("$runtimeType - Initializing, endpoint: $dataEndPoint");
     assert(dataEndPoint is CarpDataEndPoint);
-    await super.initialize(dataEndPoint, deployment, measurements);
+    await super.configure(
+      dataEndPoint: dataEndPoint,
+      deployment: deployment,
+      measurements: measurements,
+    );
     carpEndPoint = dataEndPoint as CarpDataEndPoint;
 
     assert(

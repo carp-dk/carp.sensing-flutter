@@ -32,7 +32,11 @@ class DataStreamBuffer {
   ) async {
     info('Initializing $runtimeType...');
     _deployment = deployment;
-    _manager.initialize(SQLiteDataEndPoint(), deployment, measurements);
+    _manager.configure(
+      dataEndPoint: SQLiteDataEndPoint(),
+      deployment: deployment,
+      measurements: measurements,
+    );
   }
 
   /// Get the list of [DataStreamBatch] which has not yet been uploaded.
@@ -64,15 +68,19 @@ class DataStreamBuffer {
     List<Measurement> measurements = [];
     Set<int> triggerIds = {};
 
-    debug("$runtimeType - getting data stream batch for device "
-        "'${stream.deviceRoleName}' and data type '${stream.dataType}'.");
+    debug(
+      "$runtimeType - getting data stream batch for device "
+      "'${stream.deviceRoleName}' and data type '${stream.dataType}'.",
+    );
 
     // get all measurement not uploaded yet for this stream
-    const where = '${SQLiteDataManager.UPLOADED_COLUMN} = ? AND '
+    const where =
+        '${SQLiteDataManager.UPLOADED_COLUMN} = ? AND '
         '${SQLiteDataManager.DEPLOYMENT_ID_COLUMN} = ? AND '
         '${SQLiteDataManager.DEVICE_ROLE_NAME_COLUMN} = ? AND '
         '${SQLiteDataManager.DATATYPE_COLUMN} = ?';
-    final List<Map<String, dynamic>> maps = await database?.query(
+    final List<Map<String, dynamic>> maps =
+        await database?.query(
           SQLiteDataManager.MEASUREMENT_TABLE_NAME,
           where: where,
           whereArgs: [
@@ -92,14 +100,16 @@ class DataStreamBuffer {
           int.tryParse(element[SQLiteDataManager.ID_COLUMN].toString()) ?? 0;
       // save the row id of what is uploaded
       rows.add(row);
-      int? triggerId =
-          int.tryParse(element[SQLiteDataManager.TRIGGER_ID_COLUMN].toString());
+      int? triggerId = int.tryParse(
+        element[SQLiteDataManager.TRIGGER_ID_COLUMN].toString(),
+      );
       if (triggerId != null) triggerIds.add(triggerId);
 
       final jsonString =
           element[SQLiteDataManager.MEASUREMENT_COLUMN] as String;
-      final measurement =
-          Measurement.fromJson(json.decode(jsonString) as Map<String, dynamic>);
+      final measurement = Measurement.fromJson(
+        json.decode(jsonString) as Map<String, dynamic>,
+      );
       measurements.add(measurement);
     }
     firstSequenceId = rows.reduce(min);
@@ -120,17 +130,21 @@ class DataStreamBuffer {
     final args = rows.join(',');
     int? count = 0;
     if (delete) {
-      var sql = 'DELETE FROM ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} WHERE '
+      var sql =
+          'DELETE FROM ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} WHERE '
           '${SQLiteDataManager.ID_COLUMN} IN ($args)';
       count = await database?.rawDelete(sql);
     } else {
-      var sql = 'UPDATE ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} SET '
+      var sql =
+          'UPDATE ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} SET '
           '${SQLiteDataManager.UPLOADED_COLUMN} = 1 WHERE ${SQLiteDataManager.ID_COLUMN} IN ($args)';
       count = await database?.rawUpdate(sql);
     }
     rows = {};
-    debug('$runtimeType - cleaned up. '
-        'N=$count records ${delete ? 'deleted' : 'marked as uploaded'}.');
+    debug(
+      '$runtimeType - cleaned up. '
+      'N=$count records ${delete ? 'deleted' : 'marked as uploaded'}.',
+    );
   }
 
   /// Close this buffer. No more data can be added.
