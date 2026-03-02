@@ -1,6 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_survey_package/survey.dart';
 import 'package:research_package/research_package.dart';

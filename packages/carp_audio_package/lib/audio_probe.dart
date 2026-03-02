@@ -1,7 +1,7 @@
 part of 'media.dart';
 
-/// A probe recording audio from the microphone. It starts recording on [start]
-/// and stops recording on [stop], and post the recorded [MediaData] object to the
+/// A probe recording audio from the microphone. It starts recording on [onResume]
+/// and stops recording on [onPause], and post the recorded [MediaData] object to the
 /// [measurements] stream.
 ///
 /// Note that this probe generates a lot of data and should be used with caution.

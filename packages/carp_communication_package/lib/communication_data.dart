@@ -198,6 +198,8 @@ class Calendar extends Data {
   Function get fromJsonFunction => _$CalendarFromJson;
   factory Calendar.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<Calendar>(json);
+  @override
+  Map<String, dynamic> toJson() => _$CalendarToJson(this);
 }
 
 /// A calendar event.
