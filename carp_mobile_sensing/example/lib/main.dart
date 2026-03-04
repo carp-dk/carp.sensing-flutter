@@ -188,6 +188,7 @@ class StudyPageState extends State<StudyPage> {
   SmartphoneStudyProtocol get simpleProtocol => SmartphoneStudyProtocol.local(
     name: 'Simple Protocol',
     measures: [
+      Measure(type: DeviceSamplingPackage.HEARTBEAT),
       Measure(type: DeviceSamplingPackage.FREE_MEMORY),
       Measure(type: DeviceSamplingPackage.BATTERY_STATE),
       Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
