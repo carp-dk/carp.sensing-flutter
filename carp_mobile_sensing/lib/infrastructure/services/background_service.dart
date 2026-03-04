@@ -70,8 +70,14 @@ class BackgroundService {
     // Initialize the background service with the provided configuration.
     // This has to be done twice due to a quirk in the flutter_background package.
     // See issue #56 in the flutter_background package for more information.
+
+    // First attempt will open the "Stop Battery Optimization" dialog on Android,
+    // which is required to allow the app to run in the background.
     _initialized = await FlutterBackground.initialize(androidConfig: config);
-    if (!(await FlutterBackground.hasPermissions)) {
+    bool backgroundPermissions = await FlutterBackground.hasPermissions;
+
+    // Second attempt will actually initialize the background service if permissions were granted.
+    if (!_initialized && backgroundPermissions) {
       _initialized = await FlutterBackground.initialize(androidConfig: config);
     }
 
@@ -87,6 +93,12 @@ class BackgroundService {
     if (!_initialized) {
       warning('$runtimeType - Background service is not initialized.');
       return false;
+    }
+
+    bool enabled = FlutterBackground.isBackgroundExecutionEnabled;
+    if (enabled) {
+      warning('$runtimeType - Background service is already enabled.');
+      return true;
     }
 
     bool hasPermissions = await FlutterBackground.hasPermissions;
