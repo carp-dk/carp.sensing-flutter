@@ -48,16 +48,18 @@ import 'package:archive/archive_io.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 part 'infrastructure/data_managers/console_data_manager.dart';
 part 'infrastructure/data_managers/file_data_manager.dart';
 part 'infrastructure/data_managers/sqlite_data_manager.dart';
 
-part 'infrastructure/phone/file_protocol_manager.dart';
-part 'infrastructure/phone/local_notification_manager.dart';
-part 'infrastructure/phone/logging.dart';
+part 'infrastructure/services/file_protocol_manager.dart';
+part 'infrastructure/services/local_notification_manager.dart';
+part 'infrastructure/services/logging.dart';
+part 'infrastructure/services/background_service.dart';
 
-part 'infrastructure/deployment_service.dart';
-part 'infrastructure/persistence.dart';
+part 'infrastructure/services/deployment_service.dart';
+part 'infrastructure/services/persistence.dart';
 part 'infrastructure/settings.dart';
-part 'infrastructure/protocol_manager.dart';
+part 'domain/services/protocol_manager.dart';

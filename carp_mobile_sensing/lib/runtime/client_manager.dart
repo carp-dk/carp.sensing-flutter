@@ -111,9 +111,16 @@ class SmartPhoneClientManager
   ///
   /// If [enableNotifications] is true (default), notifications is created when
   /// an [AppTask] is triggered.
-  /// The [notificationController] specifies what [NotificationManager] to
-  /// use for notifications. If not specified, the [FlutterLocalNotificationManager]
-  /// is used.
+  ///
+  /// If [enableBackgroundMode] is true (default), data sampling will be enabled
+  /// to run in the background. This means that data sampling will continue
+  /// even when the app is not in the foreground, as long as the phone is not
+  /// restarted. If background mode is enabled, the [backgroundNotificationTitle]
+  /// and [backgroundNotificationText] can be specified to customize the notification
+  /// shown when data sampling is running in the background. If not specified,
+  /// default English titles and text will be used. If you want to use localized
+  /// titles and text, you can provide them here.
+  /// Note that background mode is only supported on Android, and will be ignored on iOS.
   ///
   /// If [askForPermissions] is true (default), this client manager will
   /// automatically ask for permissions for all sampling packages at once.
@@ -124,7 +131,9 @@ class SmartPhoneClientManager
     DeploymentService? deploymentService,
     DeviceDataCollectorFactory? dataCollectorFactory,
     bool enableNotifications = true,
-    NotificationManager? notificationController,
+    bool enableBackgroundMode = true,
+    String? backgroundNotificationTitle,
+    String? backgroundNotificationText,
     bool askForPermissions = true,
   }) async {
     // Fast out if already configured
@@ -157,14 +166,27 @@ class SmartPhoneClientManager
     deviceController.registerAllAvailableDevices();
 
     if (enableNotifications) {
-      _notificationController =
-          notificationController ?? FlutterLocalNotificationManager();
+      _notificationController = FlutterLocalNotificationManager();
+    }
+
+    if (enableBackgroundMode) {
+      await BackgroundService().initialize(
+        notificationTitle: backgroundNotificationTitle,
+        notificationText: backgroundNotificationText,
+      );
     }
 
     // Initialize the app task controller.
     await AppTaskController().initialize(
       enableNotifications: enableNotifications,
     );
+
+    // Enable background mode if specified. This will make sure that data sampling
+    // will continue even when the app is not in the foreground, as long as the
+    // phone is not restarted.
+    if (enableBackgroundMode) {
+      await BackgroundService().enable();
+    }
 
     var statusMsg =
         '===========================================================\n'
@@ -176,6 +198,7 @@ class SmartPhoneClientManager
         '  Device Controller : $deviceController\n'
         '  Available Devices : ${deviceController.devicesToString()}\n'
         '        Persistence : ${Persistence().databaseName.split('/').last}\n'
+        '    Background Mode : ${BackgroundService().isEnabled ? "enabled" : "disabled"}\n'
         '===========================================================\n';
     debugPrint(statusMsg);
 

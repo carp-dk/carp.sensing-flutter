@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../infrastructure.dart';
+part of '../../infrastructure.dart';
 
 /// A local (in-memory) implementation of a [DeploymentService] useful in
 /// CAMS studies to be deployed locally on this phone.

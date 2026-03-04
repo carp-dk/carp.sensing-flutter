@@ -257,13 +257,13 @@ class ScreenEvent extends Data {
     ScreenEvent sd = ScreenEvent();
 
     switch (event) {
-      case ScreenStateEvent.SCREEN_ON:
+      case ScreenStateEvent.screenOn:
         sd.screenEvent = 'SCREEN_ON';
         break;
-      case ScreenStateEvent.SCREEN_OFF:
+      case ScreenStateEvent.screenOff:
         sd.screenEvent = 'SCREEN_OFF';
         break;
-      case ScreenStateEvent.SCREEN_UNLOCKED:
+      case ScreenStateEvent.screenUnlocked:
         sd.screenEvent = 'SCREEN_UNLOCKED';
         break;
     }

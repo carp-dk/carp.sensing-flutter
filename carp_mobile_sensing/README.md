@@ -28,11 +28,13 @@ When you want to add CAMS to you app, there are a few things to do in terms of c
 
 First, CAMS rely on the [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications) plugin. So **if you want to use App Tasks and notifications** you should configure your app to the [platforms it supports](https://pub.dev/packages/flutter_local_notifications#-supported-platforms) and configure your app for both [Android](https://pub.dev/packages/flutter_local_notifications#-android-setup) and [iOS](https://pub.dev/packages/flutter_local_notifications#-ios-setup). There is a lot of details in configuring for notifications - especially for Android - so read this carefully.
 
+Second, to support data sampling in the background, CAMS rely on the [flutter_background](https://pub.dev/packages/flutter_background) plugin. This only works on Android and requires adding permissions to the `AndroidManifest.xml` and specifying the appropriate [`foregroundServiceType`](https://developer.android.com/develop/background-work/services/fgs/service-types) for your use case.
+
 ### Android Integration
 
-Set the minimum android SDK to 26 and Java SDK Version to 34 by setting the `minSdkVersion`, the `compileSdkVersion`, and `targetSdkVersion` in the `build.gradle` file, located in the `android/app/` folder:
+Set the minimum android SDK to 26 and Java SDK Version to 36 by setting the `minSdkVersion`, the `compileSdkVersion`, and `targetSdkVersion` in the `build.gradle` file, located in the `android/app/` folder:
 
-If collecting step counts or using notifications in your app, add the following to your app's `manifest.xml` file located in `android/app/src/main`:
+If collecting step counts or using notifications in your app, add the following to your app's `AndroidManifest.xml` file located in `android/app/src/main`:
 
 ````xml
 <!-- Used for activity recognition (step count) -->
@@ -77,7 +79,7 @@ The pedometer (step count) probe uses `NSMotion` on iOS and the `NSMotionUsageDe
 -------------------------------------
 
 > [!NOTE]  
-> Other CAMS sampling packages require additional permissions in the `manifest.xml` or `Info.plist` files.
+> Other CAMS sampling packages require additional permissions in the `AndroidManifest.xml` or `Info.plist` files.
 > See the **documentation** for each package.
 
 ## Documentation

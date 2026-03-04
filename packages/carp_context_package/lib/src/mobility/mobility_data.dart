@@ -6,6 +6,7 @@ class Mobility extends Data {
   /// The time this data was collected.
   DateTime? timestamp;
 
+  // TODO - make this a day instead of a date time.
   /// The day of this mobility features.
   DateTime? date;
 

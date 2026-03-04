@@ -9,6 +9,7 @@ plugins {
 android {
     namespace = "dk.carp.carp_mobile_sensing_example"
     compileSdk = flutter.compileSdkVersion
+    // compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

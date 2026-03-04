@@ -35,7 +35,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
     debug('$runtimeType - permissions: $status');
 
     await FlutterLocalNotificationsPlugin().initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: AndroidInitializationSettings('app_icon'),
         iOS: DarwinInitializationSettings(),
       ),
@@ -68,10 +68,10 @@ class FlutterLocalNotificationManager implements NotificationManager {
   }) async {
     id ??= _random.nextInt(1000);
     await FlutterLocalNotificationsPlugin().show(
-      id,
-      title,
-      body,
-      _platformChannelSpecifics,
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: _platformChannelSpecifics,
     );
     return id;
   }
@@ -90,11 +90,11 @@ class FlutterLocalNotificationManager implements NotificationManager {
     );
 
     await FlutterLocalNotificationsPlugin().zonedSchedule(
-      id,
-      title,
-      body,
-      time,
-      _platformChannelSpecifics,
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: time,
+      notificationDetails: _platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
 
@@ -121,11 +121,11 @@ class FlutterLocalNotificationManager implements NotificationManager {
     };
 
     await FlutterLocalNotificationsPlugin().zonedSchedule(
-      id,
-      title,
-      body,
-      time,
-      _platformChannelSpecifics,
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: time,
+      notificationDetails: _platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: recurrence,
     );
@@ -135,16 +135,16 @@ class FlutterLocalNotificationManager implements NotificationManager {
 
   @override
   Future<void> cancelNotification(int id) async =>
-      await FlutterLocalNotificationsPlugin().cancel(id);
+      await FlutterLocalNotificationsPlugin().cancel(id: id);
 
   @override
   Future<void> createTaskNotification(UserTask task) async {
     if (task.notification) {
       await FlutterLocalNotificationsPlugin().show(
-        task.id.hashCode,
-        task.title,
-        task.description,
-        _platformChannelSpecifics,
+        id: task.id.hashCode,
+        title: task.title,
+        body: task.description,
+        notificationDetails: _platformChannelSpecifics,
         payload: task.id,
       );
       info('$runtimeType - Notification created for $task');
@@ -163,11 +163,11 @@ class FlutterLocalNotificationManager implements NotificationManager {
       );
 
       await FlutterLocalNotificationsPlugin().zonedSchedule(
-        task.id.hashCode,
-        task.title,
-        task.description,
-        time,
-        _platformChannelSpecifics,
+        id: task.id.hashCode,
+        title: task.title,
+        body: task.description,
+        scheduledDate: time,
+        notificationDetails: _platformChannelSpecifics,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: task.id,
       );
@@ -189,7 +189,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
   @override
   Future<void> cancelTaskNotification(UserTask task) async {
     if (task.notification) {
-      await FlutterLocalNotificationsPlugin().cancel(task.id.hashCode);
+      await FlutterLocalNotificationsPlugin().cancel(id: task.id.hashCode);
       info('$runtimeType - Notification canceled for $task');
     }
   }

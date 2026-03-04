@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   http: ^1.2.1
   json_annotation: ^4.8.0
+  shared_preferences: ^2.2.0
+  
   carp_serializable: ^2.0.0
   carp_core: ^1.8.0
   carp_mobile_sensing:

@@ -4,7 +4,7 @@
  * found in the LICENSE file.
  */
 
-part of '../infrastructure.dart';
+part of '../../infrastructure.dart';
 
 /// The [Persistence] class is a singleton which handles persistence of study
 /// runtime information to a SQLite database on the phone. Used to store information

@@ -63,7 +63,8 @@ class StudyPageState extends State<StudyPage> {
     // Set debug level for more detailed debugging information.
     Settings().debugLevel = DebugLevel.debug;
 
-    // Configure the client.
+    // Configure the client. Note that the client can take a series of configuration
+    // parameters, but here we're just using the default configurations.
     client.configure();
 
     // Listen on all the measurements and print them as json.
