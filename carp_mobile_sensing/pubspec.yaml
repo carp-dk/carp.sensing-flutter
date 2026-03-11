@@ -5,10 +5,9 @@ homepage: https://github.com/carp-dk/carp.sensing-flutter
 repository: https://github.com/carp-dk/carp.sensing-flutter
 issue_tracker: https://github.com/carp-dk/carp.sensing-flutter/issues
 topics:
-  - sensing
+  - mobile-sensing
   - mobile-health
   - sensors
-  - dart
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
