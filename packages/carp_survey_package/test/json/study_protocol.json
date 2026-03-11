@@ -1,14 +1,14 @@
 {
-  "id": "b47f3729-12f8-41de-a47d-5ab153122ca8",
-  "createdOn": "2026-01-18T14:33:39.813632Z",
+  "id": "6fd5c551-ddc1-41a9-80f8-6f443a9a52d3",
+  "createdOn": "2026-03-09T08:50:24.221934Z",
   "version": 0,
   "ownerId": "alex@uni.dk",
   "name": "Context package test",
   "participantRoles": [],
   "primaryDevices": [
     {
-      "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-      "roleName": "Primary Phone",
+      "__type": "dk.carp.cams.devices.Smartphone",
+      "roleName": "Smartphone",
       "isOptional": false,
       "defaultSamplingConfiguration": {},
       "isPrimaryDevice": true
@@ -24,23 +24,31 @@
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.device_information"
+          "type": "dk.cachet.carp.deviceinformation"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.free_memory"
+          "type": "dk.cachet.carp.applicationinformation"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.battery_state"
+          "type": "dk.cachet.carp.freememory"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.screen_event"
+          "type": "dk.cachet.carp.batterystate"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.app_lifecycle_event"
+          "type": "dk.cachet.carp.screenevent"
+        },
+        {
+          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+          "type": "dk.cachet.carp.applifecycleevent"
+        },
+        {
+          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+          "type": "dk.cachet.carp.heartbeat"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -64,15 +72,15 @@
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.acceleration_features"
+          "type": "dk.cachet.carp.accelerationfeatures"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.step_event"
+          "type": "dk.cachet.carp.stepevent"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.ambient_light"
+          "type": "dk.cachet.carp.ambientlight"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -88,11 +96,7 @@
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.heartbeat"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.completed_app_task"
+          "type": "dk.cachet.carp.completedapptask"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -106,11 +110,11 @@
       "measures": [
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.device_information"
+          "type": "dk.cachet.carp.deviceinformation"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.ambient_light"
+          "type": "dk.cachet.carp.ambientlight"
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -118,7 +122,7 @@
         },
         {
           "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.completed_app_task.survey"
+          "type": "dk.cachet.carp.completedapptask.survey"
         }
       ],
       "type": "survey",
@@ -405,11 +409,11 @@
   "triggers": {
     "0": {
       "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-      "sourceDeviceRoleName": "Primary Phone"
+      "sourceDeviceRoleName": "Smartphone"
     },
     "1": {
       "__type": "dk.cachet.carp.common.application.triggers.DelayedTrigger",
-      "sourceDeviceRoleName": "Primary Phone",
+      "sourceDeviceRoleName": "Smartphone",
       "delay": 30000000
     }
   },
@@ -417,13 +421,13 @@
     {
       "triggerId": 0,
       "taskName": "Task #9",
-      "destinationDeviceRoleName": "Primary Phone",
+      "destinationDeviceRoleName": "Smartphone",
       "control": "Start"
     },
     {
       "triggerId": 1,
       "taskName": "WHO-5 Survey",
-      "destinationDeviceRoleName": "Primary Phone",
+      "destinationDeviceRoleName": "Smartphone",
       "control": "Start"
     }
   ],

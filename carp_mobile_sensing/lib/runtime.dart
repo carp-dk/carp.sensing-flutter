@@ -1,13 +1,14 @@
 /*
- * Copyright 2018-2022 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018-2026 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
 
-/// Contains classes for running the sensing framework incl.
-/// the [SmartphoneDeploymentExecutor], [TaskExecutor] and different types of
-/// [Probe]s.
+/// The runtime layer is the main entry point to CAMS and holds the [SmartPhoneClientManager],
+/// [SmartphoneStudyController]s with a [SmartphoneDeploymentExecutor] for each
+/// running study, [DeviceController] with [DeviceManager]s for each connected
+/// device, and a [SamplingPackageRegistry] for registering sampling packages
+/// and their supported devices and probes.
 library;
 
 import 'dart:async';
@@ -42,10 +43,10 @@ part 'runtime/app_task_controller.dart';
 part 'runtime/client_manager.dart';
 part 'runtime/client_repository.dart';
 part 'runtime/study_controller.dart';
-part 'runtime/device_controller.dart';
-part 'runtime/device_manager.dart';
-part 'runtime/device_managers.dart';
-part 'runtime/sampling_package.dart';
+part 'runtime/device_manager/device_controller.dart';
+part 'runtime/device_manager/device_manager.dart';
+part 'runtime/device_manager/device_managers.dart';
+part 'runtime/sampling_package_registry.dart';
 part 'runtime/user_tasks.dart';
 
 part 'runtime.g.dart';

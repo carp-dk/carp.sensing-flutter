@@ -76,7 +76,7 @@ class DataManagerEventTypes {
 
 /// An abstract [DataManager] implementation useful for extension.
 ///
-/// Takes data from a [Stream<DataPoint>] and uploads these.
+/// Takes data from a [Stream<Measurement>] and uploads it.
 /// Also supports JSON encoding via the [toJsonString] method.
 abstract class AbstractDataManager implements DataManager {
   late SmartphoneDeployment _deployment;

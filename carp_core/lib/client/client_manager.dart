@@ -82,7 +82,7 @@ abstract class ClientManager<
   ///
   /// Optionally, you can specify or override:
   ///  * [deploymentService] - where to get study deployments
-  ///  * [dataCollectorFactory] - which data collectors to use to collect data
+  ///  * [dataCollectorFactory] - the factory for creating data collectors
   ///
   /// Throws an [AssertionError] if this client manager has already been configured.
   /// Throws [NotConfiguredException] if after configuration either

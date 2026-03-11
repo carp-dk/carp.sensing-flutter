@@ -30,17 +30,15 @@ class MobileSensingApp extends StatelessWidget {
   const MobileSensingApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mobile Sensing',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData.dark(),
-      home: const StudyPage(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Mobile Sensing',
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      useMaterial3: true,
+    ),
+    darkTheme: ThemeData.dark(),
+    home: const StudyPage(),
+  );
 }
 
 class StudyPage extends StatefulWidget {

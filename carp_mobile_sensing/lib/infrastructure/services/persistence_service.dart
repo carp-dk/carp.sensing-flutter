@@ -6,7 +6,7 @@
 
 part of '../../infrastructure.dart';
 
-/// The [Persistence] class is a singleton which handles persistence of study
+/// The [PersistenceService] class is a singleton which handles persistence of study
 /// runtime information to a SQLite database on the phone. Used to store information
 /// across app re-start on:
 ///
@@ -28,7 +28,7 @@ part of '../../infrastructure.dart';
 /// On Android, Flutter files are stored in the `databases` directory, which is
 /// located in the `data/data/<package_name>/databases/` folder.
 /// Files can be accessed via AndroidStudio.
-class Persistence {
+class PersistenceService {
   static const String DATABASE_NAME = 'carp';
   static const String STUDY_TABLE_NAME = 'studies';
   static const String TASK_QUEUE_TABLE_NAME = 'task_queue';
@@ -52,11 +52,11 @@ class Persistence {
   String? _databasePath;
   Database? _database;
 
-  static final Persistence _instance = Persistence._();
-  Persistence._();
+  static final PersistenceService _instance = PersistenceService._();
+  PersistenceService._();
 
   /// Get the singleton persistence layer.
-  factory Persistence() => _instance;
+  factory PersistenceService() => _instance;
 
   /// Path of the database.
   String get databasePath => '$_databasePath';

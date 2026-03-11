@@ -17,26 +17,25 @@ import 'package:carp_serializable/carp_serializable.dart';
 /// This is an example of how to set up a simple study.
 /// Used in the README file.
 Future<void> minimalExample() async {
-  // Create a protocol.
-  final phone = Smartphone();
   final protocol =
       SmartphoneStudyProtocol(
           ownerId: 'AB',
           name: 'Tracking steps, light, screen, and battery',
           dataEndPoint: SQLiteDataEndPoint(),
         )
-        ..addPrimaryDevice(phone)
+        ..addPrimaryDevice(Smartphone())
+        ..addParticipantRole(ParticipantRole('Participant'))
         ..addTaskControl(
-          DelayedTrigger(delay: const Duration(seconds: 10)),
+          ImmediateTrigger(),
           BackgroundTask(
             measures: [
               Measure(type: SensorSamplingPackage.STEP_EVENT),
               Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
               Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
               Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+              Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
             ],
           ),
-          phone,
         );
 
   // Create and configure a client manager for this phone.
@@ -74,6 +73,16 @@ Future<void> minimalExample() async {
 /// Create and configure a client manager for this phone, add the protocol,
 /// start the study, and resume data sampling.
 Future<void> oneLineExample() async {
+  // SmartPhoneClientManager().configure().then(
+  //   (_) => SmartPhoneClientManager()
+  //       .addStudyFromProtocol(protocol)
+  //       .then(
+  //         (_) => SmartPhoneClientManager()
+  //           ..start()
+  //           ..resume(),
+  //       ),
+  // );
+
   SmartPhoneClientManager().configure().then(
     (_) => SmartPhoneClientManager()
         .addStudyFromProtocol(
@@ -133,9 +142,9 @@ Future<void> example_0() async {
 
   // Create and configure a client manager for this phone, and
   // create a study based on the protocol.
-  SmartPhoneClientManager client = SmartPhoneClientManager();
+  final client = SmartPhoneClientManager();
   await client.configure();
-  var study = await client.addStudyFromProtocol(protocol);
+  final study = await client.addStudyFromProtocol(protocol);
 
   // STEP III -- START THE STUDY
 
@@ -144,13 +153,13 @@ Future<void> example_0() async {
   // This will first deploy the study since it has not been deployed yet and
   // the start the study. Data sampling will NOT be started, since the study's
   // [samplingStatus] is still not resumed.
-  SmartPhoneClientManager().start();
+  client.start();
 
   // Now resume data sampling.
-  SmartPhoneClientManager().resume();
+  client.resume();
 
   // Listening and print all measurements collected
-  SmartPhoneClientManager().measurements.forEach(print);
+  client.measurements.forEach(print);
 }
 
 /// This is an example of how to set up a study.
@@ -158,7 +167,7 @@ Future<void> example_0() async {
 /// collected data in a local SQLite database.
 void example_1() async {
   // Create a study protocol storing data in a local SQLite database.
-  SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
+  final protocol = SmartphoneStudyProtocol(
     ownerId: 'abc@dtu.dk',
     name: 'Track patient movement',
     dataEndPoint: SQLiteDataEndPoint(),
@@ -166,7 +175,7 @@ void example_1() async {
 
   // Define which devices are used for data collection.
   // In this case, its only this smartphone.
-  Smartphone phone = Smartphone();
+  final phone = Smartphone();
   protocol.addPrimaryDevice(phone);
 
   // Add a participant role
@@ -185,6 +194,7 @@ void example_1() async {
       ],
     ),
     phone,
+    Control.Start,
   );
 
   // Use the on-phone deployment service.
@@ -209,6 +219,9 @@ void example_1() async {
 
   // Configure the controller and start sampling.
   controller?.start();
+
+  // Resume data sampling for a specific study.
+  controller?.resume();
 
   // Print all data events from the study
   controller?.measurements.forEach(print);
@@ -280,6 +293,21 @@ void example_2() async {
     phone,
   );
 
+  // Alternatively override the sampling configuration of the light measure in the protocol directly.
+  protocol.addTaskControl(
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
+        Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)
+          ..overrideSamplingConfiguration = PeriodicSamplingConfiguration(
+            interval: const Duration(minutes: 10),
+            duration: const Duration(seconds: 20),
+          ),
+      ],
+    ),
+    phone,
+  );
+
   // use the on-phone deployment service
   DeploymentService deploymentService = SmartphoneDeploymentService();
 
@@ -330,14 +358,13 @@ void example_2() async {
       .listen((json) => print(json));
 
   // subscribe to the stream of measurements
-  StreamSubscription<Measurement> subscription = controller!.measurements
-      .listen((Measurement measurement) {
-        // do something w. the measurement, e.g. print the json
-        print(const JsonEncoder.withIndent(' ').convert(measurement));
-      });
+  var subscription = controller?.measurements.listen((Measurement measurement) {
+    // do something w. the measurement, e.g. print the json
+    print(const JsonEncoder.withIndent(' ').convert(measurement));
+  });
 
-  // Listen to a specific probe(s)
-  controller.executor
+  // Listen to a specific probe
+  controller?.executor
       .lookupProbe(CarpDataTypes.ACCELERATION)
       .forEach(
         (probe) =>
@@ -345,11 +372,11 @@ void example_2() async {
       );
 
   // Sampling can be stopped and started
-  controller.executor.pause();
-  controller.executor.resume();
+  controller?.executor.pause();
+  controller?.executor.resume();
 
   // Stop specific probe(s)
-  controller.executor
+  controller?.executor
       .lookupProbe(CarpDataTypes.ACCELERATION)
       .forEach((probe) => probe.pause());
 
@@ -365,17 +392,17 @@ void example_2() async {
   );
 
   // Restart the light probe(s) in order to load the new configuration
-  controller.executor
+  controller?.executor
       .lookupProbe(SensorSamplingPackage.AMBIENT_LIGHT)
       // .forEach((probe) => probe.restart());
       .forEach((probe) => probe.resume());
 
   // Once the sampling has to stop, e.g. in a Flutter dispose() method,
   // call the controller's dispose method.
-  controller.dispose();
+  controller?.dispose();
 
   // Cancel the subscription.
-  await subscription.cancel();
+  await subscription?.cancel();
 }
 
 /// An example of how to configure a [SmartphoneStudyProtocol] with the
@@ -481,7 +508,7 @@ void transformedExample() async {
 
 void protocolExample() async {
   // Create a protocol. Note that the [id] is not used for anything.
-  SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
+  final protocol = SmartphoneStudyProtocol(
     ownerId: 'AB',
     name: 'Track patient movement',
     dataEndPoint: SQLiteDataEndPoint(),
@@ -546,36 +573,31 @@ void protocolExample() async {
     phone,
   );
 
-  // // Example of how to start and stop sampling using the Control.Start and
-  // // Control.Stop method
-  // var task_1 = BackgroundTask(
-  //   measures: [
-  //     Measure(type: CarpDataTypes.ACCELERATION_TYPE_NAME),
-  //     Measure(type: CarpDataTypes.ROTATION_TYPE_NAME),
-  //   ],
-  // );
+  // Example of how to start and stop sampling using the Control.Start and
+  // Control.Stop method
+
+  // Collect IMU data
+  var imuTask = BackgroundTask(
+    measures: [
+      Measure(type: SensorSamplingPackage.ACCELERATION),
+      Measure(type: SensorSamplingPackage.ROTATION),
+    ],
+  );
 
   // var task_2 = BackgroundTask(
-  //   measures: [
-  //     Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-  //   ],
+  //   measures: [Measure(type: DeviceSamplingPackage.BATTERY_STATE)],
   // );
 
-  // // Collect IMU data
-  // protocol.addTaskControls(
-  //   ImmediateTrigger(),
-  //   [task_1, task_2],
-  //   phone,
-  //   Control.Start,
-  // );
+  // Collect IMU data
+  protocol.addTaskControl(ImmediateTrigger(), imuTask, phone, Control.Start);
 
-  // // After a while, stop it again
-  // protocol.addTaskControl(
-  //   DelayedTrigger(delay: Duration(seconds: 10)),
-  //   task_1,
-  //   phone,
-  //   Control.Stop,
-  // );
+  // After a while, stop it again
+  protocol.addTaskControl(
+    DelayedTrigger(delay: Duration(seconds: 10)),
+    imuTask,
+    phone,
+    Control.Stop,
+  );
 
   // // add a random trigger to collect device info at random times
   // protocol.addTaskControl(
@@ -591,15 +613,17 @@ void protocolExample() async {
   //   Control.Start,
   // );
 
-  // // add a ConditionalPeriodicTrigger to check periodically
-  // protocol.addTaskControl(
-  //     ConditionalPeriodicTrigger(
-  //         period: Duration(seconds: 20),
-  //         triggerCondition: () => ('jakob'.length == 5)),
-  //     BackgroundTask()
-  //       ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
-  //     phone,
-  //     Control.Start);
+  // add a ConditionalPeriodicTrigger to check periodically
+  protocol.addTaskControl(
+    ConditionalPeriodicTrigger(
+      period: Duration(seconds: 20),
+      triggerCondition: () => ('jakob'.length == 5),
+    ),
+    BackgroundTask()
+      ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+    phone,
+    Control.Start,
+  );
 
   // // Collect device info after 30 secs
   // protocol.addTaskControl(
@@ -631,16 +655,17 @@ void protocolExample() async {
     phone,
   );
 
-  // // Add a cron job every day at 11:45
-  // protocol.addTaskControl(
-  //     CronScheduledTrigger.parse(cronExpression: '45 11 * * *'),
-  //     AppTask(
-  //       type: AppTask.SENSING_TYPE,
-  //       title: "Cron - every day at 11:45",
-  //       measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-  //       notification: true,
-  //     ),
-  //     phone);
+  // Add a cron job that triggers an app task every day at 11:45
+  protocol.addTaskControl(
+    CronScheduledTrigger.parse(cronExpression: '45 11 * * *'),
+    AppTask(
+      type: AppTask.SENSING_TYPE,
+      title: "Click here to collect device information",
+      measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
+      notification: true,
+    ),
+    phone,
+  );
 }
 
 // /// An example of how to use the [SamplingSchema] model.

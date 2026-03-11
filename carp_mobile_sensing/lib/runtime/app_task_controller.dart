@@ -320,7 +320,7 @@ class AppTaskController {
     bool success = true;
 
     try {
-      final snapshots = await Persistence().getUserTasks(study);
+      final snapshots = await PersistenceService().getUserTasks(study);
 
       // now create new AppTaskExecutors, initialize them, and add them to the queue
       for (var snapshot in snapshots) {

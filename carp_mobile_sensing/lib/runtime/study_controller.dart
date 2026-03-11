@@ -6,7 +6,16 @@
  */
 part of '../runtime.dart';
 
-/// A [SmartphoneStudyController] controls the execution of a [SmartphoneStudy].
+/// Controls the runtime execution of a [SmartphoneStudy].
+///
+/// A [SmartphoneStudyController] is responsible for:
+///  * Orchestrating the lifecycle of a [SmartphoneDeploymentExecutor]
+///  * Configuring the [DataManager] based on the study's [DataEndPoint]
+///  * Requesting OS permissions needed for sampling
+///  * Transforming collected [Measurement]s using the privacy schema and
+///    preferred data format specified in the deployment
+///
+/// Access via [SmartPhoneClientManager.getStudyController].
 class SmartphoneStudyController {
   final SmartphoneStudy _study;
   DataManager? _dataManager;
@@ -181,8 +190,8 @@ class SmartphoneStudyController {
         ' deployment id : ${deployment?.studyDeploymentId}\n'
         ' deployed time : ${deployment?.deployed}\n'
         '     role name : ${deployment?.deviceConfiguration.roleName}\n'
-        '      platform : ${DeviceInfo().platform.toString()}\n'
-        '     device ID : ${DeviceInfo().deviceID.toString()}\n'
+        '      platform : ${DeviceInfoService().platform.toString()}\n'
+        '     device ID : ${DeviceInfoService().deviceID.toString()}\n'
         ' data endpoint : ${dataEndPoint?.type}\n'
         '  data manager : $_dataManager\n'
         '===============================================================\n';

@@ -8,7 +8,7 @@
 part of '../runtime.dart';
 
 /// A [ClientRepository] that runs on a smartphone. Works as a singleton.
-/// Uses the [Persistence] infrastructure to store study information persistently
+/// Uses the [PersistenceService] infrastructure to store study information persistently
 /// across app restarts.
 class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   static final SmartphoneClientRepository _instance =
@@ -34,7 +34,7 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
 
   Future<void> init() async {
     // Load all studies from persistent storage.
-    _repository = (await Persistence().getAllStudies()).toSet();
+    _repository = (await PersistenceService().getAllStudies()).toSet();
     for (var study in _repository) {
       _studyStatusEventGroup.add(study.events);
     }
@@ -44,7 +44,7 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   void addStudy(SmartphoneStudy study) {
     if (_repository.add(study)) {
       _studyStatusEventGroup.add(study.events);
-      Persistence().saveStudy(study);
+      PersistenceService().saveStudy(study);
     }
   }
 
@@ -71,11 +71,12 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   void removeStudy(SmartphoneStudy study) {
     _studyStatusEventGroup.remove(study.events);
     _repository.remove(study);
-    Persistence().removeStudy(study);
+    PersistenceService().removeStudy(study);
   }
 
   @override
-  void updateStudy(SmartphoneStudy study) => Persistence().updateStudy(study);
+  void updateStudy(SmartphoneStudy study) =>
+      PersistenceService().updateStudy(study);
 
   @override
   String toString() => '$runtimeType [${_repository.length}]';

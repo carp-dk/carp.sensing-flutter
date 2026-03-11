@@ -36,11 +36,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
        _deviceRoleName = deviceRoleName,
        _createdOn = createdOn ?? DateTime.now(),
        _deploymentStatus = deploymentStatus,
-       _deployment = deployment {
-    // print events for logging purpose
-    // TODO: remove later
-    events.listen((event) => print);
-  }
+       _deployment = deployment;
 
   /// The ID of the deployed study for which to collect data.
   String get studyDeploymentId => _studyDeploymentId;

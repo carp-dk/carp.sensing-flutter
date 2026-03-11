@@ -22,7 +22,7 @@ part of 'esense.dart';
 // audio streaming), and use the LEFT earbud for IMU data collection using BLE
 // as part of a mobile sensing study.
 
-/// A [DeviceDescriptor] for an eSense device used in a [StudyProtocol].
+/// A [DeviceConfiguration] for an eSense device used in a [StudyProtocol].
 ///
 /// **From the eSense User Documentation:**
 ///
@@ -91,9 +91,6 @@ class ESenseDeviceManager
   /// Only available after [bleName] has been set.
   ESenseManager? get manager =>
       bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
-
-  // @override
-  // String get id => bleName?.split('-').last ?? '????';
 
   @override
   String? get displayName => bleName;
@@ -193,7 +190,7 @@ class ESenseDeviceManager
         }
       });
 
-      // try to scan for eSense device and connect to it
+      // try to connect to the manager with the [bleName]
       manager?.connect();
     } catch (error) {
       warning(

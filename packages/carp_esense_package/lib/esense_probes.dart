@@ -37,21 +37,17 @@ class ESenseSensorProbe extends _ESenseProbe {
   Stream<Measurement>? _stream;
 
   @override
-  Stream<Measurement>? get stream {
-    _stream ??= (deviceManager.isConnected)
-        ? deviceManager.manager!.sensorEvents
-              .map(
-                (event) => Measurement.fromData(
-                  ESenseSensor.fromSensorEvent(
-                    deviceName: deviceManager.manager!.deviceName,
-                    event: event,
-                  ),
-                  event.timestamp.microsecondsSinceEpoch,
+  Stream<Measurement>? get stream => _stream ??= (deviceManager.isConnected)
+      ? deviceManager.manager!.sensorEvents
+            .map(
+              (event) => Measurement.fromData(
+                ESenseSensor.fromSensorEvent(
+                  deviceName: deviceManager.manager!.deviceName,
+                  event: event,
                 ),
-              )
-              .asBroadcastStream()
-        : null;
-
-    return _stream;
-  }
+                event.timestamp.microsecondsSinceEpoch,
+              ),
+            )
+            .asBroadcastStream()
+      : null;
 }

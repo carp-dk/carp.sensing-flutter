@@ -9,13 +9,12 @@ part of '../../../sampling_packages.dart';
 /// A [SamplingPackage] containing data types, sampling schemas and probes
 /// for collecting information from the phone sensors:
 ///
-///  - accelerometer
-///  - gyroscope
-///  - magnetometer
-///  - acceleration features
-///  - ambient light
+///  - accelerometer (rate of change in velocity, including and excluding gravity)
+///  - gyroscope (rotation)
+///  - magnetometer (compass)
+///  - acceleration features (e.g. mean, variance, etc. calculated over a sampling period)
+///  - ambient light (from the phone's light sensor)
 ///  - pedometer (step events)
-///
 class SensorSamplingPackage extends SmartphoneSamplingPackage {
   /// Rate of change in velocity, including gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
@@ -56,6 +55,7 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
+  ///    Default is 10 seconds sampling every 5 minutes.
   static const String AMBIENT_LIGHT =
       '${CarpDataTypes.CARP_NAMESPACE}.ambientlight';
 

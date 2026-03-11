@@ -61,19 +61,19 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
     String? deviceId,
     String? deviceDisplayName,
   }) {
-    if (!DeviceInfo().initialized) {
+    if (!DeviceInfoService().initialized) {
       warning(
         '$runtimeType - Initialize DeviceInfo before creating a Smartphone registration '
         'in order to get correct device specific information.',
       );
     }
 
-    final id = deviceId ?? DeviceInfo().deviceID;
-    final platform = DeviceInfo().platform;
-    final hardware = DeviceInfo().hardware;
-    final deviceManufacturer = DeviceInfo().deviceManufacturer;
-    final deviceModel = DeviceInfo().deviceModel;
-    final sdk = DeviceInfo().sdk;
+    final id = deviceId ?? DeviceInfoService().deviceID;
+    final platform = DeviceInfoService().platform;
+    final hardware = DeviceInfoService().hardware;
+    final deviceManufacturer = DeviceInfoService().deviceManufacturer;
+    final deviceModel = DeviceInfoService().deviceModel;
+    final sdk = DeviceInfoService().sdk;
     final displayName =
         deviceDisplayName ??
         ((Platform.isAndroid)
@@ -87,9 +87,9 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
       hardwareName: hardware,
       deviceManufacturer: deviceManufacturer,
       deviceModel: deviceModel,
-      operatingSystem: DeviceInfo().operatingSystemName,
+      operatingSystem: DeviceInfoService().operatingSystemName,
       sdk: sdk,
-      release: DeviceInfo().release,
+      release: DeviceInfoService().release,
     );
   }
 

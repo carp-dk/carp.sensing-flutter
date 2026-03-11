@@ -11,18 +11,18 @@ part of '../../../sampling_packages.dart';
 class DeviceProbe extends MeasurementProbe {
   @override
   Future<Measurement?> getMeasurement() async {
-    await DeviceInfo().init();
+    await DeviceInfoService().init();
 
     return Measurement.fromData(
       DeviceInformation(
-        deviceData: DeviceInfo().deviceData,
-        platform: DeviceInfo().platform,
-        deviceId: DeviceInfo().deviceID,
-        deviceName: DeviceInfo().deviceName,
-        deviceModel: DeviceInfo().deviceModel,
-        deviceManufacturer: DeviceInfo().deviceManufacturer,
-        operatingSystem: DeviceInfo().operatingSystemName,
-        hardware: DeviceInfo().hardware,
+        deviceData: DeviceInfoService().deviceData,
+        platform: DeviceInfoService().platform,
+        deviceId: DeviceInfoService().deviceID,
+        deviceName: DeviceInfoService().deviceName,
+        deviceModel: DeviceInfoService().deviceModel,
+        deviceManufacturer: DeviceInfoService().deviceManufacturer,
+        operatingSystem: DeviceInfoService().operatingSystemName,
+        hardware: DeviceInfoService().hardware,
       ),
     );
   }

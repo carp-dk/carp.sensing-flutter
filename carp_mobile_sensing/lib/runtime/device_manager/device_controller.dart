@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../runtime.dart';
+part of '../../runtime.dart';
 
 /// A [DeviceController] handles runtime management of all devices and services
 /// available to this phone, including the phone itself.

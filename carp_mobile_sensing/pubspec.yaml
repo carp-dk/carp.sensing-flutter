@@ -1,10 +1,17 @@
 name: carp_mobile_sensing
 description: Mobile Sensing Framework for Flutter. A software framework for collecting sensor data from the phone and attached wearable devices via probes. Can be extended.
 version: 2.0.0
-homepage: https://github.com/cph-cachet/carp.sensing-flutter
+homepage: https://github.com/carp-dk/carp.sensing-flutter
+repository: https://github.com/carp-dk/carp.sensing-flutter
+issue_tracker: https://github.com/carp-dk/carp.sensing-flutter/issues
+topics:
+  - sensing
+  - mobile-health
+  - sensors
+  - dart
 
 environment:
-  sdk: ">=3.22.0 <4.0.0"
+  sdk: ">=3.10.0 <4.0.0"
   flutter: ">=3.19.0"
 
 # This package only supports iOS and Android
@@ -46,13 +53,13 @@ dependencies:
   light: ^5.0.0           # Light sensor
   screen_state: ^5.0.0    # Screen LOCK/ON/OFF
 
-# Overriding carp core libraries to use the local copy
-# Remove this before release of package
-dependency_overrides:
-  # carp_serializable:
-  #   path: ../carp_serializable/
-  carp_core:
-    path: ../carp_core/
+# Overriding carp core libraries to use the local copy during development.
+# Remove overrides before publishing.
+# dependency_overrides:
+#   carp_serializable:
+#     path: ../carp_serializable/
+#   carp_core:
+#     path: ../carp_core/
 
 dev_dependencies:
   build_runner: any

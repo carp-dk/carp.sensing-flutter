@@ -79,14 +79,15 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
 
   /// Create a [SmartphoneStudy] from a SQL Result Map.
   factory SmartphoneStudy.fromMap(Map<String, Object?> map) {
-    final statusJson = map[Persistence.DEPLOYMENT_STATUS_COLUMN] as String?;
+    final statusJson =
+        map[PersistenceService.DEPLOYMENT_STATUS_COLUMN] as String?;
     final status = statusJson != null && statusJson != 'null'
         ? StudyDeploymentStatus.fromJson(
             json.decode(statusJson) as Map<String, dynamic>,
           )
         : null;
 
-    final deploymentJson = map[Persistence.DEPLOYMENT_COLUMN] as String?;
+    final deploymentJson = map[PersistenceService.DEPLOYMENT_COLUMN] as String?;
     final deployment = deploymentJson != null && deploymentJson != 'null'
         ? SmartphoneDeployment.fromJson(
             json.decode(deploymentJson) as Map<String, dynamic>,
@@ -94,7 +95,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
         : null;
 
     final samplingStateJson =
-        map[Persistence.SAMPLING_STATUS_COLUMN] as String?;
+        map[PersistenceService.SAMPLING_STATUS_COLUMN] as String?;
     final samplingState =
         samplingStateJson != null && samplingStateJson != 'null'
         ? SmartphoneDeploymentExecutorSamplingState.fromJson(
@@ -103,14 +104,17 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
         : null;
 
     return SmartphoneStudy(
-      studyId: map[Persistence.STUDY_ID_COLUMN] as String?,
-      studyDeploymentId: map[Persistence.STUDY_DEPLOYMENT_ID_COLUMN] as String,
-      deviceRoleName: map[Persistence.DEVICE_ROLE_NAME_COLUMN] as String,
-      participantId: map[Persistence.PARTICIPANT_ID_COLUMN] as String?,
+      studyId: map[PersistenceService.STUDY_ID_COLUMN] as String?,
+      studyDeploymentId:
+          map[PersistenceService.STUDY_DEPLOYMENT_ID_COLUMN] as String,
+      deviceRoleName: map[PersistenceService.DEVICE_ROLE_NAME_COLUMN] as String,
+      participantId: map[PersistenceService.PARTICIPANT_ID_COLUMN] as String?,
       participantRoleName:
-          map[Persistence.PARTICIPANT_ROLE_NAME_COLUMN] as String?,
-      createdOn: map[Persistence.CREATED_ON_COLUMN] != null
-          ? DateTime.tryParse(map[Persistence.CREATED_ON_COLUMN] as String)
+          map[PersistenceService.PARTICIPANT_ROLE_NAME_COLUMN] as String?,
+      createdOn: map[PersistenceService.CREATED_ON_COLUMN] != null
+          ? DateTime.tryParse(
+              map[PersistenceService.CREATED_ON_COLUMN] as String,
+            )
           : null,
       deploymentStatus: status,
       deployment: deployment,

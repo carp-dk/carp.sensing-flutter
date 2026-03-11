@@ -7,7 +7,7 @@
  * found in the LICENSE file.
  */
 
-part of '../runtime.dart';
+part of '../../runtime.dart';
 
 /// Runtime status for a [DeviceManager].
 enum DeviceStatus {

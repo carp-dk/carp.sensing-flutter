@@ -27,14 +27,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' hide log;
-import 'dart:developer' show log;
 
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-import 'package:flutter/rendering.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -60,6 +58,5 @@ part 'infrastructure/services/logging.dart';
 part 'infrastructure/services/background_service.dart';
 
 part 'infrastructure/services/deployment_service.dart';
-part 'infrastructure/services/persistence.dart';
+part 'infrastructure/services/persistence_service.dart';
 part 'infrastructure/settings.dart';
-part 'domain/services/protocol_manager.dart';

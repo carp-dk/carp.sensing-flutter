@@ -8,8 +8,7 @@
 ///
 ///  * [DeviceSamplingPackage] - a sampling package for collecting information from the device hardware.
 ///  * [SensorSamplingPackage] - a sampling package for collecting data from the basic phone sensors:
-///  * [MonitoringSamplingPackage] - a sampling package for monitoring data sampling (e.g, errors, heartbeat, etc.)
-///
+///  * [MonitoringSamplingPackage] - a sampling package for monitoring data sampling (e.g, errors, completed tasks,etc.)
 library;
 
 import 'dart:async';

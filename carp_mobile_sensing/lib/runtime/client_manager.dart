@@ -14,6 +14,7 @@ enum ClientManagerState { created, configured, disposed }
 /// Mobile Sensing.
 ///
 /// Call [configure] before using this client.
+///
 /// It holds a set of [Smartphone] [studies], which can been added, removed,
 /// started, and stopped via the [addStudy], [removeStudy], [startStudy],
 /// and [stopStudy] methods.
@@ -142,9 +143,9 @@ class SmartPhoneClientManager
     _askForPermissions = askForPermissions;
 
     // Initialize infrastructure services and the repository.
-    await DeviceInfo().init();
+    await DeviceInfoService().init();
     await Settings().init();
-    await Persistence().init();
+    await PersistenceService().init();
     await SmartphoneClientRepository().init();
 
     // Create and register the built-in data managers.
@@ -197,7 +198,7 @@ class SmartPhoneClientManager
         ' Deployment Service : $deploymentService\n'
         '  Device Controller : $deviceController\n'
         '  Available Devices : ${deviceController.devicesToString()}\n'
-        '        Persistence : ${Persistence().databaseName.split('/').last}\n'
+        '        Persistence : ${PersistenceService().databaseName.split('/').last}\n'
         '    Background Mode : ${BackgroundService().isEnabled ? "enabled" : "disabled"}\n'
         '===========================================================\n';
     debugPrint(statusMsg);
@@ -398,7 +399,7 @@ class SmartPhoneClientManager
     // Finally dispose the client manager itself.
     ExecutorFactory().dispose();
     _group.close();
-    Persistence().close();
+    PersistenceService().close();
     _state = ClientManagerState.disposed;
     super.dispose();
   }

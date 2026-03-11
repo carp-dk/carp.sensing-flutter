@@ -22,16 +22,17 @@ void main() async {
     name: 'Polar Sensing Example',
   );
 
-  // define which devices are used for data collection - both phone and eSense
+  // Define which devices are used for data collection - both phone and polar device.
   var phone = Smartphone();
   var polar = PolarDevice(roleName: 'hr-sensor');
 
+  // Add both devices
   protocol
     ..addPrimaryDevice(phone)
     ..addConnectedDevice(polar, phone);
 
   // Add a background task that immediately starts collecting step counts,
-  //ambient light, screen activity, and battery level from the phone.
+  // ambient light, screen activity, and battery level from the phone.
   protocol.addTaskControl(
     ImmediateTrigger(),
     BackgroundTask()

@@ -3,6 +3,8 @@ part of '../infrastructure.dart';
 /// Debugging levels.
 enum DebugLevel { none, info, warning, debug }
 
+/// Handle settings for the CAMS infrastructure. This includes settings for
+/// debugging, file paths, and other settings related to the infrastructure layer.
 ///
 /// This class is a singleton, access using `Settings()`.
 /// Must be initialized using the [init] method before used.
@@ -155,9 +157,6 @@ class Settings {
     localApplicationPath.then((_) async => await carpBasePath);
 
     debug('$runtimeType - Shared Preferences: ${_preferences?.getKeys()}');
-    // _preferences?.getKeys().forEach(
-    //   (key) => debug('"$key" : ${_preferences?.get(key)}'),
-    // );
 
     // setting up time zone settings
     tz.initializeTimeZones();

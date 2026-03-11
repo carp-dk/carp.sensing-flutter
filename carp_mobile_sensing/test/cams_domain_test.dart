@@ -21,7 +21,7 @@ void main() {
     // Initialization of serialization
     CarpMobileSensing();
 
-    DeviceInfo().init();
+    DeviceInfoService().init();
 
     // Create a new study protocol.
     primaryProtocol = SmartphoneStudyProtocol(
@@ -535,7 +535,7 @@ void main() {
   });
 
   test('Register Device', () async {
-    await DeviceInfo().init();
+    await DeviceInfoService().init();
 
     StudyDeploymentStatus status_1 = await (SmartphoneDeploymentService()
         .createStudyDeployment(primaryProtocol));

@@ -67,6 +67,10 @@ class PassiveTrigger extends TriggerConfiguration {
   PassiveTrigger() : super();
 
   @JsonKey(includeFromJson: false, includeToJson: false)
+  /// The [TriggerExecutor] that backs this trigger.
+  ///
+  /// Set automatically by the runtime when the trigger executor is created.
+  /// Do not set this manually.
   late TriggerExecutor executor;
 
   /// Called when this trigger is to be triggered.

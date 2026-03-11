@@ -9,19 +9,19 @@ part of '../../domain.dart';
 
 /// Provides (static) information about the local device.
 ///
-/// This class is a singleton that one time access the information from the
+/// This service works as a singleton that one time access the information from the
 /// local device to be used in the sensing framework.
 ///
 /// It takes different hardware information from Android and iOS:
 ///
 ///  * [Android](https://developer.android.com/reference/android/os/Build)
 ///  * [iOS](https://developer.apple.com/documentation/uikit/uidevice)
-class DeviceInfo {
+class DeviceInfoService {
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 
-  static final DeviceInfo _instance = DeviceInfo._();
-  factory DeviceInfo() => _instance;
-  DeviceInfo._();
+  static final DeviceInfoService _instance = DeviceInfoService._();
+  factory DeviceInfoService() => _instance;
+  DeviceInfoService._();
 
   /// Android or iOS
   String? platform;
@@ -73,7 +73,7 @@ class DeviceInfo {
   /// Has the device info been initialized?
   bool get initialized => deviceData.isNotEmpty;
 
-  /// Initialize the device info using the [DeviceInfoPlugin].
+  /// Initialize the device info service using the [DeviceInfoPlugin].
   Future<void> init() async {
     // early out if already initialized
     if (initialized) return;

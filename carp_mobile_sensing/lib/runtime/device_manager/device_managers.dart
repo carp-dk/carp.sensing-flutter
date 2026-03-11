@@ -7,7 +7,7 @@
  * found in the LICENSE file.
  */
 
-part of '../runtime.dart';
+part of '../../runtime.dart';
 
 /// A [DeviceManager] for an onboard service, like a location service.
 abstract class ServiceManager<
@@ -143,22 +143,22 @@ class SmartphoneDeviceManager
   Set<DataType> get supportedDataTypes => _supportedDataTypes;
 
   @override
-  String? get displayName => DeviceInfo().toString();
+  String? get displayName => DeviceInfoService().toString();
 
   @override
   SmartphoneRegistration createRegistration() => SmartphoneRegistration(
-    deviceId: DeviceInfo().deviceID,
+    deviceId: DeviceInfoService().deviceID,
     deviceDisplayName: displayName,
-    platform: DeviceInfo().platform,
+    platform: DeviceInfoService().platform,
     batteryChargingState: HardwareDeviceRegistration.parseBatteryLevel(
       batteryLevel,
     ),
-    hardwareName: DeviceInfo().hardware,
-    deviceManufacturer: DeviceInfo().deviceManufacturer,
-    deviceModel: DeviceInfo().deviceModel,
-    operatingSystem: DeviceInfo().operatingSystemName,
-    sdk: DeviceInfo().sdk,
-    release: DeviceInfo().release,
+    hardwareName: DeviceInfoService().hardware,
+    deviceManufacturer: DeviceInfoService().deviceManufacturer,
+    deviceModel: DeviceInfoService().deviceModel,
+    operatingSystem: DeviceInfoService().operatingSystemName,
+    sdk: DeviceInfoService().sdk,
+    release: DeviceInfoService().release,
   );
 
   @override

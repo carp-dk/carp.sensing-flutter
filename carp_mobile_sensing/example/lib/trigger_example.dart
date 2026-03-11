@@ -20,7 +20,6 @@ class RemoteTrigger extends TriggerConfiguration {
   String uri;
 
   /// How often should we check the server?
-  /// Default is every 10 minutes.
   Duration interval;
 
   @override
@@ -53,7 +52,7 @@ class RemoteTriggerExecutor extends TriggerExecutor<RemoteTrigger> {
   }
 }
 
-/// A [TriggerFactory] for all remote triggers.
+/// A [TriggerFactory] for remote triggers.
 class RemoteTriggerFactory implements TriggerFactory {
   @override
   Set<Type> types = {
@@ -68,10 +67,11 @@ class RemoteTriggerFactory implements TriggerFactory {
   }
 
   @override
-  TriggerExecutor<TriggerConfiguration> create(TriggerConfiguration trigger) {
-    if (trigger is RemoteTrigger) return RemoteTriggerExecutor();
-    return ImmediateTriggerExecutor();
-  }
+  TriggerExecutor<TriggerConfiguration> create(TriggerConfiguration trigger) =>
+      switch (trigger) {
+        RemoteTrigger _ => RemoteTriggerExecutor(),
+        _ => ImmediateTriggerExecutor(),
+      };
 }
 
 class Sensing {

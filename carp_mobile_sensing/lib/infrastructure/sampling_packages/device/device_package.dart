@@ -10,13 +10,14 @@ part of '../../../sampling_packages.dart';
 /// A [SamplingPackage] containing data types, sampling schemas and probes
 /// for collecting information from the device hardware:
 ///
-///  - device info
-///  - battery status
-///  - screen events
-///  - app lifecycle events
-///  - free memory
-///  - time zone
-///
+///  - device info (hardware and operating system information)
+///  - installed app info (name, package name, version, etc.)
+///  - battery level and charging status
+///  - screen events (on/off/unlocked)
+///  - app lifecycle events (inactive, hidden, paused, resumed, detached)
+///  - free memory (physical and virtual)
+///  - local time zone (e.g. "Europe/Copenhagen")
+///  - heartbeat (periodic heartbeat from the device)
 class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for collection of basic device information like device name,
   /// model, manufacturer, operating system, and hardware profile.

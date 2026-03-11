@@ -131,15 +131,15 @@ class CommunicationSamplingPackage extends SmartphoneSamplingPackage {
     // register the default privacy transformers
     DataTransformerSchemaRegistry()
         .lookup(PrivacySchema.DEFAULT)!
-        .add(TEXT_MESSAGE, textMessageAnoymizer);
+        .add(TEXT_MESSAGE, textMessageAnonymizer);
     DataTransformerSchemaRegistry()
         .lookup(PrivacySchema.DEFAULT)!
-        .add(TEXT_MESSAGE_LOG, textMessageLogAnoymizer);
+        .add(TEXT_MESSAGE_LOG, textMessageLogAnonymizer);
     DataTransformerSchemaRegistry()
         .lookup(PrivacySchema.DEFAULT)!
-        .add(PHONE_LOG, phoneLogAnoymizer);
+        .add(PHONE_LOG, phoneLogAnonymizer);
     DataTransformerSchemaRegistry()
         .lookup(PrivacySchema.DEFAULT)!
-        .add(CALENDAR, calendarAnoymizer);
+        .add(CALENDAR, calendarAnonymizer);
   }
 }

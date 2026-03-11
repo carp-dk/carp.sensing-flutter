@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../../infrastructure.dart';
+part of '../../domain.dart';
 
 /// An interface defining a manger of [SmartphoneStudyProtocol]s.
 ///

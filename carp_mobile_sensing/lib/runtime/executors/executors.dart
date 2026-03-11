@@ -282,7 +282,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
 ///
 /// See [SmartphoneDeploymentExecutor] and [TaskExecutor] for examples.
 abstract class AggregateExecutor<TConfig> extends AbstractExecutor<TConfig> {
-  static final DeviceInfo deviceInfo = DeviceInfo();
+  static final DeviceInfoService deviceInfo = DeviceInfoService();
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   final Set<Executor<dynamic>> _executors = {};
 
