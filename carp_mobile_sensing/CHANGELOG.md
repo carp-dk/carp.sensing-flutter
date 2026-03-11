@@ -9,6 +9,8 @@ This release has two new main features: (i) to support adding, running, and remo
 * Added `AppLifecycleEvent` measure to collect life-cycle event from the app
 * Correct device registration in the deployment service.
 
+Note that CAMS now has a completely new [documentation](https://docs.carp.dk/carp-mobile-sensing/) page.
+
 ## 1.13.1
 
 * Fix of [#491](https://github.com/cph-cachet/carp.sensing-flutter/issues/491)
