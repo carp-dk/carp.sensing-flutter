@@ -48,7 +48,10 @@ android {
 dependencies {
     // Use to implement Health Connect. Requires SDK level 34.
     implementation("androidx.health.connect:connect-client:1.1.0-rc02")
+
+    // Use to implement the Flutter Local Notifications plugin
     coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.1.5")
+    
     // AppCompat library for Theme.AppCompat.NoActionBar
     implementation("androidx.appcompat:appcompat:1.7.0")
 }

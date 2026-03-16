@@ -40,7 +40,6 @@ class SensingBLoC {
 
   /// Is sampling running, i.e. has the study executor been started?
   bool get isSampling =>
-      // bloc.study?.isSampling ?? false;
       sensing.controller?.executor.state == ExecutorState.Resumed;
 
   /// Add a study to the app based on the current [deploymentMode].
@@ -85,7 +84,6 @@ class SensingBLoC {
     // resuming or pausing.
     !study!.isDeployed
         ? sensing.client.start()
-        // : study!.isSampling
         : isSampling
         ? sensing.client.pause()
         : sensing.client.resume();

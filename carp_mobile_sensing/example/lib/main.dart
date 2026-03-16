@@ -31,7 +31,6 @@ class MobileSensingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Mobile Sensing',
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       useMaterial3: true,
@@ -87,7 +86,6 @@ class StudyPageState extends State<StudyPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addStudy,
-        tooltip: 'Add new study',
         child: Icon(Icons.add),
       ),
     );
@@ -120,11 +118,8 @@ class StudyPageState extends State<StudyPage> {
             child: ListTile(
               isThreeLine: true,
               leading: Icon(switch (study.samplingState?.state) {
-                ExecutorState.Created => Icons.refresh,
-                ExecutorState.Initialized ||
-                ExecutorState.Paused => Icons.play_arrow,
                 ExecutorState.Resumed => Icons.pause,
-                _ => Icons.refresh,
+                _ => Icons.play_arrow,
               }, size: 40),
               title: Text(
                 'Study Deployment #$index',
@@ -154,30 +149,29 @@ class StudyPageState extends State<StudyPage> {
     ExecutorState.Undefined: Icon(Icons.error_outline),
   };
 
-  /// Add a new study to the client's list of studies based on the either the
-  /// [simpleProtocol] or [protocol] specified below.
+  /// Add and deploy a new study to the client's list of studies based on the
+  /// either the [simpleProtocol] or [protocol] specified below.
   /// Note that we use the same protocol every time we add a study.
   /// Thus, all studies will be identical in terms of data collection.
-  void addStudy() => client.addStudyFromProtocol(simpleProtocol);
+  void addStudy() => client
+      .addStudyFromProtocol(protocol)
+      .then(
+        (study) =>
+            client.tryDeployment(study.studyDeploymentId, study.deviceRoleName),
+      );
 
   /// Remove [study] from the client's list of studies.
   void removeStudy(SmartphoneStudy study) =>
       client.removeStudy(study.studyDeploymentId, study.deviceRoleName);
 
-  /// Run (start, resume, pause) [study] based on its current state.
+  /// Resume or pause [study] based on its current state.
   void runStudy(SmartphoneStudy study) => setState(() {
     var controller = client.getStudyController(study);
 
-    // If the study has not been started (and deployed) yet, do this first
-    // isDeployed
-    if (study.status.index <= StudyStatus.Deployed.index) {
-      controller?.start();
+    if (study.isSampling) {
+      controller?.pause();
     } else {
-      if (study.isSampling) {
-        controller?.pause();
-      } else {
-        controller?.resume();
-      }
+      controller?.resume();
     }
   });
 
@@ -409,7 +403,7 @@ class StudyPageState extends State<StudyPage> {
 
       // Add a app task 20 secs after deployment and make a notification.
       _protocol?.addTaskControl(
-        ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 20)),
+        ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 60)),
         AppTask(
           name: 'Device Info App Task',
           type: AppTask.SENSING_TYPE,

@@ -22,14 +22,15 @@ dependencies:
   flutter_timezone: ^5.0.0
   path_provider: ^2.1.0
   battery_plus: ^7.0.0
-  screen_state: ^4.0.0
-  light: ^4.0.0
+  screen_state: ^5.0.0
+  light: ^5.0.0
   pedometer: ^4.2.0
   flutter_activity_recognition: ^4.0.0
   device_info_plus: ^12.1.0
   device_calendar: ^4.3.1
   flutter_launcher_icons: ^0.14.0
-  flutter_local_notifications: ^19.4.2
+  flutter_local_notifications: ^21.0.0
+  flutter_background: ^1.3.0              # For running background services on Android
   location: ^8.0.1
   mdsflutter: ^2.3.1
   package_info_plus: ^8.3.1
@@ -41,8 +42,8 @@ dependencies:
   flutter_reactive_ble: ^5.0.0
   polar: ^7.0.0
 
-  #carp_serializable: ^1.1.0
-  #carp_core: ^0.30.0
+  carp_serializable: ^2.0.0 # polymorphic json serialization
+  carp_core: ^2.0.0         # the core CARP domain model
   #carp_mobile_sensing: ^0.30.6
   #carp_connectivity_package: ^0.30.0
   #carp_context_package: ^0.30.1
@@ -62,8 +63,8 @@ dependencies:
 
 # Overriding carp libraries to use the local copy
 dependency_overrides:
-  carp_serializable:
-    path: ../../carp_serializable/
+  # carp_serializable:
+  #   path: ../../carp_serializable/
   carp_core:
     path: ../../carp_core/
   carp_mobile_sensing:

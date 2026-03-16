@@ -7,7 +7,7 @@ class OMHContextDataPoint extends Data {
   DataPoint datapoint;
 
   static String get source =>
-      '{smartphone:${DeviceInfo().deviceID},app:${Settings().appName}}';
+      '{smartphone:${DeviceInfoService().deviceID},app:${Settings().appName}}';
 
   static DataPointAcquisitionProvenance get provenance =>
       DataPointAcquisitionProvenance(

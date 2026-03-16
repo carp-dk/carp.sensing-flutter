@@ -63,17 +63,25 @@ This is necessary to use BLE on Android.
 
 ### iOS Integration
 
-Install the Movesense iOS library using CocoaPods with adding this line to your app's Podfile:
+The Movesense iOS library is installed using CocoaPods by adding this setup to your app's Podfile. You need to change the `use_frameworks!` flags, add `use_modular_headers!`, and link to the Movesense bitbucket library:
 
-```pod
-pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib/'
+```ruby
+target 'Runner' do
+  # undocumented flag in cocoapods to enable static linking
+  # this is needed so that we can use Movesense and dynamic frameworks together
+  use_frameworks! :linkage => :static
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib/'
+  
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
 ```
 
-* Remove `use_frameworks!` from your Podfile so that `libmds.a` can be used correctly.
-* In your project target settings enable Background Modes, add Uses Bluetooth LE accessories
-* In your project target property list add the key [NSBluetoothAlwaysUsageDescription](https://developer.apple.com/documentation/bundleresources/information_property_list/nsbluetoothalwaysusagedescription)
-
-Add this permission in the `Info.plist` file located in `ios/Runner`:
+Add the permission to access bluetooth in the background by adding this to the `Info.plist` file located in `ios/Runner`:
 
 ```xml
 <key>NSBluetoothAlwaysUsageDescription</key>

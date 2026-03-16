@@ -25,7 +25,7 @@ class SmartphoneStudyController {
   /// Create a new [SmartphoneStudyController] to control the runtime behavior
   /// of a [study].
   SmartphoneStudyController(SmartphoneStudy study) : _study = study {
-    // listen to study events and handle deployment updates
+    // Listen to study events and handle deployment updates
     study.events.listen((event) {
       switch (event.event) {
         case StudyStatusEventTypes.DeploymentStatusReceived:
@@ -316,6 +316,10 @@ class SmartphoneStudyController {
   ///
   /// This method is only relevant on Android, and does nothing on iOS.
   /// iOS automatically asks for permissions when a resource is accessed.
+  ///
+  /// Note that location permissions are never asked for in this method, since
+  /// they can cause issues when asking for multiple permissions at once.
+  /// Location permissions should be handled separately in the app.
   Future<void> _askForAllPermissions() async {
     if (deployment == null) {
       warning(
@@ -355,13 +359,13 @@ class SmartphoneStudyController {
 
       try {
         info(
-          '$runtimeType - Asking for permissions for all measures in this deployment - status:',
+          '$runtimeType - Asking for permissions for all measures in this deployment...',
         );
         _permissions = await permissions.toList().request();
 
         _permissions?.forEach(
           (permission, status) => info(
-            ' - ${permission.toString().split('.').last} : ${status.name}',
+            '$runtimeType - Permission status for ${permission.toString().split('.').last} : ${status.name}',
           ),
         );
       } catch (error) {
@@ -438,14 +442,12 @@ class SmartphoneStudyController {
   /// If not, sampling can be started later by calling the [resume] method.
   Future<void> start() async {
     if (study.status == StudyStatus.Stopped) {
-      warning(
-        '$runtimeType - Study has been stopped. Will not start data sampling.',
-      );
+      warning('$runtimeType - Study has been stopped. Will not start study.');
       return;
     }
 
     info(
-      '$runtimeType - Starting data sampling for study deployment: ${study.studyDeploymentId}',
+      '$runtimeType - Starting study deployment: ${study.studyDeploymentId}',
     );
 
     // If this study has not yet been deployed, do this first.

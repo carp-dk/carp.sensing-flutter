@@ -2,33 +2,46 @@
     package="dk.carp.carp_mobile_sensing_app"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Check whether Health Connect is installed or not -->
-    <queries>
-        <package android:name="com.google.android.apps.healthdata" />
-        <intent>
-            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-        </intent>
-    </queries>    
-
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!-- The following permissions are used for CARP Mobile Sensing -->
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- The following permissions are used as the cores part of
+         CARP Mobile Sensing, incl. access to sensors, activity recognition, 
+         notifications, and background execution.
+         Read more at https://docs.carp.dk/carp-mobile-sensing/install-and-configure
+    -->
 
-    <!-- The following permissions are used in the Context Package -->
+    <!-- Used for activity recognition (step count) -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+
+    <!-- Used for sending and scheduling notifications -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+            android:maxSdkVersion="32" />
+
+    <!-- Used for running app in the background as a foreground service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />    
+
+    <!-- Adapt to the foreground service type(s) desired. 
+         Should also be added to the service tag below -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />        
+
+    <!-- The following permissions are used in the specific sampling packages -->
+
+    <!-- Context Package -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <!-- for Android 9 (API 28 and below), use: -->
     <uses-permission 
@@ -37,7 +50,7 @@
     <!-- for Android 10 (API 29 and later), use: -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
-    <!-- The following permissions are used in the Connectivity Package -->
+    <!-- Connectivity Package -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
     <!-- Legacy Bluetooth permissions, which is needed on devices with API 30 (Android Q) or older. -->
@@ -49,22 +62,24 @@
         android:maxSdkVersion="30" />
 
     <!-- The Connectivity package needs Bluetooth scan permission to search for BLE devices. 
-    The package doesn't use the scan to decide the location so "neverForLocation" permission flag can be used.-->
+         The package doesn't use the scan to decide the location so "neverForLocation" permission 
+         flag can be used.-->
     <uses-permission
         android:name="android.permission.BLUETOOTH_SCAN" 
         android:usesPermissionFlags="neverForLocation" /> 
     
-    <!-- The following permissions are used in the Media Package -->
+    <!-- Media Package -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
-    <!-- The following permissions are used in the Communication Package -->
+    <!-- Communication Package -->
     <uses-permission android:name="android.permission.CALL_PHONE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
     <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <!-- Even though we only want to READ the calendar, for some unknown reason we also need to add the WRITE permission. -->
+    <!-- Even though we only want to READ the calendar, for some unknown reason we also need to 
+         add the WRITE permission. -->
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
     <!-- The following permissions are used in the eSense and Polar Package -->
@@ -80,7 +95,15 @@
         android:usesPermissionFlags="neverForLocation" />  -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
-     <!-- Permissions for new android API (Health Connect) -->
+    <!-- Check whether Health Connect is installed or not -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+        <intent>
+            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent>
+    </queries>    
+
+     <!-- Permissions for Health Connect -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
     <uses-permission android:name="android.permission.health.READ_WEIGHT"/>
@@ -208,12 +231,33 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Location service with foreground service type for Android 14+
-        <service
-            android:name="com.lyokone.location.FlutterLocationService"
-            android:enabled="true"
+        <!-- Add the service declaration for flutter_background.
+             Note that the "specialUse" case needs an explanation to be shown to the user. 
+             (I wonder how this can be translated to other languages than English, and how it is 
+             shown to the user in the UI, but for now we just add a property with an explanation.)
+        -->
+        <service 
+            android:name="de.julianassmann.flutter_background.IsolateHolderService" 
             android:exported="false"
-            android:foregroundServiceType="location"
-            tools:replace="android:foregroundServiceType" /> -->
+            android:foregroundServiceType="dataSync|location|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Collection of data while app is in background."/>
+        </service>   
+
+        <!-- Used for scheduling notifications -->
+        <service
+            android:name="com.dexterous.flutterlocalnotifications.ForegroundService"        
+            android:exported="false"
+            android:stopWithTask="false"/>
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>    
+    
     </application>
 </manifest>

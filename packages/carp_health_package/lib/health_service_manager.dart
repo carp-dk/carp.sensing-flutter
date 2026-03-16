@@ -63,7 +63,7 @@ class HealthServiceManager
   @override
   void onConfigure() {
     if (Platform.isAndroid) {
-      var sdkLevel = int.parse(DeviceInfo().sdk ?? '-1');
+      var sdkLevel = int.parse(DeviceInfoService().sdk ?? '-1');
       if (sdkLevel < 34) {
         warning(
           '$runtimeType - Trying to use Google Health Connect on a phone with SDK level < 34 (SDK is $sdkLevel). '

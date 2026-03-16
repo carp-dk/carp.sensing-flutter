@@ -15,9 +15,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  carp_serializable: ^2.0.0
-  carp_core: ^1.8.0
-  carp_mobile_sensing: ^1.11.0
+  carp_serializable: ^2.0.0 # polymorphic json serialization
+  carp_core: ^2.0.0         # the core CARP domain model
+  carp_mobile_sensing: ^2.0.0
 
   mdsflutter: ^2.2.0 
   json_annotation: ^4.8.0

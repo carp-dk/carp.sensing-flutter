@@ -57,7 +57,7 @@ class DeploymentReference extends RPCCarpReference {
   /// Uses the phone's unique hardware id, if available.
   /// Otherwise uses a v4 UUID.
   String get registeredDeviceId =>
-      _registeredDeviceId ??= DeviceInfo().deviceID ?? const Uuid().v1;
+      _registeredDeviceId ??= DeviceInfoService().deviceID ?? const Uuid().v1;
 
   /// Refresh the deployment status for this [DeploymentReference] from CAWS.
   Future<StudyDeploymentStatus> getStatus() async =>
@@ -81,8 +81,8 @@ class DeploymentReference extends RPCCarpReference {
     );
 
     registration ??= DefaultDeviceRegistration(
-      deviceId: DeviceInfo().deviceID,
-      deviceDisplayName: DeviceInfo().toString(),
+      deviceId: DeviceInfoService().deviceID,
+      deviceDisplayName: DeviceInfoService().toString(),
     );
 
     return _status = StudyDeploymentStatus.fromJson(

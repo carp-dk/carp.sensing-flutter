@@ -15,7 +15,7 @@ class OMHMovisensDataPoint extends Data {
   static omh.DataPointAcquisitionProvenance provenance(MovisensData data) {
     String source =
         '{'
-        '"smartphone": "${DeviceInfo().deviceID!}", '
+        '"smartphone": "${DeviceInfoService().deviceID!}", '
         '"app": "${Settings().appName}", '
         '"sensor_type": "movisens", '
         '"sensor_name": "${data.deviceId}" '
@@ -51,7 +51,7 @@ class OMHHeartRateDataPoint extends OMHMovisensDataPoint
     );
     var source =
         '{'
-        '"smartphone": "${DeviceInfo().deviceID}", '
+        '"smartphone": "${DeviceInfoService().deviceID!}", '
         '"app": "${Settings().appName}", '
         '"sensor_type": "movisens", '
         '"sensor_name": "${data.deviceId}" '
@@ -91,7 +91,7 @@ class OMHStepCountDataPoint extends OMHMovisensDataPoint
         ));
     var source =
         '{'
-        '"smartphone": "${DeviceInfo().deviceID}", '
+        '"smartphone": "${DeviceInfoService().deviceID!}", '
         '"app": "${Settings().appName}", '
         '"sensor_type": "movisens", '
         '"sensor_name": "${data.deviceId}" '

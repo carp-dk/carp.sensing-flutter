@@ -138,26 +138,29 @@ class SmartphoneDeploymentExecutor
   /// If the prior [samplingState] is known, it resumes or pauses the executors based on
   /// the state of each [TaskControlExecutor] in the [samplingState].
   ///
-  /// This method also enqueues any buffered tasks in the [AppTaskController].
+  /// Finally, the method enqueues all app tasks buffered in the [AppTaskController].
   @override
   Future<bool> onResume() async {
-    if (_samplingState == null) return await super.onResume();
+    if (_samplingState == null) {
+      await super.onResume();
+    } else {
+      for (var executor in _executors) {
+        if (executor is TaskControlExecutor) {
+          var taskControlSamplingState = _samplingState!
+              .taskControlSamplingStates
+              .firstWhere(
+                (state) =>
+                    state.triggerId == executor.taskControl.triggerId &&
+                    state.taskName == executor.taskControl.taskName,
+              );
 
-    for (var executor in _executors) {
-      if (executor is TaskControlExecutor) {
-        var taskControlSamplingState = _samplingState!.taskControlSamplingStates
-            .firstWhere(
-              (state) =>
-                  state.triggerId == executor.taskControl.triggerId &&
-                  state.taskName == executor.taskControl.taskName,
-            );
-
-        if (taskControlSamplingState.state == ExecutorState.Resumed ||
-            taskControlSamplingState.state ==
-                ExecutorState.PausedButShouldBeResumed) {
-          executor.resume();
-        } else if (taskControlSamplingState.state == ExecutorState.Paused) {
-          executor.pause();
+          if (taskControlSamplingState.state == ExecutorState.Resumed ||
+              taskControlSamplingState.state ==
+                  ExecutorState.PausedButShouldBeResumed) {
+            executor.resume();
+          } else if (taskControlSamplingState.state == ExecutorState.Paused) {
+            executor.pause();
+          }
         }
       }
     }

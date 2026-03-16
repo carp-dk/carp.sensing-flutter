@@ -268,7 +268,7 @@ class CarpDataManager extends AbstractDataManager {
           '$runtimeType - The file attachment is not found - skipping upload.',
         );
       } else {
-        final String deviceID = DeviceInfo().deviceID.toString();
+        final String deviceID = DeviceInfoService().deviceID.toString();
         data.metadata!['device_id'] = deviceID;
         data.metadata!['study_id'] = deployment.studyId ?? '';
         data.metadata!['study_deployment_id'] = deployment.studyDeploymentId;

@@ -64,7 +64,6 @@ class BackgroundService {
       notificationText:
           notificationText ?? "Data sampling will be running in the background",
       notificationImportance: AndroidNotificationImportance.normal,
-      notificationIcon: AndroidResource(name: 'app_icon', defType: 'drawable'),
     );
 
     // Initialize the background service with the provided configuration.

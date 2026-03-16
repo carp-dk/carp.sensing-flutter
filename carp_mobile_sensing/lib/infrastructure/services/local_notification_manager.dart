@@ -13,8 +13,11 @@ part of '../../infrastructure.dart';
 /// On iOS, remember to edit the AppDelegate.swift file.
 /// See https://pub.dev/packages/flutter_local_notifications#general-setup
 ///
-/// On Android, add an `app_icon.png` square png picture in the
+/// On Android, update the AndroidManifest.xml and gradle.build files to add
+/// the necessary permissions and service declaration for notifications.
+/// Also add an `ic_launcher.png` square png picture in the
 /// `<<application_name>>/android/app/src/main/res/drawable/` folder.
+/// You can use the default app icon, just make a copy in the drawable folder.
 class FlutterLocalNotificationManager implements NotificationManager {
   static final FlutterLocalNotificationManager _instance =
       FlutterLocalNotificationManager._();
@@ -32,11 +35,11 @@ class FlutterLocalNotificationManager implements NotificationManager {
       Permission.scheduleExactAlarm,
     ]);
     var status = await permissions.request();
-    debug('$runtimeType - permissions: $status');
+    debug('$runtimeType - Permissions: $status');
 
     await FlutterLocalNotificationsPlugin().initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('app_icon'),
+        android: AndroidInitializationSettings('ic_launcher'),
         iOS: DarwinInitializationSettings(),
       ),
       onDidReceiveBackgroundNotificationResponse:
