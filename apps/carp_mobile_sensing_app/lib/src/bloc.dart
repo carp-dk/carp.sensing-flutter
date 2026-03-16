@@ -80,10 +80,15 @@ class SensingBLoC {
       'isSampling: ${study!.isSampling}',
     );
 
-    // If the study has not been started (and deployed) yet, do this before
+    // If the study has not been deployed yet, do this before
     // resuming or pausing.
     !study!.isDeployed
-        ? sensing.client.start()
+        ?
+          // sensing.client.start()
+          sensing.client.tryDeployment(
+            study!.studyDeploymentId,
+            study!.deviceRoleName,
+          )
         : isSampling
         ? sensing.client.pause()
         : sensing.client.resume();

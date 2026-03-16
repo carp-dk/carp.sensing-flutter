@@ -306,19 +306,19 @@ class SmartPhoneClientManager
     notifyListeners();
   }
 
-  /// Start the study with [studyDeploymentId] and [deviceRoleName] from this
-  /// client manager.
-  ///
-  /// Note that [startStudy] only needs to be called once. Once started, data sampling
-  /// can be resumed and paused via the controller's [resume] and [pause] methods.
-  @mustCallSuper
-  Future<void> startStudy(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
-    var study = getStudy(studyDeploymentId, deviceRoleName);
-    if (study != null) getStudyController(study)?.start();
-  }
+  // /// Start the study with [studyDeploymentId] and [deviceRoleName] from this
+  // /// client manager.
+  // ///
+  // /// Note that [startStudy] only needs to be called once. Once started, data sampling
+  // /// can be resumed and paused via the controller's [resume] and [pause] methods.
+  // @mustCallSuper
+  // Future<void> startStudy(
+  //   String studyDeploymentId,
+  //   String deviceRoleName,
+  // ) async {
+  //   var study = getStudy(studyDeploymentId, deviceRoleName);
+  //   if (study != null) getStudyController(study)?.start();
+  // }
 
   @override
   @mustCallSuper
@@ -348,17 +348,17 @@ class SmartPhoneClientManager
     return status;
   }
 
-  /// Start data sampling in all studies in this client manager.
-  ///
-  /// Note that [start] only needs to be called once. Once started,
-  /// data sampling can be resumed and paused via the [resume] and
-  /// [pause] methods.
-  void start() {
-    for (var controller in _controllers.values) {
-      controller.start();
-    }
-    notifyListeners();
-  }
+  // /// Start data sampling in all studies in this client manager.
+  // ///
+  // /// Note that [start] only needs to be called once. Once started,
+  // /// data sampling can be resumed and paused via the [resume] and
+  // /// [pause] methods.
+  // void start() {
+  //   for (var controller in _controllers.values) {
+  //     controller.start();
+  //   }
+  //   notifyListeners();
+  // }
 
   /// Resume data sampling in all studies in this client manager.
   void resume() async {

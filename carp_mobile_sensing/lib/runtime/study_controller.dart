@@ -180,7 +180,7 @@ class SmartphoneStudyController {
 
     // start the study and restart data sampling
     study.samplingState = existingSamplingStatus;
-    start();
+    _start();
 
     var statusMsg =
         '===============================================================\n'
@@ -440,7 +440,7 @@ class SmartphoneStudyController {
   ///
   /// Will resume data collection if the [study]'s samplingStatus is `Resumed`.
   /// If not, sampling can be started later by calling the [resume] method.
-  Future<void> start() async {
+  Future<void> _start() async {
     if (study.status == StudyStatus.Stopped) {
       warning('$runtimeType - Study has been stopped. Will not start study.');
       return;

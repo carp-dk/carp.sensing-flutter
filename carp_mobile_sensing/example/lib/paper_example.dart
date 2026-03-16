@@ -62,8 +62,10 @@ void sensing() async {
       deviceRoleName: phone.roleName,
     ),
   );
+  await client.tryDeployment(study.studyDeploymentId, study.deviceRoleName);
+
   SmartphoneStudyController? controller = client.getStudyController(study);
-  controller?.start();
+  controller?.resume();
 
   // listening on the data stream and print them as json to the debug console
   controller?.measurements.listen((data) => print(toJsonString(data)));

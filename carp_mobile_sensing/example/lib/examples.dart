@@ -42,10 +42,13 @@ Future<void> minimalExample() async {
   await SmartPhoneClientManager().configure();
 
   // Create a study based on the protocol.
-  await SmartPhoneClientManager().addStudyFromProtocol(protocol);
+  var study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
 
-  /// Start the study.
-  SmartPhoneClientManager().start();
+  /// Deploy the study.
+  await SmartPhoneClientManager().tryDeployment(
+    study.studyDeploymentId,
+    study.deviceRoleName,
+  );
 
   /// Resume sampling.
   SmartPhoneClientManager().resume();
@@ -56,9 +59,6 @@ Future<void> minimalExample() async {
     print(toJsonString(measurement));
   });
 
-  // Resume sampling.
-  SmartPhoneClientManager().resume();
-
   // Pause sampling.
   SmartPhoneClientManager().pause();
 
@@ -67,22 +67,44 @@ Future<void> minimalExample() async {
 
   // Dispose the client. Can not be used anymore.
   SmartPhoneClientManager().dispose();
+
+  // Permanently stop the study.
+  // This will mark the study as stopped and remove it from the client manager.
+  SmartPhoneClientManager().stopStudy(
+    study.studyDeploymentId,
+    study.deviceRoleName,
+  );
+}
+
+Future<void> oneLineExample1() async {
+  var protocol;
+
+  SmartPhoneClientManager().configure().then(
+    (_) => SmartPhoneClientManager()
+        .addStudyFromProtocol(protocol)
+        .then(
+          (study) => SmartPhoneClientManager().tryDeployment(
+            study.studyDeploymentId,
+            study.deviceRoleName,
+          ),
+        ),
+  );
+
+  SmartPhoneClientManager().configure().then(
+    (_) => SmartPhoneClientManager()
+        .addStudyFromProtocol(protocol)
+        .then(
+          (study) => SmartPhoneClientManager()
+              .tryDeployment(study.studyDeploymentId, study.deviceRoleName)
+              .then((_) => SmartPhoneClientManager().resume()),
+        ),
+  );
 }
 
 /// Alternatively: do it all in one line of code....!
 /// Create and configure a client manager for this phone, add the protocol,
-/// start the study, and resume data sampling.
-Future<void> oneLineExample() async {
-  // SmartPhoneClientManager().configure().then(
-  //   (_) => SmartPhoneClientManager()
-  //       .addStudyFromProtocol(protocol)
-  //       .then(
-  //         (_) => SmartPhoneClientManager()
-  //           ..start()
-  //           ..resume(),
-  //       ),
-  // );
-
+/// deploy the study, and resume data sampling.
+Future<void> oneLineExample2() async {
   SmartPhoneClientManager().configure().then(
     (_) => SmartPhoneClientManager()
         .addStudyFromProtocol(
@@ -97,9 +119,9 @@ Future<void> oneLineExample() async {
           ),
         )
         .then(
-          (_) => SmartPhoneClientManager()
-            ..start()
-            ..resume(),
+          (study) => SmartPhoneClientManager()
+              .tryDeployment(study.studyDeploymentId, study.deviceRoleName)
+              .then((_) => SmartPhoneClientManager().resume()),
         ),
   );
 }
@@ -148,12 +170,9 @@ Future<void> example_0() async {
 
   // STEP III -- START THE STUDY
 
-  // Start the study.
-  //
-  // This will first deploy the study since it has not been deployed yet and
-  // the start the study. Data sampling will NOT be started, since the study's
+  // Deploy the study. Data sampling will NOT be started, since the study's
   // [samplingStatus] is still not resumed.
-  client.start();
+  await client.tryDeployment(study.studyDeploymentId, study.deviceRoleName);
 
   // Now resume data sampling.
   client.resume();
@@ -215,12 +234,11 @@ void example_1() async {
       deviceRoleName: phone.roleName,
     ),
   );
-  SmartphoneStudyController? controller = client.getStudyController(study);
+
+  await client.tryDeployment(study.studyDeploymentId, study.deviceRoleName);
 
   // Configure the controller and start sampling.
-  controller?.start();
-
-  // Resume data sampling for a specific study.
+  SmartphoneStudyController? controller = client.getStudyController(study);
   controller?.resume();
 
   // Print all data events from the study
@@ -328,10 +346,13 @@ void example_2() async {
       deviceRoleName: phone.roleName,
     ),
   );
+
+  await client.tryDeployment(study.studyDeploymentId, study.deviceRoleName);
+
   SmartphoneStudyController? controller = client.getStudyController(study);
 
-  // start sampling
-  controller?.start();
+  // resume sampling
+  controller?.resume();
 
   // listening to the stream of all measurements from the controller
   controller?.measurements.listen((measurement) => print(measurement));
