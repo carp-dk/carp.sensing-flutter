@@ -53,6 +53,12 @@
     <!-- Connectivity Package -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
+    <!-- Apps Package -->
+    <uses-permission 
+        android:name="android.permission.PACKAGE_USAGE_STATS" 
+        tools:ignore="ProtectedPermissions"/>
+   <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" /> 
+
     <!-- Legacy Bluetooth permissions, which is needed on devices with API 30 (Android Q) or older. -->
     <uses-permission
         android:name="android.permission.BLUETOOTH"

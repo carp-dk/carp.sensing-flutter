@@ -225,7 +225,7 @@ class AppTaskControlExecutor extends TaskControlExecutor {
     final schedule = triggerExecutor.getSchedule(from, to);
 
     if (schedule.isEmpty) {
-      // Stop since the schedule is empty and there is not more to schedule.
+      // Pause since the schedule is empty and there is not more to schedule.
       info(
         '$runtimeType - No scheduled app tasks for task ${taskExecutor.task.name} - pausing executor again.',
       );

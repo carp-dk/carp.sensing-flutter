@@ -302,6 +302,7 @@ class PersistenceService {
         }
         break;
       case UserTaskState.dequeued:
+        // in this case we need to remove the record
         await _database?.delete(
           TASK_QUEUE_TABLE_NAME,
           where: '$TASK_ID_COLUMN = ?',

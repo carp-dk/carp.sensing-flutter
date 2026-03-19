@@ -19,27 +19,57 @@ dependencies:
   # Packages used by CAMS. For some reason, we need to explicitly depend on them here.
   # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though 
   # it does compile. See issue #530
-  flutter_timezone: ^5.0.0
-  path_provider: ^2.1.0
-  battery_plus: ^7.0.0
-  screen_state: ^5.0.0
-  light: ^5.0.0
-  pedometer: ^4.2.0
-  flutter_activity_recognition: ^4.0.0
-  device_info_plus: ^12.1.0
-  device_calendar: ^4.3.1
-  flutter_launcher_icons: ^0.14.0
-  flutter_local_notifications: ^21.0.0
+  system_info2: ^4.0.0
+  path_provider: ^2.0.0
+  sqflite: ^2.2.8                         # For local storage in SQLite DB
+  permission_handler: '>=11.0.0 <13.0.0'  # For requesting permissions on Android and iOS
+  shared_preferences: ^2.2.0
+  package_info_plus: '>=6.0.0 <10.0.0'
+  flutter_local_notifications: ^21.0.0    # For sending notification on AppTask
+  timezone: '>=0.10.0 <0.12.0'            # For collecting time zone information
+  flutter_timezone: ^5.0.0                # For getting local time zone for scheduling notifications
   flutter_background: ^1.3.0              # For running background services on Android
-  location: ^8.0.1
-  mdsflutter: ^2.3.1
-  package_info_plus: ^8.3.1
-  permission_handler: '>=11.0.0 <13.0.0'
-  shared_preferences: ^2.5.3
-  sqflite: ^2.4.2
-  health: ^13.2.0
-  # flutter_blue_plus: '>=1.29.0 <3.0.0'
+
+  # probe-dependent plugins
+  device_info_plus: ^12.1.0
+  sensors_plus: ^7.0.0
+  battery_plus: ^7.0.0
+  pedometer: ^4.0.0       # Step count from local OS
+  light: ^5.0.0           # Light sensor
+  screen_state: ^5.0.0    # Screen LOCK/ON/OFF
+
+  # For Bluetooth Low Energy (BLE) scanning and connection
   flutter_reactive_ble: ^5.0.0
+
+  # Context package plugins
+  location: ^8.0.1
+  flutter_activity_recognition: ^4.0.0
+
+  # Communication package plugins
+  device_calendar: ^4.3.1 # need to use a forked version of device_calendar - see dependency_overrides below
+  another_telephony: ^0.4.0
+  call_e_log: ^0.0.4
+  
+  # Connectivity package plugins
+  connectivity_plus: ^7.0.0    # connectivity events
+  network_info_plus: ^7.0.0    # wifi ssid name
+  flutter_blue_plus: '>=1.29.0 <3.0.0'  # bluetooth scan
+  dchs_flutter_beacon: ^0.6.4  # collecting nearby iBeacon devices
+
+  # Apps package plugins
+  app_usage: ^4.0.0
+  installed_apps: ^2.0.0
+
+  # Audio package plugins
+  flutter_sound: ^9.17.0  # audio probe
+  noise_meter: ^5.0.0     # measuring noise level
+
+  # app-specific plugins
+  flutter_launcher_icons: ^0.14.0
+
+  # wearable device plugins
+  mdsflutter: ^2.3.1
+  health: ^13.2.0
   polar: ^7.0.0
 
   carp_serializable: ^2.0.0 # polymorphic json serialization

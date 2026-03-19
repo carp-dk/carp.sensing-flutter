@@ -62,8 +62,8 @@ class WifiProbe extends IntervalProbe {
 /// The [BluetoothProbe] scans for nearby and visible Bluetooth devices and
 /// collects a [Bluetooth] measurement that lists each device found during the scan.
 ///
-/// Uses a [PeriodicSamplingConfiguration] for configuration the [interval]
-/// and [duration] of the scan. Can also be configured to filter by
+/// Uses a [PeriodicSamplingConfiguration] for configuration the interval
+/// and duration of the scan. Can also be configured to filter by
 /// [services] and [remoteIds] by using a [BluetoothScanPeriodicSamplingConfiguration].
 class BluetoothProbe extends BufferingPeriodicStreamProbe {
   /// Default timeout for bluetooth scan - 4 secs

@@ -261,8 +261,8 @@ class CronScheduledTriggerExecutor
   List<DateTime> getSchedule(DateTime from, DateTime to, [int max = 100]) {
     var cronIterator = Cron().parse(
       configuration!.cronExpression,
-      Settings().timezoneLocation,
-      tz.TZDateTime.from(from, tz.getLocation(Settings().timezoneLocation)),
+      Settings().timezone,
+      tz.TZDateTime.from(from, tz.getLocation(Settings().timezone)),
     );
     final List<DateTime> schedule = [];
     int count = 0;

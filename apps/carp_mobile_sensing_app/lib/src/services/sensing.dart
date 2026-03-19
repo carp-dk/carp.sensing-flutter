@@ -59,6 +59,7 @@ class Sensing {
       (study != null) ? client.getStudyController(study!) : null;
 
   /// The total number of measurements sampled so far.
+  /// Note that this is not persisted, so it will be reset when the app is restarted.
   int samplingSize = 0;
 
   /// The list of running - i.e. used - probes in this study.
@@ -80,24 +81,40 @@ class Sensing {
   Future<void> initialize() async {
     info('Initializing $runtimeType - mode: ${bloc.deploymentMode}');
 
-    // Configure the client manager with the deployment service selected above
-    // (local or CAWS).
+    // Configure the client manager using the deployment service above (local or CAWS).
     await client.configure(
       deploymentService: deploymentService,
       askForPermissions: true,
     );
 
-    // Listen on the measurements stream and count measurements
-    // .. and print them as json.
+    // Listen on the measurements stream and count measurements and print them as they come in.
     client.measurements.listen((measurement) {
       samplingSize++;
 
       if (Settings().debugLevel == DebugLevel.debug) {
-        // debugPrint(toJsonString(measurement));
-        debugPrint('>> ${measurement.dataType}');
+        debugPrint(toJsonString(measurement));
+        // debugPrint('>> ${measurement.dataType}');
       }
     });
 
     info('$runtimeType initialized');
   }
+
+  // Deploy the current [study], if not deployed yet.
+  Future<void> deploy() async => await client.tryDeployment(
+    study!.studyDeploymentId,
+    study!.deviceRoleName,
+  );
+
+  // Resume the current [study].
+  Future<void> resume() async {
+    // Need to ask for permissions before resuming, otherwise the app may crash
+    // when trying to start sampling without permissions.
+    controller?.askForAllPermissions().then((_) async {
+      controller?.resume();
+    });
+  }
+
+  // Pause the current [study].
+  Future<void> pause() async => client.pause();
 }

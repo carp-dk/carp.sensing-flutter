@@ -12,7 +12,7 @@ part of '../../domain.dart';
 ///
 /// This manager serves two purposes:
 ///
-/// 1. It is used by the [AppTaskController] to send notification about
+/// 1. It is used by the [AppTaskController] to create notification about
 /// [UserTask]s (which are created based on [AppTask] in the [StudyProtocol]).
 /// This happens automatically, if the app task is configured to
 /// send a notification.

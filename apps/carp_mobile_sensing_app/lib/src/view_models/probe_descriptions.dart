@@ -60,6 +60,11 @@ class ProbeDescription {
       'Information about this application, incl. name.',
       Icon(Icons.settings_applications, size: 50, color: CachetColors.GREY_2),
     ),
+    DeviceSamplingPackage.APP_LIFECYCLE_EVENT: ProbeDescriptor(
+      'App Lifecycle Events',
+      'App lifecycle events like foreground/background.',
+      Icon(Icons.power_settings_new, size: 50, color: CachetColors.GREY_2),
+    ),
     DeviceSamplingPackage.BATTERY_STATE: ProbeDescriptor(
       'Battery',
       'Battery level and charging status.',
@@ -152,7 +157,7 @@ class ProbeDescription {
     ContextSamplingPackage.LOCATION: ProbeDescriptor(
       'Location Tracking',
       "Continuous location tracking from the phone's GPS sensor.",
-      Icon(Icons.location_searching, size: 50, color: CachetColors.CYAN),
+      Icon(Icons.location_on, size: 50, color: CachetColors.CYAN),
     ),
     ContextSamplingPackage.ACTIVITY: ProbeDescriptor(
       'Activity',
@@ -172,12 +177,12 @@ class ProbeDescription {
     ContextSamplingPackage.GEOFENCE: ProbeDescriptor(
       'Geofence',
       'Track movement in/out of a geographical ares (geofence).',
-      Icon(Icons.location_on, size: 50, color: CachetColors.CYAN),
+      Icon(Icons.share_location_outlined, size: 50, color: CachetColors.CYAN),
     ),
     ContextSamplingPackage.MOBILITY: ProbeDescriptor(
       'Mobility',
       'Mobility features calculated from location data.',
-      Icon(Icons.location_on, size: 50, color: CachetColors.ORANGE),
+      Icon(Icons.mode_of_travel, size: 50, color: CachetColors.ORANGE),
     ),
     ESenseSamplingPackage.ESENSE_BUTTON: ProbeDescriptor(
       'eSense Button',

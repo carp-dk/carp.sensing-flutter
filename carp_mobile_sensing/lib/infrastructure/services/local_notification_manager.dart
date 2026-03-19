@@ -34,6 +34,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
       Permission.notification,
       Permission.scheduleExactAlarm,
     ]);
+
     var status = await permissions.request();
     debug('$runtimeType - Permissions: $status');
 
@@ -86,10 +87,12 @@ class FlutterLocalNotificationManager implements NotificationManager {
     String? body,
     required DateTime schedule,
   }) async {
+    tz.initializeTimeZones(); // for some strange reason, the time zones are not always initialized when this method is called, so we initialize them here to be sure
+
     id ??= _random.nextInt(1000);
     final time = tz.TZDateTime.from(
       schedule,
-      tz.getLocation(Settings().timezoneLocation),
+      tz.getLocation(Settings().timezone),
     );
 
     await FlutterLocalNotificationsPlugin().zonedSchedule(
@@ -111,10 +114,12 @@ class FlutterLocalNotificationManager implements NotificationManager {
     String? body,
     required RecurrentScheduledTrigger schedule,
   }) async {
+    tz.initializeTimeZones(); // for some strange reason, the time zones are not always initialized when this method is called, so we initialize them here to be sure
+
     id ??= _random.nextInt(1000);
     final time = tz.TZDateTime.from(
       schedule.firstOccurrence,
-      tz.getLocation(Settings().timezoneLocation),
+      tz.getLocation(Settings().timezone),
     );
 
     DateTimeComponents recurrence = switch (schedule.type) {
@@ -156,13 +161,15 @@ class FlutterLocalNotificationManager implements NotificationManager {
 
   @override
   Future<void> scheduleTaskNotification(UserTask task) async {
-    // early out if not to be scheduled
+    // early out if task should not create a notification when scheduled
     if (!task.notification) return;
 
     if (task.triggerTime.isAfter(DateTime.now())) {
+      tz.initializeTimeZones(); // for some strange reason, the time zones are not always initialized when this method is called, so we initialize them here to be sure
+
       final time = tz.TZDateTime.from(
         task.triggerTime,
-        tz.getLocation(Settings().timezoneLocation),
+        tz.getLocation(Settings().timezone),
       );
 
       await FlutterLocalNotificationsPlugin().zonedSchedule(

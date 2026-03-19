@@ -11,12 +11,13 @@ enum DebugLevel { none, info, warning, debug }
 ///
 /// Supports:
 ///  * setting debug level - see [debugLevel]
-///  * setting whether to save [AppTask]s across app re-start - see [saveAppTaskQueue]
 ///  * getting shared preferences - see [preferences]
-///  * getting app info - see [packageInfo]
+///  * getting app info - see [appName], [packageName], [version], [buildNumber],
+///    and [packageInfo]
 ///  * generating a unique and anonymous user id - see [userId]
-///  * getting the timezone of the app - see [timezoneLocation]
-///
+///  * getting the current timezone of the app - see [timezone]
+///  * getting file paths for storing data - see [localApplicationPath], [carpBasePath],
+///    [getDeploymentBasePath], [getCacheBasePath], and [getDataBasePath]
 class Settings {
   static const String USER_ID_KEY = 'user_id';
 
@@ -48,10 +49,6 @@ class Settings {
   /// Can be changed on runtime.
   DebugLevel debugLevel = DebugLevel.warning;
 
-  /// Save the queue of [AppTask]s in the [AppTaskController] across
-  /// app re-start?
-  bool saveAppTaskQueue = true;
-
   /// The app name as displayed in the OS.
   /// `CFBundleDisplayName` on iOS, `application/android:label` on Android.
   String? get appName => _appName;
@@ -76,6 +73,12 @@ class Settings {
 
   /// Package information
   PackageInfo? get packageInfo => _packageInfo;
+
+  /// The current time zone of this app.
+  ///
+  /// Note that this is only set once when the app starts, and will not update
+  /// if the user changes the time zone while the app is running.
+  String get timezone => _timezone;
 
   /// Path to a directory where the application may place data that is
   /// user-generated.
@@ -138,9 +141,6 @@ class Settings {
     '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_DATA_FILE_PATH',
   ).create(recursive: true)).path;
 
-  /// The current time zone location of this app.
-  String get timezoneLocation => _timezone;
-
   /// Initialize settings. Must be called before using any settings.
   Future<void> init() async {
     if (_initialized) return;
@@ -163,10 +163,14 @@ class Settings {
     try {
       _timezone = (await FlutterTimezone.getLocalTimezone()).identifier;
     } catch (error) {
-      _timezone = tz.local.name;
-      warning('$runtimeType - Could not get the local timezone - $error');
+      warning(
+        '$runtimeType - Could not get the local timezone - $error. '
+        'Setting timezone to default: $_timezone',
+      );
     }
-    info('Time zone set to $timezoneLocation');
+
+    info('$runtimeType - Time zone set to $timezone');
+    debug('$runtimeType - Time zone location: ${tz.getLocation(timezone)}');
     info('$runtimeType initialized');
   }
 

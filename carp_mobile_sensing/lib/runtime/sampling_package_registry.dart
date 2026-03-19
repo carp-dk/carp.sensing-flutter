@@ -1,6 +1,5 @@
 /*
- * Copyright 2021 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2021 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -17,7 +16,6 @@ part of '../runtime.dart';
 /// for an overview of available sampling packages.
 class SamplingPackageRegistry {
   final List<SamplingPackage> _packages = [];
-  final List<Permission> _permissions = [];
   DataTypeSamplingSchemeMap? _combinedSchemas;
 
   static final SamplingPackageRegistry _instance = SamplingPackageRegistry._();
@@ -27,9 +25,6 @@ class SamplingPackageRegistry {
 
   /// A list of registered packages.
   List<SamplingPackage> get packages => _packages;
-
-  /// The list of [Permission]s needed for **all** packages (combined list).
-  List<Permission> get permissions => _permissions;
 
   SamplingPackageRegistry._() {
     // register the built-in packages
@@ -42,9 +37,6 @@ class SamplingPackageRegistry {
   void register(SamplingPackage package) {
     _combinedSchemas = null;
     _packages.add(package);
-    // for (var permission in package.permissions) {
-    //   if (!_permissions.contains(permission)) _permissions.add(permission);
-    // }
     CarpDataTypes().add(package.samplingSchemes.dataTypes);
 
     // register the package's device in the device registry

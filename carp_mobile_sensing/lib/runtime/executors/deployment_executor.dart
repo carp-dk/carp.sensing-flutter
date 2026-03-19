@@ -167,7 +167,7 @@ class SmartphoneDeploymentExecutor
 
     await AppTaskController().enqueueBufferedTasks();
     debug(
-      '$runtimeType resumed - ${await SmartPhoneClientManager().notificationController?.pendingNotificationRequestsCount} notifications are currently pending.',
+      '$runtimeType resumed - ${await SmartPhoneClientManager().notificationManager.pendingNotificationRequestsCount} notifications are currently pending.',
     );
 
     return true;

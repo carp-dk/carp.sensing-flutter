@@ -24,8 +24,8 @@ class PhoneLogProbe extends MeasurementProbe {
     );
     return Measurement.fromData(
       PhoneLog(
-        m.lastTime!,
-        DateTime.now(),
+        DateTime.fromMillisecondsSinceEpoch(from).toUtc(),
+        DateTime.now().toUtc(),
         entries.map((call) => PhoneCall.fromCallLogEntry(call)).toList(),
       ),
     );

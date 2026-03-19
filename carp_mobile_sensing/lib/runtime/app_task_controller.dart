@@ -11,6 +11,7 @@ class AppTaskController {
   static final AppTaskController _instance = AppTaskController._();
   final StreamController<UserTask> _controller = StreamController.broadcast();
   Timer? _garbageCollector;
+  bool _notificationsEnabled = true;
 
   /// The map of all [UserTask]s by their id.
   final Map<String, UserTask> _userTaskMap = {};
@@ -19,7 +20,11 @@ class AppTaskController {
   final List<UserTaskBufferItem> _userTaskBuffer = [];
 
   /// Should this App Task Controller send notifications to the user.
-  bool notificationsEnabled = true;
+  bool get notificationsEnabled => _notificationsEnabled;
+
+  /// The client's notification controller for sending notifications to the user.
+  NotificationManager get notificationManager =>
+      SmartPhoneClientManager().notificationManager;
 
   /// The entire list of all [UserTask]s.
   ///
@@ -66,25 +71,23 @@ class AppTaskController {
 
   /// Initialize and set up the app controller.
   ///
+  /// This will restore the queue of [UserTask]s from persistent storage.
+  ///
   /// If [enableNotifications] is true, a notification will be added to
   /// the phone's notification system when a task is enqueued via the
   /// [enqueue] method.
   Future<void> initialize({bool enableNotifications = true}) async {
+    _notificationsEnabled = enableNotifications;
+
     // Restore previous queue from persistent storage.
     await _restoreQueue();
 
-    // set up a timer which cleans up in the queue once an hour
+    // set up a timer which expires tasks in the queue once an hour
     _garbageCollector = Timer.periodic(const Duration(hours: 1), (_) {
       for (var task in userTasks) {
         if (task.expiresIn?.isNegative ?? false) expire(task.id);
       }
     });
-
-    // initialize notification controller if needed
-    notificationsEnabled = enableNotifications;
-    if (notificationsEnabled) {
-      await SmartPhoneClientManager().notificationController?.configure();
-    }
   }
 
   /// Dispose this app task controller.
@@ -143,10 +146,8 @@ class AppTaskController {
       if (notificationsEnabled && sendNotification) {
         // create notification
         (triggerTime == null)
-            ? await SmartPhoneClientManager().notificationController
-                  ?.createTaskNotification(userTask)
-            : await SmartPhoneClientManager().notificationController
-                  ?.scheduleTaskNotification(userTask);
+            ? await notificationManager.createTaskNotification(userTask)
+            : await notificationManager.scheduleTaskNotification(userTask);
       }
       return userTask;
     }
@@ -180,9 +181,8 @@ class AppTaskController {
     var remainingNotifications =
         NotificationManager.pendingNotificationLimit -
         (await SmartPhoneClientManager()
-                .notificationController
-                ?.pendingNotificationRequestsCount ??
-            0);
+            .notificationManager
+            .pendingNotificationRequestsCount);
 
     var numberOfTasksToEnqueue = min(
       remainingNotifications,
@@ -225,8 +225,7 @@ class AppTaskController {
       info('$runtimeType - Dequeued $userTask');
 
       if (notificationsEnabled) {
-        SmartPhoneClientManager().notificationController
-            ?.cancelTaskNotification(userTask);
+        notificationManager.cancelTaskNotification(userTask);
       }
     }
   }
@@ -268,9 +267,7 @@ class AppTaskController {
       _controller.sink.add(userTask);
       info('$runtimeType - Marked $userTask as done');
 
-      SmartPhoneClientManager().notificationController?.cancelTaskNotification(
-        userTask,
-      );
+      notificationManager.cancelTaskNotification(userTask);
     }
   }
 
@@ -290,9 +287,7 @@ class AppTaskController {
         _controller.sink.add(userTask);
         info('$runtimeType - Expired $userTask');
       }
-      SmartPhoneClientManager().notificationController?.cancelTaskNotification(
-        userTask,
-      );
+      notificationManager.cancelTaskNotification(userTask);
     }
   }
 
@@ -312,15 +307,19 @@ class AppTaskController {
     }
   }
 
-  /// Restore the queue from persistent storage for the specified
-  /// [study].
+  /// Restore the queue from persistent storage for [study].
+  /// If [study] is null, restore the queue for all studies.
+  ///
   /// Returns true if successful.
   Future<bool> _restoreQueue([SmartphoneStudy? study]) async {
-    debug('$runtimeType - Restoring User Task Queue');
+    info('$runtimeType - Restoring User Task Queue');
     bool success = true;
 
     try {
       final snapshots = await PersistenceService().getUserTasks(study);
+      debug(
+        '$runtimeType - Found ${snapshots.length} task(s) in persistent storage for ${study?.studyDeploymentId ?? "all studies"}.',
+      );
 
       // now create new AppTaskExecutors, initialize them, and add them to the queue
       for (var snapshot in snapshots) {

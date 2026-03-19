@@ -401,7 +401,7 @@ class StudyPageState extends State<StudyPage> {
       // the app is in the foreground. So to see the notification, please
       // background the app after deploying the study.
 
-      // Add a app task 20 secs after deployment and make a notification.
+      // Trigger an app task some secs after deployment and make a notification.
       _protocol?.addTaskControl(
         ElapsedTimeTrigger(elapsedTime: const Duration(seconds: 60)),
         AppTask(

@@ -75,22 +75,12 @@ class SensingBLoC {
   void runStudy() {
     if (study == null) return;
 
-    debug(
-      '$runtimeType - Running study - isDeployed: ${study!.isDeployed}, '
-      'isSampling: ${study!.isSampling}',
-    );
-
     // If the study has not been deployed yet, do this before
     // resuming or pausing.
     !study!.isDeployed
-        ?
-          // sensing.client.start()
-          sensing.client.tryDeployment(
-            study!.studyDeploymentId,
-            study!.deviceRoleName,
-          )
+        ? sensing.deploy()
         : isSampling
-        ? sensing.client.pause()
-        : sensing.client.resume();
+        ? sensing.pause()
+        : sensing.resume();
   }
 }

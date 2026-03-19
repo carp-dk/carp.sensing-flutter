@@ -43,7 +43,9 @@ class SmartPhoneClientManager
     extends ClientManager<Smartphone, DeviceRegistration, SmartphoneStudy>
     with ChangeNotifier {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
-  NotificationManager? _notificationController;
+
+  final NotificationManager _notificationManager =
+      FlutterLocalNotificationManager();
   bool _askForPermissions = true;
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
@@ -86,7 +88,7 @@ class SmartPhoneClientManager
       super.dataCollectorFactory as DeviceController;
 
   /// The [NotificationManager] responsible for sending notification on [AppTask]s.
-  NotificationManager? get notificationController => _notificationController;
+  NotificationManager get notificationManager => _notificationManager;
 
   /// Get the study controller for a [study].
   /// If a study controller is not available, a fresh controller will be created.
@@ -107,8 +109,8 @@ class SmartPhoneClientManager
   /// If the [dataCollectorFactory] is not specified, the default [DeviceController]
   /// is used.
   /// The [registration] is a unique device registration for this client device.
-  /// If not specified, a registration is created from the [Smartphone] factory
-  /// method.
+  /// If not specified, a registration is created from the [Smartphone.createRegistration]
+  /// factory method.
   ///
   /// If [enableNotifications] is true (default), notifications is created when
   /// an [AppTask] is triggered.
@@ -126,6 +128,14 @@ class SmartPhoneClientManager
   /// If [askForPermissions] is true (default), this client manager will
   /// automatically ask for permissions for all sampling packages at once.
   /// If you want the app to handle permissions itself, set this to false.
+  ///
+  /// When this method is called, the client manager will restore the state of
+  /// all previously added studies and resume data sampling in those studies if
+  /// they were previously resumed.
+  ///
+  /// Note that the client manager needs to be configured before adding any studies.
+  ///
+  /// If the client manager is already configured, this method will do nothing.
   @override
   Future<void> configure({
     DeviceRegistration? registration,
@@ -163,31 +173,29 @@ class SmartPhoneClientManager
       dataCollectorFactory: dataCollectorFactory,
     );
 
-    // Register all primary and connected device and service managers available in this client.
+    // Register all primary and connected device and service managers available.
     deviceController.registerAllAvailableDevices();
-
-    if (enableNotifications) {
-      _notificationController = FlutterLocalNotificationManager();
-    }
-
-    if (enableBackgroundMode) {
-      await BackgroundService().initialize(
-        notificationTitle: backgroundNotificationTitle,
-        notificationText: backgroundNotificationText,
-      );
-    }
-
-    // Initialize the app task controller.
-    await AppTaskController().initialize(
-      enableNotifications: enableNotifications,
-    );
 
     // Enable background mode if specified. This will make sure that data sampling
     // will continue even when the app is not in the foreground, as long as the
     // phone is not restarted.
     if (enableBackgroundMode) {
+      await BackgroundService().initialize(
+        notificationTitle: backgroundNotificationTitle,
+        notificationText: backgroundNotificationText,
+      );
       await BackgroundService().enable();
     }
+
+    // Configure the notification manager.
+    // This will ask for permissions if needed.
+    await notificationManager.configure();
+
+    // Initialize the app task controller.
+    // This will restore previous queue from persistent storage.
+    await AppTaskController().initialize(
+      enableNotifications: enableNotifications,
+    );
 
     var statusMsg =
         '===========================================================\n'
@@ -210,9 +218,13 @@ class SmartPhoneClientManager
     for (var study in studies) {
       await addStudy(study);
 
+      // Mark that an updated deployment status has been received for this study,
+      // and if a deployment is available, mark that as well.
+      // This will trigger the study controller to update the deployment and start
+      // sampling if the deployment is valid.
       study.deploymentStatusReceived();
       if (study.deployment != null) {
-        study.deviceDeploymentReceived(); // will also start sampling
+        study.deviceDeploymentReceived();
       }
     }
 
@@ -306,20 +318,6 @@ class SmartPhoneClientManager
     notifyListeners();
   }
 
-  // /// Start the study with [studyDeploymentId] and [deviceRoleName] from this
-  // /// client manager.
-  // ///
-  // /// Note that [startStudy] only needs to be called once. Once started, data sampling
-  // /// can be resumed and paused via the controller's [resume] and [pause] methods.
-  // @mustCallSuper
-  // Future<void> startStudy(
-  //   String studyDeploymentId,
-  //   String deviceRoleName,
-  // ) async {
-  //   var study = getStudy(studyDeploymentId, deviceRoleName);
-  //   if (study != null) getStudyController(study)?.start();
-  // }
-
   @override
   @mustCallSuper
   Future<StudyStatus> stopStudy(
@@ -348,20 +346,8 @@ class SmartPhoneClientManager
     return status;
   }
 
-  // /// Start data sampling in all studies in this client manager.
-  // ///
-  // /// Note that [start] only needs to be called once. Once started,
-  // /// data sampling can be resumed and paused via the [resume] and
-  // /// [pause] methods.
-  // void start() {
-  //   for (var controller in _controllers.values) {
-  //     controller.start();
-  //   }
-  //   notifyListeners();
-  // }
-
   /// Resume data sampling in all studies in this client manager.
-  void resume() async {
+  void resume() {
     for (var controller in _controllers.values) {
       // controller.resume();
       // Using restart instead of resume to make sure that sampling is restarted
@@ -373,7 +359,7 @@ class SmartPhoneClientManager
   }
 
   /// Pause data sampling in all studies in this client manager.
-  void pause() async {
+  void pause() {
     for (var controller in _controllers.values) {
       controller.pause();
     }

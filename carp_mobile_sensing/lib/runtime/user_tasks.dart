@@ -50,6 +50,8 @@ abstract class UserTask {
   String get title => task.title;
   String get description => task.description;
   String get instructions => task.instructions;
+
+  /// Should a notification be send for this task?
   bool get notification => task.notification;
 
   /// The time this task should trigger (typically becoming visible to the user).

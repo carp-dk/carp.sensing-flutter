@@ -312,7 +312,7 @@ class SmartphoneStudyController {
   ///
   /// Since we only ask for permission relevant to the deployment, this method
   /// should be called after deployment has taken place but before this controller
-  /// is started.
+  /// is resumed.
   ///
   /// This method is only relevant on Android, and does nothing on iOS.
   /// iOS automatically asks for permissions when a resource is accessed.
@@ -320,7 +320,7 @@ class SmartphoneStudyController {
   /// Note that location permissions are never asked for in this method, since
   /// they can cause issues when asking for multiple permissions at once.
   /// Location permissions should be handled separately in the app.
-  Future<void> _askForAllPermissions() async {
+  Future<void> askForAllPermissions() async {
     if (deployment == null) {
       warning(
         '$runtimeType - No deployment available. Skipping requesting permissions.',
@@ -362,6 +362,8 @@ class SmartphoneStudyController {
           '$runtimeType - Asking for permissions for all measures in this deployment...',
         );
         _permissions = await permissions.toList().request();
+
+        debug('$runtimeType - Permissions granted: $_permissions');
 
         _permissions?.forEach(
           (permission, status) => info(
@@ -461,12 +463,8 @@ class SmartphoneStudyController {
 
     // Ask for permissions for all measures in this deployment
     if (SmartPhoneClientManager().askForPermissions) {
-      await _askForAllPermissions();
+      await askForAllPermissions();
     }
-
-    // TODO - why this model? The AppTaskController should be responsible for restoring itself... - just like sampling state
-    // Restore the app task controller state for this study.
-    await AppTaskController()._restoreQueue(study);
 
     // Finally, resume/pause data sampling based on the current sampling state of this study.
     if (study.samplingState?.state == ExecutorState.Resumed) {
