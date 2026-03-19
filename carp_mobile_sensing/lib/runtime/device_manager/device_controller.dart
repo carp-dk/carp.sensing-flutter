@@ -71,7 +71,12 @@ class DeviceController extends DeviceDataCollectorFactory {
     }
 
     if (manager == null) {
-      warning('$runtimeType - No device manager found for device: $deviceType');
+      warning(
+        "$runtimeType - No device manager found for device: '$deviceType'. "
+        'This may be because this device is not supported on this phone. '
+        'Or it may be because the sampling package containing this device manager '
+        'has not been registered in the SamplingPackageRegistry.',
+      );
     } else {
       registerDevice(deviceType, manager);
     }

@@ -40,7 +40,8 @@ For example, on Android, if the user denies access to the health data types TWIC
 This sampling package **only** supports Google [Health Connect](https://health.google/health-connect-android/). To configure your app to use Health Connect, follow the documentation on the [`health`](https://pub.dev/packages/health#health-connect-android-option-2) package and on the [Android Developer page](https://developer.android.com/guide/health-and-fitness/health-connect/get-started).
 
 > [!IMPORTANT]  
-> Health Connect requires API level 34 and quite some edits to the `Manifest.xml` file, including declaring permissions to **all** the health data types you want to access. Read more on [Health Connect data types and permissions](https://developer.android.com/health-and-fitness/guides/health-connect/plan/data-types). If you are targeting SDK levels < 34 make sure to install the Health Connect app. Read more on the ["Get started with Health Connect "](https://developer.android.com/health-and-fitness/guides/health-connect/develop/get-started) page.
+> Health Connect requires API level 34 and quite some edits to the `Manifest.xml` file, including declaring permissions to **all** the health data types you want to access. You also need to update `MainActivity.kt` to use `FlutterFragmentActivity`.
+> Read more on [Health Connect data types and permissions](https://developer.android.com/health-and-fitness/guides/health-connect/plan/data-types). If you are targeting SDK levels < 34 make sure to install the Health Connect app. Read more on the ["Get started with Health Connect "](https://developer.android.com/health-and-fitness/guides/health-connect/develop/get-started) page.
 
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"

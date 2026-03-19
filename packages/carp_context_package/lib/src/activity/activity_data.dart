@@ -45,6 +45,9 @@ class Activity extends Data {
 
   Activity({required this.type, required this.confidence}) : super();
 
+  @override
+  bool equivalentTo(Data other) => other is Activity && type == other.type;
+
   factory Activity.fromActivity(ar.Activity activity) => Activity(
     type: ActivityType.values[activity.type.index],
     confidence: _confidenceLevelMap[activity.confidence] ?? 0,

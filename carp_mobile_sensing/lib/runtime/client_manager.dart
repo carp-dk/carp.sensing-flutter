@@ -15,29 +15,32 @@ enum ClientManagerState { created, configured, disposed }
 ///
 /// Call [configure] before using this client.
 ///
-/// It holds a set of [Smartphone] [studies], which can been added, removed,
-/// started, and stopped via the [addStudy], [removeStudy], [startStudy],
-/// and [stopStudy] methods.
+/// It holds a set of [SmartphoneStudy] [studies], which can been added,
+/// deployed, stopped, and removed via the [addStudy], [tryDeployment],
+/// [stopStudy], and [removeStudy] methods.
 ///
-/// A [SmartPhoneClientManager] is also a [ChangeNotifier] which notifies its
+/// A client manager is also a [ChangeNotifier] which notifies its
 /// listeners on any changes to its list of [studies]. The [events] stream emits
 /// and event when the state of the client changes.
 ///
 /// Assuming a `protocol` as a [StudyProtocol], this will configure and run a study
 /// in a client manager:
 ///
+/// ```dart
+/// // Create and configure a client manager for this phone.
+/// await SmartPhoneClientManager().configure();
+///
+/// // Create a study based on a protocol.
+/// var study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
+///
+/// // Deploy the study.
+///   await SmartPhoneClientManager().tryDeployment(
+///     study.studyDeploymentId,
+///     study.deviceRoleName,
+///   );
 /// ```
-///   // Create and configure a client manager for this phone.
-///   await SmartPhoneClientManager().configure();
 ///
-///   // Create a study based on a protocol.
-///   await SmartPhoneClientManager().addStudyFromProtocol(protocol);
-///
-///   // Start sampling.
-///   SmartPhoneClientManager().start();
-/// ```
-///
-/// Note that 'starting' a study does not start data collection. Use the methods
+/// Note that 'deploying' a study does not start data collection. Use the methods
 /// [resume] and [pause] to resume and pause data collection.
 class SmartPhoneClientManager
     extends ClientManager<Smartphone, DeviceRegistration, SmartphoneStudy>
@@ -346,7 +349,7 @@ class SmartPhoneClientManager
     return status;
   }
 
-  /// Resume data sampling in all studies in this client manager.
+  /// Resume data sampling for all studies in this client manager.
   void resume() {
     for (var controller in _controllers.values) {
       // controller.resume();
@@ -358,7 +361,7 @@ class SmartPhoneClientManager
     notifyListeners();
   }
 
-  /// Pause data sampling in all studies in this client manager.
+  /// Pause data sampling for all studies in this client manager.
   void pause() {
     for (var controller in _controllers.values) {
       controller.pause();

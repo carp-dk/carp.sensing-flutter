@@ -16,6 +16,28 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # CARP libraries
+  carp_serializable: ^2.0.0       # polymorphic json serialization
+  # carp_core: ^2.0.0               # the core CARP domain model
+  # carp_mobile_sensing: ^0.30.6  # the CARP mobile sensing framework
+
+  # CARP sampling packages
+  #carp_connectivity_package: ^0.30.0
+  #carp_context_package: ^0.30.1
+  #carp_audio_package: ^0.30.0
+  #carp_communication_package: ^0.30.0
+  #carp_apps_package: ^0.30.0
+  #carp_backend: ^0.30.0
+  #carp_webservices: ^0.30.0
+
+  # carp_health_package: ^2.0.0
+  # carp_esense_package: ^0.30.2
+  # carp_movisens_package: ^0.32.0
+  # carp_polar_package: ^0.30.0
+  # carp_movesense_package: ^0.30.0
+
+  research_package: ^2.0.0
+
   # Packages used by CAMS. For some reason, we need to explicitly depend on them here.
   # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though 
   # it does compile. See issue #530
@@ -49,7 +71,7 @@ dependencies:
   device_calendar: ^4.3.1 # need to use a forked version of device_calendar - see dependency_overrides below
   another_telephony: ^0.4.0
   call_e_log: ^0.0.4
-  
+
   # Connectivity package plugins
   connectivity_plus: ^7.0.0    # connectivity events
   network_info_plus: ^7.0.0    # wifi ssid name
@@ -64,31 +86,13 @@ dependencies:
   flutter_sound: ^9.17.0  # audio probe
   noise_meter: ^5.0.0     # measuring noise level
 
-  # app-specific plugins
-  flutter_launcher_icons: ^0.14.0
-
   # wearable device plugins
   mdsflutter: ^2.3.1
   health: ^13.2.0
   polar: ^7.0.0
 
-  carp_serializable: ^2.0.0 # polymorphic json serialization
-  carp_core: ^2.0.0         # the core CARP domain model
-  #carp_mobile_sensing: ^0.30.6
-  #carp_connectivity_package: ^0.30.0
-  #carp_context_package: ^0.30.1
-  #carp_audio_package: ^0.30.0
-  #carp_communication_package: ^0.30.0
-  #carp_apps_package: ^0.30.0
-  #carp_backend: ^0.30.0
-  #carp_webservices: ^0.30.0
-  #carp_health_package: ^2.0.0
-  #carp_firebase_backend: ^0.30.0
-
-  # carp_esense_package: ^0.30.2
-  # carp_movisens_package: ^0.32.0
-
-  research_package: ^2.0.0
+  # app-specific plugins
+  flutter_launcher_icons: ^0.14.0
 
 
 # Overriding carp libraries to use the local copy

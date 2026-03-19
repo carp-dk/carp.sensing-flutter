@@ -14,9 +14,6 @@
          Read more at https://docs.carp.dk/carp-mobile-sensing/install-and-configure
     -->
 
-    <!-- Used for activity recognition (step count) -->
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
-
     <!-- Used for sending and scheduling notifications -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -34,6 +31,9 @@
          Should also be added to the service tag below -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />        
+
+    <!-- Used for activity recognition (step count) -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <!-- The following permissions are used in the specific sampling packages -->
 
@@ -101,6 +101,7 @@
         android:usesPermissionFlags="neverForLocation" />  -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
+    <!-- Health Package -->
     <!-- Check whether Health Connect is installed or not -->
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
@@ -108,6 +109,10 @@
             <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
         </intent>
     </queries>    
+
+    <!-- Access health data in the foreground, which is required for the Health Connect 
+    package to be able to read and write health data while the app is in the background. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
 
      <!-- Permissions for Health Connect -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
@@ -245,7 +250,7 @@
         <service 
             android:name="de.julianassmann.flutter_background.IsolateHolderService" 
             android:exported="false"
-            android:foregroundServiceType="dataSync|location|specialUse">
+            android:foregroundServiceType="dataSync|location|health|specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Collection of data while app is in background."/>
         </service>   

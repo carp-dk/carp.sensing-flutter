@@ -44,13 +44,13 @@ Future<void> minimalExample() async {
   // Create a study based on the protocol.
   var study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
 
-  /// Deploy the study.
+  // Deploy the study.
   await SmartPhoneClientManager().tryDeployment(
     study.studyDeploymentId,
     study.deviceRoleName,
   );
 
-  /// Resume sampling.
+  // Resume sampling.
   SmartPhoneClientManager().resume();
 
   // Listening on the measurements stream.
