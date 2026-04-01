@@ -170,7 +170,7 @@ class StudyDeploymentProxy {
       if (deployedStatus != null) {
         study.deploymentStatusReceived(deployedStatus);
         study.deploymentUpdated(
-          "$runtimeType - Deployment '$studyDeploymentId' marked as deployed - status: ${deployedStatus?.status?.name}",
+          "$runtimeType - Deployment '$studyDeploymentId' marked as deployed - status: ${deployedStatus.status?.name}",
         );
       }
     } catch (error) {

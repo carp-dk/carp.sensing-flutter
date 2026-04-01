@@ -7,7 +7,7 @@
 /// Contains the core deployment classes like [PrimaryDeviceDeployment], [StudyDeployment],
 /// [ParticipantData], and [DeploymentService].
 ///
-/// See the [`carp.deployments`](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-deployments.md)
+/// See the [`carp.deployments`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-deployments.md)
 /// definition in Kotlin.
 library;
 

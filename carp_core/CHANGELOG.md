@@ -1,6 +1,6 @@
 ## 2.1.0
 
-* fix of issue [#561](https://github.com/cph-cachet/carp.sensing-flutter/issues/561)
+* fix of issue [#561](https://github.com/carp-dk/carp.sensing-flutter/issues/561)
 
 ## 2.0.0
 

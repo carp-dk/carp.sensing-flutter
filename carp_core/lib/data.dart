@@ -4,7 +4,7 @@
 /// Contains the core data classes like [Measurement], [DataStreamBatch],
 /// [DataStreamId], and defines the API of a [DataStreamService].
 ///
-/// See the [`carp-data`](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-data.md)
+/// See the [`carp-data`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-data.md)
 /// definition in Kotlin.
 library;
 

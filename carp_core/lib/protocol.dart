@@ -7,7 +7,7 @@
 /// Contain the the core CARP domain classes like [StudyProtocol], [TaskConfiguration],
 /// and [Measure].
 ///
-/// See the [`carp.protocols`](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-protocols.md)
+/// See the [`carp.protocols`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-protocols.md)
 /// definition in Kotlin.
 library;
 

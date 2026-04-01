@@ -20,7 +20,7 @@
 /// Contains the core client classes like [ClientManager], [DeviceDataCollectorFactory],
 /// [DeviceDataCollector], and [ClientRepository].
 ///
-/// See the [`carp.clients`](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-clients.md)
+/// See the [`carp.clients`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-clients.md)
 /// definition in Kotlin.
 library;
 
