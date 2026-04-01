@@ -1,4 +1,4 @@
-## 2.0.0 - BREAKING
+## 2.1.0 - BREAKING
 
 This release has two new main features: (i) to support adding, running, and removing **multiple studies** to the client manager, and (ii) to **save runtime state persistently** so that sampling of data in all studies will resume effortlessly across app restart. In addition, a set of issues have been addressed, as listed in [Milestone 2.0.0](https://github.com/carp-dk/carp.sensing-flutter/milestone/3?closed=1). The important ones include:
 
