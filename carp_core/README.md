@@ -9,7 +9,7 @@
 
 This package is one of the software components in the the overall [Copenhagen Research Platform (CARP)](https://carp.cachet.dk).
 
-This package contains the [CARP Core](https://github.com/cph-cachet/carp.core-kotlin) domain model as implemented in Dart. It contains the domain model used in the [carp_mobile_sensing](https://pub.dev/packages/carp_mobile_sensing) framework and all of its supporting libraries, packages, etc.
+This package contains the [CARP Core](https://github.com/carp-dk/carp.core-kotlin?tab=readme-ov-file#carp-core-framework) domain model as implemented in Dart. It contains the domain model used in the [carp_mobile_sensing](https://pub.dev/packages/carp_mobile_sensing) framework and all of its supporting libraries, packages, etc.
 
 This package does nothing on its own.
 
@@ -21,7 +21,7 @@ This package does nothing on its own.
 
 * For documentation on how to use CAMS, see the [documentation](https://docs.carp.dk/carp-mobile-sensing/).
 
-* For a thorough description of the CARP Core domain model, see the [carp.core-kotlin](https://github.com/cph-cachet/carp.core-kotlin) repository. The [`example.dart`](https://pub.dev/packages/carp_core/example) of this package illustrates how the [Kotlin examples](https://github.com/cph-cachet/carp.core-kotlin#example) are implemented using Dart.
+* For a thorough description of the CARP Core domain model, see the [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin?tab=readme-ov-file#table-of-contents) documentation. The [`example.dart`](https://pub.dev/packages/carp_core/example) of this package illustrates how the [Kotlin examples](https://github.com/cph-cachet/carp.core-kotlin#example) are implemented using Dart.
 
 ## License
 

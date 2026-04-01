@@ -43,7 +43,7 @@ enum ClientManagerState { created, configured, disposed }
 /// Note that 'deploying' a study does not start data collection. Use the methods
 /// [resume] and [pause] to resume and pause data collection.
 class SmartPhoneClientManager
-    extends ClientManager<Smartphone, DeviceRegistration, SmartphoneStudy>
+    extends ClientManager<Smartphone, SmartphoneRegistration, SmartphoneStudy>
     with ChangeNotifier {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
 
@@ -141,7 +141,7 @@ class SmartPhoneClientManager
   /// If the client manager is already configured, this method will do nothing.
   @override
   Future<void> configure({
-    DeviceRegistration? registration,
+    SmartphoneRegistration? registration,
     DeploymentService? deploymentService,
     DeviceDataCollectorFactory? dataCollectorFactory,
     bool enableNotifications = true,

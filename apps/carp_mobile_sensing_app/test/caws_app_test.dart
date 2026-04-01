@@ -1,6 +1,7 @@
 // import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io';
 
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart' hide Smartphone;
@@ -30,6 +31,12 @@ void main() {
 
   // CarpApp app;
   late CarpUser user;
+
+  Future<void> writeToFile(String json, String fileName) async {
+    File file = File('test/json/$fileName');
+    await file.writeAsString(json);
+    print("Done writing '$fileName'");
+  }
 
   setUp(() async {
     Settings().debugLevel = DebugLevel.debug;
@@ -132,6 +139,11 @@ void main() {
       print(toJsonString(status));
     });
 
+    // The following tests check if we can use the custom SmartphoneRegistration.
+    // This fails - see issue #561.
+    // So - right now, there is a workaround, where we use the DefaultDeviceRegistration
+    // see [CamsDeviceRegistration.toDefaultDeviceRegistration] for more details.
+
     // You can only register the same primary device once - an IllegalArgumentException is thrown.
     test("- register smartphone device", () async {
       final status = await CarpDeploymentService().registerDevice(
@@ -142,15 +154,17 @@ void main() {
       print(toJsonString(status));
     });
 
-    // You can register the same connected device multiple times - no exception is thrown.
+    // You can only register a connected device once - an IllegalArgumentException is thrown.
     test("- register location service", () async {
       final status = await CarpDeploymentService().registerDevice(
         testDeploymentId,
         "Location Service",
-        LocationService().createRegistration(
-          deviceId: 'location-service-001',
-          deviceDisplayName: 'Android Location Service',
-        ),
+        LocationServiceManager().createRegistration(),
+
+        // LocationService().createRegistration(
+        //   deviceId: 'location-service-001',
+        //   deviceDisplayName: 'Android Location Service',
+        // ),
       );
       print(toJsonString(status));
     });
@@ -169,11 +183,37 @@ void main() {
         testDeploymentId,
       );
 
-      final study = await CarpDeploymentService().getDeviceDeploymentFor(
+      await writeToFile(toJsonString(status), 'deployment_status.json');
+
+      final deployment = await CarpDeploymentService().getDeviceDeploymentFor(
         status.studyDeploymentId,
         "Smartphone",
       );
-      print(toJsonString(study));
+      await writeToFile(toJsonString(deployment), 'deployment.json');
+    });
+
+    test('- mark deployed ', () async {
+      final deployment = await CarpDeploymentService().getDeviceDeploymentFor(
+        testDeploymentId,
+        "Smartphone",
+      );
+
+      await writeToFile(toJsonString(deployment), 'deployment_2.json');
+
+      print(
+        'Marking deployment as deployed - '
+        'deploymentId: ${deployment.studyDeploymentId}, '
+        'deviceRoleName: ${deployment.deviceRoleName}, '
+        'lastUpdatedOn: ${deployment.lastUpdatedOn}',
+      );
+
+      final status = await CarpDeploymentService().deviceDeployed(
+        deployment.studyDeploymentId,
+        deployment.deviceRoleName,
+        deployment.lastUpdatedOn,
+      );
+
+      await writeToFile(toJsonString(status), 'deployment_status_2.json');
     });
   });
 

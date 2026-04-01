@@ -95,7 +95,18 @@ class PrimaryDeviceDeployment with ChangeNotifier {
   /// The time when this device deployment was last updated.
   /// This corresponds to the most recent device registration as part of this
   /// device deployment.
-  DateTime get lastUpdatedOn => registration.registrationCreatedOn;
+  DateTime get lastUpdatedOn {
+    var latestUpdate = registration.registrationCreatedOn;
+
+    for (var registration in connectedDeviceRegistrations.values) {
+      if (registration != null &&
+          registration.registrationCreatedOn.isAfter(latestUpdate)) {
+        latestUpdate = registration.registrationCreatedOn;
+      }
+    }
+
+    return latestUpdate;
+  }
 
   /// Notify listeners that this deployment has been updated.
   void hasBeenUpdated() => notifyListeners();

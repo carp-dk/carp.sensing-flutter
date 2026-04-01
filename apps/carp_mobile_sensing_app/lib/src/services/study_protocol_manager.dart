@@ -92,7 +92,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
 
     // Add an app task that triggers after deployment with a notification.
     protocol.addTaskControl(
-      ElapsedTimeTrigger(elapsedTime: const Duration(minutes: 1)),
+      ElapsedTimeTrigger(elapsedTime: const Duration(minutes: 3)),
       AppTask(
         name: 'Device Info App Task',
         type: AppTask.SENSING_TYPE,
@@ -394,7 +394,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     // going back in time until the last collected data point.
     protocol.addTaskControl(
       // PeriodicTrigger(period: Duration(minutes: 60)),
-      PeriodicTrigger(period: Duration(minutes: 1)),
+      PeriodicTrigger(period: Duration(minutes: 5)),
       BackgroundTask(
         measures: [
           HealthSamplingPackage.getHealthMeasure([

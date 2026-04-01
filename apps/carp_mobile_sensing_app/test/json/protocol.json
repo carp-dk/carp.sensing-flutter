@@ -1,6 +1,7 @@
 {
  "applicationData": {
   "protocolApiLevel": "2.0",
+  "applicationName": "carp_mobile_sensing_app",
   "studyDescription": {
    "__type": "StudyDescription",
    "title": "CAMS App - Demo Study",
@@ -18,19 +19,26 @@
    "compress": true
   }
  },
- "deviceConfiguration": {
-  "__type": "dk.carp.cams.devices.Smartphone",
-  "roleName": "Smartphone",
-  "isOptional": false,
-  "defaultSamplingConfiguration": {},
-  "isPrimaryDevice": true
- },
- "registration": {
-  "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
-  "deviceId": "80d0ee8d-951b-40b4-99e5-e857bf848b1e",
-  "deviceDisplayName": "Samsung A20",
-  "registrationCreatedOn": "2026-03-27T10:36:20.090352Z"
- },
+ "id": "9e01d056-f7df-4295-9037-7709e048d166",
+ "createdOn": "2026-03-23T11:46:15.484714Z",
+ "version": 0,
+ "ownerId": "979b408d-784e-4b1b-bb1e-ff9204e072f3",
+ "name": "CAMS App - Demo Study Protocol",
+ "participantRoles": [
+  {
+   "role": "Participant",
+   "isOptional": false
+  }
+ ],
+ "primaryDevices": [
+  {
+   "__type": "dk.carp.cams.devices.Smartphone",
+   "roleName": "Smartphone",
+   "isOptional": false,
+   "defaultSamplingConfiguration": {},
+   "isPrimaryDevice": true
+  }
+ ],
  "connectedDevices": [
   {
    "__type": "dk.carp.cams.devices.LocationService",
@@ -65,14 +73,25 @@
    "defaultSamplingConfiguration": {}
   }
  ],
- "connectedDeviceRegistrations": {
-  "Location Service": {
-   "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
-   "deviceId": "9ef1ff29-4d24-4919-b4ef-64940d067d86",
-   "deviceDisplayName": "LocationManager",
-   "registrationCreatedOn": "2026-04-01T07:31:54.592127Z"
+ "connections": [
+  {
+   "roleName": "Location Service",
+   "connectedToRoleName": "Smartphone"
+  },
+  {
+   "roleName": "Weather Service",
+   "connectedToRoleName": "Smartphone"
+  },
+  {
+   "roleName": "Polar HR Device",
+   "connectedToRoleName": "Smartphone"
+  },
+  {
+   "roleName": "Health Service",
+   "connectedToRoleName": "Smartphone"
   }
- },
+ ],
+ "assignedDevices": {},
  "tasks": [
   {
    "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
@@ -141,78 +160,6 @@
    ]
   },
   {
-   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-   "name": "Task #10",
-   "measures": [
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.activity"
-    }
-   ]
-  },
-  {
-   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-   "name": "Task #13",
-   "measures": [
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.noise",
-     "overrideSamplingConfiguration": {
-      "__type": "dk.cachet.carp.common.application.sampling.PeriodicSamplingConfiguration",
-      "interval": 23000000,
-      "duration": 5000000
-     }
-    }
-   ]
-  },
-  {
-   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-   "name": "Task #14",
-   "measures": [
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.connectivity"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.wifi"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.bluetooth",
-     "overrideSamplingConfiguration": {
-      "__type": "dk.cachet.carp.common.application.sampling.PeriodicSamplingConfiguration",
-      "interval": 33000000,
-      "duration": 5000000
-     }
-    }
-   ]
-  },
-  {
-   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-   "name": "Task #15",
-   "measures": [
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.textmessage"
-    }
-   ]
-  },
-  {
-   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-   "name": "Task #17",
-   "measures": [
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.apps"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.appusage"
-    }
-   ]
-  },
-  {
    "__type": "dk.cachet.carp.common.application.tasks.AppTask",
    "name": "Device Info App Task",
    "measures": [
@@ -233,19 +180,11 @@
   },
   {
    "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-   "name": "Task #16",
+   "name": "Task #10",
    "measures": [
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.phonelog"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.textmessagelog"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.calendar"
+     "type": "dk.cachet.carp.activity"
     }
    ]
   },
@@ -306,6 +245,86 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.weather"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #13",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.noise",
+     "overrideSamplingConfiguration": {
+      "__type": "dk.cachet.carp.common.application.sampling.PeriodicSamplingConfiguration",
+      "interval": 23000000,
+      "duration": 5000000
+     }
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #14",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.connectivity"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.wifi"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.bluetooth",
+     "overrideSamplingConfiguration": {
+      "__type": "dk.cachet.carp.common.application.sampling.PeriodicSamplingConfiguration",
+      "interval": 33000000,
+      "duration": 5000000
+     }
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #15",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.textmessage"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #16",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.phonelog"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.textmessagelog"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.calendar"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #17",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.apps"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.appusage"
     }
    ]
   },
@@ -388,45 +407,69 @@
    "sourceDeviceRoleName": "Smartphone"
   },
   "2": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "3": {
    "__type": "dk.cachet.carp.common.application.triggers.ElapsedTimeTrigger",
    "sourceDeviceRoleName": "Smartphone",
    "elapsedTime": "PT180S"
   },
-  "3": {
-   "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-   "sourceDeviceRoleName": "Location Service"
-  },
   "4": {
    "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-   "sourceDeviceRoleName": "Location Service"
+   "sourceDeviceRoleName": "Smartphone"
   },
   "5": {
    "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-   "sourceDeviceRoleName": "Weather Service"
+   "sourceDeviceRoleName": "Location Service"
   },
   "6": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Location Service"
+  },
+  "7": {
+   "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
+   "sourceDeviceRoleName": "Weather Service"
+  },
+  "8": {
    "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
    "sourceDeviceRoleName": "Weather Service",
    "period": 300000000
   },
-  "7": {
+  "9": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "10": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "11": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "12": {
    "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
    "sourceDeviceRoleName": "Smartphone",
    "period": 120000000
   },
-  "8": {
+  "13": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "14": {
    "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
    "sourceDeviceRoleName": "Polar HR Device"
   },
-  "9": {
+  "15": {
    "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
    "sourceDeviceRoleName": "Polar HR Device"
   },
-  "10": {
+  "16": {
    "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
    "sourceDeviceRoleName": "Health Service"
   },
-  "11": {
+  "17": {
    "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
    "sourceDeviceRoleName": "Health Service",
    "period": 300000000
@@ -446,104 +489,101 @@
    "control": "Start"
   },
   {
-   "triggerId": 1,
+   "triggerId": 2,
    "taskName": "Task #9",
    "destinationDeviceRoleName": "Smartphone",
    "control": "Start"
   },
   {
-   "triggerId": 1,
-   "taskName": "Task #10",
-   "destinationDeviceRoleName": "Smartphone",
-   "control": "Start"
-  },
-  {
-   "triggerId": 1,
-   "taskName": "Task #13",
-   "destinationDeviceRoleName": "Smartphone",
-   "control": "Start"
-  },
-  {
-   "triggerId": 1,
-   "taskName": "Task #14",
-   "destinationDeviceRoleName": "Smartphone",
-   "control": "Start"
-  },
-  {
-   "triggerId": 1,
-   "taskName": "Task #15",
-   "destinationDeviceRoleName": "Smartphone",
-   "control": "Start"
-  },
-  {
-   "triggerId": 1,
-   "taskName": "Task #17",
-   "destinationDeviceRoleName": "Smartphone",
-   "control": "Start"
-  },
-  {
-   "triggerId": 2,
+   "triggerId": 3,
    "taskName": "Device Info App Task",
    "destinationDeviceRoleName": "Smartphone",
    "control": "Start"
   },
   {
-   "triggerId": 3,
+   "triggerId": 4,
+   "taskName": "Task #10",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 5,
    "taskName": "Monitoring Location Service",
    "destinationDeviceRoleName": "Location Service",
    "control": "Start"
   },
   {
-   "triggerId": 4,
+   "triggerId": 6,
    "taskName": "Task #11",
    "destinationDeviceRoleName": "Location Service",
    "control": "Start"
   },
   {
-   "triggerId": 5,
+   "triggerId": 7,
    "taskName": "Monitoring Weather Service",
    "destinationDeviceRoleName": "Weather Service",
    "control": "Start"
   },
   {
-   "triggerId": 6,
+   "triggerId": 8,
    "taskName": "Task #12",
    "destinationDeviceRoleName": "Weather Service",
    "control": "Start"
   },
   {
-   "triggerId": 7,
+   "triggerId": 9,
+   "taskName": "Task #13",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 10,
+   "taskName": "Task #14",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 11,
+   "taskName": "Task #15",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 12,
    "taskName": "Task #16",
    "destinationDeviceRoleName": "Smartphone",
    "control": "Start"
   },
   {
-   "triggerId": 8,
+   "triggerId": 13,
+   "taskName": "Task #17",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 14,
    "taskName": "Monitoring Polar HR Device",
    "destinationDeviceRoleName": "Polar HR Device",
    "control": "Start"
   },
   {
-   "triggerId": 9,
+   "triggerId": 15,
    "taskName": "Polar Task",
    "destinationDeviceRoleName": "Polar HR Device",
    "control": "Start"
   },
   {
-   "triggerId": 10,
+   "triggerId": 16,
    "taskName": "Monitoring Health Service",
    "destinationDeviceRoleName": "Health Service",
    "control": "Start"
   },
   {
-   "triggerId": 11,
+   "triggerId": 17,
    "taskName": "Task #18",
    "destinationDeviceRoleName": "Health Service",
    "control": "Start"
   }
  ],
- "expectedParticipantData": [],
- "studyDeploymentId": "d8e3d84f-0fd7-4ba9-8f41-7e0863807380",
- "deployed": "2026-04-01T07:32:44.989216Z",
- "status": "Invited"
+ "expectedParticipantData": []
 }

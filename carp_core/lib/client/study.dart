@@ -41,7 +41,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// The ID of the deployed study for which to collect data.
   String get studyDeploymentId => _studyDeploymentId;
 
-  /// The role name of the device in the deployment this study runtime participates in.
+  /// The role name of the primary device in the deployment this study runtime participates in.
   String get deviceRoleName => _deviceRoleName;
 
   /// The date and time when this study was created and added to the [ClientManager].
@@ -86,6 +86,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   void deviceDeploymentReceived([TDeviceDeployment? deployment]) {
     if (deploymentStatus == null) {
       deploymentError(
+        "$runtimeType - Deployment status is null. "
         "Can't receive device deployment before having received deployment status.",
       );
       return;
@@ -113,9 +114,12 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
     notifyListeners();
   }
 
-  /// Mark the [deployment] as updated. If [deployment] is null, nothing happens.
-  void deploymentUpdated() {
+  /// Mark the [deployment] as updated.
+  /// Print the optional [message] and notify listeners of a deployment update event.
+  /// If [deployment] is null, nothing happens.
+  void deploymentUpdated([String? message]) {
     if (deployment != null) {
+      if (message != null) print(message);
       createEvent(
         StudyStatusEvent(this, StudyStatusEventTypes.DeploymentUpdated),
       );
@@ -124,6 +128,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   }
 
   /// The deployment is in an error state.
+  /// Print the optional [message] and notify listeners of a deployment error event.
   void deploymentError([String? message]) {
     if (message != null) print(message);
     createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentError));

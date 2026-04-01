@@ -1,3 +1,7 @@
+## 2.1.0
+
+* fix of issue [#561](https://github.com/cph-cachet/carp.sensing-flutter/issues/561)
+
 ## 2.0.0
 
 * upgrade to reflect the latest CARP Core Kotlin domain model in the 'client' sub-system

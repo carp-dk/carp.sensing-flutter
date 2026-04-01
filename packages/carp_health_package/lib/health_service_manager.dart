@@ -57,11 +57,13 @@ class HealthServiceManager
 
   HealthServiceManager([HealthService? configuration])
     : super(HealthService.DEVICE_TYPE, configuration: configuration) {
-    Health().configure();
+    // Health().configure();
   }
 
   @override
   void onConfigure() {
+    Health().configure();
+
     if (Platform.isAndroid) {
       var sdkLevel = int.parse(DeviceInfoService().sdk ?? '-1');
       if (sdkLevel < 34) {

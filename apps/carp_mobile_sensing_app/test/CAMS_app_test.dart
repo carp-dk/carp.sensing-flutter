@@ -27,6 +27,12 @@ void main() {
 
   StudyProtocol? protocol;
 
+  Future<void> writeToFile(String json, String fileName) async {
+    File file = File('test/json/$fileName');
+    await file.writeAsString(json);
+    print("Done writing '$fileName'");
+  }
+
   setUpAll(() async {
     // Initialization of serialization
     CarpMobileSensing.ensureInitialized();
@@ -59,6 +65,9 @@ void main() {
     test('CAMSStudyProtocol -> JSON', () async {
       print(toJsonString(protocol));
       expect(protocol?.ownerId, accountId);
+
+      // used in the test below
+      await writeToFile(toJsonString(protocol), 'protocol.json');
     });
 
     test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
@@ -74,9 +83,7 @@ void main() {
     });
 
     test('JSON File -> StudyProtocol', () async {
-      final plainJson = File(
-        'test/json/study_protocol.json',
-      ).readAsStringSync();
+      final plainJson = File('test/json/protocol.json').readAsStringSync();
 
       final p = SmartphoneStudyProtocol.fromJson(
         json.decode(plainJson) as Map<String, dynamic>,

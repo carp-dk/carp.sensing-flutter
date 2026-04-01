@@ -143,10 +143,23 @@ class CarpDeploymentService extends CarpBaseService
     String studyDeploymentId,
     String deviceRoleName,
     DeviceRegistration registration,
-  ) async => StudyDeploymentStatus.fromJson(
-    await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration))
-        as Map<String, dynamic>,
-  );
+  ) async {
+    // => StudyDeploymentStatus.fromJson( await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration))
+    //     as Map<String, dynamic>,);
+
+    // TODO - due to issue #561 in CAWS, we need to only use a [DefaultDeviceRegistration] for now.
+
+    if (registration is CamsDeviceRegistration) {
+      registration = registration.toDefaultDeviceRegistration();
+    }
+
+    return StudyDeploymentStatus.fromJson(
+      await _rpc(
+            RegisterDevice(studyDeploymentId, deviceRoleName, registration),
+          )
+          as Map<String, dynamic>,
+    );
+  }
 
   /// Unregister the device with the specified [deviceRoleName] for the study
   /// deployment with [studyDeploymentId].
@@ -204,8 +217,9 @@ class CarpDeploymentService extends CarpBaseService
   /// CAWS throws IllegalArgumentException when:
   /// - a deployment with [studyDeploymentId] does not exist
   /// - [primaryDeviceRoleName] is not present in the deployment
-  /// - the [deviceDeploymentLastUpdatedOn] does not match the expected timestamp.
-  ///   The deployment might be outdated.
+  /// - the [deviceDeploymentLastUpdatedOn] does not match the expected timestamp
+  ///   of the deployment, indicating that the deployment on the device is outdated
+  ///   and needs to be updated before it can be deployed.
   ///
   /// CAWS throws IllegalStateException when the deployment cannot be deployed yet,
   /// or the deployment has stopped.

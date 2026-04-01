@@ -24,6 +24,18 @@ abstract class CamsDeviceRegistration extends DeviceRegistration {
     this.isConnected = false,
   });
 
+  /// Convert this [CamsDeviceRegistration] to a [DefaultDeviceRegistration]
+  /// with the same base properties.
+  ///
+  /// This is needed for registering the device in the [DeploymentService]
+  /// due to issue #561 - right now CAWS only can process a [DefaultDeviceRegistration].
+  DefaultDeviceRegistration toDefaultDeviceRegistration() =>
+      DefaultDeviceRegistration(
+        deviceId: deviceId,
+        deviceDisplayName: deviceDisplayName,
+        registrationCreatedOn: registrationCreatedOn,
+      );
+
   @override
   String get jsonType => '${CamsDevice.CAMS_DEVICE_NAMESPACE}.$runtimeType';
 }
@@ -59,7 +71,11 @@ class HardwareDeviceRegistration extends CamsDeviceRegistration {
     super.isConnected,
     this.batteryChargingState = BatteryChargingState.unknown,
     this.hardwareName,
-  }) : super(deviceDisplayName: deviceDisplayName ?? hardwareName);
+  }) : super(
+         deviceDisplayName:
+             deviceDisplayName ??
+             '$hardwareName [${batteryChargingState.name.toUpperCase()}]',
+       );
 
   @override
   Function get fromJsonFunction => _$HardwareDeviceRegistrationFromJson;
@@ -103,7 +119,7 @@ class SmartphoneRegistration extends HardwareDeviceRegistration {
 
   SmartphoneRegistration({
     super.deviceId,
-    super.deviceDisplayName,
+    String? deviceDisplayName,
     super.registrationCreatedOn,
     super.isConnected = true, // A smartphone is always connected.
     super.batteryChargingState,
@@ -115,7 +131,13 @@ class SmartphoneRegistration extends HardwareDeviceRegistration {
     this.operatingSystem,
     this.sdk,
     this.release,
-  }) : super();
+  }) : super(
+         deviceDisplayName:
+             deviceDisplayName ??
+             ((Platform.isAndroid)
+                 ? '$platform (${deviceManufacturer?.toUpperCase()}) - $deviceModel [SDK: $sdk]'
+                 : '$platform - $hardwareName [SDK: $sdk]'),
+       );
 
   @override
   Function get fromJsonFunction => _$SmartphoneRegistrationFromJson;

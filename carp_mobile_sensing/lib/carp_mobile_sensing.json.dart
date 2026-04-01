@@ -62,6 +62,7 @@ void _registerFromJsonFunctions() {
       destinationDeviceRoleName: '',
       control: Control.Start,
     ),
+    AppLifecycleEvent(''),
     CompletedTask(taskName: ''),
     CompletedAppTask(taskName: '', taskType: ''),
     Heartbeat(deviceRoleName: '', deviceType: ''),
@@ -78,6 +79,7 @@ void _registerFromJsonFunctions() {
     ScreenEvent(),
     Timezone(''),
     AmbientLight(3, 5, 7, 3),
+    StepEvent(steps: 0),
   ]);
 
   // CompletedAppTask sub-classes for different AppTask types

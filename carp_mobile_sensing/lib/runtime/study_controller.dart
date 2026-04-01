@@ -48,6 +48,9 @@ class SmartphoneStudyController {
   /// The study that this [SmartphoneStudyController] controls
   SmartphoneStudy get study => _study;
 
+  /// The deployment status of this [study].
+  StudyDeploymentStatus? get deploymentStatus => study.deploymentStatus;
+
   /// The deployment associated with this [study].
   SmartphoneDeployment? get deployment => study.deployment;
 
@@ -56,9 +59,9 @@ class SmartphoneStudyController {
   ///
   /// Returns an empty list if the deployment status is not available yet.
   List<DeviceConfiguration> get remainingDevicesToRegister =>
-      (study.deploymentStatus == null)
+      (deploymentStatus == null)
       ? []
-      : study.deploymentStatus!.deviceStatusList
+      : deploymentStatus!.deviceStatusList
             .where(
               (deviceStatus) =>
                   deviceStatus.status ==
@@ -141,10 +144,12 @@ class SmartphoneStudyController {
 
     info('$runtimeType - Configuring based on new deployment information...');
 
-    // Try to register the remaining connected devices with the deployment service.
+    // Try to re-register the remaining connected devices with the deployment service.
     // Note that we allow this to run asynchronously, since this is not critical to
     // deploying this study.
-    tryRegisterRemainingDevicesToRegister();
+    // TODO - this is not needed, since we re-connect below, which will trigger re-registration of devices. So we can probably remove this.
+    // tryRegisterRemainingDevicesToRegister();
+    // await tryReregisterRemainingDevices();
 
     // Initialize the data manager
     if (dataEndPoint != null) {
@@ -174,8 +179,10 @@ class SmartphoneStudyController {
     _executor.initialize(deployment!, deployment!);
     _executor.setSamplingState(existingSamplingStatus);
 
-    // Connect to all connectable devices, incl. this phone.
-    // (Re-)connecting a device will trigger that sampling is (re)started
+    // Connect to all connectable devices.
+    // (Re-)connecting a device will trigger that
+    //   - the device is re-registered with the deployment service,
+    //   - sampling is (re)started
     await _connectAllConnectableDevices();
 
     // start the study and restart data sampling
@@ -199,52 +206,76 @@ class SmartphoneStudyController {
   }
 
   /// Tries to register the connected [device] with the deployment service.
-  /// The [device] must be available in the device controller.
+  ///
+  /// The [device] must be:
+  ///  - a connected device (i.e., not the primary device),
+  ///  - connected to this phone, and
+  ///  - available in the device controller.
   Future<void> tryRegisterConnectedDevice(DeviceConfiguration device) async {
     final deviceType = device.type;
     final deviceRoleName = device.roleName;
 
+    if (deployment?.deviceConfiguration.roleName == deviceRoleName) {
+      warning(
+        "$runtimeType - Trying to register the primary device with role name "
+        "'$deviceRoleName' as a connected device for study deployment '${study.studyDeploymentId}'. "
+        "Primary devices are automatically registered when the deployment is received, "
+        "so this should not be necessary. Continuing without registration.",
+      );
+      return;
+    }
+
     info(
-      "$runtimeType - Trying to register device with role name "
+      "$runtimeType - Trying to register connected device with role name "
       "'$deviceRoleName' for study deployment '${study.studyDeploymentId}'.",
     );
 
-    // Check if this phone has this type of device.
-    if (_deviceController.hasDevice(deviceType)) {
-      DeviceManager deviceManager = _deviceController.getDeviceManager(
-        deviceType,
-      )!;
-
-      DeviceRegistration registration = deviceManager.createRegistration();
-
-      try {
-        final deploymentStatus = await _deploymentService.registerDevice(
-          study.studyDeploymentId,
-          deviceRoleName,
-          registration,
-        );
-
-        // Also update local deployment information about the connected device registrations,
-        // so that it is in sync with the deployment service.
-        if (device is! PrimaryDeviceConfiguration) {
-          deployment?.connectedDeviceRegistrations[deviceRoleName] =
-              registration;
-        }
-        study.deploymentStatusReceived(deploymentStatus);
-      } catch (error) {
-        warning(
-          "$runtimeType - Failed to register device with role name "
-          "'$deviceRoleName' for study deployment '${study.studyDeploymentId}' "
-          "at deployment service '$_deploymentService'.\n"
-          "Error: $error\n"
-          "Continuing without registration.",
-        );
-      }
-    } else {
+    // Check if this phone has this type of device
+    if (!_deviceController.hasDevice(deviceType)) {
       warning(
         "$runtimeType - Trying to register device of type '$deviceType' playing the role "
         "'$deviceRoleName' for study deployment '${study.studyDeploymentId}'. "
         "But this smartphone does not have such a type of device."
+        "Continuing without registration.",
+      );
+      return;
+    }
+
+    // Check if the device is connected.
+    DeviceManager deviceManager = _deviceController.getDeviceManager(
+      deviceType,
+    )!;
+
+    if (!deviceManager.isConnected) {
+      warning(
+        "$runtimeType - Trying to register device with role name '$deviceRoleName' "
+        "for study deployment '${study.studyDeploymentId}', "
+        "but this device is not connected. Continuing without registration.",
+      );
+      return;
+    }
+
+    // Now try to register this device with the deployment service.
+    DeviceRegistration registration = deviceManager.createRegistration();
+    try {
+      final deploymentStatus = await _deploymentService.registerDevice(
+        study.studyDeploymentId,
+        deviceRoleName,
+        registration,
+      );
+
+      // Also update local deployment information about the connected device registrations,
+      // so that it is in sync with the deployment service.
+      if (device is! PrimaryDeviceConfiguration) {
+        deployment?.connectedDeviceRegistrations[deviceRoleName] = registration;
+      }
+      study.deploymentStatusReceived(deploymentStatus);
+    } catch (error) {
+      warning(
+        "$runtimeType - Failed to register device with role name "
+        "'$deviceRoleName' for study deployment '${study.studyDeploymentId}' "
+        "at deployment service '$_deploymentService'.\n"
+        "Error: $error\n"
         "Continuing without registration.",
       );
     }
@@ -295,8 +326,9 @@ class SmartphoneStudyController {
   }
 
   /// Tries to re-register the [device] with the deployment service.
-  /// This entails trying to unregister the device and then trying to register
-  /// it again.
+  ///
+  /// Since there is no way to update a registration, this method first tries
+  /// to unregister the device and then tries to register it again.
   Future<void> tryReregisterDevice(DeviceConfiguration device) async {
     await tryUnregisterDisconnectedDevice(device);
     // Wait for a few seconds before trying to register the device again,
@@ -400,16 +432,33 @@ class SmartphoneStudyController {
 
     var manager = _deviceController.devices[configuration.type];
 
-    // Listen to status events for this device manager and try to re-register
-    // the device with the deployment service when a real device is connected.
-    manager?.statusEvents
-        .where((status) => status == DeviceStatus.connected)
-        .listen((_) => tryReregisterDevice(configuration));
+    // If this device is a connected device, listen to status events from the
+    // device manager and try to re-register the device with the deployment
+    // service when a real device is connected.
+    configuration is! PrimaryDeviceConfiguration
+        ? manager?.statusEvents
+              .where((status) => status == DeviceStatus.connected)
+              .listen((_) => tryReregisterDevice(configuration))
+        : null;
 
     // Now configure the device incl. any pre-registration information from the deployment
     var registration =
         deployment?.connectedDeviceRegistrations[configuration.roleName];
-    manager?.configure(configuration, registration);
+
+    // TODO - due to issue # 561 in CAWS we cannot use the device registration
+    // information to configure the device manager, since CAWS does not properly
+    // return the correct custom registrations.
+    //
+    // So for now we just configure the device manager without the registration
+    // information, which means that we cannot use any pre-registration information
+    // from the deployment.
+    // Once this issue is fixed in CAWS, we can update this code to use the
+    // registration information when configuring the device manager.
+    if (_deploymentService is SmartphoneDeploymentService) {
+      manager?.configure(configuration, registration);
+    } else {
+      manager?.configure(configuration);
+    }
   }
 
   /// Start connecting all connectable devices to be used in the [deployment]

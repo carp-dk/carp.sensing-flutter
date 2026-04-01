@@ -113,6 +113,7 @@
     <!-- Access health data in the foreground, which is required for the Health Connect 
     package to be able to read and write health data while the app is in the background. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
 
      <!-- Permissions for Health Connect -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
