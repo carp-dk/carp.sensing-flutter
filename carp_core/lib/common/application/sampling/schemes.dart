@@ -26,7 +26,7 @@ part of '../../../common.dart';
 ///    concrete [DeviceConfiguration], if none of the previous configurations
 ///    are present.
 ///
-/// See also the section on[Sampling schemes and configurations](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
+/// See also the section on[Sampling schemes and configurations](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
 /// in the CARP Core Framework.
 class DataTypeSamplingScheme {
   /// The data type this sampling scheme relates to.

@@ -121,7 +121,7 @@ class PrimaryDeviceDeployment with ChangeNotifier {
 
 /// A [DeviceDeploymentStatus] represents the status of a device in a deployment.
 ///
-/// See [DeviceDeploymentStatus.kt](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/DeviceDeploymentStatus.kt).
+/// See [DeviceDeploymentStatus.kt](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/DeviceDeploymentStatus.kt).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceDeploymentStatus extends Serializable {
   /// The description of the device.

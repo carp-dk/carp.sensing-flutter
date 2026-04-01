@@ -8,14 +8,14 @@ part of '../../deployment.dart';
 
 // -----------------------------------------------------
 // Participation Service Requests
-// See https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt
+// See https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt
 // -----------------------------------------------------
 
 /// A [ParticipationServiceRequest] and its sub-classes contain the data for
 /// sending a participant request to the CARP web service.
 ///
 /// All participant requests to the CARP Service is defined in
-/// [carp.core-kotlin](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt)
+/// [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt)
 abstract class ParticipationServiceRequest extends DeploymentServiceRequest {
   final String _serviceRequestPackageNamespace =
       'dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest';

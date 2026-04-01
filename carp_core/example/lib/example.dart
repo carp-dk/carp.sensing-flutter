@@ -4,15 +4,12 @@ import 'package:carp_core/carp_core.dart';
 import 'package:carp_serializable/carp_serializable.dart';
 
 // These examples tries to mimic the example from the carp_core Kotlin
-// example at https://github.com/cph-cachet/carp.core-kotlin#example
+// example at https://github.com/carp-dk/carp.core-kotlin#example
 //
 // These are a very simple examples showing the basic of carp_core.
 //
 // Examples of how carp_core is used in CARP Mobile Sensing (CAMS) can be
-// found at:
-//
-//   * https://github.com/cph-cachet/carp.sensing-flutter
-//   * https://github.com/cph-cachet/carp.sensing-flutter/wiki
+// found at https://docs.carp.dk/carp-mobile-sensing/
 
 /// Example of how to use the **protocol** sub-system domain models
 void carpCoreProtocolExample() async {

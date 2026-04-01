@@ -262,7 +262,7 @@ enum StudyDeploymentStatusTypes {
 /// A [StudyDeploymentStatus] represents the status of a deployment as returned
 /// from the CARP web service.
 ///
-/// See [StudyDeploymentStatus.kt](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/StudyDeploymentStatus.kt).
+/// See [StudyDeploymentStatus.kt](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/StudyDeploymentStatus.kt).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyDeploymentStatus extends Serializable {
   /// The status of this device deployment:

@@ -1,7 +1,16 @@
 name: carp_core
+version: 2.1.1
 description: The core domain model for the Copenhagen Research Platform (CARP) in Dart.
-version: 2.1.0
 homepage: https://github.com/carp-dk/carp.sensing-flutter
+repository: https://github.com/carp-dk/carp.sensing-flutter/tree/main/carp_core
+issue_tracker: https://github.com/carp-dk/carp.sensing-flutter/issues
+
+documentation: https://docs.carp.dk/carp-mobile-sensing/
+topics:
+  - mobile-sensing
+  - mobile-health
+  - sensors
+  - digital-phenotyping
 
 environment:
   sdk: ">=3.8.0 <4.0.0"

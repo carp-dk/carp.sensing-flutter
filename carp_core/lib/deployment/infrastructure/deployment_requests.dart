@@ -8,14 +8,14 @@ part of '../../deployment.dart';
 
 // -----------------------------------------------------
 // Deployment Service Requests
-// See https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt
+// See https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt
 // -----------------------------------------------------
 
 /// A [DeploymentServiceRequest] and all its sub-classes contain the data for
 /// sending a RPC request to the CARP web service.
 ///
 /// All deployment requests to the CARP Service is defined in
-/// [carp.core-kotlin](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt)
+/// [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt)
 abstract class DeploymentServiceRequest extends ServiceRequest {
   final String _infrastructurePackageNamespace =
       'dk.cachet.carp.deployments.infrastructure';
