@@ -15,7 +15,7 @@ See the [CARP Mobile Sensing Documentation][docs] for how to [install & configur
 
 ## Usage
 
-To use this plugin, add [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) as [dependencies in your `pubspec.yaml` file](https://flutter.io/platform-plugins/).
+To use this plugin, add [`carp_core`](https://pub.dev/packages/carp_core) and [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) as [dependencies in your `pubspec.yaml` file](https://flutter.io/platform-plugins/).
 
 `````yaml
 dependencies:
@@ -46,7 +46,7 @@ an overview of the available [measure types](https://docs.carp.dk/carp-mobile-se
 
 > [!NOTE]
 > More scientific documentation of CAMS is available in the following papers:
-> 
+>
 > * Bardram, Jakob E. "[The CARP Mobile Sensing Framework--A Cross-platform, Reactive, Programming Framework and Runtime Environment for Digital Phenotyping.](https://arxiv.org/abs/2006.11904)" arXiv preprint arXiv:2006.11904 (2020). [[pdf](https://arxiv.org/pdf/2006.11904.pdf)]
 > * Bardram, Jakob E. "[Software Architecture Patterns for Extending Sensing Capabilities and Data Formatting in Mobile Sensing.](https://www.mdpi.com/1424-8220/22/7/2813)" Sensors 22.7 (2022). [[pdf]](https://www.mdpi.com/1424-8220/22/7/2813/pdf).
 >
@@ -62,12 +62,13 @@ However, the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-f
 
 Below is a small primer in the use of CAMS for a very simple sampling study running locally on the phone. This example is similar to the [example app](https://github.com/carp-dk/carp.sensing-flutter/blob/main/carp_mobile_sensing/example/lib/main.dart) app.
 
-Following [`carp_core`](https://pub.dev/documentation/carp_core/latest/), a CAMS study can be configured, deployed, executed, and used in different steps:
+A CAMS study can be configured, deployed, executed, and used in different steps:
 
 1. Define a [`SmartphoneStudyProtocol`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SmartphoneStudyProtocol-class.html).
-2. Deploy this protocol to the [`SmartPhoneClientManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/SmartPhoneClientManager-class.html).
-3. Use the generated data (called `measurements`) locally in the app or specify how and where to store or upload it using a [`DataEndPoint`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DataEndPoint-class.html).
-4. Control the execution of the study, like calling [`start`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/SmartPhoneClientManager/start.html).
+2. Add a study based on this protocol to the [`SmartPhoneClientManager`](https://pub.dev/documentation/carp_mobile_sensing/latest/application/SmartPhoneClientManager-class.html).
+3. Deploy the study and resume sampling.
+4. Use the generated data (called `measurements`) locally in the app or specify how and where to store or upload it using a [`DataEndPoint`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DataEndPoint-class.html).
+5. Control the execution of the study, like calling `resume` or `pause` on the client, the study, or individual probes.
 
 ### Creating a study protocol and deploying it
 
@@ -104,12 +105,15 @@ final protocol =
 await SmartPhoneClientManager().configure();
 
 // Create a study based on the protocol.
-await SmartPhoneClientManager().addStudyFromProtocol(protocol);
+var study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
 
-/// Start the study.
-SmartPhoneClientManager().start();
+// Deploy the study.
+await SmartPhoneClientManager().tryDeployment(
+  study.studyDeploymentId,
+  study.deviceRoleName,
+);
 
-/// Resume sampling.
+// Resume sampling.
 SmartPhoneClientManager().resume();
 
 // Listening on the measurements stream.
@@ -129,11 +133,11 @@ SmartPhoneClientManager().dispose();
 ```
 
 The above example defines a simple [`SmartphoneStudyProtocol`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SmartphoneStudyProtocol-class.html) which will use a [`Smartphone`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/Smartphone-class.html) as a primary device for data collection and store data in a SQLite database locally on the phone using a [`SQLiteDataEndPoint`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SQLiteDataEndPoint-class.html).
-Sampling is configured by adding a [`TaskControl`](https://pub.dev/documentation/carp_core/latest/carp_core_common/TaskControl-class.html) to the protocol using a [`DelayedTrigger`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DelayedTrigger-class.html) which triggers a [`BackgroundTask`](https://pub.dev/documentation/carp_core/latest/carp_core_common/BackgroundTask-class.html) containing four different [`Measure`](https://pub.dev/documentation/carp_core/latest/carp_core_common/Measure-class.html)s.
+Sampling is configured using a [`DelayedTrigger`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DelayedTrigger-class.html) which triggers a [`BackgroundTask`](https://pub.dev/documentation/carp_core/latest/carp_core_common/BackgroundTask-class.html) containing four different [`Measure`](https://pub.dev/documentation/carp_core/latest/carp_core_common/Measure-class.html)s.
 When this study is resumed, the background task is started after a delay of 10 seconds, and will continue to collect the four measures until paused.
 
 Sampling can be configured in very sophisticated ways, by specifying different types of devices, task controls, triggers, tasks, measures, and sampling configurations.
-See the CAMS [docs][docs] for an overview and more details.
+See the CAMS [documentation][docs] for an overview and more details.
 
 ### Minimal example
 
@@ -154,9 +158,9 @@ SmartPhoneClientManager().configure().then(
         ),
       )
       .then(
-        (_) => SmartPhoneClientManager()
-          ..start()
-          ..resume(),
+        (study) => SmartPhoneClientManager()
+            .tryDeployment(study.studyDeploymentId, study.deviceRoleName)
+            .then((_) => SmartPhoneClientManager().resume()),
       ),
 );
 ```
@@ -188,7 +192,6 @@ Calling `SmartPhoneClientManager().dispose()` would dispose of the client manage
 ## Extending CAMS
 
 CAMS is designed to be extended in at least four ways:
-
 (i) adding new triggers,
 (ii) adding new data sampling capabilities and support for new devices,
 (iii) adding a new data manager for storing and uploading data, and
@@ -211,4 +214,3 @@ This software is available 'as-is' under a [MIT license](LICENSE).
 [tracker]: https://github.com/carp-dk/carp.sensing-flutter/issues
 [docs]: https://docs.carp.dk/carp-mobile-sensing/
 [carp]: https://carp.dk/
-[discord]: https://discord.gg/NKuUwCsV

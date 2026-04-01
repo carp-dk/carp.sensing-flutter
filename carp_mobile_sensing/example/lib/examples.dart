@@ -2,7 +2,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 /*
- * Copyright 2018-2024 the Technical University of Denmark (DTU).
+ * Copyright 2018 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -17,6 +17,8 @@ import 'package:carp_serializable/carp_serializable.dart';
 /// This is an example of how to set up a simple study.
 /// Used in the README file.
 Future<void> minimalExample() async {
+  // Create a protocol collecting steps, light, and screen and battery events
+  // from the phone and store collected measurements in a local SQLite database
   final protocol =
       SmartphoneStudyProtocol(
           ownerId: 'AB',

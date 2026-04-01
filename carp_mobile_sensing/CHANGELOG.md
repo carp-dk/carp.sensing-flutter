@@ -4,12 +4,12 @@ This release has two new main features: (i) to support adding, running, and remo
 
 * Update of the client software architecture to reflect the CARP Core client architecture. This - amongst other things - provides better support for `StudyStatus` in the client manager ([#504](https://github.com/cph-cachet/carp.sensing-flutter/issues/504))
 * Simplified configuration - now only the client and not the controller needs configuration.
-* Simplified deployment - now a study can be merely started and deployment happens automatically
 * Revised state machine model for executors, now using states 'resumed' and 'paused' instead of 'started' and 'stopped'
 * Added `AppLifecycleEvent` measure to collect life-cycle event from the app
-* Correct device registration in the deployment service.
+* Correct device registration in the deployment service ([#550](https://github.com/cph-cachet/carp.sensing-flutter/issues/550)).
 
-Note that CAMS now has a completely new [documentation](https://docs.carp.dk/carp-mobile-sensing/) site.
+The example app has also been update to illustrate how a client can run multiple studies ([#559](https://github.com/cph-cachet/carp.sensing-flutter/issues/559)).
+Also note that CAMS now has a completely new [documentation](https://docs.carp.dk/carp-mobile-sensing/) site.
 
 ## 1.13.1
 
