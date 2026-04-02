@@ -1,7 +1,7 @@
 # CARP Context Sampling Package
 
 [![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
-[![pub package](https://img.shields.io/pub/v/carp_mobile_sensing.svg)](https://pub.dartlang.org/packages/carp_mobile_sensing)
+[![pub package](https://img.shields.io/pub/v/carp_context_package.svg)](https://pub.dev/packages/carp_context_package)
 [![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
@@ -9,7 +9,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
 This library contains a sampling package for collection of contextual data to work with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework.
-This packages supports sampling of the following [`Measure`](http://docs.carp.dk/carp-mobile-sensing/measure-types) types:
+This package supports sampling of the following [`Measure`](http://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
 * `dk.cachet.carp.activity`
 * `dk.cachet.carp.location`
@@ -19,16 +19,16 @@ This packages supports sampling of the following [`Measure`](http://docs.carp.dk
 * `dk.cachet.carp.air_quality`
 
 See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
-See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
+See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
-For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter).
+For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/carp-dk/carp.sensing-flutter).
 
-If you're interested in writing you own sampling packages for CARP, see the description on
+If you're interested in writing your own sampling packages for CARP, see the description on
 how to [extend](http://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that this package only works together with [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing).
+To use this package, add the following to your `pubspec.yaml` file. Note that this package only works together with [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing).
 
 `````dart
 dependencies:
@@ -39,10 +39,10 @@ dependencies:
 
 ## Location Permissions
 
-This context package make use of what Apple and Google denote as sensitive information, especially location. Therefore it is important to configure the app to access location information. Please read carefully the [**instructions on how to setup the permission_handler plugin**]( https://pub.dev/packages/permission_handler#setup) - both for Android and iOS.
+This context package makes use of what Apple and Google denote as sensitive information, especially location. Therefore it is important to configure the app to access location information. Please read carefully the [**instructions on how to set up the permission_handler plugin**]( https://pub.dev/packages/permission_handler#setup) - both for Android and iOS.
 
 > [!IMPORTANT]  
-> This context package **DOES NOT** asks for accessing location. This should be done by the app since the app should (according to the Apple and Google guidelines) tell the user why location is accessed. The Android Developers documentation contain a good description of how to [request location access at runtime](https://developer.android.com/develop/sensors-and-location/location/permissions#request-location-access-runtime).
+> This context package **DOES NOT** ask for location access. This should be done by the app since the app should (according to the Apple and Google guidelines) tell the user why location is accessed. The Android Developers documentation contains a good description of how to [request location access at runtime](https://developer.android.com/develop/sensors-and-location/location/permissions#request-location-access-runtime).
 
 ### Android
 
@@ -151,7 +151,7 @@ To use this package, import it into your app together with the
 `````dart
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-import 'package:carp_context_package/context.dart';
+import 'package:carp_context_package/carp_context_package.dart';
 `````
 
 Before creating a study and running it, register this package in the [`SamplingPackageRegistry`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
@@ -237,7 +237,7 @@ protocol.addTaskControl(
 
 ### Weather and Air Quality Measures
 
-The `WEATHER` and `AIR_QUALITY` measures uses the online [Open Weather API](https://openweathermap.org/api) and [Air Quality Open Data Platform](https://aqicn.org/data-platform/token/#/), respectively.
+The `WEATHER` and `AIR_QUALITY` measure types use the online [Open Weather API](https://openweathermap.org/api) and [Air Quality Open Data Platform](https://aqicn.org/data-platform/token/#/), respectively.
 In order to use these services, you need to obtain an API key from each of them.
 Once you have this, these services can be configured and added to a protocol like this:
 

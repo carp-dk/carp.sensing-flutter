@@ -11,7 +11,7 @@ import 'package:carp_context_package/carp_context_package.dart';
 /// needs to be deployed and executed in the CAMS framework.
 ///
 /// See the documentation on how to use CAMS:
-/// https://github.com/cph-cachet/carp.sensing-flutter/wiki
+/// https://docs.carp.dk/carp-mobile-sensing/
 void main() async {
   // register this sampling package before using its measures
   SamplingPackageRegistry().register(ContextSamplingPackage());
