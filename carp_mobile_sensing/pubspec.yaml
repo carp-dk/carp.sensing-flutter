@@ -1,9 +1,12 @@
 name: carp_mobile_sensing
-version: 2.1.0
+version: 2.1.1
 description: Mobile Sensing Framework for Flutter. A software framework for collecting sensor data from the phone and attached wearable devices via probes. Can be extended.
-homepage: https://github.com/carp-dk/carp.sensing-flutter
-repository: https://github.com/carp-dk/carp.sensing-flutter/tree/main/carp_mobile_sensing
-issue_tracker: https://github.com/carp-dk/carp.sensing-flutter/issues
+
+# Note that the following URLs to GitHub should use the old 'cph-cachet' name. 
+# It seems like the pub.dev analyzer can't figure out that the name has changed.
+homepage: https://github.com/cph-cachet/carp.sensing-flutter
+repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/carp_mobile_sensing
+issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
 
 documentation: https://docs.carp.dk/carp-mobile-sensing/
 topics:
@@ -38,7 +41,7 @@ dependencies:
   archive: ^4.0.0
   permission_handler: '>=11.0.0 <13.0.0'  # For requesting permissions on Android and iOS
   shared_preferences: ^2.2.0
-  package_info_plus: '>=6.0.0 <10.0.0'
+  package_info_plus: ^9.0.0
   flutter_local_notifications: ^21.0.0    # For sending notification on AppTask
   cron: ^0.6.0                            # For scheduling / triggering cron jobs
   timezone: '>=0.10.0 <0.12.0'            # For collecting time zone information
