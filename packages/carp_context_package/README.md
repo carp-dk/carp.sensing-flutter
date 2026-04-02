@@ -8,8 +8,8 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
-This library contains a sampling package for collection of contextual data to work with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework.
-This package supports sampling of the following [`Measure`](http://docs.carp.dk/carp-mobile-sensing/measure-types) types:
+This library contains a sampling package for collection of contextual data to work with the [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) framework.
+This package supports sampling of the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
 * `dk.cachet.carp.activity`
 * `dk.cachet.carp.location`
@@ -24,7 +24,7 @@ See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutte
 For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/carp-dk/carp.sensing-flutter).
 
 If you're interested in writing your own sampling packages for CARP, see the description on
-how to [extend](http://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
+how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
@@ -146,7 +146,7 @@ Also - make sure to activate Background mode for your Runner. Open XCode and go 
 ## Using it
 
 To use this package, import it into your app together with the
-[`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) package:
+[`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) package:
 
 `````dart
 import 'package:carp_core/carp_core.dart';
@@ -258,7 +258,7 @@ protocol.addTaskControl(
 final airQualityService = AirQualityService(apiKey: 'WAQI_API_key_goes_here');
 protocol.addConnectedDevice(airQualityService, phone);
 
-// Add a background task that air quality every 30 minutes.
+// Add a background task that collects air quality every 30 minutes.
 protocol.addTaskControl(
     PeriodicTrigger(period: Duration(minutes: 30)),
     BackgroundTask(measures: [
@@ -267,6 +267,6 @@ protocol.addTaskControl(
     airQualityService);
 ```
 
-Note that the weather and air quality measures are so-called "[one-time measures](http://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures)" and collect data once when triggered (in contrast to "event-based measures").
+Note that the weather and air quality measures are so-called "[one-time measures](https://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures)" and collect data once when triggered (in contrast to "event-based measures").
 
 See the `example.dart` file for more examples of how to set up a CAMS study protocol for this context sampling package.

@@ -1,4 +1,4 @@
-## 2.1.1
+## 2.1.2
 
 * fix of issue [#561](https://github.com/carp-dk/carp.sensing-flutter/issues/561)
 * upgrade of pubspec to latest standard.
