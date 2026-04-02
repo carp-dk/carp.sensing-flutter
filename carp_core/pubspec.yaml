@@ -1,6 +1,9 @@
 name: carp_core
 version: 2.1.2
 description: The core domain model for the Copenhagen Research Platform (CARP) in Dart.
+
+# Note that the following URLs to GitHub should use the old 'cph-cachet' name. 
+# It seems like the pub.dev analyzer can't figure out that the name has changed.
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/carp_core
 issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
