@@ -93,9 +93,6 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
       : (await manager.enable().then((_) => DeviceStatus.connected));
 
   @override
-  Future<bool> onDisconnect() async => true;
-
-  @override
   Future<bool> onHasPermissions() async => await manager.hasPermission();
 
   @override

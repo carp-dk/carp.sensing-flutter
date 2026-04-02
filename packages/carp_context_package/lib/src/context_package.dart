@@ -261,7 +261,7 @@ abstract class ContextServiceManager<
   }
 
   @override
-  bool get canConnect => true; // online services can always connect
+  bool get canConnect => true; // most online services can always connect - override if not...
 
   @override
   bool get shouldConnect => true; // online services should always connect

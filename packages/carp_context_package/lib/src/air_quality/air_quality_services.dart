@@ -50,20 +50,9 @@ class AirQualityServiceManager
     : super(AirQualityService.DEVICE_TYPE, configuration: configuration);
 
   @override
-  Future<bool> onHasPermissions() async =>
-      (await Permission.locationWhenInUse.status).isGranted;
-
-  @override
-  Future<void> onRequestPermissions() async =>
-      await LocationManager().requestPermission();
-
-  @override
   bool get canConnect => configuration?.apiKey != null;
 
   @override
   Future<DeviceStatus> onConnect() async =>
       (service != null) ? DeviceStatus.connected : DeviceStatus.disconnected;
-
-  @override
-  Future<bool> onDisconnect() async => true;
 }

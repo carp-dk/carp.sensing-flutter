@@ -102,7 +102,7 @@ class LocationManager {
   /// This method is, however, **NOT** used by this context sampling package, since
   /// handling of permissions should be taken care of on an app level.
   Future<PermissionStatus> requestPermission() async {
-    // fast out if not configured
+    // Fast out if not configured
     if (!configured) {
       warning(
         '$runtimeType - is not configured. '

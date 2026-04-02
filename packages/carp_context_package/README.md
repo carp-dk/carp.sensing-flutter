@@ -1,13 +1,15 @@
 # CARP Context Sampling Package
 
-[![pub package](https://img.shields.io/pub/v/carp_context_package.svg)](https://pub.dartlang.org/packages/carp_context_package)
-[![pub points](https://img.shields.io/pub/points/carp_context_package?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_context_package/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_mobile_sensing.svg)](https://pub.dartlang.org/packages/carp_mobile_sensing)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
 This library contains a sampling package for collection of contextual data to work with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework.
-This packages supports sampling of the following [`Measure`](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types) types:
+This packages supports sampling of the following [`Measure`](http://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
 * `dk.cachet.carp.activity`
 * `dk.cachet.carp.location`
@@ -16,13 +18,13 @@ This packages supports sampling of the following [`Measure`](https://github.com/
 * `dk.cachet.carp.weather`
 * `dk.cachet.carp.air_quality`
 
-See the [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki) for further documentation, particularly on available [measure types](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types).
+See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
 See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
 For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter).
 
 If you're interested in writing you own sampling packages for CARP, see the description on
-how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing) CARP Mobile Sensing on the wiki.
+how to [extend](http://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
@@ -53,17 +55,15 @@ Add the following to your app's `AndroidManifest.xml` file located in `android/a
 
    ...
    
-    <!-- The following permissions are used in the Context Package -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
-    <!-- For Android 9 (API 28 and earlier), use: -->
-    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    <!-- for Android 9 (API 28 and below), use: -->
+    <uses-permission 
+        android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" 
+        android:maxSdkVersion="28" />
     <!-- for Android 10 (API 29 and later), use: -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
@@ -110,7 +110,7 @@ post_install do |installer|
         '$(inherited)',
         # See https://pub.dev/packages/permission_handler#setup - under iOS setup
 
-        # the app uses the following permissions:
+        # The context package uses the following permissions:
         'PERMISSION_LOCATION=1',      # Location access
         'PERMISSION_NOTIFICATIONS=1', # CARP Mobile Sensing uses notifications
         'PERMISSION_SENSORS=1',       # Core Motion sensors on iOS (pedometer)
@@ -266,5 +266,7 @@ protocol.addTaskControl(
     ]),
     airQualityService);
 ```
+
+Note that the weather and air quality measures are so-called "[one-time measures](http://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures)" and collect data once when triggered (in contrast to "event-based measures").
 
 See the `example.dart` file for more examples of how to set up a CAMS study protocol for this context sampling package.
