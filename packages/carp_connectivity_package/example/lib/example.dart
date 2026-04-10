@@ -1,6 +1,6 @@
 // ignore_for_file: unused_local_variable
 
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_connectivity_package/connectivity.dart';
 
@@ -26,31 +26,38 @@ void main() async {
   // Add an automatic task that immediately starts collecting connectivity,
   // wifi information, and nearby bluetooth devices.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
         Measure(type: ConnectivitySamplingPackage.CONNECTIVITY),
         Measure(type: ConnectivitySamplingPackage.WIFI),
         Measure(type: ConnectivitySamplingPackage.BLUETOOTH),
-      ]),
-      phone);
+      ],
+    ),
+    phone,
+  );
 
   // If you want to scan for nearby bluetooth devices, you can use a
   // [BluetoothScanPeriodicSamplingConfiguration] to configure the scan.
   // This will scan for bluetooth devices every 10 minutes for 10 seconds.
   // You can also filter by remoteIds and services.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
         Measure(
-            type: ConnectivitySamplingPackage.BLUETOOTH,
-            samplingConfiguration: BluetoothScanPeriodicSamplingConfiguration(
-              interval: const Duration(minutes: 20),
-              duration: const Duration(seconds: 15),
-              withRemoteIds: ['123', '456'],
-              withServices: ['service1', 'service2'],
-            ))
-      ]),
-      phone);
+          type: ConnectivitySamplingPackage.BLUETOOTH,
+          samplingConfiguration: BluetoothScanPeriodicSamplingConfiguration(
+            interval: const Duration(minutes: 20),
+            duration: const Duration(seconds: 15),
+            withRemoteIds: ['123', '456'],
+            withServices: ['service1', 'service2'],
+          ),
+        ),
+      ],
+    ),
+    phone,
+  );
 
   // If you want to collect iBeacon measurements, you can use a
   // [BeaconRangingPeriodicSamplingConfiguration] to configure the scan.
@@ -60,23 +67,27 @@ void main() async {
   // See the dchs_flutter_beacon plugin for more information on how to set up
   // iBeacon regions.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
         Measure(
-            type: ConnectivitySamplingPackage.BEACON,
-            samplingConfiguration: BeaconRangingPeriodicSamplingConfiguration(
-              beaconDistance: 2,
-              beaconRegions: [
-                BeaconRegion(
-                  identifier: 'region1',
-                  uuid: '12345678-1234-1234-1234-123456789012',
-                ),
-                BeaconRegion(
-                  identifier: 'region2',
-                  uuid: '12345678-1234-1234-1234-123456789012',
-                ),
-              ],
-            ))
-      ]),
-      phone);
+          type: ConnectivitySamplingPackage.BEACON,
+          samplingConfiguration: BeaconRangingPeriodicSamplingConfiguration(
+            beaconDistance: 2,
+            beaconRegions: [
+              BeaconRegion(
+                identifier: 'region1',
+                uuid: '12345678-1234-1234-1234-123456789012',
+              ),
+              BeaconRegion(
+                identifier: 'region2',
+                uuid: '12345678-1234-1234-1234-123456789012',
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+    phone,
+  );
 }
