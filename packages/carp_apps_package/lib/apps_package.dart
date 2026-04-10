@@ -17,35 +17,38 @@ class AppsSamplingPackage extends SmartphoneSamplingPackage {
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(CamsDataTypeMetaData(
-          type: APPS,
-          displayName: "Installed Apps",
-          timeType: DataTimeType.POINT,
-          dataEventType: DataEventType.ONE_TIME,
-        )),
         DataTypeSamplingScheme(
-            CamsDataTypeMetaData(
-              type: APP_USAGE,
-              displayName: "App Usage",
-              timeType: DataTimeType.TIME_SPAN,
-              dataEventType: DataEventType.ONE_TIME,
-            ),
-            HistoricSamplingConfiguration(
-              future: Duration.zero,
-              past: Duration(days: 1),
-            ))
+          CamsDataTypeMetaData(
+            type: APPS,
+            displayName: "Installed Apps",
+            timeType: DataTimeType.POINT,
+            dataEventType: DataEventType.ONE_TIME,
+          ),
+        ),
+        DataTypeSamplingScheme(
+          CamsDataTypeMetaData(
+            type: APP_USAGE,
+            displayName: "App Usage",
+            timeType: DataTimeType.TIME_SPAN,
+            dataEventType: DataEventType.ONE_TIME,
+          ),
+          HistoricSamplingConfiguration(
+            future: Duration.zero,
+            past: Duration(days: 1),
+          ),
+        ),
       ]);
 
   @override
   Probe? create(String type) => switch (type) {
-        APPS => (Platform.isAndroid) ? AppsProbe() : null,
-        APP_USAGE => (Platform.isAndroid) ? AppUsageProbe() : null,
-        _ => null,
-      };
+    APPS => (Platform.isAndroid) ? AppsProbe() : null,
+    APP_USAGE => (Platform.isAndroid) ? AppUsageProbe() : null,
+    _ => null,
+  };
 
   @override
   void onRegister() => FromJsonFactory().registerAll([
-        Apps([]),
-        AppUsage(DateTime.now(), DateTime.now()),
-      ]);
+    Apps([]),
+    AppUsage(DateTime.now(), DateTime.now()),
+  ]);
 }

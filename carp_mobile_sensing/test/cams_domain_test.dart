@@ -11,11 +11,8 @@ void main() {
   late Smartphone primaryPhone;
   DeviceConfiguration eSense;
 
-  Future<void> writeToFile(String json, String fileName) async {
-    File file = File('test/json/$fileName');
-    await file.writeAsString(json);
-    print("Done writing '$fileName'");
-  }
+  Future<void> writeToFile(String json, String fileName) async =>
+      await File('test/json/$fileName').writeAsString(json);
 
   setUp(() {
     // Initialization of serialization
