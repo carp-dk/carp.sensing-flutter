@@ -14,6 +14,9 @@ String _encode(Object object) =>
 void main() {
   late StudyProtocol protocol;
 
+  Future<void> writeToFile(String json, String fileName) async =>
+      await File('test/json/$fileName').writeAsString(json);
+
   setUp(() {
     // Initialization of serialization
     CarpMobileSensing.ensureInitialized();
@@ -115,6 +118,9 @@ void main() {
     expect(protocol, isNotNull);
     print(protocol);
     print(toJsonString(protocol));
+
+    // used in the test below
+    await writeToFile(toJsonString(protocol), 'protocol.json');
   });
 
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {

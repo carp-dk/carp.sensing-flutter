@@ -127,10 +127,9 @@ class TextMessageProbe extends StreamProbe {
 ///
 /// See [CalendarMeasure] for how to configure this probe's measure.
 class CalendarProbe extends MeasurementProbe {
-  final _deviceCalendar = cal.DeviceCalendarPlugin();
+  final _deviceCalendar = cal.DeviceCalendar.instance;
   List<cal.Calendar>? _calendars;
   late Iterator<cal.Calendar> _calendarIterator;
-  List<CalendarEvent> _events = [];
   DateTime? startDate, endDate;
 
   @override
@@ -142,15 +141,18 @@ class CalendarProbe extends MeasurementProbe {
   Future<bool> _retrieveCalendars() async {
     // try to get permission to access calendar
     var permissionsGranted = await _deviceCalendar.hasPermissions();
-    if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
+
+    if (permissionsGranted != cal.CalendarPermissionStatus.granted &&
+        permissionsGranted == cal.CalendarPermissionStatus.notDetermined) {
+      // User hasn't been asked yet - now we can prompt
       permissionsGranted = await _deviceCalendar.requestPermissions();
-      if (!permissionsGranted.isSuccess || !permissionsGranted.data!) {
+      // If permissions are still not granted, we cannot proceed.
+      if (permissionsGranted != cal.CalendarPermissionStatus.granted) {
         return false;
       }
     }
 
-    final calendarsResult = await _deviceCalendar.retrieveCalendars();
-    _calendars = calendarsResult.data;
+    _calendars = await _deviceCalendar.listCalendars();
     return true;
   }
 
@@ -158,49 +160,23 @@ class CalendarProbe extends MeasurementProbe {
   HistoricSamplingConfiguration get samplingConfiguration =>
       super.samplingConfiguration as HistoricSamplingConfiguration;
 
-  // Collects events from a calendar.
-  Future<bool> _retrieveEvents(cal.Calendar calendar) async {
-    startDate = DateTime.now().subtract(samplingConfiguration.past);
-    endDate = DateTime.now().add(samplingConfiguration.future);
-
-    var calendarEventsResult = await _deviceCalendar.retrieveEvents(
-      calendar.id,
-      cal.RetrieveEventsParams(startDate: startDate, endDate: endDate),
-    );
-    List<cal.Event>? calendarEvents = calendarEventsResult.data;
-    if (calendarEvents != null) {
-      for (var event in calendarEvents) {
-        _events.add(CalendarEvent.fromEvent(event));
-      }
-    } else {
-      return false;
-    }
-
-    // recursively collect events from the next calendar in the iterator
-    if (_calendarIterator.moveNext()) {
-      return await _retrieveEvents(_calendarIterator.current);
-    }
-
-    return true;
-  }
-
-  /// Get the [Calendar] measurement.
+  /// Get the [Calendar] measurement for all events in the calendar between
+  /// [startDate] and [endDate].
   @override
   Future<Measurement> getMeasurement() async {
     if (_calendars == null) await _retrieveCalendars();
 
     if (_calendars != null) {
-      _events = [];
-      _calendarIterator = _calendars!.iterator;
-
-      if (_calendarIterator.moveNext()) {
-        await _retrieveEvents(_calendarIterator.current);
-      }
+      // Get all events from all calendars.
+      var events = await _deviceCalendar.listEvents(startDate!, endDate!);
 
       return Measurement(
         sensorStartTime: startDate!.microsecondsSinceEpoch,
         sensorEndTime: endDate?.microsecondsSinceEpoch,
-        data: Calendar(startDate!, endDate!)..calendarEvents = _events,
+        data: Calendar(startDate!, endDate!)
+          ..calendarEvents = events
+              .map((event) => CalendarEvent.fromEvent(event))
+              .toList(),
       );
     } else {
       return Measurement.fromData(

@@ -1,14 +1,15 @@
 # CARP Communication Sampling Package
 
-[![pub package](https://img.shields.io/pub/v/carp_communication_package.svg)](https://pub.dartlang.org/packages/carp_communication_package)
-[![pub points](https://img.shields.io/pub/points/carp_communication_package?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_communication_package/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_communication_package.svg)](https://pub.dev/packages/carp_communication_package)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
-This library contains a sampling package for communication sampling to work with
-the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) package.
-This packages supports sampling of the following [`Measure`](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types) types:
+This library contains a sampling package for collection of contextual data to work with the [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) framework.
+This package supports sampling of the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
 * `dk.cachet.carp.phone_log` - the phone log.
 * `dk.cachet.carp.text_message_log` - the text (sms) message log.
@@ -17,27 +18,39 @@ This packages supports sampling of the following [`Measure`](https://github.com/
 
 Note that collection of phone and text message data is only supported on Android.
 
-See the [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki) for further documentation, particularly on available [measure types](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types).
-See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
+See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
+See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
-This package have implemented default privacy protection of text messages, phone numbers, and calendar entries as part of the default [Privacy Schema](https://github.com/cph-cachet/carp.sensing-flutter/wiki/3.-Using-CARP-Mobile-Sensing#privacy-transformer-schemas). These functions are implemented in the `communication_privacy.dart` file and use standard SHA1 hashing.
+This package have implemented default privacy protection of text messages, phone numbers, and calendar entries as part of the default [Privacy Schema](https://docs.carp.dk/carp-mobile-sensing/data-transformation-and-privacy#privacy-transformer-schemas). These functions are implemented in the `communication_privacy.dart` file and use standard SHA1 hashing.
 
 For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter/).
 
-If you're interested in writing you own sampling packages for CARP, see the description on
-how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing) CARP on the wiki.
+If you're interested in writing your own sampling packages for CARP, see the description on
+how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
 To use this package, add the following to you `pubspc.yaml` file. Note that
 this package only works together with `carp_mobile_sensing`.
 
-`````dart
+```yaml
 dependencies:
   carp_mobile_sensing: ^latest
   carp_communication_package: ^latest
   ...
-`````
+```
+
+> [!IMPORTANT]  
+> The current version (4.3.3) of [device_calendar](https://pub.dev/packages/device_calendar) is [not upgraded to use the latest version of timezone](https://github.com/builttoroam/device_calendar/issues/586).
+> Therefore, you need to override the dependecies in your app to use a local clone, like this:
+
+```yaml
+dependency_overrides:
+
+  # issue #586
+  device_calendar:
+    git: https://github.com/bardram/device_calendar
+```
 
 ### Android Integration
 
@@ -98,14 +111,14 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_communication_package/communication.dart';
 `````
 
-Before creating a study and running it, register this package in the
-[SamplingPackageRegistry](https://pub.dartlang.org/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry.html).
+Before creating a study and running it, register this package in the [`SamplingPackageRegistry`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
 
 `````dart
 SamplingPackageRegistry().register(CommunicationSamplingPackage());
 `````
 
-Collection of communication measures can be added to a study protocol like this.
+Collection of communication measures can be added to a study protocol as shown below.
+Note that `TEXT_MESSAGE` is an [event-based measure](https://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures) collected whenever a new text messages is received, whereas the other measures are [one-time measures](https://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures), which can be fetched using different triggers (in the protocol below, this is done periodically).
 
 ```dart
 // Create a study protocol

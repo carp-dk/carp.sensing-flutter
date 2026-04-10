@@ -127,7 +127,9 @@ CalendarEvent _$CalendarEventFromJson(Map<String, dynamic> json) =>
       json['end'] == null ? null : DateTime.parse(json['end'] as String),
       json['allDay'] as bool?,
       json['location'] as String?,
-      (json['attendees'] as List<dynamic>?)?.map((e) => e as String?).toList(),
+      json['status'] as String?,
+      json['timeZone'] as String?,
+      json['isRecurring'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$CalendarEventToJson(CalendarEvent instance) =>
@@ -140,5 +142,7 @@ Map<String, dynamic> _$CalendarEventToJson(CalendarEvent instance) =>
       'end': ?instance.end?.toIso8601String(),
       'allDay': ?instance.allDay,
       'location': ?instance.location,
-      'attendees': ?instance.attendees,
+      'status': ?instance.status,
+      'timeZone': ?instance.timeZone,
+      'isRecurring': instance.isRecurring,
     };

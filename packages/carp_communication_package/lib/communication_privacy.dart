@@ -89,11 +89,6 @@ CalendarEvent calendarEventAnonymizer(CalendarEvent event) {
         .convert(utf8.encode(event.description!))
         .toString();
   }
-  if (event.attendees != null) {
-    event.attendees = event.attendees!
-        .map((name) => sha1.convert(utf8.encode(name!)).toString())
-        .toList();
-  }
 
   return event;
 }

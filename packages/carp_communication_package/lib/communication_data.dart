@@ -229,8 +229,16 @@ class CalendarEvent {
   /// The location of this event
   String? location;
 
-  /// A list of attendees' name for this event
-  List<String?>? attendees;
+  /// Status of the event.
+  final String? status;
+
+  /// Timezone identifier for the event (e.g., "America/New_York").
+  /// Null for all-day events (floating dates).
+  final String? timeZone;
+
+  /// Whether this is a recurring event.
+  /// True for recurring events, false for one-time events.
+  final bool isRecurring;
 
   CalendarEvent([
     this.eventId,
@@ -241,7 +249,9 @@ class CalendarEvent {
     this.end,
     this.allDay,
     this.location,
-    this.attendees,
+    this.status,
+    this.timeZone,
+    this.isRecurring = false,
   ]);
 
   factory CalendarEvent.fromEvent(cal.Event event) {
@@ -250,11 +260,13 @@ class CalendarEvent {
       event.calendarId,
       event.title,
       event.description,
-      event.start!.toUtc(),
-      event.end!.toUtc(),
-      event.allDay,
+      event.startDate.toUtc(),
+      event.endDate.toUtc(),
+      event.isAllDay,
       event.location,
-      event.attendees!.map((attendees) => attendees!.name).toList(),
+      event.status.name,
+      event.timeZone,
+      event.isRecurring,
     );
   }
 
