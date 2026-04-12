@@ -9,8 +9,8 @@ part of 'carp_movisens_package.dart';
 /// A [DeviceConfiguration] for a Movisens device used in a [StudyProtocol].
 ///
 /// This device descriptor defined the basic configuration of the Movisens
-/// device, including [deviceName], the [sensorLocation]
-/// and the [weight], [height], [age], [sex] of the user using the device.
+/// device, including [sensorLocation] on the body, and the user parameters
+/// [weight], [height], [age], [sex] of the user using the device.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of a Movisens device.
@@ -58,7 +58,7 @@ class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
 
 /// A Movisens [DeviceManager].
 ///
-/// Note that the Movisens device manager uses the [devicename] to identify
+/// Note that the Movisens device manager uses the [deviceName] to identify
 /// the Movisens device to connect to. The default Movisens names of devices
 /// are `MOVISENS Sensor <serial>`, where `serial` is the 5-digit serial number
 /// written on the back of the device.

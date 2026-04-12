@@ -14,11 +14,8 @@ void main() {
   late StudyProtocol protocol;
   Smartphone phone;
 
-  Future<void> writeToFile(String json, String fileName) async {
-    File file = File('test/json/$fileName');
-    await file.writeAsString(json);
-    print("Done writing '$fileName'");
-  }
+  Future<void> writeToFile(String json, String fileName) async =>
+      await File('test/json/$fileName').writeAsString(json);
 
   setUpAll(() {
     // Initialization of serialization
@@ -169,7 +166,6 @@ void main() {
     final omhHR =
         DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(hr)
             as OMHHeartRateDataPoint;
-    ;
     final dp_2 = Measurement.fromData(omhHR);
     print(toJsonString(dp_2));
 

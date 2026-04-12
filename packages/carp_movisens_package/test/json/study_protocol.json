@@ -1,6 +1,6 @@
 {
- "id": "cdfc4d04-7dba-4951-8304-edb7af98307f",
- "createdOn": "2026-02-10T17:45:26.169667Z",
+ "id": "a03d281e-f848-4ccd-968a-eacf6f9df1a0",
+ "createdOn": "2026-04-12T18:08:40.608654Z",
  "version": 0,
  "ownerId": "alex@uni.dk",
  "name": "Context package test",
@@ -67,6 +67,10 @@
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.heartbeat"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.timezone"
     },
     {
@@ -108,10 +112,6 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.completedtask"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.heartbeat"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
