@@ -1,0 +1,135 @@
+{
+ "id": "c94ba71c-3a19-441a-ad84-781f816914a6",
+ "createdOn": "2026-04-12T09:56:26.622888Z",
+ "version": 0,
+ "ownerId": "alex@uni.dk",
+ "name": "Audio package test",
+ "participantRoles": [],
+ "primaryDevices": [
+  {
+   "__type": "dk.carp.cams.devices.Smartphone",
+   "roleName": "Smartphone",
+   "isOptional": false,
+   "defaultSamplingConfiguration": {},
+   "isPrimaryDevice": true
+  }
+ ],
+ "connectedDevices": [],
+ "connections": [],
+ "assignedDevices": {},
+ "tasks": [
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #8",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.deviceinformation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applicationinformation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.freememory"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.batterystate"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.screenevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applifecycleevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.heartbeat"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.timezone"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.acceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.nongravitationalacceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.rotation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.magneticfield"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.accelerationfeatures"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.stepevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.ambientlight"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.error"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.triggeredtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedapptask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.audio"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.video"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.image"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.noise"
+    }
+   ]
+  }
+ ],
+ "triggers": {
+  "0": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  }
+ },
+ "taskControls": [
+  {
+   "triggerId": 0,
+   "taskName": "Task #8",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  }
+ ],
+ "expectedParticipantData": []
+}

@@ -1,33 +1,35 @@
 # CARP Media Sampling Package
 
-[![pub package](https://img.shields.io/pub/v/carp_audio_package.svg)](https://pub.dartlang.org/packages/carp_audio_package)
-[![pub points](https://img.shields.io/pub/points/carp_audio_package?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_audio_package/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_audio_package.svg)](https://pub.dev/packages/carp_audio_package)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
-This library contains a sampling package for media (audio, video, image, noise) sampling to work with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) package.
-This packages supports sampling of the following [`Measure`](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types) types:
+This library contains a sampling package for collection of contextual data to work with the [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) framework.
+This package supports sampling of the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
 * `dk.cachet.carp.noise`
 * `dk.cachet.carp.audio`
 * `dk.cachet.carp.video`
 * `dk.cachet.carp.image`
 
-The name of the Flutter pub.dev package is "audio" for historical reasons - however, it is (now) a "media" package and the CAMS package name is `MediaSamplingPackage`.
+> [!NOTE]  
+> The name of the Flutter pub.dev package is "audio" for historical reasons - however, it is (now) a "media" package and the CAMS package name is `MediaSamplingPackage`.
 
-See the [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki) for further documentation, particularly on available [measure types](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types).
-See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
+See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
+See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
-For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter).
+For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/carp-dk/carp.sensing-flutter).
 
-If you're interested in writing you own sampling packages for CARP, see the description on
-how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/4.-Extending-CARP-Mobile-Sensing) CARP on the wiki.
+If you're interested in writing your own sampling packages for CARP, see the description on
+how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that
-this package only works together with `carp_mobile_sensing`.
+To use this package, add the following to your `pubspec.yaml` file. Note that this package only works together with [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing).
 
 `````dart
 dependencies:
@@ -75,14 +77,13 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_audio_package/media.dart';
 `````
 
-Before creating a study and running it, register this package in the
-[SamplingPackageRegistry](https://pub.dartlang.org/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry.html).
+Before creating a study and running it, register this package in the [`SamplingPackageRegistry`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
 
 ```dart
 SamplingPackageRegistry().register(MediaSamplingPackage());
 ```
 
-The `noise` measure is [event-based](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types#event-based-vs-one-time-measures), whereas the `audio`, `video`, and `image` measures are one-time measures. Using the measures from this package in a study protocol would look something like the following examples.
+The `noise` measure is [event-based](https://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures), whereas the `audio`, `video`, and `image` measures are one-time measures. Using the measures from this package in a study protocol would look something like the following examples.
 
 ```dart
 // Create a study protocol
@@ -147,4 +148,5 @@ protocol
   );
 ```
 
-Note that the `image` and `video` measures are not used in background sensing and hence do not have a probe associated. These measures are only used in a [`AppTask`](https://github.com/cph-cachet/carp.sensing-flutter/wiki/4.-The-AppTask-Model), i.e., a task done by the user.
+> [!IMPORTANT]  
+> The `image` and `video` measures are not used in background sensing and hence do not have a probe associated. These measures are only used in a [`AppTask`](https://docs.carp.dk/carp-mobile-sensing/app-task-model), i.e., a task done by the user.

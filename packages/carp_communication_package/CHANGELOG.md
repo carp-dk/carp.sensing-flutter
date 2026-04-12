@@ -1,4 +1,4 @@
-## 2.0.0
+## 2.0.1
 
 * upgrade to CARP Core and CAMS API level 2.0.0
 * using the [device_calendar_plus](https://pub.dev/packages/device_calendar_plus) plugin
