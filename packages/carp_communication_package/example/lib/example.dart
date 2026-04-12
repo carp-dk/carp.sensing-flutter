@@ -19,22 +19,22 @@ void main() async {
   );
 
   // Define which devices are used for data collection
-  // In this case, its only this smartphone
+  // In this case, it is only this smartphone
   Smartphone phone = Smartphone();
   protocol.addPrimaryDevice(phone);
 
-  // Add an background task that collects incoming SMS messages
+  // Add a background task that collects incoming SMS messages
   protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask(
           measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)]),
       phone);
 
-  // Add an background task that collects the logs for:
+  // Add a background task that collects the logs for:
   //  * in/out SMS
   //  * in/out phone calls
   //  * calendar entries
-  // every 3 hour
+  // every 3 hours
   protocol.addTaskControl(
       PeriodicTrigger(period: const Duration(hours: 3)),
       BackgroundTask(measures: [
@@ -44,8 +44,8 @@ void main() async {
       ]),
       phone);
 
-  // Add an background task that collects the calendar entries for the past 7
-  // days (max), every time the app is resumed i.e. come to the foreground).
+  // Add a background task that collects the calendar entries for the past 7
+  // days (max), every time the app is resumed (i.e., when coming to foreground).
   protocol.addTaskControl(
       AppLifecycleTrigger({AppLifecycleState.resumed}),
       BackgroundTask(measures: [

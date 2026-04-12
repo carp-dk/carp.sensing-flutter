@@ -21,7 +21,7 @@ Note that collection of phone and text message data is only supported on Android
 See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
 See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
-This package have implemented default privacy protection of text messages, phone numbers, and calendar entries as part of the default [Privacy Schema](https://docs.carp.dk/carp-mobile-sensing/data-transformation-and-privacy#privacy-transformer-schemas). These functions are implemented in the `communication_privacy.dart` file and use standard SHA1 hashing.
+This package implements default privacy protection of text messages, phone numbers, and calendar entries as part of the default [Privacy Schema](https://docs.carp.dk/carp-mobile-sensing/data-transformation-and-privacy#privacy-transformer-schemas). These functions are implemented in the `communication_privacy.dart` file and use standard SHA1 hashing.
 
 For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter/).
 
@@ -30,7 +30,7 @@ how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-s
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that
+To use this package, add the following to your `pubspec.yaml` file. Note that
 this package only works together with `carp_mobile_sensing`.
 
 ```yaml
@@ -121,7 +121,7 @@ StudyProtocol protocol = StudyProtocol(
 );
 
 // Define which devices are used for data collection
-// In this case, its only this smartphone
+// In this case, it is only this smartphone
 Smartphone phone = Smartphone();
 protocol.addPrimaryDevice(phone);
 
