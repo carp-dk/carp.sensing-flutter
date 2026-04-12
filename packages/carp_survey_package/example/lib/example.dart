@@ -47,8 +47,9 @@ void main() async {
 
   // Add a Parkinson's assessment consisting of;
   //  * an instruction step
-  //  * a timer step
-  //  * a Flanker and Tapping activity (from cognition package).
+  //  * a timer step that collects accelerometer and gyroscope data while the user is holding the phone
+  //  * a Flanker test (from cognition package).
+  //  * a Tapping Activity test (from cognition package).
   //
   // Accelerometer and gyroscope data is collected while the user is performing
   // the task in oder to assess tremor.
@@ -74,7 +75,8 @@ void main() async {
             identifier: 'RPTimerStepID',
             timeout: const Duration(seconds: 6),
             title:
-                "Please stand up and hold the phone in one hand and lift it in a straight arm until you hear the sound.",
+                "Please stand up. "
+                "Hold the phone in your dominant hand and lift it in a straight arm until you hear the sound.",
             playSound: true,
           ),
           RPFlankerActivity(

@@ -12,7 +12,8 @@ This library contains a sampling package for collection of user-generated data t
 For this, this library uses the [CARP Research Package](https://carp.cachet.dk/research-package/) and the [CARP Cognition Package](https://carp.cachet.dk/cognition-package/).
 This package supports the creation of a `RPAppTask` which can be added to a CAMS study protocol.
 
-Read more on the [Research Package API](https://carp.cachet.dk/research-package-api/) and how to [create a survey](https://carp.cachet.dk/creating-a-survey/) and how to [create a cognitive test](https://carp.cachet.dk/creating-cognitive-tests/) on the CARP website. For a demo of how to use this package and the `RPAppTask` in an app, see the [PulmonaryMonitor](https://github.com/cph-cachet/pulmonary_monitor_app) app. To read more about using the `AppTask`, see the [CAMS wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki/4.-The-AppTask-Model).
+Read more on the [Research Package API](https://carp.cachet.dk/research-package-api/) and how to [create a survey](https://carp.cachet.dk/creating-a-survey/) and how to [create a cognitive test](https://carp.cachet.dk/creating-cognitive-tests/) on the CARP website. For a demo of how to use this package and the `RPAppTask` in an app, see the [PulmonaryMonitor](https://github.com/cph-cachet/pulmonary_monitor_app) app.
+Check the [CAMS documentation](https://docs.carp.dk/carp-mobile-sensing/) to read more about the [AppTask Model](https://docs.carp.dk/carp-mobile-sensing/app-task-model).
 
 ## Installing
 
@@ -28,7 +29,8 @@ dependencies:
 
 ## Using it
 
-To use this package, add the following to your `pubspec.yaml` file. Note that this package only works together with [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing).
+To use this package, import it into your app together with the
+[`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) package:
 
 `````dart
 import 'package:carp_core/carp_core.dart';
@@ -64,16 +66,19 @@ protocol.addTaskControl(
     phone);
 ````
 
-A set of cognitive test can be added like this:
+The `rpTask` defines the WHO-5 survey. However, in this case, the survey package comes with a build-in English version of this survey, which can be accessed by the `who5Task` property.
+
+A simple assessment of tremor and cognitive functioning for Parkinson's Disease can can be added like this:
 
 ```dart
-// Add a Parkinson's assessment consisting of;
-//  * an instruction step
-//  * a timer step
-//  * a Flanker and Tapping activity (from cognition package).
-//
-// Accelerometer and gyroscope data is collected while the user is performing
-// the task in oder to assess tremor.
+  // Add a Parkinson's assessment consisting of;
+  //  * an instruction step
+  //  * a timer step that collects accelerometer and gyroscope data while the user is holding the phone
+  //  * a Flanker test (from cognition package).
+  //  * a Tapping Activity test (from cognition package).
+  //
+  // Accelerometer and gyroscope data is collected while the user is performing
+  // the task in oder to assess tremor.
 protocol.addTaskControl(
   PeriodicTrigger(period: const Duration(hours: 2)),
   RPAppTask(

@@ -21,7 +21,6 @@ class SurveyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debug('$runtimeType >> Building widget for task: ${task}');
     return RPUITask(
       task: task as RPOrderedTask,
       onSubmit: resultCallback,
