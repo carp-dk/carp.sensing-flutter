@@ -42,7 +42,7 @@ These are the available CARP Mobile Sensing Flutter components in this repositor
 
 ## Documentation
 
-The overall documentation of the software architecture of CARP Mobile Sensing, and how to use and extend it, is available on this GitHub [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki). Each of the specific packages also contains more detailed documentation on how each package is used within the framework (e.g., how the [Movesense sampling package](https://pub.dartlang.org/packages/carp_movesense_package) is utilized).
+The overall documentation of the software architecture of CARP Mobile Sensing, and how to use and extend it, is available on the [CAMS Documentation site](https://docs.carp.dk/carp-mobile-sensing/). Each of the specific packages also contains more detailed documentation on how each package is used within the framework (e.g., how the [Movesense sampling package](https://pub.dartlang.org/packages/carp_movesense_package) is utilized).
 
 ## Issues
 
