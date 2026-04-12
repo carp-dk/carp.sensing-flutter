@@ -1,5 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:ui';
+
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_health_package/health_package.dart';
@@ -106,4 +108,24 @@ void main() async {
   //           ])
   //         ]),
   //     phone);
+
+  // Automatically collect the set of health data when the app resumes, i.e. comes
+  // to the foreground.
+  //
+  // Note that the [HealthSamplingConfiguration] is a [HistoricSamplingConfiguration]
+  // which samples data back in time until last time, data was sampled.
+  protocol.addTaskControl(
+    AppLifecycleTrigger({AppLifecycleState.resumed}),
+    BackgroundTask(
+      measures: [
+        HealthSamplingPackage.getHealthMeasure([
+          HealthDataType.STEPS,
+          HealthDataType.BASAL_ENERGY_BURNED,
+          HealthDataType.WEIGHT,
+          HealthDataType.SLEEP_SESSION,
+        ]),
+      ],
+    ),
+    healthService,
+  );
 }

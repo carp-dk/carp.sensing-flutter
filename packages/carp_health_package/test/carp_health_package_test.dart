@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart' hide TimeOfDay;
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -18,6 +17,9 @@ void main() {
     late StudyProtocol protocol;
     Smartphone phone;
 
+    Future<void> writeToFile(String json, String fileName) async =>
+        await File('test/json/$fileName').writeAsString(json);
+
     setUpAll(() {
       WidgetsFlutterBinding.ensureInitialized();
       // Initialization of serialization
@@ -25,6 +27,8 @@ void main() {
 
       // register the context sampling package
       SamplingPackageRegistry().register(HealthSamplingPackage());
+
+      Health();
 
       // Create a new study protocol.
       protocol = StudyProtocol(
@@ -101,6 +105,9 @@ void main() {
       print(protocol);
       print(toJsonString(protocol));
       expect(protocol.ownerId, 'alex@uni.dk');
+
+      // used in the test below
+      await writeToFile(toJsonString(protocol), 'protocol.json');
     });
 
     test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
@@ -115,9 +122,7 @@ void main() {
     });
 
     test('JSON File -> StudyProtocol', () async {
-      String plainJson = File(
-        'test/json/study_protocol.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/protocol.json').readAsStringSync();
 
       StudyProtocol protocol = StudyProtocol.fromJson(
         json.decode(plainJson) as Map<String, dynamic>,
@@ -153,6 +158,9 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
       CarpMobileSensing.ensureInitialized();
       SamplingPackageRegistry().register(HealthSamplingPackage());
+
+      // Initialization of JSON serialization in Health plugin
+      Health();
 
       DateTime to = DateTime.now();
       DateTime from = to.subtract(Duration(milliseconds: 10000));
