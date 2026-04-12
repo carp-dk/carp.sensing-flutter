@@ -40,18 +40,6 @@ dependencies:
   ...
 ```
 
-> [!IMPORTANT]  
-> The current version (4.3.3) of [device_calendar](https://pub.dev/packages/device_calendar) is [not upgraded to use the latest version of timezone](https://github.com/builttoroam/device_calendar/issues/586).
-> Therefore, you need to override the dependecies in your app to use a local clone, like this:
-
-```yaml
-dependency_overrides:
-
-  # issue #586
-  device_calendar:
-    git: https://github.com/bardram/device_calendar
-```
-
 ### Android Integration
 
 Add the following to your app's `AndroidManifest.xml` file located in `android/app/src/main`:
@@ -95,10 +83,15 @@ Add the following to your app's `AndroidManifest.xml` file located in `android/a
 
 Add this permission in the `Info.plist` file located in `ios/Runner`:
 
-````xml
+```xml
+<!-- iOS 10–16 (legacy key, still valid) -->
 <key>NSCalendarsUsageDescription</key>
 <string>INSERT_REASON_HERE</string>
-````
+
+<!-- iOS 17+ -->
+<key>NSCalendarsFullAccessUsageDescription</key>
+<string>INSERT_REASON_HERE</string>
+```
 
 ## Using it
 
@@ -149,6 +142,21 @@ protocol.addTaskControl(
       Measure(type: CommunicationSamplingPackage.PHONE_LOG),
       Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
       Measure(type: CommunicationSamplingPackage.CALENDAR),
+    ]),
+    phone);
+```
+
+All the log measures (`PHONE_LOG`, `TEXT_MESSAGE_LOG`, `CALENDAR`) collects data using a [`HistoricSamplingConfiguration`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/HistoricSamplingConfiguration-class.html) which per default collects all data back to the last time, data was collected. Restriction on the history ("past") of data collection can be overridden, like this:
+
+```dart
+// Add an background task that collects the calendar entries for the past 7 
+// days (max), every time the app is resumed i.e. come to the foreground).
+protocol.addTaskControl(
+    AppLifecycleTrigger({AppLifecycleState.resumed}),
+    BackgroundTask(measures: [
+      Measure(type: CommunicationSamplingPackage.CALENDAR)
+        ..overrideSamplingConfiguration =
+            HistoricSamplingConfiguration(past: const Duration(days: 7)),
     ]),
     phone);
 ```

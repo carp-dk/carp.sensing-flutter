@@ -23,7 +23,7 @@ TextMessage textMessageAnonymizer(Data data) {
   return msg;
 }
 
-/// A [TextMessageLog] anonymizer function. Anonymizes each [TextMessageDatum]
+/// A [TextMessageLog] anonymizer function. Anonymizes each [TextMessage]
 /// entry in the log using the [textMessageAnonymizer] function.
 Data textMessageLogAnonymizer(Data data) {
   assert(data is TextMessageLog);

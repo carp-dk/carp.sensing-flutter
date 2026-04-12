@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_communication_package/communication.dart';
@@ -39,6 +41,17 @@ void main() async {
         Measure(type: CommunicationSamplingPackage.PHONE_LOG),
         Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
         Measure(type: CommunicationSamplingPackage.CALENDAR),
+      ]),
+      phone);
+
+  // Add an background task that collects the calendar entries for the past 7
+  // days (max), every time the app is resumed i.e. come to the foreground).
+  protocol.addTaskControl(
+      AppLifecycleTrigger({AppLifecycleState.resumed}),
+      BackgroundTask(measures: [
+        Measure(type: CommunicationSamplingPackage.CALENDAR)
+          ..overrideSamplingConfiguration =
+              HistoricSamplingConfiguration(past: const Duration(days: 7)),
       ]),
       phone);
 }

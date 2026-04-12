@@ -124,20 +124,12 @@ class TextMessageProbe extends StreamProbe {
 }
 
 /// A probe collecting calendar entries from the calendar on the phone.
-///
-/// See [CalendarMeasure] for how to configure this probe's measure.
 class CalendarProbe extends MeasurementProbe {
-  final _deviceCalendar = cal.DeviceCalendar.instance;
+  final cal.DeviceCalendar _deviceCalendar = cal.DeviceCalendar();
   List<cal.Calendar>? _calendars;
-  late Iterator<cal.Calendar> _calendarIterator;
-  DateTime? startDate, endDate;
 
-  @override
-  bool onInitialize() {
-    _retrieveCalendars();
-    return true;
-  }
-
+  /// Get the entire list of calendars from the device.
+  /// This only needs to be done once, and the list of calendars is then cached.
   Future<bool> _retrieveCalendars() async {
     // try to get permission to access calendar
     var permissionsGranted = await _deviceCalendar.hasPermissions();
@@ -160,28 +152,34 @@ class CalendarProbe extends MeasurementProbe {
   HistoricSamplingConfiguration get samplingConfiguration =>
       super.samplingConfiguration as HistoricSamplingConfiguration;
 
-  /// Get the [Calendar] measurement for all events in the calendar between
-  /// [startDate] and [endDate].
+  /// Get a [Calendar] measurement for all events in all calendars based on
+  /// the historic [samplingConfiguration].
   @override
   Future<Measurement> getMeasurement() async {
     if (_calendars == null) await _retrieveCalendars();
 
-    if (_calendars != null) {
-      // Get all events from all calendars.
-      var events = await _deviceCalendar.listEvents(startDate!, endDate!);
-
-      return Measurement(
-        sensorStartTime: startDate!.microsecondsSinceEpoch,
-        sensorEndTime: endDate?.microsecondsSinceEpoch,
-        data: Calendar(startDate!, endDate!)
-          ..calendarEvents = events
-              .map((event) => CalendarEvent.fromEvent(event))
-              .toList(),
-      );
-    } else {
+    // Fast out if calendars could not be retrieved, e.g. due to missing permissions.
+    if (_calendars == null) {
       return Measurement.fromData(
-        Error(message: 'Permission to collect calendar entries not granted.'),
+        Error(message: 'The list of calendars could not be retrieved.'),
       );
     }
+
+    DateTime startDate =
+        samplingConfiguration.lastTime ??
+        DateTime.now().subtract(samplingConfiguration.past);
+    DateTime endDate = DateTime.now();
+
+    // Get all events from all calendars.
+    var events = await _deviceCalendar.listEvents(startDate, endDate);
+
+    return Measurement(
+      sensorStartTime: startDate.microsecondsSinceEpoch,
+      sensorEndTime: endDate.microsecondsSinceEpoch,
+      data: Calendar(startDate, endDate)
+        ..calendarEvents = events
+            .map((event) => CalendarEvent.fromEvent(event))
+            .toList(),
+    );
   }
 }

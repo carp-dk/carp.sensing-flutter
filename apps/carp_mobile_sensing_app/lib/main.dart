@@ -48,7 +48,7 @@ part 'src/views/cachet_colors.dart';
 
 void main() async {
   // Makes sure to have an instance of the WidgetsBinding, which is required
-  // to use platform channels to call native code
+  // to use platform channels to call native code.
   // See https://stackoverflow.com/questions/63873338/what-does-widgetsflutterbinding-ensureinitialized-do/63873689
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -59,6 +59,6 @@ void main() async {
 }
 
 final bloc = SensingBLoC(
-  deploymentMode: DeploymentMode.dev,
+  deploymentMode: DeploymentMode.local,
   debugLevel: DebugLevel.debug,
 );

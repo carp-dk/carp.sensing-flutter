@@ -74,7 +74,7 @@ void main() {
     print(toJsonString(protocol));
   });
 
-  test('Privacy - TextMessageDatum', () {
+  test('Privacy - TextMessage', () {
     final msg = TextMessage(id: 123, address: '25550446', body: 'Hej Jakob');
     print(msg);
 
@@ -90,7 +90,7 @@ void main() {
     print(pMsg);
   });
 
-  test('Privacy - TextMessageLogDatum', () {
+  test('Privacy - TextMessageLog', () {
     TextMessageLog log = TextMessageLog([
       TextMessage(id: 123, address: '25550446', body: 'Hej Jakob'),
       TextMessage(id: 1232, address: '25550467', body: 'Hej Eva'),
@@ -110,7 +110,7 @@ void main() {
     pLog.textMessageLog.forEach(print);
   });
 
-  test('Privacy - PhoneLogDatum', () {
+  test('Privacy - PhoneLog', () {
     PhoneLog log = PhoneLog(DateTime.now(), DateTime.now(), [
       PhoneCall(
         DateTime.now(),
@@ -142,7 +142,7 @@ void main() {
     pLog.phoneLog.forEach(print);
   });
 
-  test('Calendar', () {
+  test('Privacy - Calendar', () {
     Calendar cal = Calendar(DateTime.now(), DateTime.now(), [
       CalendarEvent('122', 'wer', 'møde #1'),
       CalendarEvent('122', 'wer', 'møde #1'),

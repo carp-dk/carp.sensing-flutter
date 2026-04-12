@@ -132,7 +132,7 @@
 
 ## 0.5.0
 
-* `calendar` measure, probe, and datum added incl. default privacy protection
+* `calendar` measure, probe, and  added incl. default privacy protection
 * `phone_log` measure redesigned as a periodic measure
 * `text_message_log` measure redesigned as a periodic measure
 * Relying on carp_mobile_sensing ^0.5.0 which is migrated to AndroidX.

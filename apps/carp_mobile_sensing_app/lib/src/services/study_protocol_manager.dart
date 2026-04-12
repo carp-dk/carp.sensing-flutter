@@ -253,12 +253,14 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //  * SMS log (in/out)
     //  * phone call log (in/out)
     //  * calendar entries
+    // Triggers every time the app is resumed (i.e., comes to the foreground).
     protocol.addTaskControl(
-      PeriodicTrigger(period: Duration(minutes: 2)),
+      // AppLifecycleTrigger({AppLifecycleState.resumed}),
+      PeriodicTrigger(period: const Duration(minutes: 1)),
       BackgroundTask(
         measures: [
-          Measure(type: CommunicationSamplingPackage.PHONE_LOG),
-          Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
+          // Measure(type: CommunicationSamplingPackage.PHONE_LOG),
+          // Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
           Measure(type: CommunicationSamplingPackage.CALENDAR),
         ],
       ),
