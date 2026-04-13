@@ -265,6 +265,7 @@ PolarDevice _$PolarDeviceFromJson(Map<String, dynamic> json) =>
     PolarDevice(
         roleName: json['roleName'] as String? ?? PolarDevice.DEFAULT_ROLE_NAME,
         isOptional: json['isOptional'] as bool? ?? true,
+        namePrefix: json['namePrefix'] as String? ?? 'Polar',
       )
       ..$type = json['__type'] as String?
       ..defaultSamplingConfiguration =
@@ -277,7 +278,6 @@ PolarDevice _$PolarDeviceFromJson(Map<String, dynamic> json) =>
       ..serviceUuids = (json['serviceUuids'] as List<dynamic>)
           .map((e) => e as String)
           .toList()
-      ..namePrefix = json['namePrefix'] as String?
       ..minRssi = (json['minRssi'] as num?)?.toInt()
       ..allowDuplicates = json['allowDuplicates'] as bool
       ..timeout = json['timeout'] == null
@@ -320,6 +320,9 @@ PolarDeviceRegistration _$PolarDeviceRegistrationFromJson(
           _$PolarDeviceTypeEnumMap,
           json['polarDeviceType'],
         ),
+        supportedDataTypes: (json['supportedDataTypes'] as List<dynamic>?)
+            ?.map((e) => $enumDecode(_$PolarDataTypeEnumMap, e))
+            .toList(),
         rssi: (json['rssi'] as num?)?.toInt(),
       )
       ..$type = json['__type'] as String?
@@ -340,6 +343,9 @@ Map<String, dynamic> _$PolarDeviceRegistrationToJson(
   'bleName': ?instance.bleName,
   'identifier': instance.identifier,
   'polarDeviceType': _$PolarDeviceTypeEnumMap[instance.polarDeviceType]!,
+  'supportedDataTypes': ?instance.supportedDataTypes
+      ?.map((e) => e.toJson())
+      .toList(),
   'rssi': ?instance.rssi,
 };
 
@@ -352,8 +358,22 @@ const _$BatteryChargingStateEnumMap = {
 };
 
 const _$PolarDeviceTypeEnumMap = {
-  PolarDeviceType.Unknown: 'UNKNOWN',
+  PolarDeviceType.Unknown: 'Unknown',
   PolarDeviceType.H9: 'H9',
   PolarDeviceType.H10: 'H10',
-  PolarDeviceType.Verity: 'SENSE',
+  PolarDeviceType.Verity: 'Verity',
+};
+
+const _$PolarDataTypeEnumMap = {
+  PolarDataType.ecg: 'ecg',
+  PolarDataType.acc: 'acc',
+  PolarDataType.ppg: 'ppg',
+  PolarDataType.ppi: 'ppi',
+  PolarDataType.gyro: 'gyro',
+  PolarDataType.magnetometer: 'magnetometer',
+  PolarDataType.hr: 'hr',
+  PolarDataType.temperature: 'temperature',
+  PolarDataType.pressure: 'pressure',
+  PolarDataType.skinTemperature: 'skinTemperature',
+  PolarDataType.location: 'location',
 };

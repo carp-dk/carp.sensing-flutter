@@ -1,6 +1,6 @@
 {
- "id": "ab670d2e-1888-4bd6-9777-d56e57d8ee20",
- "createdOn": "2026-02-09T15:54:41.123488Z",
+ "id": "e22ae4cb-be37-4d39-8e3d-5253db0fa811",
+ "createdOn": "2026-04-13T10:46:52.808020Z",
  "version": 0,
  "ownerId": "alex@uni.dk",
  "name": "Context package test",
@@ -21,6 +21,7 @@
    "isOptional": true,
    "defaultSamplingConfiguration": {},
    "serviceUuids": [],
+   "namePrefix": "Polar",
    "allowDuplicates": true
   }
  ],
@@ -59,6 +60,10 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.applifecycleevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.heartbeat"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -103,10 +108,6 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.completedtask"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.heartbeat"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",

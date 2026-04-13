@@ -17,12 +17,13 @@ void main() async {
   SamplingPackageRegistry().register(PolarSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
+  var protocol = StudyProtocol(
     ownerId: 'owner@dtu.dk',
     name: 'Polar Sensing Example',
   );
 
-  // Define which devices are used for data collection - both phone and polar device.
+  // Define which devices are used for data collection - both phone and polar device
+  // and add them to the protocol.
   var phone = Smartphone();
   var polar = PolarDevice(roleName: 'hr-sensor');
 
