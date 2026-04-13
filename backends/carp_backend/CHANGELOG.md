@@ -1,6 +1,11 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+* the methods in the `InformedConsentManager` is renamed to "Consent Document" to distinguish them from the "Informed Consent" input data type.
+
 ## 1.11.0
 
-* upgrading research_package major version 
+* upgrading research_package major version
 
 ## 1.10.0
 

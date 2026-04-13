@@ -28,9 +28,9 @@ part 'data_stream_buffer.dart';
 part 'localization_manager.dart';
 part 'informed_consent_manager.dart';
 part 'carp_resource_manager.dart';
+part 'message_manager.dart';
 part 'carp_localization.dart';
 part 'carp_backend.g.dart';
-part 'message_manager.dart';
 
 /// Specify a CARP Web Service (CAWS) endpoint for uploading data.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -46,6 +46,9 @@ class CarpDataEndPoint extends DataEndPoint {
   bool onlyUploadOnWiFi = false;
 
   /// How often should data be uploaded. In minutes.
+  ///
+  /// Default is every 10 minutes. If running in debug mode, the interval is set to
+  /// 1 minute regardless of this setting.
   int uploadInterval = 10;
 
   /// Should the local buffered data on the phone be deleted once uploaded?
@@ -63,9 +66,7 @@ class CarpDataEndPoint extends DataEndPoint {
     this.uploadInterval = 10,
     this.deleteWhenUploaded = true,
     this.compress = true,
-  }) : super(
-          type: DataEndPointTypes.CAWS,
-        );
+  }) : super(type: DataEndPointTypes.CAWS);
 
   @override
   Function get fromJsonFunction => _$CarpDataEndPointFromJson;

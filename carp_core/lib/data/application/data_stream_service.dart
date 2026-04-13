@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_data.dart';
+part of '../../data.dart';
 
 /// Store and retrieve data streams for study deployments.
 abstract class DataStreamService {

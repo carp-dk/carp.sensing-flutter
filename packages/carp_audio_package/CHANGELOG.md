@@ -1,3 +1,7 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 1.10.3
 
 * upgrading flutter_sound to 9.28.0
@@ -7,7 +11,7 @@
 * downgrading flutter_sound to 9.26.0
 
 ## 1.10.1
- 
+
 * changing pub.dev link to main instead of master branch
 
 ## 1.10.0

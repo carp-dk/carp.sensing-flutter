@@ -7,6 +7,5 @@ part of 'media.dart';
 /// for being able to add a video/image measure to a protocol.
 class VideoProbe extends MeasurementProbe {
   @override
-  Future<Measurement?> getMeasurement() async =>
-      null; // the measurement is created in the app from the VideoUserTask
+  Future<Measurement?> getMeasurement() async => null; // the measurement is created in the app from the VideoUserTask
 }

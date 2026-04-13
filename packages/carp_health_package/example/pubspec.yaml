@@ -1,30 +1,27 @@
 name: carp_health_package_example
 description: Examples of how to use the CANS Health Package.
-version: 2.11.0
 publish_to: none
 
 environment:
-  sdk: ">=2.17.0 <4.0.0"
-  flutter: ">=3.0.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.19.0"
 
 dependencies:
   flutter:
     sdk: flutter
-
-  carp_serializable: ^2.0.0
-  carp_core: ^1.8.0
-  carp_mobile_sensing: ^1.9.0
 
   carp_health_package:
     path: ../
 
 # Overriding carp libraries to use the local copy
 # Remove this before release of package
-# dependency_overrides:
-  # carp_core:
-  #   path: ../../../carp_core
-  # carp_mobile_sensing:
-  #   path: ../../../carp_mobile_sensing
+dependency_overrides:
+  # carp_serializable:
+  #   path: ../../carp_serializable/
+  carp_core:
+    path: ../../../carp_core/
+  carp_mobile_sensing:
+    path: ../../../carp_mobile_sensing/
 
 flutter:
   uses-material-design: true

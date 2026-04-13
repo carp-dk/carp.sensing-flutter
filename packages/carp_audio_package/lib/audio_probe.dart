@@ -1,7 +1,7 @@
 part of 'media.dart';
 
-/// A probe recording audio from the microphone. It starts recording on [start]
-/// and stops recording on [stop], and post the recorded [MediaData] object to the
+/// A probe recording audio from the microphone. It starts recording on [onResume]
+/// and stops recording on [onPause], and post the recorded [MediaData] object to the
 /// [measurements] stream.
 ///
 /// Note that this probe generates a lot of data and should be used with caution.
@@ -29,12 +29,13 @@ class AudioProbe extends Probe {
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     if (await requestPermissions()) {
       try {
         await _startAudioRecording();
         debug(
-            '$runtimeType [$hashCode] - Audio recording started - sound file : $_soundFileName');
+          '$runtimeType [$hashCode] - Audio recording started - sound file : $_soundFileName',
+        );
       } catch (error) {
         warning('An error occurred trying to start audio recording - $error');
         addError(error);
@@ -47,7 +48,7 @@ class AudioProbe extends Probe {
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     if (_isRecording) {
       try {
         await _stopAudioRecording();
@@ -57,10 +58,10 @@ class AudioProbe extends Probe {
         if (_data != null) {
           _data?.endRecordingTime = DateTime.now().toUtc();
           var measurement = Measurement(
-              sensorStartTime:
-                  _data!.startRecordingTime!.microsecondsSinceEpoch,
-              sensorEndTime: _data!.endRecordingTime?.microsecondsSinceEpoch,
-              data: _data!);
+            sensorStartTime: _data!.startRecordingTime!.microsecondsSinceEpoch,
+            sensorEndTime: _data!.endRecordingTime?.microsecondsSinceEpoch,
+            data: _data!,
+          );
           addMeasurement(measurement);
         }
       } catch (error) {
@@ -80,8 +81,9 @@ class AudioProbe extends Probe {
     // fast out if recording is already in progress (can only record one at a time)
     if (_isRecording) {
       warning(
-          'Trying to start audio recording, but recording is already running. '
-          'Make sure to stop this audio probe before resuming it.');
+        'Trying to start audio recording, but recording is already running. '
+        'Make sure to stop this audio probe before resuming it.',
+      );
       return;
     }
 
@@ -95,10 +97,7 @@ class AudioProbe extends Probe {
     _isRecording = true;
 
     // start the recording
-    await _recorder.startRecorder(
-      toFile: _soundFileName,
-      codec: Codec.aacMP4,
-    );
+    await _recorder.startRecorder(toFile: _soundFileName, codec: Codec.aacMP4);
   }
 
   Future<void> _stopAudioRecording() async {
@@ -115,8 +114,8 @@ class AudioProbe extends Probe {
     if (_path == null) {
       // create a sub-directory for media (audio) files
       final directory = await Directory(
-              '${await Settings().getDataBasePath(deployment!.studyDeploymentId)}/${MediaSamplingPackage.MEDIA_FILES_PATH}')
-          .create(recursive: true);
+        '${await Settings().getDataBasePath(deployment!.studyDeploymentId)}/${MediaSamplingPackage.MEDIA_FILES_PATH}',
+      ).create(recursive: true);
 
       _path = directory.path;
     }

@@ -13,8 +13,10 @@ abstract class MovisensProbe extends StreamProbe {
       super.deviceManager as MovisensDeviceManager;
 
   @override
-  Stream<Measurement>? get stream => data?.map((event) =>
-      Measurement.fromData(event, event.timestamp.microsecondsSinceEpoch));
+  Stream<Measurement>? get stream => data?.map(
+    (event) =>
+        Measurement.fromData(event, event.timestamp.microsecondsSinceEpoch),
+  );
 
   Stream<MovisensData>? get data;
 }
@@ -37,40 +39,58 @@ class MovisensActivityProbe extends MovisensProbe {
     // fast out if physical activity service does not exist
     if (deviceManager.device?.physicalActivityService == null) return false;
 
-    _group.add(deviceManager.device?.physicalActivityService?.stepsEvents
-            ?.map((event) => MovisensStepCount.fromMovisensEvent(event)) ??
-        Stream.empty());
-    _group.add(deviceManager.device?.physicalActivityService?.bodyPositionEvents
-            ?.map((event) => MovisensBodyPosition.fromMovisensEvent(event)) ??
-        Stream.empty());
-    _group.add(deviceManager.device?.physicalActivityService?.inclinationEvents
-            ?.map((event) => MovisensInclination.fromMovisensEvent(event)) ??
-        Stream.empty());
-    _group.add(deviceManager
-            .device?.physicalActivityService?.movementAccelerationEvents
-            ?.map((event) =>
-                MovisensMovementAcceleration.fromMovisensEvent(event)) ??
-        Stream.empty());
-    _group.add(deviceManager.device?.physicalActivityService?.metEvents
-            ?.map((event) => MovisensMET.fromMovisensEvent(event)) ??
-        Stream.empty());
-    _group.add(deviceManager.device?.physicalActivityService?.metLevelEvents
-            ?.map((event) => MovisensMETLevel.fromMovisensEvent(event)) ??
-        Stream.empty());
+    _group.add(
+      deviceManager.device?.physicalActivityService?.stepsEvents?.map(
+            (event) => MovisensStepCount.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
+    _group.add(
+      deviceManager.device?.physicalActivityService?.bodyPositionEvents?.map(
+            (event) => MovisensBodyPosition.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
+    _group.add(
+      deviceManager.device?.physicalActivityService?.inclinationEvents?.map(
+            (event) => MovisensInclination.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
+    _group.add(
+      deviceManager.device?.physicalActivityService?.movementAccelerationEvents
+              ?.map(
+                (event) =>
+                    MovisensMovementAcceleration.fromMovisensEvent(event),
+              ) ??
+          Stream.empty(),
+    );
+    _group.add(
+      deviceManager.device?.physicalActivityService?.metEvents?.map(
+            (event) => MovisensMET.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
+    _group.add(
+      deviceManager.device?.physicalActivityService?.metLevelEvents?.map(
+            (event) => MovisensMETLevel.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
 
     return true;
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     await deviceManager.device?.physicalActivityService?.enableNotify();
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     await deviceManager.device?.physicalActivityService?.enableNotify();
-    return await super.onStop();
+    return await super.onPause();
   }
 }
 
@@ -89,108 +109,125 @@ class MovisensHRProbe extends MovisensProbe {
     // fast out if HRV service does not exist
     if (deviceManager.device?.hrvService == null) return false;
 
-    _group.add(deviceManager.device?.hrvService?.hrMeanEvents
-            ?.map((event) => MovisensHR.fromMovisensEvent(event)) ??
-        Stream.empty());
-    _group.add(deviceManager.device?.hrvService?.rmssd
-            ?.map((event) => MovisensHRV.fromMovisensEvent(event)) ??
-        Stream.empty());
-    _group.add(deviceManager.device?.hrvService?.hrvIsValidEvents
-            ?.map((event) => MovisensIsHrvValid.fromMovisensEvent(event)) ??
-        Stream.empty());
+    _group.add(
+      deviceManager.device?.hrvService?.hrMeanEvents?.map(
+            (event) => MovisensHR.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
+    _group.add(
+      deviceManager.device?.hrvService?.rmssd?.map(
+            (event) => MovisensHRV.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
+    _group.add(
+      deviceManager.device?.hrvService?.hrvIsValidEvents?.map(
+            (event) => MovisensIsHrvValid.fromMovisensEvent(event),
+          ) ??
+          Stream.empty(),
+    );
 
     return true;
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     await deviceManager.device?.hrvService?.enableNotify();
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     await deviceManager.device?.hrvService?.enableNotify();
-    return await super.onStop();
+    return await super.onPause();
   }
 }
 
 /// A probe collecting Elecrodermal Activity (EDA) events ([MovisensEDA]).
 class MovisensEDAProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data =>
-      deviceManager.device?.edaService?.edaSclMeanEvents
-          ?.map((event) => MovisensEDA.fromMovisensEvent(event));
+  Stream<MovisensData>? get data => deviceManager
+      .device
+      ?.edaService
+      ?.edaSclMeanEvents
+      ?.map((event) => MovisensEDA.fromMovisensEvent(event));
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     await deviceManager.device?.edaService?.enableNotify();
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     await deviceManager.device?.edaService?.enableNotify();
-    return await super.onStop();
+    return await super.onPause();
   }
 }
 
 /// A probe collecting Skin Temperature events ([MovisensSkinTemperature]).
 class MovisensSkinTemperatureProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data =>
-      deviceManager.device?.skinTemperatureService?.skinTemperatureEvents
-          ?.map((event) => MovisensSkinTemperature.fromMovisensEvent(event));
+  Stream<MovisensData>? get data => deviceManager
+      .device
+      ?.skinTemperatureService
+      ?.skinTemperatureEvents
+      ?.map((event) => MovisensSkinTemperature.fromMovisensEvent(event));
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     await deviceManager.device?.skinTemperatureService?.enableNotify();
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     await deviceManager.device?.skinTemperatureService?.enableNotify();
-    return await super.onStop();
+    return await super.onPause();
   }
 }
 
 /// A probe collecting Skin Temperature events ([MovisensSkinTemperature]).
 class RespirationProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data =>
-      deviceManager.device?.respirationService?.respiratoryMovementEvents
-          ?.map((event) => MovisensRespiration.fromMovisensEvent(event));
+  Stream<MovisensData>? get data => deviceManager
+      .device
+      ?.respirationService
+      ?.respiratoryMovementEvents
+      ?.map((event) => MovisensRespiration.fromMovisensEvent(event));
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     await deviceManager.device?.skinTemperatureService?.enableNotify();
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     await deviceManager.device?.skinTemperatureService?.enableNotify();
-    return await super.onStop();
+    return await super.onPause();
   }
 }
 
 /// A probe collecting tap marker events ([MovisensTapMarker]).
 class MovisensTapMarkerProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data =>
-      deviceManager.device?.markerService?.tapMarkerEvents
-          ?.map((event) => MovisensTapMarker.fromMovisensEvent(event));
+  Stream<MovisensData>? get data => deviceManager
+      .device
+      ?.markerService
+      ?.tapMarkerEvents
+      ?.map((event) => MovisensTapMarker.fromMovisensEvent(event));
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     await deviceManager.device?.markerService?.enableNotify();
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
-  Future<bool> onStop() async {
+  Future<bool> onPause() async {
     await deviceManager.device?.markerService?.enableNotify();
-    return await super.onStop();
+    return await super.onPause();
   }
 }

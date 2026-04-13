@@ -1,0 +1,68 @@
+{
+  "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited",
+  "createdOn": "2025-11-03T09:53:12.957270689Z",
+  "studyDeploymentId": "45bedfb0-9a1b-4a4e-a16a-165f0a939812",
+  "deviceStatusList": [
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+        "isPrimaryDevice": true,
+        "roleName": "Father's Phone"
+      },
+      "canBeDeployed": true,
+      "remainingDevicesToRegisterToObtainDeployment": [
+        "Mother's Phone",
+        "Father's Phone"
+      ],
+      "remainingDevicesToRegisterBeforeDeployment": [
+        "Mother's Phone",
+        "Father's Phone"
+      ]
+    },
+    {
+      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+        "isPrimaryDevice": true,
+        "roleName": "Mother's Phone"
+      },
+      "canBeDeployed": true,
+      "remainingDevicesToRegisterToObtainDeployment": [
+        "Father's Phone",
+        "Mother's Phone"
+      ],
+      "remainingDevicesToRegisterBeforeDeployment": [
+        "Father's Phone",
+        "Mother's Phone"
+      ]
+    }
+  ],
+  "participantStatusList": [
+    {
+      "participantId": "b8deae84-5065-45b3-9d12-b766cc4f4013",
+      "assignedParticipantRoles": {
+        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+        "roleNames": [
+          "Father"
+        ]
+      },
+      "assignedPrimaryDeviceRoleNames": [
+        "Father's Phone"
+      ]
+    },
+    {
+      "participantId": "6f7674c7-03a1-424a-9511-9dd57864b806",
+      "assignedParticipantRoles": {
+        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+        "roleNames": [
+          "Mother"
+        ]
+      },
+      "assignedPrimaryDeviceRoleNames": [
+        "Mother's Phone"
+      ]
+    }
+  ],
+  "startedOn": null
+}

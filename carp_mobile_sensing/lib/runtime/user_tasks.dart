@@ -19,10 +19,7 @@ abstract class UserTaskFactory {
 /// A [UserTaskFactory] that can create a non-UI sensing task.
 class SensingUserTaskFactory implements UserTaskFactory {
   @override
-  List<String> types = [
-    BackgroundSensingUserTask.SENSING_TYPE,
-    BackgroundSensingUserTask.ONE_TIME_SENSING_TYPE,
-  ];
+  List<String> types = [AppTask.SENSING_TYPE];
 
   @override
   UserTask create(AppTaskExecutor executor) =>
@@ -53,6 +50,8 @@ abstract class UserTask {
   String get title => task.title;
   String get description => task.description;
   String get instructions => task.instructions;
+
+  /// Should a notification be send for this task?
   bool get notification => task.notification;
 
   /// The time this task should trigger (typically becoming visible to the user).
@@ -79,11 +78,12 @@ abstract class UserTask {
   }
 
   /// Is this task available to be done by the user?
-  bool get availableForUser => (_state == UserTaskState.enqueued ||
+  bool get availableForUser =>
+      (_state == UserTaskState.enqueued ||
       _state == UserTaskState.canceled ||
       _state == UserTaskState.notified);
 
-  /// Has a notification been created via a [NotificationController] in the
+  /// Has a notification been created via a [NotificationManager] in the
   /// phone's notification system?
   bool hasNotificationBeenCreated = false;
 
@@ -128,24 +128,8 @@ abstract class UserTask {
       _executor.deployment,
     );
 
-    // // add the events from the background executor to the overall stream of events
-    // _executor.addExecutor(backgroundTaskExecutor);
-
     state = UserTaskState.started;
   }
-
-  // /// Listen to remove the background executor when all of its underlying
-  // /// probes have stopped.
-  // /// Issue => https://github.com/cph-cachet/carp_studies_app/issues/341
-  // void _removeExecutor() {
-  //   backgroundTaskExecutor.states
-  //       .where((event) => event == ExecutorState.stopped)
-  //       .listen((_) {
-  //     if (backgroundTaskExecutor.haveAllProbesStopped) {
-  //       _executor.removeExecutor(backgroundTaskExecutor);
-  //     }
-  //   });
-  // }
 
   /// Callback from the app if this task is canceled.
   ///
@@ -155,7 +139,6 @@ abstract class UserTask {
   void onCancel({bool dequeue = false}) {
     state = UserTaskState.canceled;
     if (dequeue) AppTaskController().dequeue(id);
-    // _removeExecutor();
   }
 
   /// Callback from the app if this task expires.
@@ -165,7 +148,6 @@ abstract class UserTask {
   void onExpired() {
     state = UserTaskState.expired;
     AppTaskController().dequeue(id);
-    // _removeExecutor();
   }
 
   /// Callback from the app when this task is done.
@@ -179,7 +161,6 @@ abstract class UserTask {
     state = UserTaskState.done;
     AppTaskController().done(id, result);
     if (dequeue) AppTaskController().dequeue(id);
-    // _removeExecutor();
   }
 
   /// Callback from the OS when this task is clicked by the user in the
@@ -233,25 +214,41 @@ enum UserTaskState {
 /// It starts when the [onStart] methods is called and stops when the
 /// [onDone] methods is called.
 class BackgroundSensingUserTask extends UserTask {
-  /// A background sensing user task which can be started and stopped.
-  static const String SENSING_TYPE = 'sensing';
-
-  /// A background sensing user task which runs once and then stops.
-  @Deprecated('Use BackgroundSensingUserTask.SENSING_TYPE instead. '
-      'This will be removed in a future version.')
-  static const String ONE_TIME_SENSING_TYPE = 'one_time_sensing';
-
   BackgroundSensingUserTask(super.executor);
 
   @override
   void onStart() {
     super.onStart();
-    backgroundTaskExecutor.start();
+    backgroundTaskExecutor.resume();
   }
 
   @override
   void onDone({dequeue = false, Data? result}) {
     super.onDone(dequeue: dequeue, result: result);
-    backgroundTaskExecutor.stop();
+    backgroundTaskExecutor.pause();
+  }
+
+  /// Callback from the OS when this task is clicked by the user in the
+  /// OS notification system.
+  ///
+  /// Resumes the background sensing.
+  /// When the background sensing pauses, the task is marked as done.
+  @mustCallSuper
+  @override
+  void onNotification() {
+    super.onNotification();
+    onStart();
+
+    // Listen to when the background sensing pauses.
+    // We do this because this background sensing task is never explicitly
+    // marked as done - it just runs until the background sensing pauses.
+    backgroundTaskExecutor.stateEvents
+        .where((state) => state == ExecutorState.Paused)
+        .listen((state) {
+          debug(
+            '$runtimeType - Background sensing has paused - making this user task done.',
+          );
+          onDone();
+        });
   }
 }

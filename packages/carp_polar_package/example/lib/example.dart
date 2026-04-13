@@ -1,4 +1,6 @@
-import 'package:carp_core/carp_core.dart';
+// ignore_for_file: depend_on_referenced_packages
+
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_polar_package/carp_polar_package.dart';
 
@@ -15,42 +17,43 @@ void main() async {
   SamplingPackageRegistry().register(PolarSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
+  var protocol = StudyProtocol(
     ownerId: 'owner@dtu.dk',
     name: 'Polar Sensing Example',
   );
 
-  // define which devices are used for data collection - both phone and eSense
+  // Define which devices are used for data collection - both phone and polar device
+  // and add them to the protocol.
   var phone = Smartphone();
-  var polar = PolarDevice(
-    roleName: 'hr-sensor',
-    identifier: '1C709B20',
-    name: 'H10',
-    deviceType: PolarDeviceType.H10,
-  );
+  var polar = PolarDevice(roleName: 'hr-sensor');
 
+  // Add both devices
   protocol
     ..addPrimaryDevice(phone)
     ..addConnectedDevice(polar, phone);
 
   // Add a background task that immediately starts collecting step counts,
-  //ambient light, screen activity, and battery level from the phone.
+  // ambient light, screen activity, and battery level from the phone.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask()
-        ..addMeasure(Measure(type: SensorSamplingPackage.STEP_COUNT))
-        ..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT))
-        ..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT))
-        ..addMeasure(Measure(type: DeviceSamplingPackage.BATTERY_STATE)),
-      phone);
+    ImmediateTrigger(),
+    BackgroundTask()
+      ..addMeasure(Measure(type: SensorSamplingPackage.STEP_EVENT))
+      ..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT))
+      ..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT))
+      ..addMeasure(Measure(type: DeviceSamplingPackage.BATTERY_STATE)),
+    phone,
+  );
 
   // Add a background task that immediately starts collecting HR and ECG data
   // from the Polar device.
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
         Measure(type: PolarSamplingPackage.HR),
         Measure(type: PolarSamplingPackage.ECG),
-      ]),
-      polar);
+      ],
+    ),
+    polar,
+  );
 }

@@ -4,12 +4,10 @@ part of '../carp_context_package.dart';
 /// and provide its correct OMH [format] and [provenance].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class OMHContextDataPoint extends Data {
-  static const dataType = "${NameSpace.OMH}.${SchemaSupport.DATA_POINT}";
-
   DataPoint datapoint;
 
   static String get source =>
-      '{smartphone:${DeviceInfo().deviceID},app:${Settings().appName}}';
+      '{smartphone:${DeviceInfoService().deviceID},app:${Settings().appName}}';
 
   static DataPointAcquisitionProvenance get provenance =>
       DataPointAcquisitionProvenance(
@@ -38,14 +36,20 @@ class OMHGeopositionDataPoint extends OMHContextDataPoint
 
   factory OMHGeopositionDataPoint.fromLocationData(Location location) {
     var pos = Geoposition(
-        latitude: PlaneAngleUnitValue(
-            unit: PlaneAngleUnit.DEGREE_OF_ARC, value: location.latitude),
-        longitude: PlaneAngleUnitValue(
-            unit: PlaneAngleUnit.DEGREE_OF_ARC, value: location.longitude),
-        positioningSystem: PositioningSystem.GPS);
+      latitude: PlaneAngleUnitValue(
+        unit: PlaneAngleUnit.DEGREE_OF_ARC,
+        value: location.latitude,
+      ),
+      longitude: PlaneAngleUnitValue(
+        unit: PlaneAngleUnit.DEGREE_OF_ARC,
+        value: location.longitude,
+      ),
+      positioningSystem: PositioningSystem.GPS,
+    );
 
     return OMHGeopositionDataPoint(
-        DataPoint(body: pos, provenance: OMHContextDataPoint.provenance));
+      DataPoint(body: pos, provenance: OMHContextDataPoint.provenance),
+    );
   }
 
   factory OMHGeopositionDataPoint.fromJson(Map<String, dynamic> json) =>
@@ -65,12 +69,14 @@ class OMHPhysicalActivityDataPoint extends OMHContextDataPoint
     var act = PhysicalActivity(activityName: activity.typeString);
 
     return OMHPhysicalActivityDataPoint(
-        DataPoint(body: act, provenance: OMHContextDataPoint.provenance));
+      DataPoint(body: act, provenance: OMHContextDataPoint.provenance),
+    );
   }
 
   factory OMHPhysicalActivityDataPoint.fromJson(Map<String, dynamic> json) =>
       OMHPhysicalActivityDataPoint(DataPoint.fromJson(json));
 
-  static DataTransformer get transformer => ((data) =>
-      OMHPhysicalActivityDataPoint.fromActivityData(data as Activity));
+  static DataTransformer get transformer =>
+      ((data) =>
+          OMHPhysicalActivityDataPoint.fromActivityData(data as Activity));
 }

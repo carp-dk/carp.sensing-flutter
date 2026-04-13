@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -78,13 +77,9 @@ class LocationManager {
   Future<bool> isBackgroundModeEnabled() async =>
       await _provider.isBackgroundModeEnabled();
 
-  /// Does this location manger have permission to access location "always"?
-  Future<PermissionStatus> hasPermission() async =>
-      await Permission.locationAlways.status;
-
-  /// Has location been granted to this location manager?
-  Future<bool> isGranted() async =>
-      (await hasPermission()) == PermissionStatus.granted;
+  /// Does this location manger have permission to access location?
+  Future<bool> hasPermission() async =>
+      (await _provider.hasPermission()) == location.PermissionStatus.granted;
 
   /// Request permissions to access location.
   ///
@@ -106,43 +101,33 @@ class LocationManager {
   /// This method is, however, **NOT** used by this context sampling package, since
   /// handling of permissions should be taken care of on an app level.
   Future<PermissionStatus> requestPermission() async {
-    bool serviceEnabled =
-        await Permission.locationAlways.serviceStatus.isEnabled;
+    // Fast out if not configured
+    if (!configured) {
+      warning(
+        '$runtimeType - is not configured. '
+        "Call 'configure' before requesting permission.",
+      );
+      return PermissionStatus.denied;
+    }
+    debug('$runtimeType - Requesting permission to access location...');
 
-    if (!serviceEnabled) {
-      serviceEnabled = await _provider.requestService();
-      if (!serviceEnabled) {
-        warning('$runtimeType - Location service could not be enabled.');
-        return PermissionStatus.restricted;
+    var permissionGranted = await _provider.hasPermission();
+    if (permissionGranted == location.PermissionStatus.denied) {
+      permissionGranted = await _provider.requestPermission();
+      if (permissionGranted != location.PermissionStatus.granted) {
+        warning(
+          "$runtimeType - The user opted not to allow collection of location data. "
+          "The only way to change the permission's status now is to let the "
+          "user manually enables it in the system settings.",
+        );
       }
     }
 
-    var permission = await Permission.locationWhenInUse.status;
+    debug('$runtimeType - Permission: $permissionGranted');
 
-    switch (permission) {
-      case PermissionStatus.permanentlyDenied:
-        warning(
-            "$runtimeType - The user opted to never again see the permission request dialog for this "
-            "app. The only way to change the permission's status now is to let the "
-            "user manually enables it in the system settings.");
-        // openAppSettings();
-        break;
-      case PermissionStatus.denied:
-      case PermissionStatus.restricted:
-      case PermissionStatus.limited:
-      case PermissionStatus.provisional:
-        permission = await Permission.locationWhenInUse.request();
-        break;
-      case PermissionStatus.granted:
-        permission = await Permission.locationAlways.request();
-        break;
-    }
-
-    debug('$runtimeType.requestPermission()'
-        ' - Location service enabled: $serviceEnabled'
-        ' - permission: $permission');
-
-    return permission;
+    return permissionGranted == location.PermissionStatus.granted
+        ? PermissionStatus.granted
+        : PermissionStatus.denied;
   }
 
   /// Enable the [LocationManager] for accessing location also when the app is
@@ -171,31 +156,21 @@ class LocationManager {
       }
     }
     _enabled = true;
-
-    // var permission = await _provider.hasPermission();
-    var permission = await Permission.locationWhenInUse.status;
     bool backgroundMode = false;
 
-    if (permission != PermissionStatus.granted) {
-      warning(
-          "$runtimeType - Permission to collect location data has not been granted. "
-          "Make sure to grant this BEFORE sensing is resumed. "
-          "The context sampling package does not handle location permissions. This should be handled on the application level.");
-    } else {
-      try {
-        // note that the following will request the "location always" permission
-        // which will open the OS-specific settings on the phone (both iOS and Android)
-        backgroundMode = await _provider.enableBackgroundMode();
-      } catch (error) {
-        warning('$runtimeType - Could not enable background mode - $error');
-      }
+    try {
+      backgroundMode = await _provider.enableBackgroundMode();
+    } catch (error) {
+      warning('$runtimeType - Could not enable background mode - $error');
     }
 
-    info('$runtimeType'
-        ' - service enabled: $serviceEnabled'
-        ' - permission: $permission'
-        ' - background mode: $backgroundMode');
+    info(
+      '$runtimeType - Location service enabled, background mode: $backgroundMode',
+    );
   }
+
+  LocationService? _configuration;
+  LocationService? get configuration => _configuration;
 
   /// Configures the [LocationManager], incl. sending a notification to the
   /// Android notification system.
@@ -205,52 +180,71 @@ class LocationManager {
   Future<void> configure(LocationService configuration) async {
     // fast out if already configured
     if (configured) return;
+    _configuration = configuration;
 
     // ensured that this location manager is enable first
     await enable();
 
-    // Need to check if location permission has been granted before trying to
-    // change settings using the "changeSettings()" methods.
-    // The location plugin will throw a native Android exception trying to change
-    // setting without permissions to access location. And this exception is not
-    // propagated to Flutter and is hence not caught by the try-catch block below.
-    //
-    // See https://github.com/Lyokone/flutterlocation/blob/c14f8173caf33f8c38d01b28c94e0804c63e0db9/packages/location/android/src/main/java/com/lyokone/location/FlutterLocation.java#L201
-    var permission = await Permission.location.status;
-    if (permission != PermissionStatus.granted) {
-      warning(
+    info('Configuring $runtimeType - configuration: $configuration');
+    _configured = false;
+
+    // Only on Android, configure the notification shown when running in background.
+    if (Platform.isAndroid) {
+      // Need to check if location permission has been granted before trying to
+      // change settings using the "changeSettings()" methods.
+      // The location plugin will throw a native Android exception trying to change
+      // setting without permissions to access location. And this exception is not
+      // propagated to Flutter and is hence not caught by the try-catch block below.
+      //
+      // See https://github.com/Lyokone/flutterlocation/blob/c14f8173caf33f8c38d01b28c94e0804c63e0db9/packages/location/android/src/main/java/com/lyokone/location/FlutterLocation.java#L201
+      var permission = await Permission.location.status;
+      if (permission != PermissionStatus.granted) {
+        warning(
           "$runtimeType - Permission to collect location data has not been granted. "
           "Cannot configure $runtimeType. "
           "Make sure to grant this BEFORE sensing is resumed. "
-          "The context sampling package does not handle location permissions. This should be handled on the application level.");
-    } else {
-      info('Configuring $runtimeType - configuration: $configuration');
-      _configured = false;
-
-      try {
-        await _provider.changeSettings(
-          accuracy:
-              location.LocationAccuracy.values[configuration.accuracy.index],
-          distanceFilter: configuration.distance,
-          interval: configuration.interval.inMilliseconds,
+          "The context sampling package does not handle location permissions. This should be handled on the application level.",
         );
 
-        await _provider.changeNotificationOptions(
-            title: configuration.notificationTitle ?? 'CARP Location Service',
-            subtitle: configuration.notificationMessage ??
-                'The location service is running in the background',
-            description: configuration.notificationDescription ??
-                'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
-                    'This is required for main features to work properly when the app is not in use.',
-            onTapBringToFront: configuration.notificationOnTapBringToFront,
-            iconName: configuration.notificationIconName);
-
-        info('$runtimeType - configured successfully.');
-        _configured = true;
-      } catch (error) {
-        warning('$runtimeType - Configuration failed - $error');
-        return;
+        // If not granted, try to request 'when in use' permission.
+        await Permission.locationWhenInUse.request();
       }
+
+      // Change notification options - only on Android.
+      try {
+        await _provider.changeNotificationOptions(
+          title: configuration.notificationTitle ?? 'CARP Location Service',
+          subtitle:
+              configuration.notificationMessage ??
+              'The location service is running in the background',
+          description:
+              configuration.notificationDescription ??
+              'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
+                  'This is required for main features to work properly when the app is not in use.',
+          onTapBringToFront: configuration.notificationOnTapBringToFront,
+          iconName: configuration.notificationIconName,
+        );
+      } catch (error) {
+        warning(
+          '$runtimeType - Configuration of Android notification failed - $error\n'
+          'Ignoring this.',
+        );
+      }
+    }
+
+    // Change location settings - both Android and iOS.
+    try {
+      await _provider.changeSettings(
+        accuracy:
+            location.LocationAccuracy.values[configuration.accuracy.index],
+        distanceFilter: configuration.distance,
+        interval: configuration.interval.inMilliseconds,
+      );
+
+      info('$runtimeType - configured successfully.');
+      _configured = true;
+    } catch (error) {
+      warning('$runtimeType - Configuration failed - $error');
     }
   }
 
@@ -263,8 +257,9 @@ class LocationManager {
   /// Throws an error if the app does not have permission to access location.
   Future<Location> getLocation() async {
     try {
-      _lastKnownLocation =
-          await onLocationChanged.first.timeout(const Duration(seconds: 6));
+      _lastKnownLocation = await onLocationChanged.first.timeout(
+        const Duration(seconds: 6),
+      );
     } catch (_) {}
 
     if (_lastKnownLocation == null) {
@@ -289,182 +284,11 @@ class LocationManager {
   ///
   /// Throws an error if the app has no permission to access location.
   Stream<Location> get onLocationChanged => _provider.onLocationChanged.map(
-      (location) => _lastKnownLocation = Location.fromLocationData(location));
+    (location) => _lastKnownLocation = Location.fromLocationData(location),
+  );
+
+  @override
+  toString() => configuration != null
+      ? '$runtimeType\n${configuration!.accuracy.name} | ${configuration!.distance.toInt()} m | ${configuration!.interval.inSeconds} secs'
+      : '$runtimeType';
 }
-
-// /// A manger that knows how to get location information.
-// /// Provide access to location data while the app is in the background.
-// ///
-// /// Use as a singleton:
-// ///
-// ///  `LocationManager()...`
-// ///
-// /// Note that this [LocationManager] **tries** to handle location permissions
-// /// during its configuration (via the [configure] method) and the [hasPermission]
-// /// and [requestPermission] methods.
-// ///
-// /// **However**, it is much better - and also recommended by both Apple and
-// /// Google - to handle permissions on an application level and show the location
-// /// permission dialogue to the user **before** using probes that depend on location.
-// ///
-// /// This [LocationManager] based on the [geolocator](https://pub.dev/packages/geolocator)
-// /// plugin.
-// class LocationManager {
-//   static final LocationManager _instance = LocationManager._();
-//   LocationManager._();
-
-//   /// Get the singleton [LocationManager] instance
-//   factory LocationManager() => _instance;
-
-//   bool _enabled = false, _configured = false;
-//   Location? _lastKnownLocation;
-//   geolocator.LocationSettings? _settings;
-
-//   /// Is the location service enabled, which entails that
-//   ///  * location service is enabled
-//   ///  * permissions granted
-//   bool get enabled => _enabled;
-
-//   /// Is the location service configured via the [configure] method.
-//   bool get configured => _configured;
-
-//   // /// Is the location service enabled in background mode?
-//   // Future<bool> isBackgroundModeEnabled() async =>
-//   //     await _provider.isBackgroundModeEnabled();
-
-//   /// Does this location manger have permission to access location "always"?
-//   ///
-//   /// If the result is [PermissionStatus.permanentlyDenied], no dialog will be
-//   /// shown on [requestPermission].
-//   Future<PermissionStatus> hasPermission() async =>
-//       await Permission.locationAlways.status;
-
-//   /// Has location been granted to this location manager?
-//   Future<bool> isGranted() async =>
-//       (await hasPermission()) == PermissionStatus.granted;
-
-//   /// Request permissions to access location.
-//   ///
-//   /// If the result is [PermissionStatus.permanentlyDenied], no dialog will be
-//   /// shown on [requestPermission].
-//   Future<PermissionStatus> requestPermission() async =>
-//       await Permission.locationAlways.request();
-
-//   /// Enable the [LocationManager], incl. sending a notification to the
-//   /// Android notification system.
-//   ///
-//   /// After the location manager is enabled, configuration can be done via the
-//   /// [configure] method.
-//   Future<void> enable() async {
-//     // fast out if already enabled
-//     if (enabled) return;
-
-//     info('Enabling $runtimeType...');
-//     _enabled = false;
-
-//     bool serviceEnabled =
-//         await geolocator.Geolocator.isLocationServiceEnabled();
-//     if (!serviceEnabled) {
-//       warning('$runtimeType - Location service is not enabled on this device.');
-//       return;
-//     }
-
-//     if (await geolocator.Geolocator.checkPermission() !=
-//         geolocator.LocationPermission.always) {
-//       warning(
-//           "$runtimeType - Permission to collect location data 'Always' in the background has not been granted. "
-//           "Make sure to grant this BEFORE sensing is resumed. "
-//           "The context sampling package does not handle permissions. This should be handled on the application level.");
-//     }
-
-//     _enabled = true;
-//     info('$runtimeType - enabled.');
-//   }
-
-//   /// Configures the [LocationManager], incl. sending a notification to the
-//   /// Android notification system.
-//   ///
-//   /// Configuration is done based on the [LocationService]. If not provided,
-//   /// as set of default configurations are used.
-//   Future<void> configure(LocationService configuration) async {
-//     // fast out if already configured
-//     if (configured) return;
-
-//     // ensured that this location manager is enable first
-//     await enable();
-
-//     info('Configuring $runtimeType - configuration: $configuration');
-//     _configured = false;
-
-//     if (Platform.isAndroid) {
-//       _settings = AndroidSettings(
-//           accuracy:
-//               geolocator.LocationAccuracy.values[configuration.accuracy.index],
-//           distanceFilter: configuration.distance.toInt(),
-//           forceLocationManager: true,
-//           intervalDuration: configuration.interval,
-//           // Set foreground notification config to keep the app alive when going to the background
-//           foregroundNotificationConfig: const ForegroundNotificationConfig(
-//             notificationText:
-//                 'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
-//                 'This is required for main features to work properly when the app is not in use.',
-//             notificationTitle: "CARP Location Service",
-//             enableWakeLock: true,
-//           ));
-//     } else if (Platform.isAndroid) {
-//       _settings = AppleSettings(
-//         accuracy:
-//             geolocator.LocationAccuracy.values[configuration.accuracy.index],
-//         distanceFilter: configuration.distance.toInt(),
-//         timeLimit: configuration.interval,
-//         // activityType: geolocator.ActivityType.fitness,
-//         pauseLocationUpdatesAutomatically: true,
-//         allowBackgroundLocationUpdates: true,
-//         // Only set to true if our app will be started up in the background.
-//         showBackgroundLocationIndicator: false,
-//       );
-//     } else {
-//       _settings = LocationSettings(
-//         accuracy:
-//             geolocator.LocationAccuracy.values[configuration.accuracy.index],
-//         distanceFilter: configuration.distance.toInt(),
-//         timeLimit: configuration.interval,
-//       );
-//     }
-
-//     info('$runtimeType - configured successfully.');
-//     _configured = true;
-//   }
-
-//   /// Gets the last known location of the phone.
-//   ///
-//   /// Throws an error if location cannot be obtained within a few seconds or
-//   /// if the app has no permission to access location.
-//   Future<Location?> lastKnownLocation() async {
-//     var position = await geolocator.Geolocator.getLastKnownPosition()
-//         .timeout(const Duration(seconds: 10));
-
-//     return position != null
-//         ? _lastKnownLocation = Location.fromPositionData(position)
-//         : _lastKnownLocation;
-//   }
-
-//   /// Gets the current location of the phone.
-//   ///
-//   /// Throws an error if location cannot be obtained within a few seconds or
-//   /// if the app has no permission to access location.
-//   Future<Location> getLocation() async =>
-//       _lastKnownLocation = Location.fromPositionData(
-//           await geolocator.Geolocator.getCurrentPosition().timeout(
-//         const Duration(seconds: 10),
-//       ));
-
-//   /// Returns a stream of [Location] objects.
-//   ///
-//   /// Throws an error if the app has no permission to access location.
-//   Stream<Location> get onLocationChanged =>
-//       geolocator.Geolocator.getPositionStream(
-//         locationSettings: _settings,
-//       ).map((position) =>
-//           _lastKnownLocation = Location.fromPositionData(position));
-// }

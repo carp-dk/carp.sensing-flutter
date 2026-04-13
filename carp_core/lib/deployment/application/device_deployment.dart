@@ -5,12 +5,12 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 /// Contains the entire description and configuration for how a single primary
 /// device participates in running a study.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class PrimaryDeviceDeployment {
+class PrimaryDeviceDeployment with ChangeNotifier {
   /// The configuration for the primary device this deployment is intended for.
   PrimaryDeviceConfiguration deviceConfiguration;
 
@@ -54,10 +54,12 @@ class PrimaryDeviceDeployment {
       for (var control in taskControls) {
         control.task ??= getTaskByName(control.taskName);
         for (var type in control.task!.getAllExpectedDataTypes()) {
-          _expectedDataStreams!.add(ExpectedDataStream(
-            dataType: type,
-            deviceRoleName: control.destinationDeviceRoleName!,
-          ));
+          _expectedDataStreams!.add(
+            ExpectedDataStream(
+              dataType: type,
+              deviceRoleName: control.destinationDeviceRoleName!,
+            ),
+          );
         }
       }
     }
@@ -93,7 +95,21 @@ class PrimaryDeviceDeployment {
   /// The time when this device deployment was last updated.
   /// This corresponds to the most recent device registration as part of this
   /// device deployment.
-  DateTime get lastUpdatedOn => registration.registrationCreatedOn;
+  DateTime get lastUpdatedOn {
+    var latestUpdate = registration.registrationCreatedOn;
+
+    for (var registration in connectedDeviceRegistrations.values) {
+      if (registration != null &&
+          registration.registrationCreatedOn.isAfter(latestUpdate)) {
+        latestUpdate = registration.registrationCreatedOn;
+      }
+    }
+
+    return latestUpdate;
+  }
+
+  /// Notify listeners that this deployment has been updated.
+  void hasBeenUpdated() => notifyListeners();
 
   factory PrimaryDeviceDeployment.fromJson(Map<String, dynamic> json) =>
       _$PrimaryDeviceDeploymentFromJson(json);
@@ -105,17 +121,19 @@ class PrimaryDeviceDeployment {
 
 /// A [DeviceDeploymentStatus] represents the status of a device in a deployment.
 ///
-/// See [DeviceDeploymentStatus.kt](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/DeviceDeploymentStatus.kt).
+/// See [DeviceDeploymentStatus.kt](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/DeviceDeploymentStatus.kt).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceDeploymentStatus extends Serializable {
-  DeviceDeploymentStatusTypes? _status;
-
   /// The description of the device.
   DeviceConfiguration device;
 
-  /// Determines whether the device can be deployed by retrieving [PrimaryDeviceDeployment].
-  /// Not all primary devices necessarily need deployment; chained primary devices do not.
-  bool? canBeDeployed = false;
+  /// Determines whether the device can be deployed by retrieving a [PrimaryDeviceDeployment].
+  ///
+  /// Only primary devices can be deployed. However, not all primary devices
+  /// necessarily need deployment; chained primary devices do not.
+  ///
+  /// Is null if already deployed, i.e., [status] is [DeviceDeploymentStatusTypes.Deployed].
+  bool? canBeDeployed;
 
   /// Determines whether the device requires a device deployment, and if so,
   /// whether the deployment configuration (to initialize the device environment)
@@ -123,17 +141,23 @@ class DeviceDeploymentStatus extends Serializable {
   /// This requires the specified device and all other primary devices it depends
   /// on to be registered.
   bool get canObtainDeviceDeployment =>
-      (_status == DeviceDeploymentStatusTypes.Deployed ||
-          (_status == DeviceDeploymentStatusTypes.NotDeployed &&
-              remainingDevicesToRegisterToObtainDeployment!.isEmpty));
+      (status == DeviceDeploymentStatusTypes.Deployed ||
+      (status != DeviceDeploymentStatusTypes.Deployed &&
+          (remainingDevicesToRegisterToObtainDeployment?.isEmpty ?? true)));
+
+  /// Determines whether the device and all dependent devices have been
+  /// registered successfully and is ready for deployment.
+  bool get isReadyForDeployment =>
+      (canBeDeployed ?? true) &&
+      (remainingDevicesToRegisterBeforeDeployment?.isEmpty ?? true);
 
   /// The role names of devices which need to be registered before the deployment
   /// information for this device can be obtained.
-  List<String>? remainingDevicesToRegisterToObtainDeployment = [];
+  List<String>? remainingDevicesToRegisterToObtainDeployment;
 
   /// The role names of devices which need to be registered before this device
   /// can be declared as successfully deployed.
-  List<String>? remainingDevicesToRegisterBeforeDeployment = [];
+  List<String>? remainingDevicesToRegisterBeforeDeployment;
 
   /// Get the status of this device deployment:
   /// * Unregistered
@@ -141,39 +165,32 @@ class DeviceDeploymentStatus extends Serializable {
   /// * Deployed
   /// * NeedsRedeployment
   @JsonKey(includeFromJson: false, includeToJson: false)
-  DeviceDeploymentStatusTypes get status {
-    // if this object has been created locally, then we know the status
-    if (_status != null) return _status!;
-
-    // if this object was create from json deserialization,
-    // the $type reflects the status
-    switch ($type!.split('.').last) {
-      case 'Unregistered':
-        return DeviceDeploymentStatusTypes.Unregistered;
-      case 'Registered':
-        return DeviceDeploymentStatusTypes.Registered;
-      case 'Deployed':
-        return DeviceDeploymentStatusTypes.Deployed;
-      case 'Running':
-        return DeviceDeploymentStatusTypes.Running;
-      case 'NeedsRedeployment':
-        return DeviceDeploymentStatusTypes.NeedsRedeployment;
-      default:
-        return DeviceDeploymentStatusTypes.Deployed;
-    }
-  }
-
-  /// Set the status of this device deployment.
-  set status(DeviceDeploymentStatusTypes status) => _status = status;
+  DeviceDeploymentStatusTypes status = DeviceDeploymentStatusTypes.Unregistered;
 
   DeviceDeploymentStatus({required this.device}) : super() {
-    _status = DeviceDeploymentStatusTypes.Unregistered;
+    status = DeviceDeploymentStatusTypes.Unregistered;
   }
 
   @override
   Function get fromJsonFunction => _$DeviceDeploymentStatusFromJson;
-  factory DeviceDeploymentStatus.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DeviceDeploymentStatus>(json);
+
+  factory DeviceDeploymentStatus.fromJson(Map<String, dynamic> json) {
+    DeviceDeploymentStatus status = FromJsonFactory()
+        .fromJson<DeviceDeploymentStatus>(json);
+
+    // when this object was create from json deserialization,
+    // the last part of the $type reflects the status
+    status.status = switch (status.$type?.split('.').last) {
+      'Unregistered' => DeviceDeploymentStatusTypes.Unregistered,
+      'Registered' => DeviceDeploymentStatusTypes.Registered,
+      'NeedsRedeployment' => DeviceDeploymentStatusTypes.NeedsRedeployment,
+      'Deployed' => DeviceDeploymentStatusTypes.Deployed,
+      _ => DeviceDeploymentStatusTypes.Deployed,
+    };
+
+    return status;
+  }
+
   @override
   Map<String, dynamic> toJson() => _$DeviceDeploymentStatusToJson(this);
   @override
@@ -184,10 +201,11 @@ class DeviceDeploymentStatus extends Serializable {
 }
 
 /// The types of device deployment status.
+///
+/// This is based on the [state diagram for a DeviceDeploymentStatus](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-deployments.md#study-and-device-deployment-state).
+/// Note, however, that the `NotDeployed` state is not explicitly represented here,
+/// since it is merely an abstract state in the Kotlin implementation.
 enum DeviceDeploymentStatusTypes {
-  /// A device deployment status which indicates the correct deployment has not been deployed yet.
-  NotDeployed,
-
   /// Device deployment status for when a device has not been registered.
   Unregistered,
 
@@ -195,13 +213,8 @@ enum DeviceDeploymentStatusTypes {
   Registered,
 
   /// Device deployment status when the device has retrieved its
-  /// [PrimaryDeviceDeployment] and was able to load all the necessary
-  /// plugins to execute the study.
+  /// [PrimaryDeviceDeployment] and was able to start executing the study.
   Deployed,
-
-  /// All primary devices have been successfully deployed and data collection
-  /// has started on the time specified by [startedOn].
-  Running,
 
   /// Device deployment status when the device has previously been deployed
   /// correctly, but due to changes in device registrations needs to be redeployed.

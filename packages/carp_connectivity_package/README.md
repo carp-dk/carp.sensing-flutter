@@ -1,32 +1,34 @@
 # CARP Connectivity Sampling Package
 
-[![pub package](https://img.shields.io/pub/v/carp_connectivity_package.svg)](https://pub.dartlang.org/packages/carp_connectivity_package)
-[![pub points](https://img.shields.io/pub/points/carp_connectivity_package?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_connectivity_package/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_connectivity_package.svg)](https://pub.dev/packages/carp_connectivity_package)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
-This library contains a sampling package for collection of connectivity related measures to work with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework.
-This packages supports sampling of the following [`Measure`](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types) types:
+This library contains a sampling package for collection of connectivity related measures to work with the [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) framework.
+This package supports sampling of the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
 * `dk.cachet.carp.wifi`
 * `dk.cachet.carp.connectivity`
 * `dk.cachet.carp.bluetooth`
 * `dk.cachet.carp.beacon`
 
-See the [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki) for further documentation, particularly on available [measure types](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types).
-See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
+See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
+See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
-There is privacy protection of wifi and bluetooth names as part of the default [Privacy Schema](https://github.com/cph-cachet/carp.sensing-flutter/wiki/3.-Using-CARP-Mobile-Sensing#privacy-transformer-schemas).
+There is privacy protection of wifi and bluetooth names as part of the default [Privacy Schema](https://docs.carp.dk/carp-mobile-sensing/data-transformation-and-privacy#privacy-transformer-schemas).
 
 For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter).
 
-If you're interested in writing you own sampling packages for CARP, see the description on
-how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing) CARP on the wiki.
+If you're interested in writing your own sampling packages for CARP, see the description on
+how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that this package only works together with [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing).
+To use this package, add the following to your `pubspec.yaml` file. Note that this package only works together with [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing).
 
 `````dart
 dependencies:
@@ -37,36 +39,40 @@ dependencies:
   ...
 `````
 
-### Android Integration
+### Android
 
-As explained in the Android [Wi-Fi scanning overview](https://developer.android.com/guide/topics/connectivity/wifi-scan), access to wifi information required different permission to be set.
-For Android >= 10 (API level 29) you need `ACCESS_FINE_LOCATION`, and `ACCESS_COARSE_LOCATION`.
-For Android >=12 (API level 31) be sure that your app has `ACCESS_NETWORK_STATE` permission.
-
-Add the following to your app's `AndroidManifest.xml` file located in `android/app/src/main`:
+As explained in the Android [Wi-Fi scanning overview](https://developer.android.com/guide/topics/connectivity/wifi-scan), access to wifi information requires location access and wifi access permissions.
+As explained in the [dchs_flutter_beacon](https://pub.dev/packages/dchs_flutter_beacon#setup-specific-for-android) plugin, access to iBeacons requires location access and Bluetooth access permissions.
+In summary, you should add the following to your app's `AndroidManifest.xml` file located in `android/app/src/main`:
 
 ````xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="<your_package_name>"
-    xmlns:tools="http://schemas.android.com/tools">
+<!-- Required for accessing location information -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-   ...
+<!-- Optional: background scanning -->
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-    <!-- The following permissions are used in the Connectivity Package -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-</manifest>
+<!-- Required for accessing network information -->
+<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+
+<!-- Required for BLE scanning on Android 12+ (API 31+) -->
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
+<!-- Recommended when checking Bluetooth state or prompting the user to enable Bluetooth -->
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 ````
 
-> Note that connectivity changes are **not** communicated to Android apps in the background starting with Android 8 (SDK 26). Hence, connectivity status is only collected when your app is resumed.
+> [!IMPORTANT]  
+> Connectivity changes are **not** communicated to Android apps in the background starting with Android 8 (SDK 26). Hence, connectivity status is only collected when your app is resumed.
 
-### iOS Integration
+### iOS
 
-From iOS >= 13 there is no longer access to wifi information.
-See here for the [Flutter](https://pub.dev/packages/network_info_plus) description
-and here for the [iOS](https://developer.apple.com/documentation/systemconfiguration/1614126-cncopycurrentnetworkinfo) description.
+Access to network information on iOS is highly restricted.
+From iOS >= 13 there is no longer direct access to wifi information.
+See the [network_info_plus](https://pub.dev/packages/network_info_plus#ios) description
+and the [iOS](https://developer.apple.com/documentation/systemconfiguration/1614126-cncopycurrentnetworkinfo) description.
 
 To enable bluetooth tracking, add these permissions in the `Info.plist` file located in `ios/Runner`:
 
@@ -166,11 +172,8 @@ protocol.addTaskControl(
 
 The default configuration scans every 10 minutes for 10 seconds, and does not specify any remote IDs or services.
 
-If you want to collect iBeacon measurements, you need to configure the scanning by setting a [`BeaconRangingPeriodicSamplingConfiguration`](https://pub.dev/documentation/carp_connectivity_package/latest/connectivity/BeaconRangingPeriodicSamplingConfiguration-class.html).
+Scanning for iBeacons is configured by the [`BeaconRangingPeriodicSamplingConfiguration`](https://pub.dev/documentation/carp_connectivity_package/latest/connectivity/BeaconRangingPeriodicSamplingConfiguration-class.html).
 The following example will scan for iBeacons in the specified regions which are closer than 2 meters. The regions are specified by their identifier and UUID. See the [dchs_flutter_beacon](https://pub.dev/packages/dchs_flutter_beacon) plugin for more information on how to set up iBeacon regions.
-
-> [!NOTE]
-> There is no default sampling configuration for iBeacons. You need to specify at least one region to scan for.
 
 ```dart
   protocol.addTaskControl(
@@ -194,3 +197,6 @@ The following example will scan for iBeacons in the specified regions which are 
       ]),
       phone);
 ```
+
+> [!IMPORTANT]
+> There is no default sampling configuration for iBeacons. You need to specify at least one region to scan for.

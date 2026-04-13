@@ -24,7 +24,9 @@ List<RPChoice> _who5Choices = [
 ];
 
 RPChoiceAnswerFormat _choiceAnswerFormat = RPChoiceAnswerFormat(
-    answerStyle: RPChoiceAnswerStyle.SingleChoice, choices: _who5Choices);
+  answerStyle: RPChoiceAnswerStyle.SingleChoice,
+  choices: _who5Choices,
+);
 
 RPQuestionStep _who5Question1 = RPQuestionStep(
   identifier: "who5_question_1",

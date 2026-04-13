@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 /// Expected participant [data] for all participants in a study deployment
 /// with [studyDeploymentId].
@@ -38,10 +38,7 @@ class RoleData {
   /// Data that is related to this role in the study deployment.
   Map<String, Data?> data;
 
-  RoleData({
-    required this.roleName,
-    this.data = const {},
-  }) : super();
+  RoleData({required this.roleName, this.data = const {}}) : super();
 
   factory RoleData.fromJson(Map<String, dynamic> json) =>
       _$RoleDataFromJson(json);

@@ -8,7 +8,7 @@
 /// or Google Health Connect.
 /// Is using the [health](https://pub.dev/packages/health) plugin.
 /// Can be configured to collect the different [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType-class.html).
-library health_package;
+library;
 
 import 'dart:async';
 import 'dart:io';
@@ -20,10 +20,11 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:health/health.dart';
 
 part 'health_domain.dart';
-part 'health_package.g.dart';
 part 'health_probe.dart';
-part 'health_services.dart';
+part 'health_service_manager.dart';
 part 'health_user_task.dart';
+
+part 'health_package.g.dart';
 
 /// The health sampling package supports the following overall measure type:
 ///
@@ -75,24 +76,30 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
   /// Data will be collected [days] days back in time. If not specified,
   /// data will be collected for the last 30 days, which is the maximum
   /// that Google Health Connect allow.
-  static Measure getHealthMeasure(List<HealthDataType> types,
-          [int days = 30]) =>
+  static Measure getHealthMeasure(
+    List<HealthDataType> types, [
+    int days = 30,
+  ]) =>
       Measure(type: HealthSamplingPackage.HEALTH)
         ..overrideSamplingConfiguration = HealthSamplingConfiguration(
-            past: Duration(days: days), healthDataTypes: types);
+          past: Duration(days: days),
+          healthDataTypes: types,
+        );
 
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-            DataTypeMetaData(
-              type: HEALTH,
-              displayName: "Health Data",
-              timeType: DataTimeType.TIME_SPAN,
-            ),
-            HealthSamplingConfiguration(
-                past: Duration(days: 30),
-                healthDataTypes: [HealthDataType.STEPS]))
+          DataTypeMetaData(
+            type: HEALTH,
+            displayName: "Health Data",
+            timeType: DataTimeType.TIME_SPAN,
+          ),
+          HealthSamplingConfiguration(
+            past: Duration(days: 30),
+            healthDataTypes: [HealthDataType.STEPS],
+          ),
+        ),
       ]);
 
   @override
@@ -105,16 +112,14 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
       HealthSamplingConfiguration(healthDataTypes: []),
       HealthAppTask(type: ''),
       HealthData(
-          '',
-          NumericHealthValue(numericValue: 6),
-          '',
-          '',
-          DateTime.now(),
-          DateTime.now(),
-          HealthPlatform.APPLE_HEALTH,
-          '',
-          '',
-          ''),
+        uuid: '',
+        value: NumericHealthValue(numericValue: 6),
+        unit: '',
+        healthDataType: '',
+        dateFrom: DateTime.now(),
+        dateTo: DateTime.now(),
+        platform: HealthPlatform.APPLE_HEALTH,
+      ),
     ]);
     AppTaskController().registerUserTaskFactory(HealthUserTaskFactory());
   }

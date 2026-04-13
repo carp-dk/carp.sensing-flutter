@@ -4,8 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// Describes a participant playing a [role] in a study, and whether this
 /// role [isOptional].
@@ -79,11 +78,8 @@ class AssignedTo extends Serializable {
 
   @override
   Function get fromJsonFunction => _$AssignedToFromJson;
-  factory AssignedTo.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AssignedTo>(
-        json,
-        notAvailable: AssignedTo.all(),
-      );
+  factory AssignedTo.fromJson(Map<String, dynamic> json) => FromJsonFactory()
+      .fromJson<AssignedTo>(json, notAvailable: AssignedTo.all());
   @override
   Map<String, dynamic> toJson() => _$AssignedToToJson(this);
 

@@ -19,6 +19,8 @@ Flutter/App.framework
 Flutter/Flutter.framework
 Flutter/Flutter.podspec
 Flutter/Generated.xcconfig
+Flutter/Debug.xcconfig
+Flutter/Release.xcconfig
 Flutter/ephemeral/
 Flutter/app.flx
 Flutter/app.zip
@@ -32,3 +34,5 @@ Runner/GeneratedPluginRegistrant.*
 !default.mode2v3
 !default.pbxuser
 !default.perspectivev3
+!Flutter/Debug.xcconfig
+!Flutter/Release.xcconfig

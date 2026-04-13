@@ -11,9 +11,10 @@ dependencies:
   flutter:
     sdk: flutter
   
-  carp_core: ^1.9.0
-  carp_mobile_sensing: ^1.13.0
+  carp_core: ^2.0.0
+  carp_mobile_sensing: ^2.0.0
   qr_code_scanner_plus: ^2.0.12
+  oidc: ^0.12.0
 
   # carp_core:
   #   path: ../../../carp_core
@@ -21,8 +22,6 @@ dependencies:
   #   path: ../../../carp_mobile_sensing
   carp_webservices:
     path: ../
-
-  oidc: ^0.12.0
 
 dev_dependencies:
   test: any

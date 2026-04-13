@@ -82,8 +82,9 @@ class MovesenseSamplingPackage implements SamplingPackage {
   static const String TEMPERATURE = "$MOVESENSE_NAMESPACE.temperature";
   static const String IMU = "$MOVESENSE_NAMESPACE.imu";
 
-  final MovesenseDeviceManager _deviceManager =
-      MovesenseDeviceManager(MovesenseDevice.DEVICE_TYPE);
+  final MovesenseDeviceManager _deviceManager = MovesenseDeviceManager(
+    MovesenseDevice.DEVICE_TYPE,
+  );
 
   @override
   List<DataTypeMetaData> get dataTypes => samplingSchemes.dataTypes;
@@ -96,18 +97,18 @@ class MovesenseSamplingPackage implements SamplingPackage {
 
   @override
   Probe? create(String type) => switch (type) {
-        DEVICE_INFO => MovesenseDeviceProbe(),
-        STATE => MovesenseStateChangeProbe(),
-        HR => MovesenseHRProbe(),
-        ECG => MovesenseECGProbe(),
-        // only the MD device supports temperature
-        TEMPERATURE =>
-          deviceManager.configuration?.deviceType == MovesenseDeviceType.MD
-              ? MovesenseTemperatureProbe()
-              : null,
-        IMU => MovesenseIMUProbe(),
-        _ => null,
-      };
+    DEVICE_INFO => MovesenseDeviceProbe(),
+    STATE => MovesenseStateChangeProbe(),
+    HR => MovesenseHRProbe(),
+    ECG => MovesenseECGProbe(),
+    // Only the Movesense Medical (MD) device supports temperature measurement.
+    TEMPERATURE =>
+      deviceManager.movesenseDeviceType == MovesenseDeviceType.MD
+          ? MovesenseTemperatureProbe()
+          : null,
+    IMU => MovesenseIMUProbe(),
+    _ => null,
+  };
 
   @override
   void onRegister() {

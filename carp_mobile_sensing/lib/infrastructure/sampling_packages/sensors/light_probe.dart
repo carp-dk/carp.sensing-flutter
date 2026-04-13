@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../sensors.dart';
+part of '../../../sampling_packages.dart';
 
 /// The [LightProbe] listens to the phone's light sensor typically located
 /// near the front camera.
@@ -34,7 +34,8 @@ class LightProbe extends BufferingPeriodicStreamProbe {
       : Measurement(
           sensorStartTime: _sensorStartTime,
           sensorEndTime: _sensorEndTime,
-          data: AmbientLight.fromLuxReadings(_luxValues));
+          data: AmbientLight.fromLuxReadings(_luxValues),
+        );
 
   @override
   void onSamplingStart() {

@@ -1,4 +1,6 @@
-import 'package:carp_core/carp_core.dart';
+// ignore_for_file: depend_on_referenced_packages
+
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_survey_package/survey.dart';
 import 'package:research_package/research_package.dart';
@@ -27,65 +29,69 @@ void main() async {
   // issuing a WHO-5 survey while also collecting device and
   // ambient light information when survey is initiated by the user.
   protocol.addTaskControl(
-      RecurrentScheduledTrigger(
-        type: RecurrentType.daily,
-        time: TimeOfDay(hour: 13),
-      ),
-      RPAppTask(
-          type: SurveyUserTask.SURVEY_TYPE,
-          name: 'WHO-5 Survey',
-          rpTask: who5Task,
-          measures: [
-            Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
-            Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-          ]),
-      phone);
+    RecurrentScheduledTrigger(
+      type: RecurrentType.daily,
+      time: TimeOfDay(hour: 13),
+    ),
+    RPAppTask(
+      type: AppTask.SURVEY_TYPE,
+      name: 'WHO-5 Survey',
+      rpTask: who5Task,
+      measures: [
+        Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
+        Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
+      ],
+    ),
+    phone,
+  );
 
   // Add a Parkinson's assessment consisting of;
   //  * an instruction step
-  //  * a timer step
-  //  * a Flanker and Tapping activity (from cognition package).
+  //  * a timer step that collects accelerometer and gyroscope data while the user is holding the phone
+  //  * a Flanker test (from cognition package).
+  //  * a Tapping Activity test (from cognition package).
   //
   // Accelerometer and gyroscope data is collected while the user is performing
   // the task in oder to assess tremor.
   protocol.addTaskControl(
-      PeriodicTrigger(period: const Duration(hours: 2)),
-      RPAppTask(
-          type: SurveyUserTask.COGNITIVE_ASSESSMENT_TYPE,
-          title: "Parkinson's' Assessment",
-          description: "A simple task assessing finger tapping speed.",
-          minutesToComplete: 3,
-          rpTask: RPOrderedTask(
-            identifier: "parkinsons_assessment",
-            steps: [
-              RPInstructionStep(
-                  identifier: 'parkinsons_instruction',
-                  title: "Parkinsons' Disease Assessment",
-                  text:
-                      "In the following pages, you will be asked to solve two simple test which will help assess your symptoms on a daily basis. "
-                      "Each test has an instruction page, which you should read carefully before starting the test.\n\n"
-                      "Please sit down comfortably and hold the phone in one hand while performing the test with the other."),
-              RPTimerStep(
-                identifier: 'RPTimerStepID',
-                timeout: const Duration(seconds: 6),
-                title:
-                    "Please stand up and hold the phone in one hand and lift it in a straight arm until you hear the sound.",
-                playSound: true,
-              ),
-              RPFlankerActivity(
-                identifier: 'flanker_1',
-                lengthOfTest: 30,
-                numberOfCards: 10,
-              ),
-              RPTappingActivity(
-                identifier: 'tapping_1',
-                lengthOfTest: 10,
-              )
-            ],
+    PeriodicTrigger(period: const Duration(hours: 2)),
+    RPAppTask(
+      type: AppTask.COGNITIVE_ASSESSMENT_TYPE,
+      title: "Parkinson's' Assessment",
+      description: "A simple task assessing finger tapping speed.",
+      minutesToComplete: 3,
+      rpTask: RPOrderedTask(
+        identifier: "parkinsons_assessment",
+        steps: [
+          RPInstructionStep(
+            identifier: 'parkinsons_instruction',
+            title: "Parkinsons' Disease Assessment",
+            text:
+                "In the following pages, you will be asked to solve two simple test which will help assess your symptoms on a daily basis. "
+                "Each test has an instruction page, which you should read carefully before starting the test.\n\n"
+                "Please sit down comfortably and hold the phone in one hand while performing the test with the other.",
           ),
-          measures: [
-            Measure(type: SensorSamplingPackage.ACCELERATION),
-            Measure(type: SensorSamplingPackage.ROTATION),
-          ]),
-      phone);
+          RPTimerStep(
+            identifier: 'RPTimerStepID',
+            timeout: const Duration(seconds: 6),
+            title:
+                "Please stand up. "
+                "Hold the phone in your dominant hand and lift it in a straight arm until you hear the sound.",
+            playSound: true,
+          ),
+          RPFlankerActivity(
+            identifier: 'flanker_1',
+            lengthOfTest: 30,
+            numberOfCards: 10,
+          ),
+          RPTappingActivity(identifier: 'tapping_1', lengthOfTest: 10),
+        ],
+      ),
+      measures: [
+        Measure(type: SensorSamplingPackage.ACCELERATION),
+        Measure(type: SensorSamplingPackage.ROTATION),
+      ],
+    ),
+    phone,
+  );
 }

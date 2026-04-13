@@ -1,0 +1,206 @@
+{
+ "id": "e22ae4cb-be37-4d39-8e3d-5253db0fa811",
+ "createdOn": "2026-04-13T10:46:52.808020Z",
+ "version": 0,
+ "ownerId": "alex@uni.dk",
+ "name": "Context package test",
+ "participantRoles": [],
+ "primaryDevices": [
+  {
+   "__type": "dk.carp.cams.devices.Smartphone",
+   "roleName": "SM-A320FL",
+   "isOptional": false,
+   "defaultSamplingConfiguration": {},
+   "isPrimaryDevice": true
+  }
+ ],
+ "connectedDevices": [
+  {
+   "__type": "dk.carp.cams.devices.PolarDevice",
+   "roleName": "Polar H10 HR monitor",
+   "isOptional": true,
+   "defaultSamplingConfiguration": {},
+   "serviceUuids": [],
+   "namePrefix": "Polar",
+   "allowDuplicates": true
+  }
+ ],
+ "connections": [
+  {
+   "roleName": "Polar H10 HR monitor",
+   "connectedToRoleName": "SM-A320FL"
+  }
+ ],
+ "assignedDevices": {},
+ "tasks": [
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #8",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.deviceinformation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applicationinformation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.freememory"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.batterystate"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.screenevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applifecycleevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.heartbeat"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.timezone"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.acceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.nongravitationalacceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.rotation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.magneticfield"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.accelerationfeatures"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.stepevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.ambientlight"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.error"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.triggeredtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedapptask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.accelerometer"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.gyroscope"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.magnetometer"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.ecg"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.ppi"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.ppg"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.hr"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #9",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.accelerometer"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.gyroscope"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.magnetometer"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.ecg"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.hr"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.ppg"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.polar.ppi"
+    }
+   ]
+  }
+ ],
+ "triggers": {
+  "0": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "SM-A320FL"
+  },
+  "1": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Polar H10 HR monitor"
+  }
+ },
+ "taskControls": [
+  {
+   "triggerId": 0,
+   "taskName": "Task #8",
+   "destinationDeviceRoleName": "SM-A320FL",
+   "control": "Start"
+  },
+  {
+   "triggerId": 1,
+   "taskName": "Task #9",
+   "destinationDeviceRoleName": "Polar H10 HR monitor",
+   "control": "Start"
+  }
+ ],
+ "expectedParticipantData": []
+}

@@ -1,31 +1,44 @@
 name: carp_apps_package
+version: 2.0.0
 description: Apps sampling package for the CARP Mobile Sensing framework (Android only).
-version: 1.7.1
-homepage: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/packages/carp_apps_package
+homepage: https://github.com/cph-cachet/carp.sensing-flutter
+repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_apps_package
+issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
+
+documentation: https://docs.carp.dk/carp-mobile-sensing/
+topics:
+  - mobile-sensing
+  - mobile-health
+  - sensors
+  - digital-phenotyping
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
+
+platforms:
+  android:
+  ios:
 
 dependencies:
   flutter:
     sdk: flutter
 
   carp_serializable: ^2.0.0
-  carp_core: ^1.8.0
-  carp_mobile_sensing: ^1.10.0
+  carp_core: ^2.0.0
+  carp_mobile_sensing: ^2.0.0
 
   app_usage: ^4.0.0
-  installed_apps: ^1.5.0
+  installed_apps: ^2.0.0
   json_annotation: ^4.8.0
   
 # Overriding carp libraries to use the local copy
 # Remove this before release of package
-# dependency_overrides:
+dependency_overrides:
 #   carp_serializable:
 #     path: ../../carp_serializable/
-#   carp_core:
-#     path: ../../carp_core/
+  # carp_core:
+  #   path: ../../carp_core/
   # carp_mobile_sensing:
   #   path: ../../carp_mobile_sensing/
 
@@ -35,7 +48,3 @@ dev_dependencies:
   json_serializable: any
   test: any
 
-# This package only supports iOS and Android
-platforms:
-  android:
-  ios:

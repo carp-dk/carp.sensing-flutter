@@ -18,13 +18,17 @@ class PhoneLogProbe extends MeasurementProbe {
         ? m.lastTime!.millisecondsSinceEpoch
         : DateTime.now().subtract(m.past).millisecondsSinceEpoch;
     int now = DateTime.now().millisecondsSinceEpoch;
-    Iterable<CallLogEntry> entries =
-        await CallLog.query(dateFrom: from, dateTo: now);
-    return Measurement.fromData(PhoneLog(
-      m.lastTime!,
-      DateTime.now(),
-      entries.map((call) => PhoneCall.fromCallLogEntry(call)).toList(),
-    ));
+    Iterable<CallLogEntry> entries = await CallLog.query(
+      dateFrom: from,
+      dateTo: now,
+    );
+    return Measurement.fromData(
+      PhoneLog(
+        DateTime.fromMillisecondsSinceEpoch(from).toUtc(),
+        DateTime.now().toUtc(),
+        entries.map((call) => PhoneCall.fromCallLogEntry(call)).toList(),
+      ),
+    );
   }
 }
 
@@ -52,16 +56,19 @@ class TextMessageLogProbe extends MeasurementProbe {
   Future<Measurement> getMeasurement() async {
     List<SmsMessage> allSms = [];
     allSms
-      ..addAll(await Telephony.instance.getInboxSms(
-        columns: ALL_SMS_COLUMNS,
-      ))
-      ..addAll(await Telephony.instance.getSentSms(
-        columns: ALL_SMS_COLUMNS,
-      ));
-    return Measurement.fromData(TextMessageLog(
-        allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList()));
+      ..addAll(await _telephony.getInboxSms(columns: ALL_SMS_COLUMNS))
+      ..addAll(await _telephony.getSentSms(columns: ALL_SMS_COLUMNS));
+    return Measurement.fromData(
+      TextMessageLog(
+        allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList(),
+      ),
+    );
   }
 }
+
+// The singleton instance of the [Telephony] class to be used in
+// background execution context.
+Telephony get _telephony => Telephony.backgroundInstance;
 
 // A private stream controller to be used in the call-back from the SMS probe.
 StreamController<Measurement> _textMessageProbeController =
@@ -70,63 +77,74 @@ StreamController<Measurement> _textMessageProbeController =
 /// The top-level call-back method for handling in-coming SMS messages when
 /// the app is in the background.
 void backgroundMessageHandler(SmsMessage message) async {
-  _textMessageProbeController
-      .add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
+  _textMessageProbeController.add(
+    Measurement.fromData(TextMessage.fromSmsMessage(message)),
+  );
 }
 
 /// The [TextMessageProbe] listens to SMS messages and collects a
-/// [TextMessageDatum] every time a new SMS message is received.
+/// [TextMessage] every time a new SMS message is received.
 ///
 /// Only works on Android.
 class TextMessageProbe extends StreamProbe {
   @override
   Stream<Measurement> get stream => _textMessageProbeController.stream;
 
-  @override
-  bool onInitialize() {
-    if (!Platform.isAndroid) {
-      throw SensingException('TextMessageProbe only available on Android.');
-    }
+  // @override
+  // bool onInitialize() {
+  //   if (!Platform.isAndroid) {
+  //     warning('$runtimeType only available on Android.');
+  //     return false;
+  //   }
 
-    Telephony.instance.listenIncomingSms(
+  //   _telephony.listenIncomingSms(
+  //     onNewMessage: (SmsMessage message) {
+  //       _textMessageProbeController.add(
+  //         Measurement.fromData(TextMessage.fromSmsMessage(message)),
+  //       );
+  //     },
+  //     onBackgroundMessage: backgroundMessageHandler,
+  //   );
+  //   return true;
+  // }
+
+  @override
+  Future<bool> onResume() async {
+    _telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
-        _textMessageProbeController
-            .add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
+        _textMessageProbeController.add(
+          Measurement.fromData(TextMessage.fromSmsMessage(message)),
+        );
       },
       onBackgroundMessage: backgroundMessageHandler,
     );
-    return true;
+
+    return await super.onResume();
   }
 }
 
 /// A probe collecting calendar entries from the calendar on the phone.
-///
-/// See [CalendarMeasure] for how to configure this probe's measure.
 class CalendarProbe extends MeasurementProbe {
-  final _deviceCalendar = cal.DeviceCalendarPlugin();
+  final cal.DeviceCalendar _deviceCalendar = cal.DeviceCalendar();
   List<cal.Calendar>? _calendars;
-  late Iterator<cal.Calendar> _calendarIterator;
-  List<CalendarEvent> _events = [];
-  DateTime? startDate, endDate;
 
-  @override
-  bool onInitialize() {
-    _retrieveCalendars();
-    return true;
-  }
-
+  /// Get the entire list of calendars from the device.
+  /// This only needs to be done once, and the list of calendars is then cached.
   Future<bool> _retrieveCalendars() async {
     // try to get permission to access calendar
     var permissionsGranted = await _deviceCalendar.hasPermissions();
-    if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
+
+    if (permissionsGranted != cal.CalendarPermissionStatus.granted &&
+        permissionsGranted == cal.CalendarPermissionStatus.notDetermined) {
+      // User hasn't been asked yet - now we can prompt
       permissionsGranted = await _deviceCalendar.requestPermissions();
-      if (!permissionsGranted.isSuccess || !permissionsGranted.data!) {
+      // If permissions are still not granted, we cannot proceed.
+      if (permissionsGranted != cal.CalendarPermissionStatus.granted) {
         return false;
       }
     }
 
-    final calendarsResult = await _deviceCalendar.retrieveCalendars();
-    _calendars = calendarsResult.data;
+    _calendars = await _deviceCalendar.listCalendars();
     return true;
   }
 
@@ -134,51 +152,34 @@ class CalendarProbe extends MeasurementProbe {
   HistoricSamplingConfiguration get samplingConfiguration =>
       super.samplingConfiguration as HistoricSamplingConfiguration;
 
-  // Collects events from a calendar.
-  Future<bool> _retrieveEvents(cal.Calendar calendar) async {
-    startDate = DateTime.now().subtract(samplingConfiguration.past);
-    endDate = DateTime.now().add(samplingConfiguration.future);
-
-    var calendarEventsResult = await _deviceCalendar.retrieveEvents(calendar.id,
-        cal.RetrieveEventsParams(startDate: startDate, endDate: endDate));
-    List<cal.Event>? calendarEvents = calendarEventsResult.data;
-    if (calendarEvents != null) {
-      for (var event in calendarEvents) {
-        _events.add(CalendarEvent.fromEvent(event));
-      }
-    } else {
-      return false;
-    }
-
-    // recursively collect events from the next calendar in the iterator
-    if (_calendarIterator.moveNext()) {
-      return await _retrieveEvents(_calendarIterator.current);
-    }
-
-    return true;
-  }
-
-  /// Get the [Calendar] measurement.
+  /// Get a [Calendar] measurement for all events in all calendars based on
+  /// the historic [samplingConfiguration].
   @override
   Future<Measurement> getMeasurement() async {
     if (_calendars == null) await _retrieveCalendars();
 
-    if (_calendars != null) {
-      _events = [];
-      _calendarIterator = _calendars!.iterator;
-
-      if (_calendarIterator.moveNext()) {
-        await _retrieveEvents(_calendarIterator.current);
-      }
-
-      return Measurement(
-        sensorStartTime: startDate!.microsecondsSinceEpoch,
-        sensorEndTime: endDate?.microsecondsSinceEpoch,
-        data: Calendar(startDate!, endDate!)..calendarEvents = _events,
+    // Fast out if calendars could not be retrieved, e.g. due to missing permissions.
+    if (_calendars == null) {
+      return Measurement.fromData(
+        Error(message: 'The list of calendars could not be retrieved.'),
       );
-    } else {
-      return Measurement.fromData(Error(
-          message: 'Permission to collect calendar entries not granted.'));
     }
+
+    DateTime startDate =
+        samplingConfiguration.lastTime ??
+        DateTime.now().subtract(samplingConfiguration.past);
+    DateTime endDate = DateTime.now();
+
+    // Get all events from all calendars.
+    var events = await _deviceCalendar.listEvents(startDate, endDate);
+
+    return Measurement(
+      sensorStartTime: startDate.microsecondsSinceEpoch,
+      sensorEndTime: endDate.microsecondsSinceEpoch,
+      data: Calendar(startDate, endDate)
+        ..calendarEvents = events
+            .map((event) => CalendarEvent.fromEvent(event))
+            .toList(),
+    );
   }
 }

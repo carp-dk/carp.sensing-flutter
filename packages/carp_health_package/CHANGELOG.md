@@ -1,3 +1,7 @@
+## 4.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 3.2.0
 
 * Fix of [#472](https://github.com/cph-cachet/carp.sensing-flutter/issues/472)

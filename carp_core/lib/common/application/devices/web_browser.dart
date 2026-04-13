@@ -4,8 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../../carp_core_common.dart';
+part of '../../../common.dart';
 
 /// Configuration of an internet-connected web browser device with no built-in [sensors].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -19,9 +18,7 @@ class WebBrowser extends PrimaryDeviceConfiguration<WebBrowserRegistration> {
 
   /// Create a new web browser device descriptor.
   /// If [roleName] is not specified, then the [DEFAULT_ROLE_NAME] is used.
-  WebBrowser({
-    super.roleName = WebBrowser.DEFAULT_ROLE_NAME,
-  });
+  WebBrowser({super.roleName = WebBrowser.DEFAULT_ROLE_NAME});
 
   @override
   WebBrowserRegistration createRegistration({
@@ -33,17 +30,16 @@ class WebBrowser extends PrimaryDeviceConfiguration<WebBrowserRegistration> {
     String? vendor,
     int? maxTouchPoints,
     int? hardwareConcurrency,
-  }) =>
-      WebBrowserRegistration(
-        deviceId: deviceId,
-        deviceDisplayName: deviceDisplayName,
-        browserName: browserName,
-        deviceMemory: deviceMemory,
-        language: language,
-        vendor: vendor,
-        maxTouchPoints: maxTouchPoints,
-        hardwareConcurrency: hardwareConcurrency,
-      );
+  }) => WebBrowserRegistration(
+    deviceId: deviceId,
+    deviceDisplayName: deviceDisplayName,
+    browserName: browserName,
+    deviceMemory: deviceMemory,
+    language: language,
+    vendor: vendor,
+    maxTouchPoints: maxTouchPoints,
+    hardwareConcurrency: hardwareConcurrency,
+  );
 
   @override
   Function get fromJsonFunction => _$WebBrowserFromJson;
@@ -58,7 +54,7 @@ class WebBrowser extends PrimaryDeviceConfiguration<WebBrowserRegistration> {
 /// Takes inspiration from the device information available via the
 /// [device_info_plus](https://pub.dev/packages/device_info_plus) via the
 /// [WebBrowserInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/WebBrowserInfo-class.html) class.
-@JsonSerializable(fieldRename: FieldRename.none, includeIfNull: true)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class WebBrowserRegistration extends DeviceRegistration {
   String? browserName;
   int? deviceMemory;

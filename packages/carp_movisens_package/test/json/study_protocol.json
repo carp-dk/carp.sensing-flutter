@@ -1,167 +1,198 @@
 {
-  "id": "ae4b1e50-cee3-11ed-a249-5310ecc03c3a",
-  "createdOn": "2023-03-30T10:14:39.541404Z",
-  "version": 0,
-  "ownerId": "alex@uni.dk",
-  "name": "Context package test",
-  "primaryDevices": [
+ "id": "a03d281e-f848-4ccd-968a-eacf6f9df1a0",
+ "createdOn": "2026-04-12T18:08:40.608654Z",
+ "version": 0,
+ "ownerId": "alex@uni.dk",
+ "name": "Context package test",
+ "participantRoles": [],
+ "primaryDevices": [
+  {
+   "__type": "dk.carp.cams.devices.Smartphone",
+   "roleName": "Smartphone",
+   "isOptional": false,
+   "defaultSamplingConfiguration": {},
+   "isPrimaryDevice": true
+  }
+ ],
+ "connectedDevices": [
+  {
+   "__type": "dk.carp.cams.devices.MovisensDevice",
+   "roleName": "movisens",
+   "isOptional": true,
+   "defaultSamplingConfiguration": {},
+   "serviceUuids": [],
+   "allowDuplicates": true,
+   "sensorLocation": "Chest",
+   "weight": 75,
+   "height": 175,
+   "age": 25,
+   "sex": "Male"
+  }
+ ],
+ "connections": [
+  {
+   "roleName": "movisens",
+   "connectedToRoleName": "Smartphone"
+  }
+ ],
+ "assignedDevices": {},
+ "tasks": [
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #8",
+   "measures": [
     {
-      "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-      "roleName": "Primary Phone",
-      "defaultSamplingConfiguration": {},
-      "isPrimaryDevice": true
-    }
-  ],
-  "connectedDevices": [
-    {
-      "__type": "dk.cachet.carp.common.application.devices.MovisensDevice",
-      "roleName": "movisens",
-      "isOptional": true,
-      "supportedDataTypes": [
-        "dk.cachet.carp.movisens.activity",
-        "dk.cachet.carp.movisens.hr",
-        "dk.cachet.carp.movisens.eda",
-        "dk.cachet.carp.movisens.tap_marker",
-        "dk.cachet.carp.movisens.skin_temperature"
-      ],
-      "defaultSamplingConfiguration": {},
-      "deviceName": "Sensor 02655",
-      "sensorLocation": "Chest",
-      "weight": 75,
-      "height": 175,
-      "age": 25,
-      "sex": "Male"
-    }
-  ],
-  "connections": [
-    {
-      "roleName": "movisens",
-      "connectedToRoleName": "Primary Phone"
-    }
-  ],
-  "tasks": [
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #6",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.deviceinformation"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.freememory"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.batterystate"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.screenevent"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.screenevent"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.acceleration"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.nongravitationalacceleration"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.rotation"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.stepcount"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.magneticfield"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.ambientlight"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.activity"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.hr"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.eda"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.skin_temperature"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.tap_marker"
-        }
-      ]
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.deviceinformation"
     },
     {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #7",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.activity"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.hr"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.eda"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.skin_temperature"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.movisens.tap_marker"
-        }
-      ]
-    }
-  ],
-  "triggers": {
-    "0": {
-      "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-      "sourceDeviceRoleName": "Primary Phone"
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applicationinformation"
     },
-    "1": {
-      "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-      "sourceDeviceRoleName": "Primary Phone"
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.freememory"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.batterystate"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.screenevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applifecycleevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.heartbeat"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.timezone"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.acceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.nongravitationalacceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.rotation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.magneticfield"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.accelerationfeatures"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.stepevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.ambientlight"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.error"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.triggeredtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedapptask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.activity"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.hr"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.eda"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.skin_temperature"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.respiration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.tap_marker"
     }
+   ]
   },
-  "taskControls": [
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #9",
+   "measures": [
     {
-      "triggerId": 0,
-      "taskName": "Task #6",
-      "destinationDeviceRoleName": "Primary Phone",
-      "control": "Start"
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.activity"
     },
     {
-      "triggerId": 1,
-      "taskName": "Task #7",
-      "destinationDeviceRoleName": "movisens",
-      "control": "Start"
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.hr"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.eda"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.skin_temperature"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.movisens.tap_marker"
     }
-  ],
-  "participantRoles": [],
-  "assignedDevices": {},
-  "expectedParticipantData": []
+   ]
+  }
+ ],
+ "triggers": {
+  "0": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "1": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "movisens"
+  }
+ },
+ "taskControls": [
+  {
+   "triggerId": 0,
+   "taskName": "Task #8",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 1,
+   "taskName": "Task #9",
+   "destinationDeviceRoleName": "movisens",
+   "control": "Start"
+  }
+ ],
+ "expectedParticipantData": []
 }

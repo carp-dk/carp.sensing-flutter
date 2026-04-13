@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// Any condition on a device ([DeviceConfiguration]) which starts or stops
 /// [TaskConfiguration]s at certain points in time when the condition applies.
@@ -25,10 +25,8 @@ class TriggerConfiguration extends Serializable {
   bool? requiresPrimaryDevice;
 
   /// Create a trigger.
-  TriggerConfiguration({
-    this.sourceDeviceRoleName,
-    this.requiresPrimaryDevice,
-  }) : super();
+  TriggerConfiguration({this.sourceDeviceRoleName, this.requiresPrimaryDevice})
+    : super();
 
   @override
   Function get fromJsonFunction => _$TriggerConfigurationFromJson;
@@ -66,7 +64,7 @@ class ElapsedTimeTrigger extends TriggerConfiguration implements Schedulable {
   ElapsedTimeTrigger({
     super.sourceDeviceRoleName,
     super.requiresPrimaryDevice = true,
-    required this.elapsedTime,
+    this.elapsedTime,
   });
 
   @override
@@ -156,20 +154,17 @@ class TimeOfDay {
   final int second;
 
   /// Constructs an instance of [TimeOfDay].
-  const TimeOfDay({
-    this.hour = 0,
-    this.minute = 0,
-    this.second = 0,
-  })  : assert(hour >= 0 && hour < 24),
-        assert(minute >= 0 && minute < 60),
-        assert(second >= 0 && second < 60),
-        super();
+  const TimeOfDay({this.hour = 0, this.minute = 0, this.second = 0})
+    : assert(hour >= 0 && hour < 24),
+      assert(minute >= 0 && minute < 60),
+      assert(second >= 0 && second < 60),
+      super();
 
   /// Creates a [TimeOfDay] based on the given [time].
   TimeOfDay.fromDateTime(DateTime time)
-      : hour = time.hour,
-        minute = time.minute,
-        second = time.second;
+    : hour = time.hour,
+      minute = time.minute,
+      second = time.second;
 
   /// Constructs a [TimeOfDay] instance with current time in the
   /// local time zone.
@@ -179,23 +174,40 @@ class TimeOfDay {
   ///
   /// The comparison is independent of whether the time is in UTC or in
   /// the local time zone.
-  bool isBefore(TimeOfDay other) => DateTime(2021, 1, 1, hour, minute, second)
-      .isBefore(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
+  bool isBefore(TimeOfDay other) => DateTime(
+    2021,
+    1,
+    1,
+    hour,
+    minute,
+    second,
+  ).isBefore(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
 
   /// Returns true if [this] occurs after [other].
   ///
   /// The comparison is independent of whether the time is in UTC or in
   /// the local time zone.
-  bool isAfter(TimeOfDay other) => DateTime(2021, 1, 1, hour, minute, second)
-      .isAfter(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
+  bool isAfter(TimeOfDay other) => DateTime(
+    2021,
+    1,
+    1,
+    hour,
+    minute,
+    second,
+  ).isAfter(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
 
   /// Returns a [Duration] with the difference when subtracting [other] from
   /// [this].
   ///
   ///  The returned [Duration] will be negative if [other] occurs after [this].
-  Duration difference(TimeOfDay other) =>
-      DateTime(2021, 1, 1, hour, minute, second).difference(
-          DateTime(2021, 1, 1, other.hour, other.minute, other.second));
+  Duration difference(TimeOfDay other) => DateTime(
+    2021,
+    1,
+    1,
+    hour,
+    minute,
+    second,
+  ).difference(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
 
   static String _twoDigits(int n) => (n >= 10) ? '$n' : '0$n';
 

@@ -1,32 +1,33 @@
 # CARP Apps Sampling Package
 
-[![pub package](https://img.shields.io/pub/v/carp_apps_package.svg)](https://pub.dartlang.org/packages/carp_context_package)
-[![pub points](https://img.shields.io/pub/points/carp_apps_package?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_apps_package/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_apps_package.svg)](https://pub.dev/packages/carp_apps_package)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/m8zE6ZAC)
 
 This library contains a sampling package for app-related sampling to work with
 the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework.
-This packages supports sampling of the following [`Measure`](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types) types:
+This packages supports sampling of the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
 * `dk.cachet.carp.apps` - a list of installed apps on the phone.
 * `dk.cachet.carp.appusage` - a log of app usage activity.
 
 These measures are only available on Android.
 
-See the [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki) for further documentation, particularly on available [measure types](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types).
-See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
+See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
+See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
 For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter).
 
-If you're interested in writing you own sampling packages for CARP, see the description on
-how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing) CARP on the wiki.
+If you're interested in writing your own sampling packages for CARP, see the description on
+how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that
-this package only works together with `carp_mobile_sensing`.
+To use this package, add the following to your `pubspec.yaml` file. Note that this package only works together with `carp_mobile_sensing`.
 
 `````dart
 dependencies:
@@ -43,14 +44,8 @@ dependencies:
 Add the following to your app's `AndroidManifest.xml` file located in `android/app/src/main` such that it contains the following permission request:
 
 ````xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="<YOUR_PACKAGE_NAME>"
-    xmlns:tools="http://schemas.android.com/tools">
-
-   <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
-   <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-   ...
-</manifest>
+<uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
+<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 ````
 
 Starting with Android 11, Android applications targeting API level 30, wanting to list "external" applications have to declare a new "normal" permission in their `AndroidManifest.xml` file called [`QUERY_ALL_PACKAGES`](https://developer.android.com/reference/kotlin/android/Manifest.permission#query_all_packages).
@@ -91,7 +86,7 @@ Collection of `APPS` and `APP_USAGE` measures can be added to a study protocol l
 Smartphone phone = Smartphone();
 protocol.addPrimaryDevice(phone);
 
-// Add an automatic task that collects the list of installed apps
+// Add an background task that collects the list of installed apps
 // and a log of app usage activity
 protocol.addTaskControl(
     ImmediateTrigger(),
@@ -100,4 +95,16 @@ protocol.addTaskControl(
       Measure(type: AppsSamplingPackage.APP_USAGE),
     ]),
     phone);
+```
+
+Note that both the `APPS` and the `APP_USAGE` are [one-time measures](https://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures), and hence only collect a measurement once. If you want to collect app usage e.g., based on app lifecycle events, you could add this to the protocol:
+
+```dart
+// Add an background task that collects app usage activity when this app
+// changes state to foreground.
+protocol.addTaskControl(
+  AppLifecycleTrigger({AppLifecycleState.resumed}),
+  BackgroundTask(measures: [Measure(type: AppsSamplingPackage.APP_USAGE)]),
+  phone,
+);
 ```

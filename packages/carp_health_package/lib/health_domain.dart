@@ -25,10 +25,7 @@ enum DasesHealthDataType {
 }
 
 /// Types of health platforms.
-enum HealthPlatform {
-  APPLE_HEALTH,
-  GOOGLE_HEALTH_CONNECT,
-}
+enum HealthPlatform { APPLE_HEALTH, GOOGLE_HEALTH_CONNECT }
 
 /// Map a [DasesHealthDataType] to a [HealthDataUnit].
 const Map<DasesHealthDataType, HealthDataUnit> dasesDataTypeToUnit = {
@@ -62,11 +59,8 @@ class HealthSamplingConfiguration extends HistoricSamplingConfiguration {
       FromJsonFactory().fromJson<HealthSamplingConfiguration>(json);
 }
 
-/// A no-op function for deserializing a HealthValue - never used.
-HealthValue _healthValueFromJson(json) => NumericHealthValue(numericValue: -1);
-
 /// A [Data] object that holds health data from a [HealthDataPoint].
-@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HealthData extends Data {
   /// A unique UUID of this data point.
   String uuid;
@@ -74,7 +68,7 @@ class HealthData extends Data {
   /// The value of the health data.
   ///
   /// See [HealthValue](https://pub.dev/documentation/health/latest/health/HealthValue-class.html)
-  @JsonKey(fromJson: _healthValueFromJson)
+  // @JsonKey(fromJson: _healthValueFromJson)
   HealthValue value;
 
   /// Unit of health data.
@@ -82,41 +76,41 @@ class HealthData extends Data {
   /// Note that the uppercase version is used, e.g. `COUNT` in the case of step counts.
   String unit;
 
+  /// The type of health data -- see [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType.html).
+  /// Note that the uppercase version is used, e.g. `STEPS`.
+  String healthDataType;
+
   /// Start date-time for this health data.
   late DateTime dateFrom;
 
   /// End date-time for this health data.
   late DateTime dateTo;
 
-  /// The type of health data -- see [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType.html).
-  /// Note that the uppercase version is used, e.g. `STEPS`.
-  String dataType;
-
   /// The platform from which this health data point came from
   HealthPlatform platform;
 
   /// The device id of the phone.
-  String deviceId;
+  String? deviceId;
 
   /// The id of the source from which the data point was fetched.
-  String sourceId;
+  String? sourceId;
 
   /// The name of the source from which the data point was fetched.
-  String sourceName;
+  String? sourceName;
 
   /// Create a [HealthData] object.
-  HealthData(
-    this.uuid,
-    this.value,
-    this.unit,
-    this.dataType,
-    DateTime dateFrom,
-    DateTime dateTo,
-    this.platform,
+  HealthData({
+    required this.uuid,
+    required this.value,
+    required this.unit,
+    required this.healthDataType,
+    required DateTime dateFrom,
+    required DateTime dateTo,
+    required this.platform,
     this.deviceId,
     this.sourceId,
     this.sourceName,
-  ) : super() {
+  }) : super() {
     this.dateFrom = dateFrom.toUtc();
     this.dateTo = dateTo.toUtc();
   }
@@ -124,16 +118,17 @@ class HealthData extends Data {
   /// Create a [HealthData] from a [HealthDataPoint] health data object.
   factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) =>
       HealthData(
-          const Uuid().v1,
-          healthDataPoint.value,
-          healthDataPoint.unitString,
-          healthDataPoint.typeString,
-          healthDataPoint.dateFrom.toUtc(),
-          healthDataPoint.dateTo.toUtc(),
-          HealthPlatform.values[healthDataPoint.sourcePlatform.index],
-          healthDataPoint.sourceDeviceId,
-          healthDataPoint.sourceId,
-          healthDataPoint.sourceName);
+        uuid: const Uuid().v1,
+        value: healthDataPoint.value,
+        unit: healthDataPoint.unitString,
+        healthDataType: healthDataPoint.typeString,
+        dateFrom: healthDataPoint.dateFrom.toUtc(),
+        dateTo: healthDataPoint.dateTo.toUtc(),
+        platform: HealthPlatform.values[healthDataPoint.sourcePlatform.index],
+        deviceId: healthDataPoint.sourceDeviceId,
+        sourceId: healthDataPoint.sourceId,
+        sourceName: healthDataPoint.sourceName,
+      );
 
   @override
   Function get fromJsonFunction => _$HealthDataFromJson;
@@ -145,19 +140,37 @@ class HealthData extends Data {
   Map<String, dynamic> toJson() => _$HealthDataToJson(this);
 
   /// The json type of this health data is `dk.cachet.carp.health.<healthdatatype>`,
-  /// where `<healthdatatype>` is the lowercase version of the [dataType].
+  /// where `<healthdatatype>` is the lowercase version of the [healthDataType].
+  // String get jsonType =>
+  //     '${HealthSamplingPackage.HEALTH}.${healthDataType.toLowerCase()}';
   @override
-  String get jsonType =>
-      '${HealthSamplingPackage.HEALTH}.${dataType.toLowerCase()}';
+  String get jsonType => HealthSamplingPackage.HEALTH;
 
   @override
-  String toString() => '${super.toString()}'
-      ', dataType: $dataType'
+  String toString() =>
+      '${super.toString()}'
+      ', healthDataType: $healthDataType'
       ', platform: $platform'
       ', value: $value'
       ', unit: $unit'
       ', dateFrom: $dateFrom'
       ', dateTo: $dateTo';
+}
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class DummyHealthData extends Data {
+  /// A unique UUID of this data point.
+  String uuid;
+  DummyHealthData({required this.uuid}) : super();
+
+  @override
+  Function get fromJsonFunction => _$DummyHealthDataFromJson;
+
+  factory DummyHealthData.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<DummyHealthData>(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$DummyHealthDataToJson(this);
 }
 
 /// An [AppTask] that can be used  to collect health data.
@@ -166,7 +179,7 @@ class HealthAppTask extends AppTask {
   List<HealthDataType> types;
 
   HealthAppTask({
-    super.type = HealthUserTask.HEALTH_ASSESSMENT_TYPE,
+    super.type = AppTask.HEALTH_ASSESSMENT_TYPE,
     super.name,
     super.title,
     super.description,

@@ -1,29 +1,28 @@
 /*
- * Copyright 2022 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2022 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 // This file holds all the CARP Core defined data type.
 // In CARP Core Kotlin, this is the "dk.cachet.carp.common.application.data" domain.
 
-/// Holds data for a [DataType].
-/// This is an abstract class and contains no data as such.
+/// Holds data of a specific [dataType].
+/// This is a base class and contains no data as such.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Data extends Serializable {
-  /// The format of this data as a [DataType].
+  /// The type of this data as a [DataType].
   @JsonKey(includeFromJson: false, includeToJson: false)
-  DataType get format => DataType.fromString(jsonType);
+  DataType get dataType => DataType.fromString(jsonType);
 
   Data() : super();
 
   /// Is this data equivalent to [other]?
   ///
   /// This is a custom 'soft' equal (==) operator used to compare two data objects.
-  /// Used in triggering something when a piece of data is collected.
+  /// Used in triggering when some data is collected.
+  /// Override in subclasses to provide custom equivalence checking.
   bool equivalentTo(Data other) => false;
 
   @override
@@ -51,7 +50,6 @@ abstract class SensorData extends Data {
 /// Typically captured by an accelerometer.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Acceleration extends SensorData {
-  static const dataType = CarpDataTypes.ACCELERATION_TYPE_NAME;
   double x, y, z;
   Acceleration({this.x = 0, this.y = 0, this.z = 0}) : super();
 
@@ -67,7 +65,6 @@ class Acceleration extends SensorData {
 /// Typically captured by a gyroscope.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Rotation extends SensorData {
-  static const dataType = CarpDataTypes.ROTATION_TYPE_NAME;
   double x, y, z;
   Rotation({this.x = 0, this.y = 0, this.z = 0}) : super();
 
@@ -84,7 +81,6 @@ class Rotation extends SensorData {
 /// Typically captured by a magnetometer sensor.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MagneticField extends SensorData {
-  static const dataType = CarpDataTypes.MAGNETIC_FIELD_TYPE_NAME;
   double x, y, z;
   MagneticField({this.x = 0, this.y = 0, this.z = 0}) : super();
 
@@ -100,8 +96,6 @@ class MagneticField extends SensorData {
 /// the World Geodetic System 1984.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Geolocation extends SensorData {
-  static const dataType = CarpDataTypes.GEOLOCATION_TYPE_NAME;
-
   /// Latitude in GPS coordinates.
   double latitude;
 
@@ -124,8 +118,6 @@ class Geolocation extends SensorData {
 /// the stronger the signal.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SignalStrength extends SensorData {
-  static const dataType = CarpDataTypes.SIGNAL_STRENGTH_TYPE_NAME;
-
   int rssi;
   SignalStrength({this.rssi = 0}) : super();
 
@@ -140,8 +132,6 @@ class SignalStrength extends SensorData {
 /// Step count data as number of steps taken in a corresponding time interval.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StepCount extends SensorData {
-  static const dataType = CarpDataTypes.STEP_COUNT_TYPE_NAME;
-
   int steps;
   StepCount({this.steps = 0}) : super();
 
@@ -156,8 +146,6 @@ class StepCount extends SensorData {
 /// Heart rate data in beats per minute ([bpm]).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HeartRate extends SensorData {
-  static const dataType = CarpDataTypes.HEART_RATE_TYPE_NAME;
-
   int bpm;
   HeartRate({this.bpm = 0}) : super();
 
@@ -172,10 +160,12 @@ class HeartRate extends SensorData {
 /// Electrocardiogram data of a single lead.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ECG extends SensorData {
-  static const dataType = CarpDataTypes.ECG_TYPE_NAME;
+  /// The sampling frequency in hertz (Hz).
+  int samplingFrequencyHz = 250;
 
-  double milliVolt;
-  ECG({this.milliVolt = 0}) : super();
+  /// The array of ECG voltage measurements in millivolt (mV).
+  List<double> milliVolt;
+  ECG({this.samplingFrequencyHz = 250, this.milliVolt = const []}) : super();
 
   @override
   Function get fromJsonFunction => _$ECGFromJson;
@@ -189,8 +179,6 @@ class ECG extends SensorData {
 /// Among others, also known as galvanic skin response (GSR) or skin conductance response/level.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class EDA extends SensorData {
-  static const dataType = CarpDataTypes.EDA_TYPE_NAME;
-
   double microSiemens;
   EDA({this.microSiemens = 0}) : super();
 
@@ -207,8 +195,6 @@ class EDA extends SensorData {
 /// [taskData] holds the result of the task, or null if no result is collected.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CompletedTask extends Data {
-  static const dataType = CarpDataTypes.COMPLETED_TASK_TYPE_NAME;
-
   /// The name of the task which was completed.
   /// This is the name of the task as specified in the study protocol.
   String taskName;
@@ -216,10 +202,7 @@ class CompletedTask extends Data {
   /// The result of the completed task, if any.
   Data? taskData;
 
-  CompletedTask({
-    required this.taskName,
-    this.taskData,
-  }) : super();
+  CompletedTask({required this.taskName, this.taskData}) : super();
 
   @override
   bool equivalentTo(Data other) =>
@@ -240,8 +223,6 @@ class CompletedTask extends Data {
 /// which caused the trigger to fire.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TriggeredTask extends Data {
-  static const dataType = CarpDataTypes.TRIGGERED_TASK_TYPE_NAME;
-
   int triggerId;
   String taskName;
   String destinationDeviceRoleName;
@@ -268,8 +249,6 @@ class TriggeredTask extends Data {
 /// holds any message about the error which might have been captured.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Error extends Data {
-  static const dataType = CarpDataTypes.ERROR_TYPE_NAME;
-
   /// The original error message returned from the probe, if available.
   String message;
 

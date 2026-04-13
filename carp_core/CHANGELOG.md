@@ -1,13 +1,23 @@
+## 2.1.2
+
+* fix of issue [#561](https://github.com/carp-dk/carp.sensing-flutter/issues/561)
+* upgrade of pubspec to latest standard.
+
+## 2.0.0
+
+* upgrade to reflect the latest CARP Core Kotlin domain model in the 'client' sub-system
+* better support for `StudyStatus` in the client manager ( [#504](https://github.com/carp-dk/carp.sensing-flutter/issues/504))
+
 ## 1.9.4
 
-* fix of issue [#506](https://github.com/cph-cachet/carp.sensing-flutter/issues/506)
+* fix of issue [#506](https://github.com/carp-dk/carp.sensing-flutter/issues/506)
 * added unit tests for input data types
 
 ## 1.9.3
 
-* fix of issue [#491](https://github.com/cph-cachet/carp.sensing-flutter/issues/491)
-* fix of issue [#452](https://github.com/cph-cachet/carp.sensing-flutter/issues/452)
-* fix of issue [#499](https://github.com/cph-cachet/carp.sensing-flutter/issues/499) and [#258](https://github.com/cph-cachet/carp-webservices-spring/issues/258)
+* fix of issue [#491](https://github.com/carp-dk/carp.sensing-flutter/issues/491)
+* fix of issue [#452](https://github.com/carp-dk/carp.sensing-flutter/issues/452)
+* fix of issue [#499](https://github.com/carp-dk/carp.sensing-flutter/issues/499) and [#258](https://github.com/carp-dk/carp-webservices-spring/issues/258)
 * adding `samplingConfiguration` to the constructor of `Measure`
 
 ## 1.8.3
@@ -16,11 +26,11 @@
 * type safe fromJson methods
 * nested json serialization
 * `addStudy` in client manager modified to take a `Study`
-* fix of issue [#435](https://github.com/cph-cachet/carp.sensing-flutter/issues/435)
+* fix of issue [#435](https://github.com/carp-dk/carp.sensing-flutter/issues/435)
 
 ## 1.7.1
 
-* support for new [input data types](https://github.com/cph-cachet/carp-webservices-spring/blob/master/docs/input-data-types.md) at CAWS
+* support for new [input data types](https://github.com/carp-dk/carp-webservices-spring/blob/master/docs/input-data-types.md) at CAWS
 
 ## 1.6.0
 
@@ -42,7 +52,7 @@
 
 ## 1.3.1
 
-* fix of issue [#352](https://github.com/cph-cachet/carp.sensing-flutter/issues/352)
+* fix of issue [#352](https://github.com/carp-dk/carp.sensing-flutter/issues/352)
 
 ## 1.3.0
 
@@ -73,11 +83,11 @@
 
 ## 0.40.2
 
-* fix of issue [#269](https://github.com/cph-cachet/carp.sensing-flutter/issues/269)
+* fix of issue [#269](https://github.com/carp-dk/carp.sensing-flutter/issues/269)
 
 ## 0.40.1
 
-* fix of issue [#265](https://github.com/cph-cachet/carp.sensing-flutter/issues/265)
+* fix of issue [#265](https://github.com/carp-dk/carp.sensing-flutter/issues/265)
 
 ## 0.40.0
 
@@ -107,7 +117,7 @@
 
 ## 0.31.1
 
-* small update to `DataManager` interface to fix issue [#221](https://github.com/cph-cachet/carp.sensing-flutter/issues/221).
+* small update to `DataManager` interface to fix issue [#221](https://github.com/carp-dk/carp.sensing-flutter/issues/221).
 
 ## 0.31.0
 
@@ -125,7 +135,7 @@
 
 ## 0.21.5
 
-* Removed unnecessary JSON object from `CreateStudyDeployment` request ([PR#200](https://github.com/cph-cachet/carp.sensing-flutter/pull/200)).
+* Removed unnecessary JSON object from `CreateStudyDeployment` request ([PR#200](https://github.com/carp-dk/carp.sensing-flutter/pull/200)).
 
 ## 0.21.4+3
 

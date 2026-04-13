@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_context_package/carp_context_package.dart';
 import 'package:openmhealth_schemas/openmhealth_schemas.dart' as omh;
@@ -14,9 +14,12 @@ String _encode(Object object) =>
 void main() {
   late StudyProtocol protocol;
 
+  Future<void> writeToFile(String json, String fileName) async =>
+      await File('test/json/$fileName').writeAsString(json);
+
   setUp(() {
     // Initialization of serialization
-    CarpMobileSensing();
+    CarpMobileSensing.ensureInitialized();
     ContextSamplingPackage().onRegister();
 
     // register the context sampling package
@@ -34,84 +37,99 @@ void main() {
 
     // Add a background task that collects activity data from the phone
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
-        phone);
+      ImmediateTrigger(),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
+      phone,
+    );
 
     // Define the online location service and add it as a 'device'
     LocationService locationService = LocationService(
-        accuracy: GeolocationAccuracy.low,
-        distance: 10,
-        interval: const Duration(minutes: 5));
+      accuracy: GeolocationAccuracy.low,
+      distance: 10,
+      interval: const Duration(minutes: 5),
+    );
     protocol.addConnectedDevice(locationService, phone);
 
     // Add a background task that collects location on a regular basis
     protocol.addTaskControl(
-        PeriodicTrigger(period: const Duration(minutes: 5)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION)),
-        locationService);
+      PeriodicTrigger(period: const Duration(minutes: 5)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION)),
+      locationService,
+    );
 
     // Add a background task that continuously collects location and mobility
     // patterns. Delays sampling by 5 minutes.
     protocol.addTaskControl(
-        DelayedTrigger(delay: const Duration(minutes: 5)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION))
-          ..addMeasure(Measure(type: ContextSamplingPackage.MOBILITY)),
-        locationService);
+      DelayedTrigger(delay: const Duration(minutes: 5)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION))
+        ..addMeasure(Measure(type: ContextSamplingPackage.MOBILITY)),
+      locationService,
+    );
 
     // Add a background task that collects geofence events using DTU as the
     // center for the geofence.
     protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.GEOFENCE)
-            ..overrideSamplingConfiguration = GeofenceSamplingConfiguration(
-                name: 'DTU',
-                center: GeoPosition(55.786025, 12.524159),
-                dwell: const Duration(minutes: 15),
-                radius: 10.0)),
-        locationService);
+      ImmediateTrigger(),
+      BackgroundTask()..addMeasure(
+        Measure(type: ContextSamplingPackage.GEOFENCE)
+          ..overrideSamplingConfiguration = GeofenceSamplingConfiguration(
+            name: 'DTU',
+            center: GeoPosition(55.786025, 12.524159),
+            dwell: const Duration(minutes: 15),
+            radius: 10.0,
+          ),
+      ),
+      locationService,
+    );
 
     // Define the online weather service and add it as a 'device'
-    WeatherService weatherService =
-        WeatherService(apiKey: 'OW_API_key_goes_here');
+    WeatherService weatherService = WeatherService(
+      apiKey: 'OW_API_key_goes_here',
+    );
     protocol.addConnectedDevice(weatherService, phone);
 
     // Add a background task that collects weather every 30 minutes.
     protocol.addTaskControl(
-        PeriodicTrigger(period: const Duration(minutes: 30)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
-        weatherService);
+      PeriodicTrigger(period: const Duration(minutes: 30)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
+      weatherService,
+    );
 
     // Define the online air quality service and add it as a 'device'
-    AirQualityService airQualityService =
-        AirQualityService(apiKey: 'WAQI_API_key_goes_here');
+    AirQualityService airQualityService = AirQualityService(
+      apiKey: 'WAQI_API_key_goes_here',
+    );
     protocol.addConnectedDevice(airQualityService, phone);
 
     // Add a background task that air quality every 30 minutes.
     protocol.addTaskControl(
-        PeriodicTrigger(period: const Duration(minutes: 30)),
-        BackgroundTask()
-          ..addMeasure(Measure(type: ContextSamplingPackage.AIR_QUALITY)),
-        airQualityService);
+      PeriodicTrigger(period: const Duration(minutes: 30)),
+      BackgroundTask()
+        ..addMeasure(Measure(type: ContextSamplingPackage.AIR_QUALITY)),
+      airQualityService,
+    );
   });
 
   test('CAMSStudyProtocol -> JSON', () async {
     expect(protocol, isNotNull);
     print(protocol);
     print(toJsonString(protocol));
+
+    // used in the test below
+    await writeToFile(toJsonString(protocol), 'protocol.json');
   });
 
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson =
-        StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
+      json.decode(studyJson) as Map<String, dynamic>,
+    );
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -119,19 +137,83 @@ void main() {
   test('JSON File -> StudyProtocol', () async {
     String plainJson = File('test/json/protocol.json').readAsStringSync();
 
-    StudyProtocol protocolFromFile =
-        StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
+    StudyProtocol protocolFromFile = StudyProtocol.fromJson(
+      json.decode(plainJson) as Map<String, dynamic>,
+    );
 
     expect(protocolFromFile.ownerId, protocol.ownerId);
     expect(
       protocolFromFile.primaryDevices.first.roleName,
       Smartphone.DEFAULT_ROLE_NAME,
     );
-    expect(
-      protocolFromFile.taskControls.length,
-      protocol.taskControls.length,
-    );
+    expect(protocolFromFile.taskControls.length, protocol.taskControls.length);
     print(toJsonString(protocolFromFile));
+  });
+
+  group('Data Types', () {
+    test('- Context Data', () async {
+      final allData = [
+        Activity(type: ActivityType.WALKING, confidence: 100),
+        AirQuality(
+          airQualityIndex: 42,
+          source: 'DMI',
+          place: 'Copenhagen',
+          latitude: 12.34,
+          longitude: 56.78,
+          airQualityLevel: AirQualityLevel.MODERATE,
+        ),
+        Geofence(type: GeofenceType.ENTER, name: 'DTU'),
+        Location(longitude: 12.524159, latitude: 55.786025, altitude: 50.0),
+        Mobility(numberOfPlaces: 5, homeStay: 80, distanceTraveled: 12000),
+        Weather()
+          ..areaName = 'Copenhagen'
+          ..country = 'Denmark'
+          ..temperature = 20.5
+          ..weatherMain = 'Clear'
+          ..weatherDescription = 'clear sky',
+      ];
+
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
+    });
+
+    test('- OMH Data', () async {
+      final allData = [
+        OMHContextDataPoint(
+          omh.DataPoint(
+            body: omh.Measure(
+              effectiveTimeFrame: omh.TimeFrame(dateTime: DateTime.now()),
+            ),
+          ),
+        ),
+
+        // The following does not work, since the omh package does not support
+        // fromJson factory methods as polymorphic constructors.
+
+        // OMHGeopositionDataPoint.fromLocationData(
+        //   Location(longitude: 12.524159, latitude: 55.786025),
+        // ),
+        // OMHPhysicalActivityDataPoint.fromActivityData(
+        //   Activity(type: ActivityType.RUNNING, confidence: 95),
+        // ),
+      ];
+
+      for (var data in allData) {
+        final dataJson = toJsonString(data);
+        print(dataJson);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [
+          json.decode(dataJson) as Map<String, dynamic>,
+        ]);
+        print(toJsonString(dataFromJson));
+        expect(toJsonString(dataFromJson), equals(dataJson));
+      }
+    });
   });
 
   test('CARP Activity', () {
@@ -197,9 +279,9 @@ void main() {
     expect(m_1.dataType.namespace, NameSpace.CARP);
     print(_encode(loc));
 
-    OMHGeopositionDataPoint geo = DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)!
-        .transform(loc) as OMHGeopositionDataPoint;
+    OMHGeopositionDataPoint geo =
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(loc)
+            as OMHGeopositionDataPoint;
     print(_encode(geo));
 
     Measurement m_2 = Measurement.fromData(geo);
@@ -217,9 +299,9 @@ void main() {
     expect(m_1.dataType.namespace, NameSpace.CARP);
     print(_encode(act));
 
-    OMHPhysicalActivityDataPoint phy = DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)!
-        .transform(act) as OMHPhysicalActivityDataPoint;
+    OMHPhysicalActivityDataPoint phy =
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(act)
+            as OMHPhysicalActivityDataPoint;
     print(_encode(phy));
 
     Measurement m_2 = Measurement.fromData(phy);
@@ -245,9 +327,9 @@ void main() {
       radius: 5,
     );
 
-    CircularGeofence f =
-        CircularGeofence.fromGeofenceSamplingConfiguration(config)
-          ..dwell = const Duration(seconds: 2); // dwell timeout 2 secs.
+    CircularGeofence f = CircularGeofence.fromGeofenceSamplingConfiguration(
+      config,
+    )..dwell = const Duration(seconds: 2); // dwell timeout 2 secs.
     print(f);
 
     d = f.moved(home);

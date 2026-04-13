@@ -2,10 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Carp Mobile Sensing App</string>
+	<string>CARP</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,31 +26,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>CARP uses bluetooth to connect to wearable devices</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>CARP uses bluetooth to connect to wearable devices</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>The CARP app needs access to calendar for testing</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>We will sync your data with the Apple Health app to give you better insights</string>
 	<key>NSHealthUpdateUsageDescription</key>
@@ -57,21 +42,31 @@
 	<string>The CARP app needs access to location when open and in the background.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>The CARP app needs access to location when in the background.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>The CARP app needs access to location when open.</string>
 	<key>NSLocationUsageDescription</key>
 	<string>The CARP app needs access to location when open and in the background.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>The CARP app needs access to location when open.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The CARP app uses the microphone to record ambient noise in the phone's environment</string>
 	<key>NSMotionUsageDescription</key>
 	<string>The CARP app uses the motion system to detects activities such as walking and biking</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>The CARP app uses the microphone to record ambient noise in the phone&apos;s environment</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>The CARP app needs access to calendar for testing</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
 		<string>location</string>
 		<string>processing</string>
+	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 </dict>
 </plist>

@@ -1,4 +1,8 @@
-import 'package:carp_core/carp_core.dart';
+// ignore_for_file: depend_on_referenced_packages
+
+import 'dart:ui';
+
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_health_package/health_package.dart';
 import 'package:health/health.dart';
@@ -32,16 +36,19 @@ void main() async {
   // Note that the [HealthSamplingConfiguration] is a [HistoricSamplingConfiguration]
   // which samples data back in time until last time, data was sampled.
   protocol.addTaskControl(
-      PeriodicTrigger(period: Duration(minutes: 60)),
-      BackgroundTask(measures: [
+    PeriodicTrigger(period: Duration(minutes: 60)),
+    BackgroundTask(
+      measures: [
         HealthSamplingPackage.getHealthMeasure([
           HealthDataType.STEPS,
           HealthDataType.BASAL_ENERGY_BURNED,
           HealthDataType.WEIGHT,
           HealthDataType.SLEEP_SESSION,
-        ])
-      ]),
-      healthService);
+        ]),
+      ],
+    ),
+    healthService,
+  );
 
   // Automatically collect another set of health data every hour
   //
@@ -51,33 +58,37 @@ void main() async {
   // However, on Apple Health, for example, the user has an option to "Turn All Categories On",
   // and if the use has done this, the all the data listed below is accessible.
   protocol.addTaskControl(
-      PeriodicTrigger(period: Duration(minutes: 60)),
-      BackgroundTask()
-        ..addMeasure(HealthSamplingPackage.getHealthMeasure([
-          HealthDataType.BLOOD_GLUCOSE,
-          HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-          HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
-          HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-          HealthDataType.HEART_RATE,
-          HealthDataType.STEPS,
-        ])),
-      healthService);
+    PeriodicTrigger(period: Duration(minutes: 60)),
+    BackgroundTask()..addMeasure(
+      HealthSamplingPackage.getHealthMeasure([
+        HealthDataType.BLOOD_GLUCOSE,
+        HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+        HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+        HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+        HealthDataType.HEART_RATE,
+        HealthDataType.STEPS,
+      ]),
+    ),
+    healthService,
+  );
 
   // Create a health app task for the user to collect his own health data once pr. day
   protocol.addTaskControl(
-      PeriodicTrigger(period: Duration(hours: 24)),
-      HealthAppTask(
-          title: "Press here to collect your physical health data",
-          description:
-              "This will collect your weight, exercise time, steps, and sleep "
-              "time from the Health database on the phone.",
-          types: [
-            HealthDataType.WEIGHT,
-            HealthDataType.STEPS,
-            HealthDataType.BASAL_ENERGY_BURNED,
-            HealthDataType.SLEEP_SESSION,
-          ]),
-      phone);
+    PeriodicTrigger(period: Duration(hours: 24)),
+    HealthAppTask(
+      title: "Press here to collect your physical health data",
+      description:
+          "This will collect your weight, exercise time, steps, and sleep "
+          "time from the Health database on the phone.",
+      types: [
+        HealthDataType.WEIGHT,
+        HealthDataType.STEPS,
+        HealthDataType.BASAL_ENERGY_BURNED,
+        HealthDataType.SLEEP_SESSION,
+      ],
+    ),
+    phone,
+  );
 
   // Create a app task with a WHO-5 survey that also collects some health data.
   // protocol.addTaskControl(
@@ -97,4 +108,24 @@ void main() async {
   //           ])
   //         ]),
   //     phone);
+
+  // Automatically collect the set of health data when the app resumes, i.e. comes
+  // to the foreground.
+  //
+  // Note that the [HealthSamplingConfiguration] is a [HistoricSamplingConfiguration]
+  // which samples data back in time until last time, data was sampled.
+  protocol.addTaskControl(
+    AppLifecycleTrigger({AppLifecycleState.resumed}),
+    BackgroundTask(
+      measures: [
+        HealthSamplingPackage.getHealthMeasure([
+          HealthDataType.STEPS,
+          HealthDataType.BASAL_ENERGY_BURNED,
+          HealthDataType.WEIGHT,
+          HealthDataType.SLEEP_SESSION,
+        ]),
+      ],
+    ),
+    healthService,
+  );
 }

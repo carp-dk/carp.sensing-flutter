@@ -4,18 +4,18 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 // -----------------------------------------------------
 // Deployment Service Requests
-// See https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt
+// See https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt
 // -----------------------------------------------------
 
 /// A [DeploymentServiceRequest] and all its sub-classes contain the data for
 /// sending a RPC request to the CARP web service.
 ///
 /// All deployment requests to the CARP Service is defined in
-/// [carp.core-kotlin](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt)
+/// [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt)
 abstract class DeploymentServiceRequest extends ServiceRequest {
   final String _infrastructurePackageNamespace =
       'dk.cachet.carp.deployments.infrastructure';
@@ -97,7 +97,10 @@ class GetStudyDeploymentStatusList extends DeploymentServiceRequest {
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class RegisterDevice extends DeploymentServiceRequest {
   RegisterDevice(
-      super.studyDeploymentId, this.deviceRoleName, this.registration);
+    super.studyDeploymentId,
+    this.deviceRoleName,
+    this.registration,
+  );
 
   /// The role name of this device.
   String deviceRoleName;

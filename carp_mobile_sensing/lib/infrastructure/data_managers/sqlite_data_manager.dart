@@ -15,18 +15,12 @@ class SQLiteDataManagerFactory implements DataManagerFactory {
   DataManager create() => SQLiteDataManager();
 }
 
-/// Stores meta data about the running [SmartphoneDeployment] and all
-/// collected [Measurement] json objects in an SQLite database on the device's
-/// local storage media.
+/// Stores all collected [Measurement] json objects in an SQLite database on
+/// the device's local storage media.
+/// Measurements are stored in the `measurements` table.
 ///
-/// Meta data is stored in the `deployment` table and measurements are stored
-/// in the `measurements` table.
-///
-/// The path and filename format is
-///
-///   `~/carp-data.db`
-///
-/// where `~` is the folder where SQLite places it database files.
+/// The path and filename format is `~/carp-data.db`, where `~` is the folder
+/// where SQLite places it database files.
 ///
 /// On iOS, this is the `NSDocumentsDirectory` and the files can be accessed via
 /// the MacOS Finder.
@@ -57,13 +51,17 @@ class SQLiteDataManager extends AbstractDataManager {
   String get type => DataEndPointTypes.SQLITE;
 
   @override
-  Future<void> initialize(
-    DataEndPoint dataEndPoint,
-    SmartphoneDeployment deployment,
-    Stream<Measurement> measurements,
-  ) async {
+  Future<void> configure({
+    required DataEndPoint dataEndPoint,
+    required SmartphoneDeployment deployment,
+    required Stream<Measurement> measurements,
+  }) async {
     assert(dataEndPoint is SQLiteDataEndPoint);
-    await super.initialize(dataEndPoint, deployment, measurements);
+    await super.configure(
+      dataEndPoint: dataEndPoint,
+      deployment: deployment,
+      measurements: measurements,
+    );
 
     info('Initializing $runtimeType...');
 
@@ -77,16 +75,18 @@ class SQLiteDataManager extends AbstractDataManager {
       onCreate: (Database db, int version) async {
         // when creating the database, create the measurements table
         debug("$runtimeType - Creating '$MEASUREMENT_TABLE_NAME' table");
-        await db.execute('CREATE TABLE $MEASUREMENT_TABLE_NAME ('
-            '$ID_COLUMN INTEGER PRIMARY KEY AUTOINCREMENT, '
-            // SQLite does not have a separate Boolean storage class. Instead,
-            // boolean values are stored as integers 0 (false) and 1 (true).
-            '$UPLOADED_COLUMN INTEGER, '
-            '$DEPLOYMENT_ID_COLUMN TEXT, '
-            '$TRIGGER_ID_COLUMN INTEGER, '
-            '$DEVICE_ROLE_NAME_COLUMN TEXT, '
-            '$DATATYPE_COLUMN TEXT, '
-            '$MEASUREMENT_COLUMN TEXT)');
+        await db.execute(
+          'CREATE TABLE $MEASUREMENT_TABLE_NAME ('
+          '$ID_COLUMN INTEGER PRIMARY KEY AUTOINCREMENT, '
+          // SQLite does not have a separate Boolean storage class. Instead,
+          // boolean values are stored as integers 0 (false) and 1 (true).
+          '$UPLOADED_COLUMN INTEGER, '
+          '$DEPLOYMENT_ID_COLUMN TEXT, '
+          '$TRIGGER_ID_COLUMN INTEGER, '
+          '$DEVICE_ROLE_NAME_COLUMN TEXT, '
+          '$DATATYPE_COLUMN TEXT, '
+          '$MEASUREMENT_COLUMN TEXT)',
+        );
 
         debug("$runtimeType - '$databaseName' DB created");
       },
@@ -98,7 +98,9 @@ class SQLiteDataManager extends AbstractDataManager {
     // If the database hasn't been created yet, wait for 3 secs
     if (database == null) {
       return Future.delayed(
-          const Duration(seconds: 3), () => onMeasurement(measurement));
+        const Duration(seconds: 3),
+        () => onMeasurement(measurement),
+      );
     }
 
     final Map<String, dynamic> map = {
@@ -107,7 +109,7 @@ class SQLiteDataManager extends AbstractDataManager {
       TRIGGER_ID_COLUMN: measurement.taskControl?.triggerId ?? 0,
       DEVICE_ROLE_NAME_COLUMN:
           measurement.taskControl?.destinationDeviceRoleName ??
-              deployment.deviceConfiguration.roleName,
+          deployment.deviceConfiguration.roleName,
       DATATYPE_COLUMN: measurement.dataType.toString(),
       MEASUREMENT_COLUMN: jsonEncode(measurement),
     };
@@ -124,23 +126,13 @@ class SQLiteDataManager extends AbstractDataManager {
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
 
-      debug('$runtimeType - wrote measurement to SQLite - '
-          'id: $id, type: ${map[DATATYPE_COLUMN]}, '
-          'device role name: ${map[DEVICE_ROLE_NAME_COLUMN]}.');
+      debug(
+        '$runtimeType - wrote measurement to SQLite - '
+        'id: $id, type: ${map[DATATYPE_COLUMN]}, '
+        'device role name: ${map[DEVICE_ROLE_NAME_COLUMN]}.',
+      );
     } catch (error) {
       warning('$runtimeType - Error writing measurement to database - $error');
     }
-  }
-
-  @override
-  Future<void> onDone() async {
-    await database?.close();
-    await super.close();
-  }
-
-  @override
-  Future<void> close() async {
-    await database?.close();
-    await super.close();
   }
 }

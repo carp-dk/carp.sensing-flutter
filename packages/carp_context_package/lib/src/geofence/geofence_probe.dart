@@ -17,23 +17,24 @@ class GeofenceProbe extends StreamProbe {
       super.deviceManager as LocationServiceManager;
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     CircularGeofence fence = CircularGeofence.fromGeofenceSamplingConfiguration(
-        samplingConfiguration as GeofenceSamplingConfiguration);
+      samplingConfiguration as GeofenceSamplingConfiguration,
+    );
 
     // listen in on the location service
     deviceManager.manager.onLocationChanged
         .map((location) => GeoPosition.fromLocation(location))
         .listen((location) {
-      // when a location event is fired, check if the new location creates a new [GeofenceData] event.
-      // if so -- add it to the main stream.
-      Geofence? data = fence.moved(location);
-      if (data != null) {
-        geoFenceStreamController.add(Measurement.fromData(data));
-      }
-    });
+          // when a location event is fired, check if the new location creates a new [GeofenceData] event.
+          // if so -- add it to the main stream.
+          Geofence? data = fence.moved(location);
+          if (data != null) {
+            geoFenceStreamController.add(Measurement.fromData(data));
+          }
+        });
 
-    return await super.onStart();
+    return await super.onResume();
   }
 
   @override
@@ -74,13 +75,13 @@ class CircularGeofence {
   }) : super();
 
   factory CircularGeofence.fromGeofenceSamplingConfiguration(
-          GeofenceSamplingConfiguration configuration) =>
-      CircularGeofence(
-        center: configuration.center,
-        radius: configuration.radius,
-        dwell: configuration.dwell,
-        name: configuration.name,
-      );
+    GeofenceSamplingConfiguration configuration,
+  ) => CircularGeofence(
+    center: configuration.center,
+    radius: configuration.radius,
+    dwell: configuration.dwell,
+    name: configuration.name,
+  );
 
   Geofence? moved(GeoPosition location) {
     Geofence? data;

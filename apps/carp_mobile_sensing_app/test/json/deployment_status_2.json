@@ -1,0 +1,101 @@
+{
+ "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Running",
+ "status": "Running",
+ "createdOn": "2026-03-23T20:02:32.409704Z",
+ "studyDeploymentId": "d8e3d84f-0fd7-4ba9-8f41-7e0863807380",
+ "deviceStatusList": [
+  {
+   "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed",
+   "device": {
+    "__type": "dk.carp.cams.devices.Smartphone",
+    "roleName": "Smartphone",
+    "isOptional": false,
+    "defaultSamplingConfiguration": {},
+    "isPrimaryDevice": true
+   }
+  },
+  {
+   "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+   "device": {
+    "__type": "dk.carp.cams.devices.LocationService",
+    "roleName": "Location Service",
+    "isOptional": true,
+    "defaultSamplingConfiguration": {},
+    "accuracy": "balanced",
+    "distance": 0.0,
+    "interval": 60000000,
+    "notificationOnTapBringToFront": false
+   },
+   "canBeDeployed": false,
+   "remainingDevicesToRegisterToObtainDeployment": [],
+   "remainingDevicesToRegisterBeforeDeployment": []
+  },
+  {
+   "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+   "device": {
+    "__type": "dk.carp.cams.devices.WeatherService",
+    "roleName": "Weather Service",
+    "isOptional": true,
+    "defaultSamplingConfiguration": {},
+    "apiKey": "66cfd8479930ed026605bc79c929ef76"
+   },
+   "canBeDeployed": false,
+   "remainingDevicesToRegisterToObtainDeployment": [
+    "Weather Service"
+   ],
+   "remainingDevicesToRegisterBeforeDeployment": [
+    "Weather Service"
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+   "device": {
+    "__type": "dk.carp.cams.devices.PolarDevice",
+    "roleName": "Polar HR Device",
+    "isOptional": true,
+    "defaultSamplingConfiguration": {},
+    "serviceUuids": [],
+    "namePrefix": "Polar",
+    "allowDuplicates": true
+   },
+   "canBeDeployed": false,
+   "remainingDevicesToRegisterToObtainDeployment": [
+    "Polar HR Device"
+   ],
+   "remainingDevicesToRegisterBeforeDeployment": [
+    "Polar HR Device"
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
+   "device": {
+    "__type": "dk.carp.cams.devices.HealthService",
+    "roleName": "Health Service",
+    "isOptional": true,
+    "defaultSamplingConfiguration": {}
+   },
+   "canBeDeployed": false,
+   "remainingDevicesToRegisterToObtainDeployment": [
+    "Health Service"
+   ],
+   "remainingDevicesToRegisterBeforeDeployment": [
+    "Health Service"
+   ]
+  }
+ ],
+ "participantStatusList": [
+  {
+   "participantId": "3c35adb4-6339-4365-84e4-e8cbc685085d",
+   "assignedParticipantRoles": {
+    "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+    "roleNames": [
+     "Participant"
+    ]
+   },
+   "assignedPrimaryDeviceRoleNames": [
+    "Smartphone"
+   ]
+  }
+ ],
+ "startedOn": "2026-03-23T20:20:31.100299Z"
+}

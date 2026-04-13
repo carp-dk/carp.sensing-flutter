@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 /// A single instantiation of a [StudyProtocol], taking care of common concerns
 /// related to devices when 'running' a study.
@@ -19,15 +19,15 @@ class StudyDeployment {
   late StudyDeploymentStatus _status;
   late StudyProtocol _protocol;
 
-  // the list of all registered devices, mapped to their role name
+  /// The list of all registered devices, mapped to their role name
   final Map<String, DeviceRegistration> _registeredDevices = {};
 
-  // the list of registered devices' configurations, mapped to their role names
+  /// The list of registered devices' configurations, mapped to their role names
   final Map<String, DeviceConfiguration> _registeredDeviceConfigurations = {};
   final Map<DeviceConfiguration, List<DeviceRegistration>>
-      _deviceRegistrationHistory = {};
+  _deviceRegistrationHistory = {};
 
-  // the list of deployed devices, organized by role name
+  /// The list of deployed devices, organized by role name
   final Set<String> _deployedDevices = {};
   final Set<DeviceConfiguration> _invalidatedDeployedDevices = {};
   DateTime? _startTime;
@@ -45,10 +45,12 @@ class StudyDeployment {
       for (var task in protocol.getTasksForDevice(device)) {
         if (task != null) {
           for (var type in task.getAllExpectedDataTypes()) {
-            streams.add(ExpectedDataStream(
-              dataType: type,
-              deviceRoleName: device.roleName,
-            ));
+            streams.add(
+              ExpectedDataStream(
+                dataType: type,
+                deviceRoleName: device.roleName,
+              ),
+            );
           }
         }
       }
@@ -62,13 +64,14 @@ class StudyDeployment {
 
   /// The set of devices which are currently registered for this study deployment.
   Map<DeviceConfiguration, DeviceRegistration> get registeredDevices =>
-      _registeredDevices.map((key, value) =>
-          MapEntry(_registeredDeviceConfigurations[key]!, value));
+      _registeredDevices.map(
+        (key, value) => MapEntry(_registeredDeviceConfigurations[key]!, value),
+      );
 
   /// Per device, a list of all device registrations (included old registrations)
   /// in the order they were registered.
   Map<DeviceConfiguration, List<DeviceRegistration>>
-      get deviceRegistrationHistory => _deviceRegistrationHistory;
+  get deviceRegistrationHistory => _deviceRegistrationHistory;
 
   /// The set of devices (role names) which have been deployed correctly.
   Set<String?> get deployedDevices => _deployedDevices;
@@ -111,8 +114,9 @@ class StudyDeployment {
 
   /// Get the status of a device in this [StudyDeployment].
   DeviceDeploymentStatus getDeviceStatus(DeviceConfiguration device) {
-    DeviceDeploymentStatus deviceStatus =
-        DeviceDeploymentStatus(device: device);
+    DeviceDeploymentStatus deviceStatus = DeviceDeploymentStatus(
+      device: device,
+    );
 
     deviceStatus.status = DeviceDeploymentStatusTypes.Unregistered;
     if (_registeredDevices.containsKey(device.roleName)) {
@@ -131,7 +135,10 @@ class StudyDeployment {
     DeviceConfiguration device,
     DeviceRegistration registration,
   ) {
-    _status.status = StudyDeploymentStatusTypes.DeployingDevices;
+    // Mark this deployment as deploying if not already done.
+    if (_status.status == StudyDeploymentStatusTypes.Invited) {
+      _status.status = StudyDeploymentStatusTypes.DeployingDevices;
+    }
 
     // Add device to currently registered devices and also store it in registration history.
     _registeredDeviceConfigurations[device.roleName] = device;
@@ -157,14 +164,18 @@ class StudyDeployment {
   ) {
     // Verify whether the specified device is part of the protocol of this
     // deployment and has been registered.
-    assert(_protocol.hasPrimaryDevice(device.roleName),
-        "The specified primary device with role name '${device.roleName}' is not part of the protocol of this deployment.");
-    assert(_registeredDevices.containsKey(device.roleName),
-        "The specified primary device with role name '${device.roleName}' has not been registered to this deployment.");
+    assert(
+      _protocol.hasPrimaryDevice(device.roleName),
+      "The specified primary device with role name '${device.roleName}' is not part of the protocol of this deployment.",
+    );
+    assert(
+      _registeredDevices.containsKey(device.roleName),
+      "The specified primary device with role name '${device.roleName}' has not been registered to this deployment.",
+    );
 
     // TODO - Verify whether the specified device is ready to be deployed.
 
-    DeviceRegistration configuration = _registeredDevices[device.roleName]!;
+    DeviceRegistration registration = _registeredDevices[device.roleName]!;
 
     // mark all registered devices as deployed
     _deployedDevices.addAll(_registeredDevices.keys);
@@ -181,6 +192,7 @@ class StudyDeployment {
     }
 
     Set<TaskConfiguration> tasks = {};
+
     // get all tasks which need to be executed on this primary device
     tasks.addAll(protocol.getTasksForDeviceRoleName(device.roleName));
 
@@ -199,13 +211,14 @@ class StudyDeployment {
     _status.status = StudyDeploymentStatusTypes.Running;
 
     return PrimaryDeviceDeployment(
-        deviceConfiguration: device,
-        registration: configuration,
-        connectedDevices: connectedDevices,
-        connectedDeviceRegistrations: connectedDeviceConfigurations,
-        tasks: tasks,
-        triggers: usedTriggers,
-        taskControls: triggeredTasks);
+      deviceConfiguration: device,
+      registration: registration,
+      connectedDevices: connectedDevices,
+      connectedDeviceRegistrations: connectedDeviceConfigurations,
+      tasks: tasks,
+      triggers: usedTriggers,
+      taskControls: triggeredTasks,
+    );
   }
 
   /// Indicate that the specified primary [device] was deployed successfully using
@@ -249,16 +262,16 @@ enum StudyDeploymentStatusTypes {
 /// A [StudyDeploymentStatus] represents the status of a deployment as returned
 /// from the CARP web service.
 ///
-/// See [StudyDeploymentStatus.kt](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/StudyDeploymentStatus.kt).
+/// See [StudyDeploymentStatus.kt](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/StudyDeploymentStatus.kt).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyDeploymentStatus extends Serializable {
   /// The status of this device deployment:
   /// * Invited
   /// * DeployingDevices
-  /// * DeploymentReady
+  /// * Running
   /// * Stopped
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  StudyDeploymentStatusTypes status = StudyDeploymentStatusTypes.Invited;
+  // @JsonKey(includeFromJson: true, includeToJson: true)
+  StudyDeploymentStatusTypes? status = StudyDeploymentStatusTypes.Invited;
 
   /// The time when the deployment was created.
   late DateTime createdOn;
@@ -280,16 +293,11 @@ class StudyDeploymentStatus extends Serializable {
   DeviceDeploymentStatus getDeviceStatus(DeviceConfiguration device) =>
       deviceStatusList.firstWhere((status) => status.device == device);
 
-  /// The [DeviceDeploymentStatus] for the primary device of this deployment,
-  /// which is typically this phone.
-  ///
-  /// Returns `null` if there is no primary device in the list of [deviceStatusList].
-  DeviceDeploymentStatus? get primaryDeviceStatus {
-    for (DeviceDeploymentStatus status in deviceStatusList) {
-      if (status.device is PrimaryDeviceConfiguration) return status;
-    }
-    return null;
-  }
+  /// Get the status of a device with the given [roleName] in this study deployment.
+  DeviceDeploymentStatus getDeviceStatusByRoleName(String roleName) =>
+      deviceStatusList.firstWhere(
+        (status) => status.device.roleName == roleName,
+      );
 
   StudyDeploymentStatus({
     required this.studyDeploymentId,
@@ -300,27 +308,19 @@ class StudyDeploymentStatus extends Serializable {
   Function get fromJsonFunction => _$StudyDeploymentStatusFromJson;
 
   factory StudyDeploymentStatus.fromJson(Map<String, dynamic> json) {
-    StudyDeploymentStatus status =
-        FromJsonFactory().fromJson<StudyDeploymentStatus>(json);
+    StudyDeploymentStatus status = FromJsonFactory()
+        .fromJson<StudyDeploymentStatus>(json);
 
-    // when this object was create from json deserialization,
-    // the last part of the $type reflects the status
-    switch (status.$type?.split('.').last) {
-      case 'Invited':
-        status.status = StudyDeploymentStatusTypes.Invited;
-        break;
-      case 'DeployingDevices':
-        status.status = StudyDeploymentStatusTypes.DeployingDevices;
-        break;
-      case 'Running':
-        status.status = StudyDeploymentStatusTypes.Running;
-        break;
-      case 'Stopped':
-        status.status = StudyDeploymentStatusTypes.Stopped;
-        break;
-      default:
-        status.status = StudyDeploymentStatusTypes.Invited;
-    }
+    // When this object was create from json deserialization, from CARP Core Kotlin,
+    // the last part of the $type reflects the status:
+    //   "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited"
+    status.status ??= switch (status.$type?.split('.').last) {
+      'Invited' => StudyDeploymentStatusTypes.Invited,
+      'DeployingDevices' => StudyDeploymentStatusTypes.DeployingDevices,
+      'Running' => StudyDeploymentStatusTypes.Running,
+      'Stopped' => StudyDeploymentStatusTypes.Stopped,
+      _ => StudyDeploymentStatusTypes.Invited,
+    };
     return status;
   }
 
@@ -332,5 +332,5 @@ class StudyDeploymentStatus extends Serializable {
 
   @override
   String toString() =>
-      '$runtimeType - deploymentId: $studyDeploymentId, status: ${status.toString().split('.').last}';
+      '$runtimeType - deploymentId: $studyDeploymentId, status: ${status?.name}';
 }

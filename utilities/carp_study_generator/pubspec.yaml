@@ -1,32 +1,32 @@
 name: carp_study_generator
 description: Utilities for managing CARP Mobile Sensing studies, including generating and uploading a study protocol, informed consent, translations, and messages.
-version: 1.4.0
+version: 2.0.0
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 
 environment:
-  sdk: ">=2.17.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  carp_serializable: ^1.1.0
-  carp_core: ^1.4.0
-  carp_mobile_sensing: ^1.4.0
-  carp_webservices: ^3.0.0
-  carp_backend: ^1.5.0
-  carp_apps_package: ^1.4.0
-  carp_context_package: ^1.4.0
-  carp_audio_package: ^1.4.0
-  carp_esense_package: ^1.4.0
-  carp_polar_package: ^1.4.0
-  carp_survey_package: ^1.4.0
-  carp_health_package: ^2.8.0
-  carp_communication_package: ^1.4.0
-  carp_connectivity_package: ^1.4.0
+  carp_serializable: ^2.0.0
+  # carp_core: ^1.4.0
+  # carp_mobile_sensing: ^1.4.0
+  # carp_webservices: ^3.0.0
+  # carp_backend: ^1.5.0
+  # carp_apps_package: ^1.4.0
+  # carp_context_package: ^1.4.0
+  # carp_audio_package: ^1.4.0
+  # carp_esense_package: ^1.4.0
+  # carp_polar_package: ^1.4.0
+  # carp_survey_package: ^1.4.0
+  # carp_health_package: ^2.8.0
+  # carp_communication_package: ^1.4.0
+  # carp_connectivity_package: ^1.4.0
 
-  research_package: ^1.4.0
-  cognition_package: ^1.5.0
+  research_package: ^2.0.0
+  cognition_package: ^1.6.0
 
   yaml: ^3.1.0
   meta: ^1.3.0
@@ -34,35 +34,36 @@ dependencies:
 # Overriding carp libraries to use the local copy
 # Remove this before release of package
 dependency_overrides:
-  uuid: ^4.3.3
+  # uuid: ^4.3.3
 #   carp_serializable:
 #     path: ../../carp_serializable/
-#   carp_core:
-#     path: ../../carp_core/
-#   carp_mobile_sensing:
-#     path: ../../carp_mobile_sensing/
-#   carp_webservices:
-#     path: ../../backends/carp_webservices/
-  # carp_backend:
-  #   path: ../../backends/carp_backend/
-#   carp_apps_package:
-#     path: ../../packages/carp_apps_package/
-  # carp_connectivity_package:
-  #   path: ../../packages/carp_connectivity_package/
-#   carp_communication_package:
-#     path: ../../packages/carp_communication_package/
-#   carp_context_package:
-#     path: ../../packages/carp_context_package/
-  # carp_audio_package:
-  #   path: ../../packages/carp_audio_package/
-#   carp_esense_package:
-#     path: ../../packages/carp_esense_package/
-#   carp_polar_package:
-#     path: ../../packages/carp_polar_package/
-#   carp_survey_package:
-#     path: ../../packages/carp_survey_package/
-#   carp_health_package:
-#     path: ../../packages/carp_health_package/
+  carp_core:
+    path: ../../carp_core/
+  carp_mobile_sensing:
+    path: ../../carp_mobile_sensing/
+  carp_webservices:
+    path: ../../backends/carp_webservices/
+  carp_backend:
+    path: ../../backends/carp_backend/
+  carp_apps_package:
+    path: ../../packages/carp_apps_package/
+  carp_connectivity_package:
+    path: ../../packages/carp_connectivity_package/
+  carp_communication_package:
+    path: ../../packages/carp_communication_package/
+  carp_context_package:
+    path: ../../packages/carp_context_package/
+  carp_audio_package:
+    path: ../../packages/carp_audio_package/
+  carp_esense_package:
+    path: ../../packages/carp_esense_package/
+  carp_polar_package:
+    path: ../../packages/carp_polar_package/
+  carp_survey_package:
+    path: ../../packages/carp_survey_package/
+  carp_health_package:
+    path: ../../packages/carp_health_package/
+
 #   research_package:
 #     path: ../../../../research.package
 #   cognition_package:
@@ -70,7 +71,7 @@ dependency_overrides:
 
 # Overriding carp libraries to use github branch
 #
-# NOTE - you need to run "flutter pub upgrade" and "flutter pub get" in order to download the lastest
+# NOTE - you need to run "flutter pub upgrade" and "flutter pub get" in order to download the latest
 # versions from Github.
 # dependency_overrides:
 #   carp_core:

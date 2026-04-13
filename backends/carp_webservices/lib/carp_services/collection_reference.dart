@@ -33,7 +33,7 @@ class CollectionReference extends CarpReference {
   /// Note that [path] should be relative and NOT start with `/`.
   /// For example; `activities/running/geopositions`
   CollectionReference._(CarpBaseService service, this._studyId, this._path)
-      : super._(service) {
+    : super._(service) {
     assert(!(_path.startsWith('/')) || _path.isEmpty);
   }
 
@@ -62,45 +62,38 @@ class CollectionReference extends CarpReference {
   String get collectionUriByID =>
       '${service.app.uri.toString()}/api/studies/$studyId/collections/id/$id';
 
-  /// Reads the collection referenced by this [CollectionReference] from the server.
+  /// Reads the collection referenced by this [CollectionReference] from the
+  /// server.
   ///
-  /// If no collection exists on the server (yet), this local CollectionReference is returned.
+  /// If no collection exists on the server (yet), this local [CollectionReference]
+  /// is returned.
   Future<CollectionReference> get() async {
     final response = await service._get(collectionUri);
-    int httpStatusCode = response.statusCode;
-
     Map<String, dynamic> responseJson =
-        json.decode(response.body) as Map<String, dynamic>;
-    if (httpStatusCode == HttpStatus.ok) {
-      return this
-        .._id = responseJson['id'] as int
-        .._path = responseJson['name'].toString();
-    }
+        service._handleResponse(response) as Map<String, dynamic>;
 
-    // All other cases are treated as an error.
-    throw CarpServiceException.fromMap(httpStatusCode, responseJson);
+    return this
+      .._id = responseJson['id'] as int
+      .._path = responseJson['name'].toString();
   }
 
   /// Get the documents in this collection.
   Future<List<DocumentSnapshot>> get documents async {
     final response = await service._get(collectionUri);
-    int httpStatusCode = response.statusCode;
 
-    final responseJson = json.decode(response.body) as Map<String, dynamic>;
-    if (httpStatusCode == HttpStatus.ok) {
-      List<dynamic> documentsJson = responseJson['documents'] as List<dynamic>;
-      List<DocumentSnapshot> documents = [];
-      for (var documentJson in documentsJson) {
-        if (documentJson is Map<String, dynamic>) {
-          final key = documentJson['name'].toString();
-          documents.add(DocumentSnapshot._('$path/$key', documentJson));
-        }
+    // we expect a collection map with a list of documents in the response
+    Map<String, dynamic> responseJson =
+        service._handleResponse(response) as Map<String, dynamic>;
+    List<dynamic> documentsJson = responseJson['documents'] as List<dynamic>;
+
+    List<DocumentSnapshot> documents = [];
+    for (var documentJson in documentsJson) {
+      if (documentJson is Map<String, dynamic>) {
+        final key = documentJson['name'].toString();
+        documents.add(DocumentSnapshot._('$path/$key', documentJson));
       }
-      return documents;
     }
-
-    // All other cases are treated as an error.
-    throw CarpServiceException.fromMap(httpStatusCode, responseJson);
+    return documents;
   }
 
   /// Returns a [DocumentReference] with the provided name in this collection.
@@ -116,13 +109,18 @@ class CollectionReference extends CarpReference {
     }
 
     return DocumentReference._path(
-        service as CarpService, studyId, documentPath);
+      service as CarpService,
+      studyId,
+      documentPath,
+    );
   }
 
-  /// Add a data document to this collection and returns a [DocumentReference] to this document.
+  /// Add a data document to this collection and returns a [DocumentReference]
+  /// to this document.
   ///
   /// If no [name] is provided, an auto-generated name is used.
-  /// If no [data] is provided, this can be set later using the [DocumentReference.setData()] method.
+  /// If no [data] is provided, this can be set later using the [DocumentReference.setData()]
+  /// method.
   Future<DocumentReference> add([
     String? name,
     Map<String, dynamic>? data,
@@ -139,33 +137,22 @@ class CollectionReference extends CarpReference {
       collectionUriByID,
       body: '{"name":"$newName"}',
     );
-    int httpStatusCode = response.statusCode;
-    Map<String, dynamic> responseJson =
-        json.decode(response.body) as Map<String, dynamic>;
 
-    if (httpStatusCode == HttpStatus.ok) {
-      int start = _path.length - _path.split('/').last.length;
-      _path = _path.replaceRange(start, _path.length,
-          newName); // renaming path, i.e. the last part of the path
-      return;
-    }
-    // All other cases are treated as an error.
-    throw CarpServiceException.fromMap(httpStatusCode, responseJson);
+    // we don't need the response for anything, but check for errors
+    service._handleResponse(response);
+
+    // renaming path, i.e. the last part of the path
+    int start = _path.length - _path.split('/').last.length;
+    _path = _path.replaceRange(start, _path.length, newName);
   }
 
   /// Deletes the collection referred to by this [CollectionReference].
   Future<void> delete() async {
     final response = await service._delete(collectionUriByID);
 
-    int httpStatusCode = response.statusCode;
-    if (httpStatusCode == HttpStatus.ok) {
-      _id = -1;
-      return;
-    } else {
-      final Map<String, dynamic> responseJson =
-          json.decode(response.body) as Map<String, dynamic>;
-      throw CarpServiceException.fromMap(httpStatusCode, responseJson);
-    }
+    // we don't need the response for anything, but check for errors
+    service._handleResponse(response);
+    _id = -1;
   }
 
   @override

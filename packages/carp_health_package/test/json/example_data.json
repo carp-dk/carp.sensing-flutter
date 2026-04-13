@@ -1,0 +1,42 @@
+[
+  {
+    "sensorStartTime": 1769424641141000,
+    "sensorEndTime": 1769424648787000,
+    "data": {
+      "__type": "dk.cachet.carp.health",
+      "uuid": "d87a55ae-5ecb-44d7-9aff-283c10a86b35",
+      "value": {
+        "__type": "NumericHealthValue",
+        "numericValue": 13.0
+      },
+      "unit": "COUNT",
+      "dateFrom": "2026-01-26T10:50:41.141Z",
+      "dateTo": "2026-01-26T10:50:48.787Z",
+      "healthDataType": "STEPS",
+      "platform": "APPLE_HEALTH",
+      "deviceId": "unknown",
+      "sourceId": "com.apple.health.4B76DB4C-F19C-4D05-8766-FC7EC4DEF393",
+      "sourceName": "Jakob’s Apple Watch"
+    }
+  },
+  {
+    "sensorStartTime": 1769431186373000,
+    "sensorEndTime": 1769432063152000,
+    "data": {
+      "__type": "dk.cachet.carp.health",
+      "uuid": "236c6441-be81-4231-8cb2-25f9483b4967",
+      "value": {
+        "__type": "NumericHealthValue",
+        "numericValue": 17.770999999999997
+      },
+      "unit": "KILOCALORIE",
+      "dateFrom": "2026-01-26T12:39:46.373Z",
+      "dateTo": "2026-01-26T12:54:23.152Z",
+      "healthDataType": "BASAL_ENERGY_BURNED",
+      "platform": "APPLE_HEALTH",
+      "deviceId": "unknown",
+      "sourceId": "com.apple.health.4B76DB4C-F19C-4D05-8766-FC7EC4DEF393",
+      "sourceName": "Jakob’s Apple Watch"
+    }
+  }
+]

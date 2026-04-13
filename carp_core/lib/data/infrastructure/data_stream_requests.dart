@@ -5,8 +5,9 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_data.dart';
+part of '../../data.dart';
 
+/// An abstract RPC request to a [DataStreamService].
 abstract class DataStreamServiceRequest extends ServiceRequest {
   final String _infrastructurePackageNamespace =
       'dk.cachet.carp.data.infrastructure';
@@ -21,6 +22,7 @@ abstract class DataStreamServiceRequest extends ServiceRequest {
       '$_infrastructurePackageNamespace.DataStreamServiceRequest.$runtimeType';
 }
 
+/// An RPC request for [DataStreamService.openDataStreams].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class OpenDataStreams extends DataStreamServiceRequest {
   DataStreamsConfiguration configuration;
@@ -34,6 +36,7 @@ class OpenDataStreams extends DataStreamServiceRequest {
   Map<String, dynamic> toJson() => _$OpenDataStreamsToJson(this);
 }
 
+/// An RPC request for [DataStreamService.appendToDataStreams].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AppendToDataStreams extends DataStreamServiceRequest {
   String studyDeploymentId;
@@ -49,6 +52,7 @@ class AppendToDataStreams extends DataStreamServiceRequest {
   Map<String, dynamic> toJson() => _$AppendToDataStreamsToJson(this);
 }
 
+/// An RPC request for [DataStreamService.getDataStream].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetDataStream extends DataStreamServiceRequest {
   DataStreamId dataStream;
@@ -69,6 +73,7 @@ class GetDataStream extends DataStreamServiceRequest {
   Map<String, dynamic> toJson() => _$GetDataStreamToJson(this);
 }
 
+/// An RPC request for [DataStreamService.closeDataStreams].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CloseDataStreams extends DataStreamServiceRequest {
   List<String> studyDeploymentIds;
@@ -82,6 +87,7 @@ class CloseDataStreams extends DataStreamServiceRequest {
   Map<String, dynamic> toJson() => _$CloseDataStreamsToJson(this);
 }
 
+/// An RPC request for [DataStreamService.removeDataStreams].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class RemoveDataStreams extends DataStreamServiceRequest {
   List<String> studyDeploymentIds;

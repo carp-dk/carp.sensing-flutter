@@ -8,10 +8,12 @@ Data bluetoothNameAnonymizer(Data data) {
   assert(data is Bluetooth);
   Bluetooth bt = data as Bluetooth;
   for (var result in bt.scanResult) {
-    result.bluetoothDeviceName =
-        sha1.convert(utf8.encode(result.bluetoothDeviceName)).toString();
-    result.advertisementName =
-        sha1.convert(utf8.encode(result.advertisementName)).toString();
+    result.bluetoothDeviceName = sha1
+        .convert(utf8.encode(result.bluetoothDeviceName))
+        .toString();
+    result.advertisementName = sha1
+        .convert(utf8.encode(result.advertisementName))
+        .toString();
   }
   return bt;
 }

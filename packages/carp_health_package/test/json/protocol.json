@@ -1,0 +1,235 @@
+{
+ "id": "62c13ff1-cffd-4b18-bc04-58d7b882dd77",
+ "createdOn": "2026-04-12T10:53:31.880567Z",
+ "version": 0,
+ "ownerId": "alex@uni.dk",
+ "name": "Context package test",
+ "participantRoles": [],
+ "primaryDevices": [
+  {
+   "__type": "dk.carp.cams.devices.Smartphone",
+   "roleName": "Smartphone",
+   "isOptional": false,
+   "defaultSamplingConfiguration": {},
+   "isPrimaryDevice": true
+  }
+ ],
+ "connectedDevices": [],
+ "connections": [],
+ "assignedDevices": {},
+ "tasks": [
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #9",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.deviceinformation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applicationinformation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.freememory"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.batterystate"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.screenevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.applifecycleevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.heartbeat"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.timezone"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.acceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.nongravitationalacceleration"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.rotation"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.magneticfield"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.accelerationfeatures"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.stepevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.ambientlight"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.error"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.triggeredtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedtask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.completedapptask"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.health"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #10",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.health",
+     "overrideSamplingConfiguration": {
+      "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
+      "past": 86400000000,
+      "future": 86400000000,
+      "healthDataTypes": [
+       "BLOOD_GLUCOSE",
+       "BLOOD_PRESSURE_DIASTOLIC",
+       "BLOOD_PRESSURE_SYSTOLIC",
+       "BLOOD_PRESSURE_DIASTOLIC",
+       "HEART_RATE",
+       "STEPS"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #11",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.health",
+     "overrideSamplingConfiguration": {
+      "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
+      "past": 86400000000,
+      "future": 86400000000,
+      "healthDataTypes": [
+       "WEIGHT"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.HealthAppTask",
+   "name": "Health App Task",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.health",
+     "overrideSamplingConfiguration": {
+      "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
+      "past": 2592000000000,
+      "future": 86400000000,
+      "healthDataTypes": [
+       "WEIGHT",
+       "STEPS",
+       "BASAL_ENERGY_BURNED",
+       "SLEEP_SESSION"
+      ]
+     }
+    }
+   ],
+   "type": "health",
+   "title": "Press here to collect your physical health data",
+   "description": "This will collect your weight, exercise time, steps, and sleep time from the Health database on the phone.",
+   "instructions": "",
+   "notification": false,
+   "types": [
+    "WEIGHT",
+    "STEPS",
+    "BASAL_ENERGY_BURNED",
+    "SLEEP_SESSION"
+   ]
+  }
+ ],
+ "triggers": {
+  "0": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "1": {
+   "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+   "sourceDeviceRoleName": "Smartphone",
+   "period": 3600000000
+  },
+  "2": {
+   "__type": "dk.cachet.carp.common.application.triggers.RecurrentScheduledTrigger",
+   "sourceDeviceRoleName": "Smartphone",
+   "type": "daily",
+   "time": {
+    "hour": 23,
+    "minute": 0,
+    "second": 0
+   },
+   "separationCount": 0
+  },
+  "3": {
+   "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+   "sourceDeviceRoleName": "Smartphone",
+   "period": 86400000000
+  }
+ },
+ "taskControls": [
+  {
+   "triggerId": 0,
+   "taskName": "Task #9",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 1,
+   "taskName": "Task #10",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 2,
+   "taskName": "Task #11",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 3,
+   "taskName": "Health App Task",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  }
+ ],
+ "expectedParticipantData": []
+}

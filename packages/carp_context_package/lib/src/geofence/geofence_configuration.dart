@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2019 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -28,9 +27,9 @@ class GeoPosition extends Serializable {
   GeoPosition(this.latitude, this.longitude);
 
   GeoPosition.fromLocation(Location location)
-      : latitude = location.latitude,
-        longitude = location.longitude,
-        super();
+    : latitude = location.latitude,
+      longitude = location.longitude,
+      super();
 
   /// Returns the approximate distance in meters between this location and the given location.
   ///
@@ -38,11 +37,14 @@ class GeoPosition extends Serializable {
   /// See http://www.movable-type.co.uk/scripts/latlong.html for details on how to
   /// calculate distance, bearing and more between latitude/longitude points.
   double distanceTo(GeoPosition destination) {
-    final sDLat =
-        math.sin((degToRad(destination.latitude) - degToRad(latitude)) / 2);
-    final sDLng =
-        math.sin((degToRad(destination.longitude) - degToRad(longitude)) / 2);
-    final a = sDLat * sDLat +
+    final sDLat = math.sin(
+      (degToRad(destination.latitude) - degToRad(latitude)) / 2,
+    );
+    final sDLng = math.sin(
+      (degToRad(destination.longitude) - degToRad(longitude)) / 2,
+    );
+    final a =
+        sDLat * sDLat +
         sDLng *
             sDLng *
             math.cos(degToRad(latitude)) *

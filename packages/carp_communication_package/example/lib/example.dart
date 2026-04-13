@@ -1,4 +1,6 @@
-import 'package:carp_core/carp_core.dart';
+import 'dart:ui';
+
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_communication_package/communication.dart';
 
@@ -17,28 +19,39 @@ void main() async {
   );
 
   // Define which devices are used for data collection
-  // In this case, its only this smartphone
+  // In this case, it is only this smartphone
   Smartphone phone = Smartphone();
   protocol.addPrimaryDevice(phone);
 
-  // Add an background task that continuously collects SMS messages in/out
+  // Add a background task that collects incoming SMS messages
   protocol.addTaskControl(
       ImmediateTrigger(),
       BackgroundTask(
           measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)]),
       phone);
 
-  // Add an background task that collects the logs for:
+  // Add a background task that collects the logs for:
   //  * in/out SMS
   //  * in/out phone calls
   //  * calendar entries
-  // every 3 hour
+  // every 3 hours
   protocol.addTaskControl(
       PeriodicTrigger(period: const Duration(hours: 3)),
       BackgroundTask(measures: [
         Measure(type: CommunicationSamplingPackage.PHONE_LOG),
         Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
         Measure(type: CommunicationSamplingPackage.CALENDAR),
+      ]),
+      phone);
+
+  // Add a background task that collects the calendar entries for the past 7
+  // days (max), every time the app is resumed (i.e., when coming to foreground).
+  protocol.addTaskControl(
+      AppLifecycleTrigger({AppLifecycleState.resumed}),
+      BackgroundTask(measures: [
+        Measure(type: CommunicationSamplingPackage.CALENDAR)
+          ..overrideSamplingConfiguration =
+              HistoricSamplingConfiguration(past: const Duration(days: 7)),
       ]),
       phone);
 }

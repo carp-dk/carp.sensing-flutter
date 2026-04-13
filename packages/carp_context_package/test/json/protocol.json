@@ -1,202 +1,204 @@
 {
-  "id": "717eec10-29ef-11ee-a1c3-db41b709561e",
-  "createdOn": "2023-07-24T06:58:07.313059Z",
-  "version": 0,
-  "ownerId": "owner@dtu.dk",
-  "name": "Context Sensing Example",
-  "primaryDevices": [
-    {
-      "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-      "roleName": "Primary Phone",
-      "defaultSamplingConfiguration": {},
-      "isPrimaryDevice": true
-    }
-  ],
-  "connectedDevices": [
-    {
-      "__type": "dk.cachet.carp.common.application.devices.LocationService",
-      "roleName": "Location Service",
-      "isOptional": true,
-      "defaultSamplingConfiguration": {},
-      "accuracy": "low",
-      "distance": 10.0,
-      "interval": 300000000
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.devices.WeatherService",
-      "roleName": "Weather Service",
-      "isOptional": true,
-      "defaultSamplingConfiguration": {},
-      "apiKey": "OW_API_key_goes_here"
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.devices.AirQualityService",
-      "roleName": "Air Quality Service",
-      "isOptional": true,
-      "defaultSamplingConfiguration": {},
-      "apiKey": "WAQI_API_key_goes_here"
-    }
-  ],
-  "connections": [
-    {
-      "roleName": "Location Service",
-      "connectedToRoleName": "Primary Phone"
-    },
-    {
-      "roleName": "Weather Service",
-      "connectedToRoleName": "Primary Phone"
-    },
-    {
-      "roleName": "Air Quality Service",
-      "connectedToRoleName": "Primary Phone"
-    }
-  ],
-  "tasks": [
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #7",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.activity"
-        }
-      ]
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #8",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.location"
-        }
-      ]
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #9",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.location"
-        },
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.mobility"
-        }
-      ]
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #10",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.geofence",
-          "overrideSamplingConfiguration": {
-            "__type": "dk.cachet.carp.common.application.sampling.GeofenceSamplingConfiguration",
-            "center": {
-              "__type": "GeoPosition",
-              "latitude": 55.786025,
-              "longitude": 12.524159
-            },
-            "radius": 10.0,
-            "dwell": 900000000,
-            "name": "DTU"
-          }
-        }
-      ]
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #11",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.weather"
-        }
-      ]
-    },
-    {
-      "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-      "name": "Task #12",
-      "measures": [
-        {
-          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-          "type": "dk.cachet.carp.airquality"
-        }
-      ]
-    }
-  ],
-  "triggers": {
-    "0": {
-      "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-      "sourceDeviceRoleName": "Primary Phone"
-    },
-    "1": {
-      "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
-      "sourceDeviceRoleName": "Location Service",
-      "period": 300000000
-    },
-    "2": {
-      "__type": "dk.cachet.carp.common.application.triggers.DelayedTrigger",
-      "sourceDeviceRoleName": "Location Service",
-      "delay": 300000000
-    },
-    "3": {
-      "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-      "sourceDeviceRoleName": "Location Service"
-    },
-    "4": {
-      "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
-      "sourceDeviceRoleName": "Weather Service",
-      "period": 1800000000
-    },
-    "5": {
-      "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
-      "sourceDeviceRoleName": "Air Quality Service",
-      "period": 1800000000
-    }
+ "id": "d03b70c9-fd8e-4ac0-9a47-edce9fef925d",
+ "createdOn": "2026-04-10T08:23:07.896804Z",
+ "version": 0,
+ "ownerId": "owner@dtu.dk",
+ "name": "Context Sensing Example",
+ "participantRoles": [],
+ "primaryDevices": [
+  {
+   "__type": "dk.carp.cams.devices.Smartphone",
+   "roleName": "Smartphone",
+   "isOptional": false,
+   "defaultSamplingConfiguration": {},
+   "isPrimaryDevice": true
+  }
+ ],
+ "connectedDevices": [
+  {
+   "__type": "dk.carp.cams.devices.LocationService",
+   "roleName": "Location Service",
+   "isOptional": true,
+   "defaultSamplingConfiguration": {},
+   "accuracy": "low",
+   "distance": 10.0,
+   "interval": 300000000,
+   "notificationOnTapBringToFront": false
   },
-  "taskControls": [
+  {
+   "__type": "dk.carp.cams.devices.WeatherService",
+   "roleName": "Weather Service",
+   "isOptional": true,
+   "defaultSamplingConfiguration": {},
+   "apiKey": "OW_API_key_goes_here"
+  },
+  {
+   "__type": "dk.carp.cams.devices.AirQualityService",
+   "roleName": "Air Quality Service",
+   "isOptional": true,
+   "defaultSamplingConfiguration": {},
+   "apiKey": "WAQI_API_key_goes_here"
+  }
+ ],
+ "connections": [
+  {
+   "roleName": "Location Service",
+   "connectedToRoleName": "Smartphone"
+  },
+  {
+   "roleName": "Weather Service",
+   "connectedToRoleName": "Smartphone"
+  },
+  {
+   "roleName": "Air Quality Service",
+   "connectedToRoleName": "Smartphone"
+  }
+ ],
+ "assignedDevices": {},
+ "tasks": [
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #8",
+   "measures": [
     {
-      "triggerId": 0,
-      "taskName": "Task #7",
-      "destinationDeviceRoleName": "Primary Phone",
-      "control": "Start"
-    },
-    {
-      "triggerId": 1,
-      "taskName": "Task #8",
-      "destinationDeviceRoleName": "Location Service",
-      "control": "Start"
-    },
-    {
-      "triggerId": 2,
-      "taskName": "Task #9",
-      "destinationDeviceRoleName": "Location Service",
-      "control": "Start"
-    },
-    {
-      "triggerId": 3,
-      "taskName": "Task #10",
-      "destinationDeviceRoleName": "Location Service",
-      "control": "Start"
-    },
-    {
-      "triggerId": 4,
-      "taskName": "Task #11",
-      "destinationDeviceRoleName": "Weather Service",
-      "control": "Start"
-    },
-    {
-      "triggerId": 5,
-      "taskName": "Task #12",
-      "destinationDeviceRoleName": "Air Quality Service",
-      "control": "Start"
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.activity"
     }
-  ],
-  "participantRoles": [],
-  "assignedDevices": {},
-  "expectedParticipantData": []
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #9",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.location"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #10",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.location"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.mobility"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #11",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.geofence",
+     "overrideSamplingConfiguration": {
+      "__type": "dk.cachet.carp.common.application.sampling.GeofenceSamplingConfiguration",
+      "center": {
+       "__type": "GeoPosition",
+       "latitude": 55.786025,
+       "longitude": 12.524159
+      },
+      "radius": 10.0,
+      "dwell": 900000000,
+      "name": "DTU"
+     }
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #12",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.weather"
+    }
+   ]
+  },
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #13",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.airquality"
+    }
+   ]
+  }
+ ],
+ "triggers": {
+  "0": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  },
+  "1": {
+   "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+   "sourceDeviceRoleName": "Location Service",
+   "period": 300000000
+  },
+  "2": {
+   "__type": "dk.cachet.carp.common.application.triggers.DelayedTrigger",
+   "sourceDeviceRoleName": "Location Service",
+   "delay": 300000000
+  },
+  "3": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Location Service"
+  },
+  "4": {
+   "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+   "sourceDeviceRoleName": "Weather Service",
+   "period": 1800000000
+  },
+  "5": {
+   "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+   "sourceDeviceRoleName": "Air Quality Service",
+   "period": 1800000000
+  }
+ },
+ "taskControls": [
+  {
+   "triggerId": 0,
+   "taskName": "Task #8",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  },
+  {
+   "triggerId": 1,
+   "taskName": "Task #9",
+   "destinationDeviceRoleName": "Location Service",
+   "control": "Start"
+  },
+  {
+   "triggerId": 2,
+   "taskName": "Task #10",
+   "destinationDeviceRoleName": "Location Service",
+   "control": "Start"
+  },
+  {
+   "triggerId": 3,
+   "taskName": "Task #11",
+   "destinationDeviceRoleName": "Location Service",
+   "control": "Start"
+  },
+  {
+   "triggerId": 4,
+   "taskName": "Task #12",
+   "destinationDeviceRoleName": "Weather Service",
+   "control": "Start"
+  },
+  {
+   "triggerId": 5,
+   "taskName": "Task #13",
+   "destinationDeviceRoleName": "Air Quality Service",
+   "control": "Start"
+  }
+ ],
+ "expectedParticipantData": []
 }

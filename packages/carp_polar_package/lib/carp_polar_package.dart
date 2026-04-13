@@ -44,7 +44,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/polar.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone, BLEHeartRateDevice;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 part 'polar_data.dart';
@@ -108,8 +108,9 @@ class PolarSamplingPackage implements SamplingPackage {
   static const String ECG = "$POLAR_NAMESPACE.ecg";
   static const String HR = "$POLAR_NAMESPACE.hr";
 
-  final DeviceManager _deviceManager =
-      PolarDeviceManager(PolarDevice.DEVICE_TYPE);
+  final DeviceManager _deviceManager = PolarDeviceManager(
+    PolarDevice.DEVICE_TYPE,
+  );
 
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
@@ -173,6 +174,11 @@ class PolarSamplingPackage implements SamplingPackage {
     // register all data types
     FromJsonFactory().registerAll([
       PolarDevice(),
+      PolarDeviceRegistration(
+        identifier: '',
+        bleAddress: '',
+        polarDeviceType: PolarDeviceType.H10,
+      ),
       PolarAccelerometer(samples: []),
       PolarGyroscope(samples: []),
       PolarMagnetometer(samples: []),

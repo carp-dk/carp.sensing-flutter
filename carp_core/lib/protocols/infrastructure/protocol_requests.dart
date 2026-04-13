@@ -4,9 +4,9 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_protocols.dart';
+part of '../../protocol.dart';
 
-/// Serializable application service requests to [ProtocolService].
+/// An abstract RPC request to a [ProtocolService].
 abstract class ProtocolServiceRequest extends ServiceRequest {
   final String _infrastructurePackageNamespace =
       'dk.cachet.carp.protocols.infrastructure';
@@ -20,6 +20,7 @@ abstract class ProtocolServiceRequest extends ServiceRequest {
       '$_infrastructurePackageNamespace.ProtocolServiceRequest.$runtimeType';
 }
 
+/// An RPC request for [ProtocolService.add].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Add extends ProtocolServiceRequest {
   final StudyProtocol protocol;
@@ -39,6 +40,7 @@ class Add extends ProtocolServiceRequest {
   Map<String, dynamic> toJson() => _$AddToJson(this);
 }
 
+/// An RPC request for [ProtocolService.addVersion].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AddVersion extends Add {
   AddVersion(super.protocol, super.versionTag);
@@ -51,6 +53,7 @@ class AddVersion extends Add {
   Map<String, dynamic> toJson() => _$AddVersionToJson(this);
 }
 
+/// An RPC request for [ProtocolService.updateParticipantDataConfiguration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class UpdateParticipantDataConfiguration extends ProtocolServiceRequest {
   final String protocolId;
@@ -66,13 +69,14 @@ class UpdateParticipantDataConfiguration extends ProtocolServiceRequest {
   @override
   Function get fromJsonFunction => _$UpdateParticipantDataConfigurationFromJson;
   factory UpdateParticipantDataConfiguration.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<UpdateParticipantDataConfiguration>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<UpdateParticipantDataConfiguration>(json);
   @override
   Map<String, dynamic> toJson() =>
       _$UpdateParticipantDataConfigurationToJson(this);
 }
 
+/// An RPC request for [ProtocolService.getBy].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetBy extends ProtocolServiceRequest {
   final String protocolId;
@@ -90,6 +94,7 @@ class GetBy extends ProtocolServiceRequest {
   Map<String, dynamic> toJson() => _$GetByToJson(this);
 }
 
+/// An RPC request for [ProtocolService.getAllForOwner].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetAllForOwner extends ProtocolServiceRequest {
   final String ownerId;
@@ -104,6 +109,7 @@ class GetAllForOwner extends ProtocolServiceRequest {
   Map<String, dynamic> toJson() => _$GetAllForOwnerToJson(this);
 }
 
+/// An RPC request for [ProtocolService.getVersionHistoryFor].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetVersionHistoryFor extends ProtocolServiceRequest {
   final String protocolId;
@@ -118,6 +124,7 @@ class GetVersionHistoryFor extends ProtocolServiceRequest {
   Map<String, dynamic> toJson() => _$GetVersionHistoryForToJson(this);
 }
 
+/// An RPC request for [ProtocolFactoryService.createCustomProtocol].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CreateCustomProtocol extends ProtocolServiceRequest {
   final String ownerId;

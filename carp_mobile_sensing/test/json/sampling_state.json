@@ -1,0 +1,31 @@
+{
+  "__type": "SmartphoneDeploymentExecutorSamplingState",
+  "state": "Resumed",
+  "studyDeploymentId": "7bb517e4-7ade-41ee-bbb1-509018e170a2",
+  "taskControlSamplingStates": [
+    {
+      "__type": "TaskControlExecutorSamplingState",
+      "state": "Resumed",
+      "triggerId": 1,
+      "taskName": "Timezone Task"
+    },
+    {
+      "__type": "TaskControlExecutorSamplingState",
+      "state": "Resumed",
+      "triggerId": 2,
+      "taskName": "Device Info Task"
+    },
+    {
+      "__type": "TaskControlExecutorSamplingState",
+      "state": "Resumed",
+      "triggerId": 3,
+      "taskName": "Background Measures Task"
+    },
+    {
+      "__type": "TaskControlExecutorSamplingState",
+      "state": "Resumed",
+      "triggerId": 4,
+      "taskName": "Device Info App Task"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ part of 'carp_polar_package.dart';
 /// Enumeration of supported Polar devices.
 enum PolarDeviceType {
   /// Unknown Polar type
-  UNKNOWN,
+  Unknown,
 
   /// Polar H9 Heart rate sensor
   H9,
@@ -17,51 +17,24 @@ enum PolarDeviceType {
   H10,
 
   /// Polar Verity Sense heart rate sensor
-  SENSE,
+  Verity,
 }
 
 /// A [DeviceConfiguration] for a Polar device used in a [StudyProtocol].
-///
-/// This device descriptor defined the basic configuration of the Polar
-/// device, including the [deviceType], the [identifier], and the [name]
-/// of the device.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class PolarDevice extends BLEHeartRateDevice {
+class PolarDevice extends BLEDevice<PolarDeviceRegistration> {
   /// The type of a Polar device.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.PolarDevice';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.PolarDevice';
 
   /// The default role name for a Polar device.
   static const String DEFAULT_ROLE_NAME = 'Polar HR Device';
-
-  /// The polar sensor settings.
-  /// This is know only **after** a polar device is connected.
-  // @JsonKey(ignore: true)
-  PolarSensorSetting? settings;
-
-  /// Polar device id printed on the sensor/device or UUID.
-  /// This [identifier] is required for connecting to a Polar device.
-  String? identifier;
-
-  /// The Bluetooth address of the sensor.
-  String? address;
-
-  /// The type of Polar device, if known.
-  PolarDeviceType? deviceType;
-
-  /// The user-friendly name of the sensor.
-  String? name;
-
-  /// RSSI (Received Signal Strength Indicator) value from advertisement
-  int? rssi;
 
   /// Create a new [PolarDevice].
   PolarDevice({
     super.roleName = PolarDevice.DEFAULT_ROLE_NAME,
     super.isOptional = true,
-    this.deviceType,
-    this.identifier,
-    this.name,
+    super.namePrefix = 'Polar',
   });
 
   @override
@@ -72,10 +45,61 @@ class PolarDevice extends BLEHeartRateDevice {
   Map<String, dynamic> toJson() => _$PolarDeviceToJson(this);
 }
 
+/// A [DeviceRegistration] for a Polar device.
+///
+/// This device registration defines the basic configuration of the Polar
+/// device, including the device type, the identifier, and the name
+/// of the device.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class PolarDeviceRegistration extends BLEDeviceRegistration {
+  /// Polar device id printed on the sensor/device or UUID.
+  String identifier;
+
+  /// The type of Polar device, if known.
+  PolarDeviceType polarDeviceType;
+
+  /// List of [PolarDataType]s that are available in the connected Polar device.
+  List<PolarDataType>? supportedDataTypes;
+
+  /// RSSI (Received Signal Strength Indicator) value from advertisement
+  int? rssi;
+
+  PolarDeviceRegistration({
+    String? deviceDisplayName,
+    super.registrationCreatedOn,
+    super.isConnected,
+    super.batteryChargingState,
+    String? hardwareName,
+    required this.identifier,
+    required super.bleAddress,
+    super.bleName,
+    required this.polarDeviceType,
+    this.supportedDataTypes,
+    this.rssi,
+  }) : super(
+         deviceDisplayName: deviceDisplayName ?? bleName,
+         hardwareName: hardwareName ?? polarDeviceType.name,
+       );
+
+  @override
+  Function get fromJsonFunction => _$PolarDeviceRegistrationFromJson;
+  factory PolarDeviceRegistration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson(json) as PolarDeviceRegistration;
+  @override
+  Map<String, dynamic> toJson() => _$PolarDeviceRegistrationToJson(this);
+}
+
 /// A Polar [DeviceManager].
-class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
+///
+/// The Polar BLE name is typically of the form
+///
+///  *  Polar Sense B34B4B56
+///  *  Polar H10 B36KB56
+///
+/// I.e., on the form "Polar <type> <identifier>".
+class PolarDeviceManager
+    extends BLEDeviceManager<PolarDevice, PolarDeviceRegistration> {
   int? _batteryLevel;
-  bool _polarFeaturesAvailable = false;
   Polar? _polar;
   final StreamController<int> _batteryEventController =
       StreamController.broadcast();
@@ -88,51 +112,57 @@ class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
   /// The [Polar] device handler.
   Polar get polar => _polar ??= Polar();
 
-  /// List of [PolarDataType]s that are available in Polar devices for online
-  /// streaming or offline recording.
+  @override
+  String? get displayName => bleName ?? '';
+
+  /// Polar device id printed on the sensor/device or UUID.
+  /// Typically on the form "B34B4B56".
   ///
-  /// Only available **after** a Polar device is successfully connected.
-  List<PolarDataType> features = [];
+  /// This identifier can be set directly if known, or can be extracted
+  /// from the [bleName] when the device is paired (e.g., "Polar H10 B36KB56").
+  ///
+  /// This identifier is used for connecting to a Polar device.
+  /// It is typically the last part of the BLE name of the device,
+  /// which is on the form "Polar <type> <identifier>".
+  /// It is not the same as the BLE address, which is typically on the
+  /// form "00:11:22:33:44:55". Polar devices do not use the BLE address
+  /// for connecting.
+  String? polarIdentifier;
 
-  @override
-  String get id => configuration?.identifier ?? '---';
+  PolarDeviceType? get polarDeviceType {
+    if (bleName == null) return null;
 
-  @override
-  String? get displayName => btleName;
-
-  @override
-  String get btleName => configuration?.name ?? '';
-
-  @override
-  set btleName(String btleName) {
-    configuration?.name = btleName;
-
-    // the Polar BTLE name is typically of the form
+    // The Polar BLE name is typically of the form
     //  *  Polar Sense B34B4B56
     //  *  Polar H10 B36KB56
-    // I.e., on the form "Polar <type> <identifier>
-    if (btleName.split(' ').first.toUpperCase() == 'POLAR') {
-      configuration?.identifier = btleName.split(' ').last;
-
-      switch (btleName.split(' ').elementAt(1).toUpperCase()) {
+    // I.e., on the form "Polar <type> <identifier>".
+    if (bleName!.split(' ').first.toUpperCase() == 'POLAR') {
+      switch (bleName!.split(' ').elementAt(1).toUpperCase()) {
         case 'H9':
-          configuration?.deviceType = PolarDeviceType.H9;
-          break;
+          return PolarDeviceType.H9;
         case 'H10':
-          configuration?.deviceType = PolarDeviceType.H10;
-          break;
+          return PolarDeviceType.H10;
         case 'SENSE':
-          configuration?.deviceType = PolarDeviceType.SENSE;
-          break;
+          return PolarDeviceType.Verity;
         default:
-          configuration?.deviceType = PolarDeviceType.UNKNOWN;
-          break;
+          return PolarDeviceType.Unknown;
       }
     }
+
+    return null;
   }
 
-  /// Are the [features] available (i.e., received from the device)?
-  bool get polarFeaturesAvailable => _polarFeaturesAvailable;
+  /// RSSI (Received Signal Strength Indicator) value from advertisement
+  int? rssi;
+
+  /// List of [PolarDataType]s that are available in Polar devices for online
+  /// streaming.
+  ///
+  /// Only available **after** a Polar device is successfully connected.
+  List<PolarDataType>? dataTypes;
+
+  /// Are the [dataTypes] available (i.e., received from the device)?
+  bool get polarDataTypesAvailable => dataTypes != null;
 
   @override
   int? get batteryLevel => _batteryLevel;
@@ -141,109 +171,118 @@ class PolarDeviceManager extends BTLEDeviceManager<PolarDevice> {
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
   @override
-  String get btleAddress => configuration?.address ?? '';
+  PolarDeviceRegistration createRegistration() => PolarDeviceRegistration(
+    deviceDisplayName: bleName,
+    isConnected: isConnected,
+    bleAddress: bleAddress ?? 'Null',
+    bleName: bleName,
+    batteryChargingState: batteryLevel != null
+        ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
+        : BatteryChargingState.unknown,
+    identifier: polarIdentifier ?? 'Unknown',
+    polarDeviceType: polarDeviceType ?? PolarDeviceType.Unknown,
+    supportedDataTypes: dataTypes,
+    rssi: rssi,
+  );
+
+  PolarDeviceManager(super.type, {super.configuration});
 
   @override
-  set btleAddress(String btleAddress) => configuration?.address = btleAddress;
-
-  PolarDeviceManager(
-    super.type, [
-    super.configuration,
-  ]);
+  void onConfigure() {
+    super.onConfigure();
+    if (registration != null) {
+      polarIdentifier = registration!.identifier;
+    }
+  }
 
   @override
-  Future<bool> canConnect() async => configuration?.identifier != null;
+  bool onPaired() => (polarIdentifier = bleName?.split(' ').last) != null;
+
+  @override
+  bool get canConnect => polarIdentifier != null;
 
   @override
   Future<DeviceStatus> onConnect() async {
-    // fast out if already connected.
-    if (isConnected) return status;
+    // fast out if no identifier is available for connecting
+    if (polarIdentifier == null) {
+      warning(
+        '$runtimeType - cannot connect to device, the Polar identifier is null.',
+      );
+      return DeviceStatus.configured;
+    }
 
-    if (configuration?.identifier == null) {
-      warning('$runtimeType - cannot connect to device, identifier is null.');
-      // return status as initialized, so that the "user" can try to reconnect with another identifier
-      return DeviceStatus.initialized;
-    } else {
-      try {
-        // listen for battery level events
-        _batterySubscription = polar.batteryLevel.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          _batteryLevel = event.level;
-          _batteryEventController.add(_batteryLevel!);
-        });
+    // Set listeners for Polar events and connect to the device.
+    // We do not mark the device as fully connected before the data types are
+    // available.
+    try {
+      // listen for battery level events
+      _batterySubscription = polar.batteryLevel.listen((event) {
+        _batteryLevel = event.level;
+        _batteryEventController.add(_batteryLevel!);
+      });
 
-        // listen for connection events
-        _connectingSubscription = polar.deviceConnecting.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          status = DeviceStatus.connecting;
-          configuration?.address = event.address;
-          configuration?.name = event.name;
-          configuration?.rssi = event.rssi;
-        });
+      // listen for connecting events
+      _connectingSubscription = polar.deviceConnecting.listen(
+        (_) => status = DeviceStatus.connecting,
+      );
 
-        _connectedSubscription = polar.deviceConnected.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          // we do not mark the device as fully connected before the features are available
-          status = DeviceStatus.connecting;
-          configuration?.address = event.address;
-          configuration?.name = event.name;
-          configuration?.rssi = event.rssi;
-        });
+      // listen for connected events
+      _connectedSubscription = polar.deviceConnected.listen((event) {
+        // we do not mark the device as fully connected before the data types
+        // are available - see below
+        status = DeviceStatus.reconnected;
+        bleAddress = event.address;
+        bleName = event.name;
+        rssi = event.rssi;
+      });
 
-        _disconnectedSubscription = polar.deviceDisconnected.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-          status = DeviceStatus.disconnected;
-          _batteryLevel = null;
-        });
+      // listen for disconnected events
+      _disconnectedSubscription = polar.deviceDisconnected.listen((event) {
+        status = DeviceStatus.disconnecting;
+        _batteryLevel = null;
+        rssi = null;
+      });
 
-        // connect to the device based on its identified (id)
-        polar.connectToDevice(id, requestPermissions: true);
-
-        // listen for what features the connected Polar device supports
-        _sdkFeatureSubscription = polar.sdkFeatureReady.listen((event) {
-          debug('$runtimeType - Polar event : $event');
-
-          if (configuration!.identifier == event.identifier &&
-              event.feature == PolarSdkFeature.onlineStreaming) {
-            polar
-                .getAvailableOnlineStreamDataTypes(event.identifier)
-                .then((dataTypes) {
-              features = dataTypes.toList();
-              debug('$runtimeType - features: $features');
-              _polarFeaturesAvailable = true;
+      // find out what data types the connected Polar device supports in streaming mode,
+      // and mark the device as fully connected when the types are available
+      polar.sdkFeatureReady
+          .firstWhere(
+            (event) =>
+                event.identifier == polarIdentifier &&
+                event.feature == PolarSdkFeature.onlineStreaming,
+          )
+          .then((_) {
+            polar.getAvailableOnlineStreamDataTypes(polarIdentifier!).then((
+              availableDataTypes,
+            ) {
+              dataTypes = availableDataTypes.toList();
               status = DeviceStatus.connected;
             });
-          }
-        });
+          });
 
-        return DeviceStatus.connecting;
-      } catch (error) {
-        warning(
-            "$runtimeType - could not connect to device of type '$type' and id '$id' - error: $error");
-        return DeviceStatus.error;
-      }
+      // now finally, start connecting to the device based on its identifier
+      polar.connectToDevice(polarIdentifier!, requestPermissions: true);
+      return DeviceStatus.connecting;
+    } catch (error) {
+      warning(
+        "$runtimeType - could not connect to device of type '$deviceType' and id '$polarIdentifier' - error: $error",
+      );
+      return DeviceStatus.disconnected;
     }
   }
 
   @override
   Future<bool> onDisconnect() async {
-    if (configuration?.identifier == null) {
-      warning(
-          '$runtimeType - cannot disconnect from device, identifier is null.');
-      return false;
-    }
-
-    stop();
+    if (polarIdentifier == null) return false;
 
     _batteryLevel = null;
-
     _batterySubscription?.cancel();
     _connectingSubscription?.cancel();
     _connectedSubscription?.cancel();
     _disconnectedSubscription?.cancel();
     _sdkFeatureSubscription?.cancel();
 
-    await polar.disconnectFromDevice(configuration!.identifier!);
+    await polar.disconnectFromDevice(polarIdentifier!);
 
     return true;
   }

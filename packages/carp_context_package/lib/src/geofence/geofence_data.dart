@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2019 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -10,8 +9,6 @@ part of '../../carp_context_package.dart';
 /// Holds information about a geofence event of entering, exiting, or dwelling.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Geofence extends Data {
-  static const dataType = ContextSamplingPackage.GEOFENCE;
-
   Geofence({required this.type, required this.name}) : super();
 
   @override

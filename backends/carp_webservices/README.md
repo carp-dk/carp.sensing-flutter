@@ -1,10 +1,12 @@
 # CARP Web Service Plugin for Flutter
 
-[![pub package](https://img.shields.io/pub/v/carp_webservices.svg)](https://pub.dartlang.org/packages/carp_webservices)
-[![pub points](https://img.shields.io/pub/points/carp_webservices?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_webservices/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_webservices.svg)](https://pub.dev/packages/carp_webservices)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
 A Flutter library to access the [CARP Web Service (CAWS)](https://carp.cachet.dk/caws/) web API.
 This library is intended to be used with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework, but also works on its own, if a app is to connect directly to CAWS.
@@ -30,8 +32,6 @@ You also need to add an activity to the `AndroidManifest.xml` to allow for redir
   <application
     android:name="${applicationName}"
     android:label="CAWS Example"
-    android:fullBackupContent="@xml/backup_rules"
-    android:dataExtractionRules="@xml/data_extraction_rules"
     android:icon="@mipmap/ic_launcher">
 
   <!-- Used by authentication redirect to/from web view -->
@@ -94,18 +94,18 @@ Replace `com.my.app` with your application id and `my-redirect-url` with your re
 
 CARP Web Services (CAWS) consists of a set of sub-services, which are accessible for the client:
 
-- [`CarpAuthService`](https://pub.dev/documentation/carp_webservices/latest/carp_auth/CarpAuthService-class.html) - authentication service for CAWS
-- [`CarpParticipationService`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/CarpParticipationService-class.html) - CAWS-specific implementation of the [ParticipationService](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-deployments.md#participationservice)
-- [`CarpDeploymentService`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/CarpDeploymentService-class.html) - CAWS-specific implementation of the [DeploymentService](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-deployments.md#deploymentservice)
-- [`CarpDataStreamService`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/CarpDataStreamService-class.html) - CAWS-specific implementation of the [DataStreamService](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-data.md#datastreamservice)
-- [`CarpService`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/CarpService-class.html) - resource management (folders, documents, and files) and alternative data management service
+- [`CarpAuthService`](https://pub.dev/documentation/carp_webservices/latest/carp_auth_carp_auth/CarpAuthService-class.html) - authentication service for CAWS
+- [`CarpParticipationService`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CarpParticipationService-class.html) - CAWS-specific implementation of the [ParticipationService](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-deployments.md#participationservice)
+- [`CarpDeploymentService`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CarpDeploymentService-class.html) - CAWS-specific implementation of the [DeploymentService](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-deployments.md#deploymentservice)
+- [`CarpDataStreamService`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CarpDataStreamService-class.html) - CAWS-specific implementation of the [DataStreamService](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-data.md#datastreamservice)
+- [`CarpService`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CarpService-class.html) - resource management (folders, documents, and files) and alternative data management service
 
 The `CarpParticipationService`, `CarpDeploymentService`, and `CarpDataStreamService` follows the [CARP Core architecture](https://github.com/cph-cachet/carp.core-kotlin?tab=readme-ov-file#architecture), and are CAWS-specific implementations of the ParticipationService, DeploymentService, and DataStreamService, respectively.
 The`CarpAuthService` and `CarpService` are only part of the CAWS architecture ("non-core" endpoints).
 
 ## Configuration
 
-All CAWS services needs to be configured before used, using the `configure` method taking a [`CarpApp`](https://pub.dev/documentation/carp_webservices/latest/carp_services/CarpApp-class.html) configuration.
+All CAWS services needs to be configured before used, using the `configure` method taking a [`CarpApp`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CarpApp-class.html) configuration.
 
 ```dart
 // The URI of the CAWS server to connect to.
@@ -159,7 +159,7 @@ Basic authentication is using the CAWS Keycloak login page, which the system ope
 CarpUser user = await CarpAuthService().authenticate();
 ```
 
-This [`CarpUser`](https://pub.dev/documentation/carp_webservices/latest/carp_auth/CarpUser-class.html) object contains the OAuth token in the `token` (of type [`OAuthToken`](https://pub.dev/documentation/carp_webservices/latest/carp_auth/OAuthToken-class.html)) parameter.
+This [`CarpUser`](https://pub.dev/documentation/carp_webservices/latest/carp_auth_carp_auth/CarpUser-class.html) object contains the OAuth token in the `token` (of type [`OAuthToken`](https://pub.dev/documentation/carp_webservices/latest/carp_auth_carp_auth/OAuthToken-class.html)) parameter.
 Since the `CarpUser` object can be serialized to JSON, the user and the (valid) OAuth token can be stored on the phone.
 
 The OAuth token can be refreshed by calling the `refresh()` method:
@@ -203,10 +203,10 @@ Enables the client to get invitations for a specific `accountId`, i.e. a user. D
 // We assume that we are authenticated to CAWS and that the CarpService()
 // instance has been configured.
 
-// configure from another CAWS service
+// Configure from another CAWS service
 CarpParticipationService().configureFrom(CarpService());
 
-// get invitations for this account (user)
+// Get invitations for this account (user)
 List<ActiveParticipationInvitation> invitations =
     await CarpParticipationService().getActiveParticipationInvitations();
 ```
@@ -224,7 +224,7 @@ The invitation holds information on the study deployment. So, once you (or the u
 CarpParticipationService().setInvitation(invitation);
 ```
 
-The participant service also handles the collection of "participant data", which are specified in the [`StudyProtocol`](https://pub.dev/documentation/carp_core/latest/carp_core_protocols/StudyProtocol-class.html) (as [`expectedParticipantData`](https://pub.dev/documentation/carp_core/latest/carp_core_protocols/StudyProtocol/expectedParticipantData.html)).
+The participant service also handles the collection of "participant data", which are specified in the [`StudyProtocol`](https://pub.dev/documentation/carp_core/latest/protocol/StudyProtocol-class.html) (as [`expectedParticipantData`](https://pub.dev/documentation/carp_core/latest/protocol/StudyProtocol/expectedParticipantData.html)).
 
 You can get and set participation data like this:
 
@@ -249,7 +249,7 @@ await CarpParticipationService().setParticipantData(
 );
 ```
 
-However, a more convenient way to handle participant data is to use a [`ParticipationReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services/ParticipationReference-class.html), which can be obtained from the `CarpParticipationService` singleton.
+However, a more convenient way to handle participant data is to use a [`ParticipationReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/ParticipationReference-class.html), which can be obtained from the `CarpParticipationService` singleton.
 
 ```dart
 ParticipationReference participation = CarpParticipationService().participation();
@@ -335,7 +335,7 @@ await CarpDeploymentService().deviceDeployed(
 );
 ```
 
-However, instead of keeping track of deployment IDs, a more convenient way to access deployments are to use a [`DeploymentReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services/DeploymentReference-class.html):
+However, instead of keeping track of deployment IDs, a more convenient way to access deployments are to use a [`DeploymentReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/DeploymentReference-class.html):
 
 ```dart
 // We assume that we are authenticated to CAWS, that the CarpService()
@@ -365,7 +365,7 @@ status = await deploymentReference.deployed();
 ## Data Stream Service
 
 Collected data is streamed back to a CARP Web Service using the [`Data`](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-data.md) subsystem.
-This is done using the [`CarpDataStreamService`](https://pub.dev/documentation/carp_webservices/latest/carp_services/CarpDataStreamService-class.html) like this:
+This is done using the [`CarpDataStreamService`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CarpDataStreamService-class.html) like this:
 
 ```dart
 // Configure a [CarpDataStreamService] from an existing CAWS service.
@@ -397,7 +397,7 @@ However, you would rarely need to use these endpoints in your app, since the [ca
 
 ## CARP Web Service
 
-The [`CarpService`](https://pub.dev/documentation/carp_webservices/latest/carp_services/CarpService-class.html) provides access to a set of "non-core" endpoints in CAWS.
+The [`CarpService`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CarpService-class.html) provides access to a set of "non-core" endpoints in CAWS.
 These "non-core" endpoints are:
 
 - JSON Documents organized in Collections
@@ -411,7 +411,7 @@ All of these endpoints can be considered as additional "resources" which are ava
 
 CARP Web Service supports storing JSON documents in nested collections.
 
-A [`CollectionReference`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/CollectionReference-class.html) is used to access collections and a [`DocumentReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services/DocumentReference-class.html) is used to access documents. Both of these can be used to:
+A [`CollectionReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/CollectionReference-class.html) is used to access collections and a [`DocumentReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/DocumentReference-class.html) is used to access documents. Both of these can be used to:
 
 - creating, updating, and deleting documents
 - accessing documents in collections
@@ -454,7 +454,7 @@ List<DocumentSnapshot> documents =
 
 CARP Web Service supports storing raw binary file.
 
-A [`FileStorageReference`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/FileStorageReference-class.html) is used to manage files and have methods for:
+A [`FileStorageReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/FileStorageReference-class.html) is used to manage files and have methods for:
 
 - uploading a file
 - downloading a file
@@ -501,7 +501,7 @@ responseCode = await CarpService().getFileStorageReference(id).delete();
 > [!CAUTION]
 > This is an old endpoint which is deprecated. Informed consent should be uploaded as a "participant data" as outlined above. However, at the moment, CAWS supports both types of informed consent (for backward compatibility reasons).
 
-A [`ConsentDocument`](https://pub.dev/documentation/carp_webservices/latest/carp_services/ConsentDocument-class.html) can be uploaded and downloaded to and from CAWS.
+A [`ConsentDocument`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/ConsentDocument-class.html) can be uploaded and downloaded to and from CAWS.
 
 ```dart
 try {
@@ -522,7 +522,7 @@ try {
 > [!CAUTION]
 > This is an old endpoint which is deprecated. Data should be uploaded using "data streams" as outlined above. However, at the moment, CAWS supports both types of data upload (for backward compatibility reasons).
 
-A [`DataPointReference`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/DataPointReference-class.html) is used to manage [`DataPoint`](https://pub.dartlang.org/documentation/carp_webservices/latest/carp_services/DataPoint-class.html) objects on a CARP Web Service, and have CRUD methods for:
+A [`DataPointReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/DataPointReference-class.html) is used to manage [`DataPoint`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/DataPoint-class.html) objects on a CARP Web Service, and have CRUD methods for:
 
 - post a data point
 - batch upload multiple data points

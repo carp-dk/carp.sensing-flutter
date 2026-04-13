@@ -26,26 +26,37 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' hide log;
+
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+
+import 'package:carp_serializable/carp_serializable.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
+import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'package:archive/archive_io.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-
-import 'package:carp_core/carp_core.dart';
-import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-
-export 'infrastructure/sampling_packages/device.dart';
-export 'infrastructure/sampling_packages/sensors.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 part 'infrastructure/data_managers/console_data_manager.dart';
 part 'infrastructure/data_managers/file_data_manager.dart';
 part 'infrastructure/data_managers/sqlite_data_manager.dart';
 
-part 'infrastructure/file_study_manager.dart';
-part 'infrastructure/local_notification_controller.dart';
-part 'infrastructure/deployment_service.dart';
-part 'infrastructure/persistence.dart';
+part 'infrastructure/services/file_protocol_manager.dart';
+part 'infrastructure/services/local_notification_manager.dart';
+part 'infrastructure/services/logging.dart';
+part 'infrastructure/services/background_service.dart';
+
+part 'infrastructure/services/deployment_service.dart';
+part 'infrastructure/services/persistence_service.dart';
+part 'infrastructure/settings.dart';

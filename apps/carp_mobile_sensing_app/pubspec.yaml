@@ -1,33 +1,27 @@
 name: carp_mobile_sensing_app
 description: The CARP Mobile Sensing App
-version: 1.11.0
+version: 2.0.0
 homepage: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app
 publish_to: 'none' 
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
-
+  
 platforms:
   android:
   ios:
 
 dependencies:
-  battery_plus: ^6.2.3
-  device_calendar: ^4.3.1
-  device_info_plus: ^12.1.0
   flutter:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.0
-  flutter_local_notifications: ^19.4.2
-  location: ^8.0.1
-  mdsflutter: ^2.3.1
-  package_info_plus: ^8.3.1
-  permission_handler: '>=11.0.0 <13.0.0'
-  
-  #carp_serializable: ^1.1.0
-  #carp_core: ^0.30.0
-  #carp_mobile_sensing: ^0.30.6
+
+  # CARP libraries
+  carp_serializable: ^2.0.0       # polymorphic json serialization
+  # carp_core: ^2.0.0               # the core CARP domain model
+  # carp_mobile_sensing: ^0.30.6  # the CARP mobile sensing framework
+
+  # CARP sampling packages
   #carp_connectivity_package: ^0.30.0
   #carp_context_package: ^0.30.1
   #carp_audio_package: ^0.30.0
@@ -35,22 +29,76 @@ dependencies:
   #carp_apps_package: ^0.30.0
   #carp_backend: ^0.30.0
   #carp_webservices: ^0.30.0
-  #carp_health_package: ^2.0.0
-  #carp_firebase_backend: ^0.30.0
 
+  # carp_health_package: ^2.0.0
   # carp_esense_package: ^0.30.2
   # carp_movisens_package: ^0.32.0
+  # carp_polar_package: ^0.30.0
+  # carp_movesense_package: ^0.30.0
 
   research_package: ^2.0.0
-  shared_preferences: ^2.5.3
-  sqflite: ^2.4.2
+
+  # Packages used by CAMS. For some reason, we need to explicitly depend on them here.
+  # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though 
+  # it does compile. See issue #530
+  system_info2: ^4.0.0
+  path_provider: ^2.0.0
+  sqflite: ^2.2.8                         # For local storage in SQLite DB
+  permission_handler: '>=11.0.0 <13.0.0'  # For requesting permissions on Android and iOS
+  shared_preferences: ^2.2.0
+  package_info_plus: ^9.0.0
+  flutter_local_notifications: ^21.0.0    # For sending notification on AppTask
+  timezone: '>=0.10.0 <0.12.0'            # For collecting time zone information
+  flutter_timezone: ^5.0.0                # For getting local time zone for scheduling notifications
+  flutter_background: ^1.3.0              # For running background services on Android
+
+  # probe-dependent plugins
+  device_info_plus: ^12.1.0
+  sensors_plus: ^7.0.0
+  battery_plus: ^7.0.0
+  pedometer: ^4.0.0       # Step count from local OS
+  light: ^5.0.0           # Light sensor
+  screen_state: ^5.0.0    # Screen LOCK/ON/OFF
+
+  # For Bluetooth Low Energy (BLE) scanning and connection
+  flutter_reactive_ble: ^5.0.0
+
+  # Context package plugins
+  location: ^8.0.1
+  flutter_activity_recognition: ^4.0.0
+
+  # Communication package plugins
+  device_calendar: ^4.3.1 # need to use a forked version of device_calendar - see dependency_overrides below
+  another_telephony: ^0.4.0
+  call_e_log: ^0.0.4
+
+  # Connectivity package plugins
+  connectivity_plus: ^7.0.0    # connectivity events
+  network_info_plus: ^7.0.0    # wifi ssid name
+  flutter_blue_plus: '>=1.29.0 <3.0.0'  # bluetooth scan
+  dchs_flutter_beacon: ^0.6.4  # collecting nearby iBeacon devices
+
+  # Apps package plugins
+  app_usage: ^4.0.0
+  installed_apps: ^2.0.0
+
+  # Audio package plugins
+  flutter_sound: ^9.17.0  # audio probe
+  noise_meter: ^5.0.0     # measuring noise level
+
+  # wearable device plugins
+  mdsflutter: ^2.3.1
   health: ^13.2.0
-  flutter_blue_plus: ^1.36.8
+  polar: ^7.0.0
+
+  # app-specific plugins
+  flutter_launcher_icons: ^0.14.0
+
 
 # Overriding carp libraries to use the local copy
 dependency_overrides:
-  carp_serializable:
-    path: ../../carp_serializable/
+  # carp_serializable:
+  #   path: ../../carp_serializable/
   carp_core:
     path: ../../carp_core/
   carp_mobile_sensing:
@@ -104,7 +152,7 @@ dependency_overrides:
   #     url: https://github.com/Panosfunk/mdsflutter.git
   #     ref: master
 
-  polar: 7.7.1
+  # polar: 7.7.1
   # load polar from https://github.com/iarata/polar due to device_info_plus conflict
   # polar:
   #   git:

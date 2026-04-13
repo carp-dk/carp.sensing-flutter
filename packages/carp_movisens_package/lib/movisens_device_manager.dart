@@ -9,22 +9,16 @@ part of 'carp_movisens_package.dart';
 /// A [DeviceConfiguration] for a Movisens device used in a [StudyProtocol].
 ///
 /// This device descriptor defined the basic configuration of the Movisens
-/// device, including the BTLE MAC [address], the [deviceName], the [sensorLocation]
-/// and the [weight], [height], [age], [sex] of the user using the device.
+/// device, including [sensorLocation] on the body, and the user parameters
+/// [weight], [height], [age], [sex] of the user using the device.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class MovisensDevice extends DeviceConfiguration {
+class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of a Movisens device.
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovisensDevice';
 
   /// The default role name for a Movisens device.
   static const String DEFAULT_ROLE_NAME = 'movisens';
-
-  /// The name of the device used for connecting to the device.
-  ///
-  /// The default Movisens names of devices are `MOVISENS Sensor <serial>`, where
-  /// `serial` is the 5-digit serial number written on the back of the device.
-  String deviceName;
 
   /// Sensor placement on body
   SensorLocation sensorLocation;
@@ -47,16 +41,12 @@ class MovisensDevice extends DeviceConfiguration {
   /// 78 kg with the sensor place on the chest.
   MovisensDevice({
     String? roleName,
-    required this.deviceName,
     this.sensorLocation = SensorLocation.Chest,
     this.sex = Sex.Male,
     this.height = 178,
     this.weight = 78,
     this.age = 25,
-  }) : super(
-          roleName: roleName ?? DEFAULT_ROLE_NAME,
-          isOptional: true,
-        );
+  }) : super(roleName: roleName ?? DEFAULT_ROLE_NAME, isOptional: true);
 
   @override
   Function get fromJsonFunction => _$MovisensDeviceFromJson;
@@ -67,49 +57,55 @@ class MovisensDevice extends DeviceConfiguration {
 }
 
 /// A Movisens [DeviceManager].
-class MovisensDeviceManager extends BTLEDeviceManager<MovisensDevice> {
-  // the last known voltage level of the Movisens device
-  int _batteryLevel = -1;
+///
+/// Note that the Movisens device manager uses the [deviceName] to identify
+/// the Movisens device to connect to. The default Movisens names of devices
+/// are `MOVISENS Sensor <serial>`, where `serial` is the 5-digit serial number
+/// written on the back of the device.
+class MovisensDeviceManager
+    extends BLEDeviceManager<MovisensDevice, BLEDeviceRegistration> {
+  // the last known battery level of the Movisens device
+  int? _batteryLevel;
   String? _connectionStatus;
   StreamSubscription<BluetoothConnectionState>? _subscription;
 
-  /// The [Movisens] device handler.
-  /// Only available after this device manger has been initialized via the
-  /// [initialize] method.
-  movisens.MovisensDevice? device;
+  movisens.MovisensDevice? _device;
 
-  // /// Movisens user data as specified in the [MovisensDevice] device descriptor.
-  // /// Only available after this device manger has been initialized via the
-  // /// [initialize] method.
-  // UserData? userData;
+  /// The Movisens device handler.
+  /// Only available after [deviceName] has been set.
+  movisens.MovisensDevice? get device => deviceName != null
+      ? _device ??= movisens.MovisensDevice(name: deviceName!)
+      : _device = null;
+
+  /// The name of the device used for connecting to the device.
+  ///
+  /// The default Movisens names of devices are `MOVISENS Sensor <serial>`, where
+  /// `serial` is the 5-digit serial number written on the back of the device.
+  String? deviceName;
 
   @override
-  String get id => device?.id ?? MovisensDevice.DEVICE_TYPE;
+  String? get displayName => deviceName;
 
   @override
-  String? get displayName => device?.name;
+  BLEDeviceRegistration createRegistration() => BLEDeviceRegistration(
+    deviceDisplayName: displayName,
+    isConnected: isConnected,
+    batteryChargingState: batteryLevel != null
+        ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
+        : BatteryChargingState.unknown,
+    bleAddress: deviceName ?? 'No Movisens device name specified',
+    bleName: deviceName ?? 'No Movisens device name specified',
+  );
 
   String? get connectionStatus => _connectionStatus;
 
-  MovisensDeviceManager(
-    super.type, [
-    super.configuration,
-  ]);
+  MovisensDeviceManager(super.type, {super.configuration});
 
   @override
-  Future<void> onInitialize(MovisensDevice configuration) async {
-    super.onInitialize(configuration);
-    device = movisens.MovisensDevice(name: configuration.deviceName);
-  }
+  int? get batteryLevel => _batteryLevel;
 
   @override
-  int get batteryLevel => _batteryLevel;
-
-  @override
-  String get btleAddress => device?.id ?? super.btleAddress;
-
-  @override
-  Future<bool> canConnect() async => device != null;
+  bool get canConnect => device != null;
 
   @override
   Future<DeviceStatus> onConnect() async {
@@ -144,20 +140,25 @@ class MovisensDeviceManager extends BTLEDeviceManager<MovisensDevice> {
 
       if (configuration != null) {
         // set user data parameters
-        await device?.userDataService
-            ?.setAgeFloat(configuration!.age.toDouble());
-        await device?.userDataService?.setSensorLocation(movisens
-            .SensorLocation.values[configuration!.sensorLocation.index]);
-        await device?.userDataService
-            ?.setWeight(configuration!.weight.toDouble());
+        await device?.userDataService?.setAgeFloat(
+          configuration!.age.toDouble(),
+        );
+        await device?.userDataService?.setSensorLocation(
+          movisens.SensorLocation.values[configuration!.sensorLocation.index],
+        );
+        await device?.userDataService?.setWeight(
+          configuration!.weight.toDouble(),
+        );
         await device?.userDataService?.setHeight(configuration!.height);
-        await device?.userDataService
-            ?.setGender(movisens.Gender.values[configuration!.sex.index]);
+        await device?.userDataService?.setGender(
+          movisens.Gender.values[configuration!.sex.index],
+        );
       }
     } catch (error) {
       warning(
-          "$runtimeType - could not connect to device of type '$type' - error: $error");
-      return DeviceStatus.error;
+        "$runtimeType - could not connect to device of type '$deviceType' - error: $error",
+      );
+      return DeviceStatus.disconnected;
     }
 
     return DeviceStatus.connecting;

@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 /// The information which needs to be provided when inviting a participant to
 /// a deployment.
@@ -43,13 +43,15 @@ class Participation {
   /// The CARP study deployment ID.
   String studyDeploymentId;
 
-  /// Unique id for this participation.
+  /// Unique id for the participant in this participation.
   String participantId;
 
+  /// The participant roles in the study protocol which the participant
+  /// is assigned to.
   AssignedTo assignedRoles;
 
   Participation(this.studyDeploymentId, this.participantId, this.assignedRoles)
-      : super();
+    : super();
 
   factory Participation.fromJson(Map<String, dynamic> json) =>
       _$ParticipationFromJson(json);
@@ -57,7 +59,7 @@ class Participation {
 
   @override
   String toString() =>
-      '${super.toString()}, id: $participantId, studyDeploymentId: $studyDeploymentId';
+      '${super.toString()}, participantId: $participantId, studyDeploymentId: $studyDeploymentId';
 }
 
 /// A description of a study, shared with participants once they are invited to a study.
@@ -77,11 +79,8 @@ class StudyInvitation {
   /// outside of scope or not yet supported by CARP core.
   dynamic applicationData;
 
-  StudyInvitation(
-    this.name, [
-    this.description,
-    this.applicationData,
-  ]) : super();
+  StudyInvitation(this.name, [this.description, this.applicationData])
+    : super();
 
   factory StudyInvitation.fromJson(Map<String, dynamic> json) =>
       _$StudyInvitationFromJson(json);
@@ -164,9 +163,11 @@ class ParticipantStatus {
   AssignedTo assignedParticipantRoles;
   Set<String> assignedPrimaryDeviceRoleNames;
 
-  ParticipantStatus(this.participantId, this.assignedParticipantRoles,
-      this.assignedPrimaryDeviceRoleNames)
-      : super();
+  ParticipantStatus(
+    this.participantId,
+    this.assignedParticipantRoles,
+    this.assignedPrimaryDeviceRoleNames,
+  ) : super();
   factory ParticipantStatus.fromJson(Map<String, dynamic> json) =>
       _$ParticipantStatusFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantStatusToJson(this);

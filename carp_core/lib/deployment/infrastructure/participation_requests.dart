@@ -4,18 +4,18 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 // -----------------------------------------------------
 // Participation Service Requests
-// See https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt
+// See https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt
 // -----------------------------------------------------
 
 /// A [ParticipationServiceRequest] and its sub-classes contain the data for
 /// sending a participant request to the CARP web service.
 ///
 /// All participant requests to the CARP Service is defined in
-/// [carp.core-kotlin](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt)
+/// [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt)
 abstract class ParticipationServiceRequest extends DeploymentServiceRequest {
   final String _serviceRequestPackageNamespace =
       'dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest';
@@ -45,8 +45,8 @@ class GetActiveParticipationInvitations extends ParticipationServiceRequest {
   @override
   Function get fromJsonFunction => _$GetActiveParticipationInvitationsFromJson;
   factory GetActiveParticipationInvitations.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<GetActiveParticipationInvitations>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<GetActiveParticipationInvitations>(json);
   @override
   Map<String, dynamic> toJson() =>
       _$GetActiveParticipationInvitationsToJson(this);
@@ -97,27 +97,6 @@ class SetParticipantData extends ParticipationServiceRequest {
 
   /// The data to be set.
   Map<String, Data?>? data;
-
-  // /// The data to be set.
-  // @JsonKey(includeFromJson: false, includeToJson: false)
-  // InputData? inputData;
-
-  // set data(Map<String, dynamic> data) {
-  //   inputData = ParticipantData(
-  //     studyDeploymentId: studyDeploymentId!,
-  //     data: data,
-  //   );
-  // }
-
-  // Map<String, dynamic> get data {
-  //   Map<String, dynamic> data = {};
-  //   inputData?.data.forEach((key, value) {
-  //     data['\$type'] = key;
-  //     data['value'] = value;
-  //   });
-
-  //   return data;
-  // }
 
   @override
   Function get fromJsonFunction => _$SetParticipantDataFromJson;

@@ -15,29 +15,6 @@ class NoiseProbe extends BufferingPeriodicStreamProbe {
   @override
   Stream<NoiseReading> get bufferingStream => _noiseMeter.noise;
 
-  // @override
-  // Future<bool> onStart() async {
-  //   // check permission to access the microphone
-
-  //   // Ask for permission before starting probe.
-  //   // Only relevant for Android - on iOS permission is automatically requested.
-  //   var status = Platform.isAndroid
-  //       ? await Permission.microphone.request()
-  //       : PermissionStatus.granted;
-
-  //   return (status == PermissionStatus.granted)
-  //       ? super.onStart()
-  //       : Future.value(false);
-
-  //   // final status = await Permission.microphone.status;
-  //   // if (!status.isGranted) {
-  //   //   warning(
-  //   //       '$runtimeType - Permission not granted to use to microphone: $status - trying to request it');
-  //   //   await Permission.microphone.request();
-  //   // }
-  //   // return super.onStart();
-  // }
-
   @override
   void onSamplingStart() {
     _startRecordingTime = DateTime.now();
@@ -48,40 +25,41 @@ class NoiseProbe extends BufferingPeriodicStreamProbe {
   void onSamplingEnd() => _endRecordingTime = DateTime.now();
 
   @override
-  void onSamplingData(dynamic event) {
-    if (event is NoiseReading) _noiseReadings.add(event);
-  }
+  void onSamplingData(dynamic event) =>
+      event is NoiseReading ? _noiseReadings.add(event) : null;
 
   @override
   Future<Measurement?> getMeasurement() async {
     if (_noiseReadings.isNotEmpty) {
-      List<num> meanList = [];
-      List<num> maxList = [];
+      Stats meanStats = Stats.fromData(
+        _noiseReadings
+            .map((reading) => reading.meanDecibel)
+            .where((e) => e.isFinite),
+      );
+      Stats maxStats = Stats.fromData(
+        _noiseReadings
+            .map((reading) => reading.maxDecibel)
+            .where((e) => e.isFinite),
+      );
 
-      for (var reading in _noiseReadings) {
-        meanList.add(reading.meanDecibel);
-        maxList.add(reading.maxDecibel);
-      }
-
-      Stats meanStats = Stats.fromData(meanList);
-      Stats maxStats = Stats.fromData(maxList);
-      // get statistics from the list of mean db's
-      num mean = meanStats.average;
-      num std = meanStats.standardDeviation;
+      num mean = meanStats.mean;
+      num std = meanStats.sampleValues.standardDeviation;
       num min = meanStats.min;
-      // get the max db from the list of max db's
       num max = maxStats.max;
 
       if (mean.isFinite && std.isFinite && min.isFinite && max.isFinite) {
         return Measurement(
-            sensorStartTime: _startRecordingTime?.microsecondsSinceEpoch ??
-                DateTime.now().microsecondsSinceEpoch,
-            sensorEndTime: _endRecordingTime?.microsecondsSinceEpoch,
-            data: Noise(
-                meanDecibel: mean.toDouble(),
-                stdDecibel: std.toDouble(),
-                minDecibel: min.toDouble(),
-                maxDecibel: max.toDouble()));
+          sensorStartTime:
+              _startRecordingTime?.microsecondsSinceEpoch ??
+              DateTime.now().microsecondsSinceEpoch,
+          sensorEndTime: _endRecordingTime?.microsecondsSinceEpoch,
+          data: Noise(
+            meanDecibel: mean.toDouble(),
+            stdDecibel: std.toDouble(),
+            minDecibel: min.toDouble(),
+            maxDecibel: max.toDouble(),
+          ),
+        );
       }
     }
 

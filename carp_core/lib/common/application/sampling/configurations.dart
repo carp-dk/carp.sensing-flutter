@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../../carp_core_common.dart';
+part of '../../../common.dart';
 
 /// Contains configuration on how to sample a data stream of a given type.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -61,8 +61,8 @@ class BatteryAwareSamplingConfiguration extends SamplingConfiguration {
   Map<String, dynamic> toJson() =>
       _$BatteryAwareSamplingConfigurationToJson(this);
   factory BatteryAwareSamplingConfiguration.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<BatteryAwareSamplingConfiguration>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<BatteryAwareSamplingConfiguration>(json);
 }
 
 /// The level of detail a data stream should be sampled at, corresponding to
@@ -78,7 +78,7 @@ enum Granularity {
 
   /// Minimal impact on power consumption, but only provides a very coarse
   /// level of detail.
-  Coarse
+  Coarse,
 }
 
 /// A [SamplingConfiguration] which allows specifying a desired level of [granularity],
@@ -92,8 +92,8 @@ class GranularitySamplingConfiguration extends SamplingConfiguration {
   Function get fromJsonFunction => _$GranularitySamplingConfigurationFromJson;
 
   factory GranularitySamplingConfiguration.fromJson(
-          Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<GranularitySamplingConfiguration>(json);
+    Map<String, dynamic> json,
+  ) => FromJsonFactory().fromJson<GranularitySamplingConfiguration>(json);
 
   @override
   Map<String, dynamic> toJson() =>

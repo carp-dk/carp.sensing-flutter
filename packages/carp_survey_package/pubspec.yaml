@@ -1,10 +1,19 @@
 name: carp_survey_package
+version: 2.0.0
 description: CARP survey sampling package. Samples survey data from the CARP Research Package and Cognition Package.
-version: 1.9.1
-homepage: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/packages/carp_survey_package
+homepage: https://github.com/cph-cachet/carp.sensing-flutter
+repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/packages/carp_survey_package
+issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
+
+documentation: https://docs.carp.dk/carp-mobile-sensing/
+topics:
+  - mobile-sensing
+  - mobile-health
+  - sensors
+  - digital-phenotyping
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 platforms:
@@ -16,8 +25,8 @@ dependencies:
     sdk: flutter
 
   carp_serializable: ^2.0.0
-  carp_core: ^1.8.0
-  carp_mobile_sensing: ^1.11.0
+  carp_core: ^2.0.0
+  carp_mobile_sensing: ^2.0.0
 
   research_package: ^2.0.0
   cognition_package: ^1.6.0

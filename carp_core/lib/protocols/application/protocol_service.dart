@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_protocols.dart';
+part of '../../protocol.dart';
 
 /// Application service which allows managing (multiple versions of)
 /// [StudyProtocol]s.

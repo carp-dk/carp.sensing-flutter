@@ -1,3 +1,8 @@
+## 2.0.1
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+* using the [device_calendar_plus](https://pub.dev/packages/device_calendar_plus) plugin
+
 ## 1.8.0
 
 * replacing the `telephony` plugin with the `another_telephony` plugin (issue [#464](https://github.com/cph-cachet/carp.sensing-flutter/issues/464))
@@ -127,7 +132,7 @@
 
 ## 0.5.0
 
-* `calendar` measure, probe, and datum added incl. default privacy protection
+* `calendar` measure, probe, and  added incl. default privacy protection
 * `phone_log` measure redesigned as a periodic measure
 * `text_message_log` measure redesigned as a periodic measure
 * Relying on carp_mobile_sensing ^0.5.0 which is migrated to AndroidX.

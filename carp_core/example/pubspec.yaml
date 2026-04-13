@@ -1,14 +1,13 @@
 name: example
 description: A example of how to use the carp_core library
 publish_to: 'none'
-version: 1.8.0
+version: 2.0.0
 
 environment:
-  sdk: '>=2.17.0 <4.0.0'
-
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.19.0"
+  
 dependencies:
-  # carp_serializable:
-  #   path: ../../carp_serializable/
   carp_core:
     path: ../
 

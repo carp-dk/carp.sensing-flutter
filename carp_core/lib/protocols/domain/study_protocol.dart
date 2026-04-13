@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_protocols.dart';
+part of '../../protocol.dart';
 
 /// A description of how a study is to be executed, defining the type(s) of
 /// primary device(s) ([PrimaryDeviceConfiguration]) responsible for
@@ -47,10 +47,10 @@ class StudyProtocol extends Snapshot {
   Set<ParticipantRole>? participantRoles = {};
 
   /// The full list of devices part of this configuration.
-  Set<DeviceConfiguration> get devices {
-    Set<DeviceConfiguration> set = {...primaryDevices, ...connectedDevices!};
-    return set;
-  }
+  Set<DeviceConfiguration> get devices => {
+    ...primaryDevices,
+    ...connectedDevices!,
+  };
 
   /// The set of devices which are responsible for aggregating and synchronizing
   /// incoming data.
@@ -88,11 +88,8 @@ class StudyProtocol extends Snapshot {
   Map<String, dynamic>? applicationData;
 
   /// Create a new protocol. [ownerId] and [name] must be specified.
-  StudyProtocol({
-    required this.ownerId,
-    required this.name,
-    this.description,
-  }) : super();
+  StudyProtocol({required this.ownerId, required this.name, this.description})
+    : super();
 
   /// Add a primary device (e.g., a phone) which is responsible for aggregating
   /// and synchronizing incoming data.
@@ -142,7 +139,8 @@ class StudyProtocol extends Snapshot {
     connections?.forEach((connection) {
       if (connection.roleName == primaryDevice.roleName) {
         var connectedDevice = connectedDevices?.firstWhere(
-            (device) => device.roleName == connection.connectedToRoleName);
+          (device) => device.roleName == connection.connectedToRoleName,
+        );
         if (connectedDevice != null) devices.add(connectedDevice);
       }
     });
@@ -161,9 +159,10 @@ class StudyProtocol extends Snapshot {
     if (trigger.requiresPrimaryDevice != null &&
         trigger.requiresPrimaryDevice!) {
       assert(
-          hasPrimaryDevice(trigger.sourceDeviceRoleName!),
-          'The passed trigger cannot be initiated by its specified source device '
-          'since it is not a primary device which is part of this protocol.');
+        hasPrimaryDevice(trigger.sourceDeviceRoleName!),
+        'The passed trigger cannot be initiated by its specified source device '
+        'since it is not a primary device which is part of this protocol.',
+      );
     }
 
     triggers['${triggers.length}'] = trigger;
@@ -181,12 +180,14 @@ class StudyProtocol extends Snapshot {
     return index;
   }
 
-  /// Add a [task] to be started or stopped (determined by [control]) on a
+  /// Add a [task] to be started (default) or stopped (determined by [control]) on a
   /// [destinationDevice] once a [trigger] within this protocol is initiated.
   /// In case the [trigger] or [task] are not yet included in this study protocol,
   /// it will be added.
   /// The [destinationDevice] needs to be added prior to this call since it needs
   /// to be set up as either a primary device or connected device.
+  /// If [destinationDevice] is not specified, the default primary device
+  /// (i.e., [primaryDevice]) is used.
   ///
   /// Throws an error if the [destinationDevice] is not included in this
   /// study protocol.
@@ -194,14 +195,17 @@ class StudyProtocol extends Snapshot {
   /// is already present.
   bool addTaskControl(
     TriggerConfiguration trigger,
-    TaskConfiguration task,
-    DeviceConfiguration destinationDevice, [
+    TaskConfiguration task, [
+    DeviceConfiguration? destinationDevice,
     Control control = Control.Start,
   ]) {
+    destinationDevice ??= primaryDevice;
+
     assert(
-        primaryDevices.contains(destinationDevice) ||
-            connectedDevices!.contains(destinationDevice),
-        'The passed device to which the task needs to be sent is not included in this study protocol.');
+      primaryDevices.contains(destinationDevice) ||
+          connectedDevices!.contains(destinationDevice),
+      'The passed device to which the task needs to be sent is not included in this study protocol.',
+    );
 
     // Add trigger and task to ensure they are included in the protocol.
     // Set the trigger's destination device if not specified.
@@ -212,12 +216,14 @@ class StudyProtocol extends Snapshot {
     // create and add a task control
     int triggerId = indexOfTrigger(trigger);
     if (triggerId >= 0) {
-      taskControls.add(TaskControl(
-        triggerId: triggerId,
-        task: task,
-        targetDevice: destinationDevice,
-        control: control,
-      ));
+      taskControls.add(
+        TaskControl(
+          triggerId: triggerId,
+          task: task,
+          targetDevice: destinationDevice,
+          control: control,
+        ),
+      );
       return true;
     }
     return false;
@@ -245,8 +251,10 @@ class StudyProtocol extends Snapshot {
   ///
   /// Throws an error if [trigger] is not part of this study protocol.
   Set<TaskControl> getTaskControls(TriggerConfiguration trigger) {
-    assert(triggers.values.contains(trigger),
-        'The passed trigger is not part of this study protocol.');
+    assert(
+      triggers.values.contains(trigger),
+      'The passed trigger is not part of this study protocol.',
+    );
     int triggerId = indexOfTrigger(trigger);
 
     Set<TaskControl> tt = {};
@@ -352,14 +360,19 @@ class StudyProtocol extends Snapshot {
     AssignedTo assignedTo,
   ) {
     assignedDevices ??= {};
-    assert(primaryDevices.contains(device),
-        "The device configuration is not part of this protocol.");
-    assert(isValidAssignment(assignedTo),
-        "One of the assigned participant roles is not part of this protocol.");
     assert(
-        !assignedTo.isAssignedToAll,
-        "Do not use this method to assign a device to all participants. "
-        "This is done per default.");
+      primaryDevices.contains(device),
+      "The device configuration is not part of this protocol.",
+    );
+    assert(
+      isValidAssignment(assignedTo),
+      "One of the assigned participant roles is not part of this protocol.",
+    );
+    assert(
+      !assignedTo.isAssignedToAll,
+      "Do not use this method to assign a device to all participants. "
+      "This is done per default.",
+    );
 
     assignedDevices![device.roleName] = assignedTo.roleNames!;
   }
@@ -368,12 +381,12 @@ class StudyProtocol extends Snapshot {
   /// to all roles.
   ///
   /// Requires that [device] is part of this protocol.
-  void removeDeviceAssignment(
-    PrimaryDeviceConfiguration device,
-  ) {
+  void removeDeviceAssignment(PrimaryDeviceConfiguration device) {
     assignedDevices ??= {};
-    assert(primaryDevices.contains(device),
-        "The device configuration is not part of this protocol.");
+    assert(
+      primaryDevices.contains(device),
+      "The device configuration is not part of this protocol.",
+    );
 
     assignedDevices!.remove(device.roleName);
   }

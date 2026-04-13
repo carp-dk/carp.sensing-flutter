@@ -1,0 +1,19 @@
+{
+  "__type": "dk.cachet.carp.deployment.domain.StudyDeploymentStatus",
+  "status": "Running",
+  "createdOn": "2025-11-21T15:16:21.959632",
+  "studyDeploymentId": "bb41b1f2-6e89-4042-890e-96b56f0cfa83",
+  "deviceStatusList": [
+    {
+      "__type": "dk.cachet.carp.deployment.domain.DeviceDeploymentStatus",
+      "device": {
+        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+        "roleName": "Primary Phone",
+        "isOptional": false,
+        "defaultSamplingConfiguration": {},
+        "isPrimaryDevice": true
+      }
+    }
+  ],
+  "participantStatusList": []
+}

@@ -1,6 +1,5 @@
 /*
- * Copyright 2018-2022 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -66,7 +65,7 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
             timeType: DataTimeType.POINT,
             permissions: [Permission.activityRecognition],
           ),
-        )
+        ),
       ]);
 
   @override
@@ -79,14 +78,15 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
       LocationSamplingConfiguration(),
       MobilitySamplingConfiguration(),
       GeofenceSamplingConfiguration(
-          name: '',
-          center: GeoPosition(1.1, 1.1),
-          dwell: const Duration(),
-          radius: 1.0),
+        name: '',
+        center: GeoPosition(1.1, 1.1),
+        dwell: const Duration(),
+        radius: 1.0,
+      ),
       LocationService(),
       WeatherService(apiKey: ''),
       AirQualityService(apiKey: ''),
-      GeoPosition(1.1, 1.1)
+      GeoPosition(1.1, 1.1),
     ]);
 
     // register all data types
@@ -96,7 +96,7 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
       Geofence(type: GeofenceType.DWELL, name: ''),
       Location(),
       Mobility(),
-      Weather()
+      Weather(),
     ]);
 
     // registering the transformers from CARP to OMH for geolocation and physical activity
@@ -120,39 +120,45 @@ class LocationSamplingPackage extends SmartphoneSamplingPackage {
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(DataTypeMetaData(
-          type: ContextSamplingPackage.LOCATION,
-          displayName: "Location",
-          timeType: DataTimeType.POINT,
-          // permissions: [Permission.locationAlways],
-        )),
-        DataTypeSamplingScheme(DataTypeMetaData(
-          type: ContextSamplingPackage.GEOFENCE,
-          displayName: "Geofence",
-          timeType: DataTimeType.POINT,
-          // permissions: [Permission.locationAlways],
-        )),
         DataTypeSamplingScheme(
-            DataTypeMetaData(
-              type: ContextSamplingPackage.MOBILITY,
-              displayName: "Mobility",
-              timeType: DataTimeType.POINT,
-              // permissions: [Permission.locationAlways],
-            ),
-            MobilitySamplingConfiguration(
-                placeRadius: 50,
-                stopRadius: 5,
-                usePriorContexts: true,
-                stopDuration: const Duration(seconds: 30))),
+          DataTypeMetaData(
+            type: ContextSamplingPackage.LOCATION,
+            displayName: "Location",
+            timeType: DataTimeType.POINT,
+            // permissions: [Permission.locationAlways],
+          ),
+        ),
+        DataTypeSamplingScheme(
+          DataTypeMetaData(
+            type: ContextSamplingPackage.GEOFENCE,
+            displayName: "Geofence",
+            timeType: DataTimeType.POINT,
+            // permissions: [Permission.locationAlways],
+          ),
+        ),
+        DataTypeSamplingScheme(
+          DataTypeMetaData(
+            type: ContextSamplingPackage.MOBILITY,
+            displayName: "Mobility",
+            timeType: DataTimeType.POINT,
+            // permissions: [Permission.locationAlways],
+          ),
+          MobilitySamplingConfiguration(
+            placeRadius: 50,
+            stopRadius: 5,
+            usePriorContexts: true,
+            stopDuration: const Duration(seconds: 30),
+          ),
+        ),
       ]);
 
   @override
   Probe? create(String type) => switch (type) {
-        ContextSamplingPackage.LOCATION => ConfigurableLocationProbe(),
-        ContextSamplingPackage.GEOFENCE => GeofenceProbe(),
-        ContextSamplingPackage.MOBILITY => MobilityProbe(),
-        _ => null,
-      };
+    ContextSamplingPackage.LOCATION => ConfigurableLocationProbe(),
+    ContextSamplingPackage.GEOFENCE => GeofenceProbe(),
+    ContextSamplingPackage.MOBILITY => MobilityProbe(),
+    _ => null,
+  };
 
   @override
   String get deviceType => LocationService.DEVICE_TYPE;
@@ -174,7 +180,7 @@ class AirQualitySamplingPackage extends SmartphoneSamplingPackage {
             displayName: "Air Quality",
             timeType: DataTimeType.POINT,
           ),
-        )
+        ),
       ]);
 
   @override
@@ -201,7 +207,7 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
             displayName: "Weather",
             timeType: DataTimeType.POINT,
           ),
-        )
+        ),
       ]);
 
   @override
@@ -213,4 +219,52 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
 
   @override
   DeviceManager get deviceManager => _deviceManager;
+}
+
+abstract class ContextServiceManager<
+  TDeviceConfiguration extends ServiceConfiguration<ServiceRegistration>
+>
+    extends ServiceManager<TDeviceConfiguration, ServiceRegistration> {
+  ContextServiceManager(super.type, {super.configuration});
+
+  @override
+  void onConfigure() {} // most services do not need further configuration
+
+  @override
+  ServiceRegistration createRegistration() => ServiceRegistration(
+    deviceDisplayName: displayName,
+    isConnected: isConnected,
+  );
+
+  bool _hasPermissions = false;
+
+  @override
+  Future<bool> onHasPermissions() async {
+    if (_hasPermissions) return true;
+    _hasPermissions = await LocationManager().hasPermission();
+    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
+    status = _hasPermissions
+        ? DeviceStatus.connected
+        : DeviceStatus.disconnected;
+    return _hasPermissions;
+  }
+
+  @override
+  Future<void> onRequestPermissions() async {
+    await LocationManager().requestPermission();
+    _hasPermissions = await LocationManager().hasPermission();
+    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
+    status = _hasPermissions
+        ? DeviceStatus.connected
+        : DeviceStatus.disconnected;
+  }
+
+  @override
+  bool get canConnect => true; // most online services can always connect - override if not...
+
+  @override
+  bool get shouldConnect => true; // online services should always connect
+
+  @override
+  Future<bool> onDisconnect() async => true;
 }

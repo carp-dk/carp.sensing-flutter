@@ -25,33 +25,16 @@ enum MovesenseDeviceType {
 }
 
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
-class MovesenseDevice extends BLEHeartRateDevice {
+class MovesenseDevice extends BLEDevice<MovesenseDeviceRegistration> {
   static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.MovesenseDevice';
+      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovesenseDevice';
 
   static const String DEFAULT_ROLE_NAME = 'Movesense ECG Device';
 
-  /// The Movesense device address.
-  ///
-  /// Address is Bluetooth MAC address for Android devices and UUID for iOS devices.
-  String? address;
-
-  /// The Movesense device serial number.
-  String? serial;
-
-  /// The Movesense device name.
-  String? name;
-
-  /// The type of Movesense device, if known.
-  MovesenseDeviceType deviceType;
-
-  MovesenseDevice(
-      {super.roleName = MovesenseDevice.DEFAULT_ROLE_NAME,
-      super.isOptional = true,
-      this.name,
-      this.address,
-      this.serial,
-      this.deviceType = MovesenseDeviceType.UNKNOWN});
+  MovesenseDevice({
+    super.roleName = MovesenseDevice.DEFAULT_ROLE_NAME,
+    super.isOptional = true,
+  });
 
   @override
   Function get fromJsonFunction => _$MovesenseDeviceFromJson;
@@ -61,7 +44,47 @@ class MovesenseDevice extends BLEHeartRateDevice {
   Map<String, dynamic> toJson() => _$MovesenseDeviceToJson(this);
 }
 
-class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
+/// A [DeviceRegistration] for a Movesense device.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class MovesenseDeviceRegistration extends BLEDeviceRegistration {
+  /// The Movesense device serial number.
+  String? serial;
+
+  /// The type of Movesense device, if known.
+  MovesenseDeviceType movesenseDeviceType;
+
+  /// The detailed device info for the connected Movesense device.
+  /// See https://www.movesense.com/docs/esw/api_reference/#info
+  Map<String, dynamic>? deviceInfo;
+
+  MovesenseDeviceRegistration({
+    String? deviceDisplayName,
+    super.registrationCreatedOn,
+    super.isConnected,
+    super.batteryChargingState,
+    String? hardwareName,
+    required super.bleAddress,
+    super.bleName,
+    this.movesenseDeviceType = MovesenseDeviceType.UNKNOWN,
+    this.deviceInfo,
+  }) : super(
+         deviceDisplayName: deviceDisplayName ?? bleName,
+         hardwareName: hardwareName ?? movesenseDeviceType.name,
+       );
+
+  @override
+  Function get fromJsonFunction => _$MovesenseDeviceRegistrationFromJson;
+  factory MovesenseDeviceRegistration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson(json) as MovesenseDeviceRegistration;
+  @override
+  Map<String, dynamic> toJson() => _$MovesenseDeviceRegistrationToJson(this);
+}
+
+/// A [BLEDeviceManager] for managing Movesense devices.
+///
+/// Typical BLE name is "Movesense 220330000122".
+class MovesenseDeviceManager
+    extends BLEDeviceManager<MovesenseDevice, MovesenseDeviceRegistration> {
   int? _batteryLevel;
   final StreamController<int> _batteryEventController =
       StreamController.broadcast();
@@ -69,66 +92,68 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
   MovesenseDeviceManager(super.type);
 
   @override
-  String get btleAddress => configuration?.address ?? '';
-
-  @override
-  set btleAddress(String btleAddress) {
-    configuration?.address = btleAddress;
-  }
-
-  @override
-  String get btleName => configuration?.name ?? 'Unknown';
-
-  @override
-  set btleName(String btleName) {
-    configuration?.name = btleName;
-
-    // the typical name is "Movesense 220330000122" where the last part is the serial number
-    if (btleName.split(' ').first.toUpperCase() == 'MOVESENSE') {
-      configuration?.serial = btleName.split(' ').last;
-    }
-  }
-
-  @override
-  String get id => configuration?.address ?? '???';
-
-  @override
   int? get batteryLevel => _batteryLevel;
-
-  @override
-  Future<bool> canConnect() async => configuration?.address != null;
-
-  @override
-  String? get displayName => btleName;
-
-  @override
-  Stream<int> get batteryEvents => _batteryEventController.stream;
 
   /// The device info for the connected Movesense device.
   /// Only available after device is connected.
   /// See https://www.movesense.com/docs/esw/api_reference/#info
   Map<String, dynamic>? deviceInfo;
 
-  /// The BLE address of the Movesense device.
-  // String? get address => configuration?.address;
+  /// The type of Movesense device based on the "hw" property in the device info.
+  MovesenseDeviceType get movesenseDeviceType {
+    final hw = (deviceInfo?["hw"] as String?)?.toUpperCase();
+
+    // Try to figure out the type of device based on the "hw" property
+    // H3 is "HR+", H4 is "HR2", A1 is "MD"
+    return switch (hw) {
+      'A1' => MovesenseDeviceType.MD,
+      'H3' => MovesenseDeviceType.HR_PLUS,
+      'H4' => MovesenseDeviceType.HR2,
+      _ => MovesenseDeviceType.UNKNOWN,
+    };
+  }
+
+  @override
+  MovesenseDeviceRegistration createRegistration() =>
+      MovesenseDeviceRegistration(
+        deviceDisplayName: bleName,
+        isConnected: isConnected,
+        bleAddress: bleAddress ?? 'Unknown Movesense Device',
+        bleName: bleName,
+        batteryChargingState: batteryLevel != null
+            ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
+            : BatteryChargingState.unknown,
+        movesenseDeviceType: movesenseDeviceType,
+        deviceInfo: deviceInfo,
+      );
+
+  @override
+  bool get canConnect => bleAddress != null;
+
+  @override
+  String? get displayName => bleName;
+
+  @override
+  Stream<int> get batteryEvents => _batteryEventController.stream;
 
   /// The serial number of the connected Movesense device.
   /// Returns null if not connected.
-  String? get serial => configuration?.serial;
+  String? serial;
 
   @override
   Future<DeviceStatus> onConnect() async {
     if (isConnected) return DeviceStatus.connected;
-    if (btleAddress.isEmpty) {
+    if (bleAddress?.isEmpty ?? true) {
       warning(
-          '$runtimeType - cannot connect to device, BLE address is missing.');
+        '$runtimeType - cannot connect to device, BLE address is missing.',
+      );
       return DeviceStatus.disconnected;
     }
 
     status = DeviceStatus.connecting;
 
     Mds.connect(
-      btleAddress,
+      bleAddress!,
       // onConnected
       (String serial) {
         _connected(serial);
@@ -153,7 +178,7 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
         } else {
           warning("$runtimeType - Error in connecting to device: $error");
           // we return status to be initialized so that the user has a chance to reconnect
-          status = DeviceStatus.initialized;
+          status = DeviceStatus.configured;
         }
       },
       // onBleConnected
@@ -166,10 +191,11 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
 
   /// Mark the Movesense device with [serial] as connected.
   void _connected(String serial) {
-    configuration?.serial = serial;
+    this.serial = serial;
 
     debug(
-        "$runtimeType - Successfully connected to Movesense device, serial: $serial");
+      "$runtimeType - Successfully connected to Movesense device, serial: $serial",
+    );
 
     _getDeviceInfo();
     _getBatteryStatus();
@@ -186,27 +212,11 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
 
     debug('$runtimeType - Getting device info.');
 
-    Mds.get(
-      Mds.createRequestUri(serial!, "/Info"),
-      "{}",
-      ((data, statusCode) {
-        debug('$runtimeType - Movesense Device Info:\n$data');
-        final dataContent = json.decode(data);
-        deviceInfo = dataContent["Content"] as Map<String, dynamic>;
-        String hw = (deviceInfo!["hw"] as String).toUpperCase();
-        debug('$runtimeType - HW: $hw');
-
-        // Try to figure out the type of device based on the "hw" property
-        // H3 is "HR+", H4 is "HR2", A1 is "MD"
-        configuration?.deviceType = switch (hw) {
-          'A1' => MovesenseDeviceType.MD,
-          'H3' => MovesenseDeviceType.HR_PLUS,
-          'H4' => MovesenseDeviceType.HR2,
-          _ => MovesenseDeviceType.UNKNOWN,
-        };
-      }),
-      (error, statusCode) => {},
-    );
+    Mds.get(Mds.createRequestUri(serial!, "/Info"), "{}", ((info, statusCode) {
+      debug('$runtimeType - Movesense Device Info:\n$info');
+      final dataContent = json.decode(info);
+      deviceInfo = dataContent["Content"] as Map<String, dynamic>;
+    }), (error, statusCode) => {});
   }
 
   /// Setting up a request (GET) for battery status at a regular interval.
@@ -238,14 +248,13 @@ class MovesenseDeviceManager extends BTLEDeviceManager<MovesenseDevice> {
 
   @override
   Future<bool> onDisconnect() async {
-    if (configuration?.address == null) {
+    if (bleAddress == null) {
       warning('$runtimeType - cannot disconnect from device, address is null.');
       return false;
     }
-    debug(
-        "$runtimeType - Disconnecting... address: '${configuration!.address}'");
+    debug("$runtimeType - Disconnecting from '$bleAddress'...");
 
-    Mds.disconnect(configuration!.address!);
+    Mds.disconnect(bleAddress!);
     return true;
   }
 }

@@ -1,9 +1,16 @@
 # CARP Movesense Sampling Package
 
-This library contains a sampling package for
-the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_movesense_package.svg)](https://pub.dev/packages/carp_movesense_package)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
+[![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
+[![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
+
+This library contains a sampling package for the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework
 to work with the [Movesense](https://www.movesense.com/) heart rate devices.
-This packages supports sampling of the following [`Measure`](https://pub.dev/documentation/carp_core/latest/carp_core_protocols/Measure-class.html) types (note that the package defines its own namespace of `dk.cachet.carp.movesense`):
+This packages supports sampling of the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types (note that the package defines its own namespace of `dk.cachet.carp.movesense`):
 
 * `dk.cachet.carp.movesense.state` : State changes (like moving, tapping, etc.)
 * `dk.cachet.carp.movesense.hr` : Heart rate
@@ -18,18 +25,17 @@ The following heart rate devices are supported:
 * [Movesense HR+](https://www.movesense.com/product/movesense-sensor-hr/)
 * [Movesense HR2](https://www.movesense.com/product/movesense-sensor-hr2/)
 
-See the `carp_mobile_sensing` [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki) for further documentation, particularly on available [measure types](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types).
-See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
+See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
+See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
-For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter).
+For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/carp-dk/carp.sensing-flutter).
 
-If you are interested in writing your own sampling packages for CARP, see the description on
-how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing#Adding-New-Sampling-Capabilities) CARP on the wiki.
+If you're interested in writing your own sampling packages for CARP, see the description on
+how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
-To use this package, add the following to you `pubspec.yaml` file. Note that
-this package only works together with `carp_mobile_sensing`.
+To use this package, add the following to you `pubspec.yaml` file. Note that this package only works together with `carp_mobile_sensing`.
 
 `````dart
 dependencies:
@@ -41,7 +47,7 @@ dependencies:
 
 See the official Movesense description of [using the plugin](https://pub.dev/packages/mdsflutter#additional-steps-for-using-the-plugin).
 
-### Android Integration
+### Android
 
 Download `mdslib-x.x.x-release.aar` from the [Movesense-mobile-lib](https://bitbucket.org/movesense/movesense-mobile-lib/src/master/) repository and put it somewhere under `android` folder of your app. Preferably create a new folder named `android/libs` and put it there.
 
@@ -58,22 +64,30 @@ allprojects {
 }
 ```
 
-> **NOTE:** The first time the app starts, make sure to allow it to access the phone location.
-This is necessary to use BLE on Android.
+> [!IMPORTANT]
+> The first time the app starts, make sure to allow it to access the phone location. This is necessary to use BLE on Android.
 
-### iOS Integration
+### iOS
 
-Install the Movesense iOS library using CocoaPods with adding this line to your app's Podfile:
+The Movesense iOS library is installed using CocoaPods by adding this setup to your app's Podfile. You need to change the `use_frameworks!` flags, add `use_modular_headers!`, and link to the Movesense bitbucket library:
 
-```pod
-pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib/'
+```ruby
+target 'Runner' do
+  # undocumented flag in cocoapods to enable static linking
+  # this is needed so that we can use Movesense and dynamic frameworks together
+  use_frameworks! :linkage => :static
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib/'
+  
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
 ```
 
-* Remove `use_frameworks!` from your Podfile so that `libmds.a` can be used correctly.
-* In your project target settings enable Background Modes, add Uses Bluetooth LE accessories
-* In your project target property list add the key [NSBluetoothAlwaysUsageDescription](https://developer.apple.com/documentation/bundleresources/information_property_list/nsbluetoothalwaysusagedescription)
-
-Add this permission in the `Info.plist` file located in `ios/Runner`:
+Add the permission to access bluetooth in the background by adding this to the `Info.plist` file located in `ios/Runner`:
 
 ```xml
 <key>NSBluetoothAlwaysUsageDescription</key>
@@ -86,8 +100,7 @@ Add this permission in the `Info.plist` file located in `ios/Runner`:
 
 ## Using it
 
-To use this package, import it into your app together with the
-[`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) package:
+To use this package, import it into your app together with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) package:
 
 `````dart
 import 'package:carp_core/carp_core.dart';
@@ -98,47 +111,45 @@ import 'package:carp_movesense_package/carp_movesense_package.dart';
 Collection of Movesense measures can be added to a study protocol like this.
 
 ```dart
-  // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Movesense Sensing Example',
-  );
+// Create a study protocol
+StudyProtocol protocol = StudyProtocol(
+  ownerId: 'owner@dtu.dk',
+  name: 'Movesense Sensing Example',
+);
 
-  // define which devices are used for data collection - both phone and eSense
-  var phone = Smartphone();
-  var movesense = MovesenseDevice(
-    serial: '220330000122',
-    address: '0C:8C:DC:3F:B2:CD',
-    name: 'Movesense Medical',
-    deviceType: MovesenseDeviceType.MD,
-  );
+// Define which devices are used for data collection - both phone and eSense
+// and add them to the protocol.
+var phone = Smartphone();
+var movesense = MovesenseDevice();
 
-  protocol
-    ..addPrimaryDevice(phone)
-    ..addConnectedDevice(movesense, phone);
+protocol
+  ..addPrimaryDevice(phone)
+  ..addConnectedDevice(movesense, phone);
 
-  // Add a background task that immediately starts collecting HR and ECG data
-  // from the Movesense device.
-  protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
-        Measure(type: MovesenseSamplingPackage.HR),
-        Measure(type: MovesenseSamplingPackage.ECG),
-      ]),
-      movesense);
+// Add a background task that immediately starts collecting HR and ECG data
+// from the Movesense device.
+protocol.addTaskControl(
+  ImmediateTrigger(),
+  BackgroundTask(
+    measures: [
+      Measure(type: MovesenseSamplingPackage.HR),
+      Measure(type: MovesenseSamplingPackage.ECG),
+    ],
+  ),
+  movesense,
+);
 ````
 
-Before executing a study with an Movesense measure, register this package in the
-[`SamplingPackageRegistry`](https://pub.dartlang.org/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry.html).
+Before executing a study with an Movesense measure, register this package in the [`SamplingPackageRegistry`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
 
 `````dart
 SamplingPackageRegistry().register(MovesenseSamplingPackage());
 `````
 
-**NOTE** that the Movesense device `address` must be specified before the phone can connect to the device via BLE. This entails that a Movesense device and its probes should not be connected and resumed, before the device address is know.
+Use the [`MovesenseDeviceManager`](https://pub.dev/documentation/carp_movesense_package/latest/carp_movesense_package/MovesenseDeviceManager-class.html) to connect to the device using the [`connect`](https://pub.dev/documentation/carp_movesense_package/latest/carp_movesense_package/PolarDeviceManager/connect.html) method. The connect method uses the [`bleAddress`](https://pub.dev/documentation/carp_movesense_package/latest/carp_movesense_package/PolarDeviceManager/bleAddress.html) to identify the Polar device, which is typically on the form "Movesense 220330000122". You should set the BLE address before trying to connect.
 
-Also note that the package does not handle permissions for Bluetooth scanning / connectivity.
-This should be handled on an app level.
+> [!IMPORTANT]
+> The package does not handle permissions for Bluetooth scanning / connectivity. This should be handled on an app level.
 
 ## Known Limitations
 

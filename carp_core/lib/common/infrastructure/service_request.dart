@@ -5,9 +5,10 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// An abstract base class for all RPC requests to CARP.
 abstract class ServiceRequest extends Serializable {
-  String apiVersion = "1.0"; // base version is 1.0
+  /// The API version of this request as defined by CARP Core Kotlin.
+  String apiVersion = "1.0";
 }

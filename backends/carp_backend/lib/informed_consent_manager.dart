@@ -7,39 +7,39 @@
 
 part of 'carp_backend.dart';
 
-/// Handles retrieving and storing informed consent definitions as [RPOrderedTask]
+/// Handles retrieving and storing consent document definitions as [RPOrderedTask]
 /// json definitions.
 abstract class InformedConsentManager {
   void initialize() {}
 
-  /// The latest downloaded informed consent document.
+  /// The latest downloaded consent document.
   ///
-  /// Returns `null` if no consent has been downloaded yet.
-  /// Use the [getInformedConsent] method to get the informed consent document
-  /// from CARP.
+  /// Returns null if no consent has been downloaded yet.
+  /// Use the [getConsentDocument] method to get the consent document
+  /// from CAWS.
   RPOrderedTask? get informedConsent;
 
-  /// Get the informed consent to be shown for this study.
+  /// Get the consent document to be shown for this study.
   ///
   /// This method return a [RPOrderedTask] which is an ordered list of [RPStep]
-  /// which are shown to the user as the informed consent flow.
+  /// which are shown to the user as the consent document flow.
   /// See [research_package](https://pub.dev/packages/research_package) for a
-  /// description on how to create an informed consent in the research package
+  /// description on how to create an consent document in the research package
   /// domain model.
   ///
-  /// If there is no informed consent, `null` is returned.
-  Future<RPOrderedTask?> getInformedConsent({bool refresh = false});
+  /// Returns null if there is no consent document available for this study.
+  Future<RPOrderedTask?> getConsentDocument({bool refresh = false});
 
-  /// Set the informed consent to be used for this study.
+  /// Set the consent document to be used for this study.
   ///
-  /// Note that this method sets the **overall** informed consent to be shown to
-  /// all participants. Uploading of a specific **signed** informed consent for
-  /// a participant is done using the [setInformedConsent] method in a
-  /// [ParticipationReference].
-  Future<bool> setInformedConsent(RPOrderedTask informedConsent);
+  /// Note that this method sets the **overall** consent document to be shown to
+  /// all participants. Uploading of a specific **signed** consent document for
+  /// a participant is done using the [ParticipationReference.setInformedConsent]
+  /// method using a [ParticipationReference].
+  Future<bool> setConsentDocument(RPOrderedTask informedConsent);
 
-  /// Delete the informed consent for this study.
+  /// Delete the consent document for this study.
   ///
-  /// Returns `true` if delete is successful, `false` otherwise.
-  Future<bool> deleteInformedConsent();
+  /// Returns true if delete is successful, false otherwise.
+  Future<bool> deleteConsentDocument();
 }

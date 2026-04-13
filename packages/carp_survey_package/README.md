@@ -1,20 +1,23 @@
 # CARP Survey Sampling Package
 
-[![pub package](https://img.shields.io/pub/v/carp_connectivity_package.svg)](https://pub.dartlang.org/packages/carp_connectivity_package)
-[![pub points](https://img.shields.io/pub/points/carp_connectivity_package?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_connectivity_package/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_survey_package.svg)](https://pub.dev/packages/carp_survey_package)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
 This library contains a sampling package for collection of user-generated data to work with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework. Data is collected via [surveys](https://carp.cachet.dk/creating-a-survey/) and [cognitive tests](https://carp.cachet.dk/creating-cognitive-tests/).
 For this, this library uses the [CARP Research Package](https://carp.cachet.dk/research-package/) and the [CARP Cognition Package](https://carp.cachet.dk/cognition-package/).
 This package supports the creation of a `RPAppTask` which can be added to a CAMS study protocol.
 
-Read more on the [Research Package API](https://carp.cachet.dk/research-package-api/) and how to [create a survey](https://carp.cachet.dk/creating-a-survey/) and how to [create a cognitive test](https://carp.cachet.dk/creating-cognitive-tests/) on the CARP website. For a demo of how to use this package and the `RPAppTask` in an app, see the [PulmonaryMonitor](https://github.com/cph-cachet/pulmonary_monitor_app) app. To read more about using the `AppTask`, see the [CAMS wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki/4.-The-AppTask-Model).
+Read more on the [Research Package API](https://carp.cachet.dk/research-package-api/) and how to [create a survey](https://carp.cachet.dk/creating-a-survey/) and how to [create a cognitive test](https://carp.cachet.dk/creating-cognitive-tests/) on the CARP website. For a demo of how to use this package and the `RPAppTask` in an app, see the [PulmonaryMonitor](https://github.com/cph-cachet/pulmonary_monitor_app) app.
+Check the [CAMS documentation](https://docs.carp.dk/carp-mobile-sensing/) to read more about the [AppTask Model](https://docs.carp.dk/carp-mobile-sensing/app-task-model).
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that
+To use this package, add the following to you `pubspec.yaml` file. Note that
 this package only works together with `carp_mobile_sensing`.
 
 `````dart
@@ -27,7 +30,7 @@ dependencies:
 ## Using it
 
 To use this package, import it into your app together with the
-[`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) package:
+[`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) package:
 
 `````dart
 import 'package:carp_core/carp_core.dart';
@@ -35,8 +38,7 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_survey_package/survey.dart';
 `````
 
-Before creating a study and running it, register this package in the
-[SamplingPackageRegistry](https://pub.dartlang.org/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry.html).
+Before creating a study and running it, register this package in the [`SamplingPackageRegistry`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
 
 `````dart
 SamplingPackageRegistry().register(SurveySamplingPackage());
@@ -64,16 +66,19 @@ protocol.addTaskControl(
     phone);
 ````
 
-A set of cognitive test can be added like this:
+The `rpTask` defines the WHO-5 survey. However, in this case, the survey package comes with a build-in English version of this survey, which can be accessed by the `who5Task` property.
+
+A simple assessment of tremor and cognitive functioning for Parkinson's Disease can can be added like this:
 
 ```dart
-// Add a Parkinson's assessment consisting of;
-//  * an instruction step
-//  * a timer step
-//  * a Flanker and Tapping activity (from cognition package).
-//
-// Accelerometer and gyroscope data is collected while the user is performing
-// the task in oder to assess tremor.
+  // Add a Parkinson's assessment consisting of;
+  //  * an instruction step
+  //  * a timer step that collects accelerometer and gyroscope data while the user is holding the phone
+  //  * a Flanker test (from cognition package).
+  //  * a Tapping Activity test (from cognition package).
+  //
+  // Accelerometer and gyroscope data is collected while the user is performing
+  // the task in oder to assess tremor.
 protocol.addTaskControl(
   PeriodicTrigger(period: const Duration(hours: 2)),
   RPAppTask(

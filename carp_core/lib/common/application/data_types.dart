@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// Contains meta data about [type].
 class DataTypeMetaData {
@@ -44,70 +44,63 @@ class CarpDataTypes {
 
   /// Geographic location data, representing latitude and longitude within the
   /// World Geodetic System 1984.
-  static const String GEOLOCATION_TYPE_NAME = "$CARP_NAMESPACE.geolocation";
+  static const String GEOLOCATION = "$CARP_NAMESPACE.geolocation";
 
   /// Step count data, representing the number of steps a participant has taken
   /// in a specified time interval.
-  static const String STEP_COUNT_TYPE_NAME = "$CARP_NAMESPACE.stepcount";
+  static const String STEP_COUNT = "$CARP_NAMESPACE.stepcount";
 
   /// Electrocardiography (ECG) data, representing electrical activity of the
   /// heart for a single lead.
-  static const String ECG_TYPE_NAME = "$CARP_NAMESPACE.ecg";
+  static const String ECG = "$CARP_NAMESPACE.ecg";
 
   /// Photoplethysmography (PPG) data, representing blood volume changes measured
   /// at the skin's surface.
-  static const String PPG_TYPE_NAME = "$CARP_NAMESPACE.ppg";
+  static const String PPG = "$CARP_NAMESPACE.ppg";
 
   /// Represents the number of heart contractions (beats) per minute.
-  static const String HEART_RATE_TYPE_NAME = "$CARP_NAMESPACE.heartrate";
+  static const String HEART_RATE = "$CARP_NAMESPACE.heartrate";
 
   /// The time interval between two consecutive heartbeats.
-  static const String INTERBEAT_INTERVAL_TYPE_NAME =
-      "$CARP_NAMESPACE.interbeatinterval";
+  static const String INTERBEAT_INTERVAL = "$CARP_NAMESPACE.interbeatinterval";
 
   /// Determines whether a sensor requiring contact with skin is making proper
   /// contact at a specific point in time.
-  static const String SENSOR_SKIN_CONTACT_TYPE_NAME =
-      "$CARP_NAMESPACE.sensorskincontact";
+  static const String SENSOR_SKIN_CONTACT = "$CARP_NAMESPACE.sensorskincontact";
 
   /// Single-channel electrodermal activity, represented as skin conductance.
-  static const String EDA_TYPE_NAME = "$CARP_NAMESPACE.eda";
+  static const String EDA = "$CARP_NAMESPACE.eda";
 
   /// Rate of change in velocity, including gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
-  static const String ACCELERATION_TYPE_NAME = "$CARP_NAMESPACE.acceleration";
+  static const String ACCELERATION = "$CARP_NAMESPACE.acceleration";
 
   /// Rate of change in velocity, excluding gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
-  static const String NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME =
+  static const String NON_GRAVITATIONAL_ACCELERATION =
       "$CARP_NAMESPACE.nongravitationalacceleration";
 
   /// Rotation of the device in x,y,z (typically measured by a gyroscope).
-  static const String ROTATION_TYPE_NAME = "$CARP_NAMESPACE.rotation";
+  static const String ROTATION = "$CARP_NAMESPACE.rotation";
 
   /// Magnetic field around the device in x,y,z (typically measured by a magnetometer).
-  static const String MAGNETIC_FIELD_TYPE_NAME =
-      "$CARP_NAMESPACE.magneticfield";
+  static const String MAGNETIC_FIELD = "$CARP_NAMESPACE.magneticfield";
 
   /// Rate of rotation around perpendicular x, y, and z axes.
-  static const String ANGULAR_VELOCITY_TYPE_NAME =
-      "$CARP_NAMESPACE.angularvelocity";
+  static const String ANGULAR_VELOCITY = "$CARP_NAMESPACE.angularvelocity";
 
   /// The received signal strength of a wireless device.
-  static const String SIGNAL_STRENGTH_TYPE_NAME =
-      "$CARP_NAMESPACE.signalstrength";
+  static const String SIGNAL_STRENGTH = "$CARP_NAMESPACE.signalstrength";
 
   /// A task which was started or stopped by a trigger, referring to identifiers
   /// in the study protocol.
-  static const String TRIGGERED_TASK_TYPE_NAME =
-      "$CARP_NAMESPACE.triggeredtask";
+  static const String TRIGGERED_TASK = "$CARP_NAMESPACE.triggeredtask";
 
   /// An interactive (i.e., involving the user) task which was completed.
-  static const String COMPLETED_TASK_TYPE_NAME =
-      "$CARP_NAMESPACE.completedtask";
+  static const String COMPLETED_TASK = "$CARP_NAMESPACE.completedtask";
 
   /// Any error that may have occurred during data collection.
-  static const String ERROR_TYPE_NAME = "$CARP_NAMESPACE.error";
+  static const String ERROR = "$CARP_NAMESPACE.error";
 
   /// A map of all CARP data types.
   Map<String, DataTypeMetaData> types = {};
@@ -124,86 +117,44 @@ class CarpDataTypes {
 
   CarpDataTypes._() {
     add([
+      DataTypeMetaData(type: GEOLOCATION, displayName: "Location"),
       DataTypeMetaData(
-        type: GEOLOCATION_TYPE_NAME,
-        displayName: "Location",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: STEP_COUNT_TYPE_NAME,
+        type: STEP_COUNT,
         displayName: "Step Count",
         timeType: DataTimeType.TIME_SPAN,
       ),
+      DataTypeMetaData(type: ECG, displayName: "Electrocardiography (ECG)"),
+      DataTypeMetaData(type: PPG, displayName: "Photoplethysmography (PPG)"),
+      DataTypeMetaData(type: HEART_RATE, displayName: "Heart Rate"),
       DataTypeMetaData(
-        type: ECG_TYPE_NAME,
-        displayName: "Electrocardiography (ECG)",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: PPG_TYPE_NAME,
-        displayName: "Photoplethysmography (PPG)",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: HEART_RATE_TYPE_NAME,
-        displayName: "Heart Rate",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: INTERBEAT_INTERVAL_TYPE_NAME,
+        type: INTERBEAT_INTERVAL,
         displayName: "Interbeat Interval",
         timeType: DataTimeType.TIME_SPAN,
       ),
       DataTypeMetaData(
-        type: SENSOR_SKIN_CONTACT_TYPE_NAME,
+        type: SENSOR_SKIN_CONTACT,
         displayName: "Sensor Skin Contact",
-        timeType: DataTimeType.POINT,
       ),
       DataTypeMetaData(
-        type: NON_GRAVITATIONAL_ACCELERATION_TYPE_NAME,
+        type: NON_GRAVITATIONAL_ACCELERATION,
         displayName: "Acceleration excl. Gravity",
-        timeType: DataTimeType.POINT,
       ),
+      DataTypeMetaData(type: EDA, displayName: "Electrodermal Activity"),
       DataTypeMetaData(
-        type: EDA_TYPE_NAME,
-        displayName: "Electrodermal Activity",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: ACCELERATION_TYPE_NAME,
+        type: ACCELERATION,
         displayName: "Acceleration incl. Gravity",
-        timeType: DataTimeType.POINT,
       ),
+      DataTypeMetaData(type: ROTATION, displayName: "Rotation"),
+      DataTypeMetaData(type: MAGNETIC_FIELD, displayName: "Magnetic Field"),
+      DataTypeMetaData(type: ANGULAR_VELOCITY, displayName: "Angular Velocity"),
+      DataTypeMetaData(type: SIGNAL_STRENGTH, displayName: "Signal Strength"),
+      DataTypeMetaData(type: TRIGGERED_TASK, displayName: "Triggered Task"),
       DataTypeMetaData(
-        type: ROTATION_TYPE_NAME,
-        displayName: "Rotation",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: MAGNETIC_FIELD_TYPE_NAME,
-        displayName: "Magnetic Field",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: ANGULAR_VELOCITY_TYPE_NAME,
-        displayName: "Angular Velocity",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: SIGNAL_STRENGTH_TYPE_NAME,
-        displayName: "Signal Strength",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: TRIGGERED_TASK_TYPE_NAME,
-        displayName: "Triggered Task",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: COMPLETED_TASK_TYPE_NAME,
+        type: COMPLETED_TASK,
         displayName: "Completed Task",
         timeType: DataTimeType.TIME_SPAN,
       ),
+      DataTypeMetaData(type: ERROR, displayName: "Error"),
     ]);
   }
 }

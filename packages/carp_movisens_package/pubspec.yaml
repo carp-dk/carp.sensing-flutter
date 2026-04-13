@@ -1,10 +1,19 @@
 name: carp_movisens_package
+version: 2.0.0
 description: CARP Movisens sampling package. Samples movement, activity, HRV, MET-level, and ECG for the Movisens Move4 and EcgMove4 devices
-version: 1.6.2
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
+repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_movisens_package
+issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
+
+documentation: https://docs.carp.dk/carp-mobile-sensing/
+topics:
+  - mobile-sensing
+  - mobile-health
+  - sensors
+  - digital-phenotyping
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 platforms:
@@ -16,19 +25,19 @@ dependencies:
     sdk: flutter
 
   carp_serializable: ^2.0.0
-  carp_core: ^1.8.0
-  carp_mobile_sensing: ^1.10.0
+  carp_core: ^2.0.0
+  carp_mobile_sensing: ^2.0.0
  
   json_annotation: ^4.8.0
   async: ^2.7.0
   movisens_flutter: ^3.1.2
   convert: ^3.0.1
   openmhealth_schemas: ^0.3.0
-  flutter_blue_plus: ^1.32.0
+  flutter_blue_plus: '>=1.29.0 <3.0.0'
 
 # Overriding carp libraries to use the local copy
 # Remove this before release of package
-# dependency_overrides:
+dependency_overrides:
   # carp_serializable:
   #   path: ../../carp_serializable/
   # carp_core:

@@ -1,10 +1,22 @@
 name: carp_mobile_sensing
+version: 2.1.1
 description: Mobile Sensing Framework for Flutter. A software framework for collecting sensor data from the phone and attached wearable devices via probes. Can be extended.
-version: 1.13.1
+
+# Note that the following URLs to GitHub should use the old 'cph-cachet' name. 
+# It seems like the pub.dev analyzer can't figure out that the name has changed.
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
+repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/carp_mobile_sensing
+issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
+
+documentation: https://docs.carp.dk/carp-mobile-sensing/
+topics:
+  - mobile-sensing
+  - mobile-health
+  - sensors
+  - digital-phenotyping
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.10.0 <4.0.0"
   flutter: ">=3.19.0"
 
 # This package only supports iOS and Android
@@ -17,7 +29,7 @@ dependencies:
     sdk: flutter
 
   carp_serializable: ^2.0.0 # polymorphic json serialization
-  carp_core: ^1.9.0         # the core CARP domain model
+  carp_core: ^2.1.0         # the core CARP domain model
 
   json_annotation: ^4.8.0
   system_info2: ^4.0.0
@@ -27,27 +39,28 @@ dependencies:
   path_provider: ^2.0.0
   sqflite: ^2.2.8                         # For local storage in SQLite DB
   archive: ^4.0.0
-  permission_handler: '>=11.0.0 <13.0.0'  # For requesting permissions on Android and iOS
+  permission_handler: '>=11.1.0 <13.0.0'  # For requesting permissions on Android and iOS
   shared_preferences: ^2.2.0
-  package_info_plus: '>=6.0.0 <9.0.0'
-  flutter_local_notifications: ^19.0.0    # For sending notification on AppTask
+  package_info_plus: ^9.0.0
+  flutter_local_notifications: ^21.0.0    # For sending notification on AppTask
   cron: ^0.6.0                            # For scheduling / triggering cron jobs
-  timezone: ^0.10.0                       # For collecting time zone information
-  flutter_timezone: ^4.0.0                # For getting local time zone for scheduling notifications
+  timezone: '>=0.10.0 <0.12.0'            # For collecting time zone information
+  flutter_timezone: ^5.0.0                # For getting local time zone for scheduling notifications
+  flutter_background: ^1.3.0              # For running background services on Android
 
   # probe-dependent plugins
   device_info_plus: ^12.1.0
-  sensors_plus: ^6.0.0
-  battery_plus: ^6.0.0
+  sensors_plus: ^7.0.0
+  battery_plus: ^7.0.0
 
   # CARP plugins
   pedometer: ^4.0.0       # Step count from local OS
-  light: ^4.0.0           # Light sensor
-  screen_state: ^4.0.0    # Screen LOCK/ON/OFF
+  light: ^5.0.0           # Light sensor
+  screen_state: ^5.0.0    # Screen LOCK/ON/OFF
 
-# Overriding carp core libraries to use the local copy
-# Remove this before release of package
-# dependency_overrides:
+# Overriding carp core libraries to use the local copy during development.
+# Remove overrides before publishing.
+dependency_overrides:
 #   carp_serializable:
 #     path: ../carp_serializable/
   # carp_core:
@@ -58,14 +71,3 @@ dev_dependencies:
   json_serializable: any
   test: any
   flutter_lints: any
-
-
-# Useful pubspec commands:
-#   flutter pub upgrade
-#   flutter pub outdated
-#   flutter pub outdated --no-dev-dependencies --up-to-date --no-dependency-overrides
-#   flutter pub cache repair
-#   ./gradlew clean
-#
-# Auto generate json code (.g files) with:
-#   dart run build_runner build --delete-conflicting-outputs

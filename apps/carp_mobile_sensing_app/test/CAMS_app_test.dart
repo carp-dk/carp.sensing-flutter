@@ -27,7 +27,13 @@ void main() {
 
   StudyProtocol? protocol;
 
-  setUp(() async {
+  Future<void> writeToFile(String json, String fileName) async {
+    File file = File('test/json/$fileName');
+    await file.writeAsString(json);
+    print("Done writing '$fileName'");
+  }
+
+  setUpAll(() async {
     // Initialization of serialization
     CarpMobileSensing.ensureInitialized();
 
@@ -46,15 +52,10 @@ void main() {
 
     // configure the BLOC w. deployment and data format
     bloc.deploymentMode = DeploymentMode.dev;
-    bloc.dataFormat = NameSpace.CARP;
 
     // generate the protocol to be used in testing below
     // setting the right accountId, if to be uploaded to CAWS
-    protocol ??= LocalStudyProtocolManager()
-        // .getSingleUserStudyProtocol('CAMS Health Protocol');
-        .getFamilyStudyProtocol(
-            'CAMS Demo App Protocol - Family study with Participant Data');
-
+    protocol ??= await LocalStudyProtocolManager().getStudyProtocol('');
     protocol?.ownerId = accountId;
   });
 
@@ -64,6 +65,9 @@ void main() {
     test('CAMSStudyProtocol -> JSON', () async {
       print(toJsonString(protocol));
       expect(protocol?.ownerId, accountId);
+
+      // used in the test below
+      await writeToFile(toJsonString(protocol), 'protocol.json');
     });
 
     test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
@@ -72,34 +76,24 @@ void main() {
 
       SmartphoneStudyProtocol protocolFromJson =
           SmartphoneStudyProtocol.fromJson(
-              json.decode(studyJson) as Map<String, dynamic>);
+            json.decode(studyJson) as Map<String, dynamic>,
+          );
       // print(toJsonString(protocolFromJson));
       expect(toJsonString(protocolFromJson), equals(studyJson));
     });
 
     test('JSON File -> StudyProtocol', () async {
-      final plainJson =
-          File('test/json/study_protocol.json').readAsStringSync();
+      final plainJson = File('test/json/protocol.json').readAsStringSync();
 
       final p = SmartphoneStudyProtocol.fromJson(
-          json.decode(plainJson) as Map<String, dynamic>);
+        json.decode(plainJson) as Map<String, dynamic>,
+      );
 
       // need to set the id and date, since it is auto-generated each time.
       p.id = protocol!.id;
       p.createdOn = protocol!.createdOn;
 
       expect(toJsonString(protocol), toJsonString(p));
-    });
-  });
-
-  group("Resource Generator Scripts", () {
-    setUp(() async {});
-
-    /// Generates and prints the local study protocol as json
-    test('protocol -> JSON', () async {
-      StudyProtocol? protocol =
-          await LocalStudyProtocolManager().getStudyProtocol('1234');
-      print(toJsonString(protocol));
     });
   });
 }

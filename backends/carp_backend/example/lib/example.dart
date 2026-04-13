@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
@@ -13,15 +15,9 @@ void main() async {
 
   // Configure an app that points to the CARP web services (CAWS)
   // The URI of the CAWS server to connect to.
-  final Uri uri = Uri(
-    scheme: 'https',
-    host: 'dev.carp.dk',
-  );
+  final Uri uri = Uri(scheme: 'https', host: 'dev.carp.dk');
 
-  late CarpApp app = CarpApp(
-    name: "CAWS @ DTU",
-    uri: uri,
-  );
+  late CarpApp app = CarpApp(name: "CAWS @ DTU", uri: uri);
 
   // The authentication configuration
   late CarpAuthProperties authProperties = CarpAuthProperties(
@@ -29,11 +25,7 @@ void main() async {
     clientId: 'studies-app',
     redirectURI: Uri.parse('carp-studies-auth://auth'),
     // For authentication at CAWS the path is '/auth/realms/Carp'
-    discoveryURL: uri.replace(pathSegments: [
-      'auth',
-      'realms',
-      'Carp',
-    ]),
+    discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
   );
 
   // Configure the CAWS services
@@ -77,20 +69,14 @@ void main() async {
   final study = SmartphoneStudy.fromInvitation(invitation);
   await client.addStudy(study);
 
-  // Get the study controller and try to deploy the study.
-  //
-  // If "useCached" is true and the study has already been deployed on this
-  // phone, the local cache will be used (default behavior).
-  // If not deployed before (i.e., cached) the study deployment will be
-  // fetched from the deployment service.
-  final controller = client.getStudyRuntime(study.studyDeploymentId);
-  await controller?.tryDeployment(useCached: false);
+  // Deploy the study.
+  await SmartPhoneClientManager().tryDeployment(
+    study.studyDeploymentId,
+    study.deviceRoleName,
+  );
 
-  // Configure the controller
-  await controller?.configure();
-
-  // Start sampling
-  controller?.start();
+  // Resume sampling.
+  SmartPhoneClientManager().resume();
 
   // -----------------------------------------------
   // DIFFERENT WAYS TO UPLOAD DATA TO CAWS
@@ -122,8 +108,9 @@ void main() async {
   );
 
   // Using the "old" DataPoint endpoint for uploading batches of data points.
-  var dataPointEndPoint =
-      CarpDataEndPoint(uploadMethod: CarpUploadMethod.datapoint);
+  var dataPointEndPoint = CarpDataEndPoint(
+    uploadMethod: CarpUploadMethod.datapoint,
+  );
 
   // var dataPointEndPoint = CarpDataEndPoint(
   //   uploadMethod: CarpUploadMethod.datapoint,
@@ -158,7 +145,7 @@ void main() async {
   // );
 
   // Create a study protocol with a specific data endpoint.
-  SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
+  var protocol = SmartphoneStudyProtocol(
     ownerId: 'AB',
     name: 'Track patient movement',
     dataEndPoint: streamingEndPoint,
@@ -181,21 +168,23 @@ void main() async {
   icManager.initialize();
 
   // Create a simple informed consent...
-  final consent = RPOrderedTask(identifier: '12', steps: [
-    RPInstructionStep(
-      identifier: "1",
-      title: "Welcome!",
-    )..text = "Welcome to this study! ",
-    RPCompletionStep(
+  final consent = RPOrderedTask(
+    identifier: '12',
+    steps: [
+      RPInstructionStep(identifier: "1", title: "Welcome!")
+        ..text = "Welcome to this study! ",
+      RPCompletionStep(
         identifier: "2",
         title: "Thank You!",
-        text: "We saved your consent document."),
-  ]);
+        text: "We saved your consent document.",
+      ),
+    ],
+  );
   // .. and upload it to CAWS.
-  await icManager.setInformedConsent(consent);
+  await icManager.setConsentDocument(consent);
 
   // Get the informed consent back as a RPOrderedTask, if available.
-  RPOrderedTask? myConsent = await icManager.getInformedConsent();
+  RPOrderedTask? myConsent = await icManager.getConsentDocument();
 
   // --------------------------------------------------
   // HANDLING MESSAGES CARP
@@ -206,12 +195,14 @@ void main() async {
   messageManager.initialize();
 
   // Create a message and upload it to CAWS.
-  messageManager.setMessage(Message(
-    id: '123',
-    title: 'Great News!',
-    message: 'There are great news from CARP',
-    type: MessageType.news,
-  ));
+  messageManager.setMessage(
+    Message(
+      id: '123',
+      title: 'Great News!',
+      message: 'There are great news from CARP',
+      type: MessageType.news,
+    ),
+  );
 
   // Get all messages from CAWS.
   messageManager.getMessages().then((messages) {

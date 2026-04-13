@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_deployment.dart';
+part of '../../deployment.dart';
 
 /// Application service which allows inviting participants, retrieving participation
 /// invitations for study deployments, and managing data related to participants
@@ -14,9 +14,8 @@ abstract class ParticipationService {
 
   /// Get all invitations of active study deployments the account
   /// with the given [accountId] has been invited to.
-  Future<List<ActiveParticipationInvitation>> getActiveParticipationInvitations(
-    String accountId,
-  );
+  Future<List<ActiveParticipationInvitation>>
+  getActiveParticipationInvitations({String? accountId});
 
   /// Get currently set data for all expected participant data in the study
   /// deployment with [studyDeploymentId].

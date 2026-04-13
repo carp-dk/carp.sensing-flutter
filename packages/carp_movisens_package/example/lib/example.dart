@@ -1,7 +1,8 @@
-import 'package:carp_core/carp_core.dart';
+// ignore_for_file: depend_on_referenced_packages
+
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_movisens_package/carp_movisens_package.dart';
-// import 'package:movisens_flutter/movisens_flutter.dart';
 
 /// This is a very simple example of how this sampling package is used with
 /// CARP Mobile Sensing (CAMS).
@@ -12,15 +13,16 @@ void main() async {
   SamplingPackageRegistry().register(MovisensSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
+  var protocol = StudyProtocol(
     ownerId: 'owner@dtu.dk',
     name: 'Movisens Example',
   );
 
-  // define which devices are used for data collection - both phone and Movisens
-  Smartphone phone = Smartphone();
-  MovisensDevice movisens = MovisensDevice(
-    deviceName: 'MOVISENS Sensor 02655',
+  // Define which devices are used for data collection - both phone and Movisens
+  // and add them to the protocol.
+  // Note that the Movisens device is added as a connected device to the phone.
+  var phone = Smartphone();
+  var movisens = MovisensDevice(
     sensorLocation: SensorLocation.Chest,
     sex: Sex.Male,
     height: 175,
@@ -32,11 +34,13 @@ void main() async {
     ..addPrimaryDevice(phone)
     ..addConnectedDevice(movisens, phone);
 
-  // adding a movisens measure
+  // Adding a movisens measure
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(name: 'Movisens Task', measures: [
-        Measure(type: MovisensSamplingPackage.ACTIVITY),
-      ]),
-      movisens);
+    ImmediateTrigger(),
+    BackgroundTask(
+      name: 'Movisens Task',
+      measures: [Measure(type: MovisensSamplingPackage.ACTIVITY)],
+    ),
+    movisens,
+  );
 }

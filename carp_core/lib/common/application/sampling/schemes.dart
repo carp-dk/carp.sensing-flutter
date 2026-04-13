@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../../carp_core_common.dart';
+part of '../../../common.dart';
 
 /// Specifies the sampling scheme for a data type ([dataType]), including possible
 /// options, defaults, and constraints.
@@ -26,7 +26,7 @@ part of '../../carp_core_common.dart';
 ///    concrete [DeviceConfiguration], if none of the previous configurations
 ///    are present.
 ///
-/// See also the section on[Sampling schemes and configurations](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
+/// See also the section on[Sampling schemes and configurations](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
 /// in the CARP Core Framework.
 class DataTypeSamplingScheme {
   /// The data type this sampling scheme relates to.
@@ -43,12 +43,14 @@ class DataTypeSamplingScheme {
   /// Create a [Measure] for the [dataType] defined by this sampling scheme,
   /// and override the measure's default [SamplingConfiguration] with
   /// this scheme's [defaultSamplingConfiguration].
-  Measure get measure => Measure(type: type)
-    ..overrideSamplingConfiguration = defaultSamplingConfiguration;
+  Measure get measure =>
+      Measure(type: type)
+        ..overrideSamplingConfiguration = defaultSamplingConfiguration;
 
-  DataTypeSamplingScheme(this.dataType,
-      [SamplingConfiguration? defaultSamplingConfiguration])
-      : super() {
+  DataTypeSamplingScheme(
+    this.dataType, [
+    SamplingConfiguration? defaultSamplingConfiguration,
+  ]) : super() {
     this.defaultSamplingConfiguration =
         defaultSamplingConfiguration ?? NoOptionsSamplingConfiguration();
   }
@@ -63,8 +65,9 @@ class DataTypeSamplingSchemeMap {
 
   /// Creates a [DataTypeSamplingSchemeMap] from the list of [schemes].
   DataTypeSamplingSchemeMap.from(List<DataTypeSamplingScheme> schemes) {
-    _map.addAll(Map.fromEntries(
-        schemes.map((scheme) => MapEntry(scheme.type, scheme))));
+    _map.addAll(
+      Map.fromEntries(schemes.map((scheme) => MapEntry(scheme.type, scheme))),
+    );
   }
 
   /// This sampling schema as a native [Map].
@@ -78,8 +81,9 @@ class DataTypeSamplingSchemeMap {
       _map.values.map((schema) => schema.dataType).toList();
 
   /// The map of all [SamplingConfiguration] entries in this scheme.
-  Map<String, SamplingConfiguration> get configurations => _map
-      .map((key, value) => MapEntry(key, value.defaultSamplingConfiguration));
+  Map<String, SamplingConfiguration> get configurations => _map.map(
+    (key, value) => MapEntry(key, value.defaultSamplingConfiguration),
+  );
 
   /// The configuration for the data type [type], or `null` if [type] is not in the map.
   DataTypeSamplingScheme? operator [](String? type) => _map[type];

@@ -46,8 +46,6 @@ enum MovesenseDeviceState {
 /// See https://www.movesense.com/docs/esw/api_reference/#info
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseDeviceInformation extends SensorData {
-  static const dataType = MovesenseSamplingPackage.DEVICE_INFO;
-
   String? manufacturerName;
   String? brandName;
   String? productName;
@@ -122,7 +120,7 @@ class MovesenseDeviceInformation extends SensorData {
   Map<String, dynamic> toJson() => _$MovesenseDeviceInformationToJson(this);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MovesenseSamplingPackage.DEVICE_INFO;
 }
 
 /// States API is a uniform, simplistic interface for accessing states of internal
@@ -137,8 +135,6 @@ class MovesenseDeviceInformation extends SensorData {
 /// See issue [#15](https://github.com/petri-lipponen-movesense/mdsflutter/issues/15).
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseStateChange extends SensorData {
-  static const dataType = MovesenseSamplingPackage.STATE;
-
   /// The state event.
   final MovesenseDeviceState state;
 
@@ -146,7 +142,7 @@ class MovesenseStateChange extends SensorData {
   late int timestamp;
 
   MovesenseStateChange(this.state, [int? timestamp])
-      : timestamp = timestamp ?? DateTime.now().millisecond;
+    : timestamp = timestamp ?? DateTime.now().millisecond;
 
   // Example event:
   //
@@ -205,7 +201,7 @@ class MovesenseStateChange extends SensorData {
   Map<String, dynamic> toJson() => _$MovesenseStateChangeToJson(this);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MovesenseSamplingPackage.STATE;
 }
 
 /// Movesense sensor is equipped with analog front-end capable of capturing ECG
@@ -214,8 +210,6 @@ class MovesenseStateChange extends SensorData {
 /// See https://www.movesense.com/docs/esw/api_reference/#meashr
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseHR extends SensorData {
-  static const dataType = MovesenseSamplingPackage.HR;
-
   /// The average heart rate (Hz).
   final double hr;
 
@@ -242,7 +236,7 @@ class MovesenseHR extends SensorData {
   Map<String, dynamic> toJson() => _$MovesenseHRToJson(this);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MovesenseSamplingPackage.HR;
 }
 
 /// Movesense sensor is equipped with analog front-end capable of capturing ECG
@@ -251,8 +245,6 @@ class MovesenseHR extends SensorData {
 /// See https://www.movesense.com/docs/esw/api_reference/#measecg
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseECG extends SensorData {
-  static const dataType = MovesenseSamplingPackage.ECG;
-
   /// The device's internal timestamp of this sample in milliseconds.
   final int timestamp;
 
@@ -277,7 +269,7 @@ class MovesenseECG extends SensorData {
   Map<String, dynamic> toJson() => _$MovesenseECGToJson(this);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MovesenseSamplingPackage.ECG;
 }
 
 /// The Movesense MD sensor is equipped with temperature sensor, which can be
@@ -287,8 +279,6 @@ class MovesenseECG extends SensorData {
 /// See https://www.movesense.com/docs/esw/api_reference/#meastemperature
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseTemperature extends SensorData {
-  static const dataType = MovesenseSamplingPackage.TEMPERATURE;
-
   /// The device's internal timestamp of this sample in milliseconds.
   final int timestamp;
 
@@ -312,7 +302,7 @@ class MovesenseTemperature extends SensorData {
   Map<String, dynamic> toJson() => _$MovesenseTemperatureToJson(this);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MovesenseSamplingPackage.TEMPERATURE;
 }
 
 /// Provides a synchronized access to combined accelerometer, gyroscope and
@@ -323,8 +313,6 @@ class MovesenseTemperature extends SensorData {
 /// See https://www.movesense.com/docs/esw/api_reference/#measimu
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseIMU extends SensorData {
-  static const dataType = MovesenseSamplingPackage.IMU;
-
   /// The device's internal timestamp of this sample in milliseconds.
   final int timestamp;
 
@@ -344,20 +332,35 @@ class MovesenseIMU extends SensorData {
 
     List<MovesenseAccelerometerSample> acc =
         (data["Body"]["ArrayAcc"] as List<dynamic>)
-            .map((sample) => MovesenseAccelerometerSample(
-                sample['x'] as num, sample['y'] as num, sample['z'] as num))
+            .map(
+              (sample) => MovesenseAccelerometerSample(
+                sample['x'] as num,
+                sample['y'] as num,
+                sample['z'] as num,
+              ),
+            )
             .toList();
 
     List<MovesenseGyroscopeSample> gyro =
         (data["Body"]["ArrayAcc"] as List<dynamic>)
-            .map((sample) => MovesenseGyroscopeSample(
-                sample['x'] as num, sample['y'] as num, sample['z'] as num))
+            .map(
+              (sample) => MovesenseGyroscopeSample(
+                sample['x'] as num,
+                sample['y'] as num,
+                sample['z'] as num,
+              ),
+            )
             .toList();
 
     List<MovesenseMagnetometerSample> mag =
         (data["Body"]["ArrayAcc"] as List<dynamic>)
-            .map((sample) => MovesenseMagnetometerSample(
-                sample['x'] as num, sample['y'] as num, sample['z'] as num))
+            .map(
+              (sample) => MovesenseMagnetometerSample(
+                sample['x'] as num,
+                sample['y'] as num,
+                sample['z'] as num,
+              ),
+            )
             .toList();
 
     return MovesenseIMU(timestamp.toInt(), acc, gyro, mag);
@@ -371,7 +374,7 @@ class MovesenseIMU extends SensorData {
   Map<String, dynamic> toJson() => _$MovesenseIMUToJson(this);
 
   @override
-  String get jsonType => dataType;
+  String get jsonType => MovesenseSamplingPackage.IMU;
 }
 
 /// Movesense accelerometer sample

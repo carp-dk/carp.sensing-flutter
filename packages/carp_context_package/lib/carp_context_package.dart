@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 
 import 'package:json_annotation/json_annotation.dart';
@@ -26,7 +27,7 @@ import 'package:flutter_activity_recognition/flutter_activity_recognition.dart'
     as ar;
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone, BLEHeartRateDevice;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 part 'src/location_manager.dart';

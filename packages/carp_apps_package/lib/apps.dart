@@ -17,7 +17,7 @@ import 'package:installed_apps/app_info.dart';
 import 'package:app_usage/app_usage.dart' as app_usage;
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 part 'apps_data.dart';

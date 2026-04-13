@@ -18,7 +18,7 @@ MovisensStepCount _$MovisensStepCountFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$MovisensStepCountToJson(MovisensStepCount instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -26,25 +26,25 @@ Map<String, dynamic> _$MovisensStepCountToJson(MovisensStepCount instance) =>
     };
 
 MovisensBodyPosition _$MovisensBodyPositionFromJson(
-        Map<String, dynamic> json) =>
-    MovisensBodyPosition(
-      deviceId: json['deviceId'] as String,
-      type: json['type'] as String,
-      timestamp: json['timestamp'] == null
-          ? null
-          : DateTime.parse(json['timestamp'] as String),
-      bodyPosition: json['bodyPosition'] as String,
-    )..$type = json['__type'] as String?;
+  Map<String, dynamic> json,
+) => MovisensBodyPosition(
+  deviceId: json['deviceId'] as String,
+  type: json['type'] as String,
+  timestamp: json['timestamp'] == null
+      ? null
+      : DateTime.parse(json['timestamp'] as String),
+  bodyPosition: json['bodyPosition'] as String,
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensBodyPositionToJson(
-        MovisensBodyPosition instance) =>
-    <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
-      'timestamp': instance.timestamp.toIso8601String(),
-      'deviceId': instance.deviceId,
-      'type': instance.type,
-      'bodyPosition': instance.bodyPosition,
-    };
+  MovisensBodyPosition instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'timestamp': instance.timestamp.toIso8601String(),
+  'deviceId': instance.deviceId,
+  'type': instance.type,
+  'bodyPosition': instance.bodyPosition,
+};
 
 MovisensInclination _$MovisensInclinationFromJson(Map<String, dynamic> json) =>
     MovisensInclination(
@@ -59,50 +59,50 @@ MovisensInclination _$MovisensInclinationFromJson(Map<String, dynamic> json) =>
     )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensInclinationToJson(
-        MovisensInclination instance) =>
-    <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
-      'timestamp': instance.timestamp.toIso8601String(),
-      'deviceId': instance.deviceId,
-      'type': instance.type,
-      'x': instance.x,
-      'y': instance.y,
-      'z': instance.z,
-    };
+  MovisensInclination instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'timestamp': instance.timestamp.toIso8601String(),
+  'deviceId': instance.deviceId,
+  'type': instance.type,
+  'x': instance.x,
+  'y': instance.y,
+  'z': instance.z,
+};
 
 MovisensMovementAcceleration _$MovisensMovementAccelerationFromJson(
-        Map<String, dynamic> json) =>
-    MovisensMovementAcceleration(
-      deviceId: json['deviceId'] as String,
-      type: json['type'] as String,
-      timestamp: json['timestamp'] == null
-          ? null
-          : DateTime.parse(json['timestamp'] as String),
-      movementAcceleration: (json['movementAcceleration'] as num).toDouble(),
-    )..$type = json['__type'] as String?;
+  Map<String, dynamic> json,
+) => MovisensMovementAcceleration(
+  deviceId: json['deviceId'] as String,
+  type: json['type'] as String,
+  timestamp: json['timestamp'] == null
+      ? null
+      : DateTime.parse(json['timestamp'] as String),
+  movementAcceleration: (json['movementAcceleration'] as num).toDouble(),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensMovementAccelerationToJson(
-        MovisensMovementAcceleration instance) =>
-    <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
-      'timestamp': instance.timestamp.toIso8601String(),
-      'deviceId': instance.deviceId,
-      'type': instance.type,
-      'movementAcceleration': instance.movementAcceleration,
-    };
+  MovisensMovementAcceleration instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'timestamp': instance.timestamp.toIso8601String(),
+  'deviceId': instance.deviceId,
+  'type': instance.type,
+  'movementAcceleration': instance.movementAcceleration,
+};
 
 MovisensMET _$MovisensMETFromJson(Map<String, dynamic> json) => MovisensMET(
-      deviceId: json['deviceId'] as String,
-      type: json['type'] as String,
-      timestamp: json['timestamp'] == null
-          ? null
-          : DateTime.parse(json['timestamp'] as String),
-      met: (json['met'] as num).toInt(),
-    )..$type = json['__type'] as String?;
+  deviceId: json['deviceId'] as String,
+  type: json['type'] as String,
+  timestamp: json['timestamp'] == null
+      ? null
+      : DateTime.parse(json['timestamp'] as String),
+  met: (json['met'] as num).toInt(),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensMETToJson(MovisensMET instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -124,7 +124,7 @@ MovisensMETLevel _$MovisensMETLevelFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$MovisensMETLevelToJson(MovisensMETLevel instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -135,17 +135,17 @@ Map<String, dynamic> _$MovisensMETLevelToJson(MovisensMETLevel instance) =>
     };
 
 MovisensHR _$MovisensHRFromJson(Map<String, dynamic> json) => MovisensHR(
-      deviceId: json['deviceId'] as String,
-      type: json['type'] as String,
-      timestamp: json['timestamp'] == null
-          ? null
-          : DateTime.parse(json['timestamp'] as String),
-      hr: (json['hr'] as num).toInt(),
-    )..$type = json['__type'] as String?;
+  deviceId: json['deviceId'] as String,
+  type: json['type'] as String,
+  timestamp: json['timestamp'] == null
+      ? null
+      : DateTime.parse(json['timestamp'] as String),
+  hr: (json['hr'] as num).toInt(),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensHRToJson(MovisensHR instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -153,17 +153,17 @@ Map<String, dynamic> _$MovisensHRToJson(MovisensHR instance) =>
     };
 
 MovisensHRV _$MovisensHRVFromJson(Map<String, dynamic> json) => MovisensHRV(
-      deviceId: json['deviceId'] as String,
-      type: json['type'] as String,
-      timestamp: json['timestamp'] == null
-          ? null
-          : DateTime.parse(json['timestamp'] as String),
-      hrv: (json['hrv'] as num).toInt(),
-    )..$type = json['__type'] as String?;
+  deviceId: json['deviceId'] as String,
+  type: json['type'] as String,
+  timestamp: json['timestamp'] == null
+      ? null
+      : DateTime.parse(json['timestamp'] as String),
+  hrv: (json['hrv'] as num).toInt(),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensHRVToJson(MovisensHRV instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -182,7 +182,7 @@ MovisensIsHrvValid _$MovisensIsHrvValidFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$MovisensIsHrvValidToJson(MovisensIsHrvValid instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -190,17 +190,17 @@ Map<String, dynamic> _$MovisensIsHrvValidToJson(MovisensIsHrvValid instance) =>
     };
 
 MovisensEDA _$MovisensEDAFromJson(Map<String, dynamic> json) => MovisensEDA(
-      deviceId: json['deviceId'] as String,
-      type: json['type'] as String,
-      timestamp: json['timestamp'] == null
-          ? null
-          : DateTime.parse(json['timestamp'] as String),
-      edaSclMean: (json['edaSclMean'] as num).toDouble(),
-    )..$type = json['__type'] as String?;
+  deviceId: json['deviceId'] as String,
+  type: json['type'] as String,
+  timestamp: json['timestamp'] == null
+      ? null
+      : DateTime.parse(json['timestamp'] as String),
+  edaSclMean: (json['edaSclMean'] as num).toDouble(),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensEDAToJson(MovisensEDA instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -208,25 +208,25 @@ Map<String, dynamic> _$MovisensEDAToJson(MovisensEDA instance) =>
     };
 
 MovisensSkinTemperature _$MovisensSkinTemperatureFromJson(
-        Map<String, dynamic> json) =>
-    MovisensSkinTemperature(
-      deviceId: json['deviceId'] as String,
-      type: json['type'] as String,
-      timestamp: json['timestamp'] == null
-          ? null
-          : DateTime.parse(json['timestamp'] as String),
-      skinTemperature: (json['skinTemperature'] as num).toDouble(),
-    )..$type = json['__type'] as String?;
+  Map<String, dynamic> json,
+) => MovisensSkinTemperature(
+  deviceId: json['deviceId'] as String,
+  type: json['type'] as String,
+  timestamp: json['timestamp'] == null
+      ? null
+      : DateTime.parse(json['timestamp'] as String),
+  skinTemperature: (json['skinTemperature'] as num).toDouble(),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensSkinTemperatureToJson(
-        MovisensSkinTemperature instance) =>
-    <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
-      'timestamp': instance.timestamp.toIso8601String(),
-      'deviceId': instance.deviceId,
-      'type': instance.type,
-      'skinTemperature': instance.skinTemperature,
-    };
+  MovisensSkinTemperature instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'timestamp': instance.timestamp.toIso8601String(),
+  'deviceId': instance.deviceId,
+  'type': instance.type,
+  'skinTemperature': instance.skinTemperature,
+};
 
 MovisensRespiration _$MovisensRespirationFromJson(Map<String, dynamic> json) =>
     MovisensRespiration(
@@ -239,14 +239,14 @@ MovisensRespiration _$MovisensRespirationFromJson(Map<String, dynamic> json) =>
     )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MovisensRespirationToJson(
-        MovisensRespiration instance) =>
-    <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
-      'timestamp': instance.timestamp.toIso8601String(),
-      'deviceId': instance.deviceId,
-      'type': instance.type,
-      'value': instance.value,
-    };
+  MovisensRespiration instance,
+) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'timestamp': instance.timestamp.toIso8601String(),
+  'deviceId': instance.deviceId,
+  'type': instance.type,
+  'value': instance.value,
+};
 
 MovisensTapMarker _$MovisensTapMarkerFromJson(Map<String, dynamic> json) =>
     MovisensTapMarker(
@@ -260,7 +260,7 @@ MovisensTapMarker _$MovisensTapMarkerFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$MovisensTapMarkerToJson(MovisensTapMarker instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'timestamp': instance.timestamp.toIso8601String(),
       'deviceId': instance.deviceId,
       'type': instance.type,
@@ -269,32 +269,48 @@ Map<String, dynamic> _$MovisensTapMarkerToJson(MovisensTapMarker instance) =>
 
 MovisensDevice _$MovisensDeviceFromJson(Map<String, dynamic> json) =>
     MovisensDevice(
-      roleName: json['roleName'] as String?,
-      deviceName: json['deviceName'] as String,
-      sensorLocation: $enumDecodeNullable(
-              _$SensorLocationEnumMap, json['sensorLocation']) ??
-          SensorLocation.Chest,
-      sex: $enumDecodeNullable(_$SexEnumMap, json['sex']) ?? Sex.Male,
-      height: (json['height'] as num?)?.toInt() ?? 178,
-      weight: (json['weight'] as num?)?.toInt() ?? 78,
-      age: (json['age'] as num?)?.toInt() ?? 25,
-    )
+        roleName: json['roleName'] as String?,
+        sensorLocation:
+            $enumDecodeNullable(
+              _$SensorLocationEnumMap,
+              json['sensorLocation'],
+            ) ??
+            SensorLocation.Chest,
+        sex: $enumDecodeNullable(_$SexEnumMap, json['sex']) ?? Sex.Male,
+        height: (json['height'] as num?)?.toInt() ?? 178,
+        weight: (json['weight'] as num?)?.toInt() ?? 78,
+        age: (json['age'] as num?)?.toInt() ?? 25,
+      )
       ..$type = json['__type'] as String?
       ..isOptional = json['isOptional'] as bool?
       ..defaultSamplingConfiguration =
           (json['defaultSamplingConfiguration'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-            k, SamplingConfiguration.fromJson(e as Map<String, dynamic>)),
-      );
+            (k, e) => MapEntry(
+              k,
+              SamplingConfiguration.fromJson(e as Map<String, dynamic>),
+            ),
+          )
+      ..serviceUuids = (json['serviceUuids'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList()
+      ..namePrefix = json['namePrefix'] as String?
+      ..minRssi = (json['minRssi'] as num?)?.toInt()
+      ..allowDuplicates = json['allowDuplicates'] as bool
+      ..timeout = json['timeout'] == null
+          ? null
+          : Duration(microseconds: (json['timeout'] as num).toInt());
 
 Map<String, dynamic> _$MovisensDeviceToJson(MovisensDevice instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'roleName': instance.roleName,
-      if (instance.isOptional case final value?) 'isOptional': value,
-      if (instance.defaultSamplingConfiguration case final value?)
-        'defaultSamplingConfiguration': value,
-      'deviceName': instance.deviceName,
+      'isOptional': ?instance.isOptional,
+      'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration,
+      'serviceUuids': instance.serviceUuids,
+      'namePrefix': ?instance.namePrefix,
+      'minRssi': ?instance.minRssi,
+      'allowDuplicates': instance.allowDuplicates,
+      'timeout': ?instance.timeout?.inMicroseconds,
       'sensorLocation': _$SensorLocationEnumMap[instance.sensorLocation]!,
       'weight': instance.weight,
       'height': instance.height,

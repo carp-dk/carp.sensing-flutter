@@ -1,10 +1,19 @@
 name: carp_communication_package
+version: 2.0.1
 description: CARP communication sampling package. Samples phone, sms, and calendar logs and activity.
-version: 1.8.0
-homepage: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/packages/carp_communication_package
+homepage: https://github.com/cph-cachet/carp.sensing-flutter
+repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_communication_package
+issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
+
+documentation: https://docs.carp.dk/carp-mobile-sensing/
+topics:
+  - mobile-sensing
+  - mobile-health
+  - sensors
+  - digital-phenotyping
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 platforms:
@@ -16,15 +25,15 @@ dependencies:
     sdk: flutter
 
   carp_serializable: ^2.0.0
-  carp_core: ^1.9.0
-  carp_mobile_sensing: ^1.13.0
+  carp_core: ^2.0.0
+  carp_mobile_sensing: ^2.0.0
 
   json_annotation: ^4.8.0
   another_telephony: ^0.4.0
   call_e_log: ^0.0.4
-  # device_calendar: ^4.3.2
+  device_calendar_plus: ^0.3.0
   crypto: ^3.0.1
-  permission_handler: '>=11.0.0 <13.0.0'
+  permission_handler: '>=11.1.0 <13.0.0'
   
 # Overriding carp libraries to use the local copy.
 # Remove this before release of package.
@@ -35,10 +44,6 @@ dependency_overrides:
   #   path: ../../carp_core/
   # carp_mobile_sensing:
   #   path: ../../carp_mobile_sensing/
-
-  # in order to publish the package, use "flutter pub publish --skip-validation"
-  device_calendar:
-    git: https://github.com/bardram/device_calendar
 
 dev_dependencies:
   flutter_lints: any

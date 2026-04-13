@@ -5,14 +5,17 @@
  * found in the LICENSE file.
  */
 
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
-/// Describes requested measures and/or output to be presented on a device.
+/// Describes requested measures to be collected by a device.
 ///
 /// A [TaskConfiguration] holds information about each task to be triggered by
-/// a [TriggerConfiguration] as part of a [StudyProtocol].
+/// a [TriggerConfiguration] as part of a [TaskControl].
 /// Each task holds a list of [Measure]s to be done as part of this task.
 /// A [TaskConfiguration] is hence an aggregation of [Measure]s.
+///
+/// Note that the [name] of the task identifies the task and has to be unique
+/// within a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TaskConfiguration extends Serializable {
   static int _counter = 0;
@@ -30,7 +33,7 @@ class TaskConfiguration extends Serializable {
   /// of task measures, or as the result of user interactions, for this task.
   Set<String> getAllExpectedDataTypes() =>
       (measures?.map((measure) => measure.type).toSet() ?? {})
-        ..add(CarpDataTypes.COMPLETED_TASK_TYPE_NAME);
+        ..add(CarpDataTypes.COMPLETED_TASK);
 
   /// Add [measure] to this task.
   void addMeasure(Measure measure) => measures!.add(measure);
@@ -41,14 +44,13 @@ class TaskConfiguration extends Serializable {
   /// Remove [measure] from this task.
   void removeMeasure(Measure measure) => measures!.remove(measure);
 
-  /// Create a task. If [name] is not specified, a name is generated.
-  TaskConfiguration({
-    String? name,
-    this.description,
-    List<Measure>? measures,
-  }) : super() {
+  /// Create a task. The [name] uniquely identifies the task.
+  /// If [name] is not specified, a name is generated.
+  TaskConfiguration({String? name, this.description, List<Measure>? measures})
+    : super() {
     this.name = name ?? 'Task #${_counter++}';
-    this.measures = measures ?? [];
+    // Remove duplicates by converting to a set and back to a list.
+    this.measures = measures?.toSet().toList() ?? [];
   }
 
   @override
@@ -63,6 +65,23 @@ class TaskConfiguration extends Serializable {
   @override
   String toString() =>
       '$runtimeType - name: $name, measures size: ${measures?.length}';
+}
+
+/// A task which is used for monitoring the execution of the data sampling
+/// collecting data on [CompletedTask], [TriggeredTask], and [Error].
+/// This task is not supposed to be executed as such, but allows the addition
+/// of such monitoring measure to be added to a protocol.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class MonitoringTask extends TaskConfiguration {
+  /// Create a new monitoring task.
+  MonitoringTask({super.name, super.description, super.measures});
+
+  @override
+  Function get fromJsonFunction => _$MonitoringTaskFromJson;
+  factory MonitoringTask.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<MonitoringTask>(json);
+  @override
+  Map<String, dynamic> toJson() => _$MonitoringTaskToJson(this);
 }
 
 /// A task which specifies that all containing measures and/or
@@ -140,21 +159,18 @@ class WebTask extends TaskConfiguration {
   String url;
 
   /// Create a task which redirects to a web page [url].
-  WebTask({
-    super.name,
-    super.description,
-    super.measures,
-    required this.url,
-  });
+  WebTask({super.name, super.description, super.measures, required this.url});
 
   /// Replace the variables in [url] with the specified runtime values,
   /// if the variables are present.
   String getUrl(
-          String participantId, String studyDeploymentId, int triggerId) =>
-      url
-          .replaceFirst('\$PARTICIPANT_ID', participantId)
-          .replaceFirst('\$DEPLOYMENT_ID', studyDeploymentId)
-          .replaceFirst('\$TRIGGER_ID', triggerId.toString());
+    String participantId,
+    String studyDeploymentId,
+    int triggerId,
+  ) => url
+      .replaceFirst('\$PARTICIPANT_ID', participantId)
+      .replaceFirst('\$DEPLOYMENT_ID', studyDeploymentId)
+      .replaceFirst('\$TRIGGER_ID', triggerId.toString());
 
   @override
   Function get fromJsonFunction => _$WebTaskFromJson;

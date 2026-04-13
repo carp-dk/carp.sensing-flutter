@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -16,8 +15,9 @@ class LocationProbe extends StreamProbe {
       super.deviceManager as LocationServiceManager;
 
   @override
-  Stream<Measurement> get stream => deviceManager.manager.onLocationChanged
-      .map((location) => Measurement.fromData(location));
+  Stream<Measurement> get stream => deviceManager.manager.onLocationChanged.map(
+    (location) => Measurement.fromData(location),
+  );
 }
 
 /// A probe that collects location data from the underlying OS's location API.
@@ -45,7 +45,7 @@ class ConfigurableLocationProbe extends Probe {
   }
 
   @override
-  Future<bool> onStart() async {
+  Future<bool> onResume() async {
     if (await requestPermissions()) {
       // if this is a one-time sampling, just get the location once and return
       if (oneTimeSampling) {
@@ -56,11 +56,12 @@ class ConfigurableLocationProbe extends Probe {
           warning('$runtimeType - Error getting location - $error');
           addError('$runtimeType - Error getting location: $error');
         }
-        // automatically stop this probe after it is done collecting the measurement
-        Future.delayed(const Duration(seconds: 5), () => stop());
+        // automatically pause this probe after it is done collecting the measurement
+        Future.delayed(const Duration(seconds: 5), () => pause());
       } else {
-        var stream = deviceManager.manager.onLocationChanged
-            .map((location) => Measurement.fromData(location));
+        var stream = deviceManager.manager.onLocationChanged.map(
+          (location) => Measurement.fromData(location),
+        );
 
         _subscription = stream.listen(
           (measurement) => addMeasurement(measurement),
@@ -72,13 +73,7 @@ class ConfigurableLocationProbe extends Probe {
   }
 
   @override
-  Future<bool> onStop() async {
-    await _subscription?.cancel();
-    return true;
-  }
-
-  @override
-  Future<bool> onRestart() async {
+  Future<bool> onPause() async {
     await _subscription?.cancel();
     return true;
   }

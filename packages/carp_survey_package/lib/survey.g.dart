@@ -7,37 +7,35 @@ part of 'survey.dart';
 // **************************************************************************
 
 RPAppTask _$RPAppTaskFromJson(Map<String, dynamic> json) => RPAppTask(
-      name: json['name'] as String?,
-      type: json['type'] as String,
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      instructions: json['instructions'] as String? ?? '',
-      minutesToComplete: (json['minutesToComplete'] as num?)?.toInt(),
-      expire: json['expire'] == null
-          ? null
-          : Duration(microseconds: (json['expire'] as num).toInt()),
-      notification: json['notification'] as bool? ?? false,
-      measures: (json['measures'] as List<dynamic>?)
-          ?.map((e) => Measure.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      rpTask: RPTask.fromJson(json['rpTask'] as Map<String, dynamic>),
-    )..$type = json['__type'] as String?;
+  name: json['name'] as String?,
+  type: json['type'] as String,
+  title: json['title'] as String? ?? '',
+  description: json['description'] as String? ?? '',
+  instructions: json['instructions'] as String? ?? '',
+  minutesToComplete: (json['minutesToComplete'] as num?)?.toInt(),
+  expire: json['expire'] == null
+      ? null
+      : Duration(microseconds: (json['expire'] as num).toInt()),
+  notification: json['notification'] as bool? ?? false,
+  measures: (json['measures'] as List<dynamic>?)
+      ?.map((e) => Measure.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  rpTask: RPTask.fromJson(json['rpTask'] as Map<String, dynamic>),
+)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$RPAppTaskToJson(RPAppTask instance) => <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
-      'name': instance.name,
-      if (instance.measures?.map((e) => e.toJson()).toList() case final value?)
-        'measures': value,
-      'type': instance.type,
-      'title': instance.title,
-      'description': instance.description,
-      'instructions': instance.instructions,
-      if (instance.minutesToComplete case final value?)
-        'minutesToComplete': value,
-      if (instance.expire?.inMicroseconds case final value?) 'expire': value,
-      'notification': instance.notification,
-      'rpTask': instance.rpTask.toJson(),
-    };
+  '__type': ?instance.$type,
+  'name': instance.name,
+  'measures': ?instance.measures?.map((e) => e.toJson()).toList(),
+  'type': instance.type,
+  'title': instance.title,
+  'description': instance.description,
+  'instructions': instance.instructions,
+  'minutesToComplete': ?instance.minutesToComplete,
+  'expire': ?instance.expire?.inMicroseconds,
+  'notification': instance.notification,
+  'rpTask': instance.rpTask.toJson(),
+};
 
 RPTaskResultData _$RPTaskResultDataFromJson(Map<String, dynamic> json) =>
     RPTaskResultData(
@@ -50,9 +48,9 @@ RPTaskResultData _$RPTaskResultDataFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$RPTaskResultDataToJson(RPTaskResultData instance) =>
     <String, dynamic>{
-      if (instance.$type case final value?) '__type': value,
+      '__type': ?instance.$type,
       'status': _$SurveyStatusEnumMap[instance.status]!,
-      if (instance.result?.toJson() case final value?) 'result': value,
+      'result': ?instance.result?.toJson(),
     };
 
 const _$SurveyStatusEnumMap = {

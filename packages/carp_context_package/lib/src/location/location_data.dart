@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -10,8 +9,6 @@ part of '../../carp_context_package.dart';
 /// Holds location information using the GPS format from the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Location extends Geolocation {
-  static const dataType = ContextSamplingPackage.LOCATION;
-
   /// In meters above the WGS 84 reference ellipsoid.
   /// Derived from GPS information.
   double? altitude;

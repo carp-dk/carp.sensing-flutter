@@ -1,4 +1,8 @@
-import 'package:carp_core/carp_core.dart';
+// ignore_for_file: depend_on_referenced_packages
+
+import 'dart:ui';
+
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_apps_package/apps.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
@@ -21,13 +25,24 @@ void main() async {
   Smartphone phone = Smartphone();
   protocol.addPrimaryDevice(phone);
 
-  // Add an automatic task that collects the list of installed apps
+  // Add an background task that collects the list of installed apps
   // and a log of app usage activity
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(measures: [
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [
         Measure(type: AppsSamplingPackage.APPS),
         Measure(type: AppsSamplingPackage.APP_USAGE),
-      ]),
-      phone);
+      ],
+    ),
+    phone,
+  );
+
+  // Add an background task that collects app usage activity when this app
+  // changes state to foreground.
+  protocol.addTaskControl(
+    AppLifecycleTrigger({AppLifecycleState.resumed}),
+    BackgroundTask(measures: [Measure(type: AppsSamplingPackage.APP_USAGE)]),
+    phone,
+  );
 }

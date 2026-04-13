@@ -3,7 +3,7 @@
 /// * informed consent
 /// * translation files (localization)
 /// * messages and news articles
-library carp_study_generator;
+library;
 
 import 'dart:async';
 

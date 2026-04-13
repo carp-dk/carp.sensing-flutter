@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Copenhagen Center for Health Technology (CACHET) at the
- * Technical University of Denmark (DTU).
+ * Copyright 2018 the Technical University of Denmark (DTU).
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
@@ -20,7 +19,9 @@ class ActivityProbe extends StreamProbe {
 
   @override
   Stream<Measurement> get stream => _stream ??= ar
-      .FlutterActivityRecognition.instance.activityStream
+      .FlutterActivityRecognition
+      .instance
+      .activityStream
       .where((event) => event.type != ar.ActivityType.UNKNOWN)
       .where((event) => event.confidence != ar.ActivityConfidence.LOW)
       .map((activity) => Measurement.fromData(Activity.fromActivity(activity)))

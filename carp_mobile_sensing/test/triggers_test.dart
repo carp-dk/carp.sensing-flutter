@@ -1,4 +1,4 @@
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:test/test.dart';
 import 'package:carp_serializable/carp_serializable.dart';
@@ -11,7 +11,7 @@ void main() {
   group('Sampling Configurations', () {
     test('Sampling Packages.', () {
       var schemes = DeviceSamplingPackage().samplingSchemes;
-      expect(schemes.configurations.length, 5);
+      expect(schemes.configurations.length, 8);
 
       print(schemes);
     });
@@ -78,7 +78,8 @@ void main() {
         duration: const Duration(seconds: 1),
       );
       print(
-          'weekly, Thursday at 14:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
+        'weekly, Thursday at 14:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
+      );
       expect(t.period.inDays, 2 * 7);
 
       // the monthly trigger from iPDM-GO app
@@ -89,7 +90,8 @@ void main() {
         duration: const Duration(seconds: 1),
       );
       print(
-          'monthly, 1st day of month at 18:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
+        'monthly, 1st day of month at 18:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
+      );
       expect(t.period.inDays, 1 * 30);
 
       // collect quarterly on the 11th day of the first month
@@ -102,7 +104,8 @@ void main() {
         duration: const Duration(seconds: 1),
       );
       print(
-          'quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
+        'quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
+      );
       expect(t.period.inDays, 3 * 30);
 
       // collect monthly in the second week on a monday at 14:30
@@ -114,7 +117,8 @@ void main() {
         duration: const Duration(seconds: 1),
       );
       print(
-          'monthly, 2nd week of month on Tuesday at 14:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
+        'monthly, 2nd week of month on Tuesday at 14:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
+      );
       expect(t.firstOccurrence.weekday, DateTime.tuesday);
       expect(t.period.inDays, 30);
 
@@ -127,7 +131,8 @@ void main() {
         duration: const Duration(seconds: 1),
       );
       print(
-          'quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
+        'quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
+      );
       expect(t.period.inDays, 3 * 30);
     });
 
@@ -228,15 +233,13 @@ void main() {
 
     test(' - CronScheduledTrigger', () {
       print('cron job at 12:00 every day.');
-      CronScheduledTrigger t =
-          CronScheduledTrigger.parse(cronExpression: '0 12 * * *');
+      CronScheduledTrigger t = CronScheduledTrigger.parse(
+        cronExpression: '0 12 * * *',
+      );
       print(t);
       print(toJsonString(t));
 
-      t = CronScheduledTrigger(
-        minute: 0,
-        hour: 12,
-      );
+      t = CronScheduledTrigger(minute: 0, hour: 12);
       print(t);
 
       final from = DateTime.now();

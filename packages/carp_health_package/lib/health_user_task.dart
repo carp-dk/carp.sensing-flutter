@@ -5,8 +5,6 @@ part of 'health_package.dart';
 /// When started, it will ask for permission to access the health data listed
 /// in the [HealthAppTask].
 class HealthUserTask extends UserTask {
-  static const String HEALTH_ASSESSMENT_TYPE = 'health';
-
   // Health health = Health();
 
   /// The [HealthAppTask] which specifies which health data to collect.
@@ -21,55 +19,48 @@ class HealthUserTask extends UserTask {
 
     // then check for permission to access health data
     try {
-      var healthProbe = backgroundTaskExecutor.probes
-          .firstWhere((probe) => probe is HealthProbe) as HealthProbe;
+      var healthProbe =
+          backgroundTaskExecutor.probes.firstWhere(
+                (probe) => probe is HealthProbe,
+              )
+              as HealthProbe;
 
-      healthProbe.hasPermissions().then((granted) {
+      // Always request permissions when starting the health user task.
+      healthProbe.requestPermissions().then((granted) {
         if (granted) {
           debug(
-              '$runtimeType - Already has permissions to access health data.');
-          _startProbeAndStopAgain();
+            '$runtimeType - Got permissions to access health data. Now starting data collection.',
+          );
+          backgroundTaskExecutor.resume();
+          Timer(const Duration(seconds: 30), () => onDone());
         } else {
-          healthProbe.requestPermissions().then((granted) {
-            if (granted) {
-              debug('$runtimeType - Got permissions to access health data.');
-              _startProbeAndStopAgain();
-            } else {
-              warning(
-                  '$runtimeType - Could not get permissions to access health data.');
-              return;
-            }
-          });
+          warning(
+            '$runtimeType - Could not get permissions to access health data.',
+          );
+          return;
         }
       });
     } catch (error) {
       // if the health probe is not found in the list of probes, we cannot
       // access health data.
       warning(
-          '$runtimeType - No health probe found in list of probes. Does the '
-          'study protocol include any health data types?');
+        '$runtimeType - No health probe found in list of probes. Does the '
+        'study protocol include any health data types?',
+      );
     }
-  }
-
-  void _startProbeAndStopAgain() {
-    backgroundTaskExecutor.start();
-    Timer(const Duration(seconds: 10), () => onDone());
   }
 
   @override
   void onDone({dequeue = false, Data? result}) {
     super.onDone(dequeue: dequeue, result: result);
-    backgroundTaskExecutor.stop();
+    backgroundTaskExecutor.pause();
   }
 }
 
 class HealthUserTaskFactory implements UserTaskFactory {
   @override
-  List<String> types = [
-    HealthUserTask.HEALTH_ASSESSMENT_TYPE,
-  ];
+  List<String> types = [AppTask.HEALTH_ASSESSMENT_TYPE];
 
-  // always create a [HealthUserTask]
   @override
   UserTask create(AppTaskExecutor executor) => HealthUserTask(executor);
 }

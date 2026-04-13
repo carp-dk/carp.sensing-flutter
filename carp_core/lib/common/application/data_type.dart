@@ -4,7 +4,7 @@
  * Use of this source code is governed by a MIT-style license that can be
  * found in the LICENSE file.
  */
-part of '../carp_core_common.dart';
+part of '../../common.dart';
 
 /// Specifies the type of a [Measure].
 ///
@@ -33,8 +33,10 @@ class DataType {
   const DataType(this.namespace, this.name) : super();
 
   factory DataType.fromString(String type) {
-    assert(type.contains('.'),
-        "A data type must contain both a namespace and a name separated with a '.'");
+    assert(
+      type.contains('.'),
+      "A data type must contain both a namespace and a name separated with a '.'",
+    );
     final String name = type.split('.').last;
     final String namespace = type.substring(0, type.indexOf(name) - 1);
     return DataType(namespace, name);
@@ -44,10 +46,8 @@ class DataType {
   String toString() => '$namespace.$name';
 
   @override
-  bool operator ==(other) {
-    if (other is! DataType) return false;
-    return (other.namespace == namespace && other.name == name);
-  }
+  bool operator ==(other) =>
+      other is DataType && (other.namespace == namespace && other.name == name);
 
   // taken from https://dart.dev/guides/libraries/library-tour#implementing-map-keys
   @override

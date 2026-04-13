@@ -1,3 +1,7 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 1.7.1
 
 * replacing the `device_apps` plugin with the `installed_apps` plugin

@@ -1,15 +1,17 @@
-/// This library contains the software architecture for the CARP Mobile Sensing (CAMS)
-/// framework implemented in Flutter. Supports cross-platform (iOS and Android) sensing.
+/// This library contains the software architecture for the CARP Mobile Sensing
+/// (CAMS) framework implemented in Flutter.
+/// Supports cross-platform (iOS and Android) mobile sensing.
 ///
 /// The CAMS software architecture is a domain-drive design (DDD) model using an
 /// onion-based layout with the following onion layers:
 ///
 ///  * [domain] - contains the core domain model for CAMS which extends the domain
 ///             model of the [carp_core](https://pub.dev/packages/carp_core) domain model.
+///             This also include definition of service interfaces.
 ///  * [runtime] - contains the business logic for executing a sensing study (normally
-///              called 'application services' in DDD).
-///  * [services] - contains all services definitions used for sensing.
+///              called 'application' in DDD).
 ///  * [infrastructure] - contains specific implementation of the services used.
+///  * [sampling_packages] - contains the build-in sampling packages.
 ///
 /// Domain-driven design (DDD) is a software design approach that focuses on modeling
 /// the software to match the domain, or the subject area, that the software is
@@ -20,16 +22,16 @@
 library;
 
 import 'package:carp_serializable/carp_serializable.dart';
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone, BLEHeartRateDevice;
 
 import 'domain.dart';
 import 'runtime.dart';
-import 'infrastructure.dart';
+import 'sampling_packages.dart';
 
 export 'domain.dart';
 export 'runtime.dart';
-export 'services.dart';
 export 'infrastructure.dart';
+export 'sampling_packages.dart';
 
 part 'carp_mobile_sensing.json.dart';
 
@@ -44,7 +46,7 @@ class CarpMobileSensing {
 
   CarpMobileSensing._() {
     Core.ensureInitialized();
-    CAMSDataType();
+    CamsDataTypes();
     _registerFromJsonFunctions();
   }
 

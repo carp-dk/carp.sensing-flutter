@@ -1,3 +1,16 @@
+## 2.1.1 - BREAKING
+
+This release has two new main features: (i) to support adding, running, and removing **multiple studies** to the client manager, and (ii) to **save runtime state persistently** so that sampling of data in all studies will resume effortlessly across app restart. In addition, a set of issues have been addressed, as listed in [Milestone 2.0.0](https://github.com/carp-dk/carp.sensing-flutter/milestone/3?closed=1). The important ones include:
+
+* Update of the client software architecture to reflect the CARP Core client architecture. This - amongst other things - provides better support for `StudyStatus` in the client manager ([#504](https://github.com/cph-cachet/carp.sensing-flutter/issues/504))
+* Simplified configuration - now only the client and not the controller needs configuration.
+* Revised state machine model for executors, now using states 'resumed' and 'paused' instead of 'started' and 'stopped'
+* Added `AppLifecycleEvent` measure to collect life-cycle event from the app
+* Correct device registration in the deployment service ([#550](https://github.com/cph-cachet/carp.sensing-flutter/issues/550)).
+
+The example app has also been update to illustrate how a client can run multiple studies ([#559](https://github.com/cph-cachet/carp.sensing-flutter/issues/559)).
+Also note that CAMS now has a completely new [documentation](https://docs.carp.dk/carp-mobile-sensing/) site.
+
 ## 1.13.1
 
 * Fix of [#491](https://github.com/cph-cachet/carp.sensing-flutter/issues/491)
@@ -8,15 +21,15 @@
 
 ## 1.12.6
 
-* deprecating the `ONE_TIME_SENSING_TYPE` - now there is only one type of sensing user task ([#488](https://github.com/cph-cachet/carp.sensing-flutter/issues/488))
+* Deprecating the `ONE_TIME_SENSING_TYPE` - now there is only one type of sensing user task ([#488](https://github.com/cph-cachet/carp.sensing-flutter/issues/488))
 
 ## 1.12.4
 
-* upgrade of Android APK
-* bumped minimum Flutter SDK requirement to 3.3
-* upgrade of plugins to latest versions
+* Upgrade of Android APK
+* Bumped minimum Flutter SDK requirement to 3.3
+* Upgrade of plugins to latest versions
 * Fix of [#470](https://github.com/cph-cachet/carp.sensing-flutter/issues/470)
-* upgrade to latest Flutter plugins
+* Upgrade to latest Flutter plugins
 * Fix of [#481](https://github.com/cph-cachet/carp.sensing-flutter/issues/481)
 * Fix of [#482](https://github.com/cph-cachet/carp.sensing-flutter/issues/482)
 

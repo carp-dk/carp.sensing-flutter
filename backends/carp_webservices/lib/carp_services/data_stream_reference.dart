@@ -19,7 +19,7 @@ class DataStreamReference extends RPCCarpReference {
   CarpDataStreamService get service => super.service as CarpDataStreamService;
 
   DataStreamReference._(CarpDataStreamService service, this.studyDeploymentId)
-      : super._(service);
+    : super._(service);
 
   /// The URL for the data stream service endpoint.
   ///
@@ -33,12 +33,11 @@ class DataStreamReference extends RPCCarpReference {
   Future<void> append(
     List<DataStreamBatch> batch, {
     bool compress = true,
-  }) async =>
-      await service.appendToDataStreams(
-        studyDeploymentId,
-        batch,
-        compress: compress,
-      );
+  }) async => await service.appendToDataStreams(
+    studyDeploymentId,
+    batch,
+    compress: compress,
+  );
 
   /// Get all data points in [dataStream] with sequence numbers between
   /// [fromSequenceId] and [toSequenceIdInclusive].
@@ -46,7 +45,9 @@ class DataStreamReference extends RPCCarpReference {
     DataStreamId dataStream,
     int fromSequenceId, [
     int? toSequenceIdInclusive,
-  ]) async =>
-      await service.getDataStream(
-          dataStream, fromSequenceId, toSequenceIdInclusive);
+  ]) async => await service.getDataStream(
+    dataStream,
+    fromSequenceId,
+    toSequenceIdInclusive,
+  );
 }
