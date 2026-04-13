@@ -104,10 +104,7 @@ class HTTPRetry {
   Future<http.Response> get(String url, {Map<String, String>? headers}) async =>
       await retry(
         () => client
-            .get(
-              Uri.parse(Uri.encodeFull(url)),
-              headers: headers,
-            )
+            .get(Uri.parse(Uri.encodeFull(url)), headers: headers)
             .timeout(const Duration(seconds: 20)),
         delayFactor: const Duration(seconds: 5),
         maxAttempts: 15,
@@ -121,21 +118,20 @@ class HTTPRetry {
     Map<String, String>? headers,
     Object? body,
     Encoding? encoding,
-  }) async =>
-      await retry(
-        () => client
-            .post(
-              Uri.parse(Uri.encodeFull(url)),
-              headers: headers,
-              body: body,
-              encoding: encoding,
-            )
-            .timeout(const Duration(seconds: 20)),
-        delayFactor: const Duration(seconds: 5),
-        maxAttempts: 15,
-        retryIf: (e) => e is SocketException || e is TimeoutException,
-        onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to POST $url'),
-      );
+  }) async => await retry(
+    () => client
+        .post(
+          Uri.parse(Uri.encodeFull(url)),
+          headers: headers,
+          body: body,
+          encoding: encoding,
+        )
+        .timeout(const Duration(seconds: 20)),
+    delayFactor: const Duration(seconds: 5),
+    maxAttempts: 15,
+    retryIf: (e) => e is SocketException || e is TimeoutException,
+    onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to POST $url'),
+  );
 
   /// Sends an HTTP PUT request with the given [headers] and [body] to the given [url].
   Future<http.Response> put(
@@ -143,38 +139,32 @@ class HTTPRetry {
     Map<String, String>? headers,
     Object? body,
     Encoding? encoding,
-  }) async =>
-      await retry(
-        () => client
-            .put(
-              Uri.parse(Uri.encodeFull(url)),
-              headers: headers,
-              body: body,
-              encoding: encoding,
-            )
-            .timeout(const Duration(seconds: 20)),
-        delayFactor: const Duration(seconds: 5),
-        maxAttempts: 15,
-        retryIf: (e) => e is SocketException || e is TimeoutException,
-        onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to PUT $url'),
-      );
+  }) async => await retry(
+    () => client
+        .put(
+          Uri.parse(Uri.encodeFull(url)),
+          headers: headers,
+          body: body,
+          encoding: encoding,
+        )
+        .timeout(const Duration(seconds: 20)),
+    delayFactor: const Duration(seconds: 5),
+    maxAttempts: 15,
+    retryIf: (e) => e is SocketException || e is TimeoutException,
+    onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to PUT $url'),
+  );
 
   /// Sends an HTTP DELETE request with the given [headers] to the given [url].
   Future<http.Response> delete(
     String url, {
     Map<String, String>? headers,
-  }) async =>
-      await retry(
-        () => client
-            .delete(
-              Uri.parse(Uri.encodeFull(url)),
-              headers: headers,
-            )
-            .timeout(const Duration(seconds: 15)),
-        delayFactor: const Duration(seconds: 5),
-        maxAttempts: 15,
-        retryIf: (e) => e is SocketException || e is TimeoutException,
-        onRetry: (e) =>
-            debugPrint('${e.runtimeType} - Retrying to DELETE $url'),
-      );
+  }) async => await retry(
+    () => client
+        .delete(Uri.parse(Uri.encodeFull(url)), headers: headers)
+        .timeout(const Duration(seconds: 15)),
+    delayFactor: const Duration(seconds: 5),
+    maxAttempts: 15,
+    retryIf: (e) => e is SocketException || e is TimeoutException,
+    onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to DELETE $url'),
+  );
 }

@@ -66,17 +66,16 @@ class CarpUser {
   }
 
   factory CarpUser.fromJWTOAuth(Map<String, dynamic> jwt, OAuthToken token) {
-  return CarpUser(
-    username: jwt['preferred_username'] as String,
-    id: jwt['sub'] as String,
-    firstName: jwt['given_name'] as String?,
-    lastName: jwt['family_name'] as String?,
-    email: jwt['email'] as String?,
-    roles: (jwt['realm_access']?['roles'] as List<dynamic>?) ?? [],
-    token: token,
-  );
-}
-
+    return CarpUser(
+      username: jwt['preferred_username'] as String,
+      id: jwt['sub'] as String,
+      firstName: jwt['given_name'] as String?,
+      lastName: jwt['family_name'] as String?,
+      email: jwt['email'] as String?,
+      roles: (jwt['realm_access']?['roles'] as List<dynamic>?) ?? [],
+      token: token,
+    );
+  }
 
   factory CarpUser.fromJson(Map<String, dynamic> json) =>
       _$CarpUserFromJson(json);

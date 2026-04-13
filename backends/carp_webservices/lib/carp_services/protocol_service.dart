@@ -55,7 +55,7 @@ class CarpProtocolService extends CarpBaseService
   @override
   Future<List<ProtocolVersion>> getVersionHistoryFor(String protocolId) async {
     Map<String, dynamic> responseJson =
-        await (_rpc(GetVersionHistoryFor(protocolId)) as Map<String, dynamic>);
+        (await _rpc(GetVersionHistoryFor(protocolId)) as Map<String, dynamic>);
     final items = responseJson['items'] as List<dynamic>;
     return items
         .map((item) => ProtocolVersion.fromJson(item as Map<String, dynamic>))

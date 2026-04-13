@@ -2,7 +2,10 @@ part of 'carp_auth.dart';
 
 /// Holds information of a token issued by an OAuth authorization endpoint.
 @JsonSerializable(
-    fieldRename: FieldRename.snake, includeIfNull: false, explicitToJson: true)
+  fieldRename: FieldRename.snake,
+  includeIfNull: false,
+  explicitToJson: true,
+)
 class OAuthToken {
   /// The OAuth access token.
   final String accessToken;
@@ -52,13 +55,13 @@ class OAuthToken {
 
   /// Clone this token.
   OAuthToken clone() => OAuthToken(
-        accessToken,
-        refreshToken,
-        tokenType,
-        expiresAt,
-        scope,
-        idToken,
-      );
+    accessToken,
+    refreshToken,
+    tokenType,
+    expiresAt,
+    scope,
+    idToken,
+  );
 
   /// Expire the authenticated OAuth token for this user.
   void expire() => expiresAt = DateTime.now();
@@ -66,7 +69,8 @@ class OAuthToken {
   /// Has the access token expired?
   bool get hasExpired => DateTime.now().isAfter(expiresAt);
 
-  String get tokenInfo => "Access Token: $accessToken, "
+  String get tokenInfo =>
+      "Access Token: $accessToken, "
       "Refresh Token: $refreshToken, "
       "Expiry date: $expiresAt";
 
@@ -88,8 +92,5 @@ class OAuthEndPoint {
   /// Default is `/oauth/token`
   String path;
 
-  OAuthEndPoint({
-    required this.clientID,
-    this.path = "/oauth/token",
-  });
+  OAuthEndPoint({required this.clientID, this.path = "/oauth/token"});
 }
