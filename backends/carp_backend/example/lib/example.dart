@@ -69,20 +69,14 @@ void main() async {
   final study = SmartphoneStudy.fromInvitation(invitation);
   await client.addStudy(study);
 
-  // Get the study controller and try to deploy the study.
-  //
-  // If "useCached" is true and the study has already been deployed on this
-  // phone, the local cache will be used (default behavior).
-  // If not deployed before (i.e., cached) the study deployment will be
-  // fetched from the deployment service.
-  final controller = client.getStudyRuntime(study.studyDeploymentId);
-  await controller?.tryDeployment(useCached: false);
+  // Deploy the study.
+  await SmartPhoneClientManager().tryDeployment(
+    study.studyDeploymentId,
+    study.deviceRoleName,
+  );
 
-  // Configure the controller
-  await controller?.configure();
-
-  // Start sampling
-  controller?.start();
+  // Resume sampling.
+  SmartPhoneClientManager().resume();
 
   // -----------------------------------------------
   // DIFFERENT WAYS TO UPLOAD DATA TO CAWS
@@ -151,7 +145,7 @@ void main() async {
   // );
 
   // Create a study protocol with a specific data endpoint.
-  SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
+  var protocol = SmartphoneStudyProtocol(
     ownerId: 'AB',
     name: 'Track patient movement',
     dataEndPoint: streamingEndPoint,
@@ -187,10 +181,10 @@ void main() async {
     ],
   );
   // .. and upload it to CAWS.
-  await icManager.setInformedConsent(consent);
+  await icManager.setConsentDocument(consent);
 
   // Get the informed consent back as a RPOrderedTask, if available.
-  RPOrderedTask? myConsent = await icManager.getInformedConsent();
+  RPOrderedTask? myConsent = await icManager.getConsentDocument();
 
   // --------------------------------------------------
   // HANDLING MESSAGES CARP

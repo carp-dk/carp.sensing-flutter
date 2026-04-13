@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 // import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:carp_core/carp_core.dart';
+import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
@@ -44,15 +44,11 @@ void main() {
   /// Setup CARP and authenticate.
   /// Runs once before all tests.
   setUpAll(() async {
-    Settings().saveAppTaskQueue = false;
     Settings().debugLevel = DebugLevel.debug;
     StudyProtocol(ownerId: 'user@dtu.dk', name: 'ignored');
 
     // Configure an app that points to the CARP web services (DEV)
-    final Uri uri = Uri(
-      scheme: 'https',
-      host: hostName,
-    );
+    final Uri uri = Uri(scheme: 'https', host: hostName);
 
     late CarpApp app = CarpApp(
       name: "CAWS @ DTU",
@@ -65,11 +61,7 @@ void main() {
       clientId: 'studies-app',
       redirectURI: Uri.parse('carp-studies-auth://auth'),
       // For authentication at CAWS the path is '/auth/realms/Carp'
-      discoveryURL: uri.replace(pathSegments: [
-        'auth',
-        'realms',
-        'Carp',
-      ]),
+      discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
     );
 
     // Configure the service with the same study we will use for all testing
@@ -117,37 +109,41 @@ void main() {
 
   group("Informed Consent", () {
     test('- get', () async {
-      RPOrderedTask? informedConsent =
-          await CarpResourceManager().getInformedConsent(refresh: true);
+      RPOrderedTask? informedConsent = await CarpResourceManager()
+          .getConsentDocument(refresh: true);
 
       print(_encode(informedConsent));
     });
 
     test('- set', () async {
-      RPOrderedTask anotherInformedConsent =
-          RPOrderedTask(identifier: '12', steps: [
-        RPInstructionStep(
-          identifier: "1",
-          title: "Welcome!",
-          text: "Welcome to this study!",
-        ),
-        RPCompletionStep(
+      RPOrderedTask anotherInformedConsent = RPOrderedTask(
+        identifier: '12',
+        steps: [
+          RPInstructionStep(
+            identifier: "1",
+            title: "Welcome!",
+            text: "Welcome to this study!",
+          ),
+          RPCompletionStep(
             identifier: "2",
             title: "Thank You!",
-            text: "We saved your consent document - VIII"),
-      ]);
+            text: "We saved your consent document - VIII",
+          ),
+        ],
+      );
 
-      bool success = await CarpResourceManager()
-          .setInformedConsent(anotherInformedConsent);
+      bool success = await CarpResourceManager().setConsentDocument(
+        anotherInformedConsent,
+      );
       print('updated: $success');
-      RPOrderedTask? informedConsent =
-          await CarpResourceManager().getInformedConsent(refresh: true);
+      RPOrderedTask? informedConsent = await CarpResourceManager()
+          .getConsentDocument(refresh: true);
 
       print(_encode(informedConsent));
     });
 
     test('- delete', () async {
-      bool success = await CarpResourceManager().deleteInformedConsent();
+      bool success = await CarpResourceManager().deleteConsentDocument();
       print('deleted: $success');
     });
   });
@@ -156,28 +152,23 @@ void main() {
     Locale locale = const Locale('en');
 
     test('- get', () async {
-      Map<String, String>? localizations =
-          await CarpResourceManager().getLocalizations(
-        locale,
-        refresh: true,
-        cache: false,
-      );
+      Map<String, String>? localizations = await CarpResourceManager()
+          .getLocalizations(locale, refresh: true, cache: false);
 
       print(_encode(localizations));
     });
 
     test('- set', () async {
-      Map<String, String> daLocalizations = {
-        'Hi': 'Hej',
-        'Bye': 'Farvel',
-      };
+      Map<String, String> daLocalizations = {'Hi': 'Hej', 'Bye': 'Farvel'};
 
-      bool success =
-          await CarpResourceManager().setLocalizations(locale, daLocalizations);
+      bool success = await CarpResourceManager().setLocalizations(
+        locale,
+        daLocalizations,
+      );
       print('updated: $success');
 
-      Map<String, String>? localizations =
-          await CarpResourceManager().getLocalizations(locale);
+      Map<String, String>? localizations = await CarpResourceManager()
+          .getLocalizations(locale);
       expect(localizations, localizations);
       print(_encode(localizations));
     });
@@ -190,21 +181,22 @@ void main() {
 
   group("Messages", () {
     Message getMessage([String? id]) => Message(
-          id: id,
-          type: MessageType.article,
-          title: 'The importance of healthy eating',
-          subTitle: '',
-          message: 'A healthy diet is essential for good health and nutrition. '
-              'It protects you against many chronic noncommunicable diseases, such as heart disease, diabetes and cancer. '
-              'Eating a variety of foods and consuming less salt, sugars and saturated and industrially-produced trans-fats, are essential for healthy diet.\n\n'
-              'A healthy diet comprises a combination of different foods. These include:\n\n'
-              ' - Staples like cereals (wheat, barley, rye, maize or rice) or starchy tubers or roots (potato, yam, taro or cassava).\n'
-              ' - Legumes (lentils and beans).\n'
-              ' - Fruit and vegetables.\n'
-              ' - Foods from animal sources (meat, fish, eggs and milk).\n\n'
-              'Here is some useful information, based on WHO recommendations, to follow a healthy diet, and the benefits of doing so.',
-          url: 'https://www.who.int/initiatives/behealthy/healthy-diet',
-        );
+      id: id,
+      type: MessageType.article,
+      title: 'The importance of healthy eating',
+      subTitle: '',
+      message:
+          'A healthy diet is essential for good health and nutrition. '
+          'It protects you against many chronic noncommunicable diseases, such as heart disease, diabetes and cancer. '
+          'Eating a variety of foods and consuming less salt, sugars and saturated and industrially-produced trans-fats, are essential for healthy diet.\n\n'
+          'A healthy diet comprises a combination of different foods. These include:\n\n'
+          ' - Staples like cereals (wheat, barley, rye, maize or rice) or starchy tubers or roots (potato, yam, taro or cassava).\n'
+          ' - Legumes (lentils and beans).\n'
+          ' - Fruit and vegetables.\n'
+          ' - Foods from animal sources (meat, fish, eggs and milk).\n\n'
+          'Here is some useful information, based on WHO recommendations, to follow a healthy diet, and the benefits of doing so.',
+      url: 'https://www.who.int/initiatives/behealthy/healthy-diet',
+    );
 
     test('- create', () async {
       Message message = getMessage('1');
@@ -232,8 +224,9 @@ void main() {
     });
 
     test('- get specific', () async {
-      final message = await CarpResourceManager()
-          .getMessage('fc8539f0-2eb2-11ee-b8d3-af65eeff3f6f');
+      final message = await CarpResourceManager().getMessage(
+        'fc8539f0-2eb2-11ee-b8d3-af65eeff3f6f',
+      );
       print(_encode(message));
       expect(message, isNotNull);
       // expect(message_2!.id, message_1.id);
@@ -298,7 +291,7 @@ void main() {
         {
           'content-type': 'audio/mpeg',
           'content-language': 'en',
-          'activity': 'test'
+          'activity': 'test',
         },
       );
 
@@ -315,7 +308,7 @@ void main() {
         {
           'content-type': 'image/jpg',
           'content-language': 'en',
-          'activity': 'test'
+          'activity': 'test',
         },
       );
 
