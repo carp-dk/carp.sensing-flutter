@@ -33,7 +33,7 @@ These are the available CARP Mobile Sensing Flutter components in this repositor
 | **Backends** | **Backend data upload components** |  |
 | [carp_webservices](./backends/carp_webservices) | Flutter API for CARP Web Services (CAWS) | [![pub package](https://img.shields.io/pub/v/carp_webservices.svg)](https://pub.dartlang.org/packages/carp_webservices) |
 | [carp_backend](./backends/carp_backend) | Data manager for uploading data to a CAWS data backend. | [![pub package](https://img.shields.io/pub/v/carp_backend.svg)](https://pub.dartlang.org/packages/carp_backend) |
-| [carp_firebase_backend](./backends/carp_firebase_backend) | Data manager for uploading data to Firebase as both zipped files and JSON data| [![pub package](https://img.shields.io/pub/v/carp_firebase_backend.svg)](https://pub.dartlang.org/packages/carp_firebase_backend) |
+| [carp_firebase_backend](./backends/carp_firebase_backend) | **NOT MAINTAINED ATM** Data manager for uploading data to Firebase as both zipped files and JSON data| [![pub package](https://img.shields.io/pub/v/carp_firebase_backend.svg)](https://pub.dartlang.org/packages/carp_firebase_backend) |
 | **Utilities** | **Misc. CAMS utilities** |  |
 | [carp_study_generator](./utilities/carp_study_generator) | A simple command line interface (CLI) to upload study protocols, informed consent, and localization files to a CAWS backend.  | [![pub package](https://img.shields.io/pub/v/carp_study_generator.svg)](https://pub.dartlang.org/packages/carp_study_generator) |
 | **Apps** | **Misc. mobile sensing demo apps** |  |
