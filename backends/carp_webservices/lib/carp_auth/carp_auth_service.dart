@@ -242,11 +242,6 @@ class CarpAuthService {
     return '${authProperties.discoveryURL}/login-actions/action-token$secondPart';
   }
 
-  String _constructAuthUri(String uri) {
-    String secondPart = uri.split('action-token').last;
-    return '${authProperties.discoveryURL}/login-actions/action-token$secondPart';
-  }
-
   /// Authenticate to this CARP service using a [username] and [password].
   ///
   /// The discovery URL in the [authProperties] is used to find the Identity Server.
