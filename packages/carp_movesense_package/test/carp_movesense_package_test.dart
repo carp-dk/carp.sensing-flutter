@@ -16,6 +16,9 @@ void main() {
   late Smartphone phone;
   late MovesenseDevice movesense;
 
+  Future<void> writeToFile(String json, String fileName) async =>
+      await File('test/json/$fileName').writeAsString(json);
+
   setUpAll(() {
     WidgetsFlutterBinding.ensureInitialized();
     CarpMobileSensing.ensureInitialized();
@@ -67,10 +70,11 @@ void main() {
     );
   });
 
-  test('CAMSStudyProtocol -> JSON', () {
+  test('CAMSStudyProtocol -> JSON', () async {
     print(protocol);
     print(toJsonString(protocol));
     expect(protocol.ownerId, 'alex@uni.dk');
+    await writeToFile(toJsonString(protocol), 'protocol.json');
   });
 
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
@@ -82,9 +86,9 @@ void main() {
     expect(toJsonString(protocolFromJson), studyJson);
   });
 
-  test('JSON File -> StudyProtocol', () {
+  test('JSON File -> StudyProtocol', () async {
     // Read the study protocol from json file
-    String plainJson = File('test/json/study_protocol.json').readAsStringSync();
+    String plainJson = File('test/json/protocol.json').readAsStringSync();
 
     StudyProtocol protocol = StudyProtocol.fromJson(
       json.decode(plainJson) as Map<String, dynamic>,
