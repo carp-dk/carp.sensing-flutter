@@ -1,15 +1,17 @@
 # CARP eSense Sampling Package
 
-[![pub package](https://img.shields.io/pub/v/carp_esense_package.svg)](https://pub.dartlang.org/packages/carp_esense_package)
-[![pub points](https://img.shields.io/pub/points/carp_esense_package?color=2E8B57&label=pub%20points)](https://pub.dev/packages/carp_esense_package/score)
-[![github stars](https://img.shields.io/github/stars/cph-cachet/carp.sensing-flutter.svg?style=flat&logo=github&colorB=deeppink&label=stars)](https://github.com/cph-cachet/carp.sensing-flutter)
+[![CARP](https://img.shields.io/badge/CARP-carp.dk-2E8B57)](https://carp.dk/)
+[![pub package](https://img.shields.io/pub/v/carp_esense_package.svg)](https://pub.dev/packages/carp_esense_package)
+[![GitHub](https://img.shields.io/badge/GitHub-carp.sensing--flutter-deeppink?logo=github&logoColor=white)](https://github.com/carp-dk/carp.sensing-flutter)
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
 
 This library contains a sampling package for
 the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework
 to work with the [eSense](https://www.esense.io) earable computing platform.
-This packages supports sampling of the following [`Measure`](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types) types (note that the package defines its own namespace of `dk.cachet.carp.esense`):
+This packages supports sampling of the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types (note that the package defines its own namespace of `dk.cachet.carp.esense`):
 
 * `dk.cachet.carp.esense.button` : eSense button pressed / released events
 * `dk.cachet.carp.esense.sensor` : eSense sensor (accelerometer & gyroscope) events.
@@ -17,18 +19,17 @@ This packages supports sampling of the following [`Measure`](https://github.com/
 See the user documentation on the [eSense device](https://www.esense.io/share/eSense-User-Documentation.pdf) for how to use the device.
 See the [`esense_flutter`](https://pub.dev/packages/esense_flutter) Flutter plugin and its [API](https://pub.dev/documentation/esense_flutter/latest/) documentation to understand how sensor data is generated and their data formats.
 
-See the CARP Mobile Sensing [wiki](https://github.com/cph-cachet/carp.sensing-flutter/wiki) for further documentation, particularly on available [measure types](https://github.com/cph-cachet/carp.sensing-flutter/wiki/A.-Measure-Types).
-See the [CARP Mobile Sensing App](https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
+See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
+See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
 For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter).
 
-If you are interested in writing your own sampling packages, see the description on
-how to [extend](https://github.com/cph-cachet/carp.sensing-flutter/wiki/5.-Extending-CARP-Mobile-Sensing) CARP Mobile Sensing on the wiki.
+If you're interested in writing your own sampling packages for CARP, see the description on
+how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that
-this package only works together with `carp_mobile_sensing`.
+To use this package, add the following to you `pubspec.yaml` file. Note that this package only works together with `carp_mobile_sensing`.
 
 `````dart
 dependencies:
@@ -62,10 +63,9 @@ Add the following to your app's `manifest.xml` file located in `android/app/src/
 
 ### iOS Integration
 
-Requires iOS 10 or later. Hence, in your `Podfile` in the `ios` folder of your app,
-make sure that the platform is set to `10.0`.
+Requires iOS 10 or later. Hence, in your `Podfile` in the `ios` folder of your app, make sure that the platform is set to `10.0`.
 
-```pod
+```ruby
 platform :ios, '10.0'
 ```
 
@@ -95,7 +95,7 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_esense_package/esense.dart';
 `````
 
-Before executing a study with an eSense measure, register this package in the [SamplingPackageRegistry](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
+Before executing a study with an eSense measure, register this package in the [`SamplingPackageRegistry`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
 
 `````dart
 SamplingPackageRegistry().register(ESenseSamplingPackage());
@@ -105,44 +105,35 @@ Collection of eSense measurements can be added to a study protocol like this.
 
 ```dart
 // Create a study protocol
-StudyProtocol protocol = StudyProtocol(
+var protocol = StudyProtocol(
   ownerId: 'owner@dtu.dk',
   name: 'eSense Sensing Example',
 );
 
-// define which devices are used for data collection - both phone and eSense
+// Define which devices are used for data collection - both phone and eSense
+// and add them to the protocol.
 var phone = Smartphone();
-var eSense = ESenseDevice(
-  deviceName: 'eSense-0223',
-  samplingRate: 10,
-);
+var eSense = ESenseDevice(samplingRate: 10);
 
 protocol
   ..addPrimaryDevice(phone)
   ..addConnectedDevice(eSense, phone);
 
-// Add a background task that immediately starts collecting step counts,
-// ambient light, screen activity, and battery level from the phone.
-protocol.addTaskControl(
-    ImmediateTrigger(),
-    BackgroundTask(measures: [
-      Measure(type: SensorSamplingPackage.STEP_COUNT),
-      Measure(type: SensorSamplingPackage.AMBIENT_LIGHT),
-      Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
-      Measure(type: DeviceSamplingPackage.BATTERY_STATE),
-    ]),
-    phone);
-
 // Add a background task that immediately starts collecting eSense button and
 // sensor events from the eSense device.
 protocol.addTaskControl(
-    ImmediateTrigger(),
-    BackgroundTask(measures: [
+  ImmediateTrigger(),
+  BackgroundTask(
+    measures: [
       Measure(type: ESenseSamplingPackage.ESENSE_BUTTON),
       Measure(type: ESenseSamplingPackage.ESENSE_SENSOR),
-    ]),
-    eSense);
+    ],
+  ),
+  eSense,
+);    
 ````
 
+Connection to an eSense device happens via the `ESenseDeviceManager` calling the `connect` method. This method uses the `bleName` of the device to connect via BLE.
+
 > [!IMPORTANT]  
-> The eSense device must be paired with the phone via BLE **before** CAMS can connect to it.
+> The physical eSense device must be paired with the phone via BLE **before** CAMS can connect to it.

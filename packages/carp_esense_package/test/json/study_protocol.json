@@ -7,8 +7,8 @@
    "description": "Testing the eSense sampling package with a simple study protocol."
   }
  },
- "id": "7fb3fd47-f61b-48c5-add2-39d4762bfc67",
- "createdOn": "2026-02-10T17:26:09.127460Z",
+ "id": "add76fb5-213a-4a04-98d2-6716001fc1dc",
+ "createdOn": "2026-04-13T10:07:19.210212Z",
  "version": 0,
  "ownerId": "alex@uni.dk",
  "name": "eSense package test",
@@ -56,10 +56,6 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.completedtask"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.heartbeat"
     }
    ]
   },
@@ -78,10 +74,6 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.completedtask"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.heartbeat"
     }
    ]
   },
@@ -112,6 +104,10 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.applifecycleevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.heartbeat"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -156,10 +152,6 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.completedtask"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.heartbeat"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",

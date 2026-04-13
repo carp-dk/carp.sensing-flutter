@@ -7,7 +7,8 @@ import 'package:carp_connectivity_package/connectivity.dart';
 /// This is a very simple example of how this sampling package is used with
 /// CARP Mobile Sensing (CAMS).
 /// NOTE, however, that the code below will not run.
-/// See the documentation on how to use CAMS: https://github.com/cph-cachet/carp.sensing-flutter/wiki
+/// See the documentation on how to use CAMS:
+/// https://docs.carp.dk/carp-mobile-sensing/
 void main() async {
   // Register this sampling package before using its measures
   SamplingPackageRegistry().register(ConnectivitySamplingPackage());

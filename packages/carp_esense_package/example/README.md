@@ -1,1 +1,0 @@
-# eSense example code

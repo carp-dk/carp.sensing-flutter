@@ -11,18 +11,19 @@ import 'package:carp_esense_package/esense.dart';
 /// needs to be deployed and executed in the CAMS framework.
 ///
 /// See the documentation on how to use CAMS:
-/// https://github.com/cph-cachet/carp.sensing-flutter/wiki
+/// https://docs.carp.dk/carp-mobile-sensing/
 void main() async {
-  // register this sampling package before using its measures
+  // Register this sampling package before using its measures
   SamplingPackageRegistry().register(ESenseSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
+  var protocol = StudyProtocol(
     ownerId: 'owner@dtu.dk',
     name: 'eSense Sensing Example',
   );
 
-  // define which devices are used for data collection - both phone and eSense
+  // Define which devices are used for data collection - both phone and eSense
+  // and add them to the protocol.
   var phone = Smartphone();
   var eSense = ESenseDevice(samplingRate: 10);
 
