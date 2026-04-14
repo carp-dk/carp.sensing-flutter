@@ -4,39 +4,35 @@
 #         DO NOT CHECK INTO GIT REPOSITORY
 #
 
-# configuration of the CARP server and the user who runs this study
+# configuration of the CARP server URI and the user credentials who uploads this study
 server:
-  # uri: https://cans.cachet.dk/
-  uri: https://carp.computerome.dk/auth/dev/realms/Carp
-  client_id: xxxxx
-  client_secret: xxxxx
-  username: xxx@cachet.dk
-  password: xxx
+  uri: https://dev.carp.dk
+  # username: xxx@cachet.dk
+  # password: xxx  
+  username: jakob@bardram.net
+  password: Christian
 
 # configuration of the study ID - used for upload of informed consent and translations
 study:
   study_id: 75b95ab5-bfc8-48ce-a5d4-d11b228ca74b
 
-# configuration of the protocol to be uploaded
+# configuration of the local path to the protocol, consent document, messages, 
+# and localization files to be uploaded
 protocol:
   path: carp/resources/protocol.json
 
-# configuration of the informed consent to be uploaded
 consent:
   path: carp/resources/consent.json
 
-# configuration of the messages to be uploaded
 message:
-  # the location of the messages to be uploaded
   path: carp/messages/
   # list the messages to be uploaded
   # add each message as a <name>.json file in the [path] folder
   messages:
     - 1
     - 2
-
+    
 localization:
-  # the location of the localization files to be uploaded
   path: carp/lang/
   # list the locales supported
   # for each locale, add a <locale>.json file in the [path] folder

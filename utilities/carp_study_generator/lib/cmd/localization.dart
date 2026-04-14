@@ -18,23 +18,22 @@ class LocalizationCommand extends AbstractCommand {
           json.decode(getLocaleJson(locale)) as Map<String, dynamic>;
 
       print("Uploading localization for locale: '$locale' to CARP.");
-      bool success = await CarpResourceManager()
-          .setLocalizations(Locale(locale), upLocalizations);
+      bool success = await CarpResourceManager().setLocalizations(
+        Locale(locale),
+        upLocalizations,
+      );
 
       if (success) {
         print('Upload successful - # elements: ${upLocalizations.length}');
 
         print("Downloading localization for locale: '$locale' from CARP.");
-        Map<String, String>? downLocalizations =
-            await CarpResourceManager().getLocalizations(
-          Locale(locale),
-          refresh: true,
-          cache: false,
-        );
+        Map<String, String>? downLocalizations = await CarpResourceManager()
+            .getLocalizations(Locale(locale), refresh: true, cache: false);
 
         (downLocalizations != null)
             ? print(
-                'Download successful - # elements: ${downLocalizations.length}')
+                'Download successful - # elements: ${downLocalizations.length}',
+              )
             : print('Download returned null - something went wrong.');
       } else {
         print('Upload not successful - something went wrong.');

@@ -1,207 +1,59 @@
 {
     "__type": "RPOrderedTask",
     "identifier": "consentTaskID",
-    "close_after_finished": true,
+    "closeAfterFinished": false,
     "steps": [
-        {
-            "__type": "RPInstructionStep",
-            "identifier": "instructionID",
-            "title": "Welcome!",
-            "text": "informed_consent.welcome_text",
-            "optional": false,
-            "detail_text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ultricies feugiat turpis nec efficitur. Integer in pharetra libero. Proin a leo eu enim porttitor hendrerit. Suspendisse vestibulum interdum mollis. Donec in sapien ut orci ultricies laoreet. Ut maximus ante id arcu feugiat scelerisque. Proin non rutrum libero. Aliquam blandit arcu ac dolor consequat maximus. Integer et dolor quis quam tempor porta quis vel nibh. Phasellus ullamcorper fringilla lorem, ac tempus sem cursus a. Aliquam maximus facilisis quam. Morbi hendrerit tempor tellus, ac hendrerit augue tincidunt eu. Cras convallis lorem at nulla mattis tristique.",
-            "footnote": "(1) Important footnote",
-            "image_path": "assets/images/waving-hand.png"
-        },
         {
             "__type": "RPVisualConsentStep",
             "identifier": "visualStep",
             "title": "",
             "optional": false,
-            "consent_document": {
+            "consentDocument": {
                 "__type": "RPConsentDocument",
-                "signatures": [
-                    {
-                        "__type": "RPConsentSignature",
-                        "requires_name": true,
-                        "requires_signature_image": true,
-                        "identifier": "consentSignatureID"
-                    }
-                ],
-                "title": "Informed Consent - Full Version",
+                "signatures": [],
+                "title": "ic.consent.intro",
                 "sections": [
                     {
                         "__type": "RPConsentSection",
                         "type": "Overview",
-                        "title": "Overview",
-                        "summary": "Welcome! This is a summary for Overview",
-                        "content": "Overview dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
+                        "title": "ic.overview.title",
+                        "summary": "ic.overview.summary",
+                        "content": "ic.overview.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "DataGathering",
-                        "title": "Data Gathering",
-                        "summary": "This is a summary for Data Gathering.",
-                        "content": "Data Gathering dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Privacy",
-                        "title": "Privacy",
-                        "summary": "This is a summary for Privacy.",
-                        "content": "Privacy dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
+                        "title": "ic.data.title",
+                        "summary": "ic.data.summary",
+                        "content": "ic.data.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "DataUse",
-                        "title": "Data Use",
-                        "summary": "This is a summary for Data Use.",
-                        "content": "Data Use dolor sit amet"
+                        "title": "ic.data_use.title",
+                        "summary": "ic.data_use.summary",
+                        "content": "ic.data_use.content"
                     },
                     {
                         "__type": "RPConsentSection",
-                        "type": "TimeCommitment",
-                        "title": "Time Commitment",
-                        "summary": "This is a summary for Time Commitment.",
-                        "content": "Time commitment dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Duration",
-                        "title": "Study duration",
-                        "summary": "This is a summary for Duration.",
-                        "content": "Duration dolor sit amet"
+                        "type": "Privacy",
+                        "title": "ic.privacy.title",
+                        "summary": "ic.privacy.summary",
+                        "content": "ic.privacy.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "StudyTasks",
-                        "title": "What should you do?",
-                        "summary": "This is a summary for Study Tasks.",
-                        "content": "Study Tasks dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "StudySurvey",
-                        "title": "Study Survey",
-                        "summary": "This is a summary for Study Survey.",
-                        "content": "Study Survey dolor sit amet"
+                        "title": "ic.tasks.title",
+                        "summary": "ic.tasks.summary",
+                        "content": "ic.tasks.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "Withdrawing",
-                        "title": "Withdrawing",
-                        "summary": "This is a summary for Withdrawing.",
-                        "content": "Withdrawing dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "YourRights",
-                        "title": "Your rights",
-                        "summary": "This is a summary for Your Rights.",
-                        "content": "Your Rights dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Welcome",
-                        "title": "Welcome",
-                        "summary": "This is a summary for Welcome.",
-                        "content": "Welcome dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "AboutUs",
-                        "title": "About us",
-                        "summary": "This is a summary for About Us.",
-                        "content": "About Us dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Goals",
-                        "title": "Our goal",
-                        "summary": "This is a summary for Goals.",
-                        "content": "Goals dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Benefits",
-                        "title": "Benefits for you",
-                        "summary": "This is a summary for Benefits.",
-                        "content": "Benefits dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Location",
-                        "title": "Location",
-                        "summary": "This is a summary for Location.",
-                        "content": "Location dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Health",
-                        "title": "Health",
-                        "summary": "This is a summary for Health.",
-                        "content": "Health dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "UserDataCollection",
-                        "title": "Data collection from you",
-                        "summary": "This study will ask you to provide the information about the following categories:",
-                        "data_types": [
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Alcohol",
-                                "data_information": "You have to input some info about alcohol in the alcohol card  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ut aliquet augue, sed maximus sapien. Cras non sem vulputate, tincidunt est in, euismod orci. Aenean elit nisl, convallis vel lacus eget, pellentesque laoreet nunc."
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Mood",
-                                "data_information": "You have to input some info about your mood in the mood card"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Weight",
-                                "data_information": "You have to input some info about your weight in the weight card"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Medications",
-                                "data_information": "You have to input some info about your medications in the medications card"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Smoking",
-                                "data_information": "You have to input some info about your smoking in the smoking card"
-                            }
-                        ]
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "PassiveDataCollection",
-                        "title": "Passive data collection",
-                        "summary": "This study will passively collect data about the following categories:",
-                        "data_types": [
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Steps",
-                                "data_information": "Your daily step counts as collected by the phone."
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Activity",
-                                "data_information": "Your different types of activities as detected by the phone"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Location",
-                                "data_information": "Your location as you move around"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Noise",
-                                "data_information": "Background noise as detected by the phone's microphone"
-                            }
-                        ]
+                        "title": "ic.participation.title",
+                        "summary": "ic.participation.summary",
+                        "content": "ic.participation.content"
                     }
                 ]
             }
@@ -209,203 +61,65 @@
         {
             "__type": "RPConsentReviewStep",
             "identifier": "consentreviewstepID",
-            "title": "",
+            "title": "ic.review.title",
+            "text": "ic.review.text",
             "optional": false,
-            "consent_document": {
+            "consentDocument": {
                 "__type": "RPConsentDocument",
-                "signatures": [
-                    {
-                        "__type": "RPConsentSignature",
-                        "requires_name": true,
-                        "requires_signature_image": true,
-                        "identifier": "consentSignatureID"
-                    }
-                ],
-                "title": "Informed Consent - Full Version",
+                "signatures": [],
+                "title": "ic.consent.intro",
                 "sections": [
                     {
                         "__type": "RPConsentSection",
                         "type": "Overview",
-                        "title": "Overview",
-                        "summary": "Welcome! This is a summary for Overview",
-                        "content": "Overview dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
+                        "title": "ic.overview.title",
+                        "summary": "ic.overview.summary",
+                        "content": "ic.overview.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "DataGathering",
-                        "title": "Data Gathering",
-                        "summary": "This is a summary for Data Gathering.",
-                        "content": "Data Gathering dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Privacy",
-                        "title": "Privacy",
-                        "summary": "This is a summary for Privacy.",
-                        "content": "Privacy dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
+                        "title": "ic.data.title",
+                        "summary": "ic.data.summary",
+                        "content": "ic.data.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "DataUse",
-                        "title": "Data Use",
-                        "summary": "This is a summary for Data Use.",
-                        "content": "Data Use dolor sit amet"
+                        "title": "ic.data_use.title",
+                        "summary": "ic.data_use.summary",
+                        "content": "ic.data_use.content"
                     },
                     {
                         "__type": "RPConsentSection",
-                        "type": "TimeCommitment",
-                        "title": "Time Commitment",
-                        "summary": "This is a summary for Time Commitment.",
-                        "content": "Time commitment dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Duration",
-                        "title": "Study duration",
-                        "summary": "This is a summary for Duration.",
-                        "content": "Duration dolor sit amet"
+                        "type": "Privacy",
+                        "title": "ic.privacy.title",
+                        "summary": "ic.privacy.summary",
+                        "content": "ic.privacy.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "StudyTasks",
-                        "title": "What should you do?",
-                        "summary": "This is a summary for Study Tasks.",
-                        "content": "Study Tasks dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "StudySurvey",
-                        "title": "Study Survey",
-                        "summary": "This is a summary for Study Survey.",
-                        "content": "Study Survey dolor sit amet"
+                        "title": "ic.tasks.title",
+                        "summary": "ic.tasks.summary",
+                        "content": "ic.tasks.content"
                     },
                     {
                         "__type": "RPConsentSection",
                         "type": "Withdrawing",
-                        "title": "Withdrawing",
-                        "summary": "This is a summary for Withdrawing.",
-                        "content": "Withdrawing dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "YourRights",
-                        "title": "Your rights",
-                        "summary": "This is a summary for Your Rights.",
-                        "content": "Your Rights dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Welcome",
-                        "title": "Welcome",
-                        "summary": "This is a summary for Welcome.",
-                        "content": "Welcome dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "AboutUs",
-                        "title": "About us",
-                        "summary": "This is a summary for About Us.",
-                        "content": "About Us dolor sit amet, consectetur adipiscing elit. Aenean a mi porttitor, bibendum elit elementum, placerat augue. Quisque eu sollicitudin tortor, sed egestas ante. Sed convallis, mauris quis malesuada convallis, lectus ante vestibulum ante, vel lobortis magna dui eu nisl. Proin ac pellentesque nulla. Morbi facilisis dui aliquam quam pulvinar efficitur. Duis at lorem vitae leo pharetra ultricies. Proin viverra eleifend varius. Nulla sed nisi ut enim placerat venenatis. Maecenas imperdiet accumsan ligula id varius. Donec rhoncus gravida odio vitae convallis.Nullam at tempor erat. Praesent euismod orci nec sollicitudin placerat. Nunc nec nibh efficitur, mattis ante sit amet, scelerisque libero. Aliquam et mollis erat. Pellentesque aliquam convallis turpis sit amet molestie. Duis accumsan venenatis imperdiet. Integer quis est non elit varius mattis. Donec hendrerit in nisl eget sollicitudin. Nulla sapien lacus, mattis non orci sed, commodo tincidunt risus."
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Goals",
-                        "title": "Our goal",
-                        "summary": "This is a summary for Goals.",
-                        "content": "Goals dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Benefits",
-                        "title": "Benefits for you",
-                        "summary": "This is a summary for Benefits.",
-                        "content": "Benefits dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Location",
-                        "title": "Location",
-                        "summary": "This is a summary for Location.",
-                        "content": "Location dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "Health",
-                        "title": "Health",
-                        "summary": "This is a summary for Health.",
-                        "content": "Health dolor sit amet"
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "UserDataCollection",
-                        "title": "Data collection from you",
-                        "summary": "This study will ask you to provide the information about the following categories:",
-                        "data_types": [
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Alcohol",
-                                "data_information": "You have to input some info about alcohol in the alcohol card  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ut aliquet augue, sed maximus sapien. Cras non sem vulputate, tincidunt est in, euismod orci. Aenean elit nisl, convallis vel lacus eget, pellentesque laoreet nunc."
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Mood",
-                                "data_information": "You have to input some info about your mood in the mood card"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Weight",
-                                "data_information": "You have to input some info about your weight in the weight card"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Medications",
-                                "data_information": "You have to input some info about your medications in the medications card"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Smoking",
-                                "data_information": "You have to input some info about your smoking in the smoking card"
-                            }
-                        ]
-                    },
-                    {
-                        "__type": "RPConsentSection",
-                        "type": "PassiveDataCollection",
-                        "title": "Passive data collection",
-                        "summary": "This study will passively collect data about the following categories:",
-                        "data_types": [
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Steps",
-                                "data_information": "Your daily step counts as collected by the phone."
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Activity",
-                                "data_information": "Your different types of activities as detected by the phone"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Location",
-                                "data_information": "Your location as you move around"
-                            },
-                            {
-                                "__type": "RPDataTypeSection",
-                                "data_name": "Noise",
-                                "data_information": "Background noise as detected by the phone's microphone"
-                            }
-                        ]
+                        "title": "ic.participation.title",
+                        "summary": "ic.participation.summary",
+                        "content": "ic.participation.content"
                     }
                 ]
             },
-            "text": "informed_consent.agree_confirm",
-            "reason_for_consent": "informed_consent.agree_text"
+            "reasonForConsent": "ic.review.reason"
         },
         {
             "__type": "RPCompletionStep",
             "identifier": "completionID",
-            "title": "informed_consent.thanks",
-            "text": "informed_consent.document_saved",
+            "title": "ic.completion.title",
+            "text": "ic.completion.text",
             "optional": false
         }
     ]
