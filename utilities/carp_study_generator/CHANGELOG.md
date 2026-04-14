@@ -1,3 +1,7 @@
+## 2.0.0
+
+* upgrade to CARP Core and CAMS API level 2.0.0
+
 ## 1.5.0
 
 * upgrade to carp_mobile_sensing: ^1.5.0

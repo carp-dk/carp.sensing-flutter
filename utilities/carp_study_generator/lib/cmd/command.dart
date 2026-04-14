@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+
 part of '../carp_study_generator.dart';
 
 /// The interface for all CARP Commands.
@@ -22,8 +24,8 @@ abstract class AbstractCommand implements Command {
 
   CarpApp get app => _app ??= CarpApp(name: "CAWS @ DTU", uri: uri);
 
-  String get clientId => _yaml['server']['client_id'].toString();
-  String get clientSecret => _yaml['server']['client_secret'].toString();
+  // String get clientId => _yaml['server']['client_id'].toString();
+  // String get clientSecret => _yaml['server']['client_secret'].toString();
   String get username => _yaml['server']['username'].toString();
   String get password => _yaml['server']['password'].toString();
 
@@ -51,9 +53,8 @@ abstract class AbstractCommand implements Command {
     CarpDataManager();
     ResearchPackage.ensureInitialized();
     CognitionPackage.ensureInitialized();
-
-    // make sure not to mess with CAMS
-    Settings().saveAppTaskQueue = false;
+    SharedPreferences.setMockInitialValues({});
+    Settings().debugLevel = DebugLevel.none;
 
     _yaml ??= loadYaml(File('carp/carpspec.yaml').readAsStringSync());
 
@@ -70,45 +71,40 @@ abstract class AbstractCommand implements Command {
   }
 
   /// The configuration of the CARP server app.
-  // CarpApp get app {
-  void configure() {
+  Future<void> configure() async {
     if (studyId.isEmpty) {
       throw Exception("The study ID cannot be empty - '$studyId'");
     }
+
+    await CarpAuthService().configure(authProperties);
 
     CarpService().configure(
       app,
       SmartphoneStudy(
         studyId: studyId,
         studyDeploymentId: studyDeploymentId,
-        deviceRoleName:
-            'ignored', // this is not used for the command line utilities
+        deviceRoleName: 'ignored',
       ),
     );
   }
 
-  // The authentication configuration
-  CarpAuthProperties get authProperties {
-    if (_authProperties == null) {}
-    CarpAuthProperties(
-      authURL: uri,
-      clientId: 'studies-app',
-      redirectURI: Uri.parse('carp-studies-auth://auth'),
-      // For authentication at CAWS the path is '/auth/realms/Carp'
-      discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
-    );
-    return _authProperties!;
-  }
+  /// The authentication configuration
+  CarpAuthProperties get authProperties =>
+      _authProperties ??= CarpAuthProperties(
+        authURL: uri,
+        clientId: 'studies-app',
+        redirectURI: Uri.parse('carp-studies-auth://auth'),
+        // For authentication at CAWS the path is '/auth/realms/Carp'
+        discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
+      );
 
   /// Authenticate at the CARP server.
   Future<void> authenticate() async {
-    configure();
-    print('Authenticating to the CARP Server...');
+    await configure();
     await CarpAuthService().authenticateWithUsernamePassword(
       username: username,
       password: password,
     );
-    print("Authenticated as user: '$username'");
     CarpProtocolService().configureFrom(CarpService());
   }
 }

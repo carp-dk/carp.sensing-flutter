@@ -7,10 +7,12 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:yaml/yaml.dart';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:yaml/yaml.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';

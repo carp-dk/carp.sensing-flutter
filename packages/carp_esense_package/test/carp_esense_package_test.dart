@@ -69,7 +69,7 @@ void main() {
     print(protocol);
     print(toJsonString(protocol));
     expect(protocol.ownerId, 'alex@uni.dk');
-    await writeToFile(toJsonString(protocol), 'study_protocol.json');
+    await writeToFile(toJsonString(protocol), 'protocol.json');
   });
 
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
@@ -82,7 +82,7 @@ void main() {
 
   test('JSON File -> StudyProtocol', () async {
     // Read the study protocol from json file
-    String plainJson = File('test/json/study_protocol.json').readAsStringSync();
+    String plainJson = File('test/json/protocol.json').readAsStringSync();
 
     StudyProtocol protocol = StudyProtocol.fromJson(
       json.decode(plainJson) as Map<String, dynamic>,

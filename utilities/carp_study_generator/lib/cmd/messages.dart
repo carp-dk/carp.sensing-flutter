@@ -13,7 +13,8 @@ class MessagesCommand extends AbstractCommand {
     for (var element in messageIds) {
       String id = element.toString();
       Message message = Message.fromJson(
-          json.decode(getMessageJson(id)) as Map<String, dynamic>);
+        json.decode(getMessageJson(id)) as Map<String, dynamic>,
+      );
 
       await CarpResourceManager().setMessage(message);
       print("Uploaded message '$id' - id: '${message.id}'");

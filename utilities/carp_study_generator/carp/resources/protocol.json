@@ -1,128 +1,102 @@
 {
     "applicationData": {
+        "protocolApiLevel": "2.0",
+        "applicationName": "carp_mobile_sensing_app",
         "studyDescription": {
             "__type": "StudyDescription",
-            "title": "study.description.title",
-            "description": "study.description.description",
-            "purpose": "study.description.purpose",
-            "studyDescriptionUrl": "study.description.url",
-            "privacyPolicyUrl": "study.description.privacy",
-            "responsible": {
-                "__type": "StudyResponsible",
-                "id": "study.responsible.id",
-                "name": "study.responsible.name",
-                "title": "study.responsible.title",
-                "email": "study.responsible.email",
-                "address": "study.responsible.address",
-                "affiliation": "study.responsible.affiliation"
-            }
+            "title": "CAMS App - Demo Study",
+            "description": "A study demonstrating most measures and probes. Used for the demo app."
         },
         "dataEndPoint": {
             "__type": "CarpDataEndPoint",
             "type": "CAWS",
             "dataFormat": "dk.cachet.carp",
-            "uploadMethod": "datapoint",
+            "uploadMethod": "stream",
             "name": "CARP Web Services",
             "onlyUploadOnWiFi": false,
             "uploadInterval": 10,
-            "deleteWhenUploaded": true
+            "deleteWhenUploaded": false,
+            "compress": true
         }
     },
-    "id": "6339a440-da0f-11ed-b2d2-3d2051b5c70c",
-    "createdOn": "2023-04-13T15:25:14.244927Z",
+    "id": "6323007c-37dc-4a53-a366-86743999e11a",
+    "createdOn": "2026-04-14T10:52:52.172557Z",
     "version": 0,
-    "description": "study.description.description",
-    "ownerId": "john_doe",
-    "name": "CARP Study App Demo Protocol",
+    "ownerId": "979b408d-784e-4b1b-bb1e-ff9204e072f3",
+    "name": "CAMS App - Demo Study Protocol",
+    "participantRoles": [
+        {
+            "role": "Participant",
+            "isOptional": false
+        }
+    ],
     "primaryDevices": [
         {
-            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-            "roleName": "Primary Phone",
+            "__type": "dk.carp.cams.devices.Smartphone",
+            "roleName": "Smartphone",
+            "isOptional": false,
             "defaultSamplingConfiguration": {},
             "isPrimaryDevice": true
         }
     ],
     "connectedDevices": [
         {
-            "__type": "dk.cachet.carp.common.application.devices.ESenseDevice",
-            "roleName": "eSense",
-            "isOptional": true,
-            "supportedDataTypes": [
-                "dk.cachet.carp.esense.button",
-                "dk.cachet.carp.esense.sensor"
-            ],
-            "defaultSamplingConfiguration": {}
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.devices.PolarDevice",
-            "roleName": "Polar HR Device",
-            "isOptional": true,
-            "supportedDataTypes": [
-                "dk.cachet.carp.polar.accelerometer",
-                "dk.cachet.carp.polar.gyroscope",
-                "dk.cachet.carp.polar.magnetometer",
-                "dk.cachet.carp.polar.ppg",
-                "dk.cachet.carp.polar.ppi",
-                "dk.cachet.carp.polar.ecg",
-                "dk.cachet.carp.polar.hr"
-            ],
-            "defaultSamplingConfiguration": {}
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.devices.LocationService",
+            "__type": "dk.carp.cams.devices.LocationService",
             "roleName": "Location Service",
             "isOptional": true,
             "defaultSamplingConfiguration": {},
             "accuracy": "balanced",
             "distance": 0.0,
-            "interval": 60000000
+            "interval": 60000000,
+            "notificationOnTapBringToFront": false
         },
         {
-            "__type": "dk.cachet.carp.common.application.devices.WeatherService",
+            "__type": "dk.carp.cams.devices.WeatherService",
             "roleName": "Weather Service",
             "isOptional": true,
             "defaultSamplingConfiguration": {},
-            "apiKey": "12b6e28582eb9298577c734a31ba9f4f"
+            "apiKey": "66cfd8479930ed026605bc79c929ef76"
         },
         {
-            "__type": "dk.cachet.carp.common.application.devices.AirQualityService",
-            "roleName": "Air Quality Service",
+            "__type": "dk.carp.cams.devices.PolarDevice",
+            "roleName": "Polar HR Device",
             "isOptional": true,
             "defaultSamplingConfiguration": {},
-            "apiKey": "9e538456b2b85c92647d8b65090e29f957638c77"
+            "serviceUuids": [],
+            "namePrefix": "Polar",
+            "allowDuplicates": true
+        },
+        {
+            "__type": "dk.carp.cams.devices.HealthService",
+            "roleName": "Health Service",
+            "isOptional": true,
+            "defaultSamplingConfiguration": {}
         }
     ],
     "connections": [
         {
-            "roleName": "eSense",
-            "connectedToRoleName": "Primary Phone"
-        },
-        {
-            "roleName": "Polar HR Device",
-            "connectedToRoleName": "Primary Phone"
-        },
-        {
             "roleName": "Location Service",
-            "connectedToRoleName": "Primary Phone"
+            "connectedToRoleName": "Smartphone"
         },
         {
             "roleName": "Weather Service",
-            "connectedToRoleName": "Primary Phone"
+            "connectedToRoleName": "Smartphone"
         },
         {
-            "roleName": "Air Quality Service",
-            "connectedToRoleName": "Primary Phone"
+            "roleName": "Polar HR Device",
+            "connectedToRoleName": "Smartphone"
+        },
+        {
+            "roleName": "Health Service",
+            "connectedToRoleName": "Smartphone"
         }
     ],
+    "assignedDevices": {},
     "tasks": [
         {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #26",
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Smartphone",
             "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.coverage"
-                },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.error"
@@ -139,93 +113,29 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #27",
+            "name": "Device Info Task",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.triggeredtask"
+                    "type": "dk.cachet.carp.deviceinformation"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.completedtask"
+                    "type": "dk.cachet.carp.applicationinformation"
                 }
             ]
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #28",
+            "name": "Task #9",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.triggeredtask"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.completedtask"
-                }
-            ]
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #29",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.triggeredtask"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.completedtask"
-                }
-            ]
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #30",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.triggeredtask"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.completedtask"
-                }
-            ]
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #31",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.triggeredtask"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.completedtask"
-                }
-            ]
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #32",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.ambientlight"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.stepcount"
+                    "type": "dk.cachet.carp.heartbeat"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.freememory"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.deviceinformation"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -237,24 +147,73 @@
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.applifecycleevent"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.stepevent"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.ambientlight"
+                }
+            ]
+        },
+        {
+            "__type": "dk.cachet.carp.common.application.tasks.AppTask",
+            "name": "Device Info App Task",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.deviceinformation"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedapptask.sensing"
+                }
+            ],
+            "type": "sensing",
+            "title": "User Task",
+            "description": "Please click here to collect Device Information.",
+            "instructions": "",
+            "notification": true
+        },
+        {
+            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+            "name": "Task #10",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.activity"
                 }
             ]
         },
         {
-            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #33",
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Location Service",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.location"
+                    "type": "dk.cachet.carp.error"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.triggeredtask"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedtask"
                 }
             ]
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #34",
+            "name": "Task #11",
             "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.location"
+                },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.mobility"
@@ -262,8 +221,26 @@
             ]
         },
         {
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Weather Service",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.error"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.triggeredtask"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedtask"
+                }
+            ]
+        },
+        {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #35",
+            "name": "Task #12",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -273,939 +250,332 @@
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #36",
+            "name": "Task #13",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.airquality"
+                    "type": "dk.cachet.carp.noise",
+                    "overrideSamplingConfiguration": {
+                        "__type": "dk.cachet.carp.common.application.sampling.PeriodicSamplingConfiguration",
+                        "interval": 23000000,
+                        "duration": 5000000
+                    }
                 }
             ]
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #37",
+            "name": "Task #14",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.esense.button"
+                    "type": "dk.cachet.carp.connectivity"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.esense.sensor"
+                    "type": "dk.cachet.carp.wifi"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.bluetooth",
+                    "overrideSamplingConfiguration": {
+                        "__type": "dk.cachet.carp.common.application.sampling.PeriodicSamplingConfiguration",
+                        "interval": 33000000,
+                        "duration": 5000000
+                    }
                 }
             ]
         },
         {
             "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-            "name": "Task #38",
+            "name": "Task #15",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.textmessage"
+                }
+            ]
+        },
+        {
+            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+            "name": "Task #16",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.calendar"
+                }
+            ]
+        },
+        {
+            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+            "name": "Task #17",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.apps"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.appusage"
+                }
+            ]
+        },
+        {
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Polar HR Device",
+            "measures": [
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.error"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.triggeredtask"
+                },
+                {
+                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+                    "type": "dk.cachet.carp.completedtask"
+                }
+            ]
+        },
+        {
+            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+            "name": "Polar Task",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
                     "type": "dk.cachet.carp.polar.hr"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.polar.ecg"
                 }
             ]
         },
         {
-            "__type": "dk.cachet.carp.common.application.tasks.AppTask",
-            "name": "Task #39",
+            "__type": "dk.cachet.carp.common.application.tasks.MonitoringTask",
+            "name": "Monitoring Health Service",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.location"
+                    "type": "dk.cachet.carp.error"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.weather"
+                    "type": "dk.cachet.carp.triggeredtask"
                 },
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.airquality"
+                    "type": "dk.cachet.carp.completedtask"
                 }
-            ],
-            "type": "one_time_sensing",
-            "title": "environment.title",
-            "description": "environment.description",
-            "instructions": "",
-            "notification": false
+            ]
         },
         {
-            "__type": "dk.cachet.carp.common.application.tasks.RPAppTask",
-            "name": "Task #40",
+            "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+            "name": "Task #18",
             "measures": [
                 {
                     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.location"
-                }
-            ],
-            "type": "survey",
-            "title": "Demographics",
-            "description": "A short 4-item survey on your background.",
-            "instructions": "",
-            "minutesToComplete": 2,
-            "expire": 432000000000,
-            "notification": false,
-            "rpTask": {
-                "__type": "RPOrderedTask",
-                "identifier": "demographic_survey",
-                "close_after_finished": true,
-                "steps": [
-                    {
-                        "__type": "RPQuestionStep",
-                        "identifier": "demographic_1",
-                        "title": "Which is your biological sex?",
-                        "optional": false,
-                        "answer_format": {
-                            "__type": "RPChoiceAnswerFormat",
-                            "question_type": "SingleChoice",
-                            "choices": [
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Femal",
-                                    "value": 1,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Male",
-                                    "value": 2,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Other",
-                                    "value": 3,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Prefer not to say",
-                                    "value": 4,
-                                    "is_free_text": false
-                                }
-                            ],
-                            "answer_style": "SingleChoice"
-                        }
-                    },
-                    {
-                        "__type": "RPQuestionStep",
-                        "identifier": "demographic_2",
-                        "title": "How old are you?",
-                        "optional": false,
-                        "answer_format": {
-                            "__type": "RPChoiceAnswerFormat",
-                            "question_type": "SingleChoice",
-                            "choices": [
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Under 20",
-                                    "value": 1,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "20-29",
-                                    "value": 2,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "30-39",
-                                    "value": 3,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "40-49",
-                                    "value": 4,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "50-59",
-                                    "value": 5,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "60-69",
-                                    "value": 6,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "70-79",
-                                    "value": 7,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "80-89",
-                                    "value": 8,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "90 and above",
-                                    "value": 9,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Prefer not to say",
-                                    "value": 10,
-                                    "is_free_text": false
-                                }
-                            ],
-                            "answer_style": "SingleChoice"
-                        }
-                    },
-                    {
-                        "__type": "RPQuestionStep",
-                        "identifier": "demographic_3",
-                        "title": "Do you have any of these medical conditions?",
-                        "optional": false,
-                        "answer_format": {
-                            "__type": "RPChoiceAnswerFormat",
-                            "question_type": "MultipleChoice",
-                            "choices": [
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "None",
-                                    "value": 1,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Asthma",
-                                    "value": 2,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Cystic fibrosis",
-                                    "value": 3,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "COPD/Emphysema",
-                                    "value": 4,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Pulmonary fibrosis",
-                                    "value": 5,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Other lung disease  ",
-                                    "value": 6,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "High Blood Pressure",
-                                    "value": 7,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Angina",
-                                    "value": 8,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Previous stroke or Transient ischaemic attack  ",
-                                    "value": 9,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Valvular heart disease",
-                                    "value": 10,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Previous heart attack",
-                                    "value": 11,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Other heart disease",
-                                    "value": 12,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Diabetes",
-                                    "value": 13,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Cancer",
-                                    "value": 14,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Previous organ transplant",
-                                    "value": 15,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "HIV or impaired immune system",
-                                    "value": 16,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Other long-term condition",
-                                    "value": 17,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Prefer not to say",
-                                    "value": 18,
-                                    "is_free_text": false
-                                }
-                            ],
-                            "answer_style": "MultipleChoice"
-                        }
-                    },
-                    {
-                        "__type": "RPQuestionStep",
-                        "identifier": "demographic_4",
-                        "title": "Do you, or have you, ever smoked (including e-cigarettes)?",
-                        "optional": false,
-                        "answer_format": {
-                            "__type": "RPChoiceAnswerFormat",
-                            "question_type": "SingleChoice",
-                            "choices": [
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Never smoked",
-                                    "value": 1,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Ex-smoker",
-                                    "value": 2,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Current smoker (less than once a day",
-                                    "value": 3,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Current smoker (1-10 cigarettes pr day",
-                                    "value": 4,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Current smoker (11-20 cigarettes pr day",
-                                    "value": 5,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Current smoker (21+ cigarettes pr day",
-                                    "value": 6,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Prefer not to say",
-                                    "value": 7,
-                                    "is_free_text": false
-                                }
-                            ],
-                            "answer_style": "SingleChoice"
-                        }
+                    "type": "dk.cachet.carp.health",
+                    "overrideSamplingConfiguration": {
+                        "__type": "dk.cachet.carp.common.application.sampling.HealthSamplingConfiguration",
+                        "past": 2592000000000,
+                        "future": 86400000000,
+                        "healthDataTypes": [
+                            "STEPS",
+                            "BASAL_ENERGY_BURNED",
+                            "WEIGHT",
+                            "SLEEP_SESSION",
+                            "ELECTRODERMAL_ACTIVITY"
+                        ]
                     }
-                ]
-            }
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.RPAppTask",
-            "name": "Task #41",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.location"
                 }
-            ],
-            "type": "survey",
-            "title": "Symptoms",
-            "description": "A short 1-item survey on your daily symptoms.",
-            "instructions": "",
-            "minutesToComplete": 1,
-            "expire": 86400000000,
-            "notification": true,
-            "rpTask": {
-                "__type": "RPOrderedTask",
-                "identifier": "symptoms_survey",
-                "close_after_finished": true,
-                "steps": [
-                    {
-                        "__type": "RPQuestionStep",
-                        "identifier": "symptoms_1",
-                        "title": "Do you have any of the following symptoms today?",
-                        "optional": false,
-                        "answer_format": {
-                            "__type": "RPChoiceAnswerFormat",
-                            "question_type": "MultipleChoice",
-                            "choices": [
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "None",
-                                    "value": 1,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Fever (warmer than usual)",
-                                    "value": 2,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Dry cough",
-                                    "value": 3,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Wet cough",
-                                    "value": 4,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Sore throat, runny or blocked nose",
-                                    "value": 5,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Loss of taste and smell",
-                                    "value": 6,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Difficulty breathing or feeling short of breath",
-                                    "value": 7,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Tightness in your chest",
-                                    "value": 8,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Dizziness, confusion or vertigo",
-                                    "value": 9,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Headache",
-                                    "value": 10,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Muscle aches",
-                                    "value": 11,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Chills",
-                                    "value": 12,
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Prefer not to say",
-                                    "value": 13,
-                                    "is_free_text": false
-                                }
-                            ],
-                            "answer_style": "MultipleChoice"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.AppTask",
-            "name": "Task #42",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.audio"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.location"
-                }
-            ],
-            "type": "audio",
-            "title": "reading.title",
-            "description": "reading.description",
-            "instructions": "reading.instructions",
-            "minutesToComplete": 3,
-            "notification": false
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.AppTask",
-            "name": "Task #43",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.image"
-                }
-            ],
-            "type": "image",
-            "title": "wound.title",
-            "description": "wound.description",
-            "instructions": "wound.instructions",
-            "minutesToComplete": 3,
-            "notification": false
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.RPAppTask",
-            "name": "Task #44",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.acceleration"
-                },
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.rotation"
-                }
-            ],
-            "type": "cognition",
-            "title": "parkinsons.title",
-            "description": "parkinsons.description",
-            "instructions": "",
-            "minutesToComplete": 3,
-            "notification": false,
-            "rpTask": {
-                "__type": "RPOrderedTask",
-                "identifier": "parkinsons_assessment",
-                "close_after_finished": true,
-                "steps": [
-                    {
-                        "__type": "RPInstructionStep",
-                        "identifier": "parkinsons_instruction",
-                        "title": "parkinsons.instructions.title",
-                        "text": "parkinsons.instructions.text",
-                        "optional": false
-                    },
-                    {
-                        "__type": "RPFlankerActivity",
-                        "identifier": "flanker_1",
-                        "title": "RPActivityStep",
-                        "optional": false,
-                        "include_instructions": true,
-                        "include_results": true,
-                        "length_of_test": 30,
-                        "number_of_cards": 10
-                    },
-                    {
-                        "__type": "RPTappingActivity",
-                        "identifier": "tapping_1",
-                        "title": "RPActivityStep",
-                        "optional": false,
-                        "include_instructions": true,
-                        "include_results": true,
-                        "length_of_test": 10
-                    }
-                ]
-            }
-        },
-        {
-            "__type": "dk.cachet.carp.common.application.tasks.RPAppTask",
-            "name": "Task #45",
-            "measures": [
-                {
-                    "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                    "type": "dk.cachet.carp.location"
-                }
-            ],
-            "type": "survey",
-            "title": "The Parkinsons Disease Activities of Daily Living Scale",
-            "description": "A new simple and brief subjective measure of disability in Parkinsons disease",
-            "instructions": "",
-            "minutesToComplete": 1,
-            "expire": 86400000000,
-            "notification": true,
-            "rpTask": {
-                "__type": "RPOrderedTask",
-                "identifier": "parkinsons_survey",
-                "close_after_finished": true,
-                "steps": [
-                    {
-                        "__type": "RPQuestionStep",
-                        "identifier": "parkinsons_1",
-                        "title": "Please tick one of the descriptions that best describes how your Parkinsons disease has affected your day-to-day activities in the last month.",
-                        "optional": false,
-                        "answer_format": {
-                            "__type": "RPChoiceAnswerFormat",
-                            "question_type": "SingleChoice",
-                            "choices": [
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "No difficulties with day-to-day activities.",
-                                    "value": 1,
-                                    "detail_text": "For example: Your Parkinsons disease at present is not affecting your daily living.",
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Mild difficulties with day-to-day activities.",
-                                    "value": 2,
-                                    "detail_text": "For example: Slowness with some aspects of housework, gardening or shopping. Able to dress and manage personal hygiene completely independently but rate is slower. You may feel that your medication is not quite effective as it was.",
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Moderate difficulties with day-to-day activities.",
-                                    "value": 3,
-                                    "detail_text": "For example: Your Parkinsons disease is interfering with your daily activities. It is increasingly difficult to do simple activities without some help such as rising from a chair, washing, dressing, shopping, housework. You may have some difficulties walking and may require assistance. Difficulties with recreational activities or the ability to drive a car. The medication is now less effective.",
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "High levels of difficulties with day-to-day activities.",
-                                    "value": 4,
-                                    "detail_text": "For example: You now require much more assistance with activities of daily living such as washing, dressing, housework or feeding yourself. You may have greater difficulties with mobility and find you are becoming more dependent for assistance from others or aids and appliances. Your medication appears to be significantly less effective.",
-                                    "is_free_text": false
-                                },
-                                {
-                                    "__type": "RPChoice",
-                                    "text": "Extreme difficulties with day-to-day activities.",
-                                    "value": 5,
-                                    "detail_text": "For example: You require assistance in all daily activities. These may include dressing, washing, feeding yourself or walking unaided. You may now be housebound and obtain little or no benefit from your medication.",
-                                    "is_free_text": false
-                                }
-                            ],
-                            "answer_style": "SingleChoice"
-                        }
-                    }
-                ]
-            }
+            ]
         }
     ],
     "triggers": {
         "0": {
             "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "sourceDeviceRoleName": "Smartphone"
         },
         "1": {
-            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Smartphone"
         },
         "2": {
-            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Smartphone"
         },
         "3": {
-            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.ElapsedTimeTrigger",
+            "sourceDeviceRoleName": "Smartphone",
+            "elapsedTime": "PT180S"
         },
         "4": {
-            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Smartphone"
         },
         "5": {
             "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "sourceDeviceRoleName": "Location Service"
         },
         "6": {
             "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "sourceDeviceRoleName": "Location Service"
         },
         "7": {
-            "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "period": 300000000
+            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
+            "sourceDeviceRoleName": "Weather Service"
         },
         "8": {
-            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+            "sourceDeviceRoleName": "Weather Service",
+            "period": 300000000
         },
         "9": {
-            "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "period": 1800000000
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Smartphone"
         },
         "10": {
-            "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "period": 1800000000
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Smartphone"
         },
         "11": {
             "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "sourceDeviceRoleName": "Smartphone"
         },
         "12": {
-            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+            "sourceDeviceRoleName": "Smartphone",
+            "period": 60000000
         },
         "13": {
-            "__type": "dk.cachet.carp.common.application.triggers.OneTimeTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Smartphone"
         },
         "14": {
-            "__type": "dk.cachet.carp.common.application.triggers.OneTimeTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
+            "sourceDeviceRoleName": "Polar HR Device"
         },
         "15": {
-            "__type": "dk.cachet.carp.common.application.triggers.OneTimeTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+            "sourceDeviceRoleName": "Polar HR Device"
         },
         "16": {
-            "__type": "dk.cachet.carp.common.application.triggers.OneTimeTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
+            "__type": "dk.cachet.carp.common.application.triggers.NoOpTrigger",
+            "sourceDeviceRoleName": "Health Service"
         },
         "17": {
-            "__type": "dk.cachet.carp.common.application.triggers.OneTimeTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
-        },
-        "18": {
-            "__type": "dk.cachet.carp.common.application.triggers.OneTimeTrigger",
-            "sourceDeviceRoleName": "Primary Phone"
-        },
-        "19": {
-            "__type": "dk.cachet.carp.common.application.triggers.UserTaskTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "taskName": "Task #39",
-            "triggerCondition": "done"
-        },
-        "20": {
-            "__type": "dk.cachet.carp.common.application.triggers.UserTaskTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "taskName": "Task #40",
-            "triggerCondition": "done"
-        },
-        "21": {
-            "__type": "dk.cachet.carp.common.application.triggers.UserTaskTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "taskName": "Task #41",
-            "triggerCondition": "done"
-        },
-        "22": {
-            "__type": "dk.cachet.carp.common.application.triggers.UserTaskTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "taskName": "Task #42",
-            "triggerCondition": "done"
-        },
-        "23": {
-            "__type": "dk.cachet.carp.common.application.triggers.UserTaskTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "taskName": "Task #43",
-            "triggerCondition": "done"
-        },
-        "24": {
-            "__type": "dk.cachet.carp.common.application.triggers.UserTaskTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "taskName": "Task #44",
-            "triggerCondition": "done"
-        },
-        "25": {
-            "__type": "dk.cachet.carp.common.application.triggers.UserTaskTrigger",
-            "sourceDeviceRoleName": "Primary Phone",
-            "taskName": "Task #44",
-            "triggerCondition": "done"
+            "__type": "dk.cachet.carp.common.application.triggers.PeriodicTrigger",
+            "sourceDeviceRoleName": "Health Service",
+            "period": 300000000
         }
     },
     "taskControls": [
         {
             "triggerId": 0,
-            "taskName": "Task #26",
-            "destinationDeviceRoleName": "Primary Phone",
+            "taskName": "Monitoring Smartphone",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 1,
-            "taskName": "Task #27",
-            "destinationDeviceRoleName": "eSense",
+            "taskName": "Device Info Task",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 2,
-            "taskName": "Task #28",
-            "destinationDeviceRoleName": "Polar HR Device",
+            "taskName": "Task #9",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 3,
-            "taskName": "Task #29",
-            "destinationDeviceRoleName": "Location Service",
+            "taskName": "Device Info App Task",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 4,
-            "taskName": "Task #30",
-            "destinationDeviceRoleName": "Weather Service",
+            "taskName": "Task #10",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 5,
-            "taskName": "Task #31",
-            "destinationDeviceRoleName": "Air Quality Service",
+            "taskName": "Monitoring Location Service",
+            "destinationDeviceRoleName": "Location Service",
             "control": "Start"
         },
         {
             "triggerId": 6,
-            "taskName": "Task #32",
-            "destinationDeviceRoleName": "Primary Phone",
+            "taskName": "Task #11",
+            "destinationDeviceRoleName": "Location Service",
             "control": "Start"
         },
         {
             "triggerId": 7,
-            "taskName": "Task #33",
-            "destinationDeviceRoleName": "Location Service",
-            "control": "Start"
-        },
-        {
-            "triggerId": 8,
-            "taskName": "Task #34",
-            "destinationDeviceRoleName": "Location Service",
-            "control": "Start"
-        },
-        {
-            "triggerId": 9,
-            "taskName": "Task #35",
+            "taskName": "Monitoring Weather Service",
             "destinationDeviceRoleName": "Weather Service",
             "control": "Start"
         },
         {
+            "triggerId": 8,
+            "taskName": "Task #12",
+            "destinationDeviceRoleName": "Weather Service",
+            "control": "Start"
+        },
+        {
+            "triggerId": 9,
+            "taskName": "Task #13",
+            "destinationDeviceRoleName": "Smartphone",
+            "control": "Start"
+        },
+        {
             "triggerId": 10,
-            "taskName": "Task #36",
-            "destinationDeviceRoleName": "Air Quality Service",
+            "taskName": "Task #14",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 11,
-            "taskName": "Task #37",
-            "destinationDeviceRoleName": "eSense",
+            "taskName": "Task #15",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 12,
-            "taskName": "Task #38",
-            "destinationDeviceRoleName": "Polar HR Device",
+            "taskName": "Task #16",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 13,
-            "taskName": "Task #39",
-            "destinationDeviceRoleName": "Primary Phone",
+            "taskName": "Task #17",
+            "destinationDeviceRoleName": "Smartphone",
             "control": "Start"
         },
         {
             "triggerId": 14,
-            "taskName": "Task #40",
-            "destinationDeviceRoleName": "Primary Phone",
+            "taskName": "Monitoring Polar HR Device",
+            "destinationDeviceRoleName": "Polar HR Device",
             "control": "Start"
         },
         {
             "triggerId": 15,
-            "taskName": "Task #41",
-            "destinationDeviceRoleName": "Primary Phone",
+            "taskName": "Polar Task",
+            "destinationDeviceRoleName": "Polar HR Device",
             "control": "Start"
         },
         {
             "triggerId": 16,
-            "taskName": "Task #42",
-            "destinationDeviceRoleName": "Primary Phone",
+            "taskName": "Monitoring Health Service",
+            "destinationDeviceRoleName": "Health Service",
             "control": "Start"
         },
         {
             "triggerId": 17,
-            "taskName": "Task #43",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 18,
-            "taskName": "Task #44",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 19,
-            "taskName": "Task #39",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 20,
-            "taskName": "Task #40",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 21,
-            "taskName": "Task #41",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 22,
-            "taskName": "Task #42",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 23,
-            "taskName": "Task #43",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 24,
-            "taskName": "Task #44",
-            "destinationDeviceRoleName": "Primary Phone",
-            "control": "Start"
-        },
-        {
-            "triggerId": 25,
-            "taskName": "Task #45",
-            "destinationDeviceRoleName": "Primary Phone",
+            "taskName": "Task #18",
+            "destinationDeviceRoleName": "Health Service",
             "control": "Start"
         }
     ],
-    "participantRoles": [
-        {
-            "role": "Participant",
-            "isOptional": false
-        }
-    ],
-    "assignedDevices": {},
     "expectedParticipantData": []
 }

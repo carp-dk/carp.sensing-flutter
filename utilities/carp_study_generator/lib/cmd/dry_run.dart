@@ -26,11 +26,10 @@ class DryRunCommand extends AbstractCommand {
     }
 
     try {
-      await CarpAuthService().authenticateWithUsernamePassword(
-          username: username, password: password);
-      print('\x1B[32m[✓]\x1B[0m CARP Server \t username: $username');
+      await authenticate();
+      print('\x1B[32m[✓]\x1B[0m Authenticated \t username: $username');
     } catch (error) {
-      print('\x1B[31m[!]\x1B[0m CARP Server \t ${errorToString(error)}');
+      print('\x1B[31m[!]\x1B[0m Authenticated \t ${errorToString(error)}');
       issues++;
     }
 
@@ -40,7 +39,8 @@ class DryRunCommand extends AbstractCommand {
       print('\x1B[32m[✓]\x1B[0m Protocol path \t $protocolPath');
     } catch (error) {
       print(
-          '\x1B[31m[!]\x1B[0m Protocol path \t Could not read protocol path from carpspec.yaml - has this been specified?');
+        '\x1B[31m[!]\x1B[0m Protocol path \t Could not read protocol path from carpspec.yaml - has this been specified?',
+      );
       //print('$error');
       issues++;
     }
@@ -48,11 +48,13 @@ class DryRunCommand extends AbstractCommand {
     if (protocolJson != null) {
       try {
         StudyProtocol protocol = StudyProtocol.fromJson(
-            json.decode(protocolJson) as Map<String, dynamic>);
+          json.decode(protocolJson) as Map<String, dynamic>,
+        );
         print('\x1B[32m[✓]\x1B[0m Protocol parse \t name: ${protocol.name}');
       } catch (error) {
         print(
-            '\x1B[31m[!]\x1B[0m Protocol parse \t Error parsing protocol json - ${errorToString(error)}');
+          '\x1B[31m[!]\x1B[0m Protocol parse \t Error parsing protocol json - ${errorToString(error)}',
+        );
         issues++;
       }
     } else {
@@ -66,20 +68,24 @@ class DryRunCommand extends AbstractCommand {
       print('\x1B[32m[✓]\x1B[0m Consent path \t $consentPath');
     } catch (error) {
       print(
-          '\x1B[31m[!]\x1B[0m Consent path \t Could not read consent path from carpspec.yaml - has this been specified?');
+        '\x1B[31m[!]\x1B[0m Consent path \t Could not read consent path from carpspec.yaml - has this been specified?',
+      );
       issues++;
     }
 
     if (consentJson != null) {
       try {
         RPOrderedTask consent = RPOrderedTask.fromJson(
-            json.decode(consentJson) as Map<String, dynamic>);
+          json.decode(consentJson) as Map<String, dynamic>,
+        );
 
         print(
-            '\x1B[32m[✓]\x1B[0m Consent \t\t identifier: ${consent.identifier}');
+          '\x1B[32m[✓]\x1B[0m Consent \t\t identifier: ${consent.identifier}',
+        );
       } catch (error) {
         print(
-            '\x1B[31m[!]\x1B[0m Consent parse \t Error parsing consent json - ${errorToString(error)}');
+          '\x1B[31m[!]\x1B[0m Consent parse \t Error parsing consent json - ${errorToString(error)}',
+        );
         issues++;
       }
     } else {
@@ -116,7 +122,8 @@ class DryRunCommand extends AbstractCommand {
     }
 
     print(
-        '${(issues == 0) ? '\x1B[32m • \x1B[0m No' : '\x1B[31m • \x1B[0m $issues'} issues found!');
+      '${(issues == 0) ? '\x1B[32m • \x1B[0m No' : '\x1B[31m • \x1B[0m $issues'} issues found!',
+    );
   }
 
   /// Transform a multiline error message to one line only.
