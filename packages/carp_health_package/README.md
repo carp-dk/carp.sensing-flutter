@@ -16,14 +16,14 @@ This package supports sampling of the following [`Measure`](https://docs.carp.dk
 See the [CAMS documentation site](https://docs.carp.dk/carp-mobile-sensing/) for further documentation.
 See the [CARP Mobile Sensing App](https://github.com/carp-dk/carp.sensing-flutter/tree/main/apps/carp_mobile_sensing_app) for an example of how to build a mobile sensing app in Flutter.
 
-FFor Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/carp-dk/carp.sensing-flutter).
+For Flutter plugins for other CARP products, see [CARP Mobile Sensing in Flutter](https://github.com/carp-dk/carp.sensing-flutter).
 
 If you're interested in writing your own sampling packages for CARP, see the description on
 how to [extend](https://docs.carp.dk/carp-mobile-sensing/extending-carp-mobile-sensing) CARP Mobile Sensing.
 
 ## Installing
 
-To use this package, add the following to you `pubspc.yaml` file. Note that this package only works together with `carp_mobile_sensing`.
+To use this package, add the following to your `pubspec.yaml` file. Note that this package only works together with `carp_mobile_sensing`.
 
 `````dart
 dependencies:
@@ -148,7 +148,7 @@ There are two ways to use the health package in a CAMS protocol:
 Defining an app task to collect health data is done using the `HealthAppTask` task, like this:
 
 ```dart
-// Create a health app task for the user to collect his own health data once pr. day
+// Create a health app task for the user to collect his own health data once per day
 protocol.addTaskControl(
   PeriodicTrigger(period: Duration(hours: 24)),
   HealthAppTask(
@@ -204,7 +204,7 @@ Background sensing of health data is done by the `HealthService` specified in th
 > Background collection of health data **does not** ask for permissions (this will cause the app to show the Health permission dialogue at an arbitrary time to the user, which is not compliant to [the UX guidelines from Google](https://developer.android.com/health-and-fitness/guides/health-connect/design/permissions-and-data) and Apple to only show this dialogue in the context where the collection of health data is explained to the user). Handling of permissions should be done via the `HealthService` by using the `hasPermissions()` and `requestPermissions(()` methods.
 
 > [!IMPORTANT]  
-> Health data can only be collected when the app is in the foreground and the phone is unlocked. This applies both for Android and iOS. Hence, the term "background sensing" should be taken with a gran of salt.
+> Health data can only be collected when the app is in the foreground and the phone is unlocked. This applies both for Android and iOS. Hence, the term "background sensing" should be taken with a grain of salt.
 
 One way to ensure that health data is collected while the app is in foreground, is to add the collection of health measures to an App Task (e.g., a survey):
 
@@ -256,7 +256,7 @@ protocol.addTaskControl(
 
 ### Configuration
 
-The health measures are [one-time measures](https://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures), which implies that health data is collected when the measure is triggered. In the examples above, this happens either when the user click the user task or periodically (once pr. hour). Configuration of what data to collect is done via the [`HealthSamplingConfiguration`](https://pub.dev/documentation/carp_health_package/latest/health_package/HealthSamplingConfiguration-class.html) which is used to override the default configuration (default is to collect nothing). The `getHealthMeasure()` factory method is a convenient way to create a `Measure` with the correct `HealthSamplingConfiguration`.
+The health measures are [one-time measures](https://docs.carp.dk/carp-mobile-sensing/measure-types#event-based-vs-one-time-measures), which implies that health data is collected when the measure is triggered. In the examples above, this happens either when the user clicks the user task or periodically (once per hour). Configuration of what data to collect is done via the [`HealthSamplingConfiguration`](https://pub.dev/documentation/carp_health_package/latest/health_package/HealthSamplingConfiguration-class.html) which is used to override the default configuration (default is to collect nothing). The `getHealthMeasure()` factory method is a convenient way to create a `Measure` with the correct `HealthSamplingConfiguration`.
 
 The `HealthSamplingConfiguration` can be configured to collect a set of [`HealthDataType`](https://pub.dev/documentation/health/latest/health/HealthDataType.html) data, like:
 
