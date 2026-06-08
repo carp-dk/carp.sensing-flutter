@@ -1,7 +1,3 @@
-## 2.0.1
-
-* Fix of [#576](https://github.com/carp-dk/carp.sensing-flutter/issues/576)
-
 ## 2.0.0
 
 * upgrade to CARP Core and CAMS API level 2.0.0
