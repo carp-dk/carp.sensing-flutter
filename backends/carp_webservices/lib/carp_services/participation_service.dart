@@ -66,9 +66,14 @@ class CarpParticipationService extends CarpBaseService
     if (applicationName != null) {
       invitations = invitations
           .where(
-            (invitation) =>
-                (invitation.invitation.applicationData?['applicationName'] ==
-                applicationName),
+            (invitation) {
+              if (invitation.invitation.applicationData == null) return false;
+              if (invitation.invitation.applicationData is ! Map<String, dynamic>) {
+                return false;
+              }
+              return invitation.invitation.applicationData?['applicationName'] ==
+                  applicationName;
+            }
           )
           .toList();
     }
