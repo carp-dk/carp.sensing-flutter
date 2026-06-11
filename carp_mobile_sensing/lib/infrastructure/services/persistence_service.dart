@@ -30,6 +30,7 @@ part of '../../infrastructure.dart';
 /// Files can be accessed via AndroidStudio.
 class PersistenceService {
   static const String DATABASE_NAME = 'carp';
+  static const int DATABASE_VERSION = 2;
   static const String STUDY_TABLE_NAME = 'studies';
   static const String TASK_QUEUE_TABLE_NAME = 'task_queue';
 
@@ -72,35 +73,17 @@ class PersistenceService {
     // open the database - make sure to use the same database across app (re)start
     _database = await openDatabase(
       databaseName,
-      version: 1,
+      version: DATABASE_VERSION,
       singleInstance: true,
       onCreate: (Database db, int version) async {
         // when creating the database, create the tables
-        await db.execute(
-          'CREATE TABLE $STUDY_TABLE_NAME ('
-          '$STUDY_ID_COLUMN TEXT, '
-          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
-          '$DEVICE_ROLE_NAME_COLUMN TEXT, '
-          '$PARTICIPANT_ID_COLUMN TEXT, '
-          '$PARTICIPANT_ROLE_NAME_COLUMN TEXT, '
-          '$CREATED_ON_COLUMN TEXT, '
-          '$UPDATED_ON_COLUMN TEXT, '
-          '$DEPLOYED_ON_COLUMN TEXT, '
-          '$SAMPLING_STATUS_COLUMN TEXT, '
-          '$DEPLOYMENT_STATUS_COLUMN TEXT, '
-          '$DEPLOYMENT_COLUMN TEXT)',
-        );
-
-        await db.execute(
-          'CREATE TABLE $TASK_QUEUE_TABLE_NAME ('
-          '$ID_COLUMN INTEGER PRIMARY KEY, '
-          '$TASK_ID_COLUMN TEXT, '
-          '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
-          '$DEVICE_ROLE_NAME_COLUMN TEXT, '
-          '$TASK_COLUMN TEXT)',
-        );
+        await _createStudyTable(db);
+        await _createTaskQueueTable(db);
 
         debug('$runtimeType - $databaseName DB created');
+      },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        if (oldVersion < 2) await _migrateToV2(db);
       },
     );
 
@@ -113,6 +96,109 @@ class PersistenceService {
     AppTaskController().userTaskEvents.listen((task) => saveUserTask(task));
 
     info('$runtimeType - SQLite DB initialized - file: $databaseName');
+  }
+
+  Future<void> _createStudyTable(Database db) => db.execute(
+    'CREATE TABLE IF NOT EXISTS $STUDY_TABLE_NAME ('
+    '$STUDY_ID_COLUMN TEXT, '
+    '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
+    '$DEVICE_ROLE_NAME_COLUMN TEXT, '
+    '$PARTICIPANT_ID_COLUMN TEXT, '
+    '$PARTICIPANT_ROLE_NAME_COLUMN TEXT, '
+    '$CREATED_ON_COLUMN TEXT, '
+    '$UPDATED_ON_COLUMN TEXT, '
+    '$DEPLOYED_ON_COLUMN TEXT, '
+    '$SAMPLING_STATUS_COLUMN TEXT, '
+    '$DEPLOYMENT_STATUS_COLUMN TEXT, '
+    '$DEPLOYMENT_COLUMN TEXT)',
+  );
+
+  Future<void> _createTaskQueueTable(Database db) => db.execute(
+    'CREATE TABLE IF NOT EXISTS $TASK_QUEUE_TABLE_NAME ('
+    '$ID_COLUMN INTEGER PRIMARY KEY, '
+    '$TASK_ID_COLUMN TEXT, '
+    '$STUDY_DEPLOYMENT_ID_COLUMN TEXT, '
+    '$DEVICE_ROLE_NAME_COLUMN TEXT, '
+    '$TASK_COLUMN TEXT)',
+  );
+
+  /// Migrate a database created with version 1 to version 2.
+  ///
+  /// CAMS 1.x databases also used version 1, so the actual schema is
+  /// inspected to determine what needs to be migrated.
+  Future<void> _migrateToV2(Database db) async {
+    await _createStudyTable(db);
+    await _createTaskQueueTable(db);
+
+    // 1.x did not have a device role name column in the task queue.
+    final columns = await db.rawQuery(
+      'PRAGMA table_info($TASK_QUEUE_TABLE_NAME)',
+    );
+    if (!columns.any((column) => column['name'] == DEVICE_ROLE_NAME_COLUMN)) {
+      await db.execute(
+        'ALTER TABLE $TASK_QUEUE_TABLE_NAME '
+        'ADD COLUMN $DEVICE_ROLE_NAME_COLUMN TEXT',
+      );
+
+      // Backfill the new column from the saved task snapshots.
+      final tasks = await db.query(
+        TASK_QUEUE_TABLE_NAME,
+        columns: [ID_COLUMN, TASK_COLUMN],
+      );
+      for (final task in tasks) {
+        try {
+          final snapshot =
+              json.decode(task[TASK_COLUMN] as String) as Map<String, dynamic>;
+          await db.update(
+            TASK_QUEUE_TABLE_NAME,
+            {DEVICE_ROLE_NAME_COLUMN: snapshot['deviceRoleName']},
+            where: '$ID_COLUMN = ?',
+            whereArgs: [task[ID_COLUMN]],
+          );
+        } catch (exception) {
+          warning(
+            '$runtimeType - Failed to migrate task queue entry - $exception',
+          );
+        }
+      }
+    }
+
+    // 1.x stored studies in a 'deployment' table. Copy the columns which map
+    // to the new schema. The 1.x deployment_status column (an enum index)
+    // has no 2.x equivalent and is not migrated.
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'deployment'",
+    );
+    if (tables.isNotEmpty) {
+      try {
+        await db.execute(
+          'INSERT INTO $STUDY_TABLE_NAME ('
+          '$STUDY_ID_COLUMN, '
+          '$STUDY_DEPLOYMENT_ID_COLUMN, '
+          '$DEVICE_ROLE_NAME_COLUMN, '
+          '$PARTICIPANT_ID_COLUMN, '
+          '$PARTICIPANT_ROLE_NAME_COLUMN, '
+          '$CREATED_ON_COLUMN, '
+          '$UPDATED_ON_COLUMN, '
+          '$DEPLOYED_ON_COLUMN, '
+          '$DEPLOYMENT_COLUMN) '
+          'SELECT '
+          '$STUDY_ID_COLUMN, '
+          '$STUDY_DEPLOYMENT_ID_COLUMN, '
+          '$DEVICE_ROLE_NAME_COLUMN, '
+          '$PARTICIPANT_ID_COLUMN, '
+          '$PARTICIPANT_ROLE_NAME_COLUMN, '
+          'updated_at, updated_at, deployed_at, '
+          '$DEPLOYMENT_COLUMN '
+          'FROM deployment',
+        );
+        await db.execute('DROP TABLE deployment');
+      } catch (exception) {
+        warning('$runtimeType - Failed to migrate studies - $exception');
+      }
+    }
+
+    debug('$runtimeType - $databaseName DB migrated to version 2');
   }
 
   /// Close the persistence layer. After close is called, no deployment can be
