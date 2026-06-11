@@ -31,10 +31,34 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
       Set.from(connectedDevices)..add(deviceConfiguration);
 
   /// The timestamp (in UTC) when this deployment was deployed on this smartphone.
+  // Missing in 1.x deployments, where deployed was nullable.
+  @JsonKey(fromJson: _deployedFromJson)
   DateTime deployed = DateTime.now().toUtc();
 
   /// The status of this study deployment.
+  @JsonKey(fromJson: _statusFromJson)
   StudyDeploymentStatusTypes status = StudyDeploymentStatusTypes.Invited;
+
+  static DateTime _deployedFromJson(String? json) =>
+      json != null ? DateTime.parse(json) : DateTime.now().toUtc();
+
+  // Maps the 1.x StudyStatus enum values to StudyDeploymentStatusTypes.
+  static StudyDeploymentStatusTypes _statusFromJson(String? json) =>
+      switch (json) {
+        'Invited' ||
+        'DeploymentNotStarted' ||
+        'DeploymentStatusAvailable' ||
+        'DeploymentNotAvailable' => StudyDeploymentStatusTypes.Invited,
+        'DeployingDevices' ||
+        'Deploying' ||
+        'AwaitingOtherDeviceRegistrations' ||
+        'AwaitingDeviceDeployment' ||
+        'DeviceDeploymentReceived' ||
+        'RegisteringDevices' => StudyDeploymentStatusTypes.DeployingDevices,
+        'Running' || 'Deployed' => StudyDeploymentStatusTypes.Running,
+        'Stopped' => StudyDeploymentStatusTypes.Stopped,
+        _ => StudyDeploymentStatusTypes.Invited,
+      };
 
   /// Create a new [SmartphoneDeployment].
   ///
