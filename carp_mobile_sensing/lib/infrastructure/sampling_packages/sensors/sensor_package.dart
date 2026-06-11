@@ -67,6 +67,14 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * No sampling configuration needed.
   static const String STEP_EVENT = '${CarpDataTypes.CARP_NAMESPACE}.stepevent';
 
+  /// Total step count since last system boot from the phone's pedometer.
+  /// Kept for backwards compatibility with CAMS 1.x protocols
+  /// (protocol API level < 2.0) - use [STEP_EVENT] instead.
+  ///  * Event-based measure.
+  ///  * Uses the [Smartphone] device for data collection.
+  ///  * No sampling configuration needed.
+  static const String STEP_COUNT = CarpDataTypes.STEP_COUNT;
+
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
@@ -115,6 +123,14 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
         ),
         DataTypeSamplingScheme(
           CamsDataTypeMetaData(
+            type: STEP_COUNT,
+            displayName: "Step Count",
+            timeType: DataTimeType.POINT,
+            permissions: [Permission.activityRecognition],
+          ),
+        ),
+        DataTypeSamplingScheme(
+          CamsDataTypeMetaData(
             type: AMBIENT_LIGHT,
             displayName: "Ambient Light",
             timeType: DataTimeType.TIME_SPAN,
@@ -141,6 +157,8 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
         return GyroscopeProbe();
       case STEP_EVENT:
         return PedometerProbe();
+      case STEP_COUNT:
+        return StepCountProbe();
       case AMBIENT_LIGHT:
         return (Platform.isAndroid) ? LightProbe() : null;
       default:

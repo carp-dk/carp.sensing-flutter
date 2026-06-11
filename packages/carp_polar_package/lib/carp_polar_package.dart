@@ -187,6 +187,13 @@ class PolarSamplingPackage implements SamplingPackage {
       PolarPPI(samples: []),
       PolarHR(samples: []),
     ]);
+
+    // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
+    // the Polar device used the carp_core device namespace.
+    FromJsonFactory().register(
+      PolarDevice(),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.PolarDevice',
+    );
   }
 
   @override

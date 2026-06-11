@@ -89,6 +89,21 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
       GeoPosition(1.1, 1.1),
     ]);
 
+    // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
+    // these services used the carp_core device namespace.
+    FromJsonFactory().register(
+      LocationService(),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.LocationService',
+    );
+    FromJsonFactory().register(
+      WeatherService(apiKey: ''),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.WeatherService',
+    );
+    FromJsonFactory().register(
+      AirQualityService(apiKey: ''),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.AirQualityService',
+    );
+
     // register all data types
     FromJsonFactory().registerAll([
       Activity(type: ActivityType.UNKNOWN, confidence: 0),

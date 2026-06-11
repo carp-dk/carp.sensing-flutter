@@ -23,3 +23,18 @@ class PedometerProbe extends StreamProbe {
     ),
   );
 }
+
+/// A pedometer probe reporting the total step count since last system boot,
+/// as [StepCount] data.
+///
+/// Kept for backwards compatibility with CAMS 1.x protocols (protocol API
+/// level < 2.0) using the [CarpDataTypes.STEP_COUNT] measure type.
+class StepCountProbe extends StreamProbe {
+  @override
+  Stream<Measurement> get stream => pedometer.Pedometer.stepCountStream.map(
+    (pedometer.StepCount count) => Measurement.fromData(
+      StepCount(steps: count.steps),
+      count.timeStamp.microsecondsSinceEpoch,
+    ),
+  );
+}

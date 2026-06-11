@@ -26,8 +26,8 @@
    "uiTheme": "black"
   }
  },
- "id": "73de02da-5757-421e-97c5-53663523c84a",
- "createdOn": "2026-04-01T16:20:44.527601Z",
+ "id": "fff5022a-af09-4a4d-9019-9509d24fc87d",
+ "createdOn": "2026-06-11T06:36:21.093751Z",
  "version": 0,
  "ownerId": "user@dtu.dk",
  "name": "patient_tracking",
@@ -174,6 +174,10 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.stepevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.stepcount"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",

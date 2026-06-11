@@ -87,6 +87,13 @@ class ESenseSamplingPackage implements SamplingPackage {
       BLEDeviceRegistration(bleAddress: ''),
     ]);
 
+    // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
+    // the eSense device used the carp_core device namespace.
+    FromJsonFactory().register(
+      ESenseDevice(),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.ESenseDevice',
+    );
+
     // register all data types
     FromJsonFactory().registerAll([
       ESenseButton(deviceName: 'deviceName', pressed: true),

@@ -275,11 +275,13 @@ PolarDevice _$PolarDeviceFromJson(Map<String, dynamic> json) =>
               SamplingConfiguration.fromJson(e as Map<String, dynamic>),
             ),
           )
-      ..serviceUuids = (json['serviceUuids'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList()
+      ..serviceUuids =
+          (json['serviceUuids'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          []
       ..minRssi = (json['minRssi'] as num?)?.toInt()
-      ..allowDuplicates = json['allowDuplicates'] as bool
+      ..allowDuplicates = json['allowDuplicates'] as bool? ?? true
       ..timeout = json['timeout'] == null
           ? null
           : Duration(microseconds: (json['timeout'] as num).toInt());

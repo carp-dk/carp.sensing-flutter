@@ -112,6 +112,13 @@ class MovisensSamplingPackage implements SamplingPackage {
   void onRegister() {
     FromJsonFactory().register(MovisensDevice());
 
+    // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
+    // the Movisens device used the carp_core device namespace.
+    FromJsonFactory().register(
+      MovisensDevice(),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice',
+    );
+
     // register all data types
     FromJsonFactory().registerAll([
       MovisensStepCount(deviceId: '', type: '', steps: 0),
