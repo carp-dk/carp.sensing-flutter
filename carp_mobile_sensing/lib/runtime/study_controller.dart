@@ -266,8 +266,13 @@ class SmartphoneStudyController {
 
       // Also update local deployment information about the connected device registrations,
       // so that it is in sync with the deployment service.
-      if (device is! PrimaryDeviceConfiguration) {
-        deployment?.connectedDeviceRegistrations[deviceRoleName] = registration;
+      // Reassign instead of mutating in place: the map may be the unmodifiable
+      // `const {}` default when no registrations were deserialized.
+      if (device is! PrimaryDeviceConfiguration && deployment != null) {
+        deployment!.connectedDeviceRegistrations = {
+          ...deployment!.connectedDeviceRegistrations,
+          deviceRoleName: registration,
+        };
       }
       study.deploymentStatusReceived(deploymentStatus);
     } catch (error) {
