@@ -1,3 +1,7 @@
+## 2.0.1
+
+* register the 1.x `LocationService`, `WeatherService`, and `AirQualityService` device types as `fromJson` aliases, for backwards compatibility with studies created on CAMS 1.x (protocol API level < 2.0)
+
 ## 2.0.0
 
 * upgrade to CARP Core and CAMS API level 2.0.0
