@@ -1,3 +1,7 @@
+## 2.0.1
+
+* register the 1.x `PolarDevice` device type as a `fromJson` alias, for backwards compatibility with studies created on CAMS 1.x (protocol API level < 2.0)
+
 ## 2.0.0
 
 * upgrade to CARP Core and CAMS API level 2.0.0
