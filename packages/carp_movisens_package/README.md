@@ -106,7 +106,7 @@ To use this package, import it into your app together with the [`carp_mobile_sen
 `````dart
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-import 'package:movisens_package/movisens.dart';
+import 'package:carp_movisens_package/carp_movisens_package.dart';
 `````
 
 Before creating a study and running it, register this package in the [`SamplingPackageRegistry`](https://pub.dev/documentation/carp_mobile_sensing/latest/runtime/SamplingPackageRegistry-class.html).
