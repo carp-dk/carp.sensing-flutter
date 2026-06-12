@@ -27,6 +27,23 @@ void _registerFromJsonFunctions() {
     ServiceRegistration(),
   ]);
 
+  // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
+  // device configurations and registrations used the carp_core device
+  // namespace. Maps old type names to the corresponding CAMS 2.x classes so
+  // that old protocols and deployments still can be deserialized.
+  FromJsonFactory().register(
+    Smartphone(),
+    type: '${DeviceConfiguration.DEVICE_NAMESPACE}.Smartphone',
+  );
+  FromJsonFactory().register(
+    BLEHeartRateDevice(roleName: ''),
+    type: '${DeviceConfiguration.DEVICE_NAMESPACE}.BLEHeartRateDevice',
+  );
+  FromJsonFactory().register(
+    SmartphoneRegistration(),
+    type: '${DeviceConfiguration.DEVICE_NAMESPACE}.SmartphoneDeviceRegistration',
+  );
+
   // Task classes
   FromJsonFactory().registerAll([
     AppTask(type: ''),

@@ -318,9 +318,11 @@ BLEDevice<TRegistration> _$BLEDeviceFromJson<
     BLEDevice<TRegistration>(
         roleName: json['roleName'] as String,
         isOptional: json['isOptional'] as bool? ?? true,
-        serviceUuids: (json['serviceUuids'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList(),
+        serviceUuids:
+            (json['serviceUuids'] as List<dynamic>?)
+                ?.map((e) => e as String)
+                .toList() ??
+            [],
         namePrefix: json['namePrefix'] as String?,
         minRssi: (json['minRssi'] as num?)?.toInt(),
         allowDuplicates: json['allowDuplicates'] as bool? ?? true,
@@ -357,9 +359,11 @@ BLEHeartRateDevice _$BLEHeartRateDeviceFromJson(Map<String, dynamic> json) =>
     BLEHeartRateDevice(
         roleName: json['roleName'] as String,
         isOptional: json['isOptional'] as bool? ?? true,
-        serviceUuids: (json['serviceUuids'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList(),
+        serviceUuids:
+            (json['serviceUuids'] as List<dynamic>?)
+                ?.map((e) => e as String)
+                .toList() ??
+            [],
         namePrefix: json['namePrefix'] as String?,
         minRssi: (json['minRssi'] as num?)?.toInt(),
         allowDuplicates: json['allowDuplicates'] as bool? ?? true,
@@ -628,10 +632,11 @@ SmartphoneDeployment _$SmartphoneDeploymentFromJson(
             const {},
       )
       ..applicationData = json['applicationData'] as Map<String, dynamic>?
-      ..deployed = DateTime.parse(json['deployed'] as String)
-      ..status = $enumDecode(
-        _$StudyDeploymentStatusTypesEnumMap,
-        json['status'],
+      ..deployed = SmartphoneDeployment._deployedFromJson(
+        json['deployed'] as String?,
+      )
+      ..status = SmartphoneDeployment._statusFromJson(
+        json['status'] as String?,
       );
 
 Map<String, dynamic> _$SmartphoneDeploymentToJson(

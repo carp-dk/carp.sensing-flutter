@@ -1,6 +1,6 @@
 {
- "id": "5ff66097-078a-4dea-b1d4-56b84340e09c",
- "createdOn": "2026-04-13T11:03:25.621700Z",
+ "id": "00dd2428-3f12-4ed0-89fb-2c6cd095c1cb",
+ "createdOn": "2026-06-11T06:36:40.563759Z",
  "version": 0,
  "ownerId": "alex@uni.dk",
  "name": "Context package test",
@@ -91,6 +91,10 @@
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.stepevent"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.stepcount"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",

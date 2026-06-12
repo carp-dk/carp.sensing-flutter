@@ -121,6 +121,13 @@ class MovesenseSamplingPackage implements SamplingPackage {
       MovesenseTemperature(0, 0),
       MovesenseIMU(0, [], [], []),
     ]);
+
+    // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
+    // the Movesense device used the carp_core device namespace.
+    FromJsonFactory().register(
+      MovesenseDevice(),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.MovesenseDevice',
+    );
   }
 
   @override

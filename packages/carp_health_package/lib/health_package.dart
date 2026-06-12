@@ -121,6 +121,14 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
         platform: HealthPlatform.APPLE_HEALTH,
       ),
     ]);
+
+    // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
+    // the health service used the carp_core device namespace.
+    FromJsonFactory().register(
+      HealthService(),
+      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.HealthService',
+    );
+
     AppTaskController().registerUserTaskFactory(HealthUserTaskFactory());
   }
 

@@ -112,6 +112,7 @@ class BLEDevice<TRegistration extends BLEDeviceRegistration>
     extends CamsDevice<TRegistration> {
   /// Advertised service UUIDs to filter for.
   /// String representation of UUIDs, for example: "0000180D-0000-1000-8000-00805f9b34fb"
+  @JsonKey(defaultValue: [])
   List<String> serviceUuids = [];
 
   /// Optional device name filter (substring match, case-insensitive).
@@ -123,6 +124,7 @@ class BLEDevice<TRegistration extends BLEDeviceRegistration>
 
   /// Whether to receive repeated scan results for the same device.
   /// Useful for RSSI updates.
+  @JsonKey(defaultValue: true)
   bool allowDuplicates = true;
 
   /// Scan timeout.
@@ -137,7 +139,7 @@ class BLEDevice<TRegistration extends BLEDeviceRegistration>
     this.allowDuplicates = true,
     this.timeout,
   }) {
-    serviceUuids = serviceUuids ?? [];
+    this.serviceUuids = serviceUuids ?? [];
   }
 
   @override
