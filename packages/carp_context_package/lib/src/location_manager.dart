@@ -282,10 +282,16 @@ class LocationManager {
 
   /// Returns a stream of [Location] objects.
   ///
-  /// Throws an error if the app has no permission to access location.
-  Stream<Location> get onLocationChanged => _provider.onLocationChanged.map(
-    (location) => _lastKnownLocation = Location.fromLocationData(location),
-  );
+  /// The underlying native `location` plugin reports permission errors
+  /// (e.g. PERMISSION_DENIED_NEVER_ASK) on its event channel. `handleError`
+  /// absorbs them here so they don't propagate as unhandled future errors
+  /// to downstream subscribers.
+  Stream<Location> get onLocationChanged =>
+      _provider.onLocationChanged.handleError((Object error) {
+        warning('$runtimeType - native location stream error absorbed: $error');
+      }).map(
+        (location) => _lastKnownLocation = Location.fromLocationData(location),
+      );
 
   @override
   toString() => configuration != null
