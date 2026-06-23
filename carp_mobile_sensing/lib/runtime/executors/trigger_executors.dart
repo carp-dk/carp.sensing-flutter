@@ -547,13 +547,18 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
 
   @override
   Future<bool> onResume() async {
-    _timer = Timer.periodic(Duration(minutes: 1), (_) {
+    // enqueue immediately if not already on the list, then keep checking once
+    // pr minute - otherwise the first check (and task) is delayed a full minute.
+    void enqueueIfMissing() {
       if (!AppTaskController().userTaskQueue
           .where((task) => task.state == UserTaskState.enqueued)
           .any((task) => task.name == configuration!.taskName)) {
         onTrigger();
       }
-    });
+    }
+
+    enqueueIfMissing();
+    _timer = Timer.periodic(Duration(minutes: 1), (_) => enqueueIfMissing());
 
     return true;
   }
@@ -562,6 +567,12 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
   Future<bool> onPause() async {
     _timer?.cancel();
     return super.onPause();
+  }
+
+  @override
+  Future<void> onDispose() async {
+    _timer?.cancel();
+    return super.onDispose();
   }
 }
 

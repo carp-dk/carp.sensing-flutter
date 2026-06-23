@@ -79,7 +79,7 @@ class ExecutorFactory {
         "$runtimeType - Cannot create a TriggerExecutor for trigger type '${trigger.runtimeType}'.",
       );
     } else {
-      _triggerExecutors[studyDeploymentId] = {};
+      _triggerExecutors[studyDeploymentId] ??= {};
       _triggerExecutors[studyDeploymentId]?[triggerId] = executor;
     }
     return _triggerExecutors[studyDeploymentId]?[triggerId];
@@ -100,7 +100,7 @@ class ExecutorFactory {
         _ => null,
       };
       if (executor != null) {
-        _taskExecutors[studyDeploymentId] = {};
+        _taskExecutors[studyDeploymentId] ??= {};
         _taskExecutors[studyDeploymentId]?[task.name] = executor;
       }
     }
