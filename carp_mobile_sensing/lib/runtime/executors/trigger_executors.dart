@@ -110,6 +110,14 @@ class PassiveTriggerExecutor extends TriggerExecutor<PassiveTrigger> {
     configuration!.executor = this;
     return true;
   }
+
+  // Only fire when resumed - a trigger() call on a paused (or not-yet-resumed)
+  // executor must be ignored, otherwise it would start the task while the
+  // study is paused.
+  @override
+  void onTrigger() {
+    if (state == ExecutorState.Resumed) super.onTrigger();
+  }
 }
 
 /// Executes a [DelayedTrigger], i.e. triggers after the specified delay.

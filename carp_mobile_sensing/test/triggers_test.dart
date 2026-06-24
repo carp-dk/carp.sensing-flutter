@@ -370,8 +370,9 @@ void main() {
       });
     });
 
-    test(' - PassiveTrigger - fires only when trigger() is called', () {
-      // Use case: task started programmatically from Dart, never on its own.
+    test(' - PassiveTrigger - fires on trigger() only while resumed', () {
+      // Use case: task started programmatically from Dart, never on its own,
+      // and only while the trigger is resumed.
       FakeAsync().run((fake) {
         final trigger = PassiveTrigger();
         final ex = PassiveTriggerExecutor()..initialize(trigger);
@@ -380,13 +381,33 @@ void main() {
         // The executor registers itself, so trigger() routes to triggerEvents.
         expect(trigger.executor, same(ex));
 
+        // Before resume: trigger() is ignored.
+        trigger.trigger();
+        fake.flushMicrotasks();
+        expect(events, isEmpty, reason: 'ignored before resume');
+
         ex.resume();
         fake.elapse(const Duration(minutes: 1));
         expect(events, isEmpty, reason: 'never fires on its own');
 
+        // Resumed: trigger() fires.
         trigger.trigger();
         fake.flushMicrotasks();
-        expect(events, hasLength(1), reason: 'fires on trigger()');
+        expect(events, hasLength(1), reason: 'fires on trigger() while resumed');
+
+        // Paused: trigger() is ignored, so pausing actually stops the task.
+        ex.pause();
+        fake.flushMicrotasks();
+        trigger.trigger();
+        fake.flushMicrotasks();
+        expect(events, hasLength(1), reason: 'ignored while paused');
+
+        // Resumed again: trigger() fires again.
+        ex.resume();
+        fake.flushMicrotasks();
+        trigger.trigger();
+        fake.flushMicrotasks();
+        expect(events, hasLength(2), reason: 'fires again after resume');
       });
     });
 
