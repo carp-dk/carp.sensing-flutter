@@ -98,19 +98,16 @@ class OneTimeTriggerExecutor extends TriggerExecutor<OneTimeTrigger> {
   }
 }
 
-/// Executes a [PassiveTrigger].
+/// Executes a [PassiveTrigger], i.e. a trigger that never fires on its own and
+/// only triggers when [PassiveTrigger.trigger] is called from Dart code.
+///
+/// This executor is itself the [PassiveTrigger.executor], so that calling
+/// `trigger()` emits a [TriggerEvent] on the same stream that the
+/// [TaskControlExecutor] listens to.
 class PassiveTriggerExecutor extends TriggerExecutor<PassiveTrigger> {
-  PassiveTriggerExecutor() : super() {
-    configuration!.executor = ImmediateTriggerExecutor();
-  }
-
-  // Forward to the embedded trigger executor
   @override
   bool onInitialize() {
-    configuration!.executor.initialize(
-      configuration as TriggerConfiguration,
-      deployment!,
-    );
+    configuration!.executor = this;
     return true;
   }
 }
@@ -190,6 +187,9 @@ class PeriodicTriggerExecutor
 
   @override
   Future<bool> onResume() async {
+    // Fire immediately on resume (matching getSchedule, which includes the
+    // start time), then once per period.
+    onTrigger();
     timer = Timer.periodic(configuration!.period, (_) => onTrigger());
     return true;
   }
@@ -207,7 +207,7 @@ class DateTimeTriggerExecutor
 
   @override
   Future<bool> onResume() async {
-    if (configuration!.schedule.isAfter(DateTime.now())) {
+    if (configuration!.schedule.isBefore(DateTime.now())) {
       warning('The schedule of the DateTimeTrigger cannot be in the past.');
       return false;
     } else {
@@ -371,13 +371,16 @@ class ConditionalPeriodicTriggerExecutor
     extends TriggerExecutor<ConditionalPeriodicTrigger> {
   @override
   Future<bool> onResume() async {
-    // create a recurrent timer that checks the conditions periodically
-    timer = Timer.periodic(configuration!.period, (_) {
+    void check() {
       if (configuration!.triggerCondition != null &&
           configuration!.triggerCondition!()) {
         onTrigger();
       }
-    });
+    }
+
+    // check the condition immediately on resume, then once per period.
+    check();
+    timer = Timer.periodic(configuration!.period, (_) => check());
     return true;
   }
 }
