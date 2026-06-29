@@ -1,3 +1,8 @@
+## 4.1.1
+
+* Fix of [#581](https://github.com/carp-dk/carp.sensing-flutter/issues/581)
+* Fix login redirect uri in example app
+
 ## 4.1.0
 
 * Fix of [#576](https://github.com/carp-dk/carp.sensing-flutter/issues/576)
