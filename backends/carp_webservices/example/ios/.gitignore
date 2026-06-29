@@ -32,3 +32,6 @@ Runner/GeneratedPluginRegistrant.*
 !default.mode2v3
 !default.pbxuser
 !default.perspectivev3
+!Flutter/Debug.xcconfig
+!Flutter/Release.xcconfig
+!Flutter/Profile.xcconfig
