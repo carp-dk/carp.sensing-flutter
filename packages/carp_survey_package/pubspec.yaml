@@ -26,7 +26,7 @@ dependencies:
 
   carp_serializable: ^2.0.0
   carp_core: ^2.0.0
-  carp_mobile_sensing: ^2.0.0
+  carp_mobile_sensing: ^2.1.3
 
   research_package: ^2.0.0
   cognition_package: ^1.6.0
