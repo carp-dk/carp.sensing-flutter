@@ -1,3 +1,7 @@
+## 2.1.3
+
+* Update `screen_state` plugin to 5.0.1
+
 ## 2.1.2
 
 Backwards compatibility with studies created on CAMS 1.x (protocol API level < 2.0), so that apps can upgrade from 1.x to 2.x without losing running deployments.
