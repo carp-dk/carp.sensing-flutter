@@ -47,6 +47,12 @@ abstract class TriggerExecutor<TConfig extends TriggerConfiguration>
     return true;
   }
 
+  @override
+  @mustCallSuper
+  Future<void> onDispose() async {
+    timer?.cancel();
+  }
+
   /// Called when this trigger executor is triggering.
   @mustCallSuper
   void onTrigger() => _controller.add(TriggerEvent());
@@ -98,12 +104,7 @@ class OneTimeTriggerExecutor extends TriggerExecutor<OneTimeTrigger> {
   }
 }
 
-/// Executes a [PassiveTrigger], i.e. a trigger that never fires on its own and
-/// only triggers when [PassiveTrigger.trigger] is called from Dart code.
-///
-/// This executor is itself the [PassiveTrigger.executor], so that calling
-/// `trigger()` emits a [TriggerEvent] on the same stream that the
-/// [TaskControlExecutor] listens to.
+/// Executes a [PassiveTrigger].
 class PassiveTriggerExecutor extends TriggerExecutor<PassiveTrigger> {
   @override
   bool onInitialize() {
@@ -116,7 +117,8 @@ class PassiveTriggerExecutor extends TriggerExecutor<PassiveTrigger> {
   // study is paused.
   @override
   void onTrigger() {
-    if (state == ExecutorState.Resumed) super.onTrigger();
+    if (state != ExecutorState.Resumed) return;
+    super.onTrigger();
   }
 }
 
@@ -554,8 +556,6 @@ class UserTaskTriggerExecutor extends TriggerExecutor<UserTaskTrigger> {
 /// Executes an [NoUserTaskTrigger].
 /// Runs once pr minute.
 class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
-  Timer? _timer;
-
   @override
   Future<bool> onResume() async {
     // enqueue immediately if not already on the list, then keep checking once
@@ -569,21 +569,10 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
     }
 
     enqueueIfMissing();
-    _timer = Timer.periodic(Duration(minutes: 1), (_) => enqueueIfMissing());
+    // Use the inherited [timer], which the base onPause()/onDispose() cancel.
+    timer = Timer.periodic(Duration(minutes: 1), (_) => enqueueIfMissing());
 
     return true;
-  }
-
-  @override
-  Future<bool> onPause() async {
-    _timer?.cancel();
-    return super.onPause();
-  }
-
-  @override
-  Future<void> onDispose() async {
-    _timer?.cancel();
-    return super.onDispose();
   }
 }
 
