@@ -47,6 +47,12 @@ abstract class TriggerExecutor<TConfig extends TriggerConfiguration>
     return true;
   }
 
+  @override
+  @mustCallSuper
+  Future<void> onDispose() async {
+    timer?.cancel();
+  }
+
   /// Called when this trigger executor is triggering.
   @mustCallSuper
   void onTrigger() => _controller.add(TriggerEvent());
@@ -100,18 +106,19 @@ class OneTimeTriggerExecutor extends TriggerExecutor<OneTimeTrigger> {
 
 /// Executes a [PassiveTrigger].
 class PassiveTriggerExecutor extends TriggerExecutor<PassiveTrigger> {
-  PassiveTriggerExecutor() : super() {
-    configuration!.executor = ImmediateTriggerExecutor();
-  }
-
-  // Forward to the embedded trigger executor
   @override
   bool onInitialize() {
-    configuration!.executor.initialize(
-      configuration as TriggerConfiguration,
-      deployment!,
-    );
+    configuration!.executor = this;
     return true;
+  }
+
+  // Only fire when resumed - a trigger() call on a paused (or not-yet-resumed)
+  // executor must be ignored, otherwise it would start the task while the
+  // study is paused.
+  @override
+  void onTrigger() {
+    if (state != ExecutorState.Resumed) return;
+    super.onTrigger();
   }
 }
 
@@ -190,6 +197,9 @@ class PeriodicTriggerExecutor
 
   @override
   Future<bool> onResume() async {
+    // Fire immediately on resume (matching getSchedule, which includes the
+    // start time), then once per period.
+    onTrigger();
     timer = Timer.periodic(configuration!.period, (_) => onTrigger());
     return true;
   }
@@ -207,7 +217,7 @@ class DateTimeTriggerExecutor
 
   @override
   Future<bool> onResume() async {
-    if (configuration!.schedule.isAfter(DateTime.now())) {
+    if (configuration!.schedule.isBefore(DateTime.now())) {
       warning('The schedule of the DateTimeTrigger cannot be in the past.');
       return false;
     } else {
@@ -371,13 +381,16 @@ class ConditionalPeriodicTriggerExecutor
     extends TriggerExecutor<ConditionalPeriodicTrigger> {
   @override
   Future<bool> onResume() async {
-    // create a recurrent timer that checks the conditions periodically
-    timer = Timer.periodic(configuration!.period, (_) {
+    void check() {
       if (configuration!.triggerCondition != null &&
           configuration!.triggerCondition!()) {
         onTrigger();
       }
-    });
+    }
+
+    // check the condition immediately on resume, then once per period.
+    check();
+    timer = Timer.periodic(configuration!.period, (_) => check());
     return true;
   }
 }
@@ -543,25 +556,23 @@ class UserTaskTriggerExecutor extends TriggerExecutor<UserTaskTrigger> {
 /// Executes an [NoUserTaskTrigger].
 /// Runs once pr minute.
 class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
-  Timer? _timer;
-
   @override
   Future<bool> onResume() async {
-    _timer = Timer.periodic(Duration(minutes: 1), (_) {
+    // enqueue immediately if not already on the list, then keep checking once
+    // pr minute - otherwise the first check (and task) is delayed a full minute.
+    void enqueueIfMissing() {
       if (!AppTaskController().userTaskQueue
           .where((task) => task.state == UserTaskState.enqueued)
           .any((task) => task.name == configuration!.taskName)) {
         onTrigger();
       }
-    });
+    }
+
+    enqueueIfMissing();
+    // Use the inherited [timer], which the base onPause()/onDispose() cancel.
+    timer = Timer.periodic(Duration(minutes: 1), (_) => enqueueIfMissing());
 
     return true;
-  }
-
-  @override
-  Future<bool> onPause() async {
-    _timer?.cancel();
-    return super.onPause();
   }
 }
 

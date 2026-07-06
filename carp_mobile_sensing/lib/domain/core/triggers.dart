@@ -684,8 +684,8 @@ class UserTaskTrigger extends TriggerConfiguration {
 /// on the task list.
 ///
 /// Typically used to make sure that a specific task is always on the task list.
-/// Note that the [NoUserTaskTriggerExecutor] only checks the task list once pr
-/// minute, so a minute may pass before this trigger triggers.
+/// The [NoUserTaskTriggerExecutor] checks immediately on resume and then once
+/// pr minute, re-adding the task whenever it is no longer on the list.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class NoUserTaskTrigger extends TriggerConfiguration {
   /// The name of the task to look for, matching [TaskConfiguration.name].
