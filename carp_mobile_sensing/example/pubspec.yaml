@@ -18,13 +18,18 @@ dependencies:
   carp_core: ^1.8.0
   carp_mobile_sensing:
     path: ../../carp_mobile_sensing/
-  
-  
+  carp_context_package:
+    path: ../../packages/carp_context_package/
+
 dependency_overrides:
   # carp_serializable:
   #   path: ../../carp_serializable/
   carp_core:
     path: ../../carp_core
+  carp_mobile_sensing:
+    path: ../../carp_mobile_sensing/
+  screen_state:
+    path: ../../../flutter-plugins/packages/screen_state
 
 dev_dependencies:
   test: any

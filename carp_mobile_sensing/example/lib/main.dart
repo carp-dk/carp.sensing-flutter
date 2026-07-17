@@ -11,8 +11,16 @@ import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
+import 'package:carp_context_package/carp_context_package.dart';
 
-void main() => runApp(const MobileSensingApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  CarpMobileSensing.ensureInitialized();
+
+  // Register the context sampling package to enable location measures.
+  SamplingPackageRegistry().register(ContextSamplingPackage());
+  runApp(const MobileSensingApp());
+}
 
 /// This demo app shows a list of studies in a client manager of CARP Mobile Sensing.
 /// Each list tile shows a study showing the study's description and runtime
@@ -258,6 +266,34 @@ class StudyPageState extends State<StudyPage> {
           measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
         ),
         phone,
+      );
+
+      // Add a location service and collect location continuously in the
+      // background. Used to test that location sampling keeps running when
+      // the app is backgrounded / the phone is locked.
+      final locationService = LocationService(
+        accuracy: GeolocationAccuracy.high,
+        distance: 0,
+        interval: const Duration(seconds: 1),
+        notificationTitle: 'CAMS Example',
+        notificationMessage: 'Collecting location in the background',
+      );
+      _protocol?.addConnectedDevice(locationService, phone);
+
+      // Get the location every 10 seconds using a periodic trigger and a
+      // one-shot location sampling configuration.
+      _protocol?.addTaskControl(
+        PeriodicTrigger(period: const Duration(seconds: 1)),
+        BackgroundTask(
+          name: 'Location Task',
+          measures: [
+            Measure(type: ContextSamplingPackage.LOCATION)
+              ..overrideSamplingConfiguration = LocationSamplingConfiguration(
+                once: true,
+              ),
+          ],
+        ),
+        locationService,
       );
 
       // Add background measures from the [DeviceSamplingPackage] and
