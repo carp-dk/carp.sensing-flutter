@@ -44,10 +44,10 @@ class HealthServiceManager
             : "Google Health Connect"
       : 'N/A';
 
-  final List<HealthDataType> _types = [];
+  final Set<HealthDataType> _types = {};
 
   /// Which health data types should this service access.
-  List<HealthDataType> get types => _types.toSet().toList();
+  List<HealthDataType> get types => _types.toList();
 
   /// Add a set of health [types] this service should access.
   void addTypes(List<HealthDataType> types) {
@@ -63,6 +63,11 @@ class HealthServiceManager
   @override
   void onConfigure() {
     Health().configure();
+
+    // Gather the health types from the device's default sampling configuration.
+    final config =
+        configuration?.defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH];
+    if (config is HealthSamplingConfiguration) addTypes(config.healthDataTypes);
 
     if (Platform.isAndroid) {
       var sdkLevel = int.parse(DeviceInfoService().sdk ?? '-1');
@@ -133,6 +138,8 @@ class HealthServiceManager
   @override
   Future<bool> onHasPermissions() async {
     if (_hasPermissions) return true;
+    // No registered types yet must not count as "granted".
+    if (types.isEmpty) return false;
     _hasPermissions = await hasHealthPermissions(types);
     // if permissions are granted, we can consider the service as connected, otherwise disconnected.
     status = _hasPermissions

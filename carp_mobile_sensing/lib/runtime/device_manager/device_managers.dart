@@ -164,9 +164,14 @@ class SmartphoneDeviceManager
   @override
   void onConfigure() {
     // listen to the battery
-    _battery.onBatteryStateChanged.listen(
-      (state) async => _batteryLevel = await _battery.batteryLevel,
-    );
+    _battery.onBatteryStateChanged.listen((state) async {
+      try {
+        _batteryLevel = await _battery.batteryLevel;
+      } catch (error) {
+        // Battery info is unavailable on some platforms (e.g. the iOS simulator).
+        warning('$runtimeType - could not read battery level: $error');
+      }
+    });
 
     // find the supported data types
     for (var package in SamplingPackageRegistry().packages) {
