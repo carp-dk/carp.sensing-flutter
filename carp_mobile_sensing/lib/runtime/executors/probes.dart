@@ -131,6 +131,16 @@ abstract class Probe extends AbstractExecutor<Measure> {
     return granted;
   }
 
+  /// Whether this probe is allowed to run.
+  ///
+  /// On Android the [SmartphoneStudyController] requests all deployment
+  /// permissions in a single batch ([SmartphoneStudyController.askForAllPermissions]),
+  /// so probes only check - requesting again here would collide, as
+  /// permission_handler forbids concurrent requests. On iOS permissions are
+  /// requested automatically when a resource is accessed.
+  Future<bool> hasRequiredPermissions() async =>
+      Platform.isIOS ? true : await arePermissionsGranted();
+
   // default no-op implementation of callback methods below
 
   @override
@@ -159,7 +169,7 @@ class StubProbe extends Probe {}
 abstract class MeasurementProbe extends Probe {
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (await hasRequiredPermissions()) {
       getMeasurement().then(
         (measurement) {
           if (measurement != null) addMeasurement(measurement);
@@ -196,7 +206,7 @@ abstract class IntervalProbe extends MeasurementProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (await hasRequiredPermissions()) {
       Duration? interval = samplingConfiguration?.interval;
       if (interval != null) {
         _timer ??= Timer.periodic(interval, (_) async {
@@ -248,7 +258,7 @@ abstract class StreamProbe extends Probe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (await hasRequiredPermissions()) {
       _stream ??= stream;
       if (_stream == null) {
         warning(
@@ -304,7 +314,7 @@ abstract class PeriodicStreamProbe extends StreamProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (await hasRequiredPermissions()) {
       if (stream == null) {
         warning(
           "Trying to start the stream probe '$runtimeType' which does not provide a measurement stream. "
@@ -364,7 +374,7 @@ abstract class BufferingPeriodicProbe extends MeasurementProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (await hasRequiredPermissions()) {
       Duration? interval = samplingConfiguration?.interval;
       Duration? duration = samplingConfiguration?.duration;
       if (interval != null && duration != null) {
@@ -456,7 +466,7 @@ abstract class BufferingIntervalStreamProbe extends StreamProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (await hasRequiredPermissions()) {
       Duration? interval = samplingConfiguration?.interval;
       if (interval != null) {
         _bufferingStreamSubscription = bufferingStream.listen(
@@ -545,7 +555,7 @@ abstract class BufferingPeriodicStreamProbe extends PeriodicStreamProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (await hasRequiredPermissions()) {
       Duration? interval = samplingConfiguration?.interval;
       Duration? duration = samplingConfiguration?.duration;
       if (interval != null && duration != null) {
