@@ -3,6 +3,12 @@
     <!-- Used for activity recognition (step count) -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
+    <!-- Used for location sampling (carp_context_package) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
     <!-- Used for sending and scheduling notifications -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE" />
