@@ -13,18 +13,23 @@ dependencies:
   http: ^1.2.1
   json_annotation: ^4.8.0
   shared_preferences: ^2.2.0
+  geolocator: ^13.0.0
   
   carp_serializable: ^2.0.0
   carp_core: ^1.8.0
   carp_mobile_sensing:
     path: ../../carp_mobile_sensing/
-  
-  
+  carp_context_package:
+    path: ../../packages/carp_context_package/
+
+
 dependency_overrides:
   # carp_serializable:
   #   path: ../../carp_serializable/
   carp_core:
     path: ../../carp_core
+  carp_mobile_sensing:
+    path: ../../carp_mobile_sensing/
 
 dev_dependencies:
   test: any

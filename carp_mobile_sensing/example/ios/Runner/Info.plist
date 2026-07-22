@@ -12,6 +12,19 @@
 	<key>NSMotionUsageDescription</key>
 	<string>This application tracks your steps</string>
 
+	<!-- Permissions to collect location -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This application collects location data to track your movement</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This application collects location data in the background to track your movement</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This application collects location data in the background to track your movement</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+	</array>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

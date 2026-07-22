@@ -58,7 +58,7 @@ dependencies:
   battery_plus: ^7.0.0
   pedometer: ^4.0.0       # Step count from local OS
   light: ^5.0.0           # Light sensor
-  screen_state: ^5.0.0    # Screen LOCK/ON/OFF
+  screen_state: ^5.0.2    # Screen LOCK/ON/OFF
 
   # For Bluetooth Low Energy (BLE) scanning and connection
   flutter_reactive_ble: ^5.0.0

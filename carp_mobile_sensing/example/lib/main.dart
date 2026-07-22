@@ -5,12 +5,16 @@
  * can be found in the LICENSE file.
  */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide TimeOfDay;
 
 // The CAMS packages
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
+import 'package:carp_context_package/carp_context_package.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() => runApp(const MobileSensingApp());
 
@@ -31,10 +35,7 @@ class MobileSensingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      useMaterial3: true,
-    ),
+    theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue), useMaterial3: true),
     darkTheme: ThemeData.dark(),
     home: const StudyPage(),
   );
@@ -55,21 +56,94 @@ class StudyPageState extends State<StudyPage> {
   /// have a `client` property to use.
   SmartPhoneClientManager client = SmartPhoneClientManager();
 
+  /// The sampling interval used by BOTH location paths, so the two log streams
+  /// ([LOC-CARP] and [LOC-DIRECT]) are directly comparable.
+  static const Duration locationInterval = Duration(seconds: 5);
+
+  /// The location service used both in the protocol and to request the OS
+  /// location permission. CAMS never asks for location permission itself
+  /// (by design), so the app has to do it — see [runStudy].
+  final LocationService locationService = LocationService(
+    accuracy: GeolocationAccuracy.high,
+    distance: 0,
+    interval: locationInterval,
+  );
+
+  /// Direct subscription to the raw location stream (bypassing the CARP
+  /// measurement pipeline). Logs every fix.
+  StreamSubscription<Location>? _directLocationSub;
+
+  /// Subscription to the `geolocator` package's position stream — a third,
+  /// independent location source. Logs every fix.
+  StreamSubscription<Position>? _geoLocationSub;
+
   @override
   void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
     // Set debug level for more detailed debugging information.
     Settings().debugLevel = DebugLevel.debug;
 
+    // Register the context sampling package so location (and other context)
+    // measures are available. This must happen before configuring the client.
+    SamplingPackageRegistry().register(ContextSamplingPackage());
+
+    // Request location permission BEFORE configuring the client. CAMS connects
+    // the LocationService device during deployment/startup, and that connect
+    // fails (and is never retried) if permission isn't already granted — which
+    // leaves the location task unable to resume.
+    await LocationManager().configure(locationService);
+    await LocationManager().requestPermission();
+
     // Configure the client. Note that the client can take a series of configuration
     // parameters, but here we're just using the default configurations.
-    client.configure();
+    await client.configure();
 
-    // Listen on all the measurements and print them as json.
-    SmartPhoneClientManager().measurements.listen(
-      (measurement) => debugPrint(toJsonString(measurement)),
+    // Listen on all the measurements and print them as json. Additionally, when
+    // a measurement is a location (collected via CARP >> ContextSamplingPackage
+    // .LOCATION), log it in the compact comparable format.
+    SmartPhoneClientManager().measurements.listen((measurement) {
+      debugPrint(toJsonString(measurement));
+      final data = measurement.data;
+      if (data is Location) _logLocation('LOC-CARP', data);
+    });
+
+    // Direct location stream: subscribe straight to the OS location stream via
+    // the LocationManager, bypassing the CARP probe/measurement pipeline.
+    // Logs every fix (no throttle) for a true 1:1 comparison with LOC-CARP.
+    _directLocationSub = LocationManager().onLocationChanged.listen(
+      (location) => _logLocation('LOC-DIRECT', location),
     );
 
-    super.initState();
+    // Third source: the `geolocator` package's own position stream, independent
+    // of both CARP and the `location` plugin. Logs every fix (no throttle).
+    _geoLocationSub =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 0),
+        ).listen((position) {
+          final time = position.timestamp.toIso8601String();
+          debugPrint(
+            '[LOC-GEO] $time  ${position.latitude}, ${position.longitude}  ±${position.accuracy}m',
+          );
+        });
+  }
+
+  /// Log a [location] with a filterable [tag], a timestamp, coordinates, and the
+  /// accuracy radius in meters (the precision metric). Filter the console with
+  /// `[LOC-CARP]`, `[LOC-DIRECT]`, or `[LOC-GEO]`.
+  void _logLocation(String tag, Location location) {
+    final time = (location.time ?? DateTime.now()).toIso8601String();
+    debugPrint('[$tag] $time  ${location.latitude}, ${location.longitude}  ±${location.accuracy}m');
+  }
+
+  @override
+  void dispose() {
+    _directLocationSub?.cancel();
+    _geoLocationSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -79,15 +153,12 @@ class StudyPageState extends State<StudyPage> {
       body: ListenableBuilder(
         listenable: client,
         builder: (BuildContext context, Widget? child) => ListView.builder(
-          padding: EdgeInsets.symmetric(vertical: 4.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
           itemCount: client.studies.length,
           itemBuilder: studyTileWithBorder,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addStudy,
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: addStudy, child: const Icon(Icons.add)),
     );
   }
 
@@ -107,13 +178,7 @@ class StudyPageState extends State<StudyPage> {
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12.0),
               border: Border.all(color: Colors.grey.shade300, width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).shadowColor,
-                  blurRadius: 8.0,
-                  offset: Offset(0, 4),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Theme.of(context).shadowColor, blurRadius: 8.0, offset: const Offset(0, 4))],
             ),
             child: ListTile(
               isThreeLine: true,
@@ -121,10 +186,7 @@ class StudyPageState extends State<StudyPage> {
                 ExecutorState.Resumed => Icons.pause,
                 _ => Icons.play_arrow,
               }, size: 40),
-              title: Text(
-                'Study Deployment #$index',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              title: Text('Study Deployment #$index', style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Text(
                 'ID: ...-${study.studyDeploymentId.split('-').last}\n'
                 'Status: ${study.status.name}\n'
@@ -142,11 +204,11 @@ class StudyPageState extends State<StudyPage> {
 
   /// A set of icons to illustrate the [SmartphoneStudy.samplingState].
   static Map<ExecutorState, Icon> get executorStateIcon => {
-    ExecutorState.Created: Icon(Icons.child_care),
-    ExecutorState.Initialized: Icon(Icons.check),
-    ExecutorState.Resumed: Icon(Icons.radio_button_checked),
-    ExecutorState.Paused: Icon(Icons.radio_button_unchecked),
-    ExecutorState.Undefined: Icon(Icons.error_outline),
+    ExecutorState.Created: const Icon(Icons.child_care),
+    ExecutorState.Initialized: const Icon(Icons.check),
+    ExecutorState.Resumed: const Icon(Icons.radio_button_checked),
+    ExecutorState.Paused: const Icon(Icons.radio_button_unchecked),
+    ExecutorState.Undefined: const Icon(Icons.error_outline),
   };
 
   /// Add and deploy a new study to the client's list of studies based on the
@@ -155,25 +217,26 @@ class StudyPageState extends State<StudyPage> {
   /// Thus, all studies will be identical in terms of data collection.
   void addStudy() => client
       .addStudyFromProtocol(protocol)
-      .then(
-        (study) =>
-            client.tryDeployment(study.studyDeploymentId, study.deviceRoleName),
-      );
+      .then((study) => client.tryDeployment(study.studyDeploymentId, study.deviceRoleName));
 
   /// Remove [study] from the client's list of studies.
-  void removeStudy(SmartphoneStudy study) =>
-      client.removeStudy(study.studyDeploymentId, study.deviceRoleName);
+  void removeStudy(SmartphoneStudy study) => client.removeStudy(study.studyDeploymentId, study.deviceRoleName);
 
   /// Resume or pause [study] based on its current state.
-  void runStudy(SmartphoneStudy study) => setState(() {
+  void runStudy(SmartphoneStudy study) async {
     var controller = client.getStudyController(study);
 
     if (study.isSampling) {
       controller?.pause();
     } else {
+      // CAMS does not request location permission itself, so ask for it here
+      // before sampling starts. This is what pops the OS location dialog.
+      await LocationManager().configure(locationService);
+      await LocationManager().requestPermission();
       controller?.resume();
     }
-  });
+    setState(() {});
+  }
 
   /// A simple study protocol that collects a few basic measures
   /// using this smartphone as the primary device.
@@ -199,11 +262,7 @@ class StudyPageState extends State<StudyPage> {
   /// but you can uncomment them to see how they work.
   SmartphoneStudyProtocol get protocol {
     if (_protocol == null) {
-      _protocol = SmartphoneStudyProtocol(
-        ownerId: 'AB',
-        name: 'Demo Protocol',
-        dataEndPoint: SQLiteDataEndPoint(),
-      );
+      _protocol = SmartphoneStudyProtocol(ownerId: 'AB', name: 'Demo Protocol', dataEndPoint: SQLiteDataEndPoint());
 
       // Define which devices are used for data collection.
       //
@@ -213,6 +272,25 @@ class StudyPageState extends State<StudyPage> {
       // services (e.g., a weather service).
       var phone = Smartphone();
       _protocol?.addPrimaryDevice(phone);
+
+      // Add the location service as a connected device. Location measures are
+      // collected via this service, not directly on the phone.
+      _protocol?.addConnectedDevice(locationService, phone);
+
+      // Collect location by streaming: the probe subscribes once to the OS
+      // location stream and pipes every fix straight into the measurement
+      // stream. No polling, no timeout, no duplicates/gaps — one OS fix yields
+      // exactly one measurement (the same behavior as the [LOC-DIRECT] logger).
+      // Uses an ImmediateTrigger so the probe resumes once and stays subscribed
+      // (a PeriodicTrigger + once:true is the polling design that duplicates).
+      _protocol?.addTaskControl(
+        ImmediateTrigger(),
+        BackgroundTask(
+          name: 'Location Task',
+          measures: [Measure(type: ContextSamplingPackage.LOCATION)],
+        ),
+        locationService,
+      );
 
       // Add a participant role
       _protocol?.addParticipantRole(ParticipantRole('Participant'));
@@ -229,9 +307,7 @@ class StudyPageState extends State<StudyPage> {
           measures: [
             Measure(type: DeviceSamplingPackage.TIMEZONE),
             Measure(type: DeviceSamplingPackage.HEARTBEAT)
-              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-                interval: const Duration(minutes: 1),
-              ),
+              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(interval: const Duration(minutes: 1)),
           ],
         ),
         phone,
@@ -243,10 +319,8 @@ class StudyPageState extends State<StudyPage> {
       // not make much sense. This is just to demonstrate the use of a periodic
       // trigger, which is useful for many other types of measures.
       _protocol?.addTaskControl(
-        PeriodicTrigger(period: Duration(seconds: 10)),
-        BackgroundTask(
-          measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
-        ),
+        PeriodicTrigger(period: const Duration(seconds: 10)),
+        BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
         phone,
       );
 
@@ -273,9 +347,7 @@ class StudyPageState extends State<StudyPage> {
           name: 'Background Measures Task',
           measures: [
             Measure(type: DeviceSamplingPackage.FREE_MEMORY)
-              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-                interval: const Duration(seconds: 10),
-              ),
+              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(interval: const Duration(seconds: 10)),
             Measure(type: DeviceSamplingPackage.BATTERY_STATE),
             Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
             Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
