@@ -1,5 +1,5 @@
 name: carp_movesense_package
-version: 2.0.1
+version: 3.0.0
 description: The CARP Movesense sampling package. Samples sensor data from the Movesense MD and ACTIVE (HR+, HR2) devices.
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_movesense_package
@@ -13,7 +13,8 @@ topics:
   - digital-phenotyping
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  # `carp_movesense_flutter` (the native Movesense plugin) requires Dart >= 3.12.2,
+  sdk: ^3.12.2
   flutter: ">=3.19.0"
 
 platforms:
@@ -28,7 +29,7 @@ dependencies:
   carp_core: ^2.0.0         # the core CARP domain model
   carp_mobile_sensing: ^2.0.0
 
-  mdsflutter: ^2.2.0 
+  carp_movesense_flutter: ^0.1.0
   json_annotation: ^4.8.0
 
 

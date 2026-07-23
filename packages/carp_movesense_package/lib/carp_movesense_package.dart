@@ -52,8 +52,15 @@
 ///  * User replaceable CR 2025 battery
 ///  * Class IIa Medical Device, EU Medical Device Regulation MDR 2017/745
 ///
-/// This package uses the Flutter [mdsflutter](https://pub.dev/packages/mdsflutter) plugin,
-/// which again is based on the official [Movesense Mobile API](https://www.movesense.com/docs/mobile/mobile_sw_overview/).
+/// This package uses the Flutter
+/// [carp_movesense_flutter](https://pub.dev/packages/carp_movesense_flutter)
+/// plugin, which again is based on the official
+/// [Movesense Mobile API](https://www.movesense.com/docs/mobile/mobile_sw_overview/).
+///
+/// As of version 3.0.0 this package is based on `carp_movesense_flutter` instead
+/// of the `mdsflutter` plugin. The public API of this sampling package is unchanged.
+/// Internally, the Movesense MDS operations are routed through the mdsflutter-compatible
+/// [Mds] facade exposed by `carp_movesense_flutter`.
 library;
 
 import 'dart:async';
@@ -63,7 +70,7 @@ import 'dart:core';
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-import 'package:mdsflutter/Mds.dart';
+import 'package:carp_movesense_flutter/carp_movesense_flutter.dart' show Mds;
 import 'package:json_annotation/json_annotation.dart';
 
 part 'carp_movesense_package.g.dart';

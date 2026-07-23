@@ -44,6 +44,19 @@ abstract class _MovesenseStreamProbe extends StreamProbe {
     // fast out of already subscribed to this type of measurement
     if (_subscriptionId != null) return false;
 
+    // React to a subscription failure at most once.
+    var errorHandled = false;
+    void handleError(String label, Object error, int status) {
+      if (errorHandled) return;
+      errorHandled = true;
+
+      var errorMsg = '$runtimeType - $label, error: $error, status: $status';
+      warning(errorMsg);
+      _streamController.addError(errorMsg);
+      _subscriptionId = null;
+      if (!completer.isCompleted) completer.complete(false);
+    }
+
     try {
       _subscriptionId = Mds.subscribe(
         "$_serial/$_uri",
@@ -51,37 +64,23 @@ abstract class _MovesenseStreamProbe extends StreamProbe {
         // onSuccess
         (data, status) {
           debug('$runtimeType - OnSuccess, data: $data, status: $status');
-          completer.complete(super.onResume());
+          if (!completer.isCompleted) completer.complete(super.onResume());
         },
         // onError
-        (error, status) {
-          var errorMsg = '$runtimeType - Error, error: $error, status: $status';
-          warning(errorMsg);
-          _streamController.addError(errorMsg);
-          _subscriptionId = null;
-          completer.complete(false);
-        },
+        (error, status) => handleError('Error', error, status),
         // onNotification
         (data) {
           _streamController.add(data);
         },
         // onSubscriptionError
-        (error, status) {
-          var errorMsg =
-              '$runtimeType - Subscription Error, error: $error, status: $status';
-          warning(errorMsg);
-          _streamController.addError(errorMsg);
-          _subscriptionId = null;
-          completer.complete(false);
-        },
+        (error, status) => handleError('Subscription Error', error, status),
       );
     } catch (error) {
-      var errorMsg =
-          '$runtimeType - Error when trying to subscribe to device - serial: $_serial, uri: $_uri, error: $error';
-      warning(errorMsg);
-      _streamController.addError(errorMsg);
-      _subscriptionId = null;
-      completer.complete(false);
+      handleError(
+        'Error when trying to subscribe to device - serial: $_serial, uri: $_uri',
+        error,
+        0,
+      );
     }
 
     return completer.future;
