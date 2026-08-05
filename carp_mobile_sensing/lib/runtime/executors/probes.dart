@@ -267,10 +267,8 @@ abstract class StreamProbe extends Probe {
         );
         return false;
       } else {
-        // Cancel any previous subscription before listening again. Resuming an
-        // already resumed probe would otherwise orphan the old subscription,
-        // which keeps delivering, and every measurement would be collected
-        // once per resume.
+        // Resuming an already resumed probe would otherwise orphan the old
+        // subscription, which keeps delivering.
         await _subscription?.cancel();
         _subscription = _stream?.listen(
           _onData,

@@ -124,7 +124,6 @@ abstract class BLEDeviceManager<
     if (Platform.isAndroid) {
       await Permission.bluetoothScan.request();
       await Permission.bluetoothConnect.request();
-      // BLE scanning on Android also requires location permission.
       await Permission.locationWhenInUse.request();
     }
     if (Platform.isIOS) {

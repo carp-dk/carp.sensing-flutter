@@ -4,7 +4,6 @@ import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:test/test.dart';
 
-/// A [StreamProbe] collecting from a stream that is controlled by the test.
 class _TestStreamProbe extends StreamProbe {
   final controller = StreamController<Measurement>.broadcast();
 
@@ -29,9 +28,6 @@ void main() {
       probe.measurements.listen(collected.add);
 
       await probe.onResume();
-      // Resuming again must cancel the previous subscription. Overwriting it
-      // would orphan a subscription that keeps delivering, and every measurement
-      // would be collected once per resume.
       await probe.onResume();
 
       probe.controller.add(Measurement.fromData(FileData(filename: 'test')));

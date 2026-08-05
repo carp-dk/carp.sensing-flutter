@@ -243,17 +243,9 @@ class PolarDeviceManager
         rssi = null;
       });
 
-      // Find out what data types the connected Polar device supports and mark
-      // it as connected once any are available.
-      //
-      // Capabilities come from two independent SDK features that may become
-      // ready at different times (or only one of them):
-      //  * onlineStreaming - the Polar Measurement Data (PMD) service (ECG,
-      //    ACC, PPG, PPI, ...), available on H10, Verity Sense, etc.
-      //  * hr - the standard BLE HR service, which delivers HR on devices that
-      //    do not expose HR via PMD (e.g. Verity Sense).
-      // So we listen for each feature separately rather than gating on
-      // onlineStreaming alone (which would leave HR-only devices stuck).
+      // Data types come from two SDK features that become ready independently -
+      // a device delivering HR over the standard BLE HR service only (e.g.
+      // Verity Sense) never reports the online streaming (PMD) one.
       _sdkFeatureSubscription = polar.sdkFeatureReady
           .where((event) => event.identifier == polarIdentifier)
           .listen((event) async {
@@ -281,8 +273,8 @@ class PolarDeviceManager
       warning(
         "$runtimeType - could not connect to device of type '$deviceType' and id '$polarIdentifier' - error: $error",
       );
-      // Clean up the listeners set up above as well, so a later connect attempt
-      // does not stack subscriptions on a half-connected device.
+      // Clean up the listeners set up above, so a later attempt does not stack
+      // subscriptions on a half-connected device.
       await onDisconnect();
       return DeviceStatus.disconnected;
     }
@@ -294,8 +286,8 @@ class PolarDeviceManager
 
     _batteryLevel = null;
     dataTypes = null;
-    // Await the cancellations - disconnecting below makes the SDK emit a
-    // disconnect event, which must not reach these listeners anymore.
+    // Disconnecting below makes the SDK emit a disconnect event, which must not
+    // reach these listeners anymore.
     await Future.wait([
       ?_batterySubscription?.cancel(),
       ?_connectingSubscription?.cancel(),
