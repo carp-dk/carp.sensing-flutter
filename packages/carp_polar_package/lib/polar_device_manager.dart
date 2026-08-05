@@ -243,21 +243,35 @@ class PolarDeviceManager
         rssi = null;
       });
 
-      // find out what data types the connected Polar device supports in streaming mode,
-      // and mark the device as fully connected when the types are available
-      polar.sdkFeatureReady
-          .firstWhere(
-            (event) =>
-                event.identifier == polarIdentifier &&
-                event.feature == PolarSdkFeature.onlineStreaming,
-          )
-          .then((_) {
-            polar.getAvailableOnlineStreamDataTypes(polarIdentifier!).then((
-              availableDataTypes,
-            ) {
-              dataTypes = availableDataTypes.toList();
-              status = DeviceStatus.connected;
-            });
+      // Find out what data types the connected Polar device supports and mark
+      // it as connected once any are available.
+      //
+      // Capabilities come from two independent SDK features that may become
+      // ready at different times (or only one of them):
+      //  * onlineStreaming - the Polar Measurement Data (PMD) service (ECG,
+      //    ACC, PPG, PPI, ...), available on H10, Verity Sense, etc.
+      //  * hr - the standard BLE HR service, which delivers HR on devices that
+      //    do not expose HR via PMD (e.g. Verity Sense).
+      // So we listen for each feature separately rather than gating on
+      // onlineStreaming alone (which would leave HR-only devices stuck).
+      _sdkFeatureSubscription = polar.sdkFeatureReady
+          .where((event) => event.identifier == polarIdentifier)
+          .listen((event) async {
+            Set<PolarDataType> available = {};
+            if (event.feature == PolarSdkFeature.onlineStreaming) {
+              available = await polar.getAvailableOnlineStreamDataTypes(
+                polarIdentifier!,
+              );
+            } else if (event.feature == PolarSdkFeature.hr) {
+              available = await polar.getAvailableHrServiceDataTypes(
+                polarIdentifier!,
+              );
+            } else {
+              return;
+            }
+
+            dataTypes = {...?dataTypes, ...available}.toList();
+            status = DeviceStatus.connected;
           });
 
       // now finally, start connecting to the device based on its identifier
@@ -276,6 +290,7 @@ class PolarDeviceManager
     if (polarIdentifier == null) return false;
 
     _batteryLevel = null;
+    dataTypes = null;
     _batterySubscription?.cancel();
     _connectingSubscription?.cancel();
     _connectedSubscription?.cancel();

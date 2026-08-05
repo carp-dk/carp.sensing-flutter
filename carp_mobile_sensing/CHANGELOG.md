@@ -1,3 +1,8 @@
+## 2.1.7
+
+* resume a connectable device's task control executors when it connects after the study has started - previously they stayed paused and the device never sampled
+* request location permission for BLE devices on Android, which is required for BLE scanning to return any results
+
 ## 2.1.3
 
 * Update `screen_state` plugin to 5.0.1

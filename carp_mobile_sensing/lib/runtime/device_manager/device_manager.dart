@@ -159,8 +159,16 @@ abstract class DeviceManager<
     _registration = registration;
     onConfigure();
 
-    // Listen to status events and when this device is disconnecting or reconnected,
-    // stop or restart sampling.
+    // Listen to status events and when this device is connecting, disconnecting,
+    // or reconnected, start, stop, or restart sampling.
+    //
+    // [start] on [connected] handles the case where a connectable device (e.g.
+    // a BLE sensor) connects *after* the study is already running: its task
+    // control executors were paused at study resume (device not yet connected),
+    // and nothing else resumes them once the device connects.
+    statusEvents
+        .where((status) => status == DeviceStatus.connected)
+        .listen((_) => start());
     statusEvents
         .where((status) => status == DeviceStatus.disconnecting)
         .listen((_) => isDisconnecting());
