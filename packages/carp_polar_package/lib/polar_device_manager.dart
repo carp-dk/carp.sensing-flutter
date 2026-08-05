@@ -281,6 +281,9 @@ class PolarDeviceManager
       warning(
         "$runtimeType - could not connect to device of type '$deviceType' and id '$polarIdentifier' - error: $error",
       );
+      // Clean up the listeners set up above as well, so a later connect attempt
+      // does not stack subscriptions on a half-connected device.
+      await onDisconnect();
       return DeviceStatus.disconnected;
     }
   }
@@ -291,11 +294,15 @@ class PolarDeviceManager
 
     _batteryLevel = null;
     dataTypes = null;
-    _batterySubscription?.cancel();
-    _connectingSubscription?.cancel();
-    _connectedSubscription?.cancel();
-    _disconnectedSubscription?.cancel();
-    _sdkFeatureSubscription?.cancel();
+    // Await the cancellations - disconnecting below makes the SDK emit a
+    // disconnect event, which must not reach these listeners anymore.
+    await Future.wait([
+      ?_batterySubscription?.cancel(),
+      ?_connectingSubscription?.cancel(),
+      ?_connectedSubscription?.cancel(),
+      ?_disconnectedSubscription?.cancel(),
+      ?_sdkFeatureSubscription?.cancel(),
+    ]);
 
     await polar.disconnectFromDevice(polarIdentifier!);
 
