@@ -1,3 +1,7 @@
+## 2.0.2
+
+* disconnect from MDS when a connection attempt fails, so the native SDK stops auto-retrying in the background and the device settles as disconnected
+
 ## 2.0.1
 
 * register the 1.x `MovesenseDevice` device type as a `fromJson` alias, for backwards compatibility with studies created on CAMS 1.x (protocol API level < 2.0)

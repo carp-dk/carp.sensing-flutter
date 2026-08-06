@@ -1,3 +1,9 @@
+## 2.1.7
+
+* resume a connectable device's task control executors when it connects after the study has started - previously they stayed paused and the device never sampled
+* request location permission for BLE devices on Android, which is required for BLE scanning to return any results
+* cancel the previous subscription when a [StreamProbe] is resumed, so resuming an already resumed probe no longer orphans a subscription that keeps delivering and collects every measurement once per resume
+
 ## 2.1.3
 
 * Update `screen_state` plugin to 5.0.1
