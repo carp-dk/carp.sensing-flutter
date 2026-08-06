@@ -3,7 +3,9 @@ description: Example project for the CAMS Movesense Sampling Package.
 publish_to: 'none'
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  # Matches the carp_movesense_package SDK constraint, which inherits Dart
+  # >= 3.12.2 from the carp_movesense_flutter plugin (as of package v3.0.0).
+  sdk: ^3.12.2
   flutter: ">=3.19.0"
 
 dependencies:
