@@ -267,6 +267,9 @@ abstract class StreamProbe extends Probe {
         );
         return false;
       } else {
+        // Resuming an already resumed probe would otherwise orphan the old
+        // subscription, which keeps delivering.
+        await _subscription?.cancel();
         _subscription = _stream?.listen(
           _onData,
           onError: _onError,

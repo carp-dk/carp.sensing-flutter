@@ -101,14 +101,6 @@ class LocationManager {
   /// This method is, however, **NOT** used by this context sampling package, since
   /// handling of permissions should be taken care of on an app level.
   Future<PermissionStatus> requestPermission() async {
-    // Fast out if not configured
-    if (!configured) {
-      warning(
-        '$runtimeType - is not configured. '
-        "Call 'configure' before requesting permission.",
-      );
-      return PermissionStatus.denied;
-    }
     debug('$runtimeType - Requesting permission to access location...');
 
     var permissionGranted = await _provider.hasPermission();

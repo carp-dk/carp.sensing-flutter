@@ -109,7 +109,9 @@ abstract class BLEDeviceManager<
   @mustCallSuper
   Future<bool> onHasPermissions() async => (Platform.isAndroid)
       ? await Permission.bluetoothConnect.isGranted &&
-            await Permission.bluetoothScan.isGranted
+            await Permission.bluetoothScan.isGranted &&
+            // BLE scanning on Android also requires location permission.
+            await Permission.locationWhenInUse.isGranted
       // : (Platform.isIOS)
       //     ? await Permission.bluetooth.isGranted
       // for some reason it seems like Permission.bluetooth.isGranted always
@@ -122,6 +124,7 @@ abstract class BLEDeviceManager<
     if (Platform.isAndroid) {
       await Permission.bluetoothScan.request();
       await Permission.bluetoothConnect.request();
+      await Permission.locationWhenInUse.request();
     }
     if (Platform.isIOS) {
       await Permission.bluetooth.request();

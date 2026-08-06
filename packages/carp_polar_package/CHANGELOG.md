@@ -1,3 +1,10 @@
+## 2.0.2
+
+* discover data types from both the online streaming (PMD) and the HR service SDK features, so devices that only deliver HR via the standard BLE HR service (e.g. Verity Sense) report their supported types
+* clear the discovered data types on disconnect
+* clean up the event listeners when a connection attempt fails, so a later attempt does not stack subscriptions on a half-connected device
+* await the cancellation of the event listeners when disconnecting, so the disconnect emitted by the SDK is not handled by the listeners being torn down
+
 ## 2.0.1
 
 * register the 1.x `PolarDevice` device type as a `fromJson` alias, for backwards compatibility with studies created on CAMS 1.x (protocol API level < 2.0)

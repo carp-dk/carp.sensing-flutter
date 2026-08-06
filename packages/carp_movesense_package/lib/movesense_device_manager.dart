@@ -177,8 +177,10 @@ class MovesenseDeviceManager
           status = DeviceStatus.connected;
         } else {
           warning("$runtimeType - Error in connecting to device: $error");
-          // we return status to be initialized so that the user has a chance to reconnect
-          status = DeviceStatus.configured;
+          // Tear down the half-open connection, or the native SDK keeps
+          // retrying it in the background.
+          Mds.disconnect(bleAddress!);
+          status = DeviceStatus.disconnected;
         }
       },
       // onBleConnected

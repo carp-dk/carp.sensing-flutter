@@ -5,6 +5,10 @@
 * `carp_movesense_flutter` **bundles the native Movesense MDS libraries** (the Android `mdslib` `.aar` and the iOS `MovesenseMDS.xcframework`). Apps that upgrade should **remove the now-obsolete manual Movesense SDK setup**: the manually vendored `android/libs/mdslib-*.aar` + `flatDir` repository, and the `pod 'Movesense', :git => ...` line in the iOS `Podfile`. See the README for details.
 * Raised the minimum Dart SDK to `3.12.2` (required by `carp_movesense_flutter`).
 
+## 2.0.2
+
+* disconnect from MDS when a connection attempt fails, so the native SDK stops auto-retrying in the background and the device settles as disconnected
+
 ## 2.0.1
 
 * register the 1.x `MovesenseDevice` device type as a `fromJson` alias, for backwards compatibility with studies created on CAMS 1.x (protocol API level < 2.0)

@@ -243,21 +243,27 @@ class PolarDeviceManager
         rssi = null;
       });
 
-      // find out what data types the connected Polar device supports in streaming mode,
-      // and mark the device as fully connected when the types are available
-      polar.sdkFeatureReady
-          .firstWhere(
-            (event) =>
-                event.identifier == polarIdentifier &&
-                event.feature == PolarSdkFeature.onlineStreaming,
-          )
-          .then((_) {
-            polar.getAvailableOnlineStreamDataTypes(polarIdentifier!).then((
-              availableDataTypes,
-            ) {
-              dataTypes = availableDataTypes.toList();
-              status = DeviceStatus.connected;
-            });
+      // Data types come from two SDK features that become ready independently -
+      // a device delivering HR over the standard BLE HR service only (e.g.
+      // Verity Sense) never reports the online streaming (PMD) one.
+      _sdkFeatureSubscription = polar.sdkFeatureReady
+          .where((event) => event.identifier == polarIdentifier)
+          .listen((event) async {
+            Set<PolarDataType> available = {};
+            if (event.feature == PolarSdkFeature.onlineStreaming) {
+              available = await polar.getAvailableOnlineStreamDataTypes(
+                polarIdentifier!,
+              );
+            } else if (event.feature == PolarSdkFeature.hr) {
+              available = await polar.getAvailableHrServiceDataTypes(
+                polarIdentifier!,
+              );
+            } else {
+              return;
+            }
+
+            dataTypes = {...?dataTypes, ...available}.toList();
+            status = DeviceStatus.connected;
           });
 
       // now finally, start connecting to the device based on its identifier
@@ -267,6 +273,9 @@ class PolarDeviceManager
       warning(
         "$runtimeType - could not connect to device of type '$deviceType' and id '$polarIdentifier' - error: $error",
       );
+      // Clean up the listeners set up above, so a later attempt does not stack
+      // subscriptions on a half-connected device.
+      await onDisconnect();
       return DeviceStatus.disconnected;
     }
   }
@@ -276,11 +285,16 @@ class PolarDeviceManager
     if (polarIdentifier == null) return false;
 
     _batteryLevel = null;
-    _batterySubscription?.cancel();
-    _connectingSubscription?.cancel();
-    _connectedSubscription?.cancel();
-    _disconnectedSubscription?.cancel();
-    _sdkFeatureSubscription?.cancel();
+    dataTypes = null;
+    // Disconnecting below makes the SDK emit a disconnect event, which must not
+    // reach these listeners anymore.
+    await Future.wait([
+      ?_batterySubscription?.cancel(),
+      ?_connectingSubscription?.cancel(),
+      ?_connectedSubscription?.cancel(),
+      ?_disconnectedSubscription?.cancel(),
+      ?_sdkFeatureSubscription?.cancel(),
+    ]);
 
     await polar.disconnectFromDevice(polarIdentifier!);
 

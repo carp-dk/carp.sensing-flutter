@@ -159,8 +159,11 @@ abstract class DeviceManager<
     _registration = registration;
     onConfigure();
 
-    // Listen to status events and when this device is disconnecting or reconnected,
-    // stop or restart sampling.
+    // A device connecting after the study has started has its executors paused,
+    // and nothing else resumes them.
+    statusEvents
+        .where((status) => status == DeviceStatus.connected)
+        .listen((_) => start());
     statusEvents
         .where((status) => status == DeviceStatus.disconnecting)
         .listen((_) => isDisconnecting());
