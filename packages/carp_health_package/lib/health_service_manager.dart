@@ -50,9 +50,23 @@ class HealthServiceManager
   List<HealthDataType> get types => _types.toList();
 
   /// Add a set of health [types] this service should access.
+  ///
+  /// Types not supported on the current platform are ignored and logged as a
+  /// warning.
   void addTypes(List<HealthDataType> types) {
-    _types.addAll(types);
-    _hasPermissions = false;
+    bool isSupported(HealthDataType type) => Platform.isIOS
+        ? dataTypeKeysIOS.contains(type)
+        : dataTypeKeysAndroid.contains(type);
+
+    final unsupported = types.where((type) => !isSupported(type));
+    if (unsupported.isNotEmpty) {
+      warning(
+        '$runtimeType - Ignoring health data types not supported on '
+        '${Platform.isIOS ? 'iOS' : 'Android'}: ${unsupported.toList()}.',
+      );
+    }
+
+    _types.addAll(types.where(isSupported));
   }
 
   HealthServiceManager([HealthService? configuration])
@@ -60,14 +74,20 @@ class HealthServiceManager
     // Health().configure();
   }
 
+  /// Gather the health types to access from the sampling configuration of the
+  /// [service], so that the right permissions can be requested.
+  void gatherTypesFrom(HealthService? service) {
+    final config =
+        service?.defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH];
+    if (config is HealthSamplingConfiguration) {
+      addTypes(config.healthDataTypes);
+    }
+  }
+
   @override
   void onConfigure() {
     Health().configure();
-
-    // Gather the health types from the device's default sampling configuration.
-    final config =
-        configuration?.defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH];
-    if (config is HealthSamplingConfiguration) addTypes(config.healthDataTypes);
+    gatherTypesFrom(configuration);
 
     if (Platform.isAndroid) {
       var sdkLevel = int.parse(DeviceInfoService().sdk ?? '-1');
@@ -133,39 +153,30 @@ class HealthServiceManager
     return false;
   }
 
-  bool _hasPermissions = false;
-
   @override
   Future<bool> onHasPermissions() async {
-    if (_hasPermissions) return true;
     // No registered types yet must not count as "granted".
     if (types.isEmpty) return false;
-    _hasPermissions = await hasHealthPermissions(types);
-    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
-    status = _hasPermissions
-        ? DeviceStatus.connected
-        : DeviceStatus.disconnected;
-    return _hasPermissions;
+
+    // Apple Health does not disclose whether read access is granted - see the
+    // note above - so on iOS the only way to know is to try to collect data.
+    if (Platform.isIOS) return true;
+
+    return hasHealthPermissions(types);
   }
 
   @override
   Future<void> onRequestPermissions() async {
-    _hasPermissions = await requestHealthPermissions(types);
-    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
-    status = _hasPermissions
-        ? DeviceStatus.connected
-        : DeviceStatus.disconnected;
+    await requestHealthPermissions(types);
   }
 
   @override
   bool get canConnect => true;
 
+  // Note that [connect] only calls this once permissions have been granted.
   @override
   Future<DeviceStatus> onConnect() async => DeviceStatus.connected;
 
   @override
-  Future<bool> onDisconnect() async {
-    _hasPermissions = false;
-    return true;
-  }
+  Future<bool> onDisconnect() async => true;
 }

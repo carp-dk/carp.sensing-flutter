@@ -74,12 +74,10 @@ class LocationManager {
   bool get configured => _configured;
 
   /// Is the location service enabled in background mode?
-  Future<bool> isBackgroundModeEnabled() async =>
-      await _provider.isBackgroundModeEnabled();
+  Future<bool> isBackgroundModeEnabled() async => await _provider.isBackgroundModeEnabled();
 
   /// Does this location manger have permission to access location?
-  Future<bool> hasPermission() async =>
-      (await _provider.hasPermission()) == location.PermissionStatus.granted;
+  Future<bool> hasPermission() async => (await _provider.hasPermission()) == location.PermissionStatus.granted;
 
   /// Request permissions to access location.
   ///
@@ -117,9 +115,7 @@ class LocationManager {
 
     debug('$runtimeType - Permission: $permissionGranted');
 
-    return permissionGranted == location.PermissionStatus.granted
-        ? PermissionStatus.granted
-        : PermissionStatus.denied;
+    return permissionGranted == location.PermissionStatus.granted ? PermissionStatus.granted : PermissionStatus.denied;
   }
 
   /// Enable the [LocationManager] for accessing location also when the app is
@@ -156,9 +152,7 @@ class LocationManager {
       warning('$runtimeType - Could not enable background mode - $error');
     }
 
-    info(
-      '$runtimeType - Location service enabled, background mode: $backgroundMode',
-    );
+    info('$runtimeType - Location service enabled, background mode: $backgroundMode');
   }
 
   LocationService? _configuration;
@@ -206,9 +200,7 @@ class LocationManager {
       try {
         await _provider.changeNotificationOptions(
           title: configuration.notificationTitle ?? 'CARP Location Service',
-          subtitle:
-              configuration.notificationMessage ??
-              'The location service is running in the background',
+          subtitle: configuration.notificationMessage ?? 'The location service is running in the background',
           description:
               configuration.notificationDescription ??
               'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
@@ -227,8 +219,7 @@ class LocationManager {
     // Change location settings - both Android and iOS.
     try {
       await _provider.changeSettings(
-        accuracy:
-            location.LocationAccuracy.values[configuration.accuracy.index],
+        accuracy: location.LocationAccuracy.values[configuration.accuracy.index],
         distanceFilter: configuration.distance,
         interval: configuration.interval.inMilliseconds,
       );
@@ -249,9 +240,7 @@ class LocationManager {
   /// Throws an error if the app does not have permission to access location.
   Future<Location> getLocation() async {
     try {
-      _lastKnownLocation = await onLocationChanged.first.timeout(
-        const Duration(seconds: 6),
-      );
+      _lastKnownLocation = await onLocationChanged.first.timeout(const Duration(seconds: 6));
     } catch (_) {}
 
     if (_lastKnownLocation == null) {
@@ -278,12 +267,11 @@ class LocationManager {
   /// (e.g. PERMISSION_DENIED_NEVER_ASK) on its event channel. `handleError`
   /// absorbs them here so they don't propagate as unhandled future errors
   /// to downstream subscribers.
-  Stream<Location> get onLocationChanged =>
-      _provider.onLocationChanged.handleError((Object error) {
+  Stream<Location> get onLocationChanged => _provider.onLocationChanged
+      .handleError((Object error) {
         warning('$runtimeType - native location stream error absorbed: $error');
-      }).map(
-        (location) => _lastKnownLocation = Location.fromLocationData(location),
-      );
+      })
+      .map((location) => _lastKnownLocation = Location.fromLocationData(location));
 
   @override
   toString() => configuration != null

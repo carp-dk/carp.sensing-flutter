@@ -149,6 +149,62 @@ void main() {
       print(toJsonString(dataFromJson));
       expect(toJsonString(dataFromJson), equals(dataJson));
     });
+
+    test('HealthAppTask adds types to an existing bare health measure', () {
+      final task = HealthAppTask(
+        measures: [Measure(type: HealthSamplingPackage.HEALTH)],
+        types: [HealthDataType.WEIGHT, HealthDataType.HEIGHT],
+      );
+
+      final configuration =
+          task.measures!.single.overrideSamplingConfiguration
+              as HealthSamplingConfiguration;
+
+      expect(
+        configuration.healthDataTypes,
+        containsAll([HealthDataType.WEIGHT, HealthDataType.HEIGHT]),
+      );
+    });
+
+    test(
+      'HealthAppTask merges types into an existing health configuration',
+      () {
+        final task = HealthAppTask(
+          measures: [
+            HealthSamplingPackage.getHealthMeasure([HealthDataType.STEPS]),
+          ],
+          types: [HealthDataType.WEIGHT, HealthDataType.HEIGHT],
+        );
+
+        final configuration =
+            task.measures!.single.overrideSamplingConfiguration
+                as HealthSamplingConfiguration;
+
+        expect(
+          configuration.healthDataTypes,
+          containsAll([
+            HealthDataType.STEPS,
+            HealthDataType.WEIGHT,
+            HealthDataType.HEIGHT,
+          ]),
+        );
+      },
+    );
+
+    test('the health types are gathered from the service configuration', () {
+      final service = HealthService()
+        ..defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH] =
+            HealthSamplingConfiguration(
+              healthDataTypes: [HealthDataType.STEPS, HealthDataType.WEIGHT],
+            );
+
+      final manager = HealthServiceManager()..gatherTypesFrom(service);
+
+      expect(
+        manager.types,
+        containsAll([HealthDataType.STEPS, HealthDataType.WEIGHT]),
+      );
+    });
   });
 
   group("Data Types", () {

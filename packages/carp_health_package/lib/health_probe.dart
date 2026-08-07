@@ -32,8 +32,8 @@ class HealthProbe extends Probe {
     for (var type in samplingConfiguration.healthDataTypes) {
       // is this type supported on the current platform?
       bool supported = (Platform.isIOS)
-          ? dataTypesIOS.contains(type)
-          : dataTypesAndroid.contains(type);
+          ? dataTypeKeysIOS.contains(type)
+          : dataTypeKeysAndroid.contains(type);
 
       if (!supported) {
         warning(
