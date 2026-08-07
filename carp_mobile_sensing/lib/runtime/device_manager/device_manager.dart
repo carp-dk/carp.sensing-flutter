@@ -53,7 +53,6 @@ abstract class DeviceManager<
   final StreamController<DeviceStatus> _eventController =
       StreamController.broadcast();
 
-  bool _hasPermissions = false;
   DeviceStatus _status = DeviceStatus.unknown;
   final String _deviceType;
   TDeviceConfiguration? _configuration;
@@ -155,6 +154,7 @@ abstract class DeviceManager<
     info(
       '$runtimeType - Configuring, type: $typeName, configuration: $configuration, registration: $registration',
     );
+
     _configuration = configuration;
     _registration = registration;
     onConfigure();
@@ -183,20 +183,12 @@ abstract class DeviceManager<
   void onConfigure();
 
   /// Does this device manager have the [permissions] to run?
+  ///
+  /// Note that the result is not cached, since permissions can be revoked in
+  /// the phone's settings at any time, without the app knowing about it.
   @nonVirtual
   Future<bool> hasPermissions() async {
-    if (!_hasPermissions) {
-      info(
-        '$runtimeType - Checking permissions for device of type: $typeName.',
-      );
-      _hasPermissions = true;
-
-      // check any device-specific permission
-      _hasPermissions = await onHasPermissions() && _hasPermissions;
-
-      debug('$runtimeType - Permission of all permissions: $_hasPermissions');
-    }
-    return _hasPermissions;
+    return onHasPermissions();
   }
 
   /// Callback on [hasPermissions].
@@ -266,7 +258,9 @@ abstract class DeviceManager<
   @nonVirtual
   void start() {
     info('$runtimeType - Starting sampling...');
-    executors.forEach((executor) => executor.resume());
+    for (var executor in executors) {
+      executor.resume();
+    }
   }
 
   /// Restart sampling of the measures using this device.
