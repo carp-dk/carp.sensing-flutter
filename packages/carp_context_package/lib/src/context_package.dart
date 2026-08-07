@@ -251,28 +251,13 @@ abstract class ContextServiceManager<
     isConnected: isConnected,
   );
 
-  bool _hasPermissions = false;
+  @override
+  Future<bool> onHasPermissions() async =>
+      await LocationManager().hasPermission();
 
   @override
-  Future<bool> onHasPermissions() async {
-    if (_hasPermissions) return true;
-    _hasPermissions = await LocationManager().hasPermission();
-    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
-    status = _hasPermissions
-        ? DeviceStatus.connected
-        : DeviceStatus.disconnected;
-    return _hasPermissions;
-  }
-
-  @override
-  Future<void> onRequestPermissions() async {
-    await LocationManager().requestPermission();
-    _hasPermissions = await LocationManager().hasPermission();
-    // if permissions are granted, we can consider the service as connected, otherwise disconnected.
-    status = _hasPermissions
-        ? DeviceStatus.connected
-        : DeviceStatus.disconnected;
-  }
+  Future<void> onRequestPermissions() async =>
+      await LocationManager().requestPermission();
 
   @override
   bool get canConnect => true; // most online services can always connect - override if not...

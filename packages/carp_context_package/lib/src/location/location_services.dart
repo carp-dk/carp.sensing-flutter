@@ -87,7 +87,11 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
   @override
   Future<DeviceStatus> onConnect() async {
     await manager.configure(configuration!);
-    return manager.enabled ? DeviceStatus.connected : DeviceStatus.disconnected;
+    // The service is only ready to provide locations if the phone's location
+    // service is enabled *and* permission is granted
+    return manager.enabled && await manager.hasPermission()
+        ? DeviceStatus.connected
+        : DeviceStatus.disconnected;
   }
 
   @override
