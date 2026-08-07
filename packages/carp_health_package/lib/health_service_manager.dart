@@ -50,14 +50,23 @@ class HealthServiceManager
   List<HealthDataType> get types => _types.toList();
 
   /// Add a set of health [types] this service should access.
+  ///
+  /// Types not supported on the current platform are ignored and logged as a
+  /// warning.
   void addTypes(List<HealthDataType> types) {
-    _types.addAll(
-      types.where(
-        (type) => Platform.isIOS
-            ? dataTypeKeysIOS.contains(type)
-            : dataTypeKeysAndroid.contains(type),
-      ),
-    );
+    bool isSupported(HealthDataType type) => Platform.isIOS
+        ? dataTypeKeysIOS.contains(type)
+        : dataTypeKeysAndroid.contains(type);
+
+    final unsupported = types.where((type) => !isSupported(type));
+    if (unsupported.isNotEmpty) {
+      warning(
+        '$runtimeType - Ignoring health data types not supported on '
+        '${Platform.isIOS ? 'iOS' : 'Android'}: ${unsupported.toList()}.',
+      );
+    }
+
+    _types.addAll(types.where(isSupported));
   }
 
   HealthServiceManager([HealthService? configuration])
@@ -72,17 +81,6 @@ class HealthServiceManager
         service?.defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH];
     if (config is HealthSamplingConfiguration) {
       addTypes(config.healthDataTypes);
-    }
-  }
-
-  /// Gather health types from task-level sampling configurations.
-  void gatherTypesFromMeasures(Iterable<Measure> measures) {
-    for (final measure in measures) {
-      final config = measure.overrideSamplingConfiguration;
-      if (measure.type == HealthSamplingPackage.HEALTH &&
-          config is HealthSamplingConfiguration) {
-        addTypes(config.healthDataTypes);
-      }
     }
   }
 
