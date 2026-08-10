@@ -218,6 +218,7 @@ MovesenseDevice _$MovesenseDeviceFromJson(Map<String, dynamic> json) =>
         roleName:
             json['roleName'] as String? ?? MovesenseDevice.DEFAULT_ROLE_NAME,
         isOptional: json['isOptional'] as bool? ?? true,
+        namePrefix: json['namePrefix'] as String? ?? 'Movesense',
       )
       ..$type = json['__type'] as String?
       ..defaultSamplingConfiguration =
@@ -232,7 +233,6 @@ MovesenseDevice _$MovesenseDeviceFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           []
-      ..namePrefix = json['namePrefix'] as String?
       ..minRssi = (json['minRssi'] as num?)?.toInt()
       ..allowDuplicates = json['allowDuplicates'] as bool? ?? true
       ..timeout = json['timeout'] == null
