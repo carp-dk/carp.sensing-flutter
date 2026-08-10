@@ -1,3 +1,7 @@
+## 3.0.1
+
+* default `namePrefix` to `'Movesense'` (mirroring `PolarDevice`), so BLE scan filtering works for Movesense devices deployed from CAWS without an explicit prefix
+
 ## 3.0.0
 
 * **BREAKING (dependency only)**: migrated from the [`mdsflutter`](https://pub.dev/packages/mdsflutter) plugin to the [`carp_movesense_flutter`](https://pub.dev/packages/carp_movesense_flutter) plugin.

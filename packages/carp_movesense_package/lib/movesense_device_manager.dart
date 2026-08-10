@@ -34,6 +34,7 @@ class MovesenseDevice extends BLEDevice<MovesenseDeviceRegistration> {
   MovesenseDevice({
     super.roleName = MovesenseDevice.DEFAULT_ROLE_NAME,
     super.isOptional = true,
+    super.namePrefix = 'Movesense',
   });
 
   @override
