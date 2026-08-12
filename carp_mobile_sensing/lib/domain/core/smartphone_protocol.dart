@@ -221,7 +221,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,
   }) : super(
-         ownerId: ownerId ?? const Uuid().v1,
+         ownerId: ownerId ?? const Uuid().v1(),
          description: studyDescription?.description ?? '',
        ) {
     // add the smartphone specific protocol data as application-specific data

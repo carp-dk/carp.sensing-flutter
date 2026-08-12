@@ -112,13 +112,21 @@ void main() {
   test('UUID - version 1.0', () async {
     List<String> list = [];
     for (var i = 0; i < 5; i++) {
-      list.add((const Uuid().v1));
-      list.add((const Uuid().v1));
+      list.add((const Uuid().v1()));
+      list.add((const Uuid().v1()));
     }
     list.forEach(print);
 
     // check that all UUIDs are unique
     var unique = list.toSet().toList();
     expect(unique.length, list.length);
+  });
+
+  // A generator seeded from a small value range silently repeats itself once
+  // more ids are drawn than the range holds. Small batches look unique, so the
+  // number generated here needs to stay well above any such range.
+  test('UUID - a large batch of ids is unique', () async {
+    final ids = List.generate(100000, (_) => const Uuid().v1());
+    expect(ids.toSet(), hasLength(ids.length));
   });
 }

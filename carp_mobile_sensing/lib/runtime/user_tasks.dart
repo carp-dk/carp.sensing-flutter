@@ -106,7 +106,7 @@ abstract class UserTask {
   /// Create a new [UserTask] based on [executor].
   UserTask(AppTaskExecutor executor) {
     _executor = executor;
-    id = const Uuid().v1;
+    id = const Uuid().v1();
     // add the events from the background executor to the overall stream of events
     _executor.addExecutor(backgroundTaskExecutor);
   }

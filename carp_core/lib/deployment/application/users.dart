@@ -29,7 +29,7 @@ class ParticipantInvitation {
     required this.identity,
     required this.invitation,
   }) : super() {
-    this.participantId = participantId ?? const Uuid().v1;
+    this.participantId = participantId ?? const Uuid().v1();
   }
 
   factory ParticipantInvitation.fromJson(Map<String, dynamic> json) =>

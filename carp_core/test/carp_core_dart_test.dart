@@ -124,7 +124,7 @@ void main() {
 
     // This is called by `StudyService` when deploying a participant group.
     var invitation = ParticipantInvitation(
-      participantId: const Uuid().v1,
+      participantId: const Uuid().v1(),
       assignedRoles: AssignedTo.all(),
       identity: EmailAccountIdentity("test@test.com"),
       invitation: StudyInvitation(
