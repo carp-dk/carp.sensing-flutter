@@ -90,7 +90,7 @@ class StudyDeployment {
   /// [studyDeploymentId] specify the study deployment id.
   /// If not specified, an UUID v1 id is generated.
   StudyDeployment(StudyProtocol protocol, [String? studyDeploymentId]) {
-    _studyDeploymentId = studyDeploymentId ?? const Uuid().v1();
+    _studyDeploymentId = studyDeploymentId ?? const Uuid().v4();
     _protocol = protocol;
     _creationDate = DateTime.now();
     _status = StudyDeploymentStatus(studyDeploymentId: _studyDeploymentId);

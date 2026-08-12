@@ -187,8 +187,8 @@ In case a deserialization method for B is not found, then the object `B(-1)` is 
 Often in serialization, there is a need to generate or use unique IDs. Hence, the package re-exports the [uuid](https://pub.dev/packages/uuid) package, so a Universal Unique ID (UUID) can be generated:
 
 ```dart
-// Generate a v1 (time-based) id
-var uuid = Uuid().v1();
+// Generate a v4 (random) id
+var uuid = Uuid().v4();
 ```
 
 ## Features and bugs
