@@ -24,7 +24,7 @@ abstract class MediaData extends FileData {
     this.startRecordingTime,
     this.endRecordingTime,
   }) {
-    id = const Uuid().v1;
+    id = const Uuid().v4();
   }
 }
 

@@ -14,7 +14,7 @@ class Account {
   late String id;
 
   Account({String? id, required this.identity}) {
-    this.id = id ?? const Uuid().v1;
+    this.id = id ?? const Uuid().v4();
   }
 
   /// Create a new [Account] uniquely identified by the specified [emailAddress].

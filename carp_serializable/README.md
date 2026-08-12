@@ -184,14 +184,12 @@ In case a deserialization method for B is not found, then the object `B(-1)` is 
 
 ## Universal Unique IDs
 
-Often in serialization, there is a need to generate or use unique IDs. Hence, the package also support the generation of a simple time-based Universal Unique ID (UUID):
+Often in serialization, there is a need to generate or use unique IDs. Hence, the package re-exports the [uuid](https://pub.dev/packages/uuid) package, so a Universal Unique ID (UUID) can be generated:
 
 ```dart
-// Generate a v1 (time-based) id
-var uuid = Uuid().v1;
+// Generate a v4 (random) id
+var uuid = Uuid().v4();
 ```
-
-Note, however, that this UUID is very simple. If you need more sophisticated UUIDs, use the [uuid](https://pub.dev/packages/uuid) package.
 
 ## Features and bugs
 

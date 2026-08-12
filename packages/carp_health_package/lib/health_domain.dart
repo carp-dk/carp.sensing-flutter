@@ -118,7 +118,7 @@ class HealthData extends Data {
   /// Create a [HealthData] from a [HealthDataPoint] health data object.
   factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) =>
       HealthData(
-        uuid: const Uuid().v1,
+        uuid: const Uuid().v4(),
         value: healthDataPoint.value,
         unit: healthDataPoint.unitString,
         healthDataType: healthDataPoint.typeString,

@@ -1,3 +1,10 @@
+## 3.0.0
+
+* **BREAKING** replaced the built-in `Uuid` class with the [uuid](https://pub.dev/packages/uuid) package, which is now re-exported
+  * the old generator seeded a `Random` with `DateTime.now().microsecond` — the sub-millisecond component (0-999), not a point in time. Being deterministic, it could only ever emit 1000 distinct ids on any device in any run, so ids collided heavily once more than a handful were generated
+  * ids are now generated with `v4()` (random) rather than `v1()` (time- and MAC-based), so they no longer embed device identity or creation time
+  * migration: `Uuid().v1` (getter) becomes `const Uuid().v4()` (method)
+
 ## 2.0.1
 
 * bumped Flutter version to 3

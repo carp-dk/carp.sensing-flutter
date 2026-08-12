@@ -28,7 +28,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  carp_serializable: ^2.0.0 # polymorphic json serialization
+  carp_serializable: ^3.0.0 # polymorphic json serialization
   carp_core: ^2.1.0         # the core CARP domain model
 
   json_annotation: ^4.8.0
