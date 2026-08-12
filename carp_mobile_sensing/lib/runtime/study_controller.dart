@@ -151,10 +151,12 @@ class SmartphoneStudyController {
     // tryRegisterRemainingDevicesToRegister();
     // await tryReregisterRemainingDevices();
 
-    // Initialize the data manager
-    if (dataEndPoint != null) {
-      _dataManager = DataManagerRegistry().create(dataEndPoint!.type);
-    }
+    // Close the existing data manager before replacing it - otherwise its
+    // timer and subscriptions stay alive and keep handling measurements.
+    await _dataManager?.close();
+    _dataManager = dataEndPoint == null
+        ? null
+        : DataManagerRegistry().create(dataEndPoint!.type);
 
     if (_dataManager == null) {
       warning(
