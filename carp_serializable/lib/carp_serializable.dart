@@ -3,7 +3,6 @@ library carp_serializable;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:uuid/uuid.dart';
 
 export 'package:uuid/uuid.dart' show Uuid;
 
