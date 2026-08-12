@@ -15,7 +15,7 @@ dependencies:
   shared_preferences: ^2.2.0
   geolocator: ^13.0.0
   
-  carp_serializable: ^2.0.0
+  carp_serializable: ^3.0.0
   carp_core: ^1.8.0
   carp_mobile_sensing:
     path: ../../carp_mobile_sensing/
