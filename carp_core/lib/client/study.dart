@@ -72,7 +72,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// If [deploymentStatus] is not specified, the previously received status is
   /// marked as updated.
   void deploymentStatusReceived([StudyDeploymentStatus? deploymentStatus]) {
-    _deploymentStatus ??= deploymentStatus;
+    _deploymentStatus = deploymentStatus ?? _deploymentStatus;
     createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeploymentStatusReceived),
     );

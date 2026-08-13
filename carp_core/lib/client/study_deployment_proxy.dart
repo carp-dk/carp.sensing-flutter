@@ -60,28 +60,18 @@ class StudyDeploymentProxy {
   ) async {
     final studyDeploymentId = study.studyDeploymentId;
     final deviceRoleName = study.deviceRoleName;
-    StudyDeploymentStatus? deploymentStatus;
+    var deploymentStatus = await getStudyDeploymentStatus(study);
 
-    // Register the this primary device in the deployment service for this
-    // study deployment.
-    try {
+    // Registering an already registered device throws, so only register when
+    // the deployment service reports this primary device as unregistered.
+    if (deploymentStatus?.getDeviceStatusByRoleName(deviceRoleName).status ==
+        DeviceDeploymentStatusTypes.Unregistered) {
       deploymentStatus = await deploymentService.registerDevice(
         studyDeploymentId,
         deviceRoleName,
         registration,
       );
-    } catch (error) {
-      // Note that this device may already be registered, .e.g., in case of app
-      // restart or reinstallation. This will throw an exception from the deployment
-      // service. But, this should not prevent getting the deployment.
-      print(
-        "$runtimeType - Error registering '${study.deviceRoleName}' as primary device.\n$error",
-      );
-      deploymentStatus = null;
     }
-
-    // If we didn't get a deployment status from registration, try to get it directly.
-    deploymentStatus ??= await getStudyDeploymentStatus(study);
 
     // If we still don't have a deployment status, mark this as an error and exit.
     if (deploymentStatus == null) {
@@ -157,6 +147,8 @@ class StudyDeploymentProxy {
 
     // Stop here in case other devices need to be registered before being able to complete deployment.
     if (remainingDevicesToRegister.isNotEmpty) return;
+
+    if (deviceStatus.status == DeviceDeploymentStatusTypes.Deployed) return;
 
     // Notify deployment service of successful deployment.
     try {
