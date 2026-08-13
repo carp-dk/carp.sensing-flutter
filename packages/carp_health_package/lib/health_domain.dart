@@ -118,7 +118,7 @@ class HealthData extends Data {
   /// Create a [HealthData] from a [HealthDataPoint] health data object.
   factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) =>
       HealthData(
-        uuid: const Uuid().v4(),
+        uuid: healthDataPoint.uuid,
         value: healthDataPoint.value,
         unit: healthDataPoint.unitString,
         healthDataType: healthDataPoint.typeString,
@@ -138,6 +138,9 @@ class HealthData extends Data {
 
   @override
   Map<String, dynamic> toJson() => _$HealthDataToJson(this);
+
+  @override
+  String? get recordId => uuid.isEmpty ? null : uuid;
 
   /// The json type of this health data is `dk.cachet.carp.health.<healthdatatype>`,
   /// where `<healthdatatype>` is the lowercase version of the [healthDataType].

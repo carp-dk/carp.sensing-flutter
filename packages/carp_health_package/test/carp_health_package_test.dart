@@ -210,6 +210,26 @@ void main() {
   group("Data Types", () {
     List<HealthData> healthData = <HealthData>[];
 
+    test('preserves the source record identifier', () {
+      final now = DateTime.now();
+      final data = HealthData.fromHealthDataPoint(
+        HealthDataPoint(
+          uuid: 'source-record-id',
+          value: NumericHealthValue(numericValue: 1),
+          type: HealthDataType.STEPS,
+          unit: HealthDataUnit.COUNT,
+          dateFrom: now,
+          dateTo: now,
+          sourcePlatform: HealthPlatformType.appleHealth,
+          sourceDeviceId: 'device',
+          sourceId: 'source',
+          sourceName: 'Health',
+        ),
+      );
+
+      expect(data.recordId, 'source-record-id');
+    });
+
     setUp(() {
       WidgetsFlutterBinding.ensureInitialized();
       CarpMobileSensing.ensureInitialized();

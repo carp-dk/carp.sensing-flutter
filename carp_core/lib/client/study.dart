@@ -106,7 +106,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
     }
 
     // Listen to updates to the deployment and notify listeners.
-    deployment?.addListener(() => deploymentUpdated());
+    this.deployment?.addListener(() => deploymentUpdated());
 
     createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
