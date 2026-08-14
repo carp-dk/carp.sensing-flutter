@@ -1,3 +1,7 @@
+## 2.1.0
+
+* require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
+
 ## 2.0.2
 
 * discover data types from both the online streaming (PMD) and the HR service SDK features, so devices that only deliver HR via the standard BLE HR service (e.g. Verity Sense) report their supported types

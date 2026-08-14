@@ -1,3 +1,7 @@
+## 4.1.0
+
+* require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
+
 ## 4.0.1
 
 * register the 1.x `HealthService` device type as a `fromJson` alias, for backwards compatibility with studies created on CAMS 1.x (protocol API level < 2.0)

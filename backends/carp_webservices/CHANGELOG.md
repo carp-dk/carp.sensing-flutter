@@ -1,3 +1,7 @@
+## 4.2.0
+
+* require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
+
 ## 4.1.1
 
 * Fix of [#581](https://github.com/carp-dk/carp.sensing-flutter/issues/581)

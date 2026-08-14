@@ -1,5 +1,5 @@
 name: carp_movisens_package
-version: 2.0.1
+version: 2.1.0
 description: CARP Movisens sampling package. Samples movement, activity, HRV, MET-level, and ECG for the Movisens Move4 and EcgMove4 devices
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_movisens_package
@@ -25,8 +25,8 @@ dependencies:
     sdk: flutter
 
   carp_serializable: ^3.0.0
-  carp_core: ^2.0.0
-  carp_mobile_sensing: ^2.0.0
+  carp_core: ^2.2.0
+  carp_mobile_sensing: ^2.2.0
  
   json_annotation: ^4.8.0
   async: ^2.7.0
