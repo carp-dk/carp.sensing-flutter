@@ -57,8 +57,7 @@ abstract class DeploymentService {
   /// deployment with [studyDeploymentId].
   ///
   /// [registration] is a matching configuration for the device with [deviceRoleName].
-  /// Returns null if [studyDeploymentId] is not found.
-  Future<StudyDeploymentStatus?> registerDevice(
+  Future<StudyDeploymentStatus> registerDevice(
     String studyDeploymentId,
     String deviceRoleName,
     DeviceRegistration registration,

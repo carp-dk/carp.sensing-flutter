@@ -72,13 +72,11 @@ class SmartphoneDeploymentService implements DeploymentService {
   ) async => studyDeploymentIds.map((id) => _repository[id]?.status).toList();
 
   @override
-  Future<StudyDeploymentStatus?> registerDevice(
+  Future<StudyDeploymentStatus> registerDevice(
     String studyDeploymentId,
     String deviceRoleName,
     DeviceRegistration registration,
   ) async {
-    if (_repository[studyDeploymentId] == null) return null;
-
     StudyDeployment deployment = _repository[studyDeploymentId]!;
 
     // check if already registered - if not register device
