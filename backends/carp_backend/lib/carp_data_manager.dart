@@ -42,6 +42,7 @@ class CarpDataManager extends AbstractDataManager {
   late CarpDataEndPoint carpEndPoint;
   DataStreamBuffer buffer = DataStreamBuffer();
   Timer? uploadTimer;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   List<ConnectivityResult> _connectivity = [];
 
   /// Make sure to create and initialize the [CarpDataManager].
@@ -87,7 +88,7 @@ class CarpDataManager extends AbstractDataManager {
       'CarpService is not configured -- cannot upload data to this end point.',
     );
 
-    buffer.initialize(deployment, measurements);
+    await buffer.initialize(deployment, measurements);
 
     // Set up a timer that uploads data on a regular basis depending on debug level
     int uploadInterval = Settings().debugLevel == DebugLevel.debug
@@ -101,7 +102,7 @@ class CarpDataManager extends AbstractDataManager {
 
     // Check the current connectivity status and listen for changes
     Connectivity().checkConnectivity().then((status) => connectivity = status);
-    Connectivity().onConnectivityChanged.listen(
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
       (status) => connectivity = status,
     );
 
@@ -307,8 +308,15 @@ class CarpDataManager extends AbstractDataManager {
   @override
   Future<void> close() async {
     uploadTimer?.cancel();
-    await uploadBufferedMeasurements();
+    await _connectivitySubscription?.cancel();
+
+    // Stop receiving measurements before the final flush.
     await super.close();
+    await uploadBufferedMeasurements();
+
+    // Only detach from the buffer. Its database is shared app-wide (a single
+    // `carp-data.db`), so closing it would break the replacement manager.
+    await buffer.detach();
   }
 
   @override

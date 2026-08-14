@@ -8,7 +8,8 @@
 part of 'carp_backend.dart';
 
 /// A local buffer of data streams using the [SQLiteDataManager].
-/// Works as a singleton accessed by `DataStreamBuffer()`.
+/// Works as a singleton accessed by `DataStreamBuffer()`, since it is backed
+/// by a single, app-wide `carp-data.db` file.
 class DataStreamBuffer {
   SmartphoneDeployment? _deployment;
   final _manager = SQLiteDataManager();
@@ -32,7 +33,7 @@ class DataStreamBuffer {
   ) async {
     info('Initializing $runtimeType...');
     _deployment = deployment;
-    _manager.configure(
+    await _manager.configure(
       dataEndPoint: SQLiteDataEndPoint(),
       deployment: deployment,
       measurements: measurements,
@@ -145,6 +146,15 @@ class DataStreamBuffer {
       '$runtimeType - cleaned up. '
       'N=$count records ${delete ? 'deleted' : 'marked as uploaded'}.',
     );
+  }
+
+  /// Stop buffering measurements, but keep the database and its data intact.
+  ///
+  /// Used when a [CarpDataManager] is replaced on a deployment update: the
+  /// database is shared app-wide, so it must outlive any single manager.
+  Future<void> detach() async {
+    await _manager.close();
+    _deployment = null;
   }
 
   /// Close this buffer. No more data can be added.
