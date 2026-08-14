@@ -60,42 +60,35 @@ class StudyDeploymentProxy {
   ) async {
     final studyDeploymentId = study.studyDeploymentId;
     final deviceRoleName = study.deviceRoleName;
-    StudyDeploymentStatus? deploymentStatus;
+    StudyDeploymentStatus? deploymentStatus = await getStudyDeploymentStatus(study);
 
-    // Register the this primary device in the deployment service for this
-    // study deployment.
-    try {
-      deploymentStatus = await deploymentService.registerDevice(
-        studyDeploymentId,
-        deviceRoleName,
-        registration,
-      );
-    } catch (error) {
-      // Note that this device may already be registered, .e.g., in case of app
-      // restart or reinstallation. This will throw an exception from the deployment
-      // service. But, this should not prevent getting the deployment.
-      print(
-        "$runtimeType - Error registering '${study.deviceRoleName}' as primary device.\n$error",
-      );
-      deploymentStatus = null;
+    // A missing status is already reported by [getStudyDeploymentStatus].
+    if (deploymentStatus == null ||
+        deploymentStatus.status == StudyDeploymentStatusTypes.Running) {
+      return;
     }
 
-    // If we didn't get a deployment status from registration, try to get it directly.
-    deploymentStatus ??= await getStudyDeploymentStatus(study);
-
-    // If we still don't have a deployment status, mark this as an error and exit.
-    if (deploymentStatus == null) {
+    try {
+      deploymentStatus =
+          await deploymentService.registerDevice(
+            studyDeploymentId,
+            deviceRoleName,
+            registration,
+          ) ??
+          deploymentStatus;
+    } catch (error) {
+      // The device may already be registered, e.g. after an app restart or
+      // reinstallation. Report it, but keep obtaining the deployment.
       study.deploymentError(
-        "No study deployment with ID '$studyDeploymentId' found when trying to register device "
-        "with role name '$deviceRoleName'.",
+        "$runtimeType - Error registering '$deviceRoleName' as primary device "
+        "in study deployment '$studyDeploymentId'.\n$error",
       );
-      return;
     }
 
     // Update study with new deployment status.
     study.deploymentStatusReceived(deploymentStatus);
 
-    final deviceStatus = deploymentStatus.getDeviceStatusByRoleName(
+    final deviceStatus = deploymentStatus!.getDeviceStatusByRoleName(
       deviceRoleName,
     );
 
