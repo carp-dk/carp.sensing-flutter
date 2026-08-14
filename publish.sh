@@ -55,12 +55,8 @@ fi
 
 [ -n "$(git status --porcelain)" ] && { echo "Worktree is dirty."; exit 1; }
 
-# Validate everything first - publishing is irreversible, so no partial releases.
-for dir in "${pending[@]}"; do
-  echo "== validating $(name_of "$dir")"
-  (cd "$dir" && dart pub publish --dry-run)
-done
-
+# ponytail: no upfront validation of all packages - a dependent cannot resolve until
+# its dependency is live. On failure, re-run: published packages are skipped.
 for dir in "${pending[@]}"; do
   name=$(name_of "$dir")
   version=$(version_of "$dir")
