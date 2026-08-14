@@ -308,9 +308,7 @@ class CarpDataManager extends AbstractDataManager {
   @override
   Future<void> close() async {
     uploadTimer?.cancel();
-    uploadTimer = null;
     await _connectivitySubscription?.cancel();
-    _connectivitySubscription = null;
 
     // Stop receiving measurements before the final flush.
     await super.close();
