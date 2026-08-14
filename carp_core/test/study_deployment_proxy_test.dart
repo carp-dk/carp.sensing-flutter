@@ -15,6 +15,7 @@ class _DeploymentService implements DeploymentService {
   );
   int registerDeviceCalls = 0;
   int deviceDeployedCalls = 0;
+  bool failRegistration = false;
 
   @override
   Future<StudyDeploymentStatus?> getStudyDeploymentStatus(String id) async =>
@@ -27,6 +28,7 @@ class _DeploymentService implements DeploymentService {
     DeviceRegistration registration,
   ) async {
     registerDeviceCalls++;
+    if (failRegistration) throw Exception('registration failed');
     deviceStatus.status = DeviceDeploymentStatusTypes.Registered;
     return status;
   }
@@ -63,6 +65,21 @@ void main() {
     expect(study.deployment, isNull);
     expect(service.registerDeviceCalls, 0);
     expect(service.deviceDeployedCalls, 0);
+  });
+
+  test('continues deployment when registration fails', () async {
+    final service = _DeploymentService()
+      ..failRegistration = true
+      ..status.status = StudyDeploymentStatusTypes.DeployingDevices;
+    final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
+
+    await StudyDeploymentProxy(
+      service,
+    ).tryDeployment(study, DefaultDeviceRegistration());
+
+    expect(service.registerDeviceCalls, 1);
+    expect(study.deployment, same(service.deployment));
+    expect(service.deviceDeployedCalls, 1);
   });
 
   test('registers and acknowledges an unregistered device', () async {

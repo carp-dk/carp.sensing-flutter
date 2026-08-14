@@ -73,11 +73,19 @@ class StudyDeploymentProxy {
 
     if (deploymentStatus.status == StudyDeploymentStatusTypes.Running) return;
 
-    deploymentStatus = await deploymentService.registerDevice(
-      studyDeploymentId,
-      deviceRoleName,
-      registration,
-    );
+    try {
+      deploymentStatus = await deploymentService.registerDevice(
+        studyDeploymentId,
+        deviceRoleName,
+        registration,
+      );
+    } catch (error) {
+      // Registration errors should not prevent obtaining the deployment.
+      print(
+        "$runtimeType - Error registering '${study.deviceRoleName}' as primary device.\n$error",
+      );
+    }
+
     if (deploymentStatus == null) {
       study.deploymentError(
         "No study deployment with ID '$studyDeploymentId' found after registering device "
