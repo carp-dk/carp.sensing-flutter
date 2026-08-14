@@ -62,8 +62,6 @@ class StudyDeploymentProxy {
     final deviceRoleName = study.deviceRoleName;
     var deploymentStatus = await getStudyDeploymentStatus(study);
 
-    if (deploymentStatus?.status == StudyDeploymentStatusTypes.Running) return;
-
     // If we don't have a deployment status, mark this as an error and exit.
     if (deploymentStatus == null) {
       study.deploymentError(
@@ -72,6 +70,8 @@ class StudyDeploymentProxy {
       );
       return;
     }
+
+    if (deploymentStatus.status == StudyDeploymentStatusTypes.Running) return;
 
     deploymentStatus = await deploymentService.registerDevice(
       studyDeploymentId,
