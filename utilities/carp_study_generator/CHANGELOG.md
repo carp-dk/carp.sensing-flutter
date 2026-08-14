@@ -1,7 +1,3 @@
-## 2.1.0
-
-* require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
-
 ## 2.0.0
 
 * upgrade to CARP Core and CAMS API level 2.0.0
