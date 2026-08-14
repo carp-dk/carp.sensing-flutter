@@ -1,3 +1,7 @@
+## 2.2.0
+
+* require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
+
 ## 2.1.7
 
 * resume a connectable device's task control executors when it connects after the study has started - previously they stayed paused and the device never sampled

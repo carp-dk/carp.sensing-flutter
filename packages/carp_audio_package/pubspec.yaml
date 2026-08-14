@@ -1,5 +1,5 @@
 name: carp_audio_package
-version: 2.0.0
+version: 2.1.0
 description: CARP Media Sampling Package. Samples audio, video, image, and noise.
 
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
@@ -26,8 +26,8 @@ dependencies:
     sdk: flutter
     
   carp_serializable: ^3.0.0
-  carp_core: ^2.0.0
-  carp_mobile_sensing: ^2.0.0
+  carp_core: ^2.2.0
+  carp_mobile_sensing: ^2.2.0
  
   json_annotation: ^4.8.0
   permission_handler: '>=11.0.0 <13.0.0'

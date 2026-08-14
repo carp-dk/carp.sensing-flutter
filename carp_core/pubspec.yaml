@@ -1,5 +1,5 @@
 name: carp_core
-version: 2.1.2
+version: 2.2.0
 description: The core domain model for the Copenhagen Research Platform (CARP) in Dart.
 
 # Note that the following URLs to GitHub should use the old 'cph-cachet' name. 

@@ -1,5 +1,5 @@
 name: carp_apps_package
-version: 2.0.0
+version: 2.1.0
 description: Apps sampling package for the CARP Mobile Sensing framework (Android only).
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_apps_package
@@ -25,8 +25,8 @@ dependencies:
     sdk: flutter
 
   carp_serializable: ^3.0.0
-  carp_core: ^2.0.0
-  carp_mobile_sensing: ^2.0.0
+  carp_core: ^2.2.0
+  carp_mobile_sensing: ^2.2.0
 
   app_usage: ^4.0.0
   installed_apps: ^2.0.0

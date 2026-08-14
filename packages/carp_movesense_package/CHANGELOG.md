@@ -1,3 +1,7 @@
+## 3.1.0
+
+* require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
+
 ## 3.0.1
 
 * default `namePrefix` to `'Movesense'` (mirroring `PolarDevice`), so BLE scan filtering works for Movesense devices deployed from CAWS without an explicit prefix
