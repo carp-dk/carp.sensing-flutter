@@ -60,11 +60,13 @@ dependencies:
 
 # Overriding carp core libraries to use the local copy during development.
 # Remove overrides before publishing.
-dependency_overrides:
-  # carp_serializable:
-  #   path: ../carp_serializable/
-  # carp_core:
-  #   path: ../carp_core/
+# dependency_overrides:
+#   carp_serializable:
+#     path: ../carp_serializable/
+# carp_core:
+#   path: ../carp_core/
+# screen_state:
+#   path: ../../flutter-plugins/packages/screen_state
 
 dev_dependencies:
   build_runner: any
