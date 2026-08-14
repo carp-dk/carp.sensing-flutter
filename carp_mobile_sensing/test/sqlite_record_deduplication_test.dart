@@ -16,7 +16,13 @@ void main() {
       Measurement.fromData(_IdentifiedData('record-1', 'original')),
     );
     await manager.onMeasurement(
-      Measurement.fromData(_IdentifiedData('record-1', 'duplicate')),
+      Measurement.fromData(
+        _IdentifiedData(
+          'record-1',
+          'duplicate',
+          jsonType: 'dk.cachet.carp.health.sleep',
+        ),
+      ),
     );
 
     final rows = await manager.database!.query(
@@ -102,6 +108,12 @@ Future<String> _databasePath() async =>
 class _IdentifiedData extends Error {
   @override
   final String recordId;
+  final String? _jsonType;
 
-  _IdentifiedData(this.recordId, String message) : super(message: message);
+  _IdentifiedData(this.recordId, String message, {String? jsonType})
+    : _jsonType = jsonType,
+      super(message: message);
+
+  @override
+  String get jsonType => _jsonType ?? super.jsonType;
 }

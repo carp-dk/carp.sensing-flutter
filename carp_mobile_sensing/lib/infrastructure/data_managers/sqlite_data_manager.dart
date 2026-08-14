@@ -89,7 +89,7 @@ class SQLiteDataManager extends AbstractDataManager {
           '$RECORD_ID_COLUMN TEXT, '
           '$MEASUREMENT_COLUMN TEXT, '
           'UNIQUE($DEPLOYMENT_ID_COLUMN, $DEVICE_ROLE_NAME_COLUMN, '
-          '$DATATYPE_COLUMN, $RECORD_ID_COLUMN))',
+          '$RECORD_ID_COLUMN))',
         );
 
         debug("$runtimeType - '$databaseName' DB created");
@@ -104,7 +104,7 @@ class SQLiteDataManager extends AbstractDataManager {
             'CREATE UNIQUE INDEX measurements_record_id '
             'ON $MEASUREMENT_TABLE_NAME('
             '$DEPLOYMENT_ID_COLUMN, $DEVICE_ROLE_NAME_COLUMN, '
-            '$DATATYPE_COLUMN, $RECORD_ID_COLUMN)',
+            '$RECORD_ID_COLUMN)',
           );
         }
       },
