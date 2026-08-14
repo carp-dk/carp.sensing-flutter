@@ -28,8 +28,10 @@ PACKAGES=(
 version_of() { sed -n 's/^version: *//p' "$1/pubspec.yaml" | head -1; }
 name_of() { sed -n 's/^name: *//p' "$1/pubspec.yaml" | head -1; }
 
+# Per-version endpoint: no piping into grep, which would break under `pipefail`
+# once grep -q closes the pipe early on a large response.
 is_published() { # name version
-  curl -sf "https://pub.dev/api/packages/$1" | grep -q "\"version\":\"$2\""
+  curl -sf -o /dev/null "https://pub.dev/api/packages/$1/versions/$2"
 }
 
 pending=()
