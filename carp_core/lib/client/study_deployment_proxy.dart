@@ -62,21 +62,25 @@ class StudyDeploymentProxy {
     final deviceRoleName = study.deviceRoleName;
     var deploymentStatus = await getStudyDeploymentStatus(study);
 
-    // Registering an already registered device throws, so only register when
-    // the deployment service reports this primary device as unregistered.
-    if (deploymentStatus?.getDeviceStatusByRoleName(deviceRoleName).status ==
-        DeviceDeploymentStatusTypes.Unregistered) {
-      deploymentStatus = await deploymentService.registerDevice(
-        studyDeploymentId,
-        deviceRoleName,
-        registration,
-      );
-    }
+    if (deploymentStatus?.status == StudyDeploymentStatusTypes.Running) return;
 
-    // If we still don't have a deployment status, mark this as an error and exit.
+    // If we don't have a deployment status, mark this as an error and exit.
     if (deploymentStatus == null) {
       study.deploymentError(
         "No study deployment with ID '$studyDeploymentId' found when trying to register device "
+        "with role name '$deviceRoleName'.",
+      );
+      return;
+    }
+
+    deploymentStatus = await deploymentService.registerDevice(
+      studyDeploymentId,
+      deviceRoleName,
+      registration,
+    );
+    if (deploymentStatus == null) {
+      study.deploymentError(
+        "No study deployment with ID '$studyDeploymentId' found after registering device "
         "with role name '$deviceRoleName'.",
       );
       return;
@@ -147,8 +151,6 @@ class StudyDeploymentProxy {
 
     // Stop here in case other devices need to be registered before being able to complete deployment.
     if (remainingDevicesToRegister.isNotEmpty) return;
-
-    if (deviceStatus.status == DeviceDeploymentStatusTypes.Deployed) return;
 
     // Notify deployment service of successful deployment.
     try {

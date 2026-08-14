@@ -52,8 +52,7 @@ class _DeploymentService implements DeploymentService {
 }
 
 void main() {
-  test('refreshes an already deployed device without re-registering or '
-      're-acknowledging it', () async {
+  test('returns without registering when the deployment is running', () async {
     final service = _DeploymentService();
     final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
 
@@ -61,15 +60,14 @@ void main() {
       service,
     ).tryDeployment(study, DefaultDeviceRegistration());
 
-    // The deployment is still refreshed, but neither request is repeated -
-    // CAWS rejects both for an already deployed device.
-    expect(study.deployment, same(service.deployment));
+    expect(study.deployment, isNull);
     expect(service.registerDeviceCalls, 0);
     expect(service.deviceDeployedCalls, 0);
   });
 
   test('registers and acknowledges an unregistered device', () async {
     final service = _DeploymentService();
+    service.status.status = StudyDeploymentStatusTypes.DeployingDevices;
     service.deviceStatus.status = DeviceDeploymentStatusTypes.Unregistered;
     final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
 
