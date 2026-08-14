@@ -67,4 +67,4 @@ for dir in "${pending[@]}"; do
     is_published "$name" "$version" && break
     sleep 5
   done
-done 
+done
