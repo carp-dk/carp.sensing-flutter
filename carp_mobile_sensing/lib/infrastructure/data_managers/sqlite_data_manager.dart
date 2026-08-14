@@ -38,6 +38,7 @@ class SQLiteDataManager extends AbstractDataManager {
   static const String TRIGGER_ID_COLUMN = 'trigger_id';
   static const String DEVICE_ROLE_NAME_COLUMN = 'device_role_name';
   static const String DATATYPE_COLUMN = 'data_type';
+  static const String RECORD_ID_COLUMN = 'record_id';
   static const String MEASUREMENT_COLUMN = 'measurement';
 
   String? _databasePath;
@@ -70,7 +71,7 @@ class SQLiteDataManager extends AbstractDataManager {
     // Open the database - make sure to use the same database across app (re)start
     database = await openDatabase(
       databaseName,
-      version: 1,
+      version: 2,
       singleInstance: true,
       onCreate: (Database db, int version) async {
         // when creating the database, create the measurements table
@@ -85,10 +86,27 @@ class SQLiteDataManager extends AbstractDataManager {
           '$TRIGGER_ID_COLUMN INTEGER, '
           '$DEVICE_ROLE_NAME_COLUMN TEXT, '
           '$DATATYPE_COLUMN TEXT, '
-          '$MEASUREMENT_COLUMN TEXT)',
+          '$RECORD_ID_COLUMN TEXT, '
+          '$MEASUREMENT_COLUMN TEXT, '
+          'UNIQUE($DEPLOYMENT_ID_COLUMN, $DEVICE_ROLE_NAME_COLUMN, '
+          '$RECORD_ID_COLUMN))',
         );
 
         debug("$runtimeType - '$databaseName' DB created");
+      },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE $MEASUREMENT_TABLE_NAME '
+            'ADD COLUMN $RECORD_ID_COLUMN TEXT',
+          );
+          await db.execute(
+            'CREATE UNIQUE INDEX measurements_record_id '
+            'ON $MEASUREMENT_TABLE_NAME('
+            '$DEPLOYMENT_ID_COLUMN, $DEVICE_ROLE_NAME_COLUMN, '
+            '$RECORD_ID_COLUMN)',
+          );
+        }
       },
     );
   }
@@ -111,6 +129,7 @@ class SQLiteDataManager extends AbstractDataManager {
           measurement.taskControl?.destinationDeviceRoleName ??
           deployment.deviceConfiguration.roleName,
       DATATYPE_COLUMN: measurement.dataType.toString(),
+      RECORD_ID_COLUMN: measurement.data.recordId,
       MEASUREMENT_COLUMN: jsonEncode(measurement),
     };
 

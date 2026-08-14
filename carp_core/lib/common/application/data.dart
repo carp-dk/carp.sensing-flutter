@@ -18,6 +18,10 @@ class Data extends Serializable {
 
   Data() : super();
 
+  /// Stable identifier of the source record, if available.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  String? get recordId => null;
+
   /// Is this data equivalent to [other]?
   ///
   /// This is a custom 'soft' equal (==) operator used to compare two data objects.

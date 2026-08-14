@@ -23,6 +23,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   TDeviceDeployment? _deployment;
   final StreamController<StudyStatusEvent> _eventController =
       StreamController<StudyStatusEvent>.broadcast();
+  late final void Function() _onDeploymentUpdated = () => deploymentUpdated();
 
   /// Create a study uniquely identified by its [studyDeploymentId] and
   /// [deviceRoleName].
@@ -105,8 +106,12 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
       }
     }
 
-    // Listen to updates to the deployment and notify listeners.
-    deployment?.addListener(() => deploymentUpdated());
+    // Listen to updates to the deployment - which is also the restored one when
+    // called without a deployment. Remove first, as this may be called again
+    // for a deployment already listened to.
+    this.deployment
+      ?..removeListener(_onDeploymentUpdated)
+      ..addListener(_onDeploymentUpdated);
 
     createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
