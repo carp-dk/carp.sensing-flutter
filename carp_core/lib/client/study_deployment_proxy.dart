@@ -60,15 +60,13 @@ class StudyDeploymentProxy {
   ) async {
     final studyDeploymentId = study.studyDeploymentId;
     final deviceRoleName = study.deviceRoleName;
-    final currentStatus = await getStudyDeploymentStatus(study);
+    var deploymentStatus = await getStudyDeploymentStatus(study);
 
     // A missing status is already reported by [getStudyDeploymentStatus].
-    if (currentStatus == null ||
-        currentStatus.status == StudyDeploymentStatusTypes.Running) {
+    if (deploymentStatus == null ||
+        deploymentStatus.status == StudyDeploymentStatusTypes.Running) {
       return;
     }
-
-    var deploymentStatus = currentStatus;
 
     try {
       deploymentStatus =
@@ -90,7 +88,7 @@ class StudyDeploymentProxy {
     // Update study with new deployment status.
     study.deploymentStatusReceived(deploymentStatus);
 
-    final deviceStatus = deploymentStatus.getDeviceStatusByRoleName(
+    final deviceStatus = deploymentStatus!.getDeviceStatusByRoleName(
       deviceRoleName,
     );
 
