@@ -60,7 +60,7 @@ class StudyDeploymentProxy {
   ) async {
     final studyDeploymentId = study.studyDeploymentId;
     final deviceRoleName = study.deviceRoleName;
-    var deploymentStatus = await getStudyDeploymentStatus(study);
+    StudyDeploymentStatus? deploymentStatus = await getStudyDeploymentStatus(study);
 
     // A missing status is already reported by [getStudyDeploymentStatus].
     if (deploymentStatus == null ||
