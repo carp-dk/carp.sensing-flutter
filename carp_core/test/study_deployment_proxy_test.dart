@@ -22,7 +22,7 @@ class _DeploymentService implements DeploymentService {
       status;
 
   @override
-  Future<StudyDeploymentStatus> registerDevice(
+  Future<StudyDeploymentStatus?> registerDevice(
     String id,
     String roleName,
     DeviceRegistration registration,

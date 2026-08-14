@@ -60,9 +60,7 @@ class StudyDeploymentProxy {
   ) async {
     final studyDeploymentId = study.studyDeploymentId;
     final deviceRoleName = study.deviceRoleName;
-    StudyDeploymentStatus? deploymentStatus = await getStudyDeploymentStatus(
-      study,
-    );
+    StudyDeploymentStatus? deploymentStatus = await getStudyDeploymentStatus(study);
 
     // A missing status is already reported by [getStudyDeploymentStatus].
     if (deploymentStatus == null ||
@@ -71,11 +69,13 @@ class StudyDeploymentProxy {
     }
 
     try {
-      deploymentStatus = await deploymentService.registerDevice(
-        studyDeploymentId,
-        deviceRoleName,
-        registration,
-      );
+      deploymentStatus =
+          await deploymentService.registerDevice(
+            studyDeploymentId,
+            deviceRoleName,
+            registration,
+          ) ??
+          deploymentStatus;
     } catch (error) {
       // The device may already be registered, e.g. after an app restart or
       // reinstallation. Report it, but keep obtaining the deployment.
