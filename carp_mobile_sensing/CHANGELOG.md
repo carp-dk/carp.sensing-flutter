@@ -1,3 +1,9 @@
+## 2.3.0
+
+* upgrade to `device_info_plus` ^13.2.0 and `package_info_plus` ^10.2.1, which require Flutter >=3.41
+  * needed for compatibility with `health` ^13.3.2, which also requires `device_info_plus` ^13.x
+  * both bumps pull in `win32` 6.x; neither changes the API used here
+
 ## 2.2.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package

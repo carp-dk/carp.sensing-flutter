@@ -1,3 +1,8 @@
+## 2.2.0
+
+* upgrade to `network_info_plus` ^8.2.1, which pulls in `win32` 6.x
+  * needed for compatibility with `carp_mobile_sensing` ^2.3.0, whose `device_info_plus` ^13.x also requires `win32` 6.x
+
 ## 2.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package

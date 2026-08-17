@@ -23,6 +23,7 @@ PACKAGES=(
   packages/carp_survey_package
   backends/carp_webservices
   backends/carp_backend
+  utilities/carp_study_generator
 )
 
 version_of() { sed -n 's/^version: *//p' "$1/pubspec.yaml" | head -1; }
