@@ -1,3 +1,7 @@
+## 2.1.1
+
+- upgrade to `research_package` ^3.0.0
+
 ## 2.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package

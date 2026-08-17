@@ -1,7 +1,7 @@
 ## 4.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
-* upgrade to `health` ^13.3.2, which requires `carp_mobile_sensing` ^2.3.0 and Flutter >=3.41
+* upgrade to `health` ^13.3.2, which requires `carp_mobile_sensing` ^2.3.0 and Flutter >=3.38.1
 * export `package:health`, so apps using `HealthDataType` no longer need a direct `health` dependency
 
 ## 4.0.1

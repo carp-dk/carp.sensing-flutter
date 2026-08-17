@@ -1,6 +1,6 @@
 ## 2.3.0
 
-* upgrade to `device_info_plus` ^13.2.0 and `package_info_plus` ^10.2.1, which require Flutter >=3.41
+* upgrade to `device_info_plus` ^13.2.0 and `package_info_plus` ^10.2.1, which require Flutter >=3.38.1
   * needed for compatibility with `health` ^13.3.2, which also requires `device_info_plus` ^13.x
   * both bumps pull in `win32` 6.x; neither changes the API used here
 

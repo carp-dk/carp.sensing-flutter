@@ -36,7 +36,7 @@ dependencies:
   # carp_polar_package: ^0.30.0
   # carp_movesense_package: ^0.30.0
 
-  research_package: ^2.5.0
+  research_package: ^3.0.0
 
   # Packages used by CAMS. For some reason, we need to explicitly depend on them here.
   # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though 
