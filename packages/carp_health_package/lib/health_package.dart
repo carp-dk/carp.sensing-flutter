@@ -19,6 +19,10 @@ import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:health/health.dart';
 
+// Health types like HealthDataType are part of this package's public API
+// (e.g. HealthSamplingConfiguration), so consumers get them without depending on health.
+export 'package:health/health.dart';
+
 part 'health_domain.dart';
 part 'health_probe.dart';
 part 'health_service_manager.dart';
