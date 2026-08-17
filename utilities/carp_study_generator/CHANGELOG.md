@@ -1,7 +1,3 @@
-## 2.1.0
-
-* upgrade to `research_package` ^2.5.0 and `cognition_package` ^1.8.0
-
 ## 2.0.0
 
 * upgrade to CARP Core and CAMS API level 2.0.0

@@ -23,7 +23,6 @@ PACKAGES=(
   packages/carp_survey_package
   backends/carp_webservices
   backends/carp_backend
-  utilities/carp_study_generator
 )
 
 version_of() { sed -n 's/^version: *//p' "$1/pubspec.yaml" | head -1; }
@@ -76,6 +75,8 @@ for dir in "${pending[@]}"; do
   name=$(name_of "$dir")
   version=$(version_of "$dir")
   echo "== publishing $name $version"
+  # Drop pub's cached version lists, else a just-published dependency looks missing.
+  rm -rf "${PUB_CACHE:-$HOME/.pub-cache}/hosted/pub.dev/.cache"
   (cd "$dir" && dart pub publish --force)
 
   # Wait for pub.dev to serve it, so the next package can resolve it.
