@@ -96,12 +96,22 @@ class SQLiteDataManager extends AbstractDataManager {
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
         if (oldVersion < 2) {
-          await db.execute(
-            'ALTER TABLE $MEASUREMENT_TABLE_NAME '
-            'ADD COLUMN $RECORD_ID_COLUMN TEXT',
+          // The column/index may already exist, so guard both statements
+          // instead of crashing the upgrade on "already exists".
+          final columns = await db.rawQuery(
+            'PRAGMA table_info($MEASUREMENT_TABLE_NAME)',
           );
+          final hasRecordIdColumn = columns.any(
+            (column) => column['name'] == RECORD_ID_COLUMN,
+          );
+          if (!hasRecordIdColumn) {
+            await db.execute(
+              'ALTER TABLE $MEASUREMENT_TABLE_NAME '
+              'ADD COLUMN $RECORD_ID_COLUMN TEXT',
+            );
+          }
           await db.execute(
-            'CREATE UNIQUE INDEX measurements_record_id '
+            'CREATE UNIQUE INDEX IF NOT EXISTS measurements_record_id '
             'ON $MEASUREMENT_TABLE_NAME('
             '$DEPLOYMENT_ID_COLUMN, $DEVICE_ROLE_NAME_COLUMN, '
             '$RECORD_ID_COLUMN)',

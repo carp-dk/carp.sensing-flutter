@@ -85,6 +85,40 @@ void main() {
 
     await manager.database?.close();
   });
+
+  test('re-upgrades a database stuck with the column but no version bump', () async {
+    // A v1 database that already has the record_id column used to crash the
+    // upgrade with "duplicate column name: record_id".
+    final path = await _databasePath();
+    await deleteDatabase(path);
+    final legacy = await openDatabase(
+      path,
+      version: 1,
+      onCreate: (database, _) => database.execute(
+        'CREATE TABLE ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} ('
+        '${SQLiteDataManager.ID_COLUMN} INTEGER PRIMARY KEY, '
+        '${SQLiteDataManager.DEPLOYMENT_ID_COLUMN} TEXT, '
+        '${SQLiteDataManager.DEVICE_ROLE_NAME_COLUMN} TEXT, '
+        '${SQLiteDataManager.DATATYPE_COLUMN} TEXT)',
+      ),
+    );
+    await legacy.execute(
+      'ALTER TABLE ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} '
+      'ADD COLUMN ${SQLiteDataManager.RECORD_ID_COLUMN} TEXT',
+    );
+    await legacy.insert(SQLiteDataManager.MEASUREMENT_TABLE_NAME, {
+      SQLiteDataManager.DEPLOYMENT_ID_COLUMN: 'study-a',
+    });
+    await legacy.close();
+
+    final manager = await _manager(reset: false);
+    expect(
+      await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME),
+      hasLength(1),
+    );
+
+    await manager.database?.close();
+  });
 }
 
 Future<SQLiteDataManager> _manager({bool reset = true}) async {
