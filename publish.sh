@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Publish packages whose local version is not on pub.dev yet, dependencies first.
-# Usage: ./publish.sh [--publish]
+# Usage: ./publish.sh [--publish] [dir ...]   # no dirs = all, in dependency order
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
@@ -49,7 +49,20 @@ done
 
 [ ${#pending[@]} -eq 0 ] && { echo "Nothing to publish."; exit 0; }
 
-if [ "${1:-}" != "--publish" ]; then
+publish=false
+[ "${1:-}" = "--publish" ] && { publish=true; shift; }
+
+# Optional dir filter, so a subset can go out while keeping the dependency order.
+if [ $# -gt 0 ]; then
+  filtered=()
+  for dir in "${pending[@]}"; do
+    for want in "$@"; do [ "$dir" = "${want%/}" ] && filtered+=("$dir"); done
+  done
+  pending=("${filtered[@]}")
+  printf 'Selected %d of the above.\n' "${#pending[@]}"
+fi
+
+if ! $publish; then
   echo
   echo "Re-run with --publish to publish the ${#pending[@]} package(s) above."
   exit 0
