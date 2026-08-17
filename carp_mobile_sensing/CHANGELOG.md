@@ -1,3 +1,7 @@
+## 2.3.1
+
+* fix `duplicate column name: record_id` crash in the `record_id` SQLite migration (`SQLiteDataManager.onUpgrade`) by only adding the column/index when it isn't already there
+
 ## 2.3.0
 
 * upgrade to `device_info_plus` ^13.2.0 and `package_info_plus` ^10.2.1, which require Flutter >=3.38.1
