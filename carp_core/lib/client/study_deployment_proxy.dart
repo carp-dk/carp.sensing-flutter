@@ -63,8 +63,23 @@ class StudyDeploymentProxy {
     StudyDeploymentStatus? deploymentStatus = await getStudyDeploymentStatus(study);
 
     // A missing status is already reported by [getStudyDeploymentStatus].
-    if (deploymentStatus == null ||
-        deploymentStatus.status == StudyDeploymentStatusTypes.Running) {
+    if (deploymentStatus == null) return;
+
+    // If the deployment is already running, this client just needs the
+    // device deployment - e.g. after an app restart or reinstallation, where
+    // the server-side deployment is running but the local copy was lost.
+    if (deploymentStatus.status == StudyDeploymentStatusTypes.Running) {
+      try {
+        final deployment = await deploymentService.getDeviceDeploymentFor(
+          studyDeploymentId,
+          deviceRoleName,
+        );
+        if (deployment != null) study.deviceDeploymentReceived(deployment);
+      } catch (error) {
+        study.deploymentError(
+          "$runtimeType - Error getting deployment information.\n$error",
+        );
+      }
       return;
     }
 

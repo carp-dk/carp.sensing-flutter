@@ -54,7 +54,8 @@ class _DeploymentService implements DeploymentService {
 }
 
 void main() {
-  test('returns without registering when the deployment is running', () async {
+  test('fetches the device deployment when running but not yet held locally '
+      '(e.g. after reinstallation)', () async {
     final service = _DeploymentService();
     final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
 
@@ -62,7 +63,21 @@ void main() {
       service,
     ).tryDeployment(study, DefaultDeviceRegistration());
 
-    expect(study.deployment, isNull);
+    expect(study.deployment, same(service.deployment));
+    expect(service.registerDeviceCalls, 0);
+    expect(service.deviceDeployedCalls, 0);
+  });
+
+  test('does nothing when running and the deployment is already held locally', () async {
+    final service = _DeploymentService();
+    final study = Study<PrimaryDeviceDeployment>('deployment', 'phone')
+      ..deploymentStatusReceived(service.status)
+      ..deviceDeploymentReceived(service.deployment);
+
+    await StudyDeploymentProxy(
+      service,
+    ).tryDeployment(study, DefaultDeviceRegistration());
+
     expect(service.registerDeviceCalls, 0);
     expect(service.deviceDeployedCalls, 0);
   });
@@ -70,7 +85,8 @@ void main() {
   test('continues deployment when registration fails', () async {
     final service = _DeploymentService()
       ..failRegistration = true
-      ..status.status = StudyDeploymentStatusTypes.DeployingDevices;
+      ..status.status = StudyDeploymentStatusTypes.DeployingDevices
+      ..deviceStatus.status = DeviceDeploymentStatusTypes.Registered;
     final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
 
     await StudyDeploymentProxy(

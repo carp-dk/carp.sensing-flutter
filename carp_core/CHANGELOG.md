@@ -1,3 +1,7 @@
+## 2.2.1
+
+* fix of `StudyDeploymentProxy.tryDeployment()` not fetching the device deployment when the deployment status is `Running` but not yet held locally on this client (e.g. after app reinstallation or a local cache clear)
+
 ## 2.2.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
