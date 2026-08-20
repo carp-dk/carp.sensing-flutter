@@ -1,0 +1,55 @@
+{
+ "id": "8caf789c-8eb3-42a5-9963-024ff70ec9e1",
+ "createdOn": "2026-08-20T06:10:19.880416Z",
+ "version": 0,
+ "ownerId": "alex@uni.dk",
+ "name": "Transportation package test",
+ "participantRoles": [],
+ "primaryDevices": [
+  {
+   "__type": "dk.carp.cams.devices.Smartphone",
+   "roleName": "Smartphone",
+   "isOptional": false,
+   "defaultSamplingConfiguration": {},
+   "isPrimaryDevice": true
+  }
+ ],
+ "connectedDevices": [],
+ "connections": [],
+ "assignedDevices": {},
+ "tasks": [
+  {
+   "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
+   "name": "Task #8",
+   "measures": [
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.transportation.route"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.transportation.mode"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.transportation.userfeedback"
+    }
+   ]
+  }
+ ],
+ "triggers": {
+  "0": {
+   "__type": "dk.cachet.carp.common.application.triggers.ImmediateTrigger",
+   "sourceDeviceRoleName": "Smartphone"
+  }
+ },
+ "taskControls": [
+  {
+   "triggerId": 0,
+   "taskName": "Task #8",
+   "destinationDeviceRoleName": "Smartphone",
+   "control": "Start"
+  }
+ ],
+ "expectedParticipantData": []
+}

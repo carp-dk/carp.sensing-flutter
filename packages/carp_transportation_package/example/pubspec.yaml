@@ -1,0 +1,16 @@
+name: carp_transportation_package_example
+description: Examples of how to use the CARP Transportation Package.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  carp_transportation_package:
+    path: ../
+
+dev_dependencies:
