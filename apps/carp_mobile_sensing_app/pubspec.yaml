@@ -44,7 +44,6 @@ dependencies:
   system_info2: ^4.0.0
   path_provider: ^2.0.0
   sqflite: ^2.2.8                         # For local storage in SQLite DB
-  permission_handler: '>=11.0.0 <13.0.0'  # For requesting permissions on Android and iOS
   shared_preferences: ^2.2.0
   package_info_plus: ^10.2.1
   flutter_local_notifications: ^21.0.0    # For sending notification on AppTask

@@ -106,30 +106,21 @@ abstract class BLEDeviceManager<
   bool onPaired() => true;
 
   @override
-  @mustCallSuper
-  Future<bool> onHasPermissions() async => (Platform.isAndroid)
-      ? await Permission.bluetoothConnect.isGranted &&
-            await Permission.bluetoothScan.isGranted &&
-            // BLE scanning on Android also requires location permission.
-            await Permission.locationWhenInUse.isGranted
-      // : (Platform.isIOS)
-      //     ? await Permission.bluetooth.isGranted
-      // for some reason it seems like Permission.bluetooth.isGranted always
-      // return false on iOS....?
-      : true;
+  List<Permission> get permissions => Platform.isAndroid
+      ? [
+          Permission.bluetoothScan,
+          Permission.bluetoothConnect,
+          // BLE scanning on Android also requires location permission.
+          Permission.locationWhenInUse,
+        ]
+      : [Permission.bluetooth];
 
+  /// `Permission.bluetooth.isGranted` always reports false on iOS, so checking
+  /// it there tells us nothing. iOS prompts on first BLE use anyway.
   @override
   @mustCallSuper
-  Future<void> onRequestPermissions() async {
-    if (Platform.isAndroid) {
-      await Permission.bluetoothScan.request();
-      await Permission.bluetoothConnect.request();
-      await Permission.locationWhenInUse.request();
-    }
-    if (Platform.isIOS) {
-      await Permission.bluetooth.request();
-    }
-  }
+  Future<bool> onHasPermissions() async =>
+      Platform.isIOS ? true : super.onHasPermissions();
 }
 
 /// A device manager for a smartphone.
@@ -195,9 +186,6 @@ class SmartphoneDeviceManager
 
   @override
   bool get canConnect => true; // can always connect to the phone
-
-  @override
-  Future<void> onRequestPermissions() async {}
 
   @override
   Future<DeviceStatus> onConnect() async => DeviceStatus.connected;

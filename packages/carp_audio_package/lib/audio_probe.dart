@@ -30,21 +30,19 @@ class AudioProbe extends Probe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
-      try {
-        await _startAudioRecording();
-        debug(
-          '$runtimeType [$hashCode] - Audio recording started - sound file : $_soundFileName',
-        );
-      } catch (error) {
-        warning('An error occurred trying to start audio recording - $error');
-        addError(error);
-        return false;
-      }
-      return true;
-    } else {
+    if (!await hasRequiredPermissions()) return false;
+
+    try {
+      await _startAudioRecording();
+      debug(
+        '$runtimeType [$hashCode] - Audio recording started - sound file : $_soundFileName',
+      );
+    } catch (error) {
+      warning('An error occurred trying to start audio recording - $error');
+      addError(error);
       return false;
     }
+    return true;
   }
 
   @override

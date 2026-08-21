@@ -1,3 +1,47 @@
+## 3.0.0
+
+Permissions are now declared as data and requested in one place, before devices connect.
+
+**Fixes**
+
+* no more "allow alarms & reminders" dialog on first launch - notifications are scheduled
+  exactly when `SCHEDULE_EXACT_ALARM` happens to be granted, and inexactly (still delivered
+  while the phone is idle, within minutes) when it is not. Drop `SCHEDULE_EXACT_ALARM` from
+  your manifest unless your study truly needs to-the-second reminders
+* the Android location ladder works: `locationAlways` is asked only after `locationWhenInUse`,
+  in its own dialog, whatever order a study declares them in
+* permissions are requested *before* devices connect. Previously devices connected first,
+  failed their permission check, and stayed paused until the app was restarted.
+  Only the devices actually being connected are asked about - a wearable the participant
+  has not paired yet asks for its own permissions when it is paired
+* `Permission.notification` is asked for when a study with notifying app tasks starts,
+  instead of at `configure()` before any study exists
+
+**Breaking**
+
+* `DeviceManager.onRequestPermissions()` -> `List<Permission> get permissions`:
+
+  ```dart
+  // before
+  Future<void> onRequestPermissions() async => await Permission.sensors.request();
+  // after
+  List<Permission> get permissions => [Permission.sensors];
+  ```
+
+  `onHasPermissions()` now checks these by default - override it only to require a subset.
+  Devices not using `permission_handler` (e.g. Health Connect) can still override
+  `onRequestPermissions()`
+* `SmartPhoneClientManager.configure(askForPermissions: bool)` ->
+  `configure(permissionRequester: PermissionRequester?)`. The default asks one dialog at a
+  time; pass your own to show a rationale first, or `null` to handle permissions in the app
+* `SmartphoneStudyController.askForAllPermissions()` removed - CAMS asks automatically.
+  The new `requiredPermissions` getter lists what a deployment needs, so an app can explain
+  it up front
+* `SmartphoneStudyController.permissions` removed - it cached a status the OS can revoke at
+  any time. Ask `permission_handler` instead
+* `Probe.requestPermissions()` and `Probe.arePermissionsGranted()` removed - probes check
+  via `hasRequiredPermissions()` and never ask
+
 ## 2.3.1
 
 * fix `duplicate column name: record_id` crash in the `record_id` SQLite migration (`SQLiteDataManager.onUpgrade`) by only adding the column/index when it isn't already there

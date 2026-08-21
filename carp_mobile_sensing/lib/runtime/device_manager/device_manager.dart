@@ -163,21 +163,36 @@ abstract class DeviceManager<
   /// doing a lot of work on startup.
   void onConfigure();
 
+  /// The permissions this device needs.
+  ///
+  /// Declared, not requested - the study controller collects the permissions of
+  /// every device and measure in a deployment and asks for them once, before
+  /// connecting anything. See [SmartphoneStudyController.requiredPermissions].
+  List<Permission> get permissions => [];
+
   /// Does this device manager have the [permissions] to run?
   ///
   /// Note that the result is not cached, since permissions can be revoked in
   /// the phone's settings at any time, without the app knowing about it.
   @nonVirtual
-  Future<bool> hasPermissions() async {
-    return onHasPermissions();
+  Future<bool> hasPermissions() async => onHasPermissions();
+
+  /// Callback on [hasPermissions]. Defaults to requiring all [permissions].
+  ///
+  /// Override to require only some of them - e.g. a service that also works
+  /// without its optional background permission - or for devices whose
+  /// permissions are not handled by `permission_handler`, such as health data.
+  Future<bool> onHasPermissions() async {
+    for (final permission in permissions) {
+      if (!await permission.isGranted) return false;
+    }
+    return true;
   }
 
-  /// Callback on [hasPermissions].
-  ///
-  /// Can be overridden in sub-classes for device-specific permission handling.
-  Future<bool> onHasPermissions() async => true;
-
   /// Request all [permissions] for this device manager.
+  ///
+  /// Only needed when connecting a device on demand, e.g. from a settings page.
+  /// Devices in a deployment have their permissions requested up front.
   @nonVirtual
   Future<void> requestPermissions() async {
     info('$runtimeType - Requesting permissions for device of type: $typeName.');
@@ -185,10 +200,12 @@ abstract class DeviceManager<
     await onRequestPermissions();
   }
 
-  /// Callback on [requestPermissions].
+  /// Callback on [requestPermissions]. Defaults to asking for [permissions].
   ///
-  /// Can be overridden for device-specific permission handling.
-  Future<void> onRequestPermissions();
+  /// Override for devices whose permissions are not handled by
+  /// `permission_handler`, such as health data.
+  Future<void> onRequestPermissions() =>
+      SmartPhoneClientManager().requestPermissions(permissions);
 
   /// Ask this [DeviceManager] to start connecting to the device.
   /// Returns the [DeviceStatus] of the device.

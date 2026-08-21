@@ -1,3 +1,7 @@
+## 4.0.0
+
+* require `carp_mobile_sensing` ^3.0.0
+
 ## 3.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package

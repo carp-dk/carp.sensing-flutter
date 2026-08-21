@@ -74,7 +74,6 @@ class HealthProbe extends Probe {
   /// anymore. In this case, this method cannot be used to request permissions.
   /// Instead, the user must manually go to the settings of the phone and enable
   /// the permissions.
-  @override
   Future<bool> requestPermissions() async {
     bool permission = await hasPermissions();
     if (!permission) {

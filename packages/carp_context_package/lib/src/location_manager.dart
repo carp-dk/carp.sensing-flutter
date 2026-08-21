@@ -44,13 +44,8 @@ enum GeolocationAccuracy {
 ///
 ///  `LocationManager()...`
 ///
-/// Note that this [LocationManager] **tries** to handle location permissions
-/// during its configuration (via the [configure] method) and the [hasPermission]
-/// and [requestPermission] methods.
-///
-/// **However**, it is much better - and also recommended by both Apple and
-/// Google - to handle permissions on an application level and show the location
-/// permission dialogue to the user **before** using probes that depend on location.
+/// Does not ask for location permission - CAMS asks for a study's permissions
+/// before it connects anything. [configure] only checks, via [hasPermission].
 ///
 /// This [LocationManager] based on the [location](https://pub.dev/packages/location)
 /// plugin.
@@ -77,46 +72,7 @@ class LocationManager {
   Future<bool> isBackgroundModeEnabled() async => await _provider.isBackgroundModeEnabled();
 
   /// Does this location manger have permission to access location?
-  Future<bool> hasPermission() async => (await _provider.hasPermission()) == location.PermissionStatus.granted;
-
-  /// Request permissions to access location.
-  ///
-  /// Requesting access to location is a two step process on both Android and iOS:
-  ///
-  ///  1. First, ask for using location 'when in use'
-  ///  2. Then, ask for using location 'always'
-  ///
-  /// See the [FAQ in the permission_handler](https://pub.dev/packages/permission_handler#requesting-permissionlocationalways-always-returns-denied-on-android-10-api-29-what-can-i-do)
-  /// plugin or the [Android](https://developer.android.com/develop/sensors-and-location/location/permissions#request-only-foreground)
-  /// or [iOS](https://developer.apple.com/documentation/corelocation/requesting-authorization-to-use-location-services)
-  /// documentation.
-  ///
-  /// Note that if the permission is [PermissionStatus.permanentlyDenied], no dialog will be
-  /// shown on [requestPermission]. In this case, the Settings page from the
-  /// OS needs to be shown and the user needs to manually allow access to location.
-  /// The permission_handler plugin has a method named `openAppSettings()` which
-  /// opens the Settings page on Android / iOS.
-  /// This method is, however, **NOT** used by this context sampling package, since
-  /// handling of permissions should be taken care of on an app level.
-  Future<PermissionStatus> requestPermission() async {
-    debug('$runtimeType - Requesting permission to access location...');
-
-    var permissionGranted = await _provider.hasPermission();
-    if (permissionGranted == location.PermissionStatus.denied) {
-      permissionGranted = await _provider.requestPermission();
-      if (permissionGranted != location.PermissionStatus.granted) {
-        warning(
-          "$runtimeType - The user opted not to allow collection of location data. "
-          "The only way to change the permission's status now is to let the "
-          "user manually enables it in the system settings.",
-        );
-      }
-    }
-
-    debug('$runtimeType - Permission: $permissionGranted');
-
-    return permissionGranted == location.PermissionStatus.granted ? PermissionStatus.granted : PermissionStatus.denied;
-  }
+  Future<bool> hasPermission() => Permission.locationWhenInUse.isGranted;
 
   /// Enable the [LocationManager] for accessing location also when the app is
   /// in the background.
@@ -176,24 +132,15 @@ class LocationManager {
 
     // Only on Android, configure the notification shown when running in background.
     if (Platform.isAndroid) {
-      // Need to check if location permission has been granted before trying to
-      // change settings using the "changeSettings()" methods.
-      // The location plugin will throw a native Android exception trying to change
-      // setting without permissions to access location. And this exception is not
-      // propagated to Flutter and is hence not caught by the try-catch block below.
+      // The location plugin throws a *native* Android exception when settings are
+      // changed without location permission - it never reaches Flutter, so it
+      // cannot be caught below. Bail out instead; connecting the location service
+      // again once permission is granted will configure it.
       //
       // See https://github.com/Lyokone/flutterlocation/blob/c14f8173caf33f8c38d01b28c94e0804c63e0db9/packages/location/android/src/main/java/com/lyokone/location/FlutterLocation.java#L201
-      var permission = await Permission.location.status;
-      if (permission != PermissionStatus.granted) {
-        warning(
-          "$runtimeType - Permission to collect location data has not been granted. "
-          "Cannot configure $runtimeType. "
-          "Make sure to grant this BEFORE sensing is resumed. "
-          "The context sampling package does not handle location permissions. This should be handled on the application level.",
-        );
-
-        // If not granted, try to request 'when in use' permission.
-        await Permission.locationWhenInUse.request();
+      if (!await hasPermission()) {
+        warning('$runtimeType - Cannot configure without permission to access location.');
+        return;
       }
 
       // Change notification options - only on Android.

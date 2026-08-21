@@ -44,3 +44,6 @@ apps/carp_mobile_sensing_app/test/credentials.dart
 backends/carp_backend/test/credentials.dart
 apps/carp_mobile_sensing_app/lib/config.dart
 backends/carp_webservices/test/_credentials.dart
+
+# Local path overrides for developing against a sibling worktree - never committed.
+pubspec_overrides.yaml

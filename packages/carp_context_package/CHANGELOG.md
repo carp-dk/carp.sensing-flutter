@@ -1,3 +1,15 @@
+## 3.0.0
+
+* require `carp_mobile_sensing` ^3.0.0
+* location permissions are declared, not requested: the context services declare
+  `Permission.locationAlways` and CAMS asks for it - `locationWhenInUse` first - before
+  connecting them. Removes the three separate ways location used to be requested
+* `LocationManager.requestPermission()` removed. Location is requested like any other
+  permission now; use `SmartPhoneClientManager().requestPermissions(...)` if you need to ask
+* `LocationManager.configure()` no longer requests permission as a side effect - it bails out
+  when permission is missing, and configures when the service is connected again
+* a location probe denied permission now stays paused instead of silently reporting success
+
 ## 2.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
