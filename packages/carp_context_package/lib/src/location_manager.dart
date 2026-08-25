@@ -84,12 +84,16 @@ class LocationManager {
   ///
   /// After the location manager is enabled, configuration can be done via the
   /// [configure] method.
+  ///
+  /// Never asks for permission: called from a service's `onConnect()`, and CAMS
+  /// asks for a study's permissions before it connects anything. Asking from
+  /// here would collide with that - Android denies, without showing, any
+  /// permission request made while another one is up.
   Future<void> enable() async {
     // fast out if already enabled
     if (enabled) return;
 
     info('Enabling $runtimeType...');
-    _enabled = false;
 
     bool serviceEnabled = await _provider.serviceEnabled();
     if (!serviceEnabled) {
@@ -102,10 +106,14 @@ class LocationManager {
     _enabled = true;
     bool backgroundMode = false;
 
-    try {
-      backgroundMode = await _provider.enableBackgroundMode();
-    } catch (error) {
-      warning('$runtimeType - Could not enable background mode - $error');
+    // Only enable background mode once permission is granted - the plugin
+    // requests it natively otherwise, which is this manager's job to avoid.
+    if (await Permission.locationAlways.isGranted) {
+      try {
+        backgroundMode = await _provider.enableBackgroundMode();
+      } catch (error) {
+        warning('$runtimeType - Could not enable background mode - $error');
+      }
     }
 
     info('$runtimeType - Location service enabled, background mode: $backgroundMode');
@@ -128,7 +136,6 @@ class LocationManager {
     await enable();
 
     info('Configuring $runtimeType - configuration: $configuration');
-    _configured = false;
 
     // Only on Android, configure the notification shown when running in background.
     if (Platform.isAndroid) {

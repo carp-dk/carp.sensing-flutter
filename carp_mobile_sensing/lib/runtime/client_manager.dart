@@ -61,9 +61,17 @@ class SmartPhoneClientManager
   ///
   /// Serialized: `permission_handler` forbids concurrent requests, and two
   /// studies can start at once.
-  Future<void> requestPermissions(List<Permission> permissions) async =>
+  ///
+  /// A failed requester is logged, not rethrown: CAMS re-checks the actual
+  /// permission status afterwards anyway, and an error here must not block
+  /// the requests queued behind it.
+  Future<void> requestPermissions(List<Permission> permissions) =>
       _asking = _asking.then((_) async {
-        await _permissionRequester?.call(permissions);
+        try {
+          await _permissionRequester?.call(permissions);
+        } catch (error) {
+          warning('$runtimeType - Permission requester failed - $error');
+        }
       });
   Future<void> _asking = Future.value();
 

@@ -2,12 +2,17 @@
 
 * require `carp_mobile_sensing` ^3.0.0
 * location permissions are declared, not requested: the context services declare
-  `Permission.locationAlways` and CAMS asks for it - `locationWhenInUse` first - before
-  connecting them. Removes the three separate ways location used to be requested
-* `LocationManager.requestPermission()` removed. Location is requested like any other
-  permission now; use `SmartPhoneClientManager().requestPermissions(...)` if you need to ask
-* `LocationManager.configure()` no longer requests permission as a side effect - it bails out
-  when permission is missing, and configures when the service is connected again
+  `Permission.locationAlways`, and it is asked for - `locationWhenInUse` first - when the
+  *user* connects the service in the app. Removes the three separate ways location used
+  to be requested
+* **behaviour change:** location, weather, and air quality no longer trigger a permission
+  dialog (or sample) on deployment. They stay disconnected until the user connects the
+  location service from the app; the choice is persisted and later launches reconnect
+  silently
+* `LocationManager` no longer initiates any permission UI: `requestPermission()` removed,
+  `configure()` bails out when permission is missing, and `enable()` only enables the
+  plugin's background mode once `locationAlways` is already granted (the plugin used to
+  request it natively, colliding with other dialogs)
 * a location probe denied permission now stays paused instead of silently reporting success
 
 ## 2.1.0

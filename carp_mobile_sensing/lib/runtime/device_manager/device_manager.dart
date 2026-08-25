@@ -165,9 +165,10 @@ abstract class DeviceManager<
 
   /// The permissions this device needs.
   ///
-  /// Declared, not requested - the study controller collects the permissions of
-  /// every device and measure in a deployment and asks for them once, before
-  /// connecting anything. See [SmartphoneStudyController.requiredPermissions].
+  /// Declared here, checked - never requested - by [connect]. Asking belongs
+  /// to the app's UI via [requestPermissions], at the moment the user chooses
+  /// to connect this device. CAMS auto-connects devices on deployment and on
+  /// task start; if those could ask, dialogs would appear unprompted.
   List<Permission> get permissions => [];
 
   /// Does this device manager have the [permissions] to run?
@@ -191,8 +192,8 @@ abstract class DeviceManager<
 
   /// Request all [permissions] for this device manager.
   ///
-  /// Only needed when connecting a device on demand, e.g. from a settings page.
-  /// Devices in a deployment have their permissions requested up front.
+  /// Call before [connect], when the user chooses to connect this device -
+  /// [connect] itself only checks.
   @nonVirtual
   Future<void> requestPermissions() async {
     info('$runtimeType - Requesting permissions for device of type: $typeName.');
@@ -221,9 +222,13 @@ abstract class DeviceManager<
 
     status = DeviceStatus.connecting;
 
+    // Only check - never ask. CAMS connects devices automatically (on
+    // deployment, and when a task starts); a device the user has not granted
+    // yet simply stays disconnected until they connect it from the app, which
+    // asks via requestPermissions() first.
     if (!(await hasPermissions())) {
       warning(
-        '$runtimeType has not the permissions required to connect. '
+        '$runtimeType does not have the permissions required to connect. '
         'Call requestPermissions() before calling connect.',
       );
       return status = DeviceStatus.disconnected;

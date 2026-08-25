@@ -47,8 +47,12 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   CarpMobileSensing.ensureInitialized();
 
-  /// Fake the OS: records the calls, grants whatever is asked for.
-  List<String> fakePermissionHandler({Set<int> alreadyGranted = const {}}) {
+  /// Fake the OS: records the calls; grants whatever is asked for, unless
+  /// [denyAll] - then the user taps "Don't allow" on every dialog.
+  List<String> fakePermissionHandler({
+    Set<int> alreadyGranted = const {},
+    bool denyAll = false,
+  }) {
     final calls = <String>[];
     final granted = {...alreadyGranted};
 
@@ -62,6 +66,7 @@ void main() {
             case 'requestPermissions':
               final requested = (call.arguments as List).cast<int>();
               calls.add('request(${requested.join(',')})');
+              if (denyAll) return {for (final p in requested) p: _denied};
               granted.addAll(requested);
               return {for (final p in requested) p: _granted};
             default:
@@ -153,14 +158,84 @@ void main() {
     expect(deploymentOf(protocol).hasNotifyingTask, isTrue);
   });
 
-  test('a device without its permissions refuses to connect', () async {
-    fakePermissionHandler(); // nothing granted, nothing requested
+  test('concurrent permission requests never overlap', () async {
+    final calls = fakePermissionHandler();
+
+    // Deployment events, probes and devices all ask at once on a normal launch.
+    // Android shows one dialog at a time and denies - without showing - any
+    // request that arrives while another is up, so these must not overlap.
+    final client = SmartPhoneClientManager();
+    final permissions = _LocationishDeviceManager().permissions;
+    await Future.wait([
+      client.requestPermissions(permissions),
+      client.requestPermissions(permissions),
+    ]);
+
+    // The later runs find them granted by the first, and ask for nothing.
+    expect(calls.where((call) => call.startsWith('request')), [
+      'request(${Permission.locationWhenInUse.value})',
+      'request(${Permission.locationAlways.value})',
+    ]);
+  });
+
+  test('a failed permission request does not block later requests', () async {
+    // A request that throws must not poison the request queue - a study that
+    // fails must not block permissions for every study after it.
+    var requests = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_channel, (call) async {
+          switch (call.method) {
+            case 'checkPermissionStatus':
+              return _denied;
+            case 'requestPermissions':
+              if (++requests == 1) throw PlatformException(code: 'ERROR');
+              final asked = (call.arguments as List).cast<int>();
+              return {for (final p in asked) p: _granted};
+            default:
+              return null;
+          }
+        });
+
+    final client = SmartPhoneClientManager();
+    await client.requestPermissions([Permission.notification]); // throws inside
+    await client.requestPermissions([Permission.notification]);
+
+    expect(requests, 2);
+  });
+
+  test('auto-connect never asks - an ungranted device stays disconnected', () async {
+    final calls = fakePermissionHandler(); // nothing granted yet
     final device = _LocationishDeviceManager()
       ..configure(DeviceConfiguration(roleName: 'test'));
 
-    // This is why permissions must be requested *before* connecting: a device
-    // that connects first sees no permissions, gives up, and nothing retries.
-    expect(await device.hasPermissions(), isFalse);
+    // CAMS connects devices automatically on deployment and task start. Those
+    // paths must not trigger a dialog - the device just stays disconnected
+    // until the user connects it from the app.
+    expect(await device.connect(), DeviceStatus.disconnected);
+    expect(calls.where((call) => call.startsWith('request')), isEmpty);
+  });
+
+  test('the user connecting a device asks first, then connects', () async {
+    final calls = fakePermissionHandler(); // nothing granted yet
+    final device = _LocationishDeviceManager()
+      ..configure(DeviceConfiguration(roleName: 'test'));
+
+    // The app's connect button: ask, then connect.
+    await device.requestPermissions();
+    expect(await device.connect(), DeviceStatus.connected);
+
+    expect(calls.where((call) => call.startsWith('request')), [
+      'request(${Permission.locationWhenInUse.value})',
+      'request(${Permission.locationAlways.value})',
+    ]);
+  });
+
+  test('a device denied its permissions refuses to connect', () async {
+    fakePermissionHandler(denyAll: true);
+    final device = _LocationishDeviceManager()
+      ..configure(DeviceConfiguration(roleName: 'test'));
+
+    await device.requestPermissions(); // user taps connect, denies the dialog
     expect(await device.connect(), DeviceStatus.disconnected);
   });
 

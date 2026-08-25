@@ -117,12 +117,30 @@ class SmartphoneStudyController {
   /// Handles updates of the [deployment] status.
   Future<void> _deploymentStatusReceived() async {}
 
+  /// Serializes [_deviceDeploymentReceived], which the event stream can fire
+  /// again while a previous run is still awaiting - twice on a normal launch.
+  /// Two runs at once ask for the same permissions concurrently, and Android
+  /// bounces every request that arrives while a dialog is already up.
+  ///
+  /// A failed run is logged, not rethrown - nothing awaits the event handler,
+  /// and an error must not block the runs queued behind it.
+  Future<void> _configuring = Future.value();
+
   /// Handles the reception of a new or updated [deployment].
   ///
   /// This entails configuring devices, data manager, and executor to get
   /// ready to handle sampling of data. Data sampling is started if the
   /// [SmartphoneStudy.samplingState] is in a resumed state.
-  Future<void> _deviceDeploymentReceived() async {
+  Future<void> _deviceDeploymentReceived() =>
+      _configuring = _configuring.then((_) async {
+        try {
+          await _configureDeployment();
+        } catch (error) {
+          warning('$runtimeType - Configuring deployment failed - $error');
+        }
+      });
+
+  Future<void> _configureDeployment() async {
     debug(
       '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
     );
@@ -170,17 +188,22 @@ class SmartphoneStudyController {
     // Initialize all devices from the deployment, incl. this smartphone.
     _configureAllDevices();
 
+    // Ask for the study-wide permissions - notifications and measures - before
+    // probes initialize. Device permissions are not asked here: each device
+    // asks for its own when it is connected, so the participant sees the
+    // dialog at the moment the device is actually put to use.
+    await SmartPhoneClientManager().requestPermissions([
+      if (deployment!.hasNotifyingTask) Permission.notification,
+      for (final measure in deployment!.measures)
+        ...?_measurePermissions(measure),
+    ]);
+
     // Initialize the executor, which recursively initializes all executors and probes.
     // But before doing this, save any existing sampling status which might have
     // been loaded, so that we can properly resume sampling.
     var existingSamplingStatus = study.samplingState;
     _executor.initialize(deployment!, deployment!);
     _executor.setSamplingState(existingSamplingStatus);
-
-    // Ask for the permissions this deployment needs. Must happen before
-    // connecting, since a device that lacks its permissions refuses to connect
-    // and nothing reconnects it afterwards.
-    await SmartPhoneClientManager().requestPermissions(requiredPermissions);
 
     // Connect to all connectable devices.
     // (Re-)connecting a device will trigger that
@@ -347,15 +370,11 @@ class SmartphoneStudyController {
     );
   }
 
-  /// The permissions needed to start sampling this [deployment] now - those of
-  /// every measure, and of the devices about to be connected.
+  /// The permissions needed to run this [deployment] - those of every measure,
+  /// and of the devices about to be connected.
   ///
-  /// Devices that are not ready to connect are left out: a wearable the
-  /// participant has not paired yet is not connected at study start, so asking
-  /// for its permissions now would be asking for something we are not about to
-  /// use. An app that lets the participant pair such a device later asks then,
-  /// via [DeviceManager.requestPermissions].
-  ///
+  /// Not requested in one go: measure permissions are asked when the deployment
+  /// is configured, and each device asks for its own when it is connected.
   /// Available once the deployment is received, so an app can show what a study
   /// needs (and why) before any system dialog appears.
   List<Permission> get requiredPermissions => [
