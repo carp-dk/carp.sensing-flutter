@@ -1,3 +1,7 @@
+## 3.0.0
+
+* require `carp_mobile_sensing` ^3.0.0
+
 ## 2.2.0
 
 * upgrade to `network_info_plus` ^8.2.1, which pulls in `win32` 6.x

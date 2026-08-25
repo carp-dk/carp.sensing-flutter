@@ -91,13 +91,6 @@ class StudyPageState extends State<StudyPage> {
     // measures are available. This must happen before configuring the client.
     SamplingPackageRegistry().register(ContextSamplingPackage());
 
-    // Request location permission BEFORE configuring the client. CAMS connects
-    // the LocationService device during deployment/startup, and that connect
-    // fails (and is never retried) if permission isn't already granted — which
-    // leaves the location task unable to resume.
-    await LocationManager().configure(locationService);
-    await LocationManager().requestPermission();
-
     // Configure the client. Note that the client can take a series of configuration
     // parameters, but here we're just using the default configurations.
     await client.configure();
@@ -229,10 +222,6 @@ class StudyPageState extends State<StudyPage> {
     if (study.isSampling) {
       controller?.pause();
     } else {
-      // CAMS does not request location permission itself, so ask for it here
-      // before sampling starts. This is what pops the OS location dialog.
-      await LocationManager().configure(locationService);
-      await LocationManager().requestPermission();
       controller?.resume();
     }
     setState(() {});

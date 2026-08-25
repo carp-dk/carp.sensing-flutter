@@ -180,10 +180,7 @@ class Sensing {
   /// Initialize and set up sensing.
   Future<void> initialize() async {
     // Configure the client manager with the deployment service specified based on deployment mode
-    await client.configure(
-      deploymentService: deploymentService,
-      askForPermissions: true,
-    );
+    await client.configure(deploymentService: deploymentService);
 
     // Listen on the measurements stream and count measurements
     client.measurements.listen((measurement) => samplingSize++);

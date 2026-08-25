@@ -165,6 +165,8 @@ class HealthServiceManager
     return hasHealthPermissions(types);
   }
 
+  /// Health permissions are granted by Health Connect / Apple Health, not by
+  /// the OS permission system, so this asks the health service directly.
   @override
   Future<void> onRequestPermissions() async {
     await requestHealthPermissions(types);

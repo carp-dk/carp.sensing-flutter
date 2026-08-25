@@ -452,12 +452,12 @@ void example_3() async {
   // * [FlutterLocalNotificationController]
   // * [SmartphoneDeploymentService]
   // * [DeviceController]
-  // * asking for permissions
   // * notifications enabled
+  // * asking for the permissions a study needs, one dialog at a time
   await client.configure();
 
-  // disabling notifications and permissions handling
-  await client.configure(enableNotifications: false, askForPermissions: false);
+  // disabling notifications, and handling permissions in the app instead
+  await client.configure(enableNotifications: false, permissionRequester: null);
 
   // add and deploy the protocol
   final study = await client.addStudyFromProtocol(protocol);

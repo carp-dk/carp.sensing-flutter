@@ -189,6 +189,11 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
     return measures;
   }
 
+  /// Does this deployment have a task that notifies the user?
+  /// Android 13+ needs permission for that.
+  bool get hasNotifyingTask =>
+      tasks.any((task) => task is AppTask && task.notification);
+
   /// Get the [DeviceConfiguration] based on the [roleName].
   /// This includes both the primary device and the connected devices.
   /// Returns null if no device with [roleName] is found.

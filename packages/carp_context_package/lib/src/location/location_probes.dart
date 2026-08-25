@@ -46,28 +46,28 @@ class ConfigurableLocationProbe extends Probe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
-      // if this is a one-time sampling, just get the location once and return
-      if (oneTimeSampling) {
-        try {
-          final location = await deviceManager.manager.getLocation();
-          addMeasurement(Measurement.fromData(location));
-        } catch (error) {
-          warning('$runtimeType - Error getting location - $error');
-          addError('$runtimeType - Error getting location: $error');
-        }
-        // automatically pause this probe after it is done collecting the measurement
-        Future.delayed(const Duration(seconds: 5), () => pause());
-      } else {
-        var stream = deviceManager.manager.onLocationChanged.map(
-          (location) => Measurement.fromData(location),
-        );
+    if (!await hasRequiredPermissions()) return false;
 
-        _subscription = stream.listen(
-          (measurement) => addMeasurement(measurement),
-          onError: (Object error) => addError(error),
-        );
+    // if this is a one-time sampling, just get the location once and return
+    if (oneTimeSampling) {
+      try {
+        final location = await deviceManager.manager.getLocation();
+        addMeasurement(Measurement.fromData(location));
+      } catch (error) {
+        warning('$runtimeType - Error getting location - $error');
+        addError('$runtimeType - Error getting location: $error');
       }
+      // automatically pause this probe after it is done collecting the measurement
+      Future.delayed(const Duration(seconds: 5), () => pause());
+    } else {
+      var stream = deviceManager.manager.onLocationChanged.map(
+        (location) => Measurement.fromData(location),
+      );
+
+      _subscription = stream.listen(
+        (measurement) => addMeasurement(measurement),
+        onError: (Object error) => addError(error),
+      );
     }
     return true;
   }

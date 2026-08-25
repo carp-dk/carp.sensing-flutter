@@ -1,3 +1,76 @@
+## 3.0.0
+
+Permissions are now declared as data, and requested at the moment they are about to
+be used - study-wide permissions when the deployment is configured, device permissions
+when the *user* connects the device.
+
+**Who asks, when**
+
+| Permission for | Asked when | Asked by |
+|---|---|---|
+| notifying app tasks (`notification`) | deployment configured | `SmartphoneStudyController` |
+| measures on this phone (e.g. `activityRecognition`) | deployment configured | `SmartphoneStudyController` |
+| a device/service (e.g. `locationAlways`) | the user connects it | the app UI, via `DeviceManager.requestPermissions()` then `connect()` |
+
+CAMS auto-connects devices on deployment and on task start; those paths *check*
+permissions and never ask, so no dialog can appear unprompted. All requests go through
+one serialized queue - Android denies, without showing, any permission request that
+arrives while another dialog is up, which used to make dialogs "fail silently".
+
+**Behaviour change - devices no longer sample until the user connects them**
+
+Previously a deployment tried to obtain all its permissions up front, and every
+device with granted permissions started sampling automatically. Now a device whose
+permissions have not been granted stays `disconnected` - silently, by design - until
+the user connects it from the app (which asks first). **If your app has no UI for
+connecting devices, location/weather/air quality and other permission-guarded devices
+will never start.** Once connected, `isConnected` is persisted in the device
+registration and later launches reconnect silently - the dialog is a one-time,
+user-initiated event.
+
+**Fixes**
+
+* permission dialogs no longer fail silently. Three code paths asked concurrently
+  (the deployment handler fires twice per launch, the location plugin asked natively,
+  probes initialized mid-ask); Android bounces every request made while a dialog is
+  up, returning `denied` without showing anything
+* no more "allow alarms & reminders" dialog on first launch - notifications are scheduled
+  exactly when `SCHEDULE_EXACT_ALARM` happens to be granted, and inexactly (still delivered
+  while the phone is idle, within minutes) when it is not. Drop `SCHEDULE_EXACT_ALARM` from
+  your manifest unless your study truly needs to-the-second reminders
+* the Android location ladder works: `locationAlways` is asked only after `locationWhenInUse`,
+  in its own dialog, whatever order a study declares them in
+* `Permission.notification` is asked for when a study with notifying app tasks starts,
+  instead of at `configure()` before any study exists
+* a failed permission request or deployment configuration no longer blocks the
+  requests/configurations queued behind it
+
+**Breaking**
+
+* `DeviceManager.onRequestPermissions()` -> `List<Permission> get permissions`:
+
+  ```dart
+  // before
+  Future<void> onRequestPermissions() async => await Permission.sensors.request();
+  // after
+  List<Permission> get permissions => [Permission.sensors];
+  ```
+
+  `onHasPermissions()` now checks these by default - override it only to require a subset.
+  Devices not using `permission_handler` (e.g. Health Connect) can still override
+  `onRequestPermissions()`
+* `SmartPhoneClientManager.configure(askForPermissions: bool)` ->
+  `configure(permissionRequester: PermissionRequester?)`. The default asks one dialog at a
+  time; pass your own to show a rationale first, or `null` to handle permissions in the app
+* `SmartphoneStudyController.askForAllPermissions()` removed - study-wide permissions are
+  asked automatically at deployment; device permissions when the user connects the device.
+  The new `requiredPermissions` getter lists everything a deployment needs, so an app can
+  explain it up front
+* `SmartphoneStudyController.permissions` removed - it cached a status the OS can revoke at
+  any time. Ask `permission_handler` instead
+* `Probe.requestPermissions()` and `Probe.arePermissionsGranted()` removed - probes check
+  via `hasRequiredPermissions()` and never ask
+
 ## 2.3.1
 
 * fix `duplicate column name: record_id` crash in the `record_id` SQLite migration (`SQLiteDataManager.onUpgrade`) by only adding the column/index when it isn't already there

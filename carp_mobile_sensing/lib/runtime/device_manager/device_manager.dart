@@ -163,21 +163,37 @@ abstract class DeviceManager<
   /// doing a lot of work on startup.
   void onConfigure();
 
+  /// The permissions this device needs.
+  ///
+  /// Declared here, checked - never requested - by [connect]. Asking belongs
+  /// to the app's UI via [requestPermissions], at the moment the user chooses
+  /// to connect this device. CAMS auto-connects devices on deployment and on
+  /// task start; if those could ask, dialogs would appear unprompted.
+  List<Permission> get permissions => [];
+
   /// Does this device manager have the [permissions] to run?
   ///
   /// Note that the result is not cached, since permissions can be revoked in
   /// the phone's settings at any time, without the app knowing about it.
   @nonVirtual
-  Future<bool> hasPermissions() async {
-    return onHasPermissions();
+  Future<bool> hasPermissions() async => onHasPermissions();
+
+  /// Callback on [hasPermissions]. Defaults to requiring all [permissions].
+  ///
+  /// Override to require only some of them - e.g. a service that also works
+  /// without its optional background permission - or for devices whose
+  /// permissions are not handled by `permission_handler`, such as health data.
+  Future<bool> onHasPermissions() async {
+    for (final permission in permissions) {
+      if (!await permission.isGranted) return false;
+    }
+    return true;
   }
 
-  /// Callback on [hasPermissions].
-  ///
-  /// Can be overridden in sub-classes for device-specific permission handling.
-  Future<bool> onHasPermissions() async => true;
-
   /// Request all [permissions] for this device manager.
+  ///
+  /// Call before [connect], when the user chooses to connect this device -
+  /// [connect] itself only checks.
   @nonVirtual
   Future<void> requestPermissions() async {
     info('$runtimeType - Requesting permissions for device of type: $typeName.');
@@ -185,10 +201,12 @@ abstract class DeviceManager<
     await onRequestPermissions();
   }
 
-  /// Callback on [requestPermissions].
+  /// Callback on [requestPermissions]. Defaults to asking for [permissions].
   ///
-  /// Can be overridden for device-specific permission handling.
-  Future<void> onRequestPermissions();
+  /// Override for devices whose permissions are not handled by
+  /// `permission_handler`, such as health data.
+  Future<void> onRequestPermissions() =>
+      SmartPhoneClientManager().requestPermissions(permissions);
 
   /// Ask this [DeviceManager] to start connecting to the device.
   /// Returns the [DeviceStatus] of the device.
@@ -204,9 +222,13 @@ abstract class DeviceManager<
 
     status = DeviceStatus.connecting;
 
+    // Only check - never ask. CAMS connects devices automatically (on
+    // deployment, and when a task starts); a device the user has not granted
+    // yet simply stays disconnected until they connect it from the app, which
+    // asks via requestPermissions() first.
     if (!(await hasPermissions())) {
       warning(
-        '$runtimeType has not the permissions required to connect. '
+        '$runtimeType does not have the permissions required to connect. '
         'Call requestPermissions() before calling connect.',
       );
       return status = DeviceStatus.disconnected;

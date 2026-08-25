@@ -49,15 +49,31 @@ class SmartPhoneClientManager
 
   final NotificationManager _notificationManager =
       FlutterLocalNotificationManager();
-  bool _askForPermissions = true;
+  PermissionRequester? _permissionRequester = requestPermissionsInOrder;
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
   final StreamController<ClientManagerState> _controller =
       StreamController.broadcast();
   final Map<Study, SmartphoneStudyController> _controllers = {};
 
-  /// Will this client manager ask for permission when a new study is deployed?
-  bool get askForPermissions => _askForPermissions;
+  /// Ask the user for [permissions], using the [PermissionRequester] this
+  /// client is configured with. Does nothing if there is none.
+  ///
+  /// Serialized: `permission_handler` forbids concurrent requests, and two
+  /// studies can start at once.
+  ///
+  /// A failed requester is logged, not rethrown: CAMS re-checks the actual
+  /// permission status afterwards anyway, and an error here must not block
+  /// the requests queued behind it.
+  Future<void> requestPermissions(List<Permission> permissions) =>
+      _asking = _asking.then((_) async {
+        try {
+          await _permissionRequester?.call(permissions);
+        } catch (error) {
+          warning('$runtimeType - Permission requester failed - $error');
+        }
+      });
+  Future<void> _asking = Future.value();
 
   /// The runtime state of this client manager.
   ClientManagerState get state => _state;
@@ -128,9 +144,10 @@ class SmartPhoneClientManager
   /// titles and text, you can provide them here.
   /// Note that background mode is only supported on Android, and will be ignored on iOS.
   ///
-  /// If [askForPermissions] is true (default), this client manager will
-  /// automatically ask for permissions for all sampling packages at once.
-  /// If you want the app to handle permissions itself, set this to false.
+  /// The [permissionRequester] asks the user for the permissions a study needs,
+  /// before its devices are connected. Defaults to [requestPermissionsInOrder],
+  /// which shows the system dialogs one at a time. Pass your own to show a
+  /// rationale first, or `null` to never ask and handle permissions in the app.
   ///
   /// When this method is called, the client manager will restore the state of
   /// all previously added studies and resume data sampling in those studies if
@@ -148,12 +165,12 @@ class SmartPhoneClientManager
     bool enableBackgroundMode = true,
     String? backgroundNotificationTitle,
     String? backgroundNotificationText,
-    bool askForPermissions = true,
+    PermissionRequester? permissionRequester = requestPermissionsInOrder,
   }) async {
     // Fast out if already configured
     if (state.index >= ClientManagerState.configured.index) return;
 
-    _askForPermissions = askForPermissions;
+    _permissionRequester = permissionRequester;
 
     // Initialize infrastructure services and the repository.
     await DeviceInfoService().init();
@@ -191,7 +208,6 @@ class SmartPhoneClientManager
     }
 
     // Configure the notification manager.
-    // This will ask for permissions if needed.
     await notificationManager.configure();
 
     // Initialize the app task controller.

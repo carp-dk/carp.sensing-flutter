@@ -251,13 +251,17 @@ abstract class ContextServiceManager<
     isConnected: isConnected,
   );
 
+  /// All context services need to know where the phone is - weather and air
+  /// quality look up the location before querying their web service.
+  ///
+  /// Background location, so these keep working when the app is not in use.
   @override
-  Future<bool> onHasPermissions() async =>
-      await LocationManager().hasPermission();
+  List<Permission> get permissions => [Permission.locationAlways];
 
+  /// Background location is a bonus, not a requirement: without it these
+  /// services still work while the app is in use.
   @override
-  Future<void> onRequestPermissions() async =>
-      await LocationManager().requestPermission();
+  Future<bool> onHasPermissions() => Permission.locationWhenInUse.isGranted;
 
   @override
   bool get canConnect => true; // most online services can always connect - override if not...

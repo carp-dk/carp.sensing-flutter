@@ -1,3 +1,9 @@
+## 3.0.0
+
+* require `carp_mobile_sensing` ^3.0.0
+* the audio probe checks its permission instead of requesting it mid-recording - microphone
+  access is requested with the rest of the study's permissions, before sampling starts
+
 ## 2.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package

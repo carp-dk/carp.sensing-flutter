@@ -82,10 +82,7 @@ class Sensing {
     info('Initializing $runtimeType - mode: ${bloc.deploymentMode}');
 
     // Configure the client manager using the deployment service above (local or CAWS).
-    await client.configure(
-      deploymentService: deploymentService,
-      askForPermissions: true,
-    );
+    await client.configure(deploymentService: deploymentService);
 
     // Listen on the measurements stream and count measurements and print them as they come in.
     client.measurements.listen((measurement) {
@@ -107,13 +104,7 @@ class Sensing {
   );
 
   // Resume the current [study].
-  Future<void> resume() async {
-    // Need to ask for permissions before resuming, otherwise the app may crash
-    // when trying to start sampling without permissions.
-    controller?.askForAllPermissions().then((_) async {
-      controller?.resume();
-    });
-  }
+  Future<void> resume() async => controller?.resume();
 
   // Pause the current [study].
   Future<void> pause() async => client.pause();

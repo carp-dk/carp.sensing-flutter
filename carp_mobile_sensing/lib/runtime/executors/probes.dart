@@ -10,11 +10,10 @@ part of '../../runtime.dart';
 /// A [Probe] is a specialized [Executor] responsible for collecting data from
 /// the device sensors as configured in a [Measure].
 ///
-/// A probe may need a set of [permissions] to run. Following best practice on
-/// both [Android](https://developer.android.com/training/permissions/requesting)
-/// and [iOS](https://developer.apple.com/documentation/uikit/protecting_the_user_s_privacy/requesting_access_to_protected_resources/)
-/// a probe will ask for permission when started using the [requestPermissions]
-/// method.
+/// A probe may need a set of [permissions] to run. It never asks for them
+/// itself - they are requested for the deployment as a whole, before sampling
+/// starts. A probe without its permissions does not resume, and is resumed
+/// later when its device (re)connects.
 abstract class Probe extends AbstractExecutor<Measure> {
   /// The device that this probes uses to collect data.
   late DeviceManager deviceManager;
@@ -66,80 +65,30 @@ abstract class Probe extends AbstractExecutor<Measure> {
     super.addMeasurement(measurement);
   }
 
-  List<Permission>? _permissions;
-
-  /// The list of permissions needed for this probe.
+  /// The permissions needed for this probe to run, as declared by its
+  /// [CamsDataTypeMetaData].
   List<Permission> get permissions {
-    if (_permissions == null) {
-      var schema = SamplingPackageRegistry().samplingSchemes[type];
-      _permissions = (schema != null && schema.dataType is CamsDataTypeMetaData)
-          ? (schema.dataType as CamsDataTypeMetaData).permissions
-          : [];
-    }
-    return _permissions!;
-  }
-
-  /// Does this probe has the permissions needed to run?
-  Future<bool> arePermissionsGranted() async {
-    // fast out if no permissions to check
-    if (permissions.isEmpty) return true;
-
-    debug('$runtimeType - Checking permission for: $permissions');
-    bool granted = true;
-
-    try {
-      for (var permission in permissions) {
-        granted = granted && await permission.isGranted;
-      }
-    } catch (error) {
-      addError(
-        '$runtimeType - Error trying to check permissions, error: $error',
-      );
-      return false;
-    }
-    return granted;
-  }
-
-  /// Request the permissions needed for this probe to run.
-  /// Return true if all permissions are granted.
-  /// Only used on Android - iOS automatically request permissions when
-  /// a resource (like the microphone) is accessed.
-  Future<bool> requestPermissions() async {
-    // fast out if on iOS - permissions are automatically requested
-    if (Platform.isIOS) return true;
-
-    // fast out if already have permissions
-    if (await arePermissionsGranted()) return true;
-
-    debug('$runtimeType - Asking permission for: $permissions');
-    bool granted = true;
-
-    try {
-      final status = await permissions.request();
-      debug('$runtimeType - Permission status: $status');
-
-      granted = status.values.fold(
-        true,
-        (value, status) => value && status == PermissionStatus.granted,
-      );
-    } catch (error) {
-      addError(
-        '$runtimeType - Error trying to request permissions, error: $error',
-      );
-      return false;
-    }
-    return granted;
+    final dataType = SamplingPackageRegistry().samplingSchemes[type]?.dataType;
+    return dataType is CamsDataTypeMetaData ? dataType.permissions : const [];
   }
 
   /// Whether this probe is allowed to run.
   ///
-  /// On Android the [SmartphoneStudyController] requests all deployment
-  /// permissions in a single batch ([SmartphoneStudyController.askForAllPermissions]),
-  /// so probes only check - requesting again here would collide, as
-  /// permission_handler forbids concurrent requests. On iOS permissions are
-  /// requested automatically when a resource is accessed.
-  Future<bool> hasRequiredPermissions() async =>
-      Platform.isIOS ? true : await arePermissionsGranted();
+  /// Probes only check. The permissions of a whole deployment are requested up
+  /// front, before its devices connect - see
+  /// [SmartphoneStudyController.requiredPermissions]. On iOS there is nothing
+  /// to check: permissions are requested when a resource is first accessed.
+  Future<bool> hasRequiredPermissions() async {
+    if (Platform.isIOS) return true;
+
+    for (final permission in permissions) {
+      if (!await permission.isGranted) {
+        warning('$runtimeType - Missing permission: $permission');
+        return false;
+      }
+    }
+    return true;
+  }
 
   // default no-op implementation of callback methods below
 

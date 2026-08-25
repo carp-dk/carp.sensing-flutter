@@ -20,7 +20,6 @@ class SmartphoneStudyController {
   final SmartphoneStudy _study;
   DataManager? _dataManager;
   final SmartphoneDeploymentExecutor _executor = SmartphoneDeploymentExecutor();
-  Map<Permission, PermissionStatus>? _permissions;
 
   /// Create a new [SmartphoneStudyController] to control the runtime behavior
   /// of a [study].
@@ -76,9 +75,6 @@ class SmartphoneStudyController {
   DeploymentService get _deploymentService =>
       SmartPhoneClientManager().deploymentService;
 
-  /// The permissions granted to this client from the OS.
-  Map<Permission, PermissionStatus> get permissions => _permissions ?? {};
-
   /// The executor executing the [deployment].
   SmartphoneDeploymentExecutor get executor => _executor;
 
@@ -121,12 +117,30 @@ class SmartphoneStudyController {
   /// Handles updates of the [deployment] status.
   Future<void> _deploymentStatusReceived() async {}
 
+  /// Serializes [_deviceDeploymentReceived], which the event stream can fire
+  /// again while a previous run is still awaiting - twice on a normal launch.
+  /// Two runs at once ask for the same permissions concurrently, and Android
+  /// bounces every request that arrives while a dialog is already up.
+  ///
+  /// A failed run is logged, not rethrown - nothing awaits the event handler,
+  /// and an error must not block the runs queued behind it.
+  Future<void> _configuring = Future.value();
+
   /// Handles the reception of a new or updated [deployment].
   ///
   /// This entails configuring devices, data manager, and executor to get
   /// ready to handle sampling of data. Data sampling is started if the
   /// [SmartphoneStudy.samplingState] is in a resumed state.
-  Future<void> _deviceDeploymentReceived() async {
+  Future<void> _deviceDeploymentReceived() =>
+      _configuring = _configuring.then((_) async {
+        try {
+          await _configureDeployment();
+        } catch (error) {
+          warning('$runtimeType - Configuring deployment failed - $error');
+        }
+      });
+
+  Future<void> _configureDeployment() async {
     debug(
       '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
     );
@@ -173,6 +187,16 @@ class SmartphoneStudyController {
 
     // Initialize all devices from the deployment, incl. this smartphone.
     _configureAllDevices();
+
+    // Ask for the study-wide permissions - notifications and measures - before
+    // probes initialize. Device permissions are not asked here: each device
+    // asks for its own when it is connected, so the participant sees the
+    // dialog at the moment the device is actually put to use.
+    await SmartPhoneClientManager().requestPermissions([
+      if (deployment!.hasNotifyingTask) Permission.notification,
+      for (final measure in deployment!.measures)
+        ...?_measurePermissions(measure),
+    ]);
 
     // Initialize the executor, which recursively initializes all executors and probes.
     // But before doing this, save any existing sampling status which might have
@@ -346,73 +370,42 @@ class SmartphoneStudyController {
     );
   }
 
-  /// Asking for permissions for all the measures included in this
-  /// [study].
+  /// The permissions needed to run this [deployment] - those of every measure,
+  /// and of the devices about to be connected.
   ///
-  /// Since we only ask for permission relevant to the deployment, this method
-  /// should be called after deployment has taken place but before this controller
-  /// is resumed.
-  ///
-  /// This method is only relevant on Android, and does nothing on iOS.
-  /// iOS automatically asks for permissions when a resource is accessed.
-  ///
-  /// Note that location permissions are never asked for in this method, since
-  /// they can cause issues when asking for multiple permissions at once.
-  /// Location permissions should be handled separately in the app.
-  Future<void> askForAllPermissions() async {
-    if (deployment == null) {
-      warning(
-        '$runtimeType - No deployment available. Skipping requesting permissions.',
-      );
-      return;
-    }
-    if (Platform.isIOS) {
-      warning(
-        '$runtimeType - Requesting all permissions at once is not feasible on iOS. Skipping this.',
-      );
-      return;
-    }
+  /// Not requested in one go: measure permissions are asked when the deployment
+  /// is configured, and each device asks for its own when it is connected.
+  /// Available once the deployment is received, so an app can show what a study
+  /// needs (and why) before any system dialog appears.
+  List<Permission> get requiredPermissions => [
+    if (deployment?.hasNotifyingTask ?? false) Permission.notification,
+    for (final measure in deployment?.measures ?? <Measure>[])
+      ...?_measurePermissions(measure),
+    for (final device in _devicesToConnect) ...device.permissions,
+  ];
 
-    Set<Permission> permissions = {};
-
-    for (var measure in deployment?.measures ?? <Measure>[]) {
-      var schema = SamplingPackageRegistry().samplingSchemes[measure.type];
-      if (schema != null && schema.dataType is CamsDataTypeMetaData) {
-        permissions.addAll(
-          (schema.dataType as CamsDataTypeMetaData).permissions,
-        );
+  /// The devices in this [deployment] that are ready to be connected right now.
+  ///
+  /// A device is not ready when it still lacks what it needs to connect - a BLE
+  /// wearable that has not been paired yet, say - or when the participant has
+  /// unregistered it.
+  Iterable<DeviceManager> get _devicesToConnect sync* {
+    for (final configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
+      final device = _deviceController.getDeviceManager(configuration.type);
+      debug(
+        '$runtimeType - Checking to connect to device $device with canConnect '
+        "'${device?.canConnect}' and shouldConnect '${device?.shouldConnect}'...",
+      );
+      if (device != null && device.canConnect && device.shouldConnect) {
+        yield device;
       }
     }
+  }
 
-    debug(
-      '$runtimeType - Required permissions for this deployment: $permissions',
-    );
-
-    if (permissions.isNotEmpty) {
-      // Never ask for location permissions.
-      // Will mess it up when requesting multiple permissions at once.
-      permissions
-        ..remove(Permission.location)
-        ..remove(Permission.locationWhenInUse)
-        ..remove(Permission.locationAlways);
-
-      try {
-        info(
-          '$runtimeType - Asking for permissions for all measures in this deployment...',
-        );
-        _permissions = await permissions.toList().request();
-
-        debug('$runtimeType - Permissions granted: $_permissions');
-
-        _permissions?.forEach(
-          (permission, status) => info(
-            '$runtimeType - Permission status for ${permission.toString().split('.').last} : ${status.name}',
-          ),
-        );
-      } catch (error) {
-        warning('$runtimeType - Error requesting permissions - error: $error');
-      }
-    }
+  List<Permission>? _measurePermissions(Measure measure) {
+    final dataType =
+        SamplingPackageRegistry().samplingSchemes[measure.type]?.dataType;
+    return dataType is CamsDataTypeMetaData ? dataType.permissions : null;
   }
 
   /// Configure all devices in this [deployment].
@@ -480,15 +473,8 @@ class SmartphoneStudyController {
     debug('$runtimeType - Trying to connect to all connectable devices.');
 
     // connect all the connected devices and the primary device (i.e. this phone)
-    for (var configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
-      var device = _deviceController.getDeviceManager(configuration.type);
-      debug(
-        '$runtimeType - Checking to connect to device $device with canConnect '
-        "'${device?.canConnect}' and shouldConnect '${device?.shouldConnect}'...",
-      );
-      if (device != null && device.canConnect && device.shouldConnect) {
-        await device.connect();
-      }
+    for (final device in _devicesToConnect) {
+      await device.connect();
     }
   }
 
@@ -515,11 +501,6 @@ class SmartphoneStudyController {
         study.studyDeploymentId,
         study.deviceRoleName,
       );
-    }
-
-    // Ask for permissions for all measures in this deployment
-    if (SmartPhoneClientManager().askForPermissions) {
-      await askForAllPermissions();
     }
 
     // Finally, resume/pause data sampling based on the current sampling state of this study.
