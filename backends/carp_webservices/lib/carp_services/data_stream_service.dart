@@ -82,7 +82,7 @@ class CarpDataStreamService extends CarpBaseService
   /// [DataStreamService] interface) and mirrors [getDataStream], but is
   /// useful when the local upload time is more relevant than the sequence id
   /// (e.g., incremental sync of recently uploaded data).
-  Future<List<DataStreamBatch>> queryDataStreamByTime(
+  Future<List<DataStreamBatch>> getDataStreamBatchesByTime(
     DataStreamId dataStream,
     DateTime from,
     DateTime to,

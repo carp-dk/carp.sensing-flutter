@@ -1,4 +1,4 @@
-// Self-check for CarpDataStreamService.queryDataStreamByTime's request
+// Self-check for CarpDataStreamService.getDataStreamBatchesByTime's request
 // shape, without hitting the network: endpoint path, DataStreamId JSON body,
 // and the ISO-8601 `from`/`to` query params (must be UTC + parseable by the
 // Kotlin `Instant` converter on the CAWS backend).

@@ -1,6 +1,6 @@
 ## 4.3.0
 
-* Add `queryDataStreamByTime()` / `DataStreamReference.getByTime()` - query a data stream by local update time window via the CAWS `query-by-time` endpoint
+* Add `getDataStreamBatchesByTime()` (on `CarpDataStreamService` and `DataStreamReference`) - query a data stream by local update time window via the CAWS `query-by-time` endpoint
 * Rename `CarpDataStreamService().stream()` to `dataStream()` (old name deprecated)
 
 ## 4.2.0
