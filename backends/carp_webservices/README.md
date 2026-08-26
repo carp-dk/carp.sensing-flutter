@@ -390,7 +390,7 @@ var batch = [
 ];
 
 // Get a data stream and append the batch
-CarpDataStreamService().stream().append(batch);
+CarpDataStreamService().dataStream(studyDeploymentId).append(batch);
 ```
 
 However, you would rarely need to use these endpoints in your app, since the [carp_backend](https://pub.dev/packages/carp_backend) would handle this when you use a [`CarpDataEndPoint`](https://pub.dev/documentation/carp_backend/latest/carp_backend/CarpDataEndPoint-class.html) as the data endpoint in the study protocol.

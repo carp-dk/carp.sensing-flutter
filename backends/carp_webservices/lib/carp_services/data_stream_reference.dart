@@ -50,4 +50,13 @@ class DataStreamReference extends RPCCarpReference {
     fromSequenceId,
     toSequenceIdInclusive,
   );
+
+  /// Get all data points in [dataStream] whose local update time falls
+  /// within the inclusive [from]-[to] window, as one [DataStreamBatch] per
+  /// contiguous run of measurements.
+  Future<List<DataStreamBatch>> getDataStreamBatchesByTime(
+    DataStreamId dataStream,
+    DateTime from,
+    DateTime to,
+  ) async => await service.getDataStreamBatchesByTime(dataStream, from, to);
 }
