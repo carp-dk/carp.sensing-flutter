@@ -115,22 +115,6 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
         ),
         DataTypeSamplingScheme(
           CamsDataTypeMetaData(
-            type: STEP_EVENT,
-            displayName: "Step Events",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.activityRecognition],
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: STEP_COUNT,
-            displayName: "Step Count",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.activityRecognition],
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
             type: AMBIENT_LIGHT,
             displayName: "Ambient Light",
             timeType: DataTimeType.TIME_SPAN,
@@ -155,10 +139,6 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
         return MagnetometerProbe();
       case ROTATION:
         return GyroscopeProbe();
-      case STEP_EVENT:
-        return PedometerProbe();
-      case STEP_COUNT:
-        return StepCountProbe();
       case AMBIENT_LIGHT:
         return (Platform.isAndroid) ? LightProbe() : null;
       default:

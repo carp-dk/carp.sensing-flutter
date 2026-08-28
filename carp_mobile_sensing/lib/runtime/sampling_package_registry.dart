@@ -30,6 +30,7 @@ class SamplingPackageRegistry {
     // register the built-in packages
     register(DeviceSamplingPackage());
     register(SensorSamplingPackage());
+    register(ActivitySamplingPackage());
     register(MonitoringSamplingPackage());
   }
 

@@ -188,16 +188,6 @@ class SmartphoneStudyController {
     // Initialize all devices from the deployment, incl. this smartphone.
     _configureAllDevices();
 
-    // Ask for the study-wide permissions - notifications and measures - before
-    // probes initialize. Device permissions are not asked here: each device
-    // asks for its own when it is connected, so the participant sees the
-    // dialog at the moment the device is actually put to use.
-    await SmartPhoneClientManager().requestPermissions([
-      if (deployment!.hasNotifyingTask) Permission.notification,
-      for (final measure in deployment!.measures)
-        ...?_measurePermissions(measure),
-    ]);
-
     // Initialize the executor, which recursively initializes all executors and probes.
     // But before doing this, save any existing sampling status which might have
     // been loaded, so that we can properly resume sampling.
@@ -370,17 +360,13 @@ class SmartphoneStudyController {
     );
   }
 
-  /// The permissions needed to run this [deployment] - those of every measure,
-  /// and of the devices about to be connected.
+  /// The permissions needed to run this [deployment] - those of every device
+  /// in it.
   ///
-  /// Not requested in one go: measure permissions are asked when the deployment
-  /// is configured, and each device asks for its own when it is connected.
-  /// Available once the deployment is received, so an app can show what a study
-  /// needs (and why) before any system dialog appears.
+  /// Not requested in one go: each device asks for its own when it is
+  /// connected. Available once the deployment is received, so an app can show
+  /// what a study needs (and why) before any system dialog appears.
   List<Permission> get requiredPermissions => [
-    if (deployment?.hasNotifyingTask ?? false) Permission.notification,
-    for (final measure in deployment?.measures ?? <Measure>[])
-      ...?_measurePermissions(measure),
     for (final device in _devicesToConnect) ...device.permissions,
   ];
 
@@ -390,7 +376,8 @@ class SmartphoneStudyController {
   /// wearable that has not been paired yet, say - or when the participant has
   /// unregistered it.
   Iterable<DeviceManager> get _devicesToConnect sync* {
-    for (final configuration in deployment?.devices ?? <DeviceConfiguration>[]) {
+    for (final configuration
+        in deployment?.devices ?? <DeviceConfiguration>[]) {
       final device = _deviceController.getDeviceManager(configuration.type);
       debug(
         '$runtimeType - Checking to connect to device $device with canConnect '
@@ -402,15 +389,11 @@ class SmartphoneStudyController {
     }
   }
 
-  List<Permission>? _measurePermissions(Measure measure) {
-    final dataType =
-        SamplingPackageRegistry().samplingSchemes[measure.type]?.dataType;
-    return dataType is CamsDataTypeMetaData ? dataType.permissions : null;
-  }
-
   /// Configure all devices in this [deployment].
   void _configureAllDevices() {
     assert(deployment != null, 'Deployment is null.');
+
+    addMissingServiceDevices(deployment!);
 
     for (var configuration in deployment!.devices) {
       _configureDevice(configuration);
@@ -542,5 +525,52 @@ class SmartphoneStudyController {
     info('$runtimeType - Disposing study from this smartphone...');
     pause();
     dataManager?.close();
+  }
+}
+
+/// Add the service devices which [deployment]'s measures need, but which it
+/// does not declare.
+///
+/// Protocols written before API level 3.0 collect data types - step count,
+/// audio, phone log - that have since moved to a service of their own, which
+/// such a protocol cannot know to declare. Its probes would be created but
+/// never get a connected device to sample through. So the sampling package of
+/// each measure tells us which device it needs, and any missing one is added
+/// here, as if the protocol had declared it.
+void addMissingServiceDevices(SmartphoneDeployment deployment) {
+  final deployedTypes = deployment.devices.map((device) => device.type).toSet();
+
+  final missingTypes = {
+    for (final measure in deployment.measures)
+      for (final package in SamplingPackageRegistry().lookup(measure.type))
+        package.deviceType,
+  }..removeAll(deployedTypes);
+
+  for (final type in missingTypes) {
+    try {
+      // Services default their role name, so the type alone describes them.
+      final configuration = DeviceConfiguration.fromJson({
+        Serializable.CLASS_IDENTIFIER: type,
+      });
+
+      info(
+        "Adding device of type '$type' to deployment "
+        "'${deployment.studyDeploymentId}'. It is needed by a measure in the "
+        "protocol, but the protocol does not declare it (protocol API level "
+        "${deployment.protocolApiLevel ?? 'unknown'}).",
+      );
+
+      deployment.connectedDevices = {
+        ...deployment.connectedDevices,
+        configuration,
+      };
+    } catch (error) {
+      warning(
+        "A measure in deployment '${deployment.studyDeploymentId}' needs a "
+        "device of type '$type', which the protocol does not declare and which "
+        "could not be created. Data for that measure will not be collected.\n"
+        "Error: $error",
+      );
+    }
   }
 }

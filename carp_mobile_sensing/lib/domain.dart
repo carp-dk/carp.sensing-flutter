@@ -29,9 +29,10 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart' show AppLifecycleState;
-import 'package:permission_handler/permission_handler.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:json_annotation/json_annotation.dart';
+// Needed only by the 'infrastructure/services/device_info_service.dart' part
+// below, which is an infrastructure file living in this library.
+import 'package:device_info_plus/device_info_plus.dart';
 
 part 'domain/core/smartphone_protocol.dart';
 part 'domain/core/study_description.dart';

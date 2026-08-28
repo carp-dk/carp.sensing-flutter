@@ -10,10 +10,8 @@ part of '../../runtime.dart';
 /// A [Probe] is a specialized [Executor] responsible for collecting data from
 /// the device sensors as configured in a [Measure].
 ///
-/// A probe may need a set of [permissions] to run. It never asks for them
-/// itself - they are requested for the deployment as a whole, before sampling
-/// starts. A probe without its permissions does not resume, and is resumed
-/// later when its device (re)connects.
+/// A probe knows nothing about permissions: it samples through its
+/// [deviceManager], which is only connected once its permissions are granted.
 abstract class Probe extends AbstractExecutor<Measure> {
   /// The device that this probes uses to collect data.
   late DeviceManager deviceManager;
@@ -65,31 +63,6 @@ abstract class Probe extends AbstractExecutor<Measure> {
     super.addMeasurement(measurement);
   }
 
-  /// The permissions needed for this probe to run, as declared by its
-  /// [CamsDataTypeMetaData].
-  List<Permission> get permissions {
-    final dataType = SamplingPackageRegistry().samplingSchemes[type]?.dataType;
-    return dataType is CamsDataTypeMetaData ? dataType.permissions : const [];
-  }
-
-  /// Whether this probe is allowed to run.
-  ///
-  /// Probes only check. The permissions of a whole deployment are requested up
-  /// front, before its devices connect - see
-  /// [SmartphoneStudyController.requiredPermissions]. On iOS there is nothing
-  /// to check: permissions are requested when a resource is first accessed.
-  Future<bool> hasRequiredPermissions() async {
-    if (Platform.isIOS) return true;
-
-    for (final permission in permissions) {
-      if (!await permission.isGranted) {
-        warning('$runtimeType - Missing permission: $permission');
-        return false;
-      }
-    }
-    return true;
-  }
-
   // default no-op implementation of callback methods below
 
   @override
@@ -118,20 +91,16 @@ class StubProbe extends Probe {}
 abstract class MeasurementProbe extends Probe {
   @override
   Future<bool> onResume() async {
-    if (await hasRequiredPermissions()) {
-      getMeasurement().then(
-        (measurement) {
-          if (measurement != null) addMeasurement(measurement);
-          // automatically stop this probe after it is done collecting the measurement
-          Future.delayed(const Duration(seconds: 5), () => pause());
-        },
-        onError: (Object error, StackTrace? stackTrace) =>
-            addError(error, stackTrace),
-      );
-      return true;
-    } else {
-      return false;
-    }
+    getMeasurement().then(
+      (measurement) {
+        if (measurement != null) addMeasurement(measurement);
+        // automatically stop this probe after it is done collecting the measurement
+        Future.delayed(const Duration(seconds: 5), () => pause());
+      },
+      onError: (Object error, StackTrace? stackTrace) =>
+          addError(error, stackTrace),
+    );
+    return true;
   }
 
   /// Subclasses should implement this method to collect a [Measurement].
@@ -155,28 +124,24 @@ abstract class IntervalProbe extends MeasurementProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await hasRequiredPermissions()) {
-      Duration? interval = samplingConfiguration?.interval;
-      if (interval != null) {
-        _timer ??= Timer.periodic(interval, (_) async {
-          try {
-            var measurement = await getMeasurement();
-            if (measurement != null) addMeasurement(measurement);
-          } catch (error) {
-            addError(error);
-          }
-        });
-      } else {
-        warning(
-          '$runtimeType - no valid interval found in sampling configuration: $samplingConfiguration. '
-          'Is a valid IntervalSamplingConfiguration provided?',
-        );
-        return false;
-      }
-      return true;
+    Duration? interval = samplingConfiguration?.interval;
+    if (interval != null) {
+      _timer ??= Timer.periodic(interval, (_) async {
+        try {
+          var measurement = await getMeasurement();
+          if (measurement != null) addMeasurement(measurement);
+        } catch (error) {
+          addError(error);
+        }
+      });
     } else {
+      warning(
+        '$runtimeType - no valid interval found in sampling configuration: $samplingConfiguration. '
+        'Is a valid IntervalSamplingConfiguration provided?',
+      );
       return false;
     }
+    return true;
   }
 
   @override
@@ -207,28 +172,24 @@ abstract class StreamProbe extends Probe {
 
   @override
   Future<bool> onResume() async {
-    if (await hasRequiredPermissions()) {
-      _stream ??= stream;
-      if (_stream == null) {
-        warning(
-          "Trying to start the stream probe '$runtimeType' which does not provide a measurement stream. "
-          'Have you initialized this probe correctly or is the device connected?',
-        );
-        return false;
-      } else {
-        // Resuming an already resumed probe would otherwise orphan the old
-        // subscription, which keeps delivering.
-        await _subscription?.cancel();
-        _subscription = _stream?.listen(
-          _onData,
-          onError: _onError,
-          onDone: _onDone,
-        );
-      }
-      return true;
-    } else {
+    _stream ??= stream;
+    if (_stream == null) {
+      warning(
+        "Trying to start the stream probe '$runtimeType' which does not provide a measurement stream. "
+        'Have you initialized this probe correctly or is the device connected?',
+      );
       return false;
+    } else {
+      // Resuming an already resumed probe would otherwise orphan the old
+      // subscription, which keeps delivering.
+      await _subscription?.cancel();
+      _subscription = _stream?.listen(
+        _onData,
+        onError: _onError,
+        onDone: _onDone,
+      );
     }
+    return true;
   }
 
   @override
@@ -266,38 +227,34 @@ abstract class PeriodicStreamProbe extends StreamProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await hasRequiredPermissions()) {
-      if (stream == null) {
-        warning(
-          "Trying to start the stream probe '$runtimeType' which does not provide a measurement stream. "
-          'Have you initialized this probe correctly?',
-        );
-        return false;
-      } else {
-        Duration? interval = samplingConfiguration?.interval;
-        Duration? duration = samplingConfiguration?.duration;
-        if (interval != null && duration != null) {
-          // create a recurrent timer that starts sampling
-          _timer = Timer.periodic(interval, (timer) {
-            _subscription = stream?.listen(
-              _onData,
-              onError: _onError,
-              onDone: _onDone,
-            );
-            // create a timer that stops the sampling after the specified duration.
-            Timer(duration, () async => await _subscription?.cancel());
-          });
-        } else {
-          warning(
-            '$runtimeType - no valid interval and duration found in sampling configuration: $samplingConfiguration. '
-            'Is a valid PeriodicSamplingConfiguration provided?',
-          );
-        }
-      }
-      return true;
-    } else {
+    if (stream == null) {
+      warning(
+        "Trying to start the stream probe '$runtimeType' which does not provide a measurement stream. "
+        'Have you initialized this probe correctly?',
+      );
       return false;
+    } else {
+      Duration? interval = samplingConfiguration?.interval;
+      Duration? duration = samplingConfiguration?.duration;
+      if (interval != null && duration != null) {
+        // create a recurrent timer that starts sampling
+        _timer = Timer.periodic(interval, (timer) {
+          _subscription = stream?.listen(
+            _onData,
+            onError: _onError,
+            onDone: _onDone,
+          );
+          // create a timer that stops the sampling after the specified duration.
+          Timer(duration, () async => await _subscription?.cancel());
+        });
+      } else {
+        warning(
+          '$runtimeType - no valid interval and duration found in sampling configuration: $samplingConfiguration. '
+          'Is a valid PeriodicSamplingConfiguration provided?',
+        );
+      }
     }
+    return true;
   }
 
   @override
@@ -326,36 +283,32 @@ abstract class BufferingPeriodicProbe extends MeasurementProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await hasRequiredPermissions()) {
-      Duration? interval = samplingConfiguration?.interval;
-      Duration? duration = samplingConfiguration?.duration;
-      if (interval != null && duration != null) {
-        // create a recurrent timer that every [interval] starts the buffering
-        timer = Timer.periodic(interval, (Timer t) {
-          onSamplingStart();
-          // create a timer that stops the buffering after the specified [duration].
-          Timer(duration, () async {
-            onSamplingEnd();
-            // collect the measurement
-            try {
-              Measurement? measurement = await getMeasurement();
-              if (measurement != null) addMeasurement(measurement);
-            } catch (error) {
-              addError(error);
-            }
-          });
+    Duration? interval = samplingConfiguration?.interval;
+    Duration? duration = samplingConfiguration?.duration;
+    if (interval != null && duration != null) {
+      // create a recurrent timer that every [interval] starts the buffering
+      timer = Timer.periodic(interval, (Timer t) {
+        onSamplingStart();
+        // create a timer that stops the buffering after the specified [duration].
+        Timer(duration, () async {
+          onSamplingEnd();
+          // collect the measurement
+          try {
+            Measurement? measurement = await getMeasurement();
+            if (measurement != null) addMeasurement(measurement);
+          } catch (error) {
+            addError(error);
+          }
         });
-      } else {
-        warning(
-          '$runtimeType - no valid interval and duration found in sampling configuration: $samplingConfiguration. '
-          'Is a valid PeriodicSamplingConfiguration provided?',
-        );
-        return false;
-      }
-      return true;
+      });
     } else {
+      warning(
+        '$runtimeType - no valid interval and duration found in sampling configuration: $samplingConfiguration. '
+        'Is a valid PeriodicSamplingConfiguration provided?',
+      );
       return false;
     }
+    return true;
   }
 
   @override
@@ -418,33 +371,29 @@ abstract class BufferingIntervalStreamProbe extends StreamProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await hasRequiredPermissions()) {
-      Duration? interval = samplingConfiguration?.interval;
-      if (interval != null) {
-        _bufferingStreamSubscription = bufferingStream.listen(
-          onSamplingData,
-          onError: _onError,
-          onDone: _onDone,
-        );
-        _timer = Timer.periodic(interval, (_) async {
-          try {
-            Measurement? measurement = await getMeasurement();
-            if (measurement != null) addMeasurement(measurement);
-          } catch (error) {
-            addError(error);
-          }
-        });
-      } else {
-        warning(
-          '$runtimeType - no valid interval found in sampling configuration: $samplingConfiguration. '
-          'Is a valid IntervalSamplingConfiguration provided?',
-        );
-        return false;
-      }
-      return true;
+    Duration? interval = samplingConfiguration?.interval;
+    if (interval != null) {
+      _bufferingStreamSubscription = bufferingStream.listen(
+        onSamplingData,
+        onError: _onError,
+        onDone: _onDone,
+      );
+      _timer = Timer.periodic(interval, (_) async {
+        try {
+          Measurement? measurement = await getMeasurement();
+          if (measurement != null) addMeasurement(measurement);
+        } catch (error) {
+          addError(error);
+        }
+      });
     } else {
+      warning(
+        '$runtimeType - no valid interval found in sampling configuration: $samplingConfiguration. '
+        'Is a valid IntervalSamplingConfiguration provided?',
+      );
       return false;
     }
+    return true;
   }
 
   @override
@@ -507,39 +456,35 @@ abstract class BufferingPeriodicStreamProbe extends PeriodicStreamProbe {
 
   @override
   Future<bool> onResume() async {
-    if (await hasRequiredPermissions()) {
-      Duration? interval = samplingConfiguration?.interval;
-      Duration? duration = samplingConfiguration?.duration;
-      if (interval != null && duration != null) {
-        _timer = Timer.periodic(interval, (Timer t) {
-          onSamplingStart();
-          _bufferingStreamSubscription = bufferingStream.listen(
-            onSamplingData,
-            onError: _onError,
-            onDone: _onDone,
-          );
-          _durationTimer = Timer(duration, () async {
-            await _bufferingStreamSubscription?.cancel();
-            onSamplingEnd();
-            try {
-              Measurement? measurement = await getMeasurement();
-              if (measurement != null) addMeasurement(measurement);
-            } catch (error) {
-              addError(error);
-            }
-          });
-        });
-      } else {
-        warning(
-          '$runtimeType - no valid interval and duration found in sampling configuration: $samplingConfiguration. '
-          'Is a valid PeriodicSamplingConfiguration provided?',
+    Duration? interval = samplingConfiguration?.interval;
+    Duration? duration = samplingConfiguration?.duration;
+    if (interval != null && duration != null) {
+      _timer = Timer.periodic(interval, (Timer t) {
+        onSamplingStart();
+        _bufferingStreamSubscription = bufferingStream.listen(
+          onSamplingData,
+          onError: _onError,
+          onDone: _onDone,
         );
-        return false;
-      }
-      return true;
+        _durationTimer = Timer(duration, () async {
+          await _bufferingStreamSubscription?.cancel();
+          onSamplingEnd();
+          try {
+            Measurement? measurement = await getMeasurement();
+            if (measurement != null) addMeasurement(measurement);
+          } catch (error) {
+            addError(error);
+          }
+        });
+      });
     } else {
+      warning(
+        '$runtimeType - no valid interval and duration found in sampling configuration: $samplingConfiguration. '
+        'Is a valid PeriodicSamplingConfiguration provided?',
+      );
       return false;
     }
+    return true;
   }
 
   @override

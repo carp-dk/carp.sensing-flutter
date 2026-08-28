@@ -252,4 +252,25 @@ void main() {
     expect(await device.hasPermissions(), isTrue);
     expect(await device.connect(), DeviceStatus.connected);
   });
+
+  test("notifications are asked for - that permission is the app's, not a "
+      "device's", () async {
+    final calls = fakePermissionHandler();
+
+    // Every other permission moved to the device that needs it. Notification
+    // is the app's own - no device declares it - so the client manager asks
+    // for it when configuring, which is what this stands in for. Android 13+
+    // shows no notification at all until something does.
+    expect(
+      SamplingPackageRegistry().packages
+          .expand((package) => package.deviceManager.permissions),
+      isNot(contains(Permission.notification)),
+    );
+
+    await SmartPhoneClientManager().requestPermissions([
+      Permission.notification,
+    ]);
+
+    expect(calls, contains('request(${Permission.notification.value})'));
+  });
 }

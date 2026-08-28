@@ -161,7 +161,12 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// The API level used by study protocols.
   /// This reflects the **major** version of the CARP Mobile Sensing framework
   /// as set in the pubspec.yaml file.
-  static const String CAMS_PROTOCOL_API_LEVEL = '2.0';
+  ///
+  /// From API level 3.0, a protocol declares the services its measures sample
+  /// through - `addConnectedDevice(ActivityService(), phone)` - which is what
+  /// makes the permissions a study needs visible in the protocol itself.
+  /// Protocols from earlier levels do not, and have them added on deployment.
+  static const String CAMS_PROTOCOL_API_LEVEL = '3.0';
 
   // These static app names can be used as [applicationName] in the protocol.
   // It is the name of the Flutter app as specified in the pubspec.yaml file.

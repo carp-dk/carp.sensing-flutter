@@ -37,6 +37,7 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 part 'infrastructure/sampling_packages/sensors/sensor_probes.dart';
 part 'infrastructure/sampling_packages/sensors/light_probe.dart';
 part 'infrastructure/sampling_packages/sensors/pedometer_probe.dart';
+part 'infrastructure/sampling_packages/sensors/activity_service.dart';
 part 'infrastructure/sampling_packages/sensors/sensor_data.dart';
 part 'infrastructure/sampling_packages/sensors/sensor_package.dart';
 

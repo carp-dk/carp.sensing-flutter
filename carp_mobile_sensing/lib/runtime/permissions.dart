@@ -42,8 +42,10 @@ Future<void> requestPermissionsInOrder(List<Permission> permissions) async {
     // something else was already asking.
     info('Permission $name: ${status.name} (${took.inMilliseconds}ms)');
     if (took.inMilliseconds < 50 && status.isDenied) {
-      warning('Permission $name was denied without a dialog - another request '
-          'was already in progress.');
+      warning(
+        'Permission $name was denied without a dialog - another request '
+        'was already in progress.',
+      );
     }
   }
 }

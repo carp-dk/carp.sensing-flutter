@@ -1,6 +1,6 @@
 {
  "applicationData": {
-  "protocolApiLevel": "2.0",
+  "protocolApiLevel": "3.0",
   "studyDescription": {
    "__type": "StudyDescription",
    "title": "A Test",
@@ -34,8 +34,8 @@
  },
  "registration": {
   "__type": "dk.cachet.carp.common.application.devices.DefaultDeviceRegistration",
-  "deviceId": "7ba9d436-39ea-42cf-8487-b8e12d272aa6",
-  "registrationCreatedOn": "2026-06-11T06:36:21.116452Z"
+  "deviceId": "6505ec01-f714-441c-9032-23c6067af368",
+  "registrationCreatedOn": "2026-08-28T14:21:55.870197Z"
  },
  "connectedDevices": [
   {
@@ -158,15 +158,15 @@
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.ambientlight"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.stepevent"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.stepcount"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.ambientlight"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
@@ -335,6 +335,6 @@
   }
  ],
  "studyDeploymentId": "1234",
- "deployed": "2026-06-11T06:36:21.116445Z",
+ "deployed": "2026-08-28T14:21:55.870192Z",
  "status": "Invited"
 }

@@ -51,7 +51,9 @@ abstract class NotificationManager {
       'Notifications about scheduled tasks that the user has to do.';
 
   /// Configure and set up the notification manager.
-  /// Also tries to get permissions to send notifications.
+  ///
+  /// Does not ask for permission to notify - [SmartPhoneClientManager.configure]
+  /// does, before calling this.
   Future<void> configure();
 
   /// Create an immediate notification with [id], [title], and [body].

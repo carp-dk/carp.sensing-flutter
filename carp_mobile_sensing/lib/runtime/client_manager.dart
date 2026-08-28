@@ -208,6 +208,13 @@ class SmartPhoneClientManager
     }
 
     // Configure the notification manager.
+    //
+    // Notifications are the one permission that is not a device's: it belongs
+    // to the app itself, and is asked for here - if notifications are enabled -
+    // since Android 13+ shows nothing at all without it.
+    if (enableNotifications) {
+      await requestPermissions([Permission.notification]);
+    }
     await notificationManager.configure();
 
     // Initialize the app task controller.

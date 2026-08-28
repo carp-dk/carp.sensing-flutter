@@ -6,6 +6,27 @@ part of 'sampling_packages.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+ActivityService _$ActivityServiceFromJson(Map<String, dynamic> json) =>
+    ActivityService(roleName: json['roleName'] as String?)
+      ..$type = json['__type'] as String?
+      ..isOptional = json['isOptional'] as bool?
+      ..defaultSamplingConfiguration =
+          (json['defaultSamplingConfiguration'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              SamplingConfiguration.fromJson(e as Map<String, dynamic>),
+            ),
+          );
+
+Map<String, dynamic> _$ActivityServiceToJson(ActivityService instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'roleName': instance.roleName,
+      'isOptional': ?instance.isOptional,
+      'defaultSamplingConfiguration': ?instance.defaultSamplingConfiguration
+          ?.map((k, e) => MapEntry(k, e.toJson())),
+    };
+
 AmbientLight _$AmbientLightFromJson(Map<String, dynamic> json) =>
     AmbientLight(
         json['meanLux'] as num,

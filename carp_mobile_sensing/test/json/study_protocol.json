@@ -1,6 +1,6 @@
 {
  "applicationData": {
-  "protocolApiLevel": "2.0",
+  "protocolApiLevel": "3.0",
   "applicationName": "carp_mobile_sensing_example",
   "studyDescription": {
    "__type": "StudyDescription",
@@ -26,8 +26,8 @@
    "uiTheme": "black"
   }
  },
- "id": "fff5022a-af09-4a4d-9019-9509d24fc87d",
- "createdOn": "2026-06-11T06:36:21.093751Z",
+ "id": "419474a2-d534-4688-9f65-1cb1224f9dd6",
+ "createdOn": "2026-08-28T14:21:55.851495Z",
  "version": 0,
  "ownerId": "user@dtu.dk",
  "name": "patient_tracking",
@@ -173,15 +173,15 @@
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.ambientlight"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.stepevent"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
      "type": "dk.cachet.carp.stepcount"
-    },
-    {
-     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.ambientlight"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",

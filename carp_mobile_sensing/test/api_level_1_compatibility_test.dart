@@ -129,14 +129,56 @@ void main() {
       expect(protocol.protocolApiLevel, isNull);
     });
 
-    test(' - 1.x step count measure type', () {
-      expect(
-        SensorSamplingPackage().samplingSchemes.types,
-        contains(SensorSamplingPackage.STEP_COUNT),
+    test(' - 1.x step count measure type is still supported', () {
+      // Step count moved to the ActivitySamplingPackage in API level 3.0 -
+      // activity recognition is a permission of its own. A 1.x protocol asking
+      // for it by name must still resolve to a probe.
+      final packages = SamplingPackageRegistry().lookup(
+        SensorSamplingPackage.STEP_COUNT,
       );
+
+      expect(packages, isNotEmpty);
       expect(
-        SensorSamplingPackage().create(SensorSamplingPackage.STEP_COUNT),
+        packages.first.create(SensorSamplingPackage.STEP_COUNT),
         isA<StepCountProbe>(),
+      );
+    });
+
+    test(' - 1.x protocol gets the service devices its measures need', () {
+      // A 1.x protocol declares only the phone, and collects step count on it.
+      // Step count now samples through the ActivityService, which such a
+      // protocol cannot know to declare - so CAMS adds it, or the probe would
+      // never get a connected device to sample through.
+      final protocol = SmartphoneStudyProtocol(
+        ownerId: 'test',
+        name: '1.x protocol',
+      )..addPrimaryDevice(Smartphone());
+
+      protocol.addTaskControl(
+        ImmediateTrigger(),
+        BackgroundTask(
+          measures: [Measure(type: SensorSamplingPackage.STEP_COUNT)],
+        ),
+        protocol.primaryDevice,
+        Control.Start,
+      );
+
+      final deployment = SmartphoneDeployment.fromSmartphoneStudyProtocol(
+        studyDeploymentId: 'test',
+        primaryDeviceRoleName: protocol.primaryDevice.roleName,
+        protocol: protocol,
+      );
+
+      expect(
+        deployment.devices.map((device) => device.type),
+        isNot(contains(ActivityService.DEVICE_TYPE)),
+      );
+
+      addMissingServiceDevices(deployment);
+
+      expect(
+        deployment.devices.map((device) => device.type),
+        contains(ActivityService.DEVICE_TYPE),
       );
     });
   });
