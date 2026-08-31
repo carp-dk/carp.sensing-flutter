@@ -1,6 +1,6 @@
 {
- "id": "8caf789c-8eb3-42a5-9963-024ff70ec9e1",
- "createdOn": "2026-08-20T06:10:19.880416Z",
+ "id": "f89a77e3-b4ba-4634-a312-1e116fc9a02c",
+ "createdOn": "2026-08-31T06:25:59.682205Z",
  "version": 0,
  "ownerId": "alex@uni.dk",
  "name": "Transportation package test",
@@ -24,15 +24,31 @@
    "measures": [
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.transportation.route"
+     "type": "dk.cachet.carp.transportation.modelconfiguration"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.transportation.mode"
+     "type": "dk.cachet.carp.transportation.stageconfiguration"
     },
     {
      "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-     "type": "dk.cachet.carp.transportation.userfeedback"
+     "type": "dk.cachet.carp.transportation.transportationsample"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.transportation.move"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.transportation.stop"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.transportation.activity"
+    },
+    {
+     "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
+     "type": "dk.cachet.carp.transportation.stagemodecorrection"
     }
    ]
   }

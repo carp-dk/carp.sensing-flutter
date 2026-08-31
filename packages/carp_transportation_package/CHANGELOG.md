@@ -1,14 +1,21 @@
 ## 0.1.0
 
-* Initial release of the transportation sampling package.
-* Defines the `dk.cachet.carp.transportation` namespace with three data types:
-  * `Route` (`.route`) - a GPS route trace sent from the phone to a
-    classification server.
-  * `Mode` (`.mode`) - the route split into `RouteSegment`s, each labelled
-    with a detected `TransportationModeType`, as returned by the server.
-  * `UserFeedback` (`.userfeedback`) - the user's approval, rejection, or
-    correction of a segment's mode, or labeling of a location cluster (e.g.
-    home, work, restaurant).
-* Uses a no-op `TransportationProbe` - all three data types are added by app
-  code via `probe.addMeasurement(...)`, since none are collected from a
-  continuous phone sensor.
+* Initial release of the transportation (mobility) sampling package,
+  implementing v0.1 of the Mobility Sampling Package Design Specification.
+* Defines the `dk.cachet.carp.transportation` namespace with the data types of
+  the mobility processing pipeline:
+  * `TransportationModelConfiguration` (`.modelconfiguration`) and
+    `StageConfiguration` (`.stageconfiguration`) - one-time configuration of
+    the recognition and segmentation components.
+  * `TransportationSample` (`.transportationsample`) - a point-wise sample
+    with its embedding, predicted `TransportationMode`, and raw model output.
+  * `MoveStage` (`.move`) and `StopStage` (`.stop`) - stage-level segments
+    derived from consecutive transportation samples.
+  * `MobilityActivity` (`.activity`) - the semantic interpretation of a stop.
+  * `StageModeCorrection` (`.stagemodecorrection`) - a user correction of a
+    stage's predicted mode.
+* `Trip`, stage boundary correction, and semantic correction are not part of
+  this version and are reserved for future development.
+* Uses a no-op `TransportationProbe` - all data types are added by app code
+  via `probe.addMeasurement(...)`, since none are collected from a continuous
+  phone sensor.

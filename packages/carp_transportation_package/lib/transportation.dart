@@ -1,20 +1,28 @@
-/// A library for classifying transportation modes on routes.
+/// A library for mobility sampling: point-wise transportation mode
+/// recognition, stage-wise mobility ([MoveStage]/[StopStage]), semantic activities, and
+/// user corrections.
 ///
 /// This package does not sense continuously from device sensors like most
-/// other CARP sampling packages. Instead, it defines the data types used to:
+/// other CARP sampling packages. Raw sensor data (location, acceleration,
+/// rotation) is collected by the existing packages; this package defines the
+/// data types produced by the mobility processing pipeline on top of it:
 ///
-///  * send a collected [Route] (a trace of GPS points) to a classification
-///    server,
-///  * receive back a [Mode] classification (the route split into segments,
-///    each labelled with a detected transportation mode), and
-///  * send [UserFeedback] when the user approves/rejects/corrects a segment's
-///    mode, or labels a cluster of locations (e.g. home, work, restaurant).
+///  * [TransportationSample] - a point-wise sample with its embedding and
+///    predicted transportation mode,
+///  * [MoveStage] and [StopStage] - stage-level segments derived from consecutive
+///    transportation samples,
+///  * [MobilityActivity] - the semantic interpretation of a meaningful stop,
+///  * [StageModeCorrection] - the user's correction of a stage's mode,
+///  * [TransportationModelConfiguration] and [StageConfiguration] - the
+///    one-time configuration of the recognition and segmentation components.
 ///
-/// Since data is not collected from a continuous sensor stream, but rather
-/// submitted by app-level code (after a server round-trip or user
-/// interaction), this package uses a no-op [TransportationProbe]. App code
-/// adds data using `probe.addMeasurement(Measurement.fromData(...))`.
+/// Since this data is produced by app-level processing (model inference,
+/// segmentation, user interaction) rather than a continuous sensor stream,
+/// this package uses a no-op [TransportationProbe]. App code adds data using
+/// `probe.addMeasurement(Measurement.fromData(...))`.
 library;
+
+import 'dart:math';
 
 import 'package:json_annotation/json_annotation.dart';
 

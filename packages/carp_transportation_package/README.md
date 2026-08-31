@@ -8,55 +8,106 @@
 
 This library contains a sampling package for the
 [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing)
-framework for **classifying transportation modes on routes** and collecting
-**user feedback** on that classification.
+framework implementing the **Mobility Sampling Package Design Specification**:
+it holds the data types of a mobility processing pipeline which turns raw
+sensor observations into increasingly higher-level mobility information.
 
-Unlike most sampling packages, this package does not sense continuously from
-a phone sensor. Instead it moves data between the phone and a route
-classification server (note: this package does *not* implement the client
-for talking to that server nor the location collection itself - both are
-app/deployment specific, e.g. use `carp_context_package`'s location probe to
-collect [`RoutePoint`]s):
+Unlike most sampling packages, this package does not sense from a phone sensor
+itself. The raw sensor data (location, acceleration, rotation) is already
+collected by the existing packages (e.g. `carp_context_package`'s location
+probe); this package defines what the processing on top of it produces:
 
-1. The app builds up a [`Route`] (a GPS trace) from location data and sends
-   it to a classification server (`dk.cachet.carp.transportation.route`).
-2. The server classifies the route into segments and returns a [`Mode`]:
-   the route split into [`RouteSegment`]s, each labelled with a detected
-   [`TransportationModeType`] (`dk.cachet.carp.transportation.mode`).
-3. The user reviews the classification in the app UI and can approve,
-   reject, or correct a segment's mode, or label a cluster of locations
-   (e.g. home, work, restaurant). This is captured as [`UserFeedback`]
-   (`dk.cachet.carp.transportation.userfeedback`) and sent back to the
-   server.
+```
+sensor samples --> TransportationSample --> MoveStage / StopStage --> MobilityActivity
+                    (mode classification)      (segment decode)      (activity identification)
+```
+
+1. **Point-wise** - `TransportationSample`: a location observation enriched
+   with its learned `embedding` and the predicted `TransportationMode`,
+   together with the raw model output (`logits`, `probabilities`,
+   `confidence`).
+2. **Stage-wise** - `MoveStage` and `StopStage` (both subclasses of `Stage`):
+   continuous segments obtained by grouping consecutive transportation
+   samples. A `MoveStage` is a movement between locations (distance, speed
+   statistics, public-transport information); a `StopStage` is a stay within
+   a small area (centroid, max displacement, nearest POI).
+3. **Semantic** - `MobilityActivity`: the interpretation of a meaningful
+   stop, e.g. being at home, working, or shopping.
+4. **User feedback** - `StageModeCorrection`: the user's correction of the
+   mode predicted for a stage.
+
+Two configuration types are collected once at initialization and hold what
+does not change per sample: `TransportationModelConfiguration` (embedding
+model, mode labels, classification and decoding method, device information)
+and `StageConfiguration` (user id, segmentation method).
+
+> **Naming**: `MoveStage`, `StopStage`, and `MobilityActivity` carry a suffix/
+> prefix relative to the design specification (`Move`, `Stop`, `Activity`) to
+> avoid clashing with `carp_core`'s `Stop` deployment request and
+> `carp_context_package`'s `Activity` data type, which are typically imported
+> alongside this package.
+
+> **Not yet implemented** (reserved for future versions, per the design
+> specification): `Trip`, stage boundary correction, and semantic correction
+> of activities/trips.
 
 This package defines its own namespace `dk.cachet.carp.transportation` and
 supports the following [`Measure`](https://docs.carp.dk/carp-mobile-sensing/measure-types) types:
 
-* `dk.cachet.carp.transportation.route` : a GPS route trace sent to the
-  classification server.
-* `dk.cachet.carp.transportation.mode` : the transportation mode
-  classification of a route, received from the server.
-* `dk.cachet.carp.transportation.userfeedback` : user feedback on a route's
-  mode classification, or a location cluster labeled as a place.
+* `dk.cachet.carp.transportation.modelconfiguration` : the transportation
+  model configuration (one-time).
+* `dk.cachet.carp.transportation.stageconfiguration` : the stage segmentation
+  configuration (one-time).
+* `dk.cachet.carp.transportation.transportationsample` : a point-wise
+  transportation sample.
+* `dk.cachet.carp.transportation.move` : a stage-level moving segment.
+* `dk.cachet.carp.transportation.stop` : a stage-level still segment.
+* `dk.cachet.carp.transportation.activity` : the semantic interpretation of a
+  stop.
+* `dk.cachet.carp.transportation.stagemodecorrection` : a user correction of a
+  stage's transportation mode.
 
-Since none of the above are sensed automatically, all three are collected
-via the same no-op [`TransportationProbe`]. App code adds data to it once
-available:
+Since none of the above are sensed automatically, all are collected via the
+same no-op `TransportationProbe`. App code adds data to it once available:
 
 ```dart
-// look up the running probe(s) for this study deployment
+// look up the running probe for this study deployment
 final probe = Sensing().controller!.executor.lookupProbe(
-  TransportationSamplingPackage.ROUTE,
+  TransportationSamplingPackage.TRANSPORTATION_SAMPLE,
 ).first as TransportationProbe;
 
-// once the route is complete, add it
-probe.addMeasurement(Measurement.fromData(route));
+// after mode inference (in batches)
+probe.addMeasurement(Measurement.fromData(transportationSample));
 
-// once the server responds with a classification
-probe.addMeasurement(Measurement.fromData(mode));
+// when a stage is newly created or modified
+probe.addMeasurement(Measurement.fromData(moveStage));
 
-// once the user approves/rejects/corrects/labels
-probe.addMeasurement(Measurement.fromData(userFeedback));
+// when the user corrects a stage's mode
+probe.addMeasurement(Measurement.fromData(correction));
+```
+
+## Derived attributes
+
+Attributes marked *derived* in the design specification are computed, not
+stored - they are serialized to JSON, but recomputed from their source on
+deserialization:
+
+* `TransportationModelConfiguration.numModes` - from `modeLabels`.
+* `TransportationSample.embeddingDim` - from `embedding`.
+* `TransportationSample.confidence` - from the entropy of `probabilities`
+  when not given explicitly:
+  `confidence = 1 - (-sum(p * log p)) / log K`.
+* `Stage.numSamples`, `Stage.durationInMinutes` - from the sample id and time
+  boundaries.
+* `MobilityActivity.dwellTime` - from the activity's time boundaries.
+
+The stage attributes derived from the samples a stage spans (traveled
+distance, speed statistics, centroid, max displacement) are computed by the
+`MoveStage.fromSamples` and `StopStage.fromSamples` factories:
+
+```dart
+var move = MoveStage.fromSamples(samples, stageId: 2, mode: TransportationMode.bus);
+var stop = StopStage.fromSamples(samples, stageId: 3);
 ```
 
 ## Installation
@@ -84,9 +135,10 @@ An example of a study protocol configuration:
 protocol.addTaskControl(
   ImmediateTrigger(),
   BackgroundTask()
-    ..addMeasure(Measure(type: TransportationSamplingPackage.ROUTE))
-    ..addMeasure(Measure(type: TransportationSamplingPackage.MODE))
-    ..addMeasure(Measure(type: TransportationSamplingPackage.USER_FEEDBACK)),
+    ..addMeasure(Measure(type: TransportationSamplingPackage.TRANSPORTATION_SAMPLE))
+    ..addMeasure(Measure(type: TransportationSamplingPackage.MOVE))
+    ..addMeasure(Measure(type: TransportationSamplingPackage.STOP))
+    ..addMeasure(Measure(type: TransportationSamplingPackage.ACTIVITY)),
   phone,
 );
 ```

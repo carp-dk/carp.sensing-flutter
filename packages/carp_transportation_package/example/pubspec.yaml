@@ -1,5 +1,5 @@
 name: carp_transportation_package_example
-description: Examples of how to use the CARP Transportation Package.
+description: Example app showing how to use the CARP Transportation Package with local SQLite storage.
 version: 0.1.0
 publish_to: none
 
@@ -10,7 +10,32 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  carp_serializable: ^3.0.0
+  carp_core: ^2.2.0
+  carp_mobile_sensing: ^2.2.0
+  carp_context_package: ^2.1.0
   carp_transportation_package:
     path: ../
 
+  # used to read back what is stored in the local SQLite database
+  sqflite: ^2.2.8
+  permission_handler: ^12.0.0
+
+# Overriding carp libraries to use the local copy
+# Remove this before release of package
+dependency_overrides:
+  carp_core:
+    path: ../../../carp_core/
+  carp_mobile_sensing:
+    path: ../../../carp_mobile_sensing/
+  carp_context_package:
+    path: ../../carp_context_package/
+
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: any
+
+flutter:
+  uses-material-design: true

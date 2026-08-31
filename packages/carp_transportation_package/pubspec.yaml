@@ -1,6 +1,6 @@
 name: carp_transportation_package
 version: 0.1.0
-description: CARP transportation sampling package. Collects location-based route data, receives server-classified route segments (transportation mode) and collects user feedback on/correction of route segmentation and mode.
+description: CARP transportation sampling package. Holds the mobility data pipeline types - point-wise transportation samples with predicted travel mode, stage-level moves and stops, semantic activities, and user corrections.
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_transportation_package
 issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
