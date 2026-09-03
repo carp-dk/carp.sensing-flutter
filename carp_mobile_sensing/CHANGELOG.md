@@ -1,3 +1,9 @@
+## 2.3.2
+
+* initialize the notification plugin before asking for the notification permission - a dismissed dialog left the plugin uninitialized, and every `show()` crashed with a null icon
+* ask for the notification permission through `flutter_local_notifications` instead of `permission_handler`, which never completes its future when the dialog is dismissed - hanging `SmartPhoneClientManager.configure()` forever
+* stop requesting `SCHEDULE_EXACT_ALARM`, which Android only grants through a settings screen: notifications now schedule exactly when the permission happens to be granted, and inexactly (still while idle) otherwise
+
 ## 2.3.1
 
 * fix `duplicate column name: record_id` crash in the `record_id` SQLite migration (`SQLiteDataManager.onUpgrade`) by only adding the column/index when it isn't already there

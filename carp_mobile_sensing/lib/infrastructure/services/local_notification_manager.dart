@@ -30,14 +30,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
   Future<void> configure() async {
     tz.initializeTimeZones();
 
-    List<Permission> permissions = List.from([
-      Permission.notification,
-      Permission.scheduleExactAlarm,
-    ]);
-
-    var status = await permissions.request();
-    debug('$runtimeType - Permissions: $status');
-
+    // Registers the notification icon - without it every show() throws on Android.
     await FlutterLocalNotificationsPlugin().initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('ic_launcher'),
@@ -47,6 +40,14 @@ class FlutterLocalNotificationManager implements NotificationManager {
           onDidReceiveNotificationResponse,
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
     );
+
+    // Not permission_handler: it never completes its future if the dialog is dismissed.
+    var granted = await FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
+    debug('$runtimeType - Notification permission granted: $granted');
 
     info('$runtimeType configured.');
   }
@@ -63,6 +64,13 @@ class FlutterLocalNotificationManager implements NotificationManager {
         ),
         iOS: DarwinNotificationDetails(),
       );
+
+  /// Exact alarms need `SCHEDULE_EXACT_ALARM`, which Android only grants
+  /// through a settings screen - so use them when granted, inexact otherwise.
+  Future<AndroidScheduleMode> get _scheduleMode async =>
+      await Permission.scheduleExactAlarm.isGranted
+      ? AndroidScheduleMode.exactAllowWhileIdle
+      : AndroidScheduleMode.inexactAllowWhileIdle;
 
   @override
   Future<int> createNotification({
@@ -101,7 +109,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
       body: body,
       scheduledDate: time,
       notificationDetails: _platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: await _scheduleMode,
     );
 
     return id;
@@ -134,7 +142,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
       body: body,
       scheduledDate: time,
       notificationDetails: _platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: await _scheduleMode,
       matchDateTimeComponents: recurrence,
     );
 
@@ -178,7 +186,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
         body: task.description,
         scheduledDate: time,
         notificationDetails: _platformChannelSpecifics,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: await _scheduleMode,
         payload: task.id,
       );
       task.hasNotificationBeenCreated = true;
