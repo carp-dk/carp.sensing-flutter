@@ -112,23 +112,8 @@ abstract class Probe extends AbstractExecutor<Measure> {
     if (await arePermissionsGranted()) return true;
 
     debug('$runtimeType - Asking permission for: $permissions');
-    bool granted = true;
-
-    try {
-      final status = await permissions.request();
-      debug('$runtimeType - Permission status: $status');
-
-      granted = status.values.fold(
-        true,
-        (value, status) => value && status == PermissionStatus.granted,
-      );
-    } catch (error) {
-      addError(
-        '$runtimeType - Error trying to request permissions, error: $error',
-      );
-      return false;
-    }
-    return granted;
+    await SmartPhoneClientManager().requestPermissions(permissions);
+    return arePermissionsGranted();
   }
 
   /// Whether this probe is allowed to run.

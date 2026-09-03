@@ -1,3 +1,8 @@
+## 2.1.1
+
+* `LocationManager.requestPermission()` asks through `SmartPhoneClientManager.requestPermissions()`, so it no longer collides with other permission dialogs; it now asks 'when in use' then 'always'
+* background mode is only enabled once `locationAlways` is granted - the `location` plugin otherwise pops its own dialog outside the queue
+
 ## 2.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
