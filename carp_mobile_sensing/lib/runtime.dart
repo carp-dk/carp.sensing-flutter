@@ -42,6 +42,7 @@ part 'runtime/util/cron_parser.dart';
 part 'runtime/app_task_controller.dart';
 part 'runtime/client_manager.dart';
 part 'runtime/client_repository.dart';
+part 'runtime/permissions.dart';
 part 'runtime/study_controller.dart';
 part 'runtime/device_manager/device_controller.dart';
 part 'runtime/device_manager/device_manager.dart';
