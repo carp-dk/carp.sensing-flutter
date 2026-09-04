@@ -4,6 +4,9 @@
 * `requestPermissionsInOrder()` (the default requester) also skips already granted permissions and asks `locationWhenInUse` before `locationAlways`, as Android requires
 * `configure(permissionRequester:)` lets an app take over how the user is asked - e.g. to show a rationale before each dialog
 * `_deviceDeploymentReceived` is serialized - the deployment event fires twice on a normal launch, and the two runs used to configure and ask for permissions at the same time
+* initialize the notification plugin before asking for the notification permission - a dismissed dialog left the plugin uninitialized, and every `show()` crashed with a null icon
+* ask for the notification permission through `flutter_local_notifications` instead of `permission_handler`, which never completes its future when the dialog is dismissed - hanging `SmartPhoneClientManager.configure()` forever
+* stop requesting `SCHEDULE_EXACT_ALARM`, which Android only grants through a settings screen: notifications now schedule exactly when the permission happens to be granted, and inexactly (still while idle) otherwise
 
 ## 2.3.1
 
