@@ -50,6 +50,8 @@ class SmartPhoneClientManager
   final NotificationManager _notificationManager =
       FlutterLocalNotificationManager();
   bool _askForPermissions = true;
+  PermissionRequester _permissionRequester = requestPermissionsInOrder;
+  Future<void> _asking = Future.value();
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
   final StreamController<ClientManagerState> _controller =
@@ -58,6 +60,26 @@ class SmartPhoneClientManager
 
   /// Will this client manager ask for permission when a new study is deployed?
   bool get askForPermissions => _askForPermissions;
+
+  /// Ask the user for [permissions], using the [PermissionRequester] this
+  /// client is configured with.
+  ///
+  /// This is the one place in CAMS that talks to the OS permission dialogs.
+  /// Requests are serialized: Android denies - without showing anything - any
+  /// request made while another dialog is up, so two callers asking at once
+  /// used to make dialogs "fail silently".
+  ///
+  /// A failed requester is logged, not rethrown: callers re-check the actual
+  /// permission status afterwards anyway, and an error must not block the
+  /// requests queued behind it.
+  Future<void> requestPermissions(List<Permission> permissions) =>
+      _asking = _asking.then((_) async {
+        try {
+          await _permissionRequester(permissions);
+        } catch (error) {
+          warning('$runtimeType - Permission requester failed - $error');
+        }
+      });
 
   /// The runtime state of this client manager.
   ClientManagerState get state => _state;
@@ -129,8 +151,14 @@ class SmartPhoneClientManager
   /// Note that background mode is only supported on Android, and will be ignored on iOS.
   ///
   /// If [askForPermissions] is true (default), this client manager will
-  /// automatically ask for permissions for all sampling packages at once.
-  /// If you want the app to handle permissions itself, set this to false.
+  /// automatically ask for permissions for all sampling packages when a study
+  /// is deployed. If you want the app to handle permissions itself, set this
+  /// to false.
+  ///
+  /// The [permissionRequester] is how the user is asked, whenever CAMS needs a
+  /// permission. Defaults to [requestPermissionsInOrder], which shows the
+  /// system dialogs one at a time. Pass your own to, e.g., show a rationale
+  /// before each dialog.
   ///
   /// When this method is called, the client manager will restore the state of
   /// all previously added studies and resume data sampling in those studies if
@@ -149,11 +177,13 @@ class SmartPhoneClientManager
     String? backgroundNotificationTitle,
     String? backgroundNotificationText,
     bool askForPermissions = true,
+    PermissionRequester permissionRequester = requestPermissionsInOrder,
   }) async {
     // Fast out if already configured
     if (state.index >= ClientManagerState.configured.index) return;
 
     _askForPermissions = askForPermissions;
+    _permissionRequester = permissionRequester;
 
     // Initialize infrastructure services and the repository.
     await DeviceInfoService().init();

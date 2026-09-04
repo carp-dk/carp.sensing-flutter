@@ -121,12 +121,29 @@ class SmartphoneStudyController {
   /// Handles updates of the [deployment] status.
   Future<void> _deploymentStatusReceived() async {}
 
+  /// Serializes [_deviceDeploymentReceived], which the event stream fires
+  /// again while a previous run is still awaiting - twice on a normal launch.
+  /// Two runs at once configure and ask for permissions concurrently.
+  Future<void> _configuring = Future.value();
+
   /// Handles the reception of a new or updated [deployment].
   ///
   /// This entails configuring devices, data manager, and executor to get
   /// ready to handle sampling of data. Data sampling is started if the
   /// [SmartphoneStudy.samplingState] is in a resumed state.
-  Future<void> _deviceDeploymentReceived() async {
+  ///
+  /// A failed run is logged, not rethrown - nothing awaits the event handler,
+  /// and an error must not block the runs queued behind it.
+  Future<void> _deviceDeploymentReceived() =>
+      _configuring = _configuring.then((_) async {
+        try {
+          await _configureDeployment();
+        } catch (error) {
+          warning('$runtimeType - Configuring deployment failed - $error');
+        }
+      });
+
+  Future<void> _configureDeployment() async {
     debug(
       '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
     );
@@ -189,7 +206,7 @@ class SmartphoneStudyController {
 
     // start the study and restart data sampling
     study.samplingState = existingSamplingStatus;
-    _start();
+    await _start();
 
     var statusMsg =
         '===============================================================\n'
@@ -356,9 +373,8 @@ class SmartphoneStudyController {
   /// This method is only relevant on Android, and does nothing on iOS.
   /// iOS automatically asks for permissions when a resource is accessed.
   ///
-  /// Note that location permissions are never asked for in this method, since
-  /// they can cause issues when asking for multiple permissions at once.
-  /// Location permissions should be handled separately in the app.
+  /// Permissions are asked for one at a time, through
+  /// [SmartPhoneClientManager.requestPermissions].
   Future<void> askForAllPermissions() async {
     if (deployment == null) {
       warning(
@@ -389,29 +405,15 @@ class SmartphoneStudyController {
     );
 
     if (permissions.isNotEmpty) {
-      // Never ask for location permissions.
-      // Will mess it up when requesting multiple permissions at once.
-      permissions
-        ..remove(Permission.location)
-        ..remove(Permission.locationWhenInUse)
-        ..remove(Permission.locationAlways);
+      info(
+        '$runtimeType - Asking for permissions for all measures in this deployment...',
+      );
+      await SmartPhoneClientManager().requestPermissions(permissions.toList());
 
-      try {
-        info(
-          '$runtimeType - Asking for permissions for all measures in this deployment...',
-        );
-        _permissions = await permissions.toList().request();
-
-        debug('$runtimeType - Permissions granted: $_permissions');
-
-        _permissions?.forEach(
-          (permission, status) => info(
-            '$runtimeType - Permission status for ${permission.toString().split('.').last} : ${status.name}',
-          ),
-        );
-      } catch (error) {
-        warning('$runtimeType - Error requesting permissions - error: $error');
-      }
+      _permissions = {
+        for (final permission in permissions) permission: await permission.status,
+      };
+      debug('$runtimeType - Permissions: $_permissions');
     }
   }
 

@@ -98,24 +98,26 @@ class LocationManager {
   /// opens the Settings page on Android / iOS.
   /// This method is, however, **NOT** used by this context sampling package, since
   /// handling of permissions should be taken care of on an app level.
+  ///
+  /// Goes through [SmartPhoneClientManager.requestPermissions] so it never
+  /// collides with another dialog. Asks 'when in use' first, then 'always'.
   Future<PermissionStatus> requestPermission() async {
     debug('$runtimeType - Requesting permission to access location...');
 
-    var permissionGranted = await _provider.hasPermission();
-    if (permissionGranted == location.PermissionStatus.denied) {
-      permissionGranted = await _provider.requestPermission();
-      if (permissionGranted != location.PermissionStatus.granted) {
-        warning(
-          "$runtimeType - The user opted not to allow collection of location data. "
-          "The only way to change the permission's status now is to let the "
-          "user manually enables it in the system settings.",
-        );
-      }
+    await SmartPhoneClientManager().requestPermissions([
+      Permission.locationWhenInUse,
+      Permission.locationAlways,
+    ]);
+
+    final granted = await hasPermission();
+    if (!granted) {
+      warning(
+        "$runtimeType - The user opted not to allow collection of location data. "
+        "The only way to change the permission's status now is to let the "
+        "user manually enables it in the system settings.",
+      );
     }
-
-    debug('$runtimeType - Permission: $permissionGranted');
-
-    return permissionGranted == location.PermissionStatus.granted ? PermissionStatus.granted : PermissionStatus.denied;
+    return granted ? PermissionStatus.granted : PermissionStatus.denied;
   }
 
   /// Enable the [LocationManager] for accessing location also when the app is
@@ -128,31 +130,36 @@ class LocationManager {
   ///
   /// After the location manager is enabled, configuration can be done via the
   /// [configure] method.
-  Future<void> enable() async {
-    // fast out if already enabled
-    if (enabled) return;
+  Future<void>? _enabling;
 
-    info('Enabling $runtimeType...');
-    _enabled = false;
+  Future<void> enable() => _enabling ??= _enable().whenComplete(() => _enabling = null);
 
-    bool serviceEnabled = await _provider.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await _provider.requestService();
+  Future<void> _enable() async {
+    if (!enabled) {
+      info('Enabling $runtimeType...');
+
+      bool serviceEnabled = await _provider.serviceEnabled();
       if (!serviceEnabled) {
-        warning('$runtimeType - Location service could not be enabled.');
-        return;
+        serviceEnabled = await _provider.requestService();
+        if (!serviceEnabled) {
+          warning('$runtimeType - Location service could not be enabled.');
+          return;
+        }
+      }
+      _enabled = true;
+    }
+
+    // Retried on every call: the plugin natively pops the 'location always'
+    // dialog here if not granted, outside CAMS' permission queue - so only
+    // enable background mode once the permission is there.
+    if (!await _provider.isBackgroundModeEnabled() && await Permission.locationAlways.isGranted) {
+      try {
+        final backgroundMode = await _provider.enableBackgroundMode();
+        info('$runtimeType - Location service enabled, background mode: $backgroundMode');
+      } catch (error) {
+        warning('$runtimeType - Could not enable background mode - $error');
       }
     }
-    _enabled = true;
-    bool backgroundMode = false;
-
-    try {
-      backgroundMode = await _provider.enableBackgroundMode();
-    } catch (error) {
-      warning('$runtimeType - Could not enable background mode - $error');
-    }
-
-    info('$runtimeType - Location service enabled, background mode: $backgroundMode');
   }
 
   LocationService? _configuration;
@@ -193,7 +200,9 @@ class LocationManager {
         );
 
         // If not granted, try to request 'when in use' permission.
-        await Permission.locationWhenInUse.request();
+        await SmartPhoneClientManager().requestPermissions([
+          Permission.locationWhenInUse,
+        ]);
       }
 
       // Change notification options - only on Android.

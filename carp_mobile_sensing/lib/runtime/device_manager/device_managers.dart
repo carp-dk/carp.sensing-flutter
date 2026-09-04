@@ -120,16 +120,17 @@ abstract class BLEDeviceManager<
 
   @override
   @mustCallSuper
-  Future<void> onRequestPermissions() async {
-    if (Platform.isAndroid) {
-      await Permission.bluetoothScan.request();
-      await Permission.bluetoothConnect.request();
-      await Permission.locationWhenInUse.request();
-    }
-    if (Platform.isIOS) {
-      await Permission.bluetooth.request();
-    }
-  }
+  Future<void> onRequestPermissions() =>
+      SmartPhoneClientManager().requestPermissions(
+        Platform.isAndroid
+            ? [
+                Permission.bluetoothScan,
+                Permission.bluetoothConnect,
+                // BLE scanning on Android also requires location permission.
+                Permission.locationWhenInUse,
+              ]
+            : [Permission.bluetooth],
+      );
 }
 
 /// A device manager for a smartphone.
