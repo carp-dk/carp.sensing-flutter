@@ -3,6 +3,7 @@
 * fix permission dialogs failing silently: all permission requests now go through one serialized queue, `SmartPhoneClientManager.requestPermissions()`, which asks one dialog at a time. Android denies - without showing anything - any request made while another dialog is up, and the deployment handler, probes and device managers used to ask concurrently
 * `requestPermissionsInOrder()` (the default requester) also skips already granted permissions and asks `locationWhenInUse` before `locationAlways`, as Android requires
 * `configure(permissionRequester:)` lets an app take over how the user is asked - e.g. to show a rationale before each dialog
+* `askForAllPermissions()` and `Probe.requestPermissions()` now also ask on iOS. They skipped it because batching `List<Permission>.request()` is flaky on iOS; one at a time is not. `locationAlways` and `notification` are never auto-prompted by iOS, so studies needing them used to depend on the app asking by hand
 * `_deviceDeploymentReceived` is serialized - the deployment event fires twice on a normal launch, and the two runs used to configure and ask for permissions at the same time
 
 ## 2.3.1
