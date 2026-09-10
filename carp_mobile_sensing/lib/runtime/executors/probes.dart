@@ -102,12 +102,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
 
   /// Request the permissions needed for this probe to run.
   /// Return true if all permissions are granted.
-  /// Only used on Android - iOS automatically request permissions when
-  /// a resource (like the microphone) is accessed.
   Future<bool> requestPermissions() async {
-    // fast out if on iOS - permissions are automatically requested
-    if (Platform.isIOS) return true;
-
     // fast out if already have permissions
     if (await arePermissionsGranted()) return true;
 
@@ -118,11 +113,10 @@ abstract class Probe extends AbstractExecutor<Measure> {
 
   /// Whether this probe is allowed to run.
   ///
-  /// On Android the [SmartphoneStudyController] requests all deployment
-  /// permissions in a single batch ([SmartphoneStudyController.askForAllPermissions]),
-  /// so probes only check - requesting again here would collide, as
-  /// permission_handler forbids concurrent requests. On iOS permissions are
-  /// requested automatically when a resource is accessed.
+  /// The [SmartphoneStudyController] asks for all deployment permissions up
+  /// front ([SmartphoneStudyController.askForAllPermissions]), so probes only
+  /// check. Not on iOS: permission_handler reports Android-only groups (e.g.
+  /// activityRecognition, phone) as denied there, and iOS prompts on first use.
   Future<bool> hasRequiredPermissions() async =>
       Platform.isIOS ? true : await arePermissionsGranted();
 

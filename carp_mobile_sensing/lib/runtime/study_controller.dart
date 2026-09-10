@@ -370,21 +370,12 @@ class SmartphoneStudyController {
   /// should be called after deployment has taken place but before this controller
   /// is resumed.
   ///
-  /// This method is only relevant on Android, and does nothing on iOS.
-  /// iOS automatically asks for permissions when a resource is accessed.
-  ///
   /// Permissions are asked for one at a time, through
-  /// [SmartPhoneClientManager.requestPermissions].
+  /// [SmartPhoneClientManager.requestPermissions], on both Android and iOS.
   Future<void> askForAllPermissions() async {
     if (deployment == null) {
       warning(
         '$runtimeType - No deployment available. Skipping requesting permissions.',
-      );
-      return;
-    }
-    if (Platform.isIOS) {
-      warning(
-        '$runtimeType - Requesting all permissions at once is not feasible on iOS. Skipping this.',
       );
       return;
     }
@@ -519,9 +510,11 @@ class SmartphoneStudyController {
       );
     }
 
-    // Ask for permissions for all measures in this deployment
+    // Ask for permissions for all measures in this deployment, then retry
+    // connecting devices that were skipped earlier for lack of permissions.
     if (SmartPhoneClientManager().askForPermissions) {
       await askForAllPermissions();
+      await _connectAllConnectableDevices();
     }
 
     // Finally, resume/pause data sampling based on the current sampling state of this study.
