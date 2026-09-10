@@ -510,9 +510,11 @@ class SmartphoneStudyController {
       );
     }
 
-    // Ask for permissions for all measures in this deployment
+    // Ask for permissions for all measures in this deployment, then retry
+    // connecting devices that were skipped earlier for lack of permissions.
     if (SmartPhoneClientManager().askForPermissions) {
       await askForAllPermissions();
+      await _connectAllConnectableDevices();
     }
 
     // Finally, resume/pause data sampling based on the current sampling state of this study.

@@ -38,7 +38,14 @@ class CamsDataTypeMetaData extends DataTypeMetaData {
   ///
   /// For Android permission in the Manifest.xml file,
   /// see [Manifest.permission](https://developer.android.com/reference/android/Manifest.permission.html)
-  List<Permission> permissions;
+  ///
+  /// Declare the Android group; on iOS the Android-only groups are read as
+  /// their iOS counterpart ([Permission.activityRecognition] ->
+  /// [Permission.sensors], [Permission.bluetoothScan] -> [Permission.bluetooth]).
+  List<Permission> get permissions =>
+      Platform.isIOS ? _permissions.map(_onIOS).toList() : _permissions;
+  set permissions(List<Permission> permissions) => _permissions = permissions;
+  List<Permission> _permissions;
 
   /// Create a new description of a data [type] with some [displayName].
   ///
@@ -50,8 +57,8 @@ class CamsDataTypeMetaData extends DataTypeMetaData {
     super.displayName,
     super.timeType,
     this.dataEventType = DataEventType.EVENT,
-    this.permissions = const [],
-  });
+    List<Permission> permissions = const [],
+  }) : _permissions = permissions;
 
   /// Create a new description of a data type based on the [dataTypeMetaData].
   ///
@@ -60,13 +67,22 @@ class CamsDataTypeMetaData extends DataTypeMetaData {
   CamsDataTypeMetaData.fromDataTypeMetaData({
     required DataTypeMetaData dataTypeMetaData,
     this.dataEventType = DataEventType.EVENT,
-    this.permissions = const [],
-  }) : super(
+    List<Permission> permissions = const [],
+  }) : _permissions = permissions,
+       super(
          type: dataTypeMetaData.type,
          displayName: dataTypeMetaData.displayName,
          timeType: dataTypeMetaData.timeType,
        );
 }
+
+/// permission_handler has no iOS strategy for these Android-only groups - they
+/// come back permanentlyDenied without a dialog - so ask for the iOS one.
+Permission _onIOS(Permission permission) => switch (permission) {
+  Permission.activityRecognition => Permission.sensors,
+  Permission.bluetoothScan => Permission.bluetooth,
+  _ => permission,
+};
 
 /// Contains CAMS data type definitions similar to CARP Core [CarpDataTypes].
 class CamsDataTypes {

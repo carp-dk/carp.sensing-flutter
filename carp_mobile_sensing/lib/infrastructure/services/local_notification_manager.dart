@@ -30,10 +30,10 @@ class FlutterLocalNotificationManager implements NotificationManager {
   Future<void> configure() async {
     tz.initializeTimeZones();
 
-    List<Permission> permissions = List.from([
+    List<Permission> permissions = [
       Permission.notification,
-      Permission.scheduleExactAlarm,
-    ]);
+      if (Platform.isAndroid) Permission.scheduleExactAlarm,
+    ];
 
     var status = await permissions.request();
     debug('$runtimeType - Permissions: $status');
