@@ -20,6 +20,7 @@ Map<String, dynamic> _$ActivityToJson(Activity instance) => <String, dynamic>{
 const _$ActivityTypeEnumMap = {
   ActivityType.IN_VEHICLE: 'IN_VEHICLE',
   ActivityType.ON_BICYCLE: 'ON_BICYCLE',
+  ActivityType.ON_FOOT: 'ON_FOOT',
   ActivityType.RUNNING: 'RUNNING',
   ActivityType.STILL: 'STILL',
   ActivityType.WALKING: 'WALKING',

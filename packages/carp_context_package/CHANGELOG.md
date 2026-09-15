@@ -1,3 +1,14 @@
+## 2.2.0
+
+* **breaking** - replace the `flutter_activity_recognition` plugin with [`activity_recognition_flutter`](https://pub.dev/packages/activity_recognition_flutter) v. 6.1 for activity recognition (AR)
+* **breaking** - `Activity.fromActivity()` is replaced by `Activity.fromActivityEvent()`
+* **breaking** - the AR types are now mapped by name instead of by enum index, and a new `ActivityType.ON_FOOT` is added, since the new plugin reports the `ON_FOOT` parent activity of `WALKING` and `RUNNING`
+* `Activity.confidence` is now the confidence reported by the OS in percent (0-100), instead of being derived from the plugin's coarse `HIGH`/`MEDIUM`/`LOW` levels
+* `TILTING` events are now discarded by the `ActivityProbe`
+* added swift package manager support
+* the Android AR permissions, broadcast receiver, and foreground service are now declared by the plugin and no longer need to be added to the app's manifest
+* upgrade `location` to `^10.0.2`
+
 ## 2.1.1
 
 * `LocationManager.requestPermission()` asks through `SmartPhoneClientManager.requestPermissions()`, so it no longer collides with other permission dialogs; it now asks 'when in use' then 'always'

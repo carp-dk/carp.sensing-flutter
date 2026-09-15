@@ -9,13 +9,21 @@ part of '../../carp_context_package.dart';
 /// Holds an activity event as recognized by the phone Activity Recognition (AR) API.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Activity extends Data {
-  static final Map<ar.ActivityConfidence, int> _confidenceLevelMap = {
-    ar.ActivityConfidence.HIGH: 100,
-    ar.ActivityConfidence.MEDIUM: 70,
-    ar.ActivityConfidence.LOW: 40,
+  /// Mapping of the activity types reported by the AR plugin to the CARP
+  /// [ActivityType]s.
+  ///
+  /// The plugin's `TILTING` and `UNKNOWN` types have no CARP counterpart and
+  /// are therefore not part of this map - the [ActivityProbe] discards both.
+  static const Map<ar.ActivityType, ActivityType> _activityTypeMap = {
+    ar.ActivityType.IN_VEHICLE: ActivityType.IN_VEHICLE,
+    ar.ActivityType.ON_BICYCLE: ActivityType.ON_BICYCLE,
+    ar.ActivityType.ON_FOOT: ActivityType.ON_FOOT,
+    ar.ActivityType.RUNNING: ActivityType.RUNNING,
+    ar.ActivityType.STILL: ActivityType.STILL,
+    ar.ActivityType.WALKING: ActivityType.WALKING,
   };
 
-  /// Confidence in activity recognition.
+  /// Confidence in activity recognition in percent (0-100).
   int confidence;
 
   /// Type of activity recognized.
@@ -23,6 +31,7 @@ class Activity extends Data {
   /// Possible types of activities are:
   /// * IN_VEHICLE - The device is in a vehicle, such as a car.
   /// * ON_BICYCLE - The device is on a bicycle.
+  /// * ON_FOOT - The device is on a user who is walking or running.
   /// * WALKING - The device is on a user who is walking.
   /// * RUNNING - The device is on a user who is running.
   /// * STILL - The device is still (not moving).
@@ -47,9 +56,11 @@ class Activity extends Data {
   @override
   bool equivalentTo(Data other) => other is Activity && type == other.type;
 
-  factory Activity.fromActivity(ar.Activity activity) => Activity(
-    type: ActivityType.values[activity.type.index],
-    confidence: _confidenceLevelMap[activity.confidence] ?? 0,
+  /// Create an [Activity] from an [ar.ActivityEvent] as reported by the
+  /// AR plugin.
+  factory Activity.fromActivityEvent(ar.ActivityEvent event) => Activity(
+    type: _activityTypeMap[event.type] ?? ActivityType.UNKNOWN,
+    confidence: event.confidence,
   );
 
   @override
@@ -70,6 +81,12 @@ enum ActivityType {
 
   /// The device is on a bicycle.
   ON_BICYCLE,
+
+  /// The device is on a user who is walking or running.
+  ///
+  /// This is the parent activity of [WALKING] and [RUNNING] and is reported
+  /// when the AR API cannot tell the two apart.
+  ON_FOOT,
 
   /// The device is on a user who is running.
   RUNNING,

@@ -54,6 +54,11 @@ class DeviceDescription {
       'Movesense ECG Sensor',
       Icon(Icons.watch, size: 50, color: CachetColors.CYAN),
     ),
+    AppleWatchDevice.DEVICE_TYPE: DeviceTypeDescriptor(
+      'Apple Watch',
+      'Apple Watch (AWARE)',
+      Icon(Icons.watch, size: 50, color: CachetColors.DARK_BLUE),
+    ),
     // CortriumDevice.DEVICE_TYPE: DeviceTypeDescriptor(
     //     'Cortrium',
     //     'Cortrium ECG Holter Monitor',

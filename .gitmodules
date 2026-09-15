@@ -1,0 +1,3 @@
+[submodule "packages/carp_aware_package"]
+	path = packages/carp_aware_package
+	url = https://github.com/carp-dk/carp_aware_package/
