@@ -15,15 +15,21 @@ part of '../../carp_context_package.dart';
 ///  * TILTING - when the phone is tilted (only on Android)
 ///  * Activities with a low confidence level (<50%)
 class ActivityProbe extends StreamProbe {
+  /// The minimum confidence (in percent) an AR event must have in order to
+  /// be collected.
+  static const int minimumConfidence = 50;
+
   Stream<Measurement>? _stream;
 
   @override
-  Stream<Measurement> get stream => _stream ??= ar
-      .FlutterActivityRecognition
-      .instance
-      .activityStream
+  Stream<Measurement> get stream => _stream ??= ar.ActivityRecognition()
+      // On Android the AR plugin runs a foreground service, which is needed
+      // for AR events to keep arriving while the app is in the background.
+      // The flag is ignored on iOS.
+      .activityStream(runForegroundService: true)
       .where((event) => event.type != ar.ActivityType.UNKNOWN)
-      .where((event) => event.confidence != ar.ActivityConfidence.LOW)
-      .map((activity) => Measurement.fromData(Activity.fromActivity(activity)))
+      .where((event) => event.type != ar.ActivityType.TILTING)
+      .where((event) => event.confidence >= minimumConfidence)
+      .map((event) => Measurement.fromData(Activity.fromActivityEvent(event)))
       .asBroadcastStream();
 }

@@ -22,8 +22,7 @@ import 'package:location/location.dart' as location;
 // import 'package:geolocator_apple/geolocator_apple.dart';
 // import 'package:geolocator_android/geolocator_android.dart';
 // import 'package:carp_background_location/carp_background_location.dart' as cbl;
-// import 'package:activity_recognition_flutter/activity_recognition_flutter.dart';
-import 'package:flutter_activity_recognition/flutter_activity_recognition.dart'
+import 'package:activity_recognition_flutter/activity_recognition_flutter.dart'
     as ar;
 
 import 'package:carp_serializable/carp_serializable.dart';

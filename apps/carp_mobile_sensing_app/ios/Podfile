@@ -1,5 +1,8 @@
-# Uncomment this line to define a global platform for your project
-platform :ios, '14.0'
+# The global platform for this project. Keep in sync with the Runner target's
+# IPHONEOS_DEPLOYMENT_TARGET in Runner.xcodeproj; it is also the floor applied to
+# every pod in the post_install hook below.
+IOS_DEPLOYMENT_TARGET = '16.0'
+platform :ios, IOS_DEPLOYMENT_TARGET
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -29,20 +32,41 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   # The following is an undocumented flag in cocoapods used to enable static linking.
-  # This is needed so that we can use Movesense and dynamic frameworks together
+  # This is needed so that we can mix static and dynamic frameworks.
   use_frameworks! :linkage => :static
   use_modular_headers!
 
+  # Note: the Movesense MDS library is no longer vendored through CocoaPods.
+  # `carp_movesense_package` now depends on `carp_movesense_flutter`, which ships
+  # the `MovesenseMDS.xcframework` as a Swift Package and is picked up
+  # automatically by Flutter's SPM integration. Declaring the old
+  # `pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib/'`
+  # here would link the MDS library twice.
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  pod 'Movesense', :git => 'https://bitbucket.org/movesense/movesense-mobile-lib/'
-  
+
   target 'RunnerTests' do
     inherit! :search_paths
   end
 end
 
 post_install do |installer|
+  # Several pods (Protobuf, SwiftProtobuf, flutter_sound_core, ...) still declare
+  # deployment targets as low as iOS 10, which Xcode 16+ rejects outright:
+  # "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but
+  # the range of supported deployment target versions is 15.0 to ...".
+  # `flutter_additional_ios_build_settings` only clears the setting for pods that
+  # depend on Flutter, so raise anything left below our own target.
+  bump_deployment_target = lambda do |config|
+    current = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+    if current.nil? || current.to_f < IOS_DEPLOYMENT_TARGET.to_f
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = IOS_DEPLOYMENT_TARGET
+    end
+  end
+
+  installer.pods_project.build_configurations.each(&bump_deployment_target)
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    target.build_configurations.each(&bump_deployment_target)
   end
 end
