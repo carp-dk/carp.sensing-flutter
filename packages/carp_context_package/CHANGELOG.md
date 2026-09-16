@@ -1,3 +1,7 @@
+## 2.1.2
+
+* `Location.distanceTo`, `movedTo` and `distanceTravelled` - sum a path of fixes in meters, ignoring moves within GPS accuracy
+
 ## 2.1.1
 
 * `LocationManager.requestPermission()` asks through `SmartPhoneClientManager.requestPermissions()`, so it no longer collides with other permission dialogs; it now asks 'when in use' then 'always'

@@ -254,6 +254,19 @@ void main() {
     print(_encode(m_1));
   });
 
+  test('Location.distanceTravelled', () {
+    // Home -> Falkoner Alle -> home, ~1.5 km each way.
+    final home = Location(latitude: 55.692035, longitude: 12.558575, accuracy: 10);
+    final falkoner = Location(latitude: 55.685329, longitude: 12.538601, accuracy: 10);
+    final jitter = Location(latitude: 55.692040, longitude: 12.558580, accuracy: 10);
+    expect(home.distanceTo(falkoner), closeTo(1458, 5));
+    expect(home.movedTo(jitter), 0);
+    // Jitter below accuracy is ignored.
+    expect(Location.distanceTravelled([home, jitter, falkoner, home]), closeTo(2 * 1458, 10));
+    expect(Location.distanceTravelled([home]), 0);
+    expect(Location.distanceTravelled([]), 0);
+  });
+
   test('CARP Mobility', () {
     Mobility mob = Mobility(
       numberOfPlaces: 2,

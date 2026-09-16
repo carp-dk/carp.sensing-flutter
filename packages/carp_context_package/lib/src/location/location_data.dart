@@ -80,6 +80,28 @@ class Location extends Geolocation {
     this.provider,
   }) : super();
 
+  /// Great-circle distance in meters from this location to [other].
+  double distanceTo(Location other) =>
+      GeoPosition.fromLocation(this).distanceTo(GeoPosition.fromLocation(other));
+
+  /// Meters travelled along [path] (in chronological order), summing the
+  /// segments between consecutive locations. Segments shorter than the GPS
+  /// accuracy of either end are jitter, not movement, and are skipped.
+  static double distanceTravelled(List<Location> path) {
+    var total = 0.0;
+    for (var i = 1; i < path.length; i++) {
+      total += path[i - 1].movedTo(path[i]);
+    }
+    return total;
+  }
+
+  /// Meters moved from this location to [next], or 0 if the move is within
+  /// the GPS accuracy of either fix (jitter).
+  double movedTo(Location next) {
+    final segment = distanceTo(next);
+    return segment > math.max(accuracy ?? 0, next.accuracy ?? 0) ? segment : 0;
+  }
+
   /// Create a [Location] object based on a [LocationData] from the `location` plugin.
   Location.fromLocationData(location.LocationData location) : super() {
     latitude = location.latitude ?? 0;
