@@ -34,21 +34,8 @@ Future<void> requestPermissionsInOrder(List<Permission> permissions) async {
     if (!asked.add(permission)) continue;
     if (await permission.isGranted) continue;
 
-    final name = permission.toString().split('.').last;
-    final asking = DateTime.now();
     final status = await permission.request();
-    final took = DateTime.now().difference(asking);
-
-    // The duration is the tell: a dialog the participant actually saw takes
-    // hundreds of ms at least. An instant denial means Android refused to
-    // show one because something else was already asking.
-    info('Permission $name: ${status.name} (${took.inMilliseconds}ms)');
-    if (took.inMilliseconds < 50 && status.isDenied) {
-      warning(
-        'Permission $name was denied without a dialog - another request '
-        'was already in progress.',
-      );
-    }
+    info('Permission ${permission.toString().split('.').last}: ${status.name}');
   }
 }
 

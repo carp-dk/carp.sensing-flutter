@@ -98,30 +98,31 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
   void onSamplingStart() {
     _data = Bluetooth();
 
-    try {
-      FlutterBluePlus.startScan(
-        withServices: services,
-        withRemoteIds: remoteIds,
-        timeout:
-            samplingConfiguration?.duration ??
-            const Duration(milliseconds: DEFAULT_TIMEOUT),
-      );
-    } catch (error) {
-      FlutterBluePlus.stopScan();
+    // startScan is async - a plain try/catch would not catch its errors
+    // (e.g. adapter not ready yet on iOS: CBManagerStateUnknown).
+    FlutterBluePlus.startScan(
+      withServices: services,
+      withRemoteIds: remoteIds,
+      timeout:
+          samplingConfiguration?.duration ??
+          const Duration(milliseconds: DEFAULT_TIMEOUT),
+    ).catchError((Object error) {
       _data = Error(message: 'Error scanning for bluetooth - $error');
-    }
+    });
   }
 
   @override
   void onSamplingEnd() {
-    FlutterBluePlus.stopScan();
+    FlutterBluePlus.stopScan().catchError((Object error) {
+      _data = Error(message: 'Error stopping bluetooth scan - $error');
+    });
 
     if (_data is Bluetooth) (_data as Bluetooth).endScan = DateTime.now();
   }
 
   @override
   void onSamplingData(event) {
-    if (event is List<ScanResult>) {
+    if (_data is Bluetooth && event is List<ScanResult>) {
       (_data as Bluetooth).addBluetoothDevicesFromScanResults(event);
     }
   }

@@ -3,7 +3,7 @@ import UIKit
 import flutter_local_notifications
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -19,7 +19,15 @@ import flutter_local_notifications
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
 
-    GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  // With the UIScene life cycle the implicit FlutterEngine is created by the
+  // FlutterViewController in Main.storyboard - i.e. after the app delegate has
+  // finished launching - so plugins are registered here rather than in
+  // `application(_:didFinishLaunchingWithOptions:)`.
+  // See https://docs.flutter.dev/release/breaking-changes/uiscenedelegate
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }

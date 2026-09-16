@@ -18,6 +18,7 @@ import 'package:carp_apps_package/apps.dart';
 import 'package:carp_movisens_package/carp_movisens_package.dart';
 import 'package:carp_health_package/health_package.dart';
 import 'package:carp_movesense_package/carp_movesense_package.dart';
+import 'package:carp_aware_package/carp_aware_package.dart';
 // import 'package:carp_cortrium_package/carp_cortrium_package.dart';
 // import 'package:movisens_flutter/movisens_flutter.dart';
 

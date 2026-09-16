@@ -7,6 +7,8 @@ import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_context_package/carp_context_package.dart';
 import 'package:openmhealth_schemas/openmhealth_schemas.dart' as omh;
+import 'package:activity_recognition_flutter/activity_recognition_flutter.dart'
+    as ar;
 
 String _encode(Object object) =>
     const JsonEncoder.withIndent(' ').convert(object);
@@ -221,6 +223,33 @@ void main() {
     Measurement m_1 = Measurement.fromData(act);
     expect(m_1.dataType.namespace, NameSpace.CARP);
     print(_encode(m_1));
+  });
+
+  test('CARP Activity - from AR ActivityEvent', () {
+    // Every activity type of the AR plugin must map to the CARP type of the
+    // same name - the types the CARP model does not have (TILTING) map to
+    // UNKNOWN. These are discarded by the [ActivityProbe].
+    const expected = {
+      ar.ActivityType.IN_VEHICLE: ActivityType.IN_VEHICLE,
+      ar.ActivityType.ON_BICYCLE: ActivityType.ON_BICYCLE,
+      ar.ActivityType.ON_FOOT: ActivityType.ON_FOOT,
+      ar.ActivityType.RUNNING: ActivityType.RUNNING,
+      ar.ActivityType.STILL: ActivityType.STILL,
+      ar.ActivityType.WALKING: ActivityType.WALKING,
+      ar.ActivityType.TILTING: ActivityType.UNKNOWN,
+      ar.ActivityType.UNKNOWN: ActivityType.UNKNOWN,
+    };
+
+    // all types the plugin can report are covered
+    expect(expected.keys, containsAll(ar.ActivityType.values));
+
+    for (final entry in expected.entries) {
+      final activity = Activity.fromActivityEvent(
+        ar.ActivityEvent(entry.key, 80),
+      );
+      expect(activity.type, entry.value);
+      expect(activity.confidence, 80);
+    }
   });
 
   test('CARP AirQuality', () {

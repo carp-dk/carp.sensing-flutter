@@ -136,27 +136,27 @@ class LocationSamplingPackage extends SmartphoneSamplingPackage {
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-          DataTypeMetaData(
+          CamsDataTypeMetaData(
             type: ContextSamplingPackage.LOCATION,
             displayName: "Location",
             timeType: DataTimeType.POINT,
-            // permissions: [Permission.locationAlways],
+            permissions: [Permission.locationAlways],
           ),
         ),
         DataTypeSamplingScheme(
-          DataTypeMetaData(
+          CamsDataTypeMetaData(
             type: ContextSamplingPackage.GEOFENCE,
             displayName: "Geofence",
             timeType: DataTimeType.POINT,
-            // permissions: [Permission.locationAlways],
+            permissions: [Permission.locationAlways],
           ),
         ),
         DataTypeSamplingScheme(
-          DataTypeMetaData(
+          CamsDataTypeMetaData(
             type: ContextSamplingPackage.MOBILITY,
             displayName: "Mobility",
             timeType: DataTimeType.POINT,
-            // permissions: [Permission.locationAlways],
+            permissions: [Permission.locationAlways],
           ),
           MobilitySamplingConfiguration(
             placeRadius: 50,
@@ -190,10 +190,11 @@ class AirQualitySamplingPackage extends SmartphoneSamplingPackage {
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-          DataTypeMetaData(
+          CamsDataTypeMetaData(
             type: ContextSamplingPackage.AIR_QUALITY,
             displayName: "Air Quality",
             timeType: DataTimeType.POINT,
+            permissions: [Permission.locationWhenInUse],
           ),
         ),
       ]);
@@ -217,10 +218,11 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
         DataTypeSamplingScheme(
-          DataTypeMetaData(
+          CamsDataTypeMetaData(
             type: ContextSamplingPackage.WEATHER,
             displayName: "Weather",
             timeType: DataTimeType.POINT,
+            permissions: [Permission.locationWhenInUse],
           ),
         ),
       ]);
