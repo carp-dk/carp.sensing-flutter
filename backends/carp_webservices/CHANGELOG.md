@@ -1,3 +1,7 @@
+## 4.4.0
+
+* Add `CarpAuthService().magicLinkForCode()` - resolve a short self-signup code to its magic link via the CAWS `/api/self-signup/{code}` endpoint
+
 ## 4.3.0
 
 * Add `getDataStreamBatchesByTime()` (on `CarpDataStreamService` and `DataStreamReference`) - query a data stream by local update time window via the CAWS `query-by-time` endpoint

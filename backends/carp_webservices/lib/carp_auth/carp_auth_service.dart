@@ -237,6 +237,31 @@ class CarpAuthService {
     throw CarpUnauthorizedException('Authentication failed.');
   }
 
+  /// Resolve a short self-signup [code] (as shown to participants, e.g. `XXGHW`)
+  /// to the magic link it belongs to, using the CAWS `/api/self-signup/{code}`
+  /// endpoint. No authentication is needed.
+  ///
+  /// The returned link can be passed to [authenticateWithMagicLink].
+  /// Throws a [CarpNotFoundException] if CAWS does not know the code.
+  Future<String> magicLinkForCode(String code) async {
+    final url = authProperties.authURL
+        .replace(path: '/api/self-signup/$code')
+        .toString();
+    debug('REQUEST: POST $url');
+    final response = await httpr.post(url);
+    // The body holds a one-time auth token, so only the status is logged.
+    debug('RESPONSE: ${response.statusCode}');
+
+    final body = json.decode(response.body.isEmpty ? '{}' : response.body);
+    if (response.statusCode != HttpStatus.ok) {
+      throw CarpServiceRequestException.fromHttpStatus(
+        response.statusCode,
+        body,
+      );
+    }
+    return body['magicLink'] as String;
+  }
+
   String _constructAuthUri(String uri) {
     String secondPart = uri.split('action-token').last;
     return '${authProperties.discoveryURL}/login-actions/action-token$secondPart';
