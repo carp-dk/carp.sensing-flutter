@@ -47,8 +47,54 @@ void main() {
 
     await measurements.close();
   });
+
+  test('cleanup only removes the rows of the given data stream', () async {
+    final buffer = DataStreamBuffer();
+    final deployment = SmartphoneDeployment(
+      deviceConfiguration: Smartphone(roleName: 'phone'),
+      registration: DeviceRegistration(),
+    );
+    final measurements = StreamController<Measurement>.broadcast();
+    await deleteDatabase(
+      '${await getDatabasesPath()}/${SQLiteDataManager.DATABASE_NAME}.db',
+    );
+    await buffer.initialize(deployment, measurements.stream);
+
+    measurements.add(Measurement.fromData(Error(message: 'error')));
+    measurements.add(Measurement.fromData(StepCount(steps: 1)));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(await _rowCount(buffer), 2);
+
+    final batches = await Future.wait(
+      [CarpDataTypes.ERROR, CarpDataTypes.STEP_COUNT].map(
+        (type) => buffer.getDataStreamBatch(
+          ExpectedDataStream(dataType: type, deviceRoleName: 'phone'),
+        ),
+      ),
+    );
+    expect(batches.map((b) => b!.measurements.length), [1, 1]);
+
+    // Simulate the error stream being uploaded, but the step count rejected.
+    await buffer.cleanup(batches[0]!.dataStream);
+    await buffer.discard(batches[1]!.dataStream);
+    expect(await _rowCount(buffer), 1);
+    // The rejected row stays for debugging but is never batched again.
+    expect(
+      await buffer.getDataStreamBatch(
+        ExpectedDataStream(
+          dataType: CarpDataTypes.STEP_COUNT,
+          deviceRoleName: 'phone',
+        ),
+      ),
+      isNull,
+    );
+
+    await buffer.detach();
+    await measurements.close();
+  });
 }
 
 Future<int> _rowCount(DataStreamBuffer buffer) async =>
-    (await buffer.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME))
-        .length;
+    (await buffer.database!.query(
+      SQLiteDataManager.MEASUREMENT_TABLE_NAME,
+    )).length;

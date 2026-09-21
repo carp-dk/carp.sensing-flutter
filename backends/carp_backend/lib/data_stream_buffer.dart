@@ -14,7 +14,10 @@ class DataStreamBuffer {
   SmartphoneDeployment? _deployment;
   final _manager = SQLiteDataManager();
 
-  Set<int> rows = {};
+  /// Row ids of the not-yet-uploaded measurements, per data stream.
+  final Map<String, Set<int>> rows = {};
+
+  static String _key(DataStreamId id) => '${id.deviceRoleName}|${id.dataType}';
 
   SmartphoneDeployment? get deployment => _deployment;
   Database? get database => _manager.database;
@@ -65,9 +68,9 @@ class DataStreamBuffer {
       dataType: stream.dataType,
     );
 
-    int firstSequenceId = 0;
     List<Measurement> measurements = [];
     Set<int> triggerIds = {};
+    final streamRows = rows[_key(dataStream)] = {};
 
     debug(
       "$runtimeType - getting data stream batch for device "
@@ -100,7 +103,7 @@ class DataStreamBuffer {
       int row =
           int.tryParse(element[SQLiteDataManager.ID_COLUMN].toString()) ?? 0;
       // save the row id of what is uploaded
-      rows.add(row);
+      streamRows.add(row);
       int? triggerId = int.tryParse(
         element[SQLiteDataManager.TRIGGER_ID_COLUMN].toString(),
       );
@@ -113,22 +116,24 @@ class DataStreamBuffer {
       );
       measurements.add(measurement);
     }
-    firstSequenceId = rows.reduce(min);
 
     return DataStreamBatch(
       dataStream: dataStream,
-      firstSequenceId: firstSequenceId,
+      firstSequenceId: streamRows.reduce(min),
       measurements: measurements,
       triggerIds: triggerIds,
     );
   }
 
-  /// Clean up the database.
+  /// Clean up the database for the measurements of [dataStream] which have
+  /// been successfully uploaded.
   ///
-  /// If [delete] is true, all measurements which has been successfully uploaded
-  /// is deleted. Otherwise they are kept, but marked as uploaded.
-  Future<void> cleanup([bool delete = true]) async {
-    final args = rows.join(',');
+  /// If [delete] is true, the measurements are deleted. Otherwise they are
+  /// kept, but marked as uploaded.
+  Future<void> cleanup(DataStreamId dataStream, [bool delete = true]) async {
+    final streamRows = rows.remove(_key(dataStream));
+    if (streamRows == null || streamRows.isEmpty) return;
+    final args = streamRows.join(',');
     int? count = 0;
     if (delete) {
       var sql =
@@ -136,17 +141,30 @@ class DataStreamBuffer {
           '${SQLiteDataManager.ID_COLUMN} IN ($args)';
       count = await database?.rawDelete(sql);
     } else {
-      var sql =
-          'UPDATE ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} SET '
-          '${SQLiteDataManager.UPLOADED_COLUMN} = 1 WHERE ${SQLiteDataManager.ID_COLUMN} IN ($args)';
-      count = await database?.rawUpdate(sql);
+      count = await _markUploaded(args, 1);
     }
-    rows = {};
     debug(
       '$runtimeType - cleaned up. '
       'N=$count records ${delete ? 'deleted' : 'marked as uploaded'}.',
     );
   }
+
+  /// Discard the measurements of [dataStream] which CAWS rejected.
+  /// They are kept in the database (marked with `uploaded = 2`) for
+  /// debugging, but are never selected for upload again.
+  Future<void> discard(DataStreamId dataStream) async {
+    final streamRows = rows.remove(_key(dataStream));
+    if (streamRows == null || streamRows.isEmpty) return;
+    final count = await _markUploaded(streamRows.join(','), 2);
+    debug('$runtimeType - N=$count records marked as rejected.');
+  }
+
+  Future<int?> _markUploaded(String ids, int state) async =>
+      database?.rawUpdate(
+        'UPDATE ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} SET '
+        '${SQLiteDataManager.UPLOADED_COLUMN} = $state '
+        'WHERE ${SQLiteDataManager.ID_COLUMN} IN ($ids)',
+      );
 
   /// Stop buffering measurements, but keep the database and its data intact.
   ///
