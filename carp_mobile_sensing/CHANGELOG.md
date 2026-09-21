@@ -1,3 +1,7 @@
+## 2.4.1
+
+* fix: `SmartphoneStudyController.dispose()` now disposes its executor. A study removed while its deployment was still being configured could otherwise resume sampling, re-register its devices, and re-persist itself
+
 ## 2.4.0
 
 * fix permission dialogs failing silently: all permission requests now go through one serialized queue, `SmartPhoneClientManager.requestPermissions()`, which asks one dialog at a time. Android denies - without showing anything - any request made while another dialog is up, and the deployment handler, probes and device managers used to ask concurrently
