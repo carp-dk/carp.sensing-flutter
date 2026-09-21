@@ -1,9 +1,3 @@
-## 2.2.0
-
-* `CarpDataManager` uploads each data stream in its own request, in parallel - one rejected stream no longer blocks the others
-* a 4xx response discards the batch (`uploaded = 2`) instead of retrying it forever; 5xx and network errors are still retried
-* **BREAKING**: `DataStreamBuffer.cleanup()` now takes the `DataStreamId` to clean up; added `DataStreamBuffer.discard()`
-
 ## 2.1.1
 
 - upgrade to `research_package` ^3.0.0
