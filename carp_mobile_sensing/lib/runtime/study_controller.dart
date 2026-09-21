@@ -21,12 +21,17 @@ class SmartphoneStudyController {
   DataManager? _dataManager;
   final SmartphoneDeploymentExecutor _executor = SmartphoneDeploymentExecutor();
   Map<Permission, PermissionStatus>? _permissions;
+  StreamSubscription<SmartphoneStudyStatusEvent>? _studyEvents;
+
+  /// Set by [dispose]. A configuration already queued in [_configuring] must
+  /// stop at its next await instead of starting sampling for a removed study.
+  bool _disposed = false;
 
   /// Create a new [SmartphoneStudyController] to control the runtime behavior
   /// of a [study].
   SmartphoneStudyController(SmartphoneStudy study) : _study = study {
     // Listen to study events and handle deployment updates
-    study.events.listen((event) {
+    _studyEvents = study.events.listen((event) {
       switch (event.event) {
         case StudyStatusEventTypes.DeploymentStatusReceived:
           _deploymentStatusReceived();
@@ -147,7 +152,8 @@ class SmartphoneStudyController {
     debug(
       '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
     );
-    // fast out if study has been stopped
+    // fast out if study has been stopped or this controller disposed
+    if (_disposed) return;
     if (study.status == StudyStatus.Stopped) {
       info('$runtimeType - Study has been stopped and cannot be started.');
       return;
@@ -187,6 +193,7 @@ class SmartphoneStudyController {
       deployment: deployment!,
       measurements: measurements,
     );
+    if (_disposed) return;
 
     // Initialize all devices from the deployment, incl. this smartphone.
     _configureAllDevices();
@@ -203,6 +210,7 @@ class SmartphoneStudyController {
     //   - the device is re-registered with the deployment service,
     //   - sampling is (re)started
     await _connectAllConnectableDevices();
+    if (_disposed) return;
 
     // start the study and restart data sampling
     study.samplingState = existingSamplingStatus;
@@ -402,7 +410,8 @@ class SmartphoneStudyController {
       await SmartPhoneClientManager().requestPermissions(permissions.toList());
 
       _permissions = {
-        for (final permission in permissions) permission: await permission.status,
+        for (final permission in permissions)
+          permission: await permission.status,
       };
       debug('$runtimeType - Permissions: $_permissions');
     }
@@ -492,6 +501,7 @@ class SmartphoneStudyController {
   /// Will resume data collection if the [study]'s samplingStatus is `Resumed`.
   /// If not, sampling can be started later by calling the [resume] method.
   Future<void> _start() async {
+    if (_disposed) return;
     if (study.status == StudyStatus.Stopped) {
       warning('$runtimeType - Study has been stopped. Will not start study.');
       return;
@@ -514,13 +524,17 @@ class SmartphoneStudyController {
     // connecting devices that were skipped earlier for lack of permissions.
     if (SmartPhoneClientManager().askForPermissions) {
       await askForAllPermissions();
+      if (_disposed) return;
       await _connectAllConnectableDevices();
+      if (_disposed) return;
     }
 
     // Finally, resume/pause data sampling based on the current sampling state of this study.
     if (study.samplingState?.state == ExecutorState.Resumed) {
       debug('$runtimeType - Restarting sampling in 15 seconds...');
-      Future.delayed(Duration(seconds: 15), () => resume());
+      Future.delayed(Duration(seconds: 15), () {
+        if (!_disposed) resume();
+      });
     } else if (study.samplingState?.state == ExecutorState.Paused) {
       pause();
     }
@@ -554,6 +568,8 @@ class SmartphoneStudyController {
   @mustCallSuper
   void dispose() {
     info('$runtimeType - Disposing study from this smartphone...');
+    _disposed = true;
+    _studyEvents?.cancel();
     pause();
     dataManager?.close();
   }
