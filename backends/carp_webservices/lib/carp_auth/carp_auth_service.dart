@@ -175,10 +175,7 @@ class CarpAuthService {
         await FlutterWebAuth2.authenticate(
           url: uri,
           callbackUrlScheme: redirectUri!.split(':/').first,
-          options: FlutterWebAuth2Options(
-            intentFlags: ephemeralIntentFlags,
-            preferEphemeral: true,
-          ),
+          options: FlutterWebAuth2Options(preferEphemeral: true),
         ).then((result) async {
           code = Uri.parse(result).queryParameters['code'];
           if ((_currentUser == null || _currentUser!.isAuthenticated) &&
