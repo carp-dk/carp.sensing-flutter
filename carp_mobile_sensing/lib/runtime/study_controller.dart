@@ -147,8 +147,8 @@ class SmartphoneStudyController {
     debug(
       '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
     );
-    // fast out if study has been stopped or this controller disposed
-    if (study.status == StudyStatus.Stopped || _isDisposed) {
+    // fast out if study has been stopped
+    if (study.status == StudyStatus.Stopped) {
       info('$runtimeType - Study has been stopped and cannot be started.');
       return;
     }
@@ -187,7 +187,6 @@ class SmartphoneStudyController {
       deployment: deployment!,
       measurements: measurements,
     );
-    if (_isDisposed) return;
 
     // Initialize all devices from the deployment, incl. this smartphone.
     _configureAllDevices();
@@ -403,8 +402,7 @@ class SmartphoneStudyController {
       await SmartPhoneClientManager().requestPermissions(permissions.toList());
 
       _permissions = {
-        for (final permission in permissions)
-          permission: await permission.status,
+        for (final permission in permissions) permission: await permission.status,
       };
       debug('$runtimeType - Permissions: $_permissions');
     }
@@ -494,7 +492,6 @@ class SmartphoneStudyController {
   /// Will resume data collection if the [study]'s samplingStatus is `Resumed`.
   /// If not, sampling can be started later by calling the [resume] method.
   Future<void> _start() async {
-    if (_isDisposed) return;
     if (study.status == StudyStatus.Stopped) {
       warning('$runtimeType - Study has been stopped. Will not start study.');
       return;
@@ -517,7 +514,6 @@ class SmartphoneStudyController {
     // connecting devices that were skipped earlier for lack of permissions.
     if (SmartPhoneClientManager().askForPermissions) {
       await askForAllPermissions();
-      if (_isDisposed) return;
       await _connectAllConnectableDevices();
     }
 
@@ -556,14 +552,9 @@ class SmartphoneStudyController {
   /// When this method is called, the controller is never used again. It is an error
   /// to call any of the [start] or [stop] methods at this point.
   @mustCallSuper
-  bool get _isDisposed => executor.state == ExecutorState.Disposed;
-
   void dispose() {
     info('$runtimeType - Disposing study from this smartphone...');
     pause();
-    // Once disposed, the executor ignores initialize/resume - so a deployment
-    // configuration still queued in [_configuring] cannot restart sampling.
-    _executor.dispose();
     dataManager?.close();
   }
 }
