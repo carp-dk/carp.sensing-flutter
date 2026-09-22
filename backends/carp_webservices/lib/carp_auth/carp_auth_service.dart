@@ -175,10 +175,7 @@ class CarpAuthService {
         await FlutterWebAuth2.authenticate(
           url: uri,
           callbackUrlScheme: redirectUri!.split(':/').first,
-          options: FlutterWebAuth2Options(
-            intentFlags: ephemeralIntentFlags,
-            preferEphemeral: true,
-          ),
+          options: FlutterWebAuth2Options(preferEphemeral: true),
         ).then((result) async {
           code = Uri.parse(result).queryParameters['code'];
           if ((_currentUser == null || _currentUser!.isAuthenticated) &&
@@ -188,15 +185,7 @@ class CarpAuthService {
                 clientId!,
                 redirectUri,
                 authorizationCode: code,
-                discoveryUrl: _authProperties?.discoveryURL
-                    .replace(
-                      pathSegments: [
-                        ...?_authProperties?.discoveryURL.pathSegments,
-                        '.well-known',
-                        'openid-configuration',
-                      ],
-                    )
-                    .toString(),
+                discoveryUrl: _discoveryUrl,
                 grantType: 'authorization_code',
               ),
             );
@@ -206,28 +195,8 @@ class CarpAuthService {
 
     _currentUser = getCurrentUserProfileFromTokenResponse(tokenResponse);
 
-    final accessToken = tokenResponse.accessToken;
-    final refreshToken = tokenResponse.refreshToken;
-    final idToken = tokenResponse.idToken;
-    final scopeString =
-        tokenResponse.tokenAdditionalParameters?['scope'] ??
-        tokenResponse.tokenType;
-    final scope = (scopeString is String) ? scopeString.split(' ') : <String>[];
-    final expiresAt =
-        tokenResponse.accessTokenExpirationDateTime ??
-        DateTime.now().add(const Duration(hours: 1));
-
     if (_currentUser != null) {
-      _currentUser!.authenticated(
-        OAuthToken(
-          accessToken ?? '',
-          refreshToken ?? '',
-          idToken ?? '',
-          expiresAt,
-          scope,
-          idToken ?? '',
-        ),
-      );
+      _currentUser!.authenticated(_oauthTokenFromTokenResponse(tokenResponse));
       _authEventController.add(AuthEvent.authenticated);
       return currentUser;
     }
@@ -260,6 +229,33 @@ class CarpAuthService {
       );
     }
     return body['magicLink'] as String;
+  }
+
+  String get _discoveryUrl => _authProperties!.discoveryURL
+      .replace(
+        pathSegments: [
+          ..._authProperties!.discoveryURL.pathSegments,
+          '.well-known',
+          'openid-configuration',
+        ],
+      )
+      .toString();
+
+  OAuthToken _oauthTokenFromTokenResponse(TokenResponse tokenResponse) {
+    final idToken = tokenResponse.idToken;
+    final scopeString =
+        tokenResponse.tokenAdditionalParameters?['scope'] ??
+        tokenResponse.tokenType;
+    final scope = (scopeString is String) ? scopeString.split(' ') : <String>[];
+    return OAuthToken(
+      tokenResponse.accessToken ?? '',
+      tokenResponse.refreshToken ?? '',
+      idToken ?? '',
+      tokenResponse.accessTokenExpirationDateTime ??
+          DateTime.now().add(const Duration(hours: 1)),
+      scope,
+      idToken ?? '',
+    );
   }
 
   String _constructAuthUri(String uri) {
@@ -324,21 +320,79 @@ class CarpAuthService {
   ///
   /// Returns the signed in user (with a new [OAuthToken] access token), if successful.
   /// Throws a [CarpServiceException] if not successful.
-  Future<CarpUser> refresh() async {
+  Future<CarpUser> refresh() =>
+      _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
+
+  /// Concurrent callers (e.g. parallel uploads all hitting a 403) share one
+  /// refresh - a rotated refresh token is single-use.
+  Future<CarpUser>? _refreshing;
+
+  Future<CarpUser> _refresh() async {
     assert(_manager != null, 'Manager not configured. Call configure() first.');
     if (!_manager!.didInit) await initManager();
 
-    final OidcUser? response = await manager?.refreshToken();
+    // Magic-link (anonymous) sign-in bypasses the oidc manager, so it has no
+    // cached user to refresh - pass the refresh token we hold ourselves.
+    final ownRefreshToken = _currentUser?.token?.refreshToken;
+    final hasOwnToken = ownRefreshToken?.isNotEmpty ?? false;
+    debug(
+      '$runtimeType - refreshing token - manager user: '
+      '${manager?.currentUser != null}, own refresh token: $hasOwnToken, '
+      'user: ${_currentUser?.username}',
+    );
 
-    if (response != null) {
-      _currentUser = getCurrentUserProfile(response);
-
-      if (_currentUser != null) {
-        _currentUser!.authenticated(
-          OAuthToken.fromTokenResponse(response.token),
+    if (manager?.currentUser == null && hasOwnToken) {
+      // Anonymous sessions have no `openid` scope, so Keycloak never issues an
+      // id_token and the oidc manager refuses them - refresh like the magic
+      // link login does and read the user from the access token instead.
+      try {
+        final tokenResponse = await FlutterAppAuth().token(
+          TokenRequest(
+            _authProperties!.clientId,
+            _authProperties!.anonymousRedirectURI.toString(),
+            refreshToken: ownRefreshToken,
+            discoveryUrl: _discoveryUrl,
+            grantType: 'refresh_token',
+          ),
         );
-        _authEventController.add(AuthEvent.authenticated);
-        return currentUser;
+        _currentUser = getCurrentUserProfileFromTokenResponse(tokenResponse);
+        if (_currentUser != null) {
+          _currentUser!.authenticated(
+            _oauthTokenFromTokenResponse(tokenResponse),
+          );
+          _authEventController.add(AuthEvent.refreshed);
+          return currentUser;
+        }
+      } catch (error) {
+        warning('$runtimeType - anonymous refresh rejected - $error');
+      }
+    } else {
+      OidcUser? response;
+      try {
+        response = await manager?.refreshToken();
+      } on OidcException catch (error) {
+        // Surface Keycloak's reason (invalid_grant, session expired, ...).
+        warning(
+          '$runtimeType - refresh rejected - ${error.message} '
+          '${error.errorResponse?.error ?? ''} '
+          '${error.errorResponse?.errorDescription ?? ''}',
+        );
+      }
+
+      if (response == null) {
+        warning(
+          '$runtimeType - refresh returned no user - '
+          '${hasOwnToken ? 'refresh token rejected' : 'no refresh token to use'}',
+        );
+      } else {
+        _currentUser = getCurrentUserProfile(response);
+        if (_currentUser != null) {
+          _currentUser!.authenticated(
+            OAuthToken.fromTokenResponse(response.token),
+          );
+          _authEventController.add(AuthEvent.refreshed);
+          return currentUser;
+        }
       }
     }
 
