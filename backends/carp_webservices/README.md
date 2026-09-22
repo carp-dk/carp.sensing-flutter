@@ -182,6 +182,33 @@ To authenticate using a magic link (e.g., as read from a QR code) use the `authe
 CarpUser user = await CarpAuthService().authenticateWithMagicLink(qrcode);
 ```
 
+### How the two login flows differ
+
+There are two ways a user ends up with a token, and they are handled by different code paths:
+
+| | Browser login (`authenticate()`) | Magic link (`authenticateWithMagicLink()`) |
+|---|---|---|
+| Grant | OAuth2 authorization code, scope `openid offline_access` | Keycloak *action token* (`/login-actions/action-token`) |
+| Token exchange | `OidcUserManager` (package `oidc`) | `FlutterAppAuth().token()` directly |
+| Response | `access_token`, `refresh_token`, `id_token` | `access_token`, `refresh_token` — **no `id_token`** |
+| Who holds the user | `OidcUserManager.currentUser` | `CarpAuthService._currentUser` only |
+
+The action-token flow is not a negotiated OpenID grant, so Keycloak never attaches the `openid` scope
+and never issues an `id_token` — neither at login nor on refresh. `oidc_core` requires an `id_token`
+to build an `OidcUser`, which is why the magic-link path cannot go through the manager at all
+(`manager.refreshToken(overrideRefreshToken: ...)` gets a token back but fails on the missing `id_token`).
+
+`refresh()` therefore picks the path based on who owns the user:
+
+- `manager.currentUser != null` → `manager.refreshToken()` (browser login; `id_token` present).
+- otherwise, with a stored `refreshToken` → `FlutterAppAuth().token(grantType: 'refresh_token')`,
+  and the `CarpUser` is rebuilt from the access-token JWT claims (same as at magic-link login).
+
+Both paths emit `AuthEvent.refreshed` on success and `AuthEvent.failed` otherwise. Refresh tokens are
+single-use, so concurrent `refresh()` calls (e.g. several uploads hitting 403 at once) share one in-flight future.
+
+Listen on `authStateChanges` to persist the new token — the service does not store anything itself.
+
 To log out, just call the `logout` or `logoutNoContext` methods:
 
 ```dart
