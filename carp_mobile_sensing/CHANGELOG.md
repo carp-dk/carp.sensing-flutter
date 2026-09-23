@@ -1,6 +1,9 @@
-## 2.4.0
+## 2.4.1
 
 * `UserTask.onExpired({dequeue})` - pass `dequeue: false` to keep an expired task on the queue (state `expired`, still counted in `taskExpired`) instead of dequeuing it, which also deletes it from persistent storage. Default is unchanged
+
+## 2.4.0
+
 * fix permission dialogs failing silently: all permission requests now go through one serialized queue, `SmartPhoneClientManager.requestPermissions()`, which asks one dialog at a time. Android denies - without showing anything - any request made while another dialog is up, and the deployment handler, probes and device managers used to ask concurrently
 * `requestPermissionsInOrder()` (the default requester) also skips already granted permissions and asks `locationWhenInUse` before `locationAlways`, as Android requires
 * `configure(permissionRequester:)` lets an app take over how the user is asked - e.g. to show a rationale before each dialog
