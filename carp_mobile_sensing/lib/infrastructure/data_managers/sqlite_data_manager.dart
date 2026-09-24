@@ -148,20 +148,41 @@ class SQLiteDataManager extends AbstractDataManager {
     // running and sampling measurements.
     if (!database!.isOpen) return;
 
-    try {
-      int? id = await database?.insert(
+    // One transaction per burst: a transaction per row caps out at a few
+    // hundred inserts/s, which is too slow for e.g. health data catch-up.
+    _rows.add(map);
+    _flushTimer ??= Timer(const Duration(milliseconds: 500), _flush);
+  }
+
+  final List<Map<String, dynamic>> _rows = [];
+  Timer? _flushTimer;
+
+  Future<void> _flush() async {
+    _flushTimer = null;
+    if (_rows.isEmpty || database?.isOpen != true) return;
+    final batch = database!.batch();
+    for (final row in _rows) {
+      batch.insert(
         MEASUREMENT_TABLE_NAME,
-        map,
+        row,
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
-
-      debug(
-        '$runtimeType - wrote measurement to SQLite - '
-        'id: $id, type: ${map[DATATYPE_COLUMN]}, '
-        'device role name: ${map[DEVICE_ROLE_NAME_COLUMN]}.',
-      );
-    } catch (error) {
-      warning('$runtimeType - Error writing measurement to database - $error');
     }
+    final count = _rows.length;
+    _rows.clear();
+
+    try {
+      await batch.commit(noResult: true);
+      debug('$runtimeType - wrote $count measurements to SQLite.');
+    } catch (error) {
+      warning('$runtimeType - Error writing measurements to database - $error');
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    _flushTimer?.cancel();
+    await _flush();
+    await super.close();
   }
 }

@@ -1,3 +1,8 @@
+## 2.4.2
+
+* `SQLiteDataManager` writes measurements in one batched transaction per 500 ms instead of one transaction per measurement - a burst of ~30k health points took minutes and flooded the log with "database has been locked" warnings; it now takes seconds
+* `Probe.addMeasurement()` saves the `PersistentSamplingConfiguration.lastTime` checkpoint at most once per second instead of rewriting the whole deployment on every measurement
+
 ## 2.4.1
 
 * `UserTask.onExpired({dequeue})` - pass `dequeue: false` to keep an expired task on the queue (state `expired`, still counted in `taskExpired`) instead of dequeuing it, which also deletes it from persistent storage. Default is unchanged

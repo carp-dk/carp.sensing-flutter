@@ -61,10 +61,16 @@ abstract class Probe extends AbstractExecutor<Measure> {
     if (samplingConfiguration is PersistentSamplingConfiguration) {
       (samplingConfiguration as PersistentSamplingConfiguration).lastTime =
           DateTime.now().toUtc();
-      deployment?.hasBeenUpdated();
+      // Save the checkpoint once per burst, not once per measurement.
+      _saveCheckpoint ??= Timer(const Duration(seconds: 1), () {
+        _saveCheckpoint = null;
+        deployment?.hasBeenUpdated();
+      });
     }
     super.addMeasurement(measurement);
   }
+
+  Timer? _saveCheckpoint;
 
   List<Permission>? _permissions;
 
