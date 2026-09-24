@@ -158,12 +158,10 @@ abstract class ClientManager<
   @mustCallSuper
   Future<StudyDeploymentStatus?> getStudyDeploymentStatus(TStudy study) async {
     _checkConfiguration();
-    if (!repository.hasStudy(study)) return null;
-
-    final status = study.status;
-    final deploymentStatus = await proxy?.getStudyDeploymentStatus(study);
-    if (study.status != status) repository.updateStudy(study);
-    return deploymentStatus;
+    if (repository.hasStudy(study)) {
+      return await proxy?.getStudyDeploymentStatus(study);
+    }
+    return null;
   }
 
   /// Verifies whether the device is ready for deployment of the study runtime
