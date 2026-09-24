@@ -1,3 +1,7 @@
+## 2.5.0
+
+- feat: `NotificationManager.createNotification` takes an optional `payload`. When the user taps such a notification, its payload comes out on the new `NotificationManager.notificationTaps` stream, so the app can open the matching page. Task notifications still go to the `AppTaskController` as before.
+
 ## 2.4.3
 
 - fix: `NoUserTaskTrigger` only counted an `enqueued` task as being on the task list. Once the task was started, notified or canceled, the trigger added a new copy every minute. Now only a done or expired task counts as gone.

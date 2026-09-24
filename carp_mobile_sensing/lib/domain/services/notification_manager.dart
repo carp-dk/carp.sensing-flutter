@@ -56,13 +56,19 @@ abstract class NotificationManager {
 
   /// Create an immediate notification with [id], [title], and [body].
   /// If the [id] is not specified, a random id will be generated.
+  /// When tapped, [payload] is emitted on [notificationTaps].
   ///
   /// Returns the id of the notification created.
   Future<int> createNotification({
     int? id,
     required String title,
     String? body,
+    String? payload,
   });
+
+  /// The payloads of tapped notifications created with [createNotification].
+  /// Taps on task notifications are handled by the [AppTaskController].
+  Stream<String> get notificationTaps;
 
   /// Schedule a notification with [id], [title], and [body] at the [schedule] time.
   /// If the [id] is not specified, a random id will be generated.
@@ -125,7 +131,11 @@ class NoOpNotificationManager implements NotificationManager {
     int? id,
     required String title,
     String? body,
+    String? payload,
   }) async => 0;
+
+  @override
+  Stream<String> get notificationTaps => const Stream.empty();
 
   @override
   Future<int> scheduleNotification({
