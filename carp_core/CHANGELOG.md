@@ -1,6 +1,6 @@
 ## 2.2.2
 
-* fix: `Study.deploymentStatusReceived()` kept the first status it got and ignored later ones, so a deployment stopped on the server still looked running on the client. It now keeps the latest status. `Stopped` is final, so a late, older response cannot revive the study.
+* fix: `Study.deploymentStatusReceived()` kept the first status it got and ignored later ones, so a deployment stopped on the server still looked running on the client. It now keeps the latest status.
 * `ClientManager.getStudyDeploymentStatus()` persists the study when its status changes, and `StudyDeploymentProxy.tryDeployment()` does nothing for a stopped deployment.
 
 ## 2.2.1

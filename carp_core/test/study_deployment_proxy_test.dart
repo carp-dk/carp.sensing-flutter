@@ -94,10 +94,6 @@ void main() {
 
     study.deploymentStatusReceived();
     expect(study.status, StudyStatus.Stopped);
-
-    // a late response from before the stop does not revive it
-    study.deploymentStatusReceived(service.status);
-    expect(study.status, StudyStatus.Stopped);
   });
 
   test('continues deployment when registration fails', () async {

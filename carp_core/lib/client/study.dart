@@ -73,10 +73,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// If [deploymentStatus] is not specified, the previously received status is
   /// marked as updated.
   void deploymentStatusReceived([StudyDeploymentStatus? deploymentStatus]) {
-    // Stopped is final - a late, older response must not revive the study.
-    if (deploymentStatus != null && status != StudyStatus.Stopped) {
-      _deploymentStatus = deploymentStatus;
-    }
+    _deploymentStatus = deploymentStatus ?? _deploymentStatus;
     createEvent(
       StudyStatusEvent(this, StudyStatusEventTypes.DeploymentStatusReceived),
     );
