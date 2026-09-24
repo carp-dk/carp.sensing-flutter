@@ -305,6 +305,11 @@ class AppTaskController {
     for (var task in userTasks) {
       dequeue(task.id);
     }
+    _userTaskBuffer.removeWhere(
+      (item) =>
+          item.taskExecutor.deployment?.studyDeploymentId ==
+          study.studyDeploymentId,
+    );
   }
 
   /// Restore the queue from persistent storage for [study].

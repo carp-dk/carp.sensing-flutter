@@ -1,6 +1,6 @@
 ## 2.5.1
 
-- fix: a study deployment stopped on the server did not stop the study on the phone. Once the study's status is `Stopped`, the study controller now pauses sampling, removes the study's tasks and won't resume again. Needs `carp_core` 2.2.2.
+- fix: a study deployment stopped on the server did not stop the study on the phone. Once the study's status is `Stopped`, the study controller removes the study's tasks and disposes its executor, so nothing resumes sampling again - not even a device reconnecting. Needs `carp_core` 2.2.2.
 
 ## 2.5.0
 

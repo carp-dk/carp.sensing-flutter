@@ -118,13 +118,19 @@ class SmartphoneStudyController {
     (measurement) => measurement.data.dataType.toString() == type,
   );
 
-  /// Handles updates of the [deployment] status - stops sampling and removes
-  /// the tasks once the deployment has been stopped, e.g. on the server.
+  /// Handles updates of the [deployment] status - stops sampling for good and
+  /// removes the tasks once the deployment has been stopped, e.g. on the server.
   void _deploymentStatusReceived() {
-    if (study.status != StudyStatus.Stopped) return;
+    if (study.status != StudyStatus.Stopped ||
+        executor.state == ExecutorState.Disposed) {
+      return;
+    }
     info('$runtimeType - Study deployment has been stopped.');
     AppTaskController().removeStudy(study);
-    pause();
+    // Disposed executors ignore resume, incl. from device managers reconnecting.
+    executor
+      ..pause()
+      ..dispose();
   }
 
   /// Serializes [_deviceDeploymentReceived], which the event stream fires
@@ -533,19 +539,15 @@ class SmartphoneStudyController {
   }
 
   // Restart data sampling, ignoring any previously stored sampling state.
-  void restart() {
-    executor.clearSamplingStatus();
-    resume();
-  }
+  void restart() => executor
+    ..clearSamplingStatus()
+    ..resume();
 
   /// Resume data sampling for the [study] controlled by this controller.
   /// Will resume data sampling based on the current sampling state of this study.
   /// If you want to restart sampling and ignore any previously stored sampling state,
   /// call the [restart] method instead.
-  /// A stopped study is never resumed.
-  void resume() {
-    if (study.status != StudyStatus.Stopped) executor.resume();
-  }
+  void resume() => executor.resume();
 
   /// Pause data sampling.
   void pause() => executor.pause();
