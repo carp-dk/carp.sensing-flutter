@@ -1,3 +1,8 @@
+## 2.2.2
+
+* fix: `Study.deploymentStatusReceived()` kept the first status it got and ignored later ones, so a deployment stopped on the server still looked running on the client. It now keeps the latest status.
+* `ClientManager.getStudyDeploymentStatus()` persists the study when its status changes, and `StudyDeploymentProxy.tryDeployment()` does nothing for a stopped deployment.
+
 ## 2.2.1
 
 * fix of `StudyDeploymentProxy.tryDeployment()` not fetching the device deployment when the deployment status is `Running` but not yet held locally on this client (e.g. after app reinstallation or a local cache clear)

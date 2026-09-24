@@ -1,3 +1,7 @@
+## 2.5.1
+
+- fix: a study deployment stopped on the server did not stop the study on the phone. Once the study's status is `Stopped`, the study controller now pauses sampling, removes the study's tasks and won't resume again. Needs `carp_core` 2.2.2.
+
 ## 2.5.0
 
 - feat: `NotificationManager.createNotification` takes an optional `payload`. When the user taps such a notification, its payload comes out on the new `NotificationManager.notificationTaps` stream, so the app can open the matching page. Task notifications still go to the `AppTaskController` as before.

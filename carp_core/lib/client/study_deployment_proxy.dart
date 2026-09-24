@@ -63,7 +63,11 @@ class StudyDeploymentProxy {
     StudyDeploymentStatus? deploymentStatus = await getStudyDeploymentStatus(study);
 
     // A missing status is already reported by [getStudyDeploymentStatus].
-    if (deploymentStatus == null) return;
+    // A stopped deployment cannot be deployed.
+    if (deploymentStatus == null ||
+        deploymentStatus.status == StudyDeploymentStatusTypes.Stopped) {
+      return;
+    }
 
     // If the deployment is already running, this client just needs the
     // device deployment - e.g. after an app restart or reinstallation, where
