@@ -227,7 +227,26 @@ void main() {
         ),
       );
 
-      expect(data.recordId, 'source-record-id');
+      expect(data.recordId, startsWith('source-record-id|STEPS|'));
+    });
+
+    test('samples of one source record get distinct record ids', () {
+      HealthData sample(int second) => HealthData.fromHealthDataPoint(
+        HealthDataPoint(
+          uuid: 'heart-rate-record',
+          value: NumericHealthValue(numericValue: 70),
+          type: HealthDataType.HEART_RATE,
+          unit: HealthDataUnit.BEATS_PER_MINUTE,
+          dateFrom: DateTime.utc(2026, 1, 1, 10, 0, second),
+          dateTo: DateTime.utc(2026, 1, 1, 10, 0, second),
+          sourcePlatform: HealthPlatformType.googleHealthConnect,
+          sourceDeviceId: 'device',
+          sourceId: 'source',
+          sourceName: 'Health',
+        ),
+      );
+      expect(sample(0).recordId, isNot(sample(5).recordId));
+      expect(sample(0).recordId, sample(0).recordId, reason: 're-fetch dedups');
     });
 
     setUp(() {

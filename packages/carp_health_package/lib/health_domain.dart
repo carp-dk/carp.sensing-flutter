@@ -140,7 +140,11 @@ class HealthData extends Data {
   Map<String, dynamic> toJson() => _$HealthDataToJson(this);
 
   @override
-  String? get recordId => uuid.isEmpty ? null : uuid;
+  // The uuid is the Health Connect record id, shared by all samples/stages of
+  // one record (e.g. heart rate), so add type and time to make it per point.
+  String? get recordId => uuid.isEmpty
+      ? null
+      : '$uuid|$healthDataType|${dateFrom.toIso8601String()}|${dateTo.toIso8601String()}';
 
   /// The json type of this health data is `dk.cachet.carp.health.<healthdatatype>`,
   /// where `<healthdatatype>` is the lowercase version of the [healthDataType].
