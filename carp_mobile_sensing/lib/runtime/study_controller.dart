@@ -39,10 +39,13 @@ class SmartphoneStudyController {
       }
     });
 
-    // Keep the sampling state updated.
-    executor.stateEvents.listen(
-      (state) => study.samplingState = executor.samplingState,
-    );
+    // Keep the sampling state updated - there is none until configured, e.g.
+    // a study restored as stopped is disposed without ever being configured.
+    executor.stateEvents.listen((state) {
+      if (executor.configuration != null) {
+        study.samplingState = executor.samplingState;
+      }
+    });
   }
 
   /// The study that this [SmartphoneStudyController] controls
@@ -118,8 +121,18 @@ class SmartphoneStudyController {
     (measurement) => measurement.data.dataType.toString() == type,
   );
 
-  /// Handles updates of the [deployment] status.
-  Future<void> _deploymentStatusReceived() async {}
+  /// Handles updates of the [deployment] status - stops sampling for good and
+  /// removes the tasks once the deployment has been stopped, e.g. on the server.
+  void _deploymentStatusReceived() {
+    if (study.deploymentStatus?.status == StudyDeploymentStatusTypes.Stopped) {
+      info('$runtimeType - Study deployment has been stopped.');
+      AppTaskController().removeStudy(study);
+      // Disposed executors ignore resume, incl. from device managers reconnecting.
+      executor
+        ..pause()
+        ..dispose();
+    }
+  }
 
   /// Serializes [_deviceDeploymentReceived], which the event stream fires
   /// again while a previous run is still awaiting - twice on a normal launch.
@@ -148,7 +161,7 @@ class SmartphoneStudyController {
       '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
     );
     // fast out if study has been stopped
-    if (study.status == StudyStatus.Stopped) {
+    if (study.deploymentStatus?.status == StudyDeploymentStatusTypes.Stopped) {
       info('$runtimeType - Study has been stopped and cannot be started.');
       return;
     }
@@ -492,7 +505,7 @@ class SmartphoneStudyController {
   /// Will resume data collection if the [study]'s samplingStatus is `Resumed`.
   /// If not, sampling can be started later by calling the [resume] method.
   Future<void> _start() async {
-    if (study.status == StudyStatus.Stopped) {
+    if (study.deploymentStatus?.status == StudyDeploymentStatusTypes.Stopped) {
       warning('$runtimeType - Study has been stopped. Will not start study.');
       return;
     }
