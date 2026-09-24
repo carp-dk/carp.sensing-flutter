@@ -39,10 +39,13 @@ class SmartphoneStudyController {
       }
     });
 
-    // Keep the sampling state updated.
-    executor.stateEvents.listen(
-      (state) => study.samplingState = executor.samplingState,
-    );
+    // Keep the sampling state updated - there is none until configured, e.g.
+    // a study restored as stopped is disposed without ever being configured.
+    executor.stateEvents.listen((state) {
+      if (executor.configuration != null) {
+        study.samplingState = executor.samplingState;
+      }
+    });
   }
 
   /// The study that this [SmartphoneStudyController] controls
