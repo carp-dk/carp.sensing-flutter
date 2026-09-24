@@ -121,16 +121,14 @@ class SmartphoneStudyController {
   /// Handles updates of the [deployment] status - stops sampling for good and
   /// removes the tasks once the deployment has been stopped, e.g. on the server.
   void _deploymentStatusReceived() {
-    if (study.deploymentStatus?.status != StudyDeploymentStatusTypes.Stopped ||
-        executor.state == ExecutorState.Disposed) {
-      return;
+    if (study.deploymentStatus?.status == StudyDeploymentStatusTypes.Stopped) {
+      info('$runtimeType - Study deployment has been stopped.');
+      AppTaskController().removeStudy(study);
+      // Disposed executors ignore resume, incl. from device managers reconnecting.
+      executor
+        ..pause()
+        ..dispose();
     }
-    info('$runtimeType - Study deployment has been stopped.');
-    AppTaskController().removeStudy(study);
-    // Disposed executors ignore resume, incl. from device managers reconnecting.
-    executor
-      ..pause()
-      ..dispose();
   }
 
   /// Serializes [_deviceDeploymentReceived], which the event stream fires
