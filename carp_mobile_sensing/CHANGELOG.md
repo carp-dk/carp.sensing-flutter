@@ -1,3 +1,7 @@
+## 2.4.3
+
+- fix: `NoUserTaskTrigger` only counted an `enqueued` task as being on the task list. Once the task was started, notified or canceled, the trigger added a new copy every minute. Now only a done or expired task counts as gone.
+
 ## 2.4.2
 
 * `SQLiteDataManager` writes measurements in one batched transaction per 500 ms instead of one transaction per measurement - a burst of ~30k health points took minutes and flooded the log with "database has been locked" warnings; it now takes seconds

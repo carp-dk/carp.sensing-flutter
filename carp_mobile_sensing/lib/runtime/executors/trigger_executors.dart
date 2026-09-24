@@ -560,10 +560,13 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
   Future<bool> onResume() async {
     // enqueue immediately if not already on the list, then keep checking once
     // pr minute - otherwise the first check (and task) is delayed a full minute.
+    // A notified, started or canceled task is still on the list - only a done
+    // or expired one is not.
     void enqueueIfMissing() {
-      if (!AppTaskController().userTaskQueue
-          .where((task) => task.state == UserTaskState.enqueued)
-          .any((task) => task.name == configuration!.taskName)) {
+      if (!AppTaskController().userTaskQueue.any((task) =>
+          task.name == configuration!.taskName &&
+          task.state != UserTaskState.done &&
+          task.state != UserTaskState.expired)) {
         onTrigger();
       }
     }

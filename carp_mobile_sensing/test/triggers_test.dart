@@ -537,8 +537,40 @@ void main() {
         () {}, skip: 'needs a live SmartPhoneClientManager study controller');
     test(' - UserTaskTrigger - fires on a user task state change', () {},
         skip: 'needs a live AppTaskController user-task stream');
-    test(' - NoUserTaskTrigger - fires while the task is not enqueued', () {},
-        skip: 'needs a live AppTaskController user-task queue');
+    test(' - NoUserTaskTrigger - fires only while the task is not on the list',
+        () async {
+      const name = 'no-user-task-trigger-test';
+      final appTask = AppTaskExecutor()
+        ..initialize(AppTask(name: name, type: AppTask.SENSING_TYPE));
+
+      Future<int> triggers() async {
+        final trigger = NoUserTaskTriggerExecutor()
+          ..initialize(NoUserTaskTrigger(taskName: name));
+        var count = 0;
+        final sub = trigger.triggerEvents.listen((_) => count++);
+        trigger.resume();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        trigger.pause();
+        await sub.cancel();
+        return count;
+      }
+
+      expect(await triggers(), 1);
+
+      final task = (await AppTaskController()
+          .enqueue(appTask, sendNotification: false))!;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      // A started or canceled task is still on the list.
+      for (final state in [UserTaskState.started, UserTaskState.canceled]) {
+        task.state = state;
+        expect(await triggers(), 0, reason: '$state');
+      }
+
+      task.state = UserTaskState.done;
+      expect(await triggers(), 1);
+      AppTaskController().dequeue(task.id);
+    });
     test(' - AppLifecycleTrigger - fires on app lifecycle changes', () {},
         skip: 'needs Flutter WidgetsBinding lifecycle events');
   });
