@@ -24,6 +24,7 @@ void main() {
         ),
       ),
     );
+    await manager.close(); // flushes the pending batch
 
     final rows = await manager.database!.query(
       SQLiteDataManager.MEASUREMENT_TABLE_NAME,
@@ -42,6 +43,7 @@ void main() {
 
     await manager.onMeasurement(Measurement.fromData(Error(message: 'first')));
     await manager.onMeasurement(Measurement.fromData(Error(message: 'second')));
+    await Future<void>.delayed(const Duration(milliseconds: 700));
 
     expect(
       await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME),

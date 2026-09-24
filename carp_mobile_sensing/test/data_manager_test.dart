@@ -40,7 +40,7 @@ void main() {
     await configure(replacement);
 
     measurements.add(Measurement.fromData(Error(message: 'once')));
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await Future<void>.delayed(const Duration(milliseconds: 700)); // batched write
 
     // One measurement must yield one row - not one per manager.
     expect(
