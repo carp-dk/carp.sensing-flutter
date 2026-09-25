@@ -82,6 +82,20 @@ void main() {
     expect(service.deviceDeployedCalls, 0);
   });
 
+  test('a later status replaces the one held locally, e.g. when stopped', () async {
+    final service = _DeploymentService();
+    final study = Study<PrimaryDeviceDeployment>('deployment', 'phone')
+      ..deploymentStatusReceived(service.status);
+    final stopped = StudyDeploymentStatus(studyDeploymentId: 'deployment')
+      ..status = StudyDeploymentStatusTypes.Stopped;
+
+    study.deploymentStatusReceived(stopped);
+    expect(study.status, StudyStatus.Stopped);
+
+    study.deploymentStatusReceived();
+    expect(study.status, StudyStatus.Stopped);
+  });
+
   test('continues deployment when registration fails', () async {
     final service = _DeploymentService()
       ..failRegistration = true

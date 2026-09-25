@@ -77,6 +77,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
     int? id,
     required String title,
     String? body,
+    String? payload,
   }) async {
     id ??= _random.nextInt(1000);
     await FlutterLocalNotificationsPlugin().show(
@@ -84,9 +85,15 @@ class FlutterLocalNotificationManager implements NotificationManager {
       title: title,
       body: body,
       notificationDetails: _platformChannelSpecifics,
+      payload: payload,
     );
     return id;
   }
+
+  final StreamController<String> _taps = StreamController.broadcast();
+
+  @override
+  Stream<String> get notificationTaps => _taps.stream;
 
   @override
   Future<int> scheduleNotification({
@@ -219,11 +226,13 @@ void onDidReceiveNotificationResponse(NotificationResponse response) {
   String? payload = response.payload;
   debug('NotificationManager - callback on notification, payload: $payload');
 
-  if (payload != null) {
-    AppTaskController().onNotification(payload);
-  } else {
+  if (payload == null) {
     warning(
       "NotificationManager - Error in callback from notification - payload is '$payload'",
     );
+  } else if (AppTaskController().getUserTask(payload) != null) {
+    AppTaskController().onNotification(payload);
+  } else {
+    FlutterLocalNotificationManager()._taps.add(payload);
   }
 }
