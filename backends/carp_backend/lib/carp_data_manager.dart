@@ -157,51 +157,74 @@ class CarpDataManager extends AbstractDataManager {
 
       final batches = await buffer.getDataStreamBatches();
 
-      switch (carpEndPoint.uploadMethod) {
-        case CarpUploadMethod.stream:
-          await CarpDataStreamService().appendToDataStreams(
-            studyDeploymentId,
-            batches,
-            compress: compress,
-          );
-          addEvent(
-            DataManagerEvent(CarpDataManagerEventTypes.dataStreamAppended),
-          );
-          break;
-        case CarpUploadMethod.datapoint:
-          await uploadDataStreamBatchesAsDataPoint(batches);
-          addEvent(
-            DataManagerEvent(CarpDataManagerEventTypes.dataPointsBatchUploaded),
-          );
-          break;
-        case CarpUploadMethod.file:
-          // TODO - implement file method.
-          warning('$runtimeType - CarpUploadMethod.file not supported (yet).');
-          break;
-      }
-
-      // Count the total amount of measurements and check if any measurement
-      // has a separate file to be uploaded
-      var count = 0;
-      for (var batch in batches) {
-        count += batch.measurements.length;
-        for (var measurement in batch.measurements) {
-          if (measurement.data is FileData) {
-            var fileData = measurement.data as FileData;
-            if (fileData.upload) uploadFile(fileData);
-          }
-        }
-      }
+      // Upload each stream in its own request, all in parallel, so a rejected
+      // stream does not block the others - the server accepts or rejects a
+      // request as a whole.
+      final uploaded = await Future.wait(batches.map(_uploadBatch));
+      final count = [
+        for (var i = 0; i < batches.length; i++)
+          if (uploaded[i]) batches[i].measurements.length,
+      ].fold(0, (a, b) => a + b);
 
       info(
         "$runtimeType - Upload of data batches done. "
-        "${batches.length} batches with $count measurements in total uploaded.",
+        "${uploaded.where((ok) => ok).length}/${batches.length} batches "
+        "with $count measurements uploaded.",
       );
-
-      // if everything is uploaded successfully, then clean up the DB
-      await buffer.cleanup(carpEndPoint.deleteWhenUploaded);
     } catch (error) {
       warning('$runtimeType - Data upload failed - $error');
+    }
+  }
+
+  /// Upload [batch] and clean up its buffered measurements on success.
+  /// Returns true if uploaded. Never throws.
+  Future<bool> _uploadBatch(DataStreamBatch batch) async {
+    try {
+      await _append(batch);
+    } catch (error) {
+      // A 4xx means CAWS rejects this data - discard it rather than
+      // resending it forever. Anything else (5xx, network) is retried.
+      final rejected =
+          error is CarpServiceRequestException &&
+          error.httpStatus.httpResponseCode < 500;
+      warning(
+        '$runtimeType - Upload of data stream '
+        "'${batch.dataStream.deviceRoleName}/${batch.dataStream.dataType}' "
+        'failed - $error. ${rejected ? 'Discarding' : 'Will retry'} '
+        '${batch.measurements.length} measurements.',
+      );
+      if (rejected) await buffer.discard(batch.dataStream);
+      return false;
+    }
+    for (var measurement in batch.measurements) {
+      if (measurement.data is FileData) {
+        var fileData = measurement.data as FileData;
+        if (fileData.upload) uploadFile(fileData);
+      }
+    }
+    await buffer.cleanup(batch.dataStream, carpEndPoint.deleteWhenUploaded);
+    return true;
+  }
+
+  Future<void> _append(DataStreamBatch batch) async {
+    switch (carpEndPoint.uploadMethod) {
+      case CarpUploadMethod.stream:
+        await CarpDataStreamService().appendToDataStreams(studyDeploymentId, [
+          batch,
+        ], compress: compress);
+        addEvent(
+          DataManagerEvent(CarpDataManagerEventTypes.dataStreamAppended),
+        );
+        break;
+      case CarpUploadMethod.datapoint:
+        await uploadDataStreamBatchesAsDataPoint([batch]);
+        addEvent(
+          DataManagerEvent(CarpDataManagerEventTypes.dataPointsBatchUploaded),
+        );
+        break;
+      case CarpUploadMethod.file:
+        // TODO - implement file method.
+        throw UnsupportedError('CarpUploadMethod.file not supported (yet).');
     }
   }
 
