@@ -1,3 +1,7 @@
+## 4.1.2
+
+* log which health data types are missing permissions when the permission check fails on Android, and add `HealthServiceManager.missingHealthPermissions()` to get them
+
 ## 4.1.1
 
 * fix `HealthData.recordId` dropping most heart rate samples and all sleep stages - Health Connect gives every sample/stage of one record the same `uuid`, so deduplicating on it kept only the first. The id is now `uuid|type|dateFrom|dateTo`

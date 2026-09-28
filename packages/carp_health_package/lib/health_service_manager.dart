@@ -162,7 +162,29 @@ class HealthServiceManager
     // note above - so on iOS the only way to know is to try to collect data.
     if (Platform.isIOS) return true;
 
-    return hasHealthPermissions(types);
+    final granted = await hasHealthPermissions(types);
+    if (!granted) {
+      final missing = await missingHealthPermissions(types);
+      warning(
+        '$runtimeType - Missing health permissions for: $missing. '
+        'Either the user has not granted them, or they are not declared in the app\'s AndroidManifest.xml.',
+      );
+    }
+    return granted;
+  }
+
+  /// The health [types] this service cannot read, checked one type at a time.
+  ///
+  /// Always empty on iOS, since Apple Health does not disclose read access.
+  Future<List<HealthDataType>> missingHealthPermissions(
+    List<HealthDataType> types,
+  ) async {
+    if (Platform.isIOS) return [];
+    final missing = <HealthDataType>[];
+    for (final type in types) {
+      if (!await hasHealthPermissions([type])) missing.add(type);
+    }
+    return missing;
   }
 
   @override
