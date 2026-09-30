@@ -1,6 +1,7 @@
 ## 4.1.2
 
 * log which health data types are missing permissions when the permission check fails on Android, and add `HealthServiceManager.missingHealthPermissions()` to get them
+* fix iOS starting health sampling before access was ever requested - `onHasPermissions()` no longer returns `true` on iOS, but `false` until access has been requested (needs `health` with the fix from [carp-health-flutter#527](https://github.com/carp-dk/carp-health-flutter/pull/527))
 
 ## 4.1.1
 
