@@ -158,7 +158,9 @@ abstract class ClientManager<
   /// No deployment is attempted yet.
   ///
   /// If a study with the same deployment id and device role name has already
-  /// been added to this client, nothing happens and this study is returned.
+  /// been added to this client, it is not added again and no status is fetched.
+  /// The [study] passed in is returned, which can be a different instance from
+  /// the one already stored.
   ///
   /// Throws [NotConfiguredException] if the client has not yet been configured.
   /// Returns the study added to this client manager or the existing
@@ -192,14 +194,14 @@ abstract class ClientManager<
   /// Verifies whether the device is ready for deployment of the study runtime
   /// identified by [studyDeploymentId] and [deviceRoleName], and in case it is,
   /// deploys.
-  /// In case already deployed, nothing happens and the status of the deployment
-  /// is returned.
+  /// Also runs for a study that is already deployed, to refresh its deployment
+  /// information. Returns the study's status afterwards.
   ///
   /// Throws [NotConfiguredException] if the client has not yet been configured.
   /// Throws [IllegalArgumentException] if a study with the given
   /// [studyDeploymentId] and [deviceRoleName] has not been added.
-  /// Other deployment failures do not throw; they are reported on the study
-  /// as [StudyStatusEventTypes.DeploymentError] events.
+  /// Most other deployment failures do not throw; they are reported on the
+  /// study as [StudyStatusEventTypes.DeploymentError] events.
   ///
   /// Returns the new [StudyStatus] of the study.
   @mustCallSuper

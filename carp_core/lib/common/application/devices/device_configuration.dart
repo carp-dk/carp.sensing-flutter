@@ -120,18 +120,18 @@ class DefaultDeviceConfiguration
 /// A device which aggregates, synchronizes, and optionally uploads incoming
 /// data received from one or more connected devices (potentially just itself).
 ///
-/// Every protocol has at least one, added with
-/// [StudyProtocol.addPrimaryDevice]. In CARP Mobile Sensing this is the phone
+/// Add one with [StudyProtocol.addPrimaryDevice]; a protocol needs at least one
+/// before it can be deployed. In CARP Mobile Sensing this is the phone
 /// ([Smartphone]). Each primary device receives its own
-/// [PrimaryDeviceDeployment]. Primary devices are never optional.
+/// [PrimaryDeviceDeployment]. The constructor sets [isOptional] to false.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
     extends DeviceConfiguration<TRegistration> {
   PrimaryDeviceConfiguration({required super.roleName})
     : super(isOptional: false);
 
-  /// Always true. Only here for (de)serialization: for unknown device types,
-  /// the JSON tells whether to treat them as primary devices.
+  /// Defaults to true. Only here for (de)serialization: for unknown device
+  /// types, the JSON tells whether to treat them as primary devices.
   bool isPrimaryDevice = true;
 
   /// A new trigger which fires immediately at the start of a study deployment

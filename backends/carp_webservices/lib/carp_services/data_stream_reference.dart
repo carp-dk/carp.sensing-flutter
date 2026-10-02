@@ -8,9 +8,9 @@ part of 'carp_services.dart';
 
 /// A reference to the data streams of one study deployment in CAWS.
 ///
-/// Obtained from [CarpDataStreamService.dataStream]. Used to append data to
-/// the streams and to read data back, without passing the study deployment
-/// ID on every call.
+/// Obtained from [CarpDataStreamService.dataStream]. [append] uses this
+/// reference's study deployment ID. The read methods use the deployment ID in
+/// the [DataStreamId] you pass in, without checking that it matches.
 class DataStreamReference extends RPCCarpReference {
   /// The CARP study deployment ID.
   String studyDeploymentId;

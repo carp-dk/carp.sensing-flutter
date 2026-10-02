@@ -20,8 +20,8 @@
 /// these calls to one study deployment. The `carp_backend` package builds on
 /// this library to upload data from a running study.
 ///
-/// Each app is assumed to connect to one CAWS backend only, so all services
-/// are singletons. Configure them before use, like:
+/// Each app is assumed to connect to one CAWS backend only, so the default
+/// constructors return shared instances. Configure them before use, like:
 ///
 /// ```dart
 /// await CarpAuthService().configure(authProperties);
@@ -91,10 +91,11 @@ class CarpServiceException implements Exception {
 
 /// Exception for CAWS REST/HTTP service communication.
 ///
-/// Handles both HTTP exceptions from TCP/IP, NGINX, and CAWS application
-/// exceptions. The latter typically arise from CARP Core Java exceptions
-/// being thrown on the server side. These exceptions are mapped to HTTP
-/// status codes and messages sent back to the client.
+/// Thrown for non-success HTTP responses with a decodable JSON body, including
+/// CAWS application exceptions. The latter typically arise from CARP Core
+/// exceptions on the server side, which are mapped to HTTP status codes and
+/// messages sent back to the client. Transport failures and undecodable
+/// response bodies can propagate as other exceptions.
 class CarpServiceRequestException extends CarpServiceException {
   /// The HTTP status from CAWS associated with this exception.
   HTTPStatus httpStatus;

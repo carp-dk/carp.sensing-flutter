@@ -2,9 +2,11 @@
 ///
 /// Data is collected as [Measurement]s, grouped per data stream
 /// ([DataStreamId]) into [DataStreamBatch]es and uploaded through a
-/// [DataStreamService]. Data is pseudonymized: a measurement holds no
-/// participant information. Combined with the study protocol, the full
-/// provenance of the data (when and why it was collected) is known.
+/// [DataStreamService]. A [Measurement] only carries a [Data] payload and
+/// timestamps; this library does not strip identifying information from the
+/// payload, so the app must make sure the data meets the study's privacy
+/// requirements. Combined with the study protocol, the provenance of the data
+/// (when and why it was collected) is known.
 ///
 /// Main types: [Measurement], [DataStreamId], [DataStreamBatch],
 /// [DataStreamsConfiguration] and [DataStreamService].

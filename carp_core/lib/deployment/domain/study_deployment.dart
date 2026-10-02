@@ -11,8 +11,10 @@ part of '../../deployment.dart';
 /// related to devices when 'running' a study.
 ///
 /// I.e., a [StudyDeployment] is responsible for registering the physical
-/// devices described in the [StudyProtocol], enabling a connection between them,
-/// tracking device connection issues, and assessing data quality.
+/// devices described in the [StudyProtocol], building the
+/// [PrimaryDeviceDeployment] for each primary device, and tracking device
+/// registration and deployment status. Connection monitoring and data-quality
+/// assessment (part of the Kotlin CARP Core) are not implemented here.
 /// It lives on the deployment side, i.e. in a [DeploymentService]
 /// implementation; a client only sees its [status] and the
 /// [PrimaryDeviceDeployment] it creates.
@@ -95,8 +97,8 @@ class StudyDeployment {
   /// time (all devices deployed); null otherwise.
   DateTime? get startTime => _startTime;
 
-  /// Determines whether the study deployment has been stopped and no
-  /// further modifications are allowed.
+  /// Whether [stop] has been called. This is only a flag: later calls
+  /// can still modify the deployment.
   bool get isStopped => _isStopped;
 
   /// Create a new [StudyDeployment] based on a [StudyProtocol].
@@ -260,8 +262,8 @@ class StudyDeployment {
     _startTime = deviceDeploymentLastUpdateDate;
   }
 
-  /// Stop this study deployment. No further changes to this deployment
-  /// are allowed and no more data should be collected.
+  /// Mark this study deployment as stopped; no more data should be
+  /// collected. This does not block further changes to the deployment.
   void stop() {
     _isStopped = true;
     _status.status = StudyDeploymentStatusTypes.Stopped;

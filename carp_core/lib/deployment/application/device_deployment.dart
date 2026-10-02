@@ -15,7 +15,8 @@ part of '../../deployment.dart';
 /// controls it must run. A client stores it in [Study.deployment] and runs it.
 ///
 /// Key points:
-///  * Holds the tasks for this device and its connected devices only.
+///  * Built by [StudyDeployment.getDeviceDeploymentFor]: holds the tasks of the
+///    primary device and of all devices connected to it in the protocol.
 ///  * [expectedDataStreams] is computed from the task controls on first access.
 ///  * Is a [ChangeNotifier]; call [hasBeenUpdated] after changing it to notify
 ///    listeners (e.g., the [Study]).

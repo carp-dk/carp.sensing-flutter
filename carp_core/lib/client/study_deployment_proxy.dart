@@ -64,9 +64,10 @@ class StudyDeploymentProxy {
   ///  * Marks the device as deployed once no other devices need to be
   ///    registered first.
   ///
-  /// Can be called again to refresh the deployment. Errors are reported on the
+  /// Can be called again to refresh the deployment. Most errors are reported on the
   /// [study] as [StudyStatusEventTypes.DeploymentError] events, not thrown.
-  /// A failure to mark the device as deployed is only printed.
+  /// A missing device role in the returned deployment status throws a
+  /// [StateError]. A failure to mark the device as deployed is only printed.
   Future<void> tryDeployment(
     Study study,
     DeviceRegistration registration,

@@ -87,7 +87,7 @@ class Acceleration extends SensorData {
   Map<String, dynamic> toJson() => _$AccelerationToJson(this);
 }
 
-/// Rotation of the device in 3D space along [x], [y] and [z].
+/// Rate of rotation of the device around the [x], [y] and [z] axes.
 /// Typically captured by a gyroscope.
 ///
 /// Data type [CarpDataTypes.ROTATION].

@@ -13,8 +13,9 @@ part of '../../common.dart';
 /// collects this data type, typically through a probe.
 ///
 /// Key points:
-///  * Two measures are equal if they have the same [type]; a task keeps only
-///    one measure per type.
+///  * Two measures are equal if they have the same [type]. [TaskConfiguration]
+///    removes duplicates when it is created; later additions are not
+///    de-duplicated.
 ///  * [overrideSamplingConfiguration] overrides how the data is sampled; see
 ///    [DataTypeSamplingScheme] for the order of priority.
 ///

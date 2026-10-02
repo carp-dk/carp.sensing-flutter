@@ -40,7 +40,7 @@ class ProtocolVersion {
   /// Label of this version, e.g. a version number or date.
   String tag;
 
-  /// When this version of the protocol was created, in UTC.
+  /// When this version of the protocol was created (local time).
   late DateTime date;
 
   ProtocolVersion(this.tag) {

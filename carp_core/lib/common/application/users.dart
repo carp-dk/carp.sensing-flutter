@@ -34,7 +34,6 @@ class ParticipantRole {
 /// The values are set and read via a `ParticipationService`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ExpectedParticipantData {
-  /// The data that is expected.
   ParticipantAttribute? attribute;
 
   /// Determines whether the attribute can be set by all participants in the study

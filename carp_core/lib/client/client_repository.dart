@@ -14,7 +14,8 @@ part of '../client.dart';
 /// where the state lives (memory, local storage, ...).
 abstract interface class ClientRepository<TStudy extends Study> {
   /// The [DeviceRegistration] used to register the client in deployments;
-  /// null until [ClientManager.configure] has been called.
+  /// null when none is stored. [ClientManager.configure] writes the
+  /// registration given to it here.
   DeviceRegistration? deviceRegistration;
 
   /// Adds [study] to the repository.

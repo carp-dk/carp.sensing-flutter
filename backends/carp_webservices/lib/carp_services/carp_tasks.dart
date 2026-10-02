@@ -19,7 +19,6 @@ abstract class CarpServiceTask {
   FileStorageReference reference;
   TaskStateType _state = TaskStateType.idle;
 
-  /// The current state of this task.
   TaskStateType get state => _state;
 
   /// Start this task.
@@ -63,7 +62,9 @@ class FileUploadTask extends CarpServiceTask {
 
   /// Completes with the [CarpFileResponse] when the upload succeeds.
   ///
-  /// Completes with an error if the upload fails or is canceled.
+  /// Completes with an error for an unsuccessful HTTP response whose error
+  /// body can be decoded, or if the task is canceled. Other failures are not
+  /// consistently forwarded here and may leave this future pending.
   Future<CarpFileResponse> get onComplete => _completer.future;
 
   /// Start the the upload task.
@@ -138,8 +139,9 @@ class FileUploadTask extends CarpServiceTask {
 
 /// Downloads a file from CAWS to a local file in the background.
 ///
-/// Created and started by [FileStorageReference.download]. Await
-/// [onComplete] to know when the file is written.
+/// Created and started by [FileStorageReference.download]. [onComplete]
+/// completes after a successful HTTP response and the start of the local
+/// write; it does not wait for the write to finish.
 class FileDownloadTask extends CarpServiceTask {
   /// The file on the local device which this task is downloading to.
   /// The file has to be created before starting the download.
@@ -152,7 +154,9 @@ class FileDownloadTask extends CarpServiceTask {
 
   /// Completes with the HTTP status code (200) when the download succeeds.
   ///
-  /// Completes with an error if the download fails or is canceled.
+  /// Completes with an error for an unsuccessful HTTP response whose error
+  /// body can be decoded, or if the task is canceled. Other failures are not
+  /// consistently forwarded here and may leave this future pending.
   Future<int> get onComplete => _completer.future;
 
   /// Start the the download task.

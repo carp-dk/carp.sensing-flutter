@@ -67,8 +67,9 @@ class ParticipationReference extends RPCCarpReference {
   /// Sets participant [data] for the given [inputByParticipantRole] in this
   /// study deployment.
   /// The keys of [data] are input data types, like [InputType.INFORMED_CONSENT].
-  /// If [inputByParticipantRole] is null, the data is set for the whole
-  /// deployment.
+  /// If [inputByParticipantRole] is null, the data is shared input that any
+  /// participant role may supply. Specify the role to set input assigned to one
+  /// participant role.
   ///
   /// Returns all data for the specified study deployment, including the newly set data.
   Future<ParticipantData> setParticipantData(

@@ -111,7 +111,7 @@ class CarpParticipationService extends CarpBaseService
   /// one if more than one is available.
   ///
   /// Returns the selected invitation. Returns `null` if the user has no invitation(s)
-  /// or if the user closes the dialog (if [allowClose] is true).
+  /// or if the user cancels the dialog.
   ///
   /// If the user is invited to more than one study and [showInvitations] is `true`,
   /// an [ActiveParticipationInvitationDialog] is shown in [context].
@@ -119,8 +119,8 @@ class CarpParticipationService extends CarpBaseService
   /// If [device] is specified, it is used as the `applicationName` filter of
   /// [getActiveParticipationInvitations].
   ///
-  /// [allowClose] specifies whether the user can close the dialog without
-  /// selecting an invitation.
+  /// [allowClose] controls whether the dialog can be dismissed by tapping
+  /// outside it. The Cancel button is always shown.
   ///
   /// Throws a [CarpServiceException] if this service is not configured or
   /// no user is authenticated.

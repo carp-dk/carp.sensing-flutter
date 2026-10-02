@@ -60,10 +60,10 @@ class CarpDeploymentService extends CarpBaseService
   /// the identity, or should be handed out manually to the relevant participant
   /// by the person managing the identity.
   ///
-  /// Note that [id] is currently not sent to CAWS.
+  /// Note that [id] is currently not sent to CAWS, which assigns the
+  /// deployment ID itself.
   ///
   /// CAWS throws IllegalArgumentException when:
-  ///  - a deployment with [id] already exists
   ///  - [protocol] is invalid
   ///  - [invitations] is empty
   ///  - any of the assigned device roles in [invitations] is not part of the
@@ -257,9 +257,9 @@ class CarpDeploymentService extends CarpBaseService
     );
   }
 
-  /// Stops the study deployment with the specified [studyDeploymentId].
-  /// No further changes to this deployment will be allowed and no more
-  /// data will be collected.
+  /// Asks CAWS to stop the study deployment with the specified
+  /// [studyDeploymentId] and returns its updated status. This call does not
+  /// itself stop data collection in the local sensing runtime.
   ///
   /// CAWS throws IllegalArgumentException when a deployment with
   /// [studyDeploymentId] does not exist.

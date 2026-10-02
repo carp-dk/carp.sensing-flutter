@@ -153,7 +153,9 @@ class DocumentReference extends CarpReference {
 
   /// Deletes the document referred to by this [DocumentReference].
   ///
-  /// Does nothing if the document does not exist.
+  /// If the document ID is not known, looks the document up first and returns
+  /// without deleting if it does not exist. If the ID is known, the DELETE is
+  /// sent directly and server errors, including not found, are thrown.
   Future<void> delete() async {
     // if we don't have the document ID, get it first.
     if (id == null) _id = (await get())?.id;
@@ -204,7 +206,8 @@ class DocumentReference extends CarpReference {
   String toString() => 'DocumentReference - id: $id, path: $path';
 }
 
-/// A read-only copy of a document read from a CAWS collection.
+/// A local copy of a document read from a CAWS collection.
+/// The maps are mutable, but changing them does not update the server.
 ///
 /// Returned by [DocumentReference.get], [DocumentReference.setData],
 /// [CollectionReference.documents] and the document queries on [CarpService].

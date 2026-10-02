@@ -12,12 +12,14 @@ part of 'carp_services.dart';
 /// Key points:
 ///  * Call [configure] (or [configureFrom]) before use, or [app] throws.
 ///  * Requests use the access token of [CarpAuthService.currentUser].
-///  * A 403 response triggers one [CarpAuthService.refresh] and one retry.
-///  * Network errors are retried by [HTTPRetry]; error responses are thrown
-///    as [CarpServiceRequestException]s.
+///  * The REST helpers (GET, POST, PUT, DELETE) refresh the token once after a
+///    403 response and retry. RPC requests and file-transfer tasks do not.
+///  * Network errors are retried by [HTTPRetry]. Error responses with a JSON
+///    body are thrown as [CarpServiceRequestException]s; transport and
+///    response-decoding errors can propagate as they are.
 ///
-/// Each app is assumed to connect to one CAWS backend only, so all services
-/// are singletons and can be used like:
+/// Each app is assumed to connect to one CAWS backend only, so the default
+/// constructors return shared instances, used like:
 ///
 /// ```dart
 /// await CarpAuthService().configure(authProperties);

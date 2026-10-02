@@ -79,7 +79,6 @@ class CollectionReference extends CarpReference {
       .._path = responseJson['name'].toString();
   }
 
-  /// Gets the documents in this collection.
   Future<List<DocumentSnapshot>> get documents async {
     final response = await service._get(collectionUri);
 

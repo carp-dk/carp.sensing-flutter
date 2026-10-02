@@ -155,7 +155,8 @@ class ActiveParticipationInvitation {
   /// The study description.
   String? get studyDescription => invitation.description;
 
-  /// The role name of the first assigned device; null if none are assigned.
+  /// The role name of the first assigned device; null if [assignedDevices] is
+  /// null. Throws a [StateError] if the list is empty.
   String? get deviceRoleName => assignedDevices?.first.device.roleName;
 
   /// The ID of the participant.

@@ -8,8 +8,10 @@ part of 'carp_services.dart';
 /// endpoints, which are deprecated in CAWS.
 ///
 /// Key points:
-///  * A singleton; call [configure] before use. Other services often copy its
-///    setup via [CarpBaseService.configureFrom].
+///  * The default constructor returns a shared instance; [CarpService.instance]
+///    creates a separately configured one. Call [configure] before use. Other
+///    services often copy its setup via [CarpBaseService.configureFrom]. Its
+///    requests still use the default [CarpAuthService] for authentication.
 ///  * Most methods take an optional `studyId`; if omitted, the study ID of
 ///    [study] is used, or a [CarpServiceException] is thrown.
 ///  * Returns references ([FileStorageReference], [DocumentReference],

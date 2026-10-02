@@ -17,7 +17,7 @@ part of '../client.dart';
 ///
 /// Key points:
 ///  * [status] is derived from [deploymentStatus]; it is not stored.
-///  * Two studies are equal if they have the same [studyDeploymentId] and
+///  * Two studies are equal if they have the same type, [studyDeploymentId] and
 ///    [deviceRoleName].
 ///  * Is a [ChangeNotifier]: listeners are notified when the deployment
 ///    status or deployment changes.

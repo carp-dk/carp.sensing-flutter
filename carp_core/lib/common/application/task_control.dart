@@ -13,8 +13,9 @@ part of '../../common.dart';
 /// specified by [control]). Task controls are created by
 /// [StudyProtocol.addTaskControl]; you rarely create one yourself.
 ///
-/// Only the ids and names are serialized; [task] and [targetDevice] are
-/// runtime references that are not part of the JSON.
+/// The JSON holds the trigger id, task name, target device role name, [control]
+/// and [hasBeenScheduledUntil]; [task] and [targetDevice] are runtime
+/// references that are not part of the JSON.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TaskControl {
   /// The id of the [TriggerConfiguration]; its key in [StudyProtocol.triggers].

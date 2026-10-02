@@ -2,9 +2,9 @@
 ///
 /// [Serializable] adds a `__type` property to the JSON of each object, and
 /// [FromJsonFactory] uses it to restore the right subclass on deserialization.
-/// All CARP domain objects in `carp_core` and `carp_mobile_sensing` (protocols,
-/// devices, tasks, triggers, measures, data) build on this, which lets the same
-/// JSON be exchanged with the Kotlin CARP Core and the CARP web services.
+/// Polymorphic CARP types (devices, tasks, triggers, measures, data) use this
+/// so the same JSON can be exchanged with the Kotlin CARP Core and the CARP
+/// web services.
 ///
 /// Also re-exports [Uuid] from the `uuid` package for generating IDs.
 library carp_serializable;
@@ -25,9 +25,10 @@ export 'package:uuid/uuid.dart' show Uuid;
 /// Base class for objects that serialize to and from polymorphic JSON.
 ///
 /// Extend [Serializable] when a class hierarchy must round-trip through JSON
-/// and the concrete subclass has to be restored on deserialization. Every
-/// CARP domain object that is sent to or from a server (protocols, devices,
-/// tasks, triggers, measures, data) builds on this class.
+/// and the concrete subclass has to be restored on deserialization. Many
+/// CARP types that are sent to or from a server (devices, tasks, triggers,
+/// measures, data) extend this class; types without subclasses can use
+/// generated JSON methods directly.
 ///
 /// Key points:
 ///  * The concrete type is written to the `__type` property

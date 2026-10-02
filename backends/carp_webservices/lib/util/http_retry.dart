@@ -78,7 +78,6 @@ class ClonableMultipartFile extends http.MultipartFile {
 ///    package), each delay capped at 30 seconds.
 ///  * Each attempt times out after 20 seconds (15 for DELETE, 5 for SEND).
 class HTTPRetry {
-  /// The underlying HTTP client.
   final client = http.Client();
 
   /// Sends a multipart [request].
