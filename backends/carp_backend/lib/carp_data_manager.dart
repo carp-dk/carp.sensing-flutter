@@ -7,6 +7,10 @@
 
 part of 'carp_backend.dart';
 
+/// Creates [CarpDataManager]s for the `CAWS` data endpoint type.
+///
+/// Register it before deploying a study that uses a [CarpDataEndPoint]:
+/// `DataManagerRegistry().register(CarpDataManagerFactory())`.
 class CarpDataManagerFactory implements DataManagerFactory {
   @override
   String get type => DataEndPointTypes.CAWS;
@@ -19,36 +23,44 @@ class CarpDataManagerFactory implements DataManagerFactory {
   }
 }
 
-/// Upload CAMS measurement to the CARP Web Services (CAWS) backend.
+/// A data manager that uploads measurements to CARP Web Services (CAWS).
 ///
-/// Upload of data to CAWS can happen in three ways, as specified in
-/// [CarpUploadMethod]:
+/// Handles a [CarpDataEndPoint]. It is created by the [CarpDataManagerFactory]
+/// when a deployment with this data endpoint starts, and receives the
+/// deployment's stream of [Measurement]s.
 ///
-///   * [CarpUploadMethod.stream] - Upload data as data streams (the default method).
-///   * [CarpUploadMethod.datapoint] - Upload each data point separately using
-///       the old DataPoint batch endpoint in CAWS.
-///   * [CarpUploadMethod.file] - Collect measurements in a SQLite DB file and
-///       upload as a `db` file
-///
-/// Data is buffered locally in a [DataStreamBuffer] and uploaded to CAWS
-/// on a regular basis, as specified in the [CarpDataEndPoint.uploadInterval].
-/// However, if debug mode is set to "debug", data is uploaded every minute.
-///
-/// If the [CarpDataEndPoint.onlyUploadOnWiFi] is set to `true`, data is only
-/// uploaded when the device is connected to a WiFi network.
-/// The [CarpDataManager] listens to connectivity changes and only uploads data
-/// when the device is connected to the internet.
+/// Key points:
+///  * Measurements are buffered in a local [DataStreamBuffer] and uploaded every
+///    [CarpDataEndPoint.uploadInterval] minutes (every minute in debug mode).
+///  * [CarpDataEndPoint.uploadMethod] selects the upload method:
+///    [CarpUploadMethod.stream] (default) or [CarpUploadMethod.datapoint].
+///    [CarpUploadMethod.file] is not implemented.
+///  * Uploads are skipped when offline, when [CarpDataEndPoint.onlyUploadOnWiFi]
+///    is set and there is no WiFi, or when no user is authenticated in
+///    [CarpAuthService]. Data stays in the buffer until the next try.
+///  * [FileData] attachments with `upload` set are uploaded to CAWS file storage.
+///  * Emits [CarpDataManagerEventTypes] events on its event stream.
+///  * [CarpService] must be configured before [configure] is called.
 class CarpDataManager extends AbstractDataManager {
+  /// The data endpoint this manager uploads to. Set by [configure].
   late CarpDataEndPoint carpEndPoint;
+
+  /// The local buffer of measurements not yet uploaded.
   DataStreamBuffer buffer = DataStreamBuffer();
+
+  /// The timer that calls [uploadBufferedMeasurements]. Set by [configure].
   Timer? uploadTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   List<ConnectivityResult> _connectivity = [];
 
-  /// Make sure to create and initialize the [CarpDataManager].
+  /// Registers [CarpDataEndPoint] for JSON deserialization.
+  ///
+  /// Call this before deserializing a protocol that uses a [CarpDataEndPoint].
   static void ensureInitialized() =>
       FromJsonFactory().register(CarpDataEndPoint());
 
+  /// Creates a [CarpDataManager] and registers [CarpDataEndPoint] for JSON
+  /// deserialization.
   CarpDataManager() : super() {
     CarpMobileSensing.ensureInitialized();
     FromJsonFactory().register(CarpDataEndPoint());
@@ -57,17 +69,23 @@ class CarpDataManager extends AbstractDataManager {
   @override
   String get type => DataEndPointTypes.CAWS;
 
-  /// Should data be compressed / zipped before upload?
+  /// Whether data is compressed before upload. See [CarpDataEndPoint.compress].
   bool get compress => carpEndPoint.compress;
   set compress(bool compress) => carpEndPoint.compress = compress;
 
-  /// The connectivity status of this data manager.
+  /// The latest known network connectivity of the phone.
+  ///
+  /// Kept up to date by listening to connectivity changes after [configure].
   List<ConnectivityResult> get connectivity => _connectivity;
   set connectivity(List<ConnectivityResult> status) {
     _connectivity = status;
     info("$runtimeType - Network connectivity status set to '$status'");
   }
 
+  /// Configures this manager to buffer [measurements] from [deployment] and
+  /// upload them to [dataEndPoint], which must be a [CarpDataEndPoint].
+  ///
+  /// Starts the upload timer and listens for connectivity changes.
   @override
   Future<void> configure({
     required DataEndPoint dataEndPoint,
@@ -114,7 +132,12 @@ class CarpDataManager extends AbstractDataManager {
   @override
   Future<void> onMeasurement(Measurement measurement) async {}
 
-  /// Upload buffered measurements to CAWS.
+  /// Uploads all buffered measurements to CAWS.
+  ///
+  /// Refreshes an expired access token first. Does nothing if offline, if WiFi
+  /// is required but missing, or if no user is authenticated. On success the
+  /// buffer is cleaned up according to [CarpDataEndPoint.deleteWhenUploaded].
+  /// Errors are logged, not thrown.
   Future<void> uploadBufferedMeasurements() async {
     debug("$runtimeType - Starting upload of data batches...");
 
@@ -206,11 +229,15 @@ class CarpDataManager extends AbstractDataManager {
   }
 
   DataPointReference? _dataPointReference;
+
+  /// The CAWS DataPoint endpoint used by [CarpUploadMethod.datapoint].
   DataPointReference get dataPointReference =>
       _dataPointReference ??= CarpService().dataPointReference();
 
-  /// Transform all measurements in all [batches] to [DataPoint]s and upload
-  /// them to CAWS using the DataPoint batch upload endpoint.
+  /// Converts all measurements in [batches] to [DataPoint]s and uploads them
+  /// using the CAWS DataPoint batch endpoint.
+  ///
+  /// Used by [CarpUploadMethod.datapoint].
   Future<void> uploadDataStreamBatchesAsDataPoint(
     List<DataStreamBatch> batches,
   ) async {
@@ -247,8 +274,11 @@ class CarpDataManager extends AbstractDataManager {
     dataPointReference.batch(dataPoints);
   }
 
-  /// Upload a file attachment to CAWS, i.e. one that is referenced
-  /// in a [FileData] data object.
+  /// Uploads the file referenced by [data] to CAWS file storage.
+  ///
+  /// Adds device and deployment IDs to the file metadata. Deletes the local
+  /// file afterwards if [CarpDataEndPoint.deleteWhenUploaded] is `true`.
+  /// Errors are logged, not thrown.
   Future<void> uploadFile(FileData data) async {
     if (data.path == null) {
       warning(
@@ -305,6 +335,8 @@ class CarpDataManager extends AbstractDataManager {
     }
   }
 
+  /// Stops the upload timer, makes a final upload, and detaches from the
+  /// [buffer] without closing its shared database.
   @override
   Future<void> close() async {
     uploadTimer?.cancel();
@@ -323,9 +355,14 @@ class CarpDataManager extends AbstractDataManager {
   String toString() => '$runtimeType - ';
 }
 
-/// An enumeration of file data manager event types
+/// The types of [DataManagerEvent]s emitted by a [CarpDataManager].
 class CarpDataManagerEventTypes extends DataManagerEventTypes {
+  /// A batch of data points was uploaded using [CarpUploadMethod.datapoint].
   static const String dataPointsBatchUploaded = 'data_points_batch_uploaded';
+
+  /// Buffered data was appended to the CAWS data streams.
   static const String dataStreamAppended = 'data_stream_appended';
+
+  /// A [FileData] attachment was uploaded to CAWS file storage.
   static const String fileUploaded = 'file_uploaded';
 }

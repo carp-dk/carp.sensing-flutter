@@ -1,18 +1,28 @@
 part of 'carp_backend.dart';
 
-/// A Localization implementation that support loading localization from the
-/// CARP web service.
+/// Translations for a Flutter app, loaded from CAWS.
+///
+/// Add [CarpLocalizations.delegate] to the `localizationsDelegates` of a
+/// `MaterialApp` and look up strings with `CarpLocalizations.of(context)`.
+/// Translations are fetched (and cached) by [CarpResourceManager.getLocalizations],
+/// so [CarpService] must be configured and a study set before the app loads them.
 class CarpLocalizations {
+  /// The locale these translations are for.
   final Locale locale;
 
   CarpLocalizations(this.locale);
 
+  /// The [CarpLocalizations] of the closest [Localizations] widget above
+  /// [context], or `null` if [delegate] is not registered.
   static CarpLocalizations? of(BuildContext context) {
     return Localizations.of<CarpLocalizations>(context, CarpLocalizations);
   }
 
   Map<String, String>? _localizedStrings;
 
+  /// Loads the translations for [locale] via [CarpResourceManager].
+  ///
+  /// Called by [delegate]. Logs a warning if no translations are found.
   Future<void> load() async {
     _localizedStrings = await CarpResourceManager().getLocalizations(locale);
     if (_localizedStrings == null) {
@@ -20,12 +30,16 @@ class CarpLocalizations {
     }
   }
 
-  /// Get the translation for [key] to this [locale].
-  /// If [key] is not translated, [key] is returned.
+  /// The translation of [key] for this [locale].
+  ///
+  /// Returns [key] itself if it has no translation.
+  /// Throws if [load] has not completed or found no translations.
   String? translate(String key) =>
       (_localizedStrings!.containsKey(key)) ? _localizedStrings![key] : key;
 
-  // Static member to have a simple access to the delegate from the MaterialApp
+  /// The delegate to add to `MaterialApp.localizationsDelegates`.
+  ///
+  /// Supports every locale (see [CarpResourceManager.isSupported]) and never reloads.
   static const LocalizationsDelegate<CarpLocalizations> delegate =
       _CarpLocalizationsDelegate();
 }
