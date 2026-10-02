@@ -5,13 +5,32 @@
  */
 
 /// A [CARP Mobile Sensing](https://pub.dev/packages/carp_mobile_sensing)
-/// sampling package for collecting data from [Movisens](https://www.movisens.com/en/)
-/// sensors. This package supports the following sensors:
+/// sampling package that collects data from [Movisens](https://www.movisens.com/en/)
+/// sensors over Bluetooth Low Energy (BLE).
+///
+/// Register [MovisensSamplingPackage] in the [SamplingPackageRegistry], add a
+/// [MovisensDevice] as a connected device to the protocol, and add measures
+/// of the types below to a task that runs on that device.
+///
+/// Measure types (namespace `dk.cachet.carp.movisens`):
+///  * `dk.cachet.carp.movisens.activity` : steps, body position, inclination, movement acceleration and MET.
+///  * `dk.cachet.carp.movisens.hr` : heart rate (HR) and heart rate variability (HRV).
+///  * `dk.cachet.carp.movisens.eda` : electrodermal activity (EDA).
+///  * `dk.cachet.carp.movisens.skin_temperature` : skin temperature.
+///  * `dk.cachet.carp.movisens.respiration` : respiratory movement.
+///  * `dk.cachet.carp.movisens.tap_marker` : taps by the user on the sensor.
+///
+/// Platforms: Android and iOS.
+///
+/// Devices:
 ///
 ///  * [Move4](https://www.movisens.com/en/products/activity-sensor/) Activity Sensor.
 ///  * [EcgMove4](https://www.movisens.com/en/products/ecg-sensor/) ECG and Activity Sensor.
 ///  * [EdaMove4](https://www.movisens.com/en/products/eda-and-activity-sensor/) EDA and Activity Sensor
 ///  * [LightMove4](https://www.movisens.com/en/products/light-and-activity-sensor/) Light and Activity Sensor.
+///
+/// Not all measures are supported by all devices. For example, you need an
+/// EdaMove4 to measure EDA and an EcgMove4 to measure HR.
 ///
 /// This package uses the [movisens_flutter](https://pub.dev/packages/movisens_flutter) Flutter plugin,
 /// which again builds upon the [official Movisens BLE Protocol](https://docs.movisens.com/BluetoothLowEnergy/#introduction).
@@ -37,71 +56,56 @@ part "carp_movisens_package.g.dart";
 part 'movisens_transformers.dart';
 part 'movisens_device_manager.dart';
 
-/// The Movisens sampling package supporting the following measures each coming from
-/// different Movisens Services:
+/// The sampling package for Movisens devices.
 ///
-///  * dk.cachet.carp.movisens.activity – Physical activity like body positions, step count, inclination, acceleration, and metabolic (MET) levels.
-///  * dk.cachet.carp.movisens.hr - Heart Rate (HR), HR Variability (HRV), Mean HR
-///  * dk.cachet.carp.movisens.tap_marker - Markers of user tapping on the sensor.
-///  * dk.cachet.carp.movisens.eda - Elecrodermal Activity
-///  * dk.cachet.carp.movisens.skin_temperature - Skin temperature.
+/// It tells CARP Mobile Sensing which measure types a Movisens device
+/// provides, which [MovisensProbe] collects each of them, and which
+/// [MovisensDeviceManager] handles the connection to the device. Register it
+/// once, before a study is deployed.
 ///
-/// Note, however, that not all these measures are supported by all Movisens devices.
-/// For example, you need an EdaMove4 to measure EDA and an EcgMove4 to measure HR.
-///
-/// All measure types are continuos collection of Movisens data from a Movisens device,
-/// which are:
-///
-///  * Event-based measures.
-///  * Uses the [MovisensDevice] connected device for data collection.
-///  * No sampling configuration needed.
-///
-/// An example of a study protocol configuration is:
+/// Key points:
+///  * All measures run on a [MovisensDevice] connected device, not on the phone.
+///  * All measures are event-based and need no sampling configuration.
+///  * Not all measures are supported by all Movisens devices. For example, you
+///    need an EdaMove4 to measure EDA and an EcgMove4 to measure HR.
+///  * [onRegister] registers the device and data types for JSON
+///    deserialization. It also adds heart rate and step count transformers to
+///    the OMH schema, and a heart rate transformer to the FHIR schema, if
+///    these schemas are already registered.
 ///
 /// ```dart
-///  // Create a study protocol
-///  var protocol = StudyProtocol(
-///    ownerId: 'owner@dtu.dk',
-///    name: 'Movisens Example',
-///  );
-///
-///  // define which devices are used for data collection - both phone and Movisens
-///  var phone = Smartphone();
-///  var movisens = MovisensDevice(
-///    deviceName: 'MOVISENS Sensor 02655',
-///    sensorLocation: SensorLocation.Chest,
-///    sex: Sex.Male,
-///    height: 175,
-///    weight: 75,
-///    age: 25,
-///  );
-///
-///  protocol
-///    ..addPrimaryDevice(phone)
-///    ..addConnectedDevice(movisens);
-///
-///  // adding a movisens measure
-///  protocol.addTaskControl(
-///      ImmediateTrigger(),
-///      BackgroundTask(name: 'Movisens Task', measures: [
-///        Measure(type: MovisensSamplingPackage.ACTIVITY),
-///      ]),
-///      movisens);
+/// SamplingPackageRegistry().register(MovisensSamplingPackage());
+/// var movisens = MovisensDevice(sex: Sex.Female, height: 165, weight: 60);
+/// protocol.addConnectedDevice(movisens, phone);
+/// protocol.addTaskControl(
+///   ImmediateTrigger(),
+///   BackgroundTask(measures: [Measure(type: MovisensSamplingPackage.ACTIVITY)]),
+///   movisens,
+/// );
 /// ```
 ///
-/// To use this package, register it in the [carp_mobile_sensing] package using
-///
-/// ```
-///   SamplingPackageRegistry.register(MovisensSamplingPackage());
-/// ```
+/// See also [SamplingPackage], which this implements.
 class MovisensSamplingPackage implements SamplingPackage {
+  /// The namespace of all Movisens measure types.
   static const String MOVISENS_NAMESPACE = "${NameSpace.CARP}.movisens";
 
+  /// Measure type for physical activity. Collected by [MovisensActivityProbe].
   static const String ACTIVITY = "$MOVISENS_NAMESPACE.activity";
+
+  /// Measure type for heart rate and HRV. Collected by [MovisensHRProbe].
+  /// Needs an EcgMove4.
   static const String HR = "$MOVISENS_NAMESPACE.hr";
+
+  /// Measure type for electrodermal activity ([MovisensEDA]). Needs an EdaMove4.
   static const String EDA = "$MOVISENS_NAMESPACE.eda";
+
+  /// Measure type for respiratory movement ([MovisensRespiration]).
   static const String RESPIRATION = "$MOVISENS_NAMESPACE.respiration";
+
+  /// Measure type for skin temperature ([MovisensSkinTemperature]).
   static const String SKIN_TEMPERATURE = "$MOVISENS_NAMESPACE.skin_temperature";
+
+  /// Measure type for user taps on the sensor ([MovisensTapMarker]).
   static const String TAP_MARKER = "$MOVISENS_NAMESPACE.tap_marker";
 
   final DeviceManager _deviceManager = MovisensDeviceManager(
@@ -164,7 +168,8 @@ class MovisensSamplingPackage implements SamplingPackage {
   @override
   DeviceManager get deviceManager => _deviceManager;
 
-  /// Create a [MovisensProbe].
+  /// Creates the [MovisensProbe] for the measure [type], or null if [type] is
+  /// not a Movisens measure type.
   @override
   Probe? create(String type) {
     switch (type) {
@@ -237,6 +242,9 @@ class MovisensSamplingPackage implements SamplingPackage {
 }
 
 /// The location on the body where the Movisens device is placed.
+///
+/// Set in [MovisensDevice.sensorLocation] and sent to the device on connect,
+/// since the device's algorithms depend on it.
 enum SensorLocation {
   RightSideHip,
   Chest,

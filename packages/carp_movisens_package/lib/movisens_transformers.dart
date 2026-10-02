@@ -6,12 +6,18 @@
 
 part of 'carp_movisens_package.dart';
 
-/// A [Data] object which can hold an OMH [DataPoint](https://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_data-point)
-/// and provide its correct OMH [format] and [provenance].
+/// A [Data] object that holds an OMH [DataPoint](https://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_data-point)
+/// made from [MovisensData].
+///
+/// Base class of the OMH data transformers registered by
+/// [MovisensSamplingPackage.onRegister].
 // @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class OMHMovisensDataPoint extends Data {
+  /// The OMH data point.
   omh.DataPoint datapoint;
 
+  /// Creates the OMH provenance of [data], naming the phone, the app and the
+  /// Movisens sensor as source.
   static omh.DataPointAcquisitionProvenance provenance(MovisensData data) {
     String source =
         '{'
@@ -35,9 +41,12 @@ class OMHMovisensDataPoint extends Data {
   String get jsonType => "${NameSpace.OMH}.${omh.SchemaSupport.DATA_POINT}";
 }
 
-/// A [OMHMovisensDataPoint] that holds an OMH [HeartRate](https://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_heart-rate) data point.
+/// An [OMHMovisensDataPoint] that holds an OMH [HeartRate](https://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_heart-rate) data point.
+///
+/// Its [transformer] converts [MovisensHR] to OMH.
 class OMHHeartRateDataPoint extends OMHMovisensDataPoint
     implements DataTransformerFactory {
+  /// The OMH heart rate unit.
   static const String DEFAULT_HR_UNIT = "beats/min";
 
   OMHHeartRateDataPoint(super.datapoint);
@@ -71,11 +80,16 @@ class OMHHeartRateDataPoint extends OMHMovisensDataPoint
   factory OMHHeartRateDataPoint.fromJson(Map<String, dynamic> json) =>
       OMHHeartRateDataPoint(omh.DataPoint.fromJson(json));
 
+  /// A [DataTransformer] that converts a [MovisensHR] to an
+  /// [OMHHeartRateDataPoint].
   static DataTransformer get transformer =>
       ((data) => OMHHeartRateDataPoint.fromMovisensHRData(data as MovisensHR));
 }
 
-/// A [Data] that holds an OMH [StepCount](https://pub.dev/documentation/openmhealth_schemas/latest/domain_omh_activity/StepCount-class.html)
+/// An [OMHMovisensDataPoint] that holds an OMH [StepCount](https://pub.dev/documentation/openmhealth_schemas/latest/domain_omh_activity/StepCount-class.html)
+/// data point.
+///
+/// Its [transformer] converts [MovisensStepCount] to OMH.
 class OMHStepCountDataPoint extends OMHMovisensDataPoint
     implements DataTransformerFactory {
   OMHStepCountDataPoint(super.datapoint);
@@ -111,16 +125,22 @@ class OMHStepCountDataPoint extends OMHMovisensDataPoint
   factory OMHStepCountDataPoint.fromJson(Map<String, dynamic> json) =>
       OMHStepCountDataPoint(omh.DataPoint.fromJson(json));
 
+  /// A [DataTransformer] that converts a [MovisensStepCount] to an
+  /// [OMHStepCountDataPoint].
   static DataTransformer get transformer => ((data) =>
       OMHStepCountDataPoint.fromMovisensStepCountData(
         data as MovisensStepCount,
       ));
 }
 
-/// A [Data] that holds an FHIR [Heart Rate Observation](http://hl7.org/fhir/heartrate.html).
+/// A [Data] that holds a FHIR [Heart Rate Observation](http://hl7.org/fhir/heartrate.html).
+///
+/// Its [transformer] converts [MovisensHR] to FHIR.
 class FHIRHeartRateObservation extends Data implements DataTransformerFactory {
+  /// The heart rate unit. Not used in the FHIR JSON, which uses "beats/minute".
   static const String DEFAULT_HR_UNIT = "beats/min";
 
+  /// The FHIR Observation resource as JSON.
   Map<String, dynamic> fhirJson;
 
   FHIRHeartRateObservation(this.fhirJson) : super();
@@ -187,6 +207,8 @@ class FHIRHeartRateObservation extends Data implements DataTransformerFactory {
   @override
   String get jsonType => "${NameSpace.FHIR}.observation-vitalsigns";
 
+  /// A [DataTransformer] that converts a [MovisensHR] to a
+  /// [FHIRHeartRateObservation].
   static DataTransformer get transformer =>
       ((data) =>
           FHIRHeartRateObservation.fromMovisensHRData(data as MovisensHR));

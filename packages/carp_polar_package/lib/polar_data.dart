@@ -9,24 +9,26 @@ part of 'carp_polar_package.dart';
 //               POLAR SAMPLES
 // ------------------------------------------------------------------------
 
-/// Base class for all Polar samples.
+/// Base class for timestamped Polar samples.
+///
+/// A batch of samples is held by a [PolarSamples] data object.
 abstract class PolarSample {
-  /// The timestamp when this sample was taken in microseconds.
+  /// The time when this sample was taken on the device.
   final DateTime timeStamp;
 
   PolarSample({required this.timeStamp});
 }
 
-/// Polar accelerometer sample
+/// One accelerometer sample in a [PolarAccelerometer].
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarAccelerometerSample extends PolarSample {
-  /// x axis value in milli-G (including gravity)
+  /// x axis value in milli-G (including gravity).
   final int x;
 
-  /// y axis value in milli-G (including gravity)
+  /// y axis value in milli-G (including gravity).
   final int y;
 
-  /// z axis value in milli-G (including gravity)
+  /// z axis value in milli-G (including gravity).
   final int z;
 
   PolarAccelerometerSample({
@@ -41,16 +43,16 @@ class PolarAccelerometerSample extends PolarSample {
   Map<String, dynamic> toJson() => _$PolarAccelerometerSampleToJson(this);
 }
 
-/// Polar gyroscope sample
+/// One gyroscope sample in a [PolarGyroscope].
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarGyroscopeSample extends PolarSample {
-  /// x axis value in deg/sec
+  /// x axis value in degrees per second.
   final double x;
 
-  /// y axis value in deg/sec
+  /// y axis value in degrees per second.
   final double y;
 
-  /// z axis value in deg/sec
+  /// z axis value in degrees per second.
   final double z;
 
   PolarGyroscopeSample({
@@ -65,16 +67,16 @@ class PolarGyroscopeSample extends PolarSample {
   Map<String, dynamic> toJson() => _$PolarGyroscopeSampleToJson(this);
 }
 
-/// Polar magnetometer sample
+/// One magnetometer sample in a [PolarMagnetometer].
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarMagnetometerSample extends PolarSample {
-  /// x axis value in Gauss
+  /// x axis value in Gauss.
   final double x;
 
-  /// y axis value in Gauss
+  /// y axis value in Gauss.
   final double y;
 
-  /// z axis value in Gauss
+  /// z axis value in Gauss.
   final double z;
 
   PolarMagnetometerSample({
@@ -89,15 +91,14 @@ class PolarMagnetometerSample extends PolarSample {
   Map<String, dynamic> toJson() => _$PolarMagnetometerSampleToJson(this);
 }
 
-/// Polar PPG (Photoplethysmography) sample
+/// One photoplethysmography (PPG) sample in a [PolarPPG].
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarPPGSample extends PolarSample {
-  /// The PPG (Photoplethysmography) raw value received from the optical sensor.
-  /// Based on [PpgDataType] the amount of channels varies. Typically ppg(n)
-  /// channel + n ambient(s).
+  /// The PPG raw values received from the optical sensor, one per channel.
+  /// The channel layout depends on the [PpgDataType]. For example,
+  /// [PpgDataType.ppg3_ambient1] has three PPG channels and one ambient channel.
   final List<int> channelSamples;
 
-  /// Constructor
   PolarPPGSample({required super.timeStamp, required this.channelSamples});
 
   factory PolarPPGSample.fromJson(Map<String, dynamic> json) =>
@@ -105,7 +106,8 @@ class PolarPPGSample extends PolarSample {
   Map<String, dynamic> toJson() => _$PolarPPGSampleToJson(this);
 }
 
-/// Polar optical heart rate (OHR) pulse-to-pulse interval (PPI) sample.
+/// One optical heart rate (OHR) pulse-to-pulse interval (PPI) sample in a
+/// [PolarPPI].
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarPPISample {
   /// Pulse-to-pulse interval (PPI) in milliseconds.
@@ -145,19 +147,19 @@ class PolarPPISample {
   Map<String, dynamic> toJson() => _$PolarPPISampleToJson(this);
 }
 
-/// Polar heart rate (HR) sample
+/// One heart rate (HR) sample in a [PolarHR].
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarHRSample {
-  /// Heart rate (HR) in BPM
+  /// Heart rate (HR) in beats per minute (BPM).
   final int hr;
 
-  /// RR interval in ms.
+  /// RR intervals in milliseconds. May be empty.
   final List<int> rrsMs;
 
   /// True if there is contact between the device and the user's skin.
   final bool contactStatus;
 
-  /// True contact detection is supported on the device.
+  /// True if contact detection is supported on the device.
   final bool contactStatusSupported;
 
   PolarHRSample({
@@ -172,10 +174,10 @@ class PolarHRSample {
   Map<String, dynamic> toJson() => _$PolarHRSampleToJson(this);
 }
 
-/// Polar ECG sample
+/// One ECG sample in a [PolarECG].
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarECGSample extends PolarSample {
-  /// Voltage value in µVolts
+  /// Voltage value in µV.
   final int voltage;
 
   PolarECGSample({required super.timeStamp, required this.voltage});
@@ -189,14 +191,21 @@ class PolarECGSample extends PolarSample {
 //               POLAR => CARP SENSOR DATA
 // ------------------------------------------------------------------------
 
+/// Base class for Polar data that holds a batch of samples of type [T].
+///
+/// Each Polar probe emits one [PolarSamples] subclass per batch received from
+/// the device, like [PolarHR] or [PolarECG].
 class PolarSamples<T> extends SensorData {
-  /// Samples
+  /// The samples in this batch.
   final List<T> samples;
 
   PolarSamples({required this.samples});
 }
 
-/// Polar accelerometer data.
+/// A batch of accelerometer samples from a Polar device.
+///
+/// Collected by [PolarAccelerometerProbe] for the
+/// [PolarSamplingPackage.ACCELEROMETER] measure.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarAccelerometer extends PolarSamples<PolarAccelerometerSample> {
   PolarAccelerometer({required super.samples});
@@ -228,7 +237,10 @@ class PolarAccelerometer extends PolarSamples<PolarAccelerometerSample> {
   String get jsonType => PolarSamplingPackage.ACCELEROMETER;
 }
 
-/// Polar gyroscope data.
+/// A batch of gyroscope samples from a Polar device.
+///
+/// Collected by [PolarGyroscopeProbe] for the [PolarSamplingPackage.GYROSCOPE]
+/// measure. Supported by the Verity Sense.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarGyroscope extends PolarSamples<PolarGyroscopeSample> {
   PolarGyroscope({required super.samples});
@@ -260,7 +272,10 @@ class PolarGyroscope extends PolarSamples<PolarGyroscopeSample> {
   String get jsonType => PolarSamplingPackage.GYROSCOPE;
 }
 
-/// Polar magnetometer data.
+/// A batch of magnetometer samples from a Polar device.
+///
+/// Collected by [PolarMagnetometerProbe] for the
+/// [PolarSamplingPackage.MAGNETOMETER] measure. Supported by the Verity Sense.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarMagnetometer extends PolarSamples<PolarMagnetometerSample> {
   PolarMagnetometer({required super.samples});
@@ -292,12 +307,15 @@ class PolarMagnetometer extends PolarSamples<PolarMagnetometerSample> {
   String get jsonType => PolarSamplingPackage.MAGNETOMETER;
 }
 
-/// Polar optical heart rate (OHR) photoplethysmograpy (PPG) data.
+/// A batch of optical heart rate (OHR) photoplethysmography (PPG) samples.
+///
+/// Collected by [PolarPPGProbe] for the [PolarSamplingPackage.PPG] measure.
+/// Supported by the Verity Sense.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarPPG extends PolarSamples<PolarPPGSample> {
   /// Type of OHR data.
   ///
-  /// Varies based on what is type of optical sensor used in the device.
+  /// Varies with the type of optical sensor in the device.
   PpgDataType type;
 
   PolarPPG({required this.type, required super.samples});
@@ -327,8 +345,11 @@ class PolarPPG extends PolarSamples<PolarPPGSample> {
   String get jsonType => PolarSamplingPackage.PPG;
 }
 
-/// Polar PP interval (PPI) in milliseconds.
-/// Represents cardiac pulse-to-pulse interval extracted from PPG signal.
+/// A batch of pulse-to-pulse intervals (PPI) from a Polar device.
+///
+/// A PPI is the cardiac pulse-to-pulse interval extracted from the PPG
+/// signal. Collected by [PolarPPIProbe] for the [PolarSamplingPackage.PPI]
+/// measure. Supported by the Verity Sense.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarPPI extends PolarSamples<PolarPPISample> {
   PolarPPI({required super.samples});
@@ -361,7 +382,10 @@ class PolarPPI extends PolarSamples<PolarPPISample> {
   String get jsonType => PolarSamplingPackage.PPI;
 }
 
-/// Polar ECG data.
+/// A batch of ECG samples from a Polar device.
+///
+/// Collected by [PolarECGProbe] for the [PolarSamplingPackage.ECG] measure.
+/// Supported by the H10, at 130 Hz.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarECG extends PolarSamples<PolarECGSample> {
   PolarECG({required super.samples});
@@ -390,7 +414,10 @@ class PolarECG extends PolarSamples<PolarECGSample> {
   String get jsonType => PolarSamplingPackage.ECG;
 }
 
-/// Polar heart rate (HR).
+/// A batch of heart rate (HR) samples from a Polar device.
+///
+/// Collected by [PolarHRProbe] for the [PolarSamplingPackage.HR] measure.
+/// Supported by all Polar devices.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarHR extends PolarSamples<PolarHRSample> {
   PolarHR({required super.samples});

@@ -5,22 +5,35 @@
  */
 part of 'carp_polar_package.dart';
 
-/// Enumeration of supported Polar devices.
+/// The Polar hardware models this package can tell apart.
+///
+/// [PolarDeviceManager.polarDeviceType] derives it from the BLE name.
 enum PolarDeviceType {
-  /// Unknown Polar type
+  /// Unknown Polar type.
   Unknown,
 
-  /// Polar H9 Heart rate sensor
+  /// Polar H9 heart rate sensor.
   H9,
 
-  /// Polar H10 Heart rate sensor
+  /// Polar H10 heart rate sensor.
   H10,
 
-  /// Polar Verity Sense heart rate sensor
+  /// Polar Verity Sense optical heart rate sensor.
   Verity,
 }
 
-/// A [DeviceConfiguration] for a Polar device used in a [StudyProtocol].
+/// A Polar sensor used as a connected device in a protocol.
+///
+/// Add it with [SmartphoneStudyProtocol.addConnectedDevice] and use it as the
+/// target device of tasks with Polar measures (see [PolarSamplingPackage]).
+/// At runtime it is handled by a [PolarDeviceManager] and registered with a
+/// [PolarDeviceRegistration].
+///
+/// Key points:
+///  * Optional by default ([isOptional] is true), so a study can start
+///    without it.
+///  * [namePrefix] defaults to "Polar", so a BLE scan only shows Polar
+///    devices.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarDevice extends BLEDevice<PolarDeviceRegistration> {
   /// The type of a Polar device.
@@ -47,23 +60,29 @@ class PolarDevice extends BLEDevice<PolarDeviceRegistration> {
 
 /// A [DeviceRegistration] for a Polar device.
 ///
-/// This device registration defines the basic configuration of the Polar
-/// device, including the device type, the identifier, and the name
-/// of the device.
+/// Created by [PolarDeviceManager.createRegistration]. Holds the BLE address
+/// and name plus the Polar [identifier], [polarDeviceType] and the data types
+/// the device supports.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PolarDeviceRegistration extends BLEDeviceRegistration {
-  /// Polar device id printed on the sensor/device or UUID.
+  /// Polar device id printed on the sensor/device or UUID. "Unknown" if not
+  /// known.
   String identifier;
 
   /// The type of Polar device, if known.
   PolarDeviceType polarDeviceType;
 
   /// List of [PolarDataType]s that are available in the connected Polar device.
+  /// Null if not known.
   List<PolarDataType>? supportedDataTypes;
 
-  /// RSSI (Received Signal Strength Indicator) value from advertisement
+  /// RSSI (Received Signal Strength Indicator) value from advertisement.
   int? rssi;
 
+  /// Creates a registration.
+  ///
+  /// [deviceDisplayName] defaults to [bleName] and [hardwareName] defaults to
+  /// the name of [polarDeviceType].
   PolarDeviceRegistration({
     String? deviceDisplayName,
     super.registrationCreatedOn,
@@ -89,7 +108,10 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
   Map<String, dynamic> toJson() => _$PolarDeviceRegistrationToJson(this);
 }
 
-/// A Polar [DeviceManager].
+/// A [BLEDeviceManager] that connects to a Polar device.
+///
+/// Created by [PolarSamplingPackage] and used by the Polar probes to start
+/// data streams through [polar], using [polarIdentifier].
 ///
 /// The Polar BLE name is typically of the form
 ///
@@ -97,6 +119,17 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
 ///  *  Polar H10 B36KB56
 ///
 /// I.e., on the form "Polar <type> <identifier>".
+///
+/// Key points:
+///  * Connects using [polarIdentifier], not the BLE address. When paired, the
+///    identifier is taken from the last part of the BLE name.
+///  * The status becomes `reconnected` when the SDK reports the connection,
+///    and `connected` once the device has reported the data types it
+///    supports ([dataTypes]). Data types come from two SDK features (online
+///    streaming and the HR service), which become ready independently.
+///  * If connecting fails, it cancels its listeners so a later attempt does
+///    not stack them.
+///  * [onDisconnect] clears [batteryLevel] and [dataTypes].
 class PolarDeviceManager
     extends BLEDeviceManager<PolarDevice, PolarDeviceRegistration> {
   int? _batteryLevel;
@@ -109,7 +142,7 @@ class PolarDeviceManager
   StreamSubscription<PolarDeviceDisconnectedEvent>? _disconnectedSubscription;
   StreamSubscription<PolarSdkFeatureReadyEvent>? _sdkFeatureSubscription;
 
-  /// The [Polar] device handler.
+  /// The [Polar] SDK handler, created on first use.
   Polar get polar => _polar ??= Polar();
 
   @override
@@ -129,6 +162,10 @@ class PolarDeviceManager
   /// for connecting.
   String? polarIdentifier;
 
+  /// The type of Polar device, based on the [bleName].
+  ///
+  /// Null if [bleName] is unknown or does not start with "Polar".
+  /// [PolarDeviceType.Unknown] if the type part of the name is not recognized.
   PolarDeviceType? get polarDeviceType {
     if (bleName == null) return null;
 
@@ -152,7 +189,8 @@ class PolarDeviceManager
     return null;
   }
 
-  /// RSSI (Received Signal Strength Indicator) value from advertisement
+  /// RSSI (Received Signal Strength Indicator) value from advertisement.
+  /// Cleared when the SDK reports a disconnect.
   int? rssi;
 
   /// List of [PolarDataType]s that are available in Polar devices for online
@@ -185,6 +223,8 @@ class PolarDeviceManager
     rssi: rssi,
   );
 
+  /// Creates a device manager for the device [type], typically
+  /// [PolarDevice.DEVICE_TYPE].
   PolarDeviceManager(super.type, {super.configuration});
 
   @override
@@ -195,6 +235,7 @@ class PolarDeviceManager
     }
   }
 
+  /// Sets [polarIdentifier] to the last part of the [bleName].
   @override
   bool onPaired() => (polarIdentifier = bleName?.split(' ').last) != null;
 

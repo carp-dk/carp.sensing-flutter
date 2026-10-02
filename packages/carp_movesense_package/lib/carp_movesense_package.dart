@@ -9,58 +9,36 @@
 //  - Movesense ?? : 233830000687 : 0C:8C:DC:1B:23:3E
 
 /// A [CARP Mobile Sensing](https://pub.dev/packages/carp_mobile_sensing)
-/// sampling package for collecting data from the Movesense MD and Active
-/// (HR+ and HR2) heart rate sensors. From these sensors, this package can
-/// collect the following measures:
+/// sampling package that collects data from Movesense sensors over Bluetooth
+/// Low Energy (BLE).
 ///
-/// * `dk.cachet.carp.movesense.state` : State changes (like moving, tapping, etc.)
-/// * `dk.cachet.carp.movesense.hr` : Heart rate
-/// * `dk.cachet.carp.movesense.ecg` : Electrocardiogram (ECG)
-/// * `dk.cachet.carp.movesense.temperature` : Device temperature
-/// * `dk.cachet.carp.movesense.imu` : 9-axis Inertial Movement Unit (IMU)
+/// Register [MovesenseSamplingPackage] in the [SamplingPackageRegistry], add a
+/// [MovesenseDevice] as a connected device to the protocol, and add measures
+/// of the types below to a task that runs on that device.
 ///
-/// **Movesense Active (HR+ & HR2)r**
+/// Measure types (namespace `dk.cachet.carp.movesense`):
+///  * `dk.cachet.carp.movesense.deviceinformation` : device information ([MovesenseDeviceInformation]).
+///  * `dk.cachet.carp.movesense.state` : state changes, like tapping ([MovesenseStateChange]).
+///  * `dk.cachet.carp.movesense.hr` : heart rate and R-R interval ([MovesenseHR]).
+///  * `dk.cachet.carp.movesense.ecg` : electrocardiogram (ECG) ([MovesenseECG]).
+///  * `dk.cachet.carp.movesense.temperature` : device temperature, Movesense MD only ([MovesenseTemperature]).
+///  * `dk.cachet.carp.movesense.imu` : 9-axis Inertial Movement Unit (IMU) ([MovesenseIMU]).
 ///
-/// Optimized for exercise and daily activities, Movesense Active is an ideal
-/// platform for creating new smart wearables for well-being and sports.
+/// Platforms: Android and iOS.
 ///
-/// With integrated heart rate, movement measurement, and an open API, Movesense
-/// Active can provide new insights into all sports in the world.
-///
-/// Features:
-///
-///  * Movement measurement (9-axis IMU: accelerometer, gyroscope, magnetometer)
-///  * Heart rate (bpm), R-R intervals, single channel ECG (non-medical),
-///  * Bluetooth heart rate profile
-///  * Small and lightweight (9.4g/0.33oz with battery)
-///  * Wireless data transmission with Bluetooth Low Energy
-///  * Memory for data logging and for custom sensor apps
-///  * User replaceable CR 2025 battery
-///  * Swim and shock proof
-///
-/// **Movesense Medical**
-///
-/// Wearable ECG monitor and movement sensor for health wearables.
-/// Class IIa certified for medical use, Movesense Medical sensor is an essential
-/// building block to transform your big idea into a new healthcare solution.
-///
-/// Key features:
-///  * Single channel ECG, heart rate, R-R intervals
-///  * Movement measurement (9-axis IMU: accelerometer, gyroscope, magnetometer)
-///  * Wireless data transmission with Bluetooth Low Energy
-///  * Small and lightweight (9.4g/0.33oz with battery)
-///  * User replaceable CR 2025 battery
-///  * Class IIa Medical Device, EU Medical Device Regulation MDR 2017/745
+/// Devices: Movesense Medical (MD), Movesense Active HR+ and HR2. All of them
+/// measure single-channel ECG, heart rate, R-R intervals and 9-axis movement
+/// (accelerometer, gyroscope, magnetometer). The MD is a Class IIa medical
+/// device (EU MDR 2017/745).
 ///
 /// This package uses the Flutter
 /// [carp_movesense_flutter](https://pub.dev/packages/carp_movesense_flutter)
-/// plugin, which again is based on the official
+/// plugin, which is based on the official
 /// [Movesense Mobile API](https://www.movesense.com/docs/mobile/mobile_sw_overview/).
-///
-/// As of version 3.0.0 this package is based on `carp_movesense_flutter` instead
-/// of the `mdsflutter` plugin. The public API of this sampling package is unchanged.
-/// Internally, the Movesense MDS operations are routed through the mdsflutter-compatible
-/// [Mds] facade exposed by `carp_movesense_flutter`.
+/// As of version 3.0.0 this plugin replaces the `mdsflutter` plugin. The public
+/// API of this sampling package is unchanged. Internally, the Movesense MDS
+/// calls go through the mdsflutter-compatible [Mds] facade of
+/// `carp_movesense_flutter`.
 library;
 
 import 'dart:async';
@@ -79,14 +57,48 @@ part 'movesense_data.dart';
 part 'movesense_probes.dart';
 part 'movesense_device_manager.dart';
 
+/// The sampling package for Movesense devices.
+///
+/// It tells CARP Mobile Sensing which measure types a Movesense device
+/// provides, which [Probe] collects each of them, and which
+/// [MovesenseDeviceManager] handles the connection to the device. Register it
+/// once, before a study is deployed.
+///
+/// Key points:
+///  * All measures run on a [MovesenseDevice] connected device, not on the phone.
+///  * All measures are event-based and need no sampling configuration.
+///  * [TEMPERATURE] is only created when the connected device is a Movesense
+///    MD; for other devices [create] returns null.
+///  * [onRegister] registers the device and data types for JSON
+///    deserialization, including the CAMS 1.x device type name.
+///
+/// ```dart
+/// SamplingPackageRegistry().register(MovesenseSamplingPackage());
+/// var movesense = MovesenseDevice();
+/// protocol.addConnectedDevice(movesense, phone);
+/// protocol.addTaskControl(
+///   ImmediateTrigger(),
+///   BackgroundTask(measures: [Measure(type: MovesenseSamplingPackage.HR)]),
+///   movesense,
+/// );
+/// ```
+///
+/// See also [SamplingPackage], which this implements.
 class MovesenseSamplingPackage implements SamplingPackage {
+  /// The namespace of all Movesense measure types.
   static const String MOVESENSE_NAMESPACE = "${NameSpace.CARP}.movesense";
 
+  /// Measure type for device information ([MovesenseDeviceInformation]).
   static const String DEVICE_INFO = "$MOVESENSE_NAMESPACE.deviceinformation";
+  /// Measure type for state changes ([MovesenseStateChange]).
   static const String STATE = "$MOVESENSE_NAMESPACE.state";
+  /// Measure type for heart rate ([MovesenseHR]).
   static const String HR = "$MOVESENSE_NAMESPACE.hr";
+  /// Measure type for ECG ([MovesenseECG]).
   static const String ECG = "$MOVESENSE_NAMESPACE.ecg";
+  /// Measure type for device temperature ([MovesenseTemperature]). Movesense MD only.
   static const String TEMPERATURE = "$MOVESENSE_NAMESPACE.temperature";
+  /// Measure type for IMU data ([MovesenseIMU]).
   static const String IMU = "$MOVESENSE_NAMESPACE.imu";
 
   final MovesenseDeviceManager _deviceManager = MovesenseDeviceManager(
