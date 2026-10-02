@@ -13,8 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Pinned: formatter output can change between SDK releases.
-      - uses: dart-lang/setup-dart@v1
         with:
-          sdk: 3.13.4
-      - run: dart format --output=none --set-exit-if-changed .
+          submodules: true
+      # Pinned: formatter output can change between SDK releases.
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          cache: true
+      # Resolve packages so each analysis_options.yaml (page_width) and SDK version is honoured.
+      - run: |
+          for p in $(git ls-files '*pubspec.yaml' | xargs -n1 dirname); do
+            (cd "$p" && flutter pub get) || exit 1
+          done
+      - run: git ls-files -z '*.dart' | xargs -0 dart format --output=none --set-exit-if-changed
