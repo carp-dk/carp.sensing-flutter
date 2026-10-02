@@ -45,9 +45,8 @@ class StudyPageState extends State<StudyPage> {
 
   /// Show an info [message] in a snackbar.
   void _showInfo(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message, softWrap: true)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message, softWrap: true)));
   }
 
   List<Widget> _studyPanel() {

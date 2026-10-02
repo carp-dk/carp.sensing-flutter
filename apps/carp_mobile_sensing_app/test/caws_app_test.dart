@@ -1,6 +1,7 @@
 // import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'dart:io';
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -238,14 +239,17 @@ void main() {
     });
 
     test('- set participant data - NAME', () async {
-      var data = await CarpParticipationService()
-          .setParticipantData(testDeploymentId, {
-            InputType.FULL_NAME: FullNameInput(
-              firstName: 'Eva',
-              middleName: 'G.',
-              lastName: 'Olsen',
-            ),
-          }, "Mother");
+      var data = await CarpParticipationService().setParticipantData(
+        testDeploymentId,
+        {
+          InputType.FULL_NAME: FullNameInput(
+            firstName: 'Eva',
+            middleName: 'G.',
+            lastName: 'Olsen',
+          ),
+        },
+        "Mother",
+      );
       print(toJsonString(data));
     });
 

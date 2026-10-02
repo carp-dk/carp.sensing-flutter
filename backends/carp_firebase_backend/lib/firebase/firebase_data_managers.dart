@@ -37,7 +37,8 @@ abstract class FirebaseDataManager extends AbstractDataManager {
   Future<FirebaseApp> get firebaseApp async {
     if (firebaseEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_firebaseApp == null) {
       _firebaseApp = await Firebase.initializeApp(
@@ -69,7 +70,8 @@ abstract class FirebaseDataManager extends AbstractDataManager {
   Future<User?> get user async {
     if (firebaseEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_user == null) {
       switch (firebaseEndPoint!.firebaseAuthenticationMethod) {
@@ -83,8 +85,9 @@ abstract class FirebaseDataManager extends AbstractDataManager {
               accessToken: googleAuth.accessToken,
               idToken: googleAuth.idToken,
             );
-            UserCredential result =
-                await _auth.signInWithCredential(credential);
+            UserCredential result = await _auth.signInWithCredential(
+              credential,
+            );
             _user = result.user;
             break;
           }
@@ -93,8 +96,9 @@ abstract class FirebaseDataManager extends AbstractDataManager {
             assert(firebaseEndPoint?.email != null);
             assert(firebaseEndPoint?.password != null);
             UserCredential result = await _auth.signInWithEmailAndPassword(
-                email: firebaseEndPoint!.email!,
-                password: firebaseEndPoint!.password!);
+              email: firebaseEndPoint!.email!,
+              password: firebaseEndPoint!.password!,
+            );
             _user = result.user;
             break;
           }
@@ -104,8 +108,9 @@ abstract class FirebaseDataManager extends AbstractDataManager {
           }
       }
       if (_user != null) {
-        addEvent(FirebaseDataManagerEvent(
-            FirebaseDataManagerEventTypes.authenticated));
+        addEvent(
+          FirebaseDataManagerEvent(FirebaseDataManagerEventTypes.authenticated),
+        );
         print("signed in as " + _user!.email! + " - uid: " + _user!.uid);
       }
     }
@@ -154,8 +159,10 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
     fileDataManager.events
         .where((event) => event.runtimeType == FileDataManagerEvent)
         .where((event) => event.type == FileDataManagerEventTypes.FILE_CLOSED)
-        .listen((event) =>
-            _uploadFileToFirestore((event as FileDataManagerEvent).path));
+        .listen(
+          (event) =>
+              _uploadFileToFirestore((event as FileDataManagerEvent).path),
+        );
   }
 
   Future initialize(
@@ -175,11 +182,13 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
 
     info('Initializig FirebaseStorageDataManager...');
     info(
-        ' Firebase URI  : ${firebaseStorageDataEndPoint!.firebaseEndPoint.uri}');
+      ' Firebase URI  : ${firebaseStorageDataEndPoint!.firebaseEndPoint.uri}',
+    );
     info(' Folder path   : ${firebaseStorageDataEndPoint!.path}');
     info(' Storage       : ${storage.app.name}');
     info(
-        ' Auth. user    : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n');
+      ' Auth. user    : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n',
+    );
   }
 
   /// The Firebase Storage instance for the endpoint's bucket.
@@ -188,12 +197,15 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
   Future<FirebaseStorage> get firebaseStorage async {
     if (firebaseStorageDataEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_firebaseStorage == null) {
       final FirebaseApp? app = await firebaseApp;
       _firebaseStorage = FirebaseStorage.instanceFor(
-          app: app, bucket: firebaseStorageDataEndPoint!.firebaseEndPoint.uri);
+        app: app,
+        bucket: firebaseStorageDataEndPoint!.firebaseEndPoint.uri,
+      );
     }
     return _firebaseStorage!;
   }
@@ -204,14 +216,18 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
       "${firebaseStorageDataEndPoint!.path}/$studyDeploymentId/${DeviceInfo().deviceID.toString()}";
 
   Future<String> _uploadFileToFirestore(String localFilePath) async {
-    final String filename =
-        localFilePath.substring(localFilePath.lastIndexOf('/') + 1);
+    final String filename = localFilePath.substring(
+      localFilePath.lastIndexOf('/') + 1,
+    );
 
     info(
-        "Upload to Firestore started - path : '$firebasePath', filename : '$filename'");
+      "Upload to Firestore started - path : '$firebasePath', filename : '$filename'",
+    );
 
-    final Reference ref =
-        FirebaseStorage.instance.ref().child(firebasePath).child(filename);
+    final Reference ref = FirebaseStorage.instance
+        .ref()
+        .child(firebasePath)
+        .child(filename);
     final File file = new File(localFilePath);
     final String deviceID = DeviceInfo().deviceID.toString();
     final String? userID = (await user)!.email;
@@ -224,7 +240,7 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
         customMetadata: <String, String>{
           'device_id': '$deviceID',
           'study_deployment_id': '$studyDeploymentId',
-          'user_id': '$userID'
+          'user_id': '$userID',
         },
         // TODO - add location as metadata
       ),
@@ -236,16 +252,19 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
     String downloadUrl = await ref.getDownloadURL();
 
     await uploadTask.whenComplete(() {
-      addEvent(FirebaseDataManagerEvent(
-        FirebaseDataManagerEventTypes.file_uploaded,
-        file.path,
-        downloadUrl,
-      ));
+      addEvent(
+        FirebaseDataManagerEvent(
+          FirebaseDataManagerEventTypes.file_uploaded,
+          file.path,
+          downloadUrl,
+        ),
+      );
       info('Upload to Firestore finished - remote file url  : $downloadUrl');
       // then delete the local file.
       file.delete();
-      addEvent(FileDataManagerEvent(
-          FileDataManagerEventTypes.FILE_DELETED, file.path));
+      addEvent(
+        FileDataManagerEvent(FileDataManagerEventTypes.FILE_DELETED, file.path),
+      );
     });
 
     return downloadUrl;
@@ -286,11 +305,13 @@ class FirebaseDatabaseDataManager extends FirebaseDataManager {
 
     print('Initializig $runtimeType...');
     print(
-        ' Firebase URI    : ${firebaseDatabaseDataEndPoint!.firebaseEndPoint.uri}');
+      ' Firebase URI    : ${firebaseDatabaseDataEndPoint!.firebaseEndPoint.uri}',
+    );
     print(' Collection path : ${firebaseDatabaseDataEndPoint!.collection}');
     print(' Database        : ${database.app.name}');
     print(
-        ' Auth. user      : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n');
+      ' Auth. user      : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n',
+    );
   }
 
   /// The Firestore instance for the Firebase app.
@@ -299,7 +320,8 @@ class FirebaseDatabaseDataManager extends FirebaseDataManager {
   Future<FirebaseFirestore> get firebaseDatabase async {
     if (firebaseDatabaseDataEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_firebaseDatabase == null) {
       final FirebaseApp app = await firebaseApp;
@@ -340,7 +362,8 @@ class FirebaseDatabaseDataManager extends FirebaseDataManager {
       return true;
     } else {
       warning(
-          'Could not upload data in $runtimeType - no user is authenticated.');
+        'Could not upload data in $runtimeType - no user is authenticated.',
+      );
     }
 
     return false;
@@ -361,7 +384,7 @@ class FirebaseDataManagerEvent extends DataManagerEvent {
 
   /// Creates an event of [type], with an optional local [path] and [firebaseUri].
   FirebaseDataManagerEvent(String type, [this.path, this.firebaseUri])
-      : super(type);
+    : super(type);
 
   String toString() =>
       'FirebaseDataManagerEvent - type: $type, path: $path, firebaseUri: $firebaseUri';

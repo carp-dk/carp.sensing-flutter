@@ -54,8 +54,7 @@ void main() {
       expect(device.allowDuplicates, true);
     });
 
-    test(' - 1.x study protocol w. old device namespace and measure types',
-        () {
+    test(' - 1.x study protocol w. old device namespace and measure types', () {
       final protocol = SmartphoneStudyProtocol.fromJson({
         'applicationData': {
           'studyDescription': {
@@ -92,13 +91,11 @@ void main() {
             'name': 'Task #11',
             'measures': [
               {
-                '__type':
-                    'dk.cachet.carp.common.application.tasks.Measure.DataStream',
+                '__type': 'dk.cachet.carp.common.application.tasks.Measure.DataStream',
                 'type': 'dk.cachet.carp.stepcount',
               },
               {
-                '__type':
-                    'dk.cachet.carp.common.application.tasks.Measure.DataStream',
+                '__type': 'dk.cachet.carp.common.application.tasks.Measure.DataStream',
                 'type': 'dk.cachet.carp.heartbeat',
               },
             ],

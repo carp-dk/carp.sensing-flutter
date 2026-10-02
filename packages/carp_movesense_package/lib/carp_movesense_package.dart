@@ -90,14 +90,19 @@ class MovesenseSamplingPackage implements SamplingPackage {
 
   /// Measure type for device information ([MovesenseDeviceInformation]).
   static const String DEVICE_INFO = "$MOVESENSE_NAMESPACE.deviceinformation";
+
   /// Measure type for state changes ([MovesenseStateChange]).
   static const String STATE = "$MOVESENSE_NAMESPACE.state";
+
   /// Measure type for heart rate ([MovesenseHR]).
   static const String HR = "$MOVESENSE_NAMESPACE.hr";
+
   /// Measure type for ECG ([MovesenseECG]).
   static const String ECG = "$MOVESENSE_NAMESPACE.ecg";
+
   /// Measure type for device temperature ([MovesenseTemperature]). Movesense MD only.
   static const String TEMPERATURE = "$MOVESENSE_NAMESPACE.temperature";
+
   /// Measure type for IMU data ([MovesenseIMU]).
   static const String IMU = "$MOVESENSE_NAMESPACE.imu";
 

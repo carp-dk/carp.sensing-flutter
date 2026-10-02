@@ -76,11 +76,7 @@ class Message {
 }
 
 /// The type of a [Message].
-enum MessageType {
-  announcement,
-  article,
-  news,
-}
+enum MessageType { announcement, article, news }
 
 /// Retrieves and stores [Message]s for a study.
 ///

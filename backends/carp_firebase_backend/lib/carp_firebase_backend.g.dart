@@ -48,19 +48,22 @@ Map<String, dynamic> _$FirebaseEndPointToJson(FirebaseEndPoint instance) {
 }
 
 FirebaseDatabaseDataEndPoint _$FirebaseDatabaseDataEndPointFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   return FirebaseDatabaseDataEndPoint(
-    FirebaseEndPoint.fromJson(
-        json['firebase_end_point'] as Map<String, dynamic>),
-    collection: json['collection'] as String,
-  )
+      FirebaseEndPoint.fromJson(
+        json['firebase_end_point'] as Map<String, dynamic>,
+      ),
+      collection: json['collection'] as String,
+    )
     ..$type = json[r'$type'] as String?
     ..type = json['type'] as String
     ..dataFormat = json['data_format'] as String;
 }
 
 Map<String, dynamic> _$FirebaseDatabaseDataEndPointToJson(
-    FirebaseDatabaseDataEndPoint instance) {
+  FirebaseDatabaseDataEndPoint instance,
+) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -78,23 +81,26 @@ Map<String, dynamic> _$FirebaseDatabaseDataEndPointToJson(
 }
 
 FirebaseStorageDataEndPoint _$FirebaseStorageDataEndPointFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   return FirebaseStorageDataEndPoint(
-    FirebaseEndPoint.fromJson(
-        json['firebase_end_point'] as Map<String, dynamic>),
-    path: json['path'] as String,
-    bufferSize: json['buffer_size'],
-    zip: json['zip'],
-    encrypt: json['encrypt'],
-    publicKey: json['public_key'],
-  )
+      FirebaseEndPoint.fromJson(
+        json['firebase_end_point'] as Map<String, dynamic>,
+      ),
+      path: json['path'] as String,
+      bufferSize: json['buffer_size'],
+      zip: json['zip'],
+      encrypt: json['encrypt'],
+      publicKey: json['public_key'],
+    )
     ..$type = json[r'$type'] as String?
     ..type = json['type'] as String
     ..dataFormat = json['data_format'] as String;
 }
 
 Map<String, dynamic> _$FirebaseStorageDataEndPointToJson(
-    FirebaseStorageDataEndPoint instance) {
+  FirebaseStorageDataEndPoint instance,
+) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {

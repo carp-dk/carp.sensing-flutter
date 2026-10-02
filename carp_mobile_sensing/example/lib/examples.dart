@@ -258,8 +258,7 @@ void example_2() async {
     name: 'Tracking',
     studyDescription: StudyDescription(
       title: 'CAMS App - Sensing Coverage Study',
-      description:
-          'The default study testing coverage of most measures. Used in the coverage tests.',
+      description: 'The default study testing coverage of most measures. Used in the coverage tests.',
       purpose: 'To test sensing coverage',
       responsible: StudyResponsible(
         id: 'abc',

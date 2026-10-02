@@ -18,17 +18,22 @@ part of 'carp_movisens_package.dart';
 abstract class MovisensData extends Data {
   /// Data type of [MovisensStepCount].
   static const String STEPS = "${MovisensSamplingPackage.ACTIVITY}.steps";
+
   /// Data type of [MovisensBodyPosition].
   static const String BODY_POSITION =
       "${MovisensSamplingPackage.ACTIVITY}.body_position";
+
   /// Data type of [MovisensInclination].
   static const String INCLINATION =
       "${MovisensSamplingPackage.ACTIVITY}.inclination";
+
   /// Data type of [MovisensMovementAcceleration].
   static const String MOVEMENT_ACCELERATION =
       "${MovisensSamplingPackage.ACTIVITY}.movement_acceleration";
+
   /// Data type of [MovisensMET].
   static const String MET = "${MovisensSamplingPackage.ACTIVITY}.met";
+
   /// Data type of [MovisensMETLevel].
   static const String MET_LEVEL =
       "${MovisensSamplingPackage.ACTIVITY}.met_level";
@@ -38,9 +43,11 @@ abstract class MovisensData extends Data {
   /// Note that [MovisensHRV] and [MovisensIsHrvValid] currently also use this
   /// type as their [jsonType].
   static const String HR_MEAN = "${MovisensSamplingPackage.HR}.hr_mean";
+
   /// Data type of heart rate variability. Not used by [MovisensHRV] at the
   /// moment, which uses [HR_MEAN].
   static const String HRV = "${MovisensSamplingPackage.HR}.hrv";
+
   /// Data type of HRV validity. Not used by [MovisensIsHrvValid] at the
   /// moment, which uses [HR_MEAN].
   static const String IS_HRV_VALID =

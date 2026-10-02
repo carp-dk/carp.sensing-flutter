@@ -16,8 +16,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
       name: 'CAMS App - Demo Study Protocol',
       studyDescription: StudyDescription(
         title: 'CAMS App - Demo Study',
-        description:
-            'A study demonstrating most measures and probes. Used for the demo app.',
+        description: 'A study demonstrating most measures and probes. Used for the demo app.',
       ),
       dataEndPoint: (bloc.deploymentMode == DeploymentMode.local)
           ? SQLiteDataEndPoint()

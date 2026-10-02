@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_serializable/carp_serializable.dart';
@@ -150,9 +151,8 @@ void main() {
   });
 
   test('JSON -> StudyProtocol', () async {
-    final loadedJson = File(
-      'test/json/carp.core-dart/study_protocol.json',
-    ).readAsStringSync();
+    final loadedJson = File('test/json/carp.core-dart/study_protocol.json')
+        .readAsStringSync();
 
     final loadedProtocol = StudyProtocol.fromJson(
       json.decode(loadedJson) as Map<String, dynamic>,
@@ -179,9 +179,8 @@ void main() {
   });
 
   test('JSON -> Invitations', () async {
-    final loadedJson = File(
-      'test/json/carp.core-dart/invitations.json',
-    ).readAsStringSync();
+    final loadedJson = File('test/json/carp.core-dart/invitations.json')
+        .readAsStringSync();
 
     final jsonList = json.decode(loadedJson) as List<dynamic>;
 
@@ -207,9 +206,8 @@ void main() {
     //     macAddress: '00:00:00:00:00:00', deviceDisplayName: 'Test MAC Address');
     // print(toJsonString(macAddress));
 
-    final loadedJson = File(
-      'test/json/carp.core-dart/mac_address.json',
-    ).readAsStringSync();
+    final loadedJson = File('test/json/carp.core-dart/mac_address.json')
+        .readAsStringSync();
     final loadedMacAddress = MACAddressDeviceRegistration.fromJson(
       json.decode(loadedJson) as Map<String, dynamic>,
     );
@@ -240,9 +238,8 @@ void main() {
     );
     expect(
       st.recurrenceRule.toString(),
-      RecurrenceRule.fromString(
-        'RRULE:FREQ=DAILY;INTERVAL=2;COUNT=3',
-      ).toString(),
+      RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2;COUNT=3')
+          .toString(),
     );
     print(st);
 
@@ -256,9 +253,8 @@ void main() {
     );
     expect(
       st.recurrenceRule.toString(),
-      RecurrenceRule.fromString(
-        'RRULE:FREQ=DAILY;INTERVAL=2;UNTIL=2592000000',
-      ).toString(),
+      RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2;UNTIL=2592000000')
+          .toString(),
     );
     print(st);
   });
@@ -304,8 +300,7 @@ void main() {
 
   test('WebTask', () async {
     var task = WebTask(
-      url:
-          'https://cans.cachet.dk/portal/playground/studies/\$DEPLOYMENT_ID/settings?participant=\$PARTICIPANT_ID&trigger_id=\$TRIGGER_ID',
+      url: 'https://cans.cachet.dk/portal/playground/studies/\$DEPLOYMENT_ID/settings?participant=\$PARTICIPANT_ID&trigger_id=\$TRIGGER_ID',
     );
 
     expect(

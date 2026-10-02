@@ -45,8 +45,7 @@ class OAuthToken {
       response.accessToken.toString(),
       response.refreshToken.toString(),
       response.tokenType.toString(),
-      response
-          .calculateExpiresAt()!, // Throw an error if there is no access token expiration date
+      response.calculateExpiresAt()!, // Throw an error if there is no access token expiration date
       response.scope ?? [],
       response.idToken.toString(),
     );

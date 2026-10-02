@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:test/test.dart';
 
@@ -105,8 +106,10 @@ void main() {
     const a = '{"__type": "AB", "index": 1 }';
 
     // the fromJson method should throw an exception since A does not define a "notAvailable" value
-    expect(() => A.fromJson(json.decode(a) as Map<String, dynamic>),
-        throwsA(const TypeMatcher<SerializationException>()));
+    expect(
+      () => A.fromJson(json.decode(a) as Map<String, dynamic>),
+      throwsA(const TypeMatcher<SerializationException>()),
+    );
   });
 
   test('UUID - version 4', () async {

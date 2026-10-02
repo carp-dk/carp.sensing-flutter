@@ -90,18 +90,14 @@ class CarpParticipationService extends CarpBaseService
 
     // if a applicationName is specified, filter on that
     if (applicationName != null) {
-      invitations = invitations
-          .where(
-            (invitation) {
-              if (invitation.invitation.applicationData == null) return false;
-              if (invitation.invitation.applicationData is ! Map<String, dynamic>) {
-                return false;
-              }
-              return invitation.invitation.applicationData?['applicationName'] ==
-                  applicationName;
-            }
-          )
-          .toList();
+      invitations = invitations.where((invitation) {
+        if (invitation.invitation.applicationData == null) return false;
+        if (invitation.invitation.applicationData is! Map<String, dynamic>) {
+          return false;
+        }
+        return invitation.invitation.applicationData?['applicationName'] ==
+            applicationName;
+      }).toList();
     }
 
     return invitations;
@@ -197,7 +193,7 @@ class CarpParticipationService extends CarpBaseService
     String studyDeploymentId,
     Map<String, Data> data, [
     String? inputByParticipantRole,
-  ]) async => await participation(
-    studyDeploymentId,
-  ).setParticipantData(data, inputByParticipantRole);
+  ]) async =>
+      await participation(studyDeploymentId)
+          .setParticipantData(data, inputByParticipantRole);
 }

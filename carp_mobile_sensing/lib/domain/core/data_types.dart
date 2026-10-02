@@ -98,6 +98,7 @@ class CamsDataTypes {
   /// The data type of [CompletedAppTask].
   static const String COMPLETED_APP_TASK =
       '${CarpDataTypes.CARP_NAMESPACE}.completedapptask';
+
   /// The data type of [FileData].
   static const String FILE = '${CarpDataTypes.CARP_NAMESPACE}.file';
 

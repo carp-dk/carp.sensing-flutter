@@ -77,9 +77,8 @@ class ParticipationReference extends RPCCarpReference {
     String? inputByParticipantRole,
   ]) async => ParticipantData.fromJson(
     await _rpc(
-          SetParticipantData(studyDeploymentId, data, inputByParticipantRole),
-        )
-        as Map<String, dynamic>,
+      SetParticipantData(studyDeploymentId, data, inputByParticipantRole),
+    ) as Map<String, dynamic>,
   );
 
   /// Gets informed consent data for all participants (by role name) in this
@@ -127,11 +126,10 @@ class ParticipationReference extends RPCCarpReference {
   ]) async {
     ParticipantData.fromJson(
       await _rpc(
-            SetParticipantData(studyDeploymentId, {
-              InputType.INFORMED_CONSENT: consent,
-            }, getParticipantRoleName(inputByParticipantRole)),
-          )
-          as Map<String, dynamic>,
+        SetParticipantData(studyDeploymentId, {
+          InputType.INFORMED_CONSENT: consent,
+        }, getParticipantRoleName(inputByParticipantRole)),
+      ) as Map<String, dynamic>,
     );
   }
 
@@ -142,11 +140,10 @@ class ParticipationReference extends RPCCarpReference {
   Future<void> removeInformedConsent([String? inputByParticipantRole]) async {
     ParticipantData.fromJson(
       await _rpc(
-            SetParticipantData(studyDeploymentId, {
-              InputType.INFORMED_CONSENT: null,
-            }, getParticipantRoleName(inputByParticipantRole)),
-          )
-          as Map<String, dynamic>,
+        SetParticipantData(studyDeploymentId, {
+          InputType.INFORMED_CONSENT: null,
+        }, getParticipantRoleName(inputByParticipantRole)),
+      ) as Map<String, dynamic>,
     );
   }
 }

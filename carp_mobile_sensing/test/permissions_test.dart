@@ -143,7 +143,10 @@ void main() {
 
     // Deployment events, probes and devices all ask at once on a normal launch.
     final client = SmartPhoneClientManager();
-    final permissions = [Permission.locationWhenInUse, Permission.locationAlways];
+    final permissions = [
+      Permission.locationWhenInUse,
+      Permission.locationAlways,
+    ];
     final done = Future.wait([
       client.requestPermissions(permissions),
       client.requestPermissions(permissions),

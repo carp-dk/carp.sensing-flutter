@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -28,13 +29,10 @@ void main() {
     CarpMobileSensing();
 
     // Create a new study protocol.
-    protocol =
-        SmartphoneStudyProtocol(
-            ownerId: 'alex@uni.dk',
-            name: 'eSense package test',
-          )
-          ..description =
-              'Testing the eSense sampling package with a simple study protocol.';
+    protocol = SmartphoneStudyProtocol(
+      ownerId: 'alex@uni.dk',
+      name: 'eSense package test',
+    )..description = 'Testing the eSense sampling package with a simple study protocol.';
 
     // Define which devices are used for data collection.
     phone = Smartphone(roleName: 'SM-A320FL');

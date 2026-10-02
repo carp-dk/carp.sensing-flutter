@@ -442,7 +442,8 @@ class SmartphoneStudyController {
       await SmartPhoneClientManager().requestPermissions(permissions.toList());
 
       _permissions = {
-        for (final permission in permissions) permission: await permission.status,
+        for (final permission in permissions)
+          permission: await permission.status,
       };
       debug('$runtimeType - Permissions: $_permissions');
     }

@@ -32,12 +32,15 @@ class WeatherProbe extends MeasurementProbe {
       } catch (error) {
         warning('$runtimeType - Error getting weather - $error');
         return Measurement.fromData(
-            Error(message: '$runtimeType Exception: $error'));
+          Error(message: '$runtimeType Exception: $error'),
+        );
       }
     }
     warning(
-        '$runtimeType - no service available. Check if the WeatherService has been added to the study protocol?');
+      '$runtimeType - no service available. Check if the WeatherService has been added to the study protocol?',
+    );
     return Measurement.fromData(
-        Error(message: '$runtimeType - no service available.'));
+      Error(message: '$runtimeType - no service available.'),
+    );
   }
 }

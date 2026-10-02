@@ -41,7 +41,8 @@ void _registerFromJsonFunctions() {
   );
   FromJsonFactory().register(
     SmartphoneRegistration(),
-    type: '${DeviceConfiguration.DEVICE_NAMESPACE}.SmartphoneDeviceRegistration',
+    type:
+        '${DeviceConfiguration.DEVICE_NAMESPACE}.SmartphoneDeviceRegistration',
   );
 
   // Task classes

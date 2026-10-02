@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_serializable/carp_serializable.dart';
@@ -15,17 +16,15 @@ void main() {
 
   group('Protocol Service', () {
     test('Add - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/add.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/add.json')
+          .readAsStringSync();
 
       var expected = Add.fromJson(
         json.decode(rpcString) as Map<String, dynamic>,
       );
 
-      String plainJson = File(
-        '$path/protocols/study_protocol.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/protocols/study_protocol.json')
+          .readAsStringSync();
       StudyProtocol protocol = StudyProtocol.fromJson(
         json.decode(plainJson) as Map<String, dynamic>,
       );
@@ -44,17 +43,15 @@ void main() {
     });
 
     test('AddVersion - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/addVersion.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/addVersion.json')
+          .readAsStringSync();
 
       var expected = AddVersion.fromJson(
         json.decode(rpcString) as Map<String, dynamic>,
       );
 
-      String plainJson = File(
-        '$path/protocols/study_protocol.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/protocols/study_protocol.json')
+          .readAsStringSync();
       StudyProtocol protocol = StudyProtocol.fromJson(
         json.decode(plainJson) as Map<String, dynamic>,
       );
@@ -116,9 +113,8 @@ void main() {
     });
 
     test('GetBy - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/getBy.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/getBy.json')
+          .readAsStringSync();
 
       var expected = GetBy.fromJson(
         json.decode(rpcString) as Map<String, dynamic>,
@@ -350,9 +346,8 @@ void main() {
     });
 
     test('GetDataStream - Request', () async {
-      String rpcString = File(
-        '$path/data/DataStreamService/getDataStream.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/data/DataStreamService/getDataStream.json')
+          .readAsStringSync();
 
       var expected = GetDataStream.fromJson(
         json.decode(rpcString) as Map<String, dynamic>,
@@ -577,9 +572,8 @@ void main() {
         json.decode(rpcString) as Map<String, dynamic>,
       );
 
-      String protocolJson = File(
-        '$path/protocols/study_protocol.json',
-      ).readAsStringSync();
+      String protocolJson = File('$path/protocols/study_protocol.json')
+          .readAsStringSync();
       StudyProtocol protocol = StudyProtocol.fromJson(
         json.decode(protocolJson) as Map<String, dynamic>,
       );

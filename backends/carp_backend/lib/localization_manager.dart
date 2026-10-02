@@ -37,7 +37,9 @@ abstract class LocalizationManager {
   ///
   /// Returns `true` if successful, `false` otherwise.
   Future<bool> setLocalizations(
-      Locale locale, Map<String, dynamic> localizations);
+    Locale locale,
+    Map<String, dynamic> localizations,
+  );
 
   /// Deletes the translations for [locale].
   ///

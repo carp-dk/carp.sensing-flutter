@@ -14,14 +14,17 @@ class _BluetoothProbe extends BluetoothProbe {
 }
 
 void main() {
-  test('scan startup failure is data, and late results cannot overwrite it', () async {
-    // No native Bluetooth platform in this test: startScan fails asynchronously.
-    final probe = _BluetoothProbe();
-    probe.onSamplingStart();
-    await Future<void>.delayed(Duration.zero);
+  test(
+    'scan startup failure is data, and late results cannot overwrite it',
+    () async {
+      // No native Bluetooth platform in this test: startScan fails asynchronously.
+      final probe = _BluetoothProbe();
+      probe.onSamplingStart();
+      await Future<void>.delayed(Duration.zero);
 
-    expect((await probe.getMeasurement())?.data, isA<carp.Error>());
-    probe.onSamplingData(<ScanResult>[]);
-    expect((await probe.getMeasurement())?.data, isA<carp.Error>());
-  });
+      expect((await probe.getMeasurement())?.data, isA<carp.Error>());
+      probe.onSamplingData(<ScanResult>[]);
+      expect((await probe.getMeasurement())?.data, isA<carp.Error>());
+    },
+  );
 }

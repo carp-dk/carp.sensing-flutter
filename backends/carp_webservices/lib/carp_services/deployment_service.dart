@@ -80,13 +80,12 @@ class CarpDeploymentService extends CarpBaseService
     Map<String, DeviceRegistration>? connectedDevicePreregistrations,
   ]) async => StudyDeploymentStatus.fromJson(
     await _rpc(
-          CreateStudyDeployment(
-            protocol,
-            invitations,
-            connectedDevicePreregistrations,
-          ),
-        )
-        as Map<String, dynamic>,
+      CreateStudyDeployment(
+        protocol,
+        invitations,
+        connectedDevicePreregistrations,
+      ),
+    ) as Map<String, dynamic>,
   );
 
   /// Not supported from the client side; always throws a
@@ -122,9 +121,9 @@ class CarpDeploymentService extends CarpBaseService
     if (studyDeploymentIds.isEmpty) return [];
 
     // we expect a list of JSON objects
-    var items =
-        await _rpc(GetStudyDeploymentStatusList(studyDeploymentIds))
-            as List<dynamic>;
+    var items = await _rpc(
+      GetStudyDeploymentStatusList(studyDeploymentIds),
+    ) as List<dynamic>;
 
     final List<StudyDeploymentStatus> statusList = [];
     for (var item in items) {
@@ -168,9 +167,8 @@ class CarpDeploymentService extends CarpBaseService
 
     return StudyDeploymentStatus.fromJson(
       await _rpc(
-            RegisterDevice(studyDeploymentId, deviceRoleName, registration),
-          )
-          as Map<String, dynamic>,
+        RegisterDevice(studyDeploymentId, deviceRoleName, registration),
+      ) as Map<String, dynamic>,
     );
   }
 
@@ -212,9 +210,8 @@ class CarpDeploymentService extends CarpBaseService
     // downloading a PrimaryDeviceDeployment
     var deployment = PrimaryDeviceDeployment.fromJson(
       await _rpc(
-            GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName),
-          )
-          as Map<String, dynamic>,
+        GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName),
+      ) as Map<String, dynamic>,
     );
 
     // converting it to a SmartphoneDeployment
@@ -247,13 +244,12 @@ class CarpDeploymentService extends CarpBaseService
   ) async {
     return StudyDeploymentStatus.fromJson(
       await _rpc(
-            DeviceDeployed(
-              studyDeploymentId,
-              primaryDeviceRoleName,
-              deviceDeploymentLastUpdatedOn,
-            ),
-          )
-          as Map<String, dynamic>,
+        DeviceDeployed(
+          studyDeploymentId,
+          primaryDeviceRoleName,
+          deviceDeploymentLastUpdatedOn,
+        ),
+      ) as Map<String, dynamic>,
     );
   }
 

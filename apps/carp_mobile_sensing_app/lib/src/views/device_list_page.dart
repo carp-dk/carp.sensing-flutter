@@ -96,14 +96,13 @@ class DevicesListPageState extends State<DevicesListPage> {
                               ElevatedButton(
                                 onPressed: () async {
                                   final selectedDevice =
-                                      await Navigator.of(
-                                        context,
-                                      ).push<ble.DiscoveredDevice?>(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              BLEScannerPage(),
-                                        ),
-                                      );
+                                      await Navigator.of(context)
+                                          .push<ble.DiscoveredDevice?>(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  BLEScannerPage(),
+                                            ),
+                                          );
                                   if (selectedDevice != null) {
                                     setState(() {
                                       device.pairWithDevice(selectedDevice);

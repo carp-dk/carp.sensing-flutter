@@ -57,6 +57,7 @@
 library;
 
 import 'dart:async';
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/polar.dart';
 

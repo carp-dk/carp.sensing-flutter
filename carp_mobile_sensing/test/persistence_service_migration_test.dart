@@ -23,9 +23,8 @@ void main() {
         '${await getDatabasesPath()}/${PersistenceService.DATABASE_NAME}.db';
     await deleteDatabase(databaseName);
 
-    final deploymentJson = File(
-      'test/json/cams_1.x_study_deployment.json',
-    ).readAsStringSync();
+    final deploymentJson = File('test/json/cams_1.x_study_deployment.json')
+        .readAsStringSync();
 
     final snapshot = UserTaskSnapshot(
       '7fb3fd47-f61b-48c5-add2-39d4762bfc67',

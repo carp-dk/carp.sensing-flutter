@@ -71,13 +71,12 @@ class CarpProtocolService extends CarpBaseService
     List<ExpectedParticipantData> expectedParticipantData,
   ) async => StudyProtocol.fromJson(
     await _rpc(
-          UpdateParticipantDataConfiguration(
-            protocolId,
-            versionTag,
-            expectedParticipantData,
-          ),
-        )
-        as Map<String, dynamic>,
+      UpdateParticipantDataConfiguration(
+        protocolId,
+        versionTag,
+        expectedParticipantData,
+      ),
+    ) as Map<String, dynamic>,
   );
 
   @override
@@ -88,9 +87,8 @@ class CarpProtocolService extends CarpBaseService
     String customProtocol,
   ) async => StudyProtocol.fromJson(
     await _rpc(
-          CreateCustomProtocol(ownerId, name, description, customProtocol),
-          'protocol-factory-service',
-        )
-        as Map<String, dynamic>,
+      CreateCustomProtocol(ownerId, name, description, customProtocol),
+      'protocol-factory-service',
+    ) as Map<String, dynamic>,
   );
 }

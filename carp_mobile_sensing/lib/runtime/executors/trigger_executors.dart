@@ -607,10 +607,12 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
     // A notified, started or canceled task is still on the list - only a done
     // or expired one is not.
     void enqueueIfMissing() {
-      if (!AppTaskController().userTaskQueue.any((task) =>
-          task.name == configuration!.taskName &&
-          task.state != UserTaskState.done &&
-          task.state != UserTaskState.expired)) {
+      if (!AppTaskController().userTaskQueue.any(
+        (task) =>
+            task.name == configuration!.taskName &&
+            task.state != UserTaskState.done &&
+            task.state != UserTaskState.expired,
+      )) {
         onTrigger();
       }
     }

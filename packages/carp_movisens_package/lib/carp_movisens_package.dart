@@ -40,6 +40,7 @@ library;
 
 import 'dart:convert';
 import 'dart:async';
+
 import 'package:async/async.dart';
 import 'package:movisens_flutter/movisens_flutter.dart' as movisens;
 import 'package:json_annotation/json_annotation.dart';

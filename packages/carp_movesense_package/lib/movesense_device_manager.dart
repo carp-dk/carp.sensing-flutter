@@ -283,19 +283,17 @@ class MovesenseDeviceManager
     debug('$runtimeType - Setting up battery monitoring.');
 
     Timer.periodic(const Duration(minutes: 10), (_) {
-      Mds.get(
-        Mds.createRequestUri(serial!, "/System/States/1"),
-        "{}",
-        ((data, statusCode) {
-          final dataContent = json.decode(data);
-          num batteryState = dataContent["Content"] as num;
-          // Movesense only reports "OK" (0) or "LOW" (1) battery state
-          // This is translated to 80% & 10% battery level
-          _batteryLevel = batteryState == 0 ? 80 : 10;
-          _batteryEventController.add(_batteryLevel ?? 0);
-        }),
-        (error, statusCode) => {},
-      );
+      Mds.get(Mds.createRequestUri(serial!, "/System/States/1"), "{}", ((
+        data,
+        statusCode,
+      ) {
+        final dataContent = json.decode(data);
+        num batteryState = dataContent["Content"] as num;
+        // Movesense only reports "OK" (0) or "LOW" (1) battery state
+        // This is translated to 80% & 10% battery level
+        _batteryLevel = batteryState == 0 ? 80 : 10;
+        _batteryEventController.add(_batteryLevel ?? 0);
+      }), (error, statusCode) => {});
     });
   }
 

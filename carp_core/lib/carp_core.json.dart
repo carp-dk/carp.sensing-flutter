@@ -17,23 +17,19 @@ void _registerFromJsonFunctions() {
   FromJsonFactory().register(DeviceDeploymentStatus(device: device));
   FromJsonFactory().register(
     DeviceDeploymentStatus(device: device),
-    type:
-        'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.NotDeployed',
+    type: 'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.NotDeployed',
   );
   FromJsonFactory().register(
     DeviceDeploymentStatus(device: device),
-    type:
-        'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered',
+    type: 'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered',
   );
   FromJsonFactory().register(
     DeviceDeploymentStatus(device: device),
-    type:
-        'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered',
+    type: 'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered',
   );
   FromJsonFactory().register(
     DeviceDeploymentStatus(device: device),
-    type:
-        'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed',
+    type: 'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed',
   );
   FromJsonFactory().register(
     DeviceDeploymentStatus(device: device),
@@ -42,8 +38,7 @@ void _registerFromJsonFunctions() {
   );
   FromJsonFactory().register(
     DeviceDeploymentStatus(device: device),
-    type:
-        'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.NeedsRedeployment',
+    type: 'dk.cachet.carp.deployments.application.DeviceDeploymentStatus.NeedsRedeployment',
   );
 
   // register all the different study deployment status types - see [StudyDeploymentStatus]
@@ -55,13 +50,11 @@ void _registerFromJsonFunctions() {
   );
   FromJsonFactory().register(
     StudyDeploymentStatus(studyDeploymentId: ''),
-    type:
-        'dk.cachet.carp.deployments.application.StudyDeploymentStatus.DeployingDevices',
+    type: 'dk.cachet.carp.deployments.application.StudyDeploymentStatus.DeployingDevices',
   );
   FromJsonFactory().register(
     StudyDeploymentStatus(studyDeploymentId: ''),
-    type:
-        'dk.cachet.carp.deployments.application.StudyDeploymentStatus.DeploymentReady',
+    type: 'dk.cachet.carp.deployments.application.StudyDeploymentStatus.DeploymentReady',
   );
   FromJsonFactory().register(
     StudyDeploymentStatus(studyDeploymentId: ''),

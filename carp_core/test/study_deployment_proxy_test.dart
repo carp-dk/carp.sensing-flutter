@@ -59,42 +59,46 @@ void main() {
     final service = _DeploymentService();
     final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
 
-    await StudyDeploymentProxy(
-      service,
-    ).tryDeployment(study, DefaultDeviceRegistration());
+    await StudyDeploymentProxy(service)
+        .tryDeployment(study, DefaultDeviceRegistration());
 
     expect(study.deployment, same(service.deployment));
     expect(service.registerDeviceCalls, 0);
     expect(service.deviceDeployedCalls, 0);
   });
 
-  test('does nothing when running and the deployment is already held locally', () async {
-    final service = _DeploymentService();
-    final study = Study<PrimaryDeviceDeployment>('deployment', 'phone')
-      ..deploymentStatusReceived(service.status)
-      ..deviceDeploymentReceived(service.deployment);
+  test(
+    'does nothing when running and the deployment is already held locally',
+    () async {
+      final service = _DeploymentService();
+      final study = Study<PrimaryDeviceDeployment>('deployment', 'phone')
+        ..deploymentStatusReceived(service.status)
+        ..deviceDeploymentReceived(service.deployment);
 
-    await StudyDeploymentProxy(
-      service,
-    ).tryDeployment(study, DefaultDeviceRegistration());
+      await StudyDeploymentProxy(service)
+          .tryDeployment(study, DefaultDeviceRegistration());
 
-    expect(service.registerDeviceCalls, 0);
-    expect(service.deviceDeployedCalls, 0);
-  });
+      expect(service.registerDeviceCalls, 0);
+      expect(service.deviceDeployedCalls, 0);
+    },
+  );
 
-  test('a later status replaces the one held locally, e.g. when stopped', () async {
-    final service = _DeploymentService();
-    final study = Study<PrimaryDeviceDeployment>('deployment', 'phone')
-      ..deploymentStatusReceived(service.status);
-    final stopped = StudyDeploymentStatus(studyDeploymentId: 'deployment')
-      ..status = StudyDeploymentStatusTypes.Stopped;
+  test(
+    'a later status replaces the one held locally, e.g. when stopped',
+    () async {
+      final service = _DeploymentService();
+      final study = Study<PrimaryDeviceDeployment>('deployment', 'phone')
+        ..deploymentStatusReceived(service.status);
+      final stopped = StudyDeploymentStatus(studyDeploymentId: 'deployment')
+        ..status = StudyDeploymentStatusTypes.Stopped;
 
-    study.deploymentStatusReceived(stopped);
-    expect(study.status, StudyStatus.Stopped);
+      study.deploymentStatusReceived(stopped);
+      expect(study.status, StudyStatus.Stopped);
 
-    study.deploymentStatusReceived();
-    expect(study.status, StudyStatus.Stopped);
-  });
+      study.deploymentStatusReceived();
+      expect(study.status, StudyStatus.Stopped);
+    },
+  );
 
   test('continues deployment when registration fails', () async {
     final service = _DeploymentService()
@@ -103,9 +107,8 @@ void main() {
       ..deviceStatus.status = DeviceDeploymentStatusTypes.Registered;
     final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
 
-    await StudyDeploymentProxy(
-      service,
-    ).tryDeployment(study, DefaultDeviceRegistration());
+    await StudyDeploymentProxy(service)
+        .tryDeployment(study, DefaultDeviceRegistration());
 
     expect(service.registerDeviceCalls, 1);
     expect(study.deployment, same(service.deployment));
@@ -118,9 +121,8 @@ void main() {
     service.deviceStatus.status = DeviceDeploymentStatusTypes.Unregistered;
     final study = Study<PrimaryDeviceDeployment>('deployment', 'phone');
 
-    await StudyDeploymentProxy(
-      service,
-    ).tryDeployment(study, DefaultDeviceRegistration());
+    await StudyDeploymentProxy(service)
+        .tryDeployment(study, DefaultDeviceRegistration());
 
     expect(service.registerDeviceCalls, 1);
     expect(service.deviceDeployedCalls, 1);

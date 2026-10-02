@@ -56,16 +56,21 @@ class DataEndPoint extends Serializable {
 /// carp_webservices package implements [CAWS].
 class DataEndPointTypes {
   static const String UNKNOWN = 'UNKNOWN';
+
   /// Prints measurements to the console, see [ConsoleDataManager].
   static const String PRINT = 'PRINT';
+
   /// Stores measurements in JSON files, see [FileDataManager].
   static const String FILE = 'FILE';
+
   /// Stores measurements in a local SQLite database, see [SQLiteDataManager].
   static const String SQLITE = 'SQLITE';
   static const String FIREBASE_STORAGE = 'FIREBASE_STORAGE';
   static const String FIREBASE_DATABASE = 'FIREBASE_DATABASE';
+
   /// Uploads measurements to the CARP Web Services (CAWS) backend.
   static const String CAWS = 'CAWS';
+
   /// An Open mHealth endpoint.
   static const String OMH = 'OMH';
   static const String AWS = 'AWS';

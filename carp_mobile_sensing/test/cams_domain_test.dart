@@ -24,8 +24,7 @@ void main() {
     primaryProtocol = SmartphoneStudyProtocol(
       ownerId: 'user@dtu.dk',
       name: 'patient_tracking',
-      applicationName:
-          'carp_mobile_sensing_example', // this should match the app name in the pubspec.yaml file of the app executing this protocol
+      applicationName: 'carp_mobile_sensing_example', // this should match the app name in the pubspec.yaml file of the app executing this protocol
       studyDescription: StudyDescription(
         title: 'A Test',
         purpose: 'Testing',
@@ -250,25 +249,21 @@ void main() {
       await writeToFile(toJsonString(primaryProtocol), 'study_protocol.json');
     });
 
-    test(
-      'SmartphoneStudyProtocol -> JSON -> SmartphoneStudyProtocol :: deep assert',
-      () async {
-        print(toJsonString(primaryProtocol));
-        final studyJson = toJsonString(primaryProtocol);
+    test('SmartphoneStudyProtocol -> JSON -> SmartphoneStudyProtocol :: deep assert', () async {
+      print(toJsonString(primaryProtocol));
+      final studyJson = toJsonString(primaryProtocol);
 
-        SmartphoneStudyProtocol protocolFromJson =
-            SmartphoneStudyProtocol.fromJson(
-              json.decode(studyJson) as Map<String, dynamic>,
-            );
-        print(toJsonString(protocolFromJson));
-        expect(toJsonString(protocolFromJson), equals(studyJson));
-      },
-    );
+      SmartphoneStudyProtocol protocolFromJson =
+          SmartphoneStudyProtocol.fromJson(
+            json.decode(studyJson) as Map<String, dynamic>,
+          );
+      print(toJsonString(protocolFromJson));
+      expect(toJsonString(protocolFromJson), equals(studyJson));
+    });
 
     test('JSON File -> SmartphoneStudyProtocol', () async {
-      String plainJson = File(
-        'test/json/study_protocol.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/study_protocol.json')
+          .readAsStringSync();
 
       final protocol = SmartphoneStudyProtocol.fromJson(
         json.decode(plainJson) as Map<String, dynamic>,
@@ -334,9 +329,8 @@ void main() {
     );
 
     test('JSON File -> SmartphoneDeployment', () async {
-      final plainJson = File(
-        'test/json/study_deployment.json',
-      ).readAsStringSync();
+      final plainJson = File('test/json/study_deployment.json')
+          .readAsStringSync();
 
       final deployment = SmartphoneDeployment.fromJson(
         json.decode(plainJson) as Map<String, dynamic>,

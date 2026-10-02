@@ -99,9 +99,8 @@ class DeploymentReference extends RPCCarpReference {
 
     return _status = StudyDeploymentStatus.fromJson(
       await _rpc(
-            RegisterDevice(studyDeploymentId, deviceRoleName, registration),
-          )
-          as Map<String, dynamic>,
+        RegisterDevice(studyDeploymentId, deviceRoleName, registration),
+      ) as Map<String, dynamic>,
     );
   }
 
@@ -151,13 +150,12 @@ class DeploymentReference extends RPCCarpReference {
 
     return _status = StudyDeploymentStatus.fromJson(
       await _rpc(
-            DeviceDeployed(
-              studyDeploymentId,
-              deviceRoleName,
-              deployment!.lastUpdatedOn,
-            ),
-          )
-          as Map<String, dynamic>,
+        DeviceDeployed(
+          studyDeploymentId,
+          deviceRoleName,
+          deployment!.lastUpdatedOn,
+        ),
+      ) as Map<String, dynamic>,
     );
   }
 }

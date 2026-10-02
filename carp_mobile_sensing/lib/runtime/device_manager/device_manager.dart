@@ -70,7 +70,8 @@ abstract class DeviceManager<
   TRegistration extends DeviceRegistration
 >
     implements ConnectedDeviceDataCollector {
-  final StreamController<DeviceStatus> _eventController = StreamController.broadcast();
+  final StreamController<DeviceStatus> _eventController =
+      StreamController.broadcast();
 
   DeviceStatus _status = DeviceStatus.unknown;
   final String _deviceType;
@@ -87,7 +88,10 @@ abstract class DeviceManager<
 
   @override
   Set<DataType> get supportedDataTypes =>
-      configuration?.supportedDataTypes?.map((str) => DataType.fromString(str)).toSet() ?? {};
+      configuration?.supportedDataTypes
+          ?.map((str) => DataType.fromString(str))
+          .toSet() ??
+      {};
 
   /// The type of the device managed by this device manager, e.g.
   /// `dk.cachet.carp.common.application.devices.Smartphone`.
@@ -119,8 +123,9 @@ abstract class DeviceManager<
   ///
   /// Uses [CamsDeviceRegistration.isConnected] if the [registration] is one.
   /// Otherwise true, e.g. if there is no prior registration.
-  bool get shouldConnect =>
-      registration is CamsDeviceRegistration ? (registration as CamsDeviceRegistration).isConnected : true;
+  bool get shouldConnect => registration is CamsDeviceRegistration
+      ? (registration as CamsDeviceRegistration).isConnected
+      : true;
 
   /// The task control executors whose tasks run on this device.
   ///
@@ -153,10 +158,13 @@ abstract class DeviceManager<
 
   /// Is this device manager connecting or already connected to a device?
   bool get isConnecting =>
-      status == DeviceStatus.connected || status == DeviceStatus.reconnected || status == DeviceStatus.connecting;
+      status == DeviceStatus.connected ||
+      status == DeviceStatus.reconnected ||
+      status == DeviceStatus.connecting;
 
   /// Is this device manager connected to the real device?
-  bool get isConnected => status == DeviceStatus.connected || status == DeviceStatus.reconnected;
+  bool get isConnected =>
+      status == DeviceStatus.connected || status == DeviceStatus.reconnected;
 
   /// Configures this device manager with its [configuration].
   ///
@@ -165,11 +173,16 @@ abstract class DeviceManager<
   /// device. Calls [onConfigure] and sets [status] to
   /// [DeviceStatus.configured]. Does nothing if already configured.
   @nonVirtual
-  void configure(TDeviceConfiguration configuration, [TRegistration? registration]) {
+  void configure(
+    TDeviceConfiguration configuration, [
+    TRegistration? registration,
+  ]) {
     // fast out if already configured
     if (isConfigured) return;
 
-    info('$runtimeType - Configuring, type: $typeName, configuration: $configuration, registration: $registration');
+    info(
+      '$runtimeType - Configuring, type: $typeName, configuration: $configuration, registration: $registration',
+    );
 
     _configuration = configuration;
     _registration = registration;
@@ -177,9 +190,15 @@ abstract class DeviceManager<
 
     // A device connecting after the study has started has its executors paused,
     // and nothing else resumes them.
-    statusEvents.where((status) => status == DeviceStatus.connected).listen((_) => start());
-    statusEvents.where((status) => status == DeviceStatus.disconnecting).listen((_) => isDisconnecting());
-    statusEvents.where((status) => status == DeviceStatus.reconnected).listen((_) => restart());
+    statusEvents
+        .where((status) => status == DeviceStatus.connected)
+        .listen((_) => start());
+    statusEvents
+        .where((status) => status == DeviceStatus.disconnecting)
+        .listen((_) => isDisconnecting());
+    statusEvents
+        .where((status) => status == DeviceStatus.reconnected)
+        .listen((_) => restart());
 
     status = DeviceStatus.configured;
   }
@@ -210,7 +229,9 @@ abstract class DeviceManager<
   /// Calls [onRequestPermissions].
   @nonVirtual
   Future<void> requestPermissions() async {
-    info('$runtimeType - Requesting permissions for device of type: $typeName.');
+    info(
+      '$runtimeType - Requesting permissions for device of type: $typeName.',
+    );
 
     await onRequestPermissions();
   }
@@ -249,7 +270,9 @@ abstract class DeviceManager<
     try {
       status = await onConnect();
     } catch (error) {
-      warning('$runtimeType - Error connecting to device of type: $typeName. $error');
+      warning(
+        '$runtimeType - Error connecting to device of type: $typeName. $error',
+      );
       status = DeviceStatus.disconnected;
     }
 
@@ -282,7 +305,9 @@ abstract class DeviceManager<
     info('$runtimeType - Restarting sampling...');
 
     for (var executor in executors) {
-      debug('$runtimeType - Restarting executor: $executor, state: ${executor.state}');
+      debug(
+        '$runtimeType - Restarting executor: $executor, state: ${executor.state}',
+      );
       if (executor.state == ExecutorState.PausedButShouldBeResumed) {
         // resume data sampling with a delay to give the device some time to fully reconnect
         Future.delayed(const Duration(seconds: 15), () => executor.resume());
@@ -301,7 +326,9 @@ abstract class DeviceManager<
   /// sampling when the device is reconnected.
   @nonVirtual
   void stop({bool shouldBeResumed = false}) {
-    debug('$runtimeType - Stopping sampling - shouldResumeLater: $shouldBeResumed ...');
+    debug(
+      '$runtimeType - Stopping sampling - shouldResumeLater: $shouldBeResumed ...',
+    );
     for (var executor in executors) {
       executor.state == ExecutorState.Resumed && shouldBeResumed
           ? executor.pauseButShouldBeResumed()
@@ -316,7 +343,9 @@ abstract class DeviceManager<
   @nonVirtual
   Future<bool> disconnect() async {
     if (!isConnecting) {
-      warning('$runtimeType is not connected, so nothing to disconnect from....');
+      warning(
+        '$runtimeType is not connected, so nothing to disconnect from....',
+      );
       return true;
     }
     bool success = false;
@@ -327,7 +356,9 @@ abstract class DeviceManager<
     try {
       success = await onDisconnect();
     } catch (error) {
-      warning('$runtimeType - Error disconnecting from device of type: $typeName. $error');
+      warning(
+        '$runtimeType - Error disconnecting from device of type: $typeName. $error',
+      );
     }
     status = (success) ? DeviceStatus.disconnected : status;
 

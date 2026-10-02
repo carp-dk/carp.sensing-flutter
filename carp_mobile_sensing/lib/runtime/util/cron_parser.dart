@@ -141,18 +141,18 @@ class _Schedule {
     dynamic months,
     dynamic weekdays,
   }) {
-    List<int>? parsedMinutes = _parseConstraint(
-      minutes,
-    )?.where((x) => x >= 0 && x <= 59).toList();
-    List<int>? parsedHours = _parseConstraint(
-      hours,
-    )?.where((x) => x >= 0 && x <= 23).toList();
-    List<int>? parsedDays = _parseConstraint(
-      days,
-    )?.where((x) => x >= 1 && x <= 31).toList();
-    List<int>? parsedMonths = _parseConstraint(
-      months,
-    )?.where((x) => x >= 1 && x <= 12).toList();
+    List<int>? parsedMinutes = _parseConstraint(minutes)
+        ?.where((x) => x >= 0 && x <= 59)
+        .toList();
+    List<int>? parsedHours = _parseConstraint(hours)
+        ?.where((x) => x >= 0 && x <= 23)
+        .toList();
+    List<int>? parsedDays = _parseConstraint(days)
+        ?.where((x) => x >= 1 && x <= 31)
+        .toList();
+    List<int>? parsedMonths = _parseConstraint(months)
+        ?.where((x) => x >= 1 && x <= 12)
+        .toList();
     List<int>? parsedWeekdays = _parseConstraint(weekdays)
         ?.where((x) => x >= 0 && x <= 7)
         .map((x) => x == 0 ? 7 : x)

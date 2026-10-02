@@ -33,6 +33,7 @@ abstract class ClientManager<
   DeploymentService? _deploymentService;
   DeviceDataCollectorFactory? _dataCollectorFactory;
   TRegistration? _registration;
+
   /// Performs deployment calls for studies; created by [configure].
   StudyDeploymentProxy? proxy;
 

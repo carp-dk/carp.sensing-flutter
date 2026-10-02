@@ -20,11 +20,9 @@ class HealthUserTask extends UserTask {
 
     // then check for permission to access health data
     try {
-      var healthProbe =
-          backgroundTaskExecutor.probes.firstWhere(
-                (probe) => probe is HealthProbe,
-              )
-              as HealthProbe;
+      var healthProbe = backgroundTaskExecutor.probes.firstWhere(
+        (probe) => probe is HealthProbe,
+      ) as HealthProbe;
 
       // Always request permissions when starting the health user task.
       healthProbe.requestPermissions().then((granted) {

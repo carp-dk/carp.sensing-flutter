@@ -69,12 +69,10 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
   TRegistration createRegistration({
     String? deviceId,
     String? deviceDisplayName,
-  }) =>
-      DefaultDeviceRegistration(
-            deviceId: deviceId,
-            deviceDisplayName: deviceDisplayName,
-          )
-          as TRegistration;
+  }) => DefaultDeviceRegistration(
+    deviceId: deviceId,
+    deviceDisplayName: deviceDisplayName,
+  ) as TRegistration;
 
   @override
   String toString() =>
