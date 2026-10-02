@@ -6,45 +6,54 @@
 
 part of 'esense.dart';
 
-/// A sampling package for collecting context information from the
-/// [eSense](http://www.esense.io) device supporting the following measures:
+/// The sampling package for the [eSense](https://www.esense.io) earable.
 ///
-///  * dk.cachet.carp.esense.button
-///  * dk.cachet.carp.esense.sensor
+/// Collects button and motion sensor events from an eSense earable over
+/// Bluetooth Low Energy (BLE), using the
+/// [esense_flutter](https://pub.dev/packages/esense_flutter) plugin. Works on
+/// Android and iOS and needs the [ESenseDevice] connected device, which is
+/// handled by an [ESenseDeviceManager].
 ///
-/// Both measure types are continuous collection of eSense data from an eSense
-/// device, which are:
+/// Measure types:
+///  * `dk.cachet.carp.esense.button` ([ESENSE_BUTTON]): button pressed / released events.
+///  * `dk.cachet.carp.esense.sensor` ([ESENSE_SENSOR]): accelerometer and gyroscope events.
 ///
-///  * Event-based measure.
-///  * Uses the [ESenseDevice] connected device for data collection.
-///  * No sampling configuration needed.
+/// Key points:
+///  * Both measures are event-based and need no sampling configuration.
+///  * Creates an [ESenseButtonProbe] or an [ESenseSensorProbe] for each measure.
+///  * Registers [ESenseDevice], [ESenseButton] and [ESenseSensor] for JSON
+///    deserialization, including the CAMS 1.x device type.
 ///
-/// An example of a study protocol configuration might be:
+/// Example of a protocol that collects eSense data as soon as the study starts:
 ///
 /// ```dart
-///   // Add a background task that immediately starts collecting eSense button
-///   // and sensor events from the eSense device.
-///   protocol.addTriggeredTask(
+///   final eSense = ESenseDevice(samplingRate: 10);
+///   protocol.addConnectedDevice(eSense, phone);
+///
+///   protocol.addTaskControl(
 ///       ImmediateTrigger(),
-///       BackgroundTask()
-///         ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_BUTTON))
-///         ..addMeasure(Measure(type: ESenseSamplingPackage.ESENSE_SENSOR)),
+///       BackgroundTask(measures: [
+///         Measure(type: ESenseSamplingPackage.ESENSE_BUTTON),
+///         Measure(type: ESenseSamplingPackage.ESENSE_SENSOR),
+///       ]),
 ///       eSense);
 /// ```
 ///
-/// To use this package, register it in the [carp_mobile_sensing] package using
+/// Register this package before running a study:
 ///
-/// ```
-///   SamplingPackageRegistry.register(ESenseSamplingPackage());
+/// ```dart
+///   SamplingPackageRegistry().register(ESenseSamplingPackage());
 /// ```
 class ESenseSamplingPackage implements SamplingPackage {
+  /// The namespace of the eSense measure types, `dk.cachet.carp.esense`.
   static const String ESENSE_NAMESPACE = "${NameSpace.CARP}.esense";
 
-  /// Measure type for continuous collection of eSense button events (pressed/released).
+  /// Measure type for continuous collection of eSense button events
+  /// (pressed/released) as [ESenseButton] data.
   static const String ESENSE_BUTTON = "$ESENSE_NAMESPACE.button";
 
   /// Measure type for continuous collection of eSense sensor events
-  /// (accelerometer & gyroscope).
+  /// (accelerometer and gyroscope) as [ESenseSensor] data.
   static const String ESENSE_SENSOR = "$ESENSE_NAMESPACE.sensor";
 
   final DeviceManager _deviceManager = ESenseDeviceManager(
