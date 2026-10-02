@@ -7,6 +7,11 @@
 
 part of '../../infrastructure.dart';
 
+/// Creates a [SQLiteDataManager] for data endpoints of type
+/// [DataEndPointTypes.SQLITE].
+///
+/// Registered in the [DataManagerRegistry] by
+/// [SmartPhoneClientManager.configure].
 class SQLiteDataManagerFactory implements DataManagerFactory {
   @override
   String get type => DataEndPointTypes.SQLITE;
@@ -15,12 +20,24 @@ class SQLiteDataManagerFactory implements DataManagerFactory {
   DataManager create() => SQLiteDataManager();
 }
 
-/// Stores all collected [Measurement] json objects in an SQLite database on
-/// the device's local storage media.
-/// Measurements are stored in the `measurements` table.
+/// A data manager that stores [Measurement]s as JSON in a local SQLite database.
+///
+/// Used when the protocol's data endpoint is a [SQLiteDataEndPoint], which is
+/// the default for a [SmartphoneStudyProtocol]. Backends (e.g. `carp_backend`)
+/// read from this database and upload rows marked as not uploaded.
+///
+/// Key points:
+///  * One database file is shared by all deployments in the app. Rows are keyed
+///    by deployment ID, device role name and the measurement's record ID.
+///  * Duplicates (same deployment, device role name and record ID) are ignored.
+///  * Inserts are batched: rows are buffered and written in one transaction
+///    every 500 ms. [close] writes any remaining rows.
+///  * Write errors are logged and the batch is dropped.
+///
+/// Measurements are stored in the [MEASUREMENT_TABLE_NAME] table.
 ///
 /// The path and filename format is `~/carp-data.db`, where `~` is the folder
-/// where SQLite places it database files.
+/// where SQLite places its database files.
 ///
 /// On iOS, this is the `NSDocumentsDirectory` and the files can be accessed via
 /// the MacOS Finder.
@@ -29,16 +46,28 @@ class SQLiteDataManagerFactory implements DataManagerFactory {
 /// located in the `data/data/<package_name>/databases/` folder.
 /// Files can be accessed via AndroidStudio.
 class SQLiteDataManager extends AbstractDataManager {
+  /// Name of the database file, without the `.db` extension.
   static const String DATABASE_NAME = 'carp-data';
+
+  /// Name of the table holding the measurements.
 
   static const String MEASUREMENT_TABLE_NAME = 'measurements';
   static const String ID_COLUMN = 'id';
+
+  /// Upload flag column: `0` when stored. An uploader that keeps rows after
+  /// upload sets it to `1`.
   static const String UPLOADED_COLUMN = 'uploaded';
   static const String DEPLOYMENT_ID_COLUMN = 'deployment_id';
+
+  /// ID of the trigger that collected the measurement, or `0` if unknown.
   static const String TRIGGER_ID_COLUMN = 'trigger_id';
   static const String DEVICE_ROLE_NAME_COLUMN = 'device_role_name';
   static const String DATATYPE_COLUMN = 'data_type';
+
+  /// The [Data.recordId] of the measurement, used to drop duplicates.
   static const String RECORD_ID_COLUMN = 'record_id';
+
+  /// The JSON-encoded [Measurement].
   static const String MEASUREMENT_COLUMN = 'measurement';
 
   String? _databasePath;
@@ -46,6 +75,7 @@ class SQLiteDataManager extends AbstractDataManager {
   /// Full path and name of the database.
   String get databaseName => '$_databasePath/$DATABASE_NAME.db';
 
+  /// The open database, or `null` until [configure] has been called.
   Database? database;
 
   @override

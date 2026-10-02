@@ -7,20 +7,24 @@
 
 part of '../../../sampling_packages.dart';
 
-/// Holds basic information about the mobile device from where the data is collected.
+/// Hardware and operating system information about the phone.
+///
+/// Collected by [DeviceProbe] for the [DeviceSamplingPackage.DEVICE_INFORMATION]
+/// measure, using [DeviceInfoService].
 ///
 /// More information on the data from Android and iOS are available at:
-///   * [AndroidDeviceInfo](https://pub.dev/documentation/device_info/latest/device_info/AndroidDeviceInfo-class.html)
-///   * [IosDeviceInfo](https://pub.dev/documentation/device_info/latest/device_info/IosDeviceInfo-class.html)
+///   * [AndroidDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/AndroidDeviceInfo-class.html)
+///   * [IosDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/IosDeviceInfo-class.html)
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceInformation extends Data {
-  ///The platform type of the device.
+  /// The platform type of the device.
   /// * `Android`
-  /// * `IOS`
+  /// * `iOS`
   String? platform;
 
-  /// An identifier that is unique to the particular device.
-  /// Note that this ID will change if the user performs a factory reset on their device.
+  /// The device ID, see [DeviceInfoService.deviceID].
+  /// On iOS this is unique per device and app vendor, and changes if the app
+  /// is reinstalled or the device is reset.
   String? deviceId;
 
   /// The hardware type of this device (e.g. 'iPhone7,1' for iPhone 6 Plus).
@@ -44,7 +48,8 @@ class DeviceInformation extends Data {
   /// The OS release.
   String? release;
 
-  /// The full device info for this device.
+  /// The full, platform-specific device info as returned by the
+  /// `device_info_plus` plugin.
   Map<String, dynamic> deviceData = {};
 
   DeviceInformation({
@@ -71,7 +76,10 @@ class DeviceInformation extends Data {
   Map<String, dynamic> toJson() => _$DeviceInformationToJson(this);
 }
 
-/// Holds basic information about the app from where the data is collected.
+/// Name, version and install information about the app collecting the data.
+///
+/// Collected by [ApplicationProbe] for the
+/// [DeviceSamplingPackage.APPLICATION_INFORMATION] measure.
 ///
 /// Uses the same data structure as the [package_info_plus](https://pub.dev/packages/package_info_plus) package.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -103,7 +111,7 @@ class ApplicationInformation extends Data {
   /// - `CFBundleVersion` on iOS.
   /// - `versionCode` on Android.
   ///
-  /// Note, on iOS if an app has no buildNumber specified this property will return version
+  /// Note, on iOS if an app has no buildNumber specified this property will return version.
   /// Docs about CFBundleVersion: https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleversion
   final String buildNumber;
 
@@ -138,6 +146,7 @@ class ApplicationInformation extends Data {
     this.updateTime,
   }) : super();
 
+  /// Creates an [ApplicationInformation] from the `package_info_plus` [info].
   ApplicationInformation.fromPackageInfo(PackageInfo info)
     : appName = info.appName,
       packageName = info.packageName,
@@ -162,7 +171,10 @@ class ApplicationInformation extends Data {
   Map<String, dynamic> toJson() => _$ApplicationInformationToJson(this);
 }
 
-/// Holds battery level and charging status collected from the phone.
+/// Battery level and charging status of the phone.
+///
+/// Collected by [BatteryProbe] for the [DeviceSamplingPackage.BATTERY_STATE]
+/// measure. [batteryStatus] holds one of the `STATE_*` constants.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BatteryState extends Data {
   static const String STATE_FULL = 'full';
@@ -171,7 +183,7 @@ class BatteryState extends Data {
   static const String STATE_CONNECTED_NOT_CHARGING = 'connectedNotCharging';
   static const String STATE_UNKNOWN = 'unknown';
 
-  /// The battery level in percent.
+  /// The battery level in percent (0-100).
   int? batteryLevel;
 
   /// The charging status of the battery:
@@ -184,6 +196,8 @@ class BatteryState extends Data {
 
   BatteryState([this.batteryLevel, this.batteryStatus]) : super();
 
+  /// Creates a [BatteryState] from a battery [level] and a `battery_plus`
+  /// [state].
   BatteryState.fromBatteryState(int level, battery.BatteryState state)
     : batteryLevel = level,
       batteryStatus = _parseBatteryState(state),
@@ -223,7 +237,10 @@ class BatteryState extends Data {
   Map<String, dynamic> toJson() => _$BatteryStateToJson(this);
 }
 
-/// Holds information about free memory on the phone.
+/// Free physical and virtual memory on the phone.
+///
+/// Collected by [MemoryProbe] for the [DeviceSamplingPackage.FREE_MEMORY]
+/// measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class FreeMemory extends Data {
   /// Amount of free physical memory in bytes.
@@ -242,7 +259,10 @@ class FreeMemory extends Data {
   Map<String, dynamic> toJson() => _$FreeMemoryToJson(this);
 }
 
-/// Holds a screen event collected from the phone.
+/// A screen on, off or unlock event from the phone.
+///
+/// Collected by [ScreenProbe] for the [DeviceSamplingPackage.SCREEN_EVENT]
+/// measure. Android only.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ScreenEvent extends Data {
   /// A screen event:
@@ -253,6 +273,7 @@ class ScreenEvent extends Data {
 
   ScreenEvent([this.screenEvent]) : super();
 
+  /// Creates a [ScreenEvent] from a `screen_state` [event].
   factory ScreenEvent.fromScreenStateEvent(ScreenStateEvent event) {
     ScreenEvent sd = ScreenEvent();
 
@@ -283,13 +304,16 @@ class ScreenEvent extends Data {
   Map<String, dynamic> toJson() => _$ScreenEventToJson(this);
 }
 
-/// Holds timezone information about the mobile device.
+/// The time zone of the phone.
+///
+/// Collected by [TimezoneProbe] for the [DeviceSamplingPackage.TIMEZONE]
+/// measure.
 ///
 /// See [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 /// for an overview of timezones.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class Timezone extends Data {
-  /// The timezone as a string.
+  /// The tz database name of the time zone, e.g. `Europe/Copenhagen`.
   String timezone;
 
   Timezone(this.timezone) : super();
@@ -307,7 +331,10 @@ class Timezone extends Data {
   Map<String, dynamic> toJson() => _$TimezoneToJson(this);
 }
 
-/// Holds information about [AppLifecycleState] events collected from the phone.
+/// A change in the app's [AppLifecycleState].
+///
+/// Collected by [AppLifecycleProbe] for the
+/// [DeviceSamplingPackage.APP_LIFECYCLE_EVENT] measure.
 ///
 /// [state] can be one of the following state:
 ///  * inactive
@@ -319,7 +346,7 @@ class Timezone extends Data {
 /// See [AppLifecycleState] for details.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class AppLifecycleEvent extends Data {
-  /// The app lifecycle state.
+  /// The name of the [AppLifecycleState], e.g. `resumed`.
   String state;
 
   AppLifecycleEvent(this.state) : super();
@@ -336,11 +363,14 @@ class AppLifecycleEvent extends Data {
   Map<String, dynamic> toJson() => _$AppLifecycleEventToJson(this);
 }
 
-/// Reflects a heart beat data send every [period] minute.
-/// Useful for calculating sampling coverage over time.
+/// A heartbeat sent at a fixed interval from a device.
+///
+/// Collected by [HeartbeatProbe] for the [DeviceSamplingPackage.HEARTBEAT]
+/// measure. Useful for calculating sampling coverage over time.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Heartbeat extends Data {
-  /// The type of device.
+  /// The type of device sending the heartbeat, e.g. the CARP type name of
+  /// the [Smartphone] device.
   String deviceType;
 
   /// The role name of the device in the protocol.

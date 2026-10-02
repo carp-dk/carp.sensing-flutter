@@ -7,8 +7,12 @@
 
 part of '../../../sampling_packages.dart';
 
-/// A [SamplingPackage] containing data types, sampling schemas and probes
-/// for collecting information from the device hardware:
+/// The built-in sampling package for collecting information about the phone
+/// and the app.
+///
+/// Registered automatically in the [SamplingPackageRegistry]. Add a [Measure]
+/// with one of the measure types below to a task in your protocol to use it.
+/// All measures use the [Smartphone] primary device. It collects:
 ///
 ///  - device info (hardware and operating system information)
 ///  - installed app info (name, package name, version, etc.)
@@ -18,6 +22,19 @@ part of '../../../sampling_packages.dart';
 ///  - free memory (physical and virtual)
 ///  - local time zone (e.g. "Europe/Copenhagen")
 ///  - heartbeat (periodic heartbeat from the device)
+///
+/// Screen events are only available on Android.
+///
+/// ```dart
+/// protocol.addTaskControl(
+///   ImmediateTrigger(),
+///   BackgroundTask(measures: [
+///     Measure(type: DeviceSamplingPackage.BATTERY_STATE),
+///     Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
+///   ]),
+///   phone,
+/// );
+/// ```
 class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for collection of basic device information like device name,
   /// model, manufacturer, operating system, and hardware profile.
@@ -47,12 +64,13 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] primary device for data collection.
   ///  * Use [IntervalSamplingConfiguration] for configuration.
-  ///    Default is 5 minutes interval.
+  ///    Default is 20 seconds interval. Only changes are reported.
   static const String BATTERY_STATE =
       '${CarpDataTypes.CARP_NAMESPACE}.batterystate';
 
   /// Measure type for collection of screen events (on/off/unlocked).
   ///  * Event-based measure.
+  ///  * Android only.
   ///  * Uses the [Smartphone] primary device for data collection.
   ///  * No sampling configuration needed.
   static const String SCREEN_EVENT =
@@ -70,11 +88,12 @@ class DeviceSamplingPackage extends SmartphoneSamplingPackage {
   /// See [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
   /// for an overview of timezones.
   ///  * One-time measure.
-  ///  * Uses the [Smartphone] master device for data collection.
+  ///  * Uses the [Smartphone] primary device for data collection.
   ///  * No sampling configuration needed.
   static const String TIMEZONE = '${CarpDataTypes.CARP_NAMESPACE}.timezone';
 
-  /// Collect a heartbeat from the primary device.
+  /// Measure type for a periodic heartbeat from the phone.
+  /// Used to calculate sampling coverage over time.
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] primary device for data collection.
   ///  * Use [IntervalSamplingConfiguration] for configuration.

@@ -7,8 +7,22 @@
 
 part of '../../infrastructure.dart';
 
-/// A [NotificationManager] based on the [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
-/// Flutter plugin.
+/// A [NotificationManager] that shows local notifications using the
+/// [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
+/// plugin.
+///
+/// The default notification manager of [SmartPhoneClientManager]. It shows
+/// notifications for [UserTask]s (see [AppTaskController]) and app-specific
+/// notifications. A singleton, accessed as `FlutterLocalNotificationManager()`.
+///
+/// Key points:
+///  * [configure] must be called before use. It registers the notification
+///    icon and asks for notification permission on Android.
+///  * Uses exact alarms on Android when `SCHEDULE_EXACT_ALARM` is granted,
+///    otherwise inexact alarms.
+///  * Task notifications use the hash code of [UserTask.id] as notification id.
+///  * Taps on task notifications are sent to [AppTaskController.onNotification].
+///    Other taps are emitted on [notificationTaps].
 ///
 /// On iOS, remember to edit the AppDelegate.swift file.
 /// See https://pub.dev/packages/flutter_local_notifications#general-setup
@@ -220,7 +234,12 @@ class FlutterLocalNotificationManager implements NotificationManager {
   }
 }
 
-/// Callback method called when a notification is clicked in the operating system.
+/// Handles a tap on a notification shown by [FlutterLocalNotificationManager].
+///
+/// If the payload is the id of a [UserTask], calls
+/// [AppTaskController.onNotification]. Otherwise the payload is emitted on
+/// [FlutterLocalNotificationManager.notificationTaps]. Top-level and marked as
+/// an entry point, so it can also run when the app is in the background.
 @pragma('vm:entry-point')
 void onDidReceiveNotificationResponse(NotificationResponse response) {
   String? payload = response.payload;

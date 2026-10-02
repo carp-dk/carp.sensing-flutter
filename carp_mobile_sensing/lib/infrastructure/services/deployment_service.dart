@@ -7,8 +7,20 @@
 
 part of '../../infrastructure.dart';
 
-/// A local (in-memory) implementation of a [DeploymentService] useful in
-/// CAMS studies to be deployed locally on this phone.
+/// A [DeploymentService] that runs locally on the phone and keeps deployments
+/// in memory.
+///
+/// Used when a study is deployed from a local [SmartphoneStudyProtocol]
+/// instead of from a server. It is the default deployment service in
+/// [SmartPhoneClientManager.configure]. Use a server-backed service, such as
+/// the one in `carp_webservices`, to get deployments from CARP.
+///
+/// Key points:
+///  * A singleton, accessed as `SmartphoneDeploymentService()`.
+///  * Only accepts [SmartphoneStudyProtocol]s.
+///  * Registers [thisPhone] as the primary device of every new deployment.
+///  * Deployments are not persisted, so they are lost when the app restarts.
+///    Running studies are restored by [PersistenceService] instead.
 class SmartphoneDeploymentService implements DeploymentService {
   // key = studyDeploymentId
   final Map<String, StudyDeployment> _repository = {};
@@ -20,7 +32,8 @@ class SmartphoneDeploymentService implements DeploymentService {
   /// Get the singleton [SmartphoneDeploymentService].
   factory SmartphoneDeploymentService() => _instance;
 
-  /// The device description for this phone.
+  /// The device configuration for this phone. Registered as the primary
+  /// device of every deployment created by this service.
   Smartphone thisPhone = Smartphone();
 
   @override
@@ -135,8 +148,8 @@ class SmartphoneDeploymentService implements DeploymentService {
     );
   }
 
-  /// Get a smartphone deployment configuration for [studyDeploymentId] for
-  /// this phone.
+  /// Returns the [SmartphoneDeployment] for [studyDeploymentId] for this phone
+  /// ([thisPhone]), or `null` if the deployment is unknown.
   Future<SmartphoneDeployment?> getDeviceDeployment(
     String studyDeploymentId,
   ) async =>
@@ -167,7 +180,7 @@ class SmartphoneDeploymentService implements DeploymentService {
     return deployment.status;
   }
 
-  /// Mark the study deployment with [studyDeploymentId] as deployed successfully
+  /// Marks the study deployment with [studyDeploymentId] as deployed successfully
   /// to this primary device (phone), i.e., that the study deployment was loaded
   /// on the device and that the necessary runtime is available to run it.
   Future<StudyDeploymentStatus?> deployed(
@@ -179,7 +192,9 @@ class SmartphoneDeploymentService implements DeploymentService {
     deviceDeploymentLastUpdateDate,
   );
 
-  /// Stop the study deployment with [studyDeploymentId].
+  /// Stops the study deployment with [studyDeploymentId].
+  ///
+  /// Returns `null` if the deployment is unknown.
   @override
   Future<StudyDeploymentStatus?> stop(String studyDeploymentId) async {
     if (_repository[studyDeploymentId] == null) return null;
