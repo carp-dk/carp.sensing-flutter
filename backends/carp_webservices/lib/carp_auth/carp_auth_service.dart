@@ -1,9 +1,14 @@
 part of 'carp_auth.dart';
 
-/// The authentication service for CAWS.
+/// Authenticates users at CAWS and holds the current session.
 ///
-/// Used as a singleton.
-/// Must be configured using the [configure] method before use, like this:
+/// Configure it with a [CarpAuthProperties] using [configure] before signing
+/// in. [authenticate] opens the CAWS login page (OpenID Connect authorization
+/// code flow) and returns a [CarpUser] with an [OAuthToken]; other sign-in
+/// methods are available separately. The CAWS services ([CarpBaseService])
+/// use the access token of [CarpAuthService.currentUser] to authorize their
+/// requests. The default constructor returns a shared instance, configured
+/// like this:
 ///
 /// ```dart
 /// // The authentication configuration
@@ -22,8 +27,7 @@ part of 'carp_auth.dart';
 /// await CarpAuthService().configure(authProperties);
 /// ```
 ///
-/// Basic authentication is using the CAWS login web page, which is opened
-/// when calling the [authenticate] method:
+/// The CAWS login web page is opened when calling the [authenticate] method:
 ///
 /// ```dart
 /// CarpUser user = await CarpAuthService().authenticate();
@@ -59,12 +63,13 @@ class CarpAuthService {
   bool get authenticated => (_currentUser != null);
 
   /// The CARP authentication properties associated with the CARP Web Service.
-  /// Returns `null` if this service has not yet been configured via the
-  /// [configure] method.
+  /// Accessing this before [configure] has been called fails a null assertion;
+  /// check [isConfigured] first.
   CarpAuthProperties get authProperties => nonNullAble(_authProperties);
 
   /// Gets the current user.
-  /// Returns `null` if no user is authenticated.
+  /// Accessing this when no user is authenticated fails a null assertion;
+  /// check [authenticated] first.
   CarpUser get currentUser => nonNullAble(_currentUser);
   set currentUser(CarpUser? user) => _currentUser = user;
 
@@ -315,8 +320,8 @@ class CarpAuthService {
   /// previously granted refresh token, using the Identity Server discovery URL.
   ///
   /// This method is typically used when the access token has expired, and a new
-  /// access token is needed to access the CARP web service. The refresh token
-  /// expiration date is [OAuthToken.expiresAt].
+  /// access token is needed to access the CARP web service. [OAuthToken.expiresAt]
+  /// is the expiration time of the access token, not of the refresh token.
   ///
   /// Returns the signed in user (with a new [OAuthToken] access token), if successful.
   /// Throws a [CarpServiceException] if not successful.
@@ -480,9 +485,9 @@ class CarpAuthService {
     return CarpUser.fromJWTOAuth(jwt, oauthToken);
   }
 
-  /// Makes sure that the [CarpApp] or [CarpUser] is configured, by throwing a
-  /// [CarpServiceException] if they are null.
-  /// Otherwise, returns the non-null value.
+  /// Returns [argument] with a non-null assertion. A null [argument] fails
+  /// that assertion (the [CarpServiceException] branches below cannot be
+  /// reached).
   T nonNullAble<T>(T? argument) {
     if (argument == null && argument is CarpApp) {
       throw CarpServiceException(

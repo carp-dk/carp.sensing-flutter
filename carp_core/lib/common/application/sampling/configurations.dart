@@ -7,6 +7,11 @@
 part of '../../../common.dart';
 
 /// Contains configuration on how to sample a data stream of a given type.
+///
+/// Set on a [Measure] (as [Measure.overrideSamplingConfiguration]) or on a
+/// device (as [DeviceConfiguration.defaultSamplingConfiguration]). Subclasses
+/// hold the options, e.g. [GranularitySamplingConfiguration]. CARP Mobile
+/// Sensing adds more, such as `PeriodicSamplingConfiguration`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SamplingConfiguration extends Serializable {
   SamplingConfiguration() : super();
@@ -37,6 +42,8 @@ class NoOptionsSamplingConfiguration extends SamplingConfiguration {
 }
 
 /// A sampling configuration which changes based on how much battery the device has left.
+///
+/// Holds one [SamplingConfiguration] per battery level.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BatteryAwareSamplingConfiguration extends SamplingConfiguration {
   /// The sampling configuration to use when there is plenty of battery left.
@@ -85,6 +92,7 @@ enum Granularity {
 /// corresponding to expected degrees of power consumption.
 @JsonSerializable()
 class GranularitySamplingConfiguration extends SamplingConfiguration {
+  /// The desired level of detail.
   Granularity granularity;
   GranularitySamplingConfiguration(this.granularity);
 

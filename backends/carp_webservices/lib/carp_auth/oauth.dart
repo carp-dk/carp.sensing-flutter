@@ -31,7 +31,6 @@ class OAuthToken {
   /// The date the access token was issued.
   final DateTime issuedDate = DateTime.now();
 
-  /// Constructor
   OAuthToken(
     this.accessToken,
     this.refreshToken,

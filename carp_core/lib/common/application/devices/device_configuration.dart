@@ -6,21 +6,37 @@
  */
 part of '../../../common.dart';
 
-/// Describes any type of electronic device, such as a sensor, video camera,
-/// desktop computer, or smartphone that collects data which can be incorporated
-/// into the platform after it has been processed by a primary device (potentially itself).
-/// Optionally, a device can present output and receive user input.
+/// Describes a device that takes part in a study, as part of a protocol.
+///
+/// A device can be any electronic device, such as a sensor, video camera,
+/// desktop computer, or smartphone, that collects data which is incorporated
+/// into the platform after being processed by a primary device (potentially
+/// itself). Optionally, a device can present output and receive user input.
+///
+/// Key points:
+///  * [roleName] identifies the device within a protocol and must be unique.
+///  * Devices are either primary devices ([PrimaryDeviceConfiguration], e.g. a
+///    [Smartphone]) or connected devices (e.g., a [BLEHeartRateDevice]) added
+///    with [StudyProtocol.addConnectedDevice].
+///  * [dataTypeSamplingSchemes] lists the data types the device can collect.
+///  * At deployment, each device gets a [DeviceRegistration] of type
+///    [TRegistration] that identifies the physical device.
+///
+/// CARP Mobile Sensing and its sampling packages add more device types,
+/// each handled at runtime by a `DeviceManager`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceConfiguration<TRegistration extends DeviceRegistration>
     extends Serializable {
+  /// The JSON namespace of the CARP Core device types.
   static const DEVICE_NAMESPACE = 'dk.cachet.carp.common.application.devices';
 
-  /// The device type identifier
+  /// The device type identifier, i.e. its [jsonType].
   @JsonKey(includeFromJson: false, includeToJson: false)
   String get type => jsonType;
 
   /// A name which describes how the device participates within the study protocol;
-  /// it's 'role'. For example, 'Parent's phone' or 'Child phone'.
+  /// its 'role'. For example, 'Parent's phone' or 'Child phone'.
+  /// Must be unique within a protocol.
   String roleName;
 
   /// Determines whether device registration for this device is optional prior to
@@ -28,13 +44,13 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
   bool? isOptional;
 
   /// Sampling configurations which override the default configurations for
-  /// data types available on this device.
+  /// data types available on this device, mapped by data type.
   Map<String, SamplingConfiguration>? defaultSamplingConfiguration = {};
 
   /// Sampling schemes for all the sensors available on this device.
   ///
-  /// Implementations of [DeviceConfiguration] should simply return a map
-  /// of all supported sampling schemes here.
+  /// Implementations of [DeviceConfiguration] should return a map of all
+  /// supported sampling schemes here. Null in this base class.
   DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes => null;
 
   /// The set of data types which can be collected on this device.
@@ -76,7 +92,9 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
   String get jsonType => '$DEVICE_NAMESPACE.$runtimeType';
 }
 
-/// A default device configuration just implementing the basics.
+/// A [DeviceConfiguration] with no extra properties, for generic devices.
+///
+/// Also used as a placeholder when deserializing device-dependent objects.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DefaultDeviceConfiguration
     extends DeviceConfiguration<DefaultDeviceRegistration> {
@@ -101,18 +119,23 @@ class DefaultDeviceConfiguration
 
 /// A device which aggregates, synchronizes, and optionally uploads incoming
 /// data received from one or more connected devices (potentially just itself).
+///
+/// Add one with [StudyProtocol.addPrimaryDevice]; a protocol needs at least one
+/// before it can be deployed. In CARP Mobile Sensing this is the phone
+/// ([Smartphone]). Each primary device receives its own
+/// [PrimaryDeviceDeployment]. The constructor sets [isOptional] to false.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
     extends DeviceConfiguration<TRegistration> {
   PrimaryDeviceConfiguration({required super.roleName})
     : super(isOptional: false);
 
-  // This property is only here for (de)serialization purposes.
-  // For unknown types we need to know whether to treat them as primary
-  // devices or not (in the case of 'DeviceConfiguration' collections).
+  /// Defaults to true. Only here for (de)serialization: for unknown device
+  /// types, the JSON tells whether to treat them as primary devices.
   bool isPrimaryDevice = true;
 
-  /// A trigger which fires immediately at the start of a study deployment.
+  /// A new trigger which fires immediately at the start of a study deployment
+  /// on this device.
   TriggerConfiguration get atStartOfStudy => ElapsedTimeTrigger(
     sourceDeviceRoleName: roleName,
     elapsedTime: const Duration(),

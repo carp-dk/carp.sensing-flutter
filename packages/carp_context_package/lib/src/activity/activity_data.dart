@@ -6,7 +6,11 @@
 
 part of '../../carp_context_package.dart';
 
-/// Holds an activity event as recognized by the phone Activity Recognition (AR) API.
+/// An activity event recognized by the phone's activity recognition (AR) API.
+///
+/// Produced by [ActivityProbe] for the [ContextSamplingPackage.ACTIVITY]
+/// measure. Two activities are equivalent if they have the same [type], so
+/// repeated events of the same activity can be filtered out.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Activity extends Data {
   /// Mapping of the activity types reported by the AR plugin to the CARP
@@ -45,7 +49,7 @@ class Activity extends Data {
   /// * automotive => IN_VEHICLE
   /// * cycling => ON_BICYCLE
   ///
-  /// Note that the [ActivityProbe] discard some AR events, which include:
+  /// Note that the [ActivityProbe] discards some AR events, which include:
   ///  * UNKNOWN - when the activity cannot be recognized
   ///  * TILTING - when the phone is tilted (only on Android)
   ///  * Activities with a low confidence level (<50%)
@@ -56,8 +60,9 @@ class Activity extends Data {
   @override
   bool equivalentTo(Data other) => other is Activity && type == other.type;
 
-  /// Create an [Activity] from an [ar.ActivityEvent] as reported by the
-  /// AR plugin.
+  /// Creates an [Activity] from an `ActivityEvent` reported by the AR plugin.
+  ///
+  /// Plugin types without a CARP counterpart become [ActivityType.UNKNOWN].
   factory Activity.fromActivityEvent(ar.ActivityEvent event) => Activity(
     type: _activityTypeMap[event.type] ?? ActivityType.UNKNOWN,
     confidence: event.confidence,
@@ -74,7 +79,7 @@ class Activity extends Data {
   String get typeString => type.name;
 }
 
-/// Defines the type of activity.
+/// The type of an [Activity].
 enum ActivityType {
   /// The device is in a vehicle, such as a car.
   IN_VEHICLE,

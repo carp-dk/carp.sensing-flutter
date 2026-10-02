@@ -9,7 +9,9 @@
 
 part of '../../runtime.dart';
 
-/// Runtime status for a [DeviceManager].
+/// The runtime status of a [DeviceManager] and its device.
+///
+/// Emitted on [DeviceManager.statusEvents].
 enum DeviceStatus {
   /// The state of the device is unknown.
   unknown,
@@ -27,24 +29,42 @@ enum DeviceStatus {
   /// The device is connected to the phone and ready to be used.
   connected,
 
-  /// The device is reconnected after a temporary disconnection, e.g., due to a
-  /// temporary loss of Bluetooth connection.
+  /// The device is reconnected after a temporary disconnection.
+  ///
+  /// E.g. after a temporary loss of Bluetooth connection.
+  /// Setting this status restarts sampling; see [DeviceManager.restart].
   reconnected,
 
-  /// The device is temporarily disconnected, e.g., due to a temporary loss of
-  /// Bluetooth connection, but is expected to be reconnected again.
+  /// The device is temporarily disconnected, but expected to reconnect.
+  ///
+  /// E.g. due to a temporary loss of Bluetooth connection.
+  /// Setting this status pauses sampling on the device; see
+  /// [DeviceManager.isDisconnecting].
   disconnecting,
 
   /// The device is disconnected from the phone.
   disconnected,
 }
 
-/// A [DeviceManager] handles the runtime of any type of device or service used
-/// for data  collection.
+/// Manages one device or service used for data collection.
 ///
-/// Examples include a hardware device like a smartwatch or fitness band,
+/// It configures the device, connects to it, and starts and stops sampling on
+/// it. Examples include a hardware device like a smartwatch or fitness band,
 /// an onboard service on the smartphone like a location service, or an
-/// online service, like a weather service.
+/// online service, like a weather service. Each [SamplingPackage] provides
+/// one, and the [DeviceController] keeps them by device type.
+///
+/// Key points:
+///  * Lifecycle: [configure], then [connect]; [disconnect] stops sampling
+///    first. Subclasses implement the `on...` callbacks ([onConfigure],
+///    [onConnect], [onDisconnect], [onRequestPermissions]).
+///  * [status] drives sampling: [DeviceStatus.connected] resumes all
+///    [executors], [DeviceStatus.disconnecting] pauses them (to be resumed),
+///    and [DeviceStatus.reconnected] resumes them again after 15 seconds.
+///  * [connect] checks [hasPermissions] first and fails if they are missing.
+///
+/// See [ServiceManager], [HardwareDeviceManager], [BLEDeviceManager] and
+/// [SmartphoneDeviceManager] for the main subtypes.
 abstract class DeviceManager<
   TDeviceConfiguration extends DeviceConfiguration<TRegistration>,
   TRegistration extends DeviceRegistration
@@ -69,10 +89,11 @@ abstract class DeviceManager<
   Set<DataType> get supportedDataTypes =>
       configuration?.supportedDataTypes?.map((str) => DataType.fromString(str)).toSet() ?? {};
 
-  /// The type of the device managed by this device manager
+  /// The type of the device managed by this device manager, e.g.
+  /// `dk.cachet.carp.common.application.devices.Smartphone`.
   String get deviceType => _deviceType;
 
-  // Get a printer-friendly display name for this device.
+  /// A human-readable name for this device, or null if unknown.
   String? get displayName;
 
   /// The configuration for this device.
@@ -85,8 +106,7 @@ abstract class DeviceManager<
   /// Bluetooth device.
   TRegistration? get registration => _registration;
 
-  /// Create a device registration which can be used to configure this device
-  /// for deployment.
+  /// Creates a registration of this device for the deployment.
   ///
   /// This method is used when a device is connected and a registration for this
   /// device is needed in the deployment and hence in the deployment service.
@@ -95,13 +115,17 @@ abstract class DeviceManager<
   /// connected Bluetooth device.
   TRegistration createRegistration();
 
-  /// Indicates whether this device manager should connect to the real device
-  /// based on the last known registration information.
-  /// Returns true (default) if no prior registration information is available,
+  /// Whether to connect to the real device, based on the last registration.
+  ///
+  /// Uses [CamsDeviceRegistration.isConnected] if the [registration] is one.
+  /// Otherwise true, e.g. if there is no prior registration.
   bool get shouldConnect =>
       registration is CamsDeviceRegistration ? (registration as CamsDeviceRegistration).isConnected : true;
 
-  /// The set of task control executors that use this device manager.
+  /// The task control executors whose tasks run on this device.
+  ///
+  /// Filled by the [SmartphoneDeploymentExecutor]. Resumed and paused by
+  /// [start], [restart] and [stop].
   final Set<TaskControlExecutor> executors = {};
 
   /// The name of the [deviceType] without the namespace.
@@ -110,7 +134,9 @@ abstract class DeviceManager<
   /// The runtime status of this device.
   DeviceStatus get status => _status;
 
-  /// Change the runtime status of this device.
+  /// Changes the runtime status of this device.
+  ///
+  /// Emits the new status on [statusEvents] if it differs from the current one.
   set status(DeviceStatus newStatus) {
     if (newStatus != _status) {
       debug('$runtimeType - Setting device status: ${newStatus.name}');
@@ -132,9 +158,12 @@ abstract class DeviceManager<
   /// Is this device manager connected to the real device?
   bool get isConnected => status == DeviceStatus.connected || status == DeviceStatus.reconnected;
 
-  /// Configure this device manager by specifying its [configuration].
-  /// Optionally, a [registration] can be specified to provide runtime information
-  /// about the real device, e.g., the BLE address of a Bluetooth device.
+  /// Configures this device manager with its [configuration].
+  ///
+  /// Optionally, a [registration] can be specified to provide runtime
+  /// information about the real device, e.g., the BLE address of a Bluetooth
+  /// device. Calls [onConfigure] and sets [status] to
+  /// [DeviceStatus.configured]. Does nothing if already configured.
   @nonVirtual
   void configure(TDeviceConfiguration configuration, [TRegistration? registration]) {
     // fast out if already configured
@@ -163,7 +192,7 @@ abstract class DeviceManager<
   /// doing a lot of work on startup.
   void onConfigure();
 
-  /// Does this device manager have the [permissions] to run?
+  /// Whether this device manager has the permissions it needs to run.
   ///
   /// Note that the result is not cached, since permissions can be revoked in
   /// the phone's settings at any time, without the app knowing about it.
@@ -177,7 +206,8 @@ abstract class DeviceManager<
   /// Can be overridden in sub-classes for device-specific permission handling.
   Future<bool> onHasPermissions() async => true;
 
-  /// Request all [permissions] for this device manager.
+  /// Asks the user for the permissions this device manager needs.
+  /// Calls [onRequestPermissions].
   @nonVirtual
   Future<void> requestPermissions() async {
     info('$runtimeType - Requesting permissions for device of type: $typeName.');
@@ -190,8 +220,11 @@ abstract class DeviceManager<
   /// Can be overridden for device-specific permission handling.
   Future<void> onRequestPermissions();
 
-  /// Ask this [DeviceManager] to start connecting to the device.
-  /// Returns the [DeviceStatus] of the device.
+  /// Connects to the device and returns its new [DeviceStatus].
+  ///
+  /// Does nothing if already connecting or connected, or if not configured.
+  /// Sets [status] to [DeviceStatus.disconnected] if permissions are missing
+  /// or [onConnect] throws.
   @nonVirtual
   Future<DeviceStatus> connect() async {
     // Fast out if already connecting or connected to the device.
@@ -228,22 +261,22 @@ abstract class DeviceManager<
   /// Can be overridden for device-specific connection handling.
   Future<DeviceStatus> onConnect();
 
-  /// Start sampling of all measures using this device.
+  /// Starts sampling of all measures using this device.
   ///
-  /// This entails that all task control executors using this device are resumed,
-  /// and hence all data collection for the measures using this device is started.
+  /// Resumes all [executors]. Called automatically when [status] becomes
+  /// [DeviceStatus.connected].
   @nonVirtual
   void start() {
     info('$runtimeType - Starting sampling...');
     executors.forEach((executor) => executor.resume());
   }
 
-  /// Restart sampling of the measures using this device.
+  /// Restarts sampling of the measures using this device.
   ///
-  /// This entails that all task control executors using this device are resumed,
-  /// if they are supposed to be resumed, e.g., if they were paused due to a temporary
-  /// disconnection (via [isDisconnecting]) of the device, but not if they were paused
-  /// due to a manual [stop] of the sampling.
+  /// Resumes, after 15 seconds, only the [executors] in
+  /// [ExecutorState.PausedButShouldBeResumed], i.e. those paused by a
+  /// temporary disconnection ([isDisconnecting]) and not by [stop].
+  /// Called automatically when [status] becomes [DeviceStatus.reconnected].
   @nonVirtual
   void restart() {
     info('$runtimeType - Restarting sampling...');
@@ -257,11 +290,9 @@ abstract class DeviceManager<
     }
   }
 
-  /// Stop sampling the measures using this device.
+  /// Stops sampling the measures using this device.
   ///
-  /// This entails that all task control executors using this device are paused,
-  /// and hence all data collection for the measures using this device is stopped.
-  /// This method is e.g. used when the device is disconnected.
+  /// Pauses all [executors]. Used, e.g., when the device is disconnected.
   ///
   /// If [shouldBeResumed] is true, the executors are paused but marked to be
   /// resumed later when the device is reconnected.
@@ -278,12 +309,10 @@ abstract class DeviceManager<
     }
   }
 
-  /// Ask this [DeviceManager] to disconnect from the device.
+  /// Disconnects from the device.
   ///
-  /// All sampling on this device will be stopped before disconnection is
-  /// initiate.
-  ///
-  /// Returns true if successful, false if not.
+  /// All sampling on this device is stopped first. Returns true if
+  /// successful or if not connected, false if [onDisconnect] fails.
   @nonVirtual
   Future<bool> disconnect() async {
     if (!isConnecting) {
@@ -318,12 +347,13 @@ abstract class DeviceManager<
   /// Is to be overridden in sub-classes and implement device-specific disconnection.
   Future<bool> onDisconnect();
 
-  /// Callback when the physical device is disconnected due to e.g., a temporary
-  /// loss of Bluetooth connection.
+  /// Called when the device is lost for a while.
   ///
-  /// All sampling on this device will be stopped, but the sampling will be
-  /// marked to be restarted (via [restart]) when the device is reconnected,
-  /// e.g., when the Bluetooth connection is re-established.
+  /// E.g. due to a temporary loss of Bluetooth connection.
+  /// Pauses sampling on this device but marks it to be resumed (via [restart])
+  /// when the device is reconnected, and sets [status] to
+  /// [DeviceStatus.disconnected]. Called automatically when [status] becomes
+  /// [DeviceStatus.disconnecting].
   @nonVirtual
   Future<void> isDisconnecting() async {
     info('$runtimeType - Was disconnected from device of type: $typeName.');

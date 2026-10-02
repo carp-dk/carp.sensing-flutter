@@ -7,11 +7,16 @@
 
 part of '../../runtime.dart';
 
-/// A [DeviceController] handles runtime management of all devices and services
-/// available to this phone, including the phone itself.
+/// Keeps the [DeviceManager] of every device and service on this phone.
 ///
-/// Each specific device is handled by a [DeviceManager] which are available as
-/// a map of [devices].
+/// This includes the phone itself.
+/// A singleton, used by the [SmartPhoneClientManager] as its
+/// [DeviceDataCollectorFactory]. Device managers come from the
+/// [SamplingPackage]s registered in the [SamplingPackageRegistry], one per
+/// device type, and are kept in [devices].
+///
+/// Use it to find a device manager, e.g. to connect a Bluetooth device:
+/// `SmartPhoneClientManager().deviceController.getDeviceManager(type)`.
 class DeviceController extends DeviceDataCollectorFactory {
   static final DeviceController _instance = DeviceController._();
   DeviceController._() : super();
@@ -20,24 +25,26 @@ class DeviceController extends DeviceDataCollectorFactory {
   /// The period of sending [Heartbeat] measurements, in minutes.
   static const int HEARTBEAT_PERIOD = 5;
 
-  /// Get the singleton [DeviceController].
+  /// Returns the singleton [DeviceController].
   factory DeviceController() => _instance;
 
-  /// The map of device managers registered in this controller.
+  /// The registered device managers, by device type.
   Map<String, DeviceManager> get devices => _devices;
 
   @override
   DeviceDataCollector get localDataCollector => smartphoneDeviceManager;
 
-  /// The smartphone (primary device) manager.
+  /// The device manager of this phone (the primary device).
+  ///
+  /// Throws a [StateError] if none is registered.
   SmartphoneDeviceManager get smartphoneDeviceManager =>
       devices.values.whereType<SmartphoneDeviceManager>().first;
 
-  /// The list of connected devices on runtime.
+  /// The device managers whose device is connected now.
   List<DeviceManager> get connectedDevices =>
       _devices.values.where((manager) => manager.isConnected).toList();
 
-  /// Do this controller support the specified device [deviceType]?
+  /// Whether a registered [SamplingPackage] provides the device [deviceType].
   bool supportsDevice(String deviceType) {
     for (var package in SamplingPackageRegistry().packages) {
       if (package.deviceType == deviceType) return true;
@@ -45,7 +52,7 @@ class DeviceController extends DeviceDataCollectorFactory {
     return false;
   }
 
-  /// Do this controller support the specified device [deviceType]?
+  /// Whether a device manager for [deviceType] is registered in [devices].
   bool hasDevice(String deviceType) => _devices.containsKey(deviceType);
 
   @override
@@ -54,10 +61,10 @@ class DeviceController extends DeviceDataCollectorFactory {
     DeviceRegistration deviceRegistration,
   ) => getDeviceManager(deviceType);
 
-  /// Get a device manger for the specified [deviceType].
-  /// If a device manager is not yet available, it is created from the
-  /// sampling packages.
-  /// Returns null if no device manager for [deviceType] is found.
+  /// Returns the device manager for [deviceType].
+  ///
+  /// If none is registered yet, it is taken from the sampling packages and
+  /// registered. Returns null if no sampling package provides [deviceType].
   DeviceManager? getDeviceManager(String deviceType) {
     // early out if already registered
     if (devices.containsKey(deviceType)) return devices[deviceType];
@@ -84,16 +91,16 @@ class DeviceController extends DeviceDataCollectorFactory {
     return manager;
   }
 
-  /// A convenient method for creating and registering all devices which are
-  /// available in each [SamplingPackage] that has been registered in the
-  /// [SamplingPackageRegistry].
+  /// Registers the device managers of all packages in [SamplingPackageRegistry].
   void registerAllAvailableDevices() {
     for (var package in SamplingPackageRegistry().packages) {
       registerDevice(package.deviceType, package.deviceManager);
     }
   }
 
-  /// Register [manager] as a device manager for a device of type [deviceType].
+  /// Registers [manager] for [deviceType].
+  ///
+  /// Does nothing if a manager is already registered for [deviceType].
   void registerDevice(String deviceType, DeviceManager manager) {
     // Fast out if already registered.
     if (devices.containsKey(deviceType)) return;
@@ -105,14 +112,14 @@ class DeviceController extends DeviceDataCollectorFactory {
   /// Unregister the manager for [deviceType].
   void unregisterDevice(String deviceType) => _devices.remove(deviceType);
 
-  /// A convenient method for disconnecting all connected devices.
+  /// Starts disconnecting all [connectedDevices]. Does not wait for them.
   Future<void> disconnectAllConnectedDevices() async {
     for (var device in connectedDevices) {
       device.disconnect();
     }
   }
 
-  /// A string representation of all [devices].
+  /// The short names of all device types in [devices], for logging.
   String devicesToString() =>
       _devices.keys.map((key) => key.split('.').last).toString();
 

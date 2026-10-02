@@ -7,13 +7,37 @@
 
 part of '../../protocol.dart';
 
-/// A description of how a study is to be executed, defining the type(s) of
-/// primary device(s) ([PrimaryDeviceConfiguration]) responsible for
-/// aggregating data, the optional devices ([DeviceConfiguration]) connected
-/// to them, and the [TaskControl]'s which lead to data collection on
-/// said devices.
+/// A description of how a study is to be executed.
+///
+/// A protocol defines the primary device(s) ([PrimaryDeviceConfiguration])
+/// responsible for aggregating data, the optional devices
+/// ([DeviceConfiguration]) connected to them, and the [TaskControl]s which
+/// lead to data collection on said devices. It does not depend on any
+/// sensor technology or app.
+///
+/// Key points:
+///  * Add a primary device first; [addTaskControl] and [addTrigger] use
+///    [primaryDevice] as the default device.
+///  * [addTaskControl] adds a trigger, a task and the [TaskControl] that
+///    links them in one call.
+///  * Task names and device role names must be unique within a protocol.
+///  * A protocol is deployed with [DeploymentService.createStudyDeployment],
+///    which creates a [StudyDeployment]. CARP Mobile Sensing extends it as
+///    `SmartphoneStudyProtocol`.
+///
+/// ```dart
+/// var protocol = StudyProtocol(ownerId: 'alice@example.com', name: 'Steps');
+/// var phone = Smartphone();
+/// protocol.addPrimaryDevice(phone);
+/// protocol.addTaskControl(
+///   phone.atStartOfStudy,
+///   BackgroundTask(measures: [Measure(type: CarpDataTypes.STEP_COUNT)]),
+///   phone,
+/// );
+/// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyProtocol extends Snapshot {
+  /// The JSON namespace of the protocol domain types.
   static const String PROTOCOL_NAMESPACE = 'dk.cachet.carp.protocols.domain';
 
   // maps a task's name and the task
@@ -31,7 +55,7 @@ class StudyProtocol extends Snapshot {
     return _taskMapProperty!;
   }
 
-  /// The entity (e.g., person or group) that created this study pProtocol.
+  /// The entity (e.g., person or group) that created this study protocol.
   String ownerId;
 
   /// A unique descriptive name for the protocol assigned by the protocol owner.
@@ -147,7 +171,10 @@ class StudyProtocol extends Snapshot {
     return devices;
   }
 
-  /// Add the [trigger] to this protocol.
+  /// Add the [trigger] to this protocol, if not already added.
+  ///
+  /// Its id is the number of triggers before it ('0', '1', ...). If the
+  /// trigger has no source device, [primaryDevice] is used.
   void addTrigger(TriggerConfiguration trigger) {
     // early out if already added
     if (triggers.values.contains(trigger)) return;
@@ -276,6 +303,8 @@ class StudyProtocol extends Snapshot {
       getTaskControls(triggers['$triggerId']!);
 
   /// Add the [task] to this protocol.
+  ///
+  /// A task with the same name replaces the earlier one in the task lookup.
   void addTask(TaskConfiguration task) {
     tasks.add(task);
     _taskMap[task.name] = task;
@@ -425,9 +454,15 @@ class StudyProtocol extends Snapshot {
   String toString() => '$runtimeType - name: $name, ownerId: $ownerId';
 }
 
+/// A connection from a connected device to a primary device in a [StudyProtocol].
+///
+/// Created by [StudyProtocol.addConnectedDevice].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceConnection {
+  /// Role name of the connected device.
   String? roleName;
+
+  /// Role name of the primary device that [roleName] connects to.
   String? connectedToRoleName;
 
   DeviceConnection([this.roleName, this.connectedToRoleName]) : super();

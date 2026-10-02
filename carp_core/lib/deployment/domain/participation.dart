@@ -7,10 +7,14 @@
 
 part of '../../deployment.dart';
 
-/// Expected participant [data] for all participants in a study deployment
+/// Participant data for all participants in a study deployment
 /// with [studyDeploymentId].
+///
+/// Returned by [ParticipationService.getParticipantData]. Values are keyed by
+/// input data type (see [InputType]); unset values are null.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ParticipantData {
+  /// The study deployment this data belongs to.
   String studyDeploymentId;
 
   /// Data that is related to everyone in the study deployment.
@@ -30,9 +34,12 @@ class ParticipantData {
   Map<String, dynamic> toJson() => _$ParticipantDataToJson(this);
 }
 
-/// Expected participant [data] for all participants with a specific [roleName].
+/// Participant [data] for all participants with a specific [roleName].
+///
+/// Part of [ParticipantData.roles].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class RoleData {
+  /// The participant role this data belongs to.
   String roleName;
 
   /// Data that is related to this role in the study deployment.

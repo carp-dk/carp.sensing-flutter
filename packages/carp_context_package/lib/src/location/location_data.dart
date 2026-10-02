@@ -6,14 +6,20 @@
 
 part of '../../carp_context_package.dart';
 
-/// Holds location information using the GPS format from the phone.
+/// A location fix from the phone, in GPS (WGS 84) format.
+///
+/// Produced by [ConfigurableLocationProbe] for the
+/// [ContextSamplingPackage.LOCATION] measure, and returned by
+/// [LocationManager.getLocation]. Latitude and longitude are inherited from
+/// [Geolocation]. Most other fields are null if the platform does not report
+/// them.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Location extends Geolocation {
   /// In meters above the WGS 84 reference ellipsoid.
   /// Derived from GPS information.
   double? altitude;
 
-  /// Estimated horizontal accuracy of this location, radial, in meters
+  /// Estimated horizontal accuracy of this location, radial, in meters.
   double? accuracy;
 
   /// Estimated vertical accuracy of this location, in meters.
@@ -38,28 +44,29 @@ class Location extends Geolocation {
   /// The time when this location was collected.
   DateTime? time;
 
-  /// Is the location currently mocked
+  /// Is the location currently mocked?
   ///
-  /// Always false on iOS
+  /// Always false on iOS.
   bool? isMock;
 
-  /// Return the time of this fix, in elapsed real-time since system boot.
-  /// Only available on Android
+  /// The time of this fix, in elapsed real-time since system boot.
+  /// Only available on Android.
   /// https://developer.android.com/reference/android/location/Location#getElapsedRealtimeNanos()
   double? elapsedRealtimeNanos;
 
-  /// Get estimate of the relative precision of the alignment of the ElapsedRealtimeNanos timestamp.
-  /// Only available on Android
+  /// Estimate of the precision of [elapsedRealtimeNanos], in nanoseconds.
+  /// Only available on Android.
   /// https://developer.android.com/reference/android/location/Location#getElapsedRealtimeUncertaintyNanos()
   double? elapsedRealtimeUncertaintyNanos;
 
   /// The number of satellites used to derive the fix.
-  /// Only available on Android
+  /// Only available on Android.
   /// https://developer.android.com/reference/android/location/Location#getExtras()
   int? satellites;
 
   /// The location provider.
   /// Only available on Android. Deprecated in API level 31.
+  /// Not set by [Location.fromLocationData].
   String? provider;
 
   Location({
@@ -80,7 +87,9 @@ class Location extends Geolocation {
     this.provider,
   }) : super();
 
-  /// Create a [Location] object based on a [LocationData] from the `location` plugin.
+  /// Creates a [Location] from a `LocationData` from the `location` plugin.
+  ///
+  /// Missing latitude/longitude become 0.
   Location.fromLocationData(location.LocationData location) : super() {
     latitude = location.latitude ?? 0;
     longitude = location.longitude ?? 0;

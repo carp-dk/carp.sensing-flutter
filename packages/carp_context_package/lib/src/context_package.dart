@@ -6,12 +6,35 @@
 
 part of '../carp_context_package.dart';
 
-/// This is the base class for this context sampling package.
+/// The sampling package for context measures: activity, location, geofence,
+/// mobility, weather and air quality.
 ///
-/// To use this package, register it in the [carp_mobile_sensing] package using
+/// Register it once at app start, before a protocol using these measures is
+/// deployed. It defines the measure type names ([ACTIVITY], [LOCATION], ...)
+/// that you use in a `Measure` in your protocol.
 ///
-/// ```
-///   SamplingPackageRegistry().register(ContextSamplingPackage());
+/// Key points:
+///  * Only [ACTIVITY] is collected by this package itself (on the phone).
+///    On registration it also registers three sub-packages:
+///    [LocationSamplingPackage], [WeatherSamplingPackage] and
+///    [AirQualitySamplingPackage]. They handle the other measures.
+///  * Location-based measures need a [LocationService] connected device in
+///    the protocol. [WEATHER] needs a [WeatherService] and [AIR_QUALITY] an
+///    [AirQualityService], each with an API key.
+///  * Registers all its configurations, services and data types with the
+///    [FromJsonFactory], so protocols and measurements can be deserialized.
+///  * Adds OMH transformers for [LOCATION] ([OMHGeopositionDataPoint]) and
+///    [ACTIVITY] ([OMHPhysicalActivityDataPoint]). Assumes an OMH schema is
+///    already registered in the [DataTransformerSchemaRegistry].
+///
+/// ```dart
+/// SamplingPackageRegistry().register(ContextSamplingPackage());
+///
+/// final locationService = LocationService();
+/// protocol.addConnectedDevice(locationService, phone);
+/// protocol.addTaskControl(ImmediateTrigger(),
+///     BackgroundTask(measures: [Measure(type: ContextSamplingPackage.LOCATION)]),
+///     locationService);
 /// ```
 class ContextSamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for continuous collection of activity events as recognized
@@ -21,35 +44,36 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
   ///  * No sampling configuration needed.
   static const String ACTIVITY = "${NameSpace.CARP}.activity";
 
-  /// Measure type for continuos collection of location data.
-  ///  * Event-based measure.
+  /// Measure type for collection of [Location] data.
+  ///  * Event-based measure; continuous by default.
   ///  * Uses the [LocationService] connected device for data collection.
-  ///  * No sampling configuration needed.
+  ///  * Optional [LocationSamplingConfiguration] to sample only once, e.g.
+  ///    together with a periodic trigger.
   static const String LOCATION = "${NameSpace.CARP}.location";
 
-  /// Measure type for collection of geofence events (enter/exit/dwell).
+  /// Measure type for collection of [Geofence] events (enter/exit/dwell).
   ///  * Event-based measure.
   ///  * Uses the [LocationService] connected device for data collection.
   ///  * Use [GeofenceSamplingConfiguration] for configuration.
   static const String GEOFENCE = "${NameSpace.CARP}.geofence";
 
-  /// Measure type for continuos collection of mobility features like number of
-  /// places visited, home stay percentage, and location entropy.
+  /// Measure type for continuous collection of [Mobility] features like number
+  /// of places visited, home stay percentage, and location entropy.
   ///
   ///  * Event-based measure.
   ///  * Uses the [LocationService] connected device for data collection.
   ///  * Use [MobilitySamplingConfiguration] for configuration.
   static const String MOBILITY = "${NameSpace.CARP}.mobility";
 
-  /// Measure type for collection of air quality data from the
+  /// Measure type for collection of [AirQuality] data from the
   /// [World's Air Quality Index (WAQI)](https://waqi.info) API.
   ///  * One-time measure.
   ///  * Uses the [AirQualityService] connected device for data collection.
   ///  * No sampling configuration needed.
   static const String AIR_QUALITY = "${NameSpace.CARP}.airquality";
 
-  /// Measure type for collection of weather data from the
-  /// [Open Weather]( https://openweathermap.org/) API.
+  /// Measure type for collection of [Weather] data from the
+  /// [Open Weather](https://openweathermap.org/) API.
   ///  * One-time measure.
   ///  * Uses the [WeatherService] connected device for data collection.
   ///  * No sampling configuration needed.
@@ -128,7 +152,12 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
   }
 }
 
-/// The location sampling package.
+/// The sampling package for the location-based measures:
+/// [ContextSamplingPackage.LOCATION], [ContextSamplingPackage.GEOFENCE] and
+/// [ContextSamplingPackage.MOBILITY].
+///
+/// Registered automatically by [ContextSamplingPackage]. Its probes run on a
+/// [LocationService] connected device, managed by a [LocationServiceManager].
 class LocationSamplingPackage extends SmartphoneSamplingPackage {
   final _deviceManager = LocationServiceManager();
 
@@ -182,7 +211,10 @@ class LocationSamplingPackage extends SmartphoneSamplingPackage {
   DeviceManager get deviceManager => _deviceManager;
 }
 
-/// The air quality sampling package.
+/// The sampling package for [ContextSamplingPackage.AIR_QUALITY].
+///
+/// Registered automatically by [ContextSamplingPackage]. Its [AirQualityProbe]
+/// runs on an [AirQualityService] connected device.
 class AirQualitySamplingPackage extends SmartphoneSamplingPackage {
   final DeviceManager _deviceManager = AirQualityServiceManager();
 
@@ -210,7 +242,10 @@ class AirQualitySamplingPackage extends SmartphoneSamplingPackage {
   DeviceManager get deviceManager => _deviceManager;
 }
 
-/// The weather sampling package.
+/// The sampling package for [ContextSamplingPackage.WEATHER].
+///
+/// Registered automatically by [ContextSamplingPackage]. Its [WeatherProbe]
+/// runs on a [WeatherService] connected device.
 class WeatherSamplingPackage extends SmartphoneSamplingPackage {
   final DeviceManager _deviceManager = WeatherServiceManager();
 
@@ -238,6 +273,12 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
   DeviceManager get deviceManager => _deviceManager;
 }
 
+/// Base [ServiceManager] for the online services in this package
+/// ([LocationService], [WeatherService] and [AirQualityService]).
+///
+/// Services always try to connect, need no extra configuration, and use
+/// location permissions via [LocationManager]. Subclasses override
+/// [canConnect] when a precondition (like an API key) applies.
 abstract class ContextServiceManager<
   TDeviceConfiguration extends ServiceConfiguration<ServiceRegistration>
 >

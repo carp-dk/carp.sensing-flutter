@@ -6,9 +6,28 @@
 
 part of '../../domain.dart';
 
-/// A task that notifies the app when it is triggered.
+/// A task that the user does in the app, like filling in a survey.
 ///
-/// See [AppTaskExecutor] on how this work on runtime.
+/// When its trigger fires, an [AppTaskExecutor] wraps the task in a [UserTask]
+/// and puts it on the queue of the [AppTaskController]. The app shows the
+/// queue as a task list, and the user starts, completes, or cancels the task.
+///
+/// Key points:
+///  * [type] says what kind of task it is, e.g. [SURVEY_TYPE]. Sampling
+///    packages provide subclasses, e.g. `RPAppTask` in carp_survey_package.
+///  * [measures] are collected in the background while the task is running.
+///  * A `dk.cachet.carp.completedapptask.<type>` measure is always added, so a
+///    [CompletedAppTask] is collected when the task is done.
+///  * [expire] removes the task from the queue; [notification] sends a
+///    notification via the [NotificationManager].
+///
+/// ```dart
+/// protocol.addTaskControl(
+///   RecurrentScheduledTrigger(type: RecurrentType.daily, time: TimeOfDay(hour: 8)),
+///   AppTask(type: AppTask.SURVEY_TYPE, title: 'Daily survey', notification: true),
+///   phone,
+/// );
+/// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AppTask extends TaskConfiguration {
   /// A background sensing user task which can be started and stopped by the user.
@@ -35,7 +54,7 @@ class AppTask extends TaskConfiguration {
   /// An app task collecting health data. Used in the carp_health_package.
   static const String HEALTH_ASSESSMENT_TYPE = 'health';
 
-  /// Type of task. For example a `survey`.
+  /// The type of task, e.g. [SURVEY_TYPE]. Any string is allowed.
   String type;
 
   /// A title for this task. Can be used in the app.
@@ -53,19 +72,19 @@ class AppTask extends TaskConfiguration {
   /// If `null` the task has no completion time.
   int? minutesToComplete;
 
-  /// The duration of this app task, i.e. when it expire and is removed
-  /// from the [AppTaskController]'s queue.
-  /// If `null` the task never expire.
+  /// How long this task stays on the [AppTaskController]'s queue before it
+  /// expires and is removed. If `null`, the task never expires.
   Duration? expire;
 
-  /// Should a notification be send to the user on the phone?
+  /// Whether to send a notification to the user when the task is triggered.
+  /// Default is `false`.
   bool notification;
 
   /// The list of background [measures] as a [BackgroundTask].
   BackgroundTask get backgroundTask =>
       BackgroundTask(name: name, measures: measures);
 
-  /// Create an app task that notifies the app when it is triggered.
+  /// Creates an app task that notifies the app when it is triggered.
   ///
   /// [name] is a unique name of the task.
   /// [measures] is the list of measures to be collected in the background when

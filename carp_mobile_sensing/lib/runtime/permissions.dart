@@ -6,10 +6,12 @@
 
 part of '../runtime.dart';
 
-/// Asks the user for [permissions] and completes once done.
+/// A function that asks the user for a list of permissions.
 ///
-/// Lets an app take over how permissions are requested - e.g., to show a
-/// rationale before each system dialog. See [SmartPhoneClientManager.configure].
+/// It completes once the user has answered.
+/// Lets an app take over how permissions are requested, e.g., to show a
+/// rationale before each system dialog. Pass it to
+/// [SmartPhoneClientManager.configure].
 ///
 /// Whatever the user answers, CAMS re-checks the actual permission status
 /// afterwards, so a requester never needs to report back.

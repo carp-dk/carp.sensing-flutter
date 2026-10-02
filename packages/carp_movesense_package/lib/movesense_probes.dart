@@ -6,6 +6,10 @@
 
 part of 'carp_movesense_package.dart';
 
+/// Base class for probes that subscribe to a Movesense resource and turn each
+/// notification into a [Measurement].
+///
+/// The first 10 notifications are skipped to let the sensor stabilize.
 abstract class _MovesenseStreamProbe extends StreamProbe {
   int? _subscriptionId;
 
@@ -97,34 +101,44 @@ abstract class _MovesenseStreamProbe extends StreamProbe {
   }
 }
 
-/// A probe collecting [MovesenseHR] events.
+/// A probe collecting [MovesenseHR] data from the `Meas/HR` resource.
+///
+/// Used for the [MovesenseSamplingPackage.HR] measure.
 class MovesenseHRProbe extends _MovesenseStreamProbe {
   MovesenseHRProbe() : super("Meas/HR", MovesenseHR.fromMovesenseData);
 }
 
-/// A probe collecting [MovesenseECG] events at 125 Hz.
+/// A probe collecting [MovesenseECG] data at 125 Hz.
+///
+/// Used for the [MovesenseSamplingPackage.ECG] measure.
 class MovesenseECGProbe extends _MovesenseStreamProbe {
   MovesenseECGProbe() : super("Meas/ECG/125", MovesenseECG.fromMovesenseData);
 }
 
-/// A probe collecting [MovesenseTemperature] events.
+/// A probe collecting [MovesenseTemperature] data.
 ///
-/// Note that not all type of Movesense devices supports temperature.
+/// Used for the [MovesenseSamplingPackage.TEMPERATURE] measure. Only the
+/// Movesense MD supports temperature, so [MovesenseSamplingPackage.create]
+/// only creates this probe for that device.
 class MovesenseTemperatureProbe extends _MovesenseStreamProbe {
   MovesenseTemperatureProbe()
     : super("Meas/Temp", MovesenseTemperature.fromMovesenseData);
 }
 
-/// A probe collecting [MovesenseIMU] events at 13 Hz (lowest).
+/// A probe collecting [MovesenseIMU] data at 13 Hz (the lowest rate).
+///
+/// Used for the [MovesenseSamplingPackage.IMU] measure.
 class MovesenseIMUProbe extends _MovesenseStreamProbe {
   MovesenseIMUProbe() : super("Meas/IMU9/13", MovesenseIMU.fromMovesenseData);
 }
 
 /// A probe collecting [MovesenseStateChange] events.
-/// See [MovesenseDeviceState] for an enumeration of possible states.
 ///
-/// However, due to hardware limitation in Movesense we can only subscribe to
-/// maximum one (!) state changes
+/// Used for the [MovesenseSamplingPackage.STATE] measure.
+/// See [MovesenseDeviceState] for the possible states.
+///
+/// However, due to a hardware limitation in Movesense we can only subscribe to
+/// one (!) type of state change at a time.
 /// See https://github.com/petri-lipponen-movesense/mdsflutter/issues/15
 ///
 /// Seems like the only states we can listen to is the connectors and single tap
@@ -138,6 +152,9 @@ class MovesenseStateChangeProbe extends _MovesenseStreamProbe {
 
 /// A probe collecting [MovesenseDeviceInformation] from the connected
 /// Movesense device.
+///
+/// Used for the [MovesenseSamplingPackage.DEVICE_INFO] measure. Returns null if
+/// the device is not connected.
 class MovesenseDeviceProbe extends MeasurementProbe {
   @override
   Future<Measurement?> getMeasurement() async {
@@ -170,7 +187,11 @@ class MovesenseDeviceProbe extends MeasurementProbe {
 
 // MULTI STATE CHANGE PROBE BELOW - with notes
 
-/// Enumeration of the type of state changes available on the Movesense device.
+/// The types of state changes available on the Movesense device.
+///
+/// [MovesenseMultiStateChangeProbe] uses the index of each value as the
+/// Movesense state id.
+///
 /// See https://www.movesense.com/docs/esw/api_reference/#systemstates
 enum MovesenseState { movement, battery, connectors, doubleTap, tap, freeFall }
 
@@ -190,8 +211,8 @@ enum MovesenseState { movement, battery, connectors, doubleTap, tap, freeFall }
 /// See [MovesenseDeviceState] for an enumeration of possible states.
 ///
 /// In contrast to the [MovesenseStateChangeProbe], this probe tries to
-/// collect all the different types of state changes. However, due to hardware
-/// limitation on the device, this often will not succeed.
+/// collect all the different types of state changes. However, due to a
+/// hardware limitation on the device, this often does not succeed.
 ///
 /// Therefore, this probe is not used at the moment.
 class MovesenseMultiStateChangeProbe extends StreamProbe {

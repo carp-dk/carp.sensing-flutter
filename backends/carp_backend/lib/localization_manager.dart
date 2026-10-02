@@ -7,37 +7,39 @@
 
 part of 'carp_backend.dart';
 
-/// Handles retrieving and storing language localization mappings.
+/// Retrieves and stores translations (key-value maps) per language.
+///
+/// Implemented by [CarpResourceManager], which keeps them on CAWS. Used by
+/// [CarpLocalizations] to translate the app.
 abstract class LocalizationManager {
+  /// Resets the manager, e.g. when the study changes.
   void initialize() {}
 
-  /// Whether resources for the given [locale] can be loaded by this manager.
-  ///
-  /// Return true if the instance of `T` loaded by this delegate's [load]
-  /// method supports the given `locale`'s language.
+  /// Whether translations for [locale] can be loaded by this manager.
   bool isSupported(Locale locale);
 
-  /// Get localization mapping as json for the specified [locale].
+  /// The translations for [locale] as a key-value map.
   ///
-  /// Locale json is named according to the [locale] languageCode.
-  /// For example, the Danish translation is named `da`
+  /// Translations are named by the [Locale.languageCode] of [locale];
+  /// for example, the Danish translation is named `da`.
+  /// If [refresh] is `true`, any local cache is skipped.
   ///
-  /// If there is no language resource, `null` is returned.
+  /// Returns `null` if there are no translations for [locale].
   Future<Map<String, String>?> getLocalizations(
     Locale locale, {
     bool refresh = false,
   });
 
-  /// Set localization mapping for the specified [locale].
+  /// Stores the [localizations] for [locale].
   ///
-  /// Locale json is named according to the [locale] languageCode.
-  /// For example, the Danish translation is named `da`
+  /// Translations are named by the [Locale.languageCode] of [locale];
+  /// for example, the Danish translation is named `da`.
   ///
   /// Returns `true` if successful, `false` otherwise.
   Future<bool> setLocalizations(
       Locale locale, Map<String, dynamic> localizations);
 
-  /// Delete the localization for the [locale].
+  /// Deletes the translations for [locale].
   ///
   /// Returns `true` if successful, `false` otherwise.
   Future<bool> deleteLocalizations(Locale locale);

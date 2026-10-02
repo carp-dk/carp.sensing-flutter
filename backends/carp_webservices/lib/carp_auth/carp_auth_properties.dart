@@ -32,10 +32,10 @@ class CarpAuthProperties {
 
   /// Create a [CarpAuthProperties] which know how to access a CARP backend.
   ///
-  /// [name], [uri], and [oauth] are required parameters in order to identify,
-  /// address, and authenticate this client.
+  /// [authURL], [clientId], [redirectURI] and [discoveryURL] are required to
+  /// identify, address and authenticate this client.
   ///
-  /// A [studyDeploymentId] and a [study] may be specified, if known at the
+  /// A [studyId] and a [studyDeploymentId] may be specified, if known at
   /// creation time.
   CarpAuthProperties({
     required this.authURL,

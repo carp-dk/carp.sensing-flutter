@@ -6,8 +6,11 @@
 
 part of '../../../sampling_packages.dart';
 
-/// A [SamplingPackage] containing data types, sampling schemas and probes
-/// for collecting information from the phone sensors:
+/// The built-in sampling package for collecting data from the phone's sensors.
+///
+/// Registered automatically in the [SamplingPackageRegistry]. Add a [Measure]
+/// with one of the measure types below to a task in your protocol to use it.
+/// All measures use the [Smartphone] primary device. It collects:
 ///
 ///  - accelerometer (rate of change in velocity, including and excluding gravity)
 ///  - gyroscope (rotation)
@@ -15,6 +18,12 @@ part of '../../../sampling_packages.dart';
 ///  - acceleration features (e.g. mean, variance, etc. calculated over a sampling period)
 ///  - ambient light (from the phone's light sensor)
 ///  - pedometer (step events)
+///
+/// Ambient light is only available on Android. Step events need the
+/// activity recognition permission.
+///
+/// Raw sensor measures emit many events per second. Use
+/// [ACCELERATION_FEATURES] or a short trigger window to limit data volume.
 class SensorSamplingPackage extends SmartphoneSamplingPackage {
   /// Rate of change in velocity, including gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
@@ -36,6 +45,7 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
+  ///    Default is 3 seconds sampling every minute.
   static const String ACCELERATION_FEATURES =
       '${CarpDataTypes.CARP_NAMESPACE}.accelerationfeatures';
 
@@ -53,6 +63,7 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
 
   /// Ambient light from the phone's light sensor.
   ///  * Event-based measure.
+  ///  * Android only.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
   ///    Default is 10 seconds sampling every 5 minutes.

@@ -7,24 +7,35 @@
 
 part of 'carp_backend.dart';
 
-/// Implementation of [InformedConsentManager], [LocalizationManager], and
-/// [MessageManager] in the CARP services (CAWS) API.
+/// Stores and retrieves study resources on CAWS: the consent document,
+/// localizations and messages.
 ///
-/// Also supports caching of informed consent and localization resources locally
-/// on the phone. Messages are not cached - they are assumed to be handled by the app.
+/// Implements [InformedConsentManager], [LocalizationManager] and
+/// [MessageManager]. A singleton (`CarpResourceManager()`).
+///
+/// Key points:
+///  * Requires a configured [CarpService] with a study set, and an
+///    authenticated user in [CarpAuthService] (checked by asserts).
+///  * The consent document and localizations are cached on the phone in the
+///    study deployment folder; pass `refresh: true` to skip the cache.
+///  * Messages are not cached; the app handles them.
+///  * Call [initialize] when the study deployment changes, to reset the cache paths.
 class CarpResourceManager
     implements InformedConsentManager, LocalizationManager, MessageManager {
-  /// The base path for resources - both on the CARP server and locally on the phone
+  /// The base path for resources, both on CAWS and locally on the phone.
   static const String RESOURCE_PATH = 'resources';
 
-  /// The base path for messages - both on the CARP server and locally on the phone
+  /// The CAWS collection that holds messages.
   static const String MESSAGES_PATH = 'messages';
 
-  /// The path for the language documents at the CARP server.
-  /// Each language locale has its own document
+  /// The base path for localizations, both on CAWS and locally on the phone.
+  ///
+  /// Each language has its own document, named by its language code.
   static const String LOCALIZATION_PATH = 'localizations';
 
   static final CarpResourceManager _instance = CarpResourceManager._();
+
+  /// The singleton [CarpResourceManager].
   factory CarpResourceManager() => _instance;
 
   CarpResourceManager._() {
@@ -241,9 +252,15 @@ class CarpResourceManager
   // TODO - we cannot know if a specific locale is supported before
   // we have tried to download it from the server...
   // So - for now, we always return true, since this method is not async.
+  /// Always returns `true`, since support is only known after a download.
   @override
   bool isSupported(Locale locale) => true;
 
+  /// The translations for [locale], read from the local cache or CAWS.
+  ///
+  /// If [refresh] is `true`, the cache is skipped and the translations are
+  /// downloaded. If [cache] is `true` (the default), downloaded translations
+  /// are saved in the local cache. Returns `null` if none are found.
   @override
   Future<Map<String, String>?> getLocalizations(
     Locale locale, {
@@ -369,6 +386,10 @@ class CarpResourceManager
     return (message != null) ? Message.fromJson(message.data) : null;
   }
 
+  /// The messages of the study, at most [count] of them.
+  ///
+  /// [start] and [end] are currently ignored, since the CAWS query interface
+  /// is not used. The list is **not** sorted.
   @override
   Future<List<Message>> getMessages({
     DateTime? start,

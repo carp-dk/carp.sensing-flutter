@@ -6,7 +6,11 @@
  */
 part of 'carp_services.dart';
 
-/// Provide a data endpoint reference to a CARP Web Service.
+/// A reference to the legacy data point endpoint of one study deployment in
+/// CAWS.
+///
+/// Obtained from the deprecated [CarpService.dataPointReference]. New code
+/// uploads data with [CarpDataStreamService] instead.
 ///
 /// Can be used to:
 /// - post (upload) a [DataPoint]
@@ -17,13 +21,13 @@ part of 'carp_services.dart';
 class DataPointReference extends CarpReference {
   final String _studyDeploymentId;
 
-  /// The study deployment id this data point reference.
+  /// The study deployment id of this data point reference.
   String get studyDeploymentId => _studyDeploymentId;
 
   DataPointReference._(CarpService service, this._studyDeploymentId)
     : super._(service);
 
-  /// The URL for the data end point for this [DataPointReference].
+  /// The URL of the data point endpoint for this [DataPointReference].
   String get dataEndpointUri =>
       "${service.app.uri.toString()}/api/deployments/$studyDeploymentId/data-points";
 
@@ -45,7 +49,10 @@ class DataPointReference extends CarpReference {
   int _counter = 0;
   String? _fileCachePath;
 
-  /// The base path for storing all file cache to be uploaded.
+  /// The local folder where [batch] writes files before upload.
+  ///
+  /// Uses the cache path of [Settings] for this deployment if [Settings] is
+  /// initialized, otherwise `cache/upload`. Created if missing.
   Future<String> get fileCachePath async {
     if (_fileCachePath == null) {
       var path = 'cache';
@@ -72,9 +79,10 @@ class DataPointReference extends CarpReference {
   // Need to listen to some sort of event that the file is successfully
   // uploaded, and then delete it.
 
-  /// Batch upload a list of [DataPoint]s.
+  /// Batch uploads a list of [DataPoint]s.
   ///
-  /// Returns when successful. Throws a [CarpServiceException] if not.
+  /// The list is written to a JSON file in [fileCachePath] and sent with
+  /// [upload]. The file is not deleted afterwards.
   Future<void> batch(List<DataPoint> batch) async {
     if (batch.isEmpty) return;
 
@@ -84,13 +92,14 @@ class DataPointReference extends CarpReference {
         .then((file) => upload(file));
   }
 
-  /// Batch upload the [file] containing a list of [DataPoint]s to the CARP
-  /// backend.
+  /// Batch uploads the [file] containing a list of [DataPoint]s to CAWS.
   ///
   /// The [file] can be created using a [FileDataManager] in `carp_mobile_sensing`.
   /// Note that the file should be raw JSON, and hence _not_ zipped.
   ///
-  /// Returns when successful. Throws a [CarpServiceException] if not.
+  /// The request is sent in the background with retry; the returned future
+  /// completes before the upload does, so upload errors are not passed to
+  /// the caller.
   Future<void> upload(File file) async {
     final String url = "$dataEndpointUri/batch";
 
@@ -124,7 +133,7 @@ class DataPointReference extends CarpReference {
     });
   }
 
-  /// Get a [DataPoint] based on its [id] from the CARP backend.
+  /// Gets a [DataPoint] based on its [id] from CAWS.
   Future<DataPoint> get(int id) async {
     final url = "$dataEndpointUri/$id";
     final response = await service._get(url);
@@ -135,13 +144,13 @@ class DataPointReference extends CarpReference {
     return DataPoint.fromJson(responseJson);
   }
 
-  /// Get all [DataPoint]s for this study.
+  /// Gets all [DataPoint]s for this study deployment.
   ///
   /// Be careful using this method - this might potential return an enormous
   /// amount of data.
   Future<List<DataPoint>> getAll() async => query('');
 
-  /// Query for [DataPoint]s from the CARP backend using
+  /// Queries for [DataPoint]s in CAWS using
   /// [REST SQL (RSQL)](https://github.com/jirutka/rsql-parser).
   ///
   /// The [query] string can be build by querying data point _fields_ using
@@ -256,7 +265,7 @@ class DataPointReference extends CarpReference {
     return int.tryParse(count) ?? 0;
   }
 
-  /// Delete a data point with the given [id].
+  /// Deletes a data point with the given [id].
   ///
   /// Returns on success. Throws a [CarpServiceException] if data point is not
   /// found or otherwise unsuccessful.

@@ -26,7 +26,7 @@ part of '../../../common.dart';
 ///    concrete [DeviceConfiguration], if none of the previous configurations
 ///    are present.
 ///
-/// See also the section on[Sampling schemes and configurations](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
+/// See also the section on [Sampling schemes and configurations](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
 /// in the CARP Core Framework.
 class DataTypeSamplingScheme {
   /// The data type this sampling scheme relates to.
@@ -47,6 +47,9 @@ class DataTypeSamplingScheme {
       Measure(type: type)
         ..overrideSamplingConfiguration = defaultSamplingConfiguration;
 
+  /// Create a scheme for [dataType]. The default configuration is a
+  /// [NoOptionsSamplingConfiguration] if [defaultSamplingConfiguration] is
+  /// not specified.
   DataTypeSamplingScheme(
     this.dataType, [
     SamplingConfiguration? defaultSamplingConfiguration,
@@ -56,7 +59,10 @@ class DataTypeSamplingScheme {
   }
 }
 
-/// A set of [DataTypeSamplingScheme] mapped to their data type as `String`.
+/// A set of [DataTypeSamplingScheme]s mapped to their data type as `String`.
+///
+/// Returned by [DeviceConfiguration.dataTypeSamplingSchemes] to list what a
+/// device can collect.
 class DataTypeSamplingSchemeMap {
   final Map<String, DataTypeSamplingScheme> _map = {};
 
@@ -70,7 +76,7 @@ class DataTypeSamplingSchemeMap {
     );
   }
 
-  /// This sampling schema as a native [Map].
+  /// This sampling schema as a native [Map]. Changes to it change this map.
   Map<String, DataTypeSamplingScheme> toMap() => _map;
 
   /// The set of data types as `String` supported by this sampling schema.

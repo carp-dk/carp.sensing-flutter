@@ -9,8 +9,25 @@
 //  * H10   : B5FC172F [00634-17-03667]
 
 /// A [CARP Mobile Sensing](https://pub.dev/packages/carp_mobile_sensing)
-/// sampling package for collecting data from the Polar H10, H9, and Polar Verity
-/// Sense optical heart rate sensors as follows.
+/// sampling package that collects data from Polar H10, H9 and Verity Sense
+/// heart rate sensors over Bluetooth Low Energy (BLE).
+///
+/// Register [PolarSamplingPackage] in the [SamplingPackageRegistry], add a
+/// [PolarDevice] as a connected device to the protocol, and add measures of
+/// the types below to a task that runs on that device.
+///
+/// Measure types (namespace `dk.cachet.carp.polar`):
+///  * `dk.cachet.carp.polar.hr` : heart rate and RR intervals ([PolarHR]).
+///  * `dk.cachet.carp.polar.ecg` : electrocardiogram (ECG) ([PolarECG]).
+///  * `dk.cachet.carp.polar.accelerometer` : accelerometer ([PolarAccelerometer]).
+///  * `dk.cachet.carp.polar.gyroscope` : gyroscope ([PolarGyroscope]).
+///  * `dk.cachet.carp.polar.magnetometer` : magnetometer ([PolarMagnetometer]).
+///  * `dk.cachet.carp.polar.ppg` : photoplethysmography (PPG) ([PolarPPG]).
+///  * `dk.cachet.carp.polar.ppi` : pulse-to-pulse interval (PPI) ([PolarPPI]).
+///
+/// Platforms: Android and iOS (iOS 14 or later).
+///
+/// What each device supports:
 ///
 /// **H10 Heart rate sensor**
 ///
@@ -22,7 +39,7 @@
 /// **Polar Verity Sense optical heart rate sensor**
 ///
 ///  * Heart rate (HR) as beats per minute.
-///  * Photoplethysmograpy (PPG) values with a sampling rate of 55Hz (see [Polar SDK issue #202](https://github.com/polarofficial/polar-ble-sdk/issues/202#issuecomment-940645360)).
+///  * Photoplethysmography (PPG) values with a sampling rate of 55Hz (see [Polar SDK issue #202](https://github.com/polarofficial/polar-ble-sdk/issues/202#issuecomment-940645360)).
 ///  * PP interval (milliseconds) representing cardiac pulse-to-pulse interval extracted from PPG signal.
 ///  * Accelerometer data with sample rate of 52Hz and range of 8G. Axis specific acceleration data in mG.
 ///  * Gyroscope data with sample rate of 52Hz and ranges of 250dps, 500dps, 1000dps and 2000dps. Axis specific gyroscope data in dps.
@@ -33,7 +50,7 @@
 ///  * Heart rate as beats per minute. RR Interval in ms and 1/1024 format.
 ///  * Heart rate broadcast.
 ///
-/// This package uses the [polar](https://pub.dev/packages?q=polar) Flutter plugin,
+/// This package uses the [polar](https://pub.dev/packages/polar) Flutter plugin,
 /// which again builds upon the [official Polar SDK](https://github.com/polarofficial/polar-ble-sdk).
 /// Please consult the Polar [technical documentation](https://github.com/polarofficial/polar-ble-sdk/tree/master/technical_documentation)
 /// on the details on how to interpret the collected data.
@@ -52,60 +69,57 @@ part 'polar_probes.dart';
 part "carp_polar_package.g.dart";
 part 'polar_device_manager.dart';
 
-/// The Polar sampling package supporting the following measures (depending on the
-/// type of Polar device used):
+/// The sampling package for Polar devices.
 ///
-///  * dk.cachet.carp.polar.accelerometer
-///  * dk.cachet.carp.polar.gyroscope
-///  * dk.cachet.carp.polar.magnetometer
-///  * dk.cachet.carp.polar.ecg
-///  * dk.cachet.carp.polar.ppi
-///  * dk.cachet.carp.polar.ppg
-///  * dk.cachet.carp.polar.hr
+/// It tells CARP Mobile Sensing which measure types a Polar device provides,
+/// which [Probe] collects each of them, and which [PolarDeviceManager]
+/// handles the connection to the device. Register it once, before a study
+/// is deployed.
 ///
-/// All measure types are continuos collection of Polar data from a Polar device,
-/// which are:
-///
-///  * Event-based measures.
-///  * Uses the [PolarDevice] connected device for data collection.
-///  * No sampling configuration needed.
-///
-/// An example of a study protocol configuration is:
+/// Key points:
+///  * All measures run on a [PolarDevice] connected device, not on the phone.
+///  * All measures are event-based and need no sampling configuration.
+///  * Which measures work depends on the Polar device. A probe only starts if
+///    the connected device reports the matching [PolarDataType] in
+///    [PolarDeviceManager.dataTypes].
+///  * [onRegister] registers the device and data types for JSON
+///    deserialization, including the CAMS 1.x device type name.
 ///
 /// ```dart
-///   // Create a Polar H10 heart rate sensor.
-///   var polar = PolarDevice(
-///     roleName: 'hr-sensor',
-///     identifier: '1C709B20',
-///     name: 'H10',
-///     polarDeviceType: PolarDeviceType.H10,
-///   );
-///
-///   // Add a background task that immediately starts collecting Polar HR and
-///   // ECG data from the Polar device.
-///   protocol.addTaskControl(
-///      ImmediateTrigger(),
-///      BackgroundTask(measures: [
-///        Measure(type: PolarSamplingPackage.HR),
-///        Measure(type: PolarSamplingPackage.ECG),
-///      ]),
-///      polar);
+/// SamplingPackageRegistry().register(PolarSamplingPackage());
+/// var polar = PolarDevice(roleName: 'hr-sensor');
+/// protocol.addConnectedDevice(polar, phone);
+/// protocol.addTaskControl(
+///   ImmediateTrigger(),
+///   BackgroundTask(measures: [Measure(type: PolarSamplingPackage.HR)]),
+///   polar,
+/// );
 /// ```
 ///
-/// To use this package, register it in the [carp_mobile_sensing] package using
-///
-/// ```
-///   SamplingPackageRegistry.register(PolarSamplingPackage());
-/// ```
+/// See also [SamplingPackage], which this implements.
 class PolarSamplingPackage implements SamplingPackage {
+  /// The namespace of all Polar measure types.
   static const String POLAR_NAMESPACE = "${NameSpace.CARP}.polar";
 
+  /// Measure type for accelerometer data ([PolarAccelerometer]).
   static const String ACCELEROMETER = "$POLAR_NAMESPACE.accelerometer";
+
+  /// Measure type for gyroscope data ([PolarGyroscope]).
   static const String GYROSCOPE = "$POLAR_NAMESPACE.gyroscope";
+
+  /// Measure type for magnetometer data ([PolarMagnetometer]).
   static const String MAGNETOMETER = "$POLAR_NAMESPACE.magnetometer";
+
+  /// Measure type for photoplethysmography data ([PolarPPG]).
   static const String PPG = "$POLAR_NAMESPACE.ppg";
+
+  /// Measure type for pulse-to-pulse intervals ([PolarPPI]).
   static const String PPI = "$POLAR_NAMESPACE.ppi";
+
+  /// Measure type for ECG data ([PolarECG]).
   static const String ECG = "$POLAR_NAMESPACE.ecg";
+
+  /// Measure type for heart rate data ([PolarHR]).
   static const String HR = "$POLAR_NAMESPACE.hr";
 
   final DeviceManager _deviceManager = PolarDeviceManager(

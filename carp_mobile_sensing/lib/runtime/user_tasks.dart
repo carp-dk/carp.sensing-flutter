@@ -6,17 +6,21 @@
 
 part of '../runtime.dart';
 
-/// A factory which can create a [UserTask] based on the `type` of an
-/// [AppTask].
+/// Creates a [UserTask] for an [AppTask], based on [AppTask.type].
+///
+/// Packages that add app task types (e.g., surveys) implement one and
+/// register it with [AppTaskController.registerUserTaskFactory].
 abstract class UserTaskFactory {
-  /// The list of supported [AppTask] types.
+  /// The [AppTask.type]s this factory supports.
   List<String> types = [];
 
   /// Create a [UserTask] that wraps [executor].
   UserTask create(AppTaskExecutor executor);
 }
 
-/// A [UserTaskFactory] that can create a non-UI sensing task.
+/// The default [UserTaskFactory], for [AppTask.SENSING_TYPE] app tasks.
+///
+/// Creates a [BackgroundSensingUserTask].
 class SensingUserTaskFactory implements UserTaskFactory {
   @override
   List<String> types = [AppTask.SENSING_TYPE];
@@ -26,24 +30,38 @@ class SensingUserTaskFactory implements UserTaskFactory {
       BackgroundSensingUserTask(executor);
 }
 
-/// A task that the user of the app needs to attend to.
+/// A task the user needs to do, e.g. fill in a survey.
 ///
-/// An [UserTask] is enqueued in the [AppTaskController]'s queue.
+/// It is shown in the app's task list. A user task is the runtime form of an [AppTask]. It is created by a
+/// [UserTaskFactory] each time the app task is triggered, and put on the
+/// [AppTaskController] queue. The app shows it to the user and calls
+/// [onStart], [onCancel], [onDone] or [onExpired] as the user acts on it.
 ///
-/// An [UserTask] wraps a [backgroundTaskExecutor], which collects the
-/// measures defined in this task. This is done in the background and started
-/// when this user task is started by calling the [onStart] method.
+/// Key points:
+///  * [state] follows [UserTaskState]; changes are emitted on [stateEvents].
+///    Changes made by the controller are also on
+///    [AppTaskController.userTaskEvents].
+///  * The measures of [AppTask.backgroundTask] are collected by
+///    [backgroundTaskExecutor], initialized when [onStart] is called.
+///  * Subclasses can provide a [widget] for the task's UI.
+///  * When done, a [CompletedAppTask] measurement with the [result] is added
+///    to the study's measurements.
 abstract class UserTask {
   late AppTaskExecutor _executor;
   UserTaskState _state = UserTaskState.initialized;
   final StreamController<UserTaskState> _stateController =
       StreamController.broadcast();
 
-  /// The [AppTask] from which this user task originates from.
+  /// The [AppTask] this user task was created from.
   AppTask get task => _executor.task;
 
+  /// The id of the study deployment this task belongs to.
+  ///
+  /// Null if the executor has no deployment.
   String? get studyDeploymentId =>
       appTaskExecutor.deployment?.studyDeploymentId;
+
+  /// A unique id of this user task, a v4 UUID.
   late String id;
   String get type => task.type;
   String get name => task.name;
@@ -51,7 +69,7 @@ abstract class UserTask {
   String get description => task.description;
   String get instructions => task.instructions;
 
-  /// Should a notification be send for this task?
+  /// Whether a notification should be shown for this task.
   bool get notification => task.notification;
 
   /// The time this task should trigger (typically becoming visible to the user).
@@ -63,28 +81,29 @@ abstract class UserTask {
   /// The time this task was marked as done in the [onDone] method.
   DateTime? doneTime;
 
-  /// Returns a [Duration] until this task expires and is removed from the queue.
-  /// The returned [Duration] will be negative if [this] has expired.
-  /// Returns `null` if this task never expires.
+  /// The time left until this task expires, based on [AppTask.expire].
+  ///
+  /// Negative if this task has expired. `null` if it never expires.
   Duration? get expiresIn => (task.expire != null)
       ? triggerTime.add(task.expire!).difference(DateTime.now())
       : null;
 
-  /// The state of this task.
+  /// The state of this task. Setting it emits the new state on [stateEvents].
   UserTaskState get state => _state;
   set state(UserTaskState state) {
     _state = state;
     _stateController.add(state);
   }
 
-  /// Is this task available to be done by the user?
+  /// Whether the user can do this task now.
+  ///
+  /// True if it is enqueued, notified or canceled.
   bool get availableForUser =>
       (_state == UserTaskState.enqueued ||
       _state == UserTaskState.canceled ||
       _state == UserTaskState.notified);
 
-  /// Has a notification been created via a [NotificationManager] in the
-  /// phone's notification system?
+  /// Whether the [NotificationManager] has created a notification for it.
   bool hasNotificationBeenCreated = false;
 
   /// A stream of state changes of this user task.
@@ -93,17 +112,18 @@ abstract class UserTask {
   /// changes to a [UserTask].
   Stream<UserTaskState> get stateEvents => _stateController.stream;
 
-  /// The [AppTaskExecutor] that created this user task.
+  /// The [AppTaskExecutor] this user task wraps.
   AppTaskExecutor get appTaskExecutor => _executor;
 
-  /// The task executor which is used to collect the sensor measures of this user
-  /// task in the background once started.
+  /// Collects the measures of [AppTask.backgroundTask] once started.
+  ///
+  /// Its measurements are forwarded through [appTaskExecutor].
   BackgroundTaskExecutor backgroundTaskExecutor = BackgroundTaskExecutor();
 
-  /// The result of this task, once done.
+  /// The result of this task, set by [onDone]. Null until then.
   Data? result;
 
-  /// Create a new [UserTask] based on [executor].
+  /// Creates a user task wrapping [executor], with a new [id].
   UserTask(AppTaskExecutor executor) {
     _executor = executor;
     id = const Uuid().v4();
@@ -111,7 +131,7 @@ abstract class UserTask {
     _executor.addExecutor(backgroundTaskExecutor);
   }
 
-  /// Does this user task has a user interface (`Widget`) to show to the user?
+  /// Whether this task has a [widget] to show to the user. False by default.
   bool get hasWidget => false;
 
   /// The widget to be shown to the user as part of this task, if any.
@@ -119,7 +139,10 @@ abstract class UserTask {
   /// method has been called.
   Widget? get widget => null;
 
-  /// Callback from the app when this task is to be started.
+  /// Called by the app when the user starts this task.
+  ///
+  /// Initializes [backgroundTaskExecutor] and sets [state] to
+  /// [UserTaskState.started].
   @mustCallSuper
   void onStart() {
     // initialize the background task which holds any measures added to the app task
@@ -131,17 +154,17 @@ abstract class UserTask {
     state = UserTaskState.started;
   }
 
-  /// Callback from the app if this task is canceled.
+  /// Called by the app when the user cancels this task.
   ///
   /// If [dequeue] is `true` the task is removed from the queue.
-  /// Otherwise, it it kept on the queue with state [UserTaskState.canceled].
+  /// Otherwise, it is kept on the queue with state [UserTaskState.canceled].
   @mustCallSuper
   void onCancel({bool dequeue = false}) {
     state = UserTaskState.canceled;
     if (dequeue) AppTaskController().dequeue(id);
   }
 
-  /// Callback from the app if this task expires.
+  /// Called by the app when this task expires.
   ///
   /// If [dequeue] is `true` (the default) the task is removed from the queue,
   /// which also deletes it from persistent storage. Pass `false` to keep it on
@@ -153,10 +176,11 @@ abstract class UserTask {
     if (dequeue) AppTaskController().dequeue(id);
   }
 
-  /// Callback from the app when this task is done.
+  /// Called by the app when the user has finished this task.
   ///
-  /// If [dequeue] is `true` the task is removed from the queue.
-  /// [result] can specify the result obtained from this task, if available.
+  /// Sets [result], [doneTime] and [state], and marks the task as done in the
+  /// [AppTaskController]. If [dequeue] is `true` the task is also removed
+  /// from the queue.
   @mustCallSuper
   void onDone({bool dequeue = false, Data? result}) {
     this.result = result;
@@ -166,10 +190,9 @@ abstract class UserTask {
     if (dequeue) AppTaskController().dequeue(id);
   }
 
-  /// Callback from the OS when this task is clicked by the user in the
-  /// OS notification system.
+  /// Called by the [AppTaskController] when the user taps the notification.
   ///
-  /// Default implementation is no-op, but can be extended in sub-classes.
+  /// Does nothing by default; subclasses can override it.
   @mustCallSuper
   @protected
   void onNotification() {}
@@ -182,7 +205,7 @@ abstract class UserTask {
 
 /// The states of a [UserTask].
 enum UserTaskState {
-  /// Initialized and ready.
+  /// Created, not yet on the queue.
   initialized,
 
   /// Put on the [AppTaskController] queue.
@@ -191,7 +214,7 @@ enum UserTaskState {
   /// Removed from the [AppTaskController] queue.
   dequeued,
 
-  /// The user has clicked on the notification based on this notification.
+  /// The user has tapped the notification of this task.
   notified,
 
   /// Started by the user.
@@ -203,7 +226,7 @@ enum UserTaskState {
   /// Done by the user.
   done,
 
-  /// Expired.
+  /// Expired, i.e. [AppTask.expire] has passed before it was done.
   expired,
 
   /// An undefined state and cannot be used.
@@ -211,11 +234,12 @@ enum UserTaskState {
   undefined,
 }
 
-/// A non-UI sensing task that collects sensor data in the background.
-/// For example noise.
+/// A user task without UI that collects sensor data in the background.
 ///
-/// It starts when the [onStart] methods is called and stops when the
-/// [onDone] methods is called.
+/// E.g. noise.
+///
+/// Sensing starts on [onStart] and stops on [onDone]. Created by the
+/// [SensingUserTaskFactory] for app tasks of type [AppTask.SENSING_TYPE].
 class BackgroundSensingUserTask extends UserTask {
   BackgroundSensingUserTask(super.executor);
 
@@ -231,10 +255,8 @@ class BackgroundSensingUserTask extends UserTask {
     backgroundTaskExecutor.pause();
   }
 
-  /// Callback from the OS when this task is clicked by the user in the
-  /// OS notification system.
+  /// Starts the background sensing when the user taps the notification.
   ///
-  /// Resumes the background sensing.
   /// When the background sensing pauses, the task is marked as done.
   @mustCallSuper
   @override

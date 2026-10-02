@@ -1,29 +1,51 @@
 part of 'media.dart';
 
-/// A sampling package for capturing audio (incl. noise) and video (incl. images).
+/// The sampling package for capturing audio (incl. noise) and video (incl. images).
 ///
-/// To use this package, register it in the [carp_mobile_sensing] package using
+/// Register it before you deploy a protocol that uses its measure types:
 ///
+/// ```dart
+/// SamplingPackageRegistry().register(MediaSamplingPackage());
 /// ```
-///   SamplingPackageRegistry.register(MediaSamplingPackage());
-/// ```
+///
+/// Key points:
+///  * [AUDIO] and [NOISE] use the microphone and request the microphone
+///    permission.
+///  * [VIDEO] and [IMAGE] do not collect anything themselves. The app records
+///    the media and must request the camera permission itself (see [VideoProbe]).
+///  * Media files are stored in the [MEDIA_FILES_PATH] folder of the
+///    deployment's data folder.
+///
+/// See also [AudioProbe] and [NoiseProbe].
 class MediaSamplingPackage extends SmartphoneSamplingPackage {
-  /// The name of the folder used for storing audio files.
+  /// The name of the folder used for storing media files.
   static const String MEDIA_FILES_PATH = 'media';
 
+  /// Measure type for a video recorded by the app ([VideoMedia]).
+  ///  * One-time measure.
+  ///  * Uses the [Smartphone] primary device.
+  ///  * The app creates the measurement; [VideoProbe] only acts as a placeholder.
   static const String VIDEO = "${NameSpace.CARP}.video";
+
+  /// Measure type for an image captured by the app ([ImageMedia]).
+  ///  * One-time measure.
+  ///  * Uses the [Smartphone] primary device.
+  ///  * The app creates the measurement; [VideoProbe] only acts as a placeholder.
   static const String IMAGE = "${NameSpace.CARP}.image";
 
   /// Measure type for one-time collection of audio from the phone's microphone.
   ///  * One-time measure.
-  ///  * Uses the [Smartphone] connected device for data collection.
+  ///  * Uses the [Smartphone] primary device for data collection.
   ///  * No sampling configuration needed.
+  ///  * Collected as [AudioMedia] data.
   static const String AUDIO = "${NameSpace.CARP}.audio";
 
   /// Measure type for periodic collection of noise data from the phone's microphone.
   ///  * Event-based (Periodic) measure.
-  ///  * Uses the [Smartphone] master device for data collection.
-  ///  * Use a [PeriodicSamplingConfiguration] for configuration.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use a [PeriodicSamplingConfiguration] for configuration. Default is
+  ///    10 seconds every 5 minutes.
+  ///  * Collected as [Noise] data.
   static const String NOISE = "${NameSpace.CARP}.noise";
 
   @override

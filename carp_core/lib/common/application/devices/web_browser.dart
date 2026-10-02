@@ -6,10 +6,13 @@
  */
 part of '../../../common.dart';
 
-/// Configuration of an internet-connected web browser device with no built-in [sensors].
+/// Configuration of an internet-connected web browser device with no built-in
+/// sensors.
+///
+/// A [PrimaryDeviceConfiguration] registered with a [WebBrowserRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class WebBrowser extends PrimaryDeviceConfiguration<WebBrowserRegistration> {
-  /// The type of a web browser device device.
+  /// The type of a web browser device.
   static const String DEVICE_TYPE =
       '${DeviceConfiguration.DEVICE_NAMESPACE}.WebBrowser';
 

@@ -9,6 +9,10 @@ part of '../../deployment.dart';
 /// Application service which allows inviting participants, retrieving participation
 /// invitations for study deployments, and managing data related to participants
 /// which is input by users.
+///
+/// A participant app uses [getActiveParticipationInvitations] to find the
+/// studies it is invited to, and [setParticipantData] to store [InputData]
+/// such as informed consent. Works alongside [DeploymentService].
 abstract class ParticipationService {
   static const String API_VERSION = "1.0";
 

@@ -1,13 +1,20 @@
 part of '../infrastructure.dart';
 
-/// Debugging levels.
+/// The amount of logging done by CAMS, set in [Settings.debugLevel].
+///
+/// Each level includes the levels before it. Logging is done with the
+/// top-level `info`, `warning` and `debug` functions.
+///  * [none] - no logging.
+///  * [info] - information messages.
+///  * [warning] - warnings.
+///  * [debug] - debug messages (only shown when the app runs in debug mode).
 enum DebugLevel { none, info, warning, debug }
 
-/// Handle settings for the CAMS infrastructure. This includes settings for
-/// debugging, file paths, and other settings related to the infrastructure layer.
+/// Global settings for CAMS: logging level, app info, time zone, a user ID,
+/// and the file paths used to store data on the phone.
 ///
-/// This class is a singleton, access using `Settings()`.
-/// Must be initialized using the [init] method before used.
+/// A singleton, accessed as `Settings()`. Must be initialized with [init]
+/// before use, which [SmartPhoneClientManager.configure] does.
 ///
 /// Supports:
 ///  * setting debug level - see [debugLevel]
@@ -19,10 +26,16 @@ enum DebugLevel { none, info, warning, debug }
 ///  * getting file paths for storing data - see [localApplicationPath], [carpBasePath],
 ///    [getDeploymentBasePath], [getCacheBasePath], and [getDataBasePath]
 class Settings {
+  /// The [preferences] key under which [userId] is stored.
   static const String USER_ID_KEY = 'user_id';
 
+  /// Folder name for deployments under [carpBasePath].
   static const String CARP_DEPLOYMENT_FILE_PATH = 'deployments';
+
+  /// Folder name for data under a deployment folder.
   static const String CARP_DATA_FILE_PATH = 'data';
+
+  /// Folder name for cached data under a deployment folder.
   static const String CARP_CACHE_FILE_PATH = 'cache';
 
   static final Settings _instance = Settings._();
@@ -46,7 +59,7 @@ class Settings {
   /// The global debug level setting.
   ///
   /// See [DebugLevel] for valid debug level settings.
-  /// Can be changed on runtime.
+  /// Can be changed at runtime. Default is [DebugLevel.warning].
   DebugLevel debugLevel = DebugLevel.warning;
 
   /// The app name as displayed in the OS.
@@ -71,17 +84,18 @@ class Settings {
   /// Wraps NSUserDefaults (on iOS) and SharedPreferences (on Android).
   SharedPreferences? get preferences => _preferences;
 
-  /// Package information
+  /// Package information for the app, from the `package_info_plus` plugin.
   PackageInfo? get packageInfo => _packageInfo;
 
   /// The current time zone of this app.
   ///
   /// Note that this is only set once when the app starts, and will not update
   /// if the user changes the time zone while the app is running.
+  /// Defaults to `Europe/Copenhagen` if the time zone cannot be read.
   String get timezone => _timezone;
 
   /// Path to a directory where the application may place data that is
-  /// user-generated.
+  /// user-generated (the app documents directory).
   Future<String> get localApplicationPath async {
     if (_localApplicationPath == null) {
       final directory = await getApplicationDocumentsDirectory();
@@ -121,7 +135,8 @@ class Settings {
     return _deploymentBasePaths[studyDeploymentId]!;
   }
 
-  /// The base path for storing all cached data.
+  /// The base path for storing cached data for a deployment.
+  /// The folder is created if it does not exist.
   ///
   ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/cache`
   ///
@@ -131,7 +146,8 @@ class Settings {
     '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_CACHE_FILE_PATH',
   ).create(recursive: true)).path;
 
-  /// The base path for storing all data (e.g. media files).
+  /// The base path for storing data (e.g. data files and media files) for a
+  /// deployment. The folder is created if it does not exist.
   ///
   ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/data`
   ///
@@ -141,7 +157,10 @@ class Settings {
     '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_DATA_FILE_PATH',
   ).create(recursive: true)).path;
 
-  /// Initialize settings. Must be called before using any settings.
+  /// Initializes settings. Must be called before using any settings.
+  ///
+  /// Loads shared preferences and package info, creates [carpBasePath], and
+  /// reads the local [timezone]. Calling it again does nothing.
   Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
@@ -176,14 +195,14 @@ class Settings {
 
   String? _userId;
 
-  /// Generate a user id that is;
+  /// A user ID that is:
   ///  * unique
   ///  * anonymous
   ///  * persistent
   ///
   /// This id is generated the first time this method is called and then stored
   /// on the phone in-between sessions, and will therefore be the same for
-  /// the same app on the same phone.
+  /// the same app on the same phone. Requires [init] to have been called.
   Future<String> get userId async {
     assert(
       _preferences != null,

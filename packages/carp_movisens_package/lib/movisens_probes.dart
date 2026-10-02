@@ -6,7 +6,10 @@
 
 part of 'carp_movisens_package.dart';
 
-/// A probe collecting data from the Movisens device using a [StreamProbe].
+/// Base class for probes that collect [MovisensData] from a Movisens device.
+///
+/// Each subclass maps the events of a Movisens BLE service to [MovisensData]
+/// in [data]. The device is reached through [MovisensDeviceManager.device].
 abstract class MovisensProbe extends StreamProbe {
   @override
   MovisensDeviceManager get deviceManager =>
@@ -18,10 +21,14 @@ abstract class MovisensProbe extends StreamProbe {
         Measurement.fromData(event, event.timestamp.microsecondsSinceEpoch),
   );
 
+  /// The stream of data from the Movisens device. May be null if the device
+  /// or the service is not available.
   Stream<MovisensData>? get data;
 }
 
-/// A probe collecting Physical Activity events:
+/// A probe collecting physical activity data.
+///
+/// Used for the [MovisensSamplingPackage.ACTIVITY] measure. Collects:
 ///  * [MovisensStepCount]
 ///  * [MovisensBodyPosition]
 ///  * [MovisensInclination]
@@ -94,7 +101,9 @@ class MovisensActivityProbe extends MovisensProbe {
   }
 }
 
-/// A probe collecting Heart Rate (HR) events:
+/// A probe collecting heart rate (HR) data.
+///
+/// Used for the [MovisensSamplingPackage.HR] measure. Collects:
 ///  * [MovisensHR]
 ///  * [MovisensHRV]
 ///  * [MovisensIsHrvValid]
@@ -144,7 +153,8 @@ class MovisensHRProbe extends MovisensProbe {
   }
 }
 
-/// A probe collecting Elecrodermal Activity (EDA) events ([MovisensEDA]).
+/// A probe collecting electrodermal activity (EDA) data ([MovisensEDA]) for
+/// the [MovisensSamplingPackage.EDA] measure.
 class MovisensEDAProbe extends MovisensProbe {
   @override
   Stream<MovisensData>? get data => deviceManager
@@ -166,7 +176,8 @@ class MovisensEDAProbe extends MovisensProbe {
   }
 }
 
-/// A probe collecting Skin Temperature events ([MovisensSkinTemperature]).
+/// A probe collecting skin temperature data ([MovisensSkinTemperature]) for
+/// the [MovisensSamplingPackage.SKIN_TEMPERATURE] measure.
 class MovisensSkinTemperatureProbe extends MovisensProbe {
   @override
   Stream<MovisensData>? get data => deviceManager
@@ -188,7 +199,11 @@ class MovisensSkinTemperatureProbe extends MovisensProbe {
   }
 }
 
-/// A probe collecting Skin Temperature events ([MovisensSkinTemperature]).
+/// A probe collecting respiratory movement data ([MovisensRespiration]) for
+/// the [MovisensSamplingPackage.RESPIRATION] measure.
+///
+/// Note that it currently enables notifications on the skin temperature
+/// service, not the respiration service, when resumed.
 class RespirationProbe extends MovisensProbe {
   @override
   Stream<MovisensData>? get data => deviceManager
@@ -210,7 +225,8 @@ class RespirationProbe extends MovisensProbe {
   }
 }
 
-/// A probe collecting tap marker events ([MovisensTapMarker]).
+/// A probe collecting tap marker events ([MovisensTapMarker]) for the
+/// [MovisensSamplingPackage.TAP_MARKER] measure.
 class MovisensTapMarkerProbe extends MovisensProbe {
   @override
   Stream<MovisensData>? get data => deviceManager

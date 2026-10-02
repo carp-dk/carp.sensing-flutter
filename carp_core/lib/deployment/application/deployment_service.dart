@@ -6,9 +6,20 @@
  */
 part of '../../deployment.dart';
 
-/// Application service which allows deploying study protocols to participants
-/// and retrieving [PrimaryDeviceDeployment]'s for participating primary devices
-/// as defined in the protocol.
+/// Application service which deploys study protocols to participants and hands
+/// out the [PrimaryDeviceDeployment] for each primary device.
+///
+/// This is the service a client talks to when it joins a study deployment.
+/// A client (see [ClientManager] and [StudyDeploymentProxy]) uses it in this
+/// order: [getStudyDeploymentStatus] -> [registerDevice] ->
+/// [getDeviceDeploymentFor] -> [deviceDeployed]; and [stop] to end the study.
+///
+/// Key points:
+///  * Most methods return null instead of throwing when the deployment
+///    does not exist.
+///  * Implemented by the CARP web services client (`carp_webservices`) and,
+///    for local studies, by `SmartphoneDeploymentService` in CARP Mobile
+///    Sensing.
 abstract class DeploymentService {
   static const String API_VERSION = "1.1";
 
@@ -22,7 +33,7 @@ abstract class DeploymentService {
   /// the identity, or should be handed out manually to the relevant participant
   /// by the person managing the identity.
   ///
-  /// [id] specifies the study deployment id. If not specified, an UUID v1 id
+  /// [id] specifies the study deployment id. If not specified, a UUID v4 id
   /// is generated.
   /// [connectedDevicePreregistrations] lists optional pre-registrations for
   /// connected devices in the study [protocol].

@@ -6,7 +6,11 @@
 
 part of '../../domain.dart';
 
-/// Root class for all CAMS device registrations.
+/// Base class for CAMS device registrations.
+///
+/// A device registration holds the details of a concrete device once it is
+/// registered for a deployment, e.g. its id and name. It is created by
+/// [DeviceManager.createRegistration] and stored in the deployment.
 abstract class CamsDeviceRegistration extends DeviceRegistration {
   /// Indicates whether this device was connected when registered.
   ///
@@ -40,16 +44,21 @@ abstract class CamsDeviceRegistration extends DeviceRegistration {
   String get jsonType => '${CamsDevice.CAMS_DEVICE_NAMESPACE}.$runtimeType';
 }
 
-/// The charging state of the device battery of a [HardwareDeviceRegistration].
+/// The battery level of a [HardwareDeviceRegistration], as a coarse state.
+///
+/// See [HardwareDeviceRegistration.parseBatteryLevel] for the level ranges.
 enum BatteryChargingState { unknown, full, normal, low, critical }
 
-/// A [DeviceRegistration] for a hardware device.
+/// A [DeviceRegistration] for a hardware device, with its name and battery state.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HardwareDeviceRegistration extends CamsDeviceRegistration {
   /// The battery charging state of the device upon registration.
   BatteryChargingState batteryChargingState = BatteryChargingState.unknown;
 
-  /// Get the [BatteryChargingState] based on a battery level percentage (0-100).
+  /// The [BatteryChargingState] for a battery level percentage (0-100).
+  ///
+  /// 0-10 is critical, 11-20 low, 21-90 normal, 91-100 full, and anything
+  /// above 100 unknown.
   static BatteryChargingState parseBatteryLevel(int batteryLevel) =>
       switch (batteryLevel) {
         <= 10 => BatteryChargingState.critical,
@@ -62,8 +71,11 @@ class HardwareDeviceRegistration extends CamsDeviceRegistration {
   /// The hardware name of this device, if available.
   String? hardwareName;
 
-  /// Create a new [HardwareDeviceRegistration] based on hardware information,
-  /// incl [hardwareName] and [batteryChargingState].
+  /// Creates a new [HardwareDeviceRegistration] based on hardware information,
+  /// incl. [hardwareName] and [batteryChargingState].
+  ///
+  /// If no `deviceDisplayName` is given, it is built from [hardwareName] and
+  /// [batteryChargingState].
   HardwareDeviceRegistration({
     super.deviceId,
     String? deviceDisplayName,
@@ -87,16 +99,22 @@ class HardwareDeviceRegistration extends CamsDeviceRegistration {
 
 /// A [DeviceRegistration] for a [Smartphone] specifying details of the phone.
 ///
+/// Created by the [SmartphoneDeviceManager] (or [Smartphone.createRegistration]).
+/// Always marked as connected.
+///
 /// Takes inspiration from the device information available via the
 /// [device_info_plus](https://pub.dev/packages/device_info_plus) via the
 /// [AndroidDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/AndroidDeviceInfo-class.html)
 /// and [IosDeviceInfo](https://pub.dev/documentation/device_info_plus/latest/device_info_plus/IosDeviceInfo-class.html) classes.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SmartphoneRegistration extends HardwareDeviceRegistration {
-  ///The platform type of the device - Android or iOS.
+  /// The platform type of the device - Android or iOS.
   String? platform;
 
   /// The hardware type of this device (e.g. 'iPhone7,1' for iPhone 6 Plus).
+  ///
+  /// Not set by the constructor or [Smartphone.createRegistration], which use
+  /// [hardwareName] instead.
   String? hardware;
 
   /// Device name as specified by the OS.
@@ -108,13 +126,13 @@ class SmartphoneRegistration extends HardwareDeviceRegistration {
   /// Device model as specified by the OS.
   String? deviceModel;
 
-  /// Device OS as specified by the OS.
+  /// Name of the operating system as specified by the OS.
   String? operatingSystem;
 
   /// The SDK version.
   String? sdk;
 
-  /// The OS release.
+  /// The OS release (version).
   String? release;
 
   SmartphoneRegistration({
@@ -162,7 +180,10 @@ class BLEDeviceRegistration extends HardwareDeviceRegistration {
   /// and it may not be available at the time of registration.
   String? bleName;
 
-  /// Create a new [BLEDeviceRegistration] with a unique BLE [bleAddress].
+  /// Creates a new [BLEDeviceRegistration] with a unique BLE [bleAddress].
+  ///
+  /// The [bleAddress] is also used as the device id, and [bleName] is used as
+  /// display name and hardware name, if those are not given.
   BLEDeviceRegistration({
     String? deviceDisplayName,
     super.registrationCreatedOn,

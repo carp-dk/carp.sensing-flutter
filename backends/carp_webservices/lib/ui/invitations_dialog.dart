@@ -7,9 +7,14 @@
 
 part of '../carp_services/carp_services.dart';
 
-/// A modal dialog shown a list of [ActiveParticipationInvitation] for the
+/// A modal dialog showing a list of [ActiveParticipationInvitation]s for the
 /// user to select one from.
+///
+/// Shown by [CarpParticipationService.getStudyInvitation] when the user has
+/// more than one invitation. Tapping an invitation pops it as the dialog
+/// result; Cancel pops `null`.
 class ActiveParticipationInvitationDialog {
+  /// Builds the dialog for the given [invitations].
   AlertDialog build(
     BuildContext context,
     List<ActiveParticipationInvitation> invitations,
@@ -33,6 +38,8 @@ class ActiveParticipationInvitationDialog {
     ],
   );
 
+  /// Shortens [studyDescription] to at most 100 characters, ending in `...`
+  /// if cut.
   String shortStudyDescription(String studyDescription) =>
       (studyDescription.length < 100)
       ? studyDescription

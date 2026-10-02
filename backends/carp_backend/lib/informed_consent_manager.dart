@@ -7,30 +7,31 @@
 
 part of 'carp_backend.dart';
 
-/// Handles retrieving and storing consent document definitions as [RPOrderedTask]
-/// json definitions.
+/// Retrieves and stores the study's consent document as an [RPOrderedTask].
+///
+/// The consent document is shown to participants using the `research_package`
+/// UI. Implemented by [CarpResourceManager], which keeps it on CAWS.
 abstract class InformedConsentManager {
+  /// Resets the manager, e.g. when the study changes.
   void initialize() {}
 
-  /// The latest downloaded consent document.
+  /// The consent document last set with [setConsentDocument].
   ///
-  /// Returns null if no consent has been downloaded yet.
-  /// Use the [getConsentDocument] method to get the consent document
-  /// from CAWS.
+  /// `null` if none has been set. Use [getConsentDocument] to download the
+  /// consent document from CAWS.
   RPOrderedTask? get informedConsent;
 
-  /// Get the consent document to be shown for this study.
+  /// The consent document to show for this study.
   ///
-  /// This method return a [RPOrderedTask] which is an ordered list of [RPStep]
-  /// which are shown to the user as the consent document flow.
-  /// See [research_package](https://pub.dev/packages/research_package) for a
-  /// description on how to create an consent document in the research package
-  /// domain model.
+  /// The [RPOrderedTask] is an ordered list of [RPStep]s shown to the user as
+  /// the consent flow. See [research_package](https://pub.dev/packages/research_package)
+  /// for how to create a consent document.
+  /// If [refresh] is `true`, any local cache is skipped.
   ///
-  /// Returns null if there is no consent document available for this study.
+  /// Returns `null` if there is no consent document for this study.
   Future<RPOrderedTask?> getConsentDocument({bool refresh = false});
 
-  /// Set the consent document to be used for this study.
+  /// Sets the consent document to use for this study.
   ///
   /// Note that this method sets the **overall** consent document to be shown to
   /// all participants. Uploading of a specific **signed** consent document for
@@ -38,8 +39,8 @@ abstract class InformedConsentManager {
   /// method using a [ParticipationReference].
   Future<bool> setConsentDocument(RPOrderedTask informedConsent);
 
-  /// Delete the consent document for this study.
+  /// Deletes the consent document for this study.
   ///
-  /// Returns true if delete is successful, false otherwise.
+  /// Returns `true` if successful, `false` otherwise.
   Future<bool> deleteConsentDocument();
 }

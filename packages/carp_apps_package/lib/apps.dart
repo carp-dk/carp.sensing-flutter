@@ -5,7 +5,16 @@
  * found in the LICENSE file.
  */
 
-/// A library for collecting data from apps on the phone.
+/// A sampling package that collects data about the apps installed on the phone.
+///
+/// Register [AppsSamplingPackage] in the `SamplingPackageRegistry` to use
+/// these measure types in a protocol:
+///  * `dk.cachet.carp.apps` - the list of installed apps ([Apps]).
+///  * `dk.cachet.carp.appusage` - app usage over a time period ([AppUsage]).
+///
+/// Android only. Both measures run on the [Smartphone] primary device and need
+/// the `QUERY_ALL_PACKAGES` and `PACKAGE_USAGE_STATS` permissions in the app's
+/// Android manifest.
 library;
 
 import 'dart:io';

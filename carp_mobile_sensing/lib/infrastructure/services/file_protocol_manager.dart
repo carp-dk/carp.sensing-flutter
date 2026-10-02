@@ -7,15 +7,12 @@
 
 part of '../../infrastructure.dart';
 
-/// Retrieve and store [StudyProtocol] json definitions on the device's local
-/// file system.
+/// A [StudyProtocolManager] that loads and saves [SmartphoneStudyProtocol]s
+/// as JSON files on the phone.
 ///
-/// The path and filename format is
-///
-///   `~/carp/study/study-<study_id>.json`
-///
+/// The path and filename format is given by [filename].
 class FileStudyProtocolManager implements StudyProtocolManager {
-  /// Initializing the the local FileDeploymentService
+  /// Logs the protocol file path. No other setup is needed.
   @override
   Future<void> initialize() async {
     info('Initializing FileDeploymentService...');
@@ -39,7 +36,7 @@ class FileStudyProtocolManager implements StudyProtocolManager {
     return study;
   }
 
-  /// Save a study on the local file system.
+  /// Saves [study] as JSON to [filename].
   /// Returns `true` if successful.
   @override
   Future<bool> saveStudyProtocol(
@@ -59,10 +56,11 @@ class FileStudyProtocolManager implements StudyProtocolManager {
     return success;
   }
 
-  /// Current path and filename according to this format:
+  /// The path and filename of the protocol with [studyId], on the format
   ///
-  ///   `carp/protocols/protocol-<study_id>.json`
+  ///   `<localApplicationPath>/protocols/protocol-<study_id>.json`
   ///
+  /// See [Settings.localApplicationPath].
   String filename(String studyId) =>
       '${Settings().localApplicationPath}/protocols/protocol-$studyId.json';
 }

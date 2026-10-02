@@ -10,9 +10,9 @@ part of '../../runtime.dart';
 //                                        EXECUTORS
 //-----------------------------------------------------------------------------
 
-/// The state of an [Executor].
+/// The runtime state of an [Executor].
 ///
-/// The runtime state has the following state machine:
+/// The states follow this state machine:
 ///
 /// ```
 /// +---------------------------------------------------------------+      +-----------+
@@ -31,12 +31,12 @@ enum ExecutorState {
   /// Resumed and actively collecting data.
   Resumed,
 
-  /// Paused not collecting data. Can be resumed in this state.
+  /// Paused and not collecting data. Can be resumed in this state.
   Paused,
 
   /// Paused and not collecting data, but should be resumed again when possible.
   /// This is typically used when a device is disconnected by the OS and
-  /// the reconnected, and the executor should be resumed again when possible.
+  /// then reconnected, and the executor should be resumed again when possible.
   PausedButShouldBeResumed,
 
   /// Permanently disposed. Cannot be used anymore.
@@ -49,6 +49,11 @@ enum ExecutorState {
   Undefined,
 }
 
+/// A serializable snapshot of an [Executor]'s [ExecutorState].
+///
+/// Saved with a [SmartphoneStudy] so sampling can be restored in the same
+/// state after an app restart. See [SmartphoneDeploymentExecutorSamplingState]
+/// for the full state of a deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SamplingState extends Serializable {
   /// The runtime state of this executor.
@@ -64,28 +69,21 @@ class SamplingState extends Serializable {
   Map<String, dynamic> toJson() => _$SamplingStateToJson(this);
 }
 
-/// A [Executor] is responsible for executing data collection based on a
-/// configuration [TConfig].
+/// Runs one part of a deployment, configured by a [TConfig].
 ///
-/// The behavior of an executor is controlled by its life-cycle methods: [initialize],
-/// [resume], [pause], and [dispose]. A paused executor can be resumed again.
+/// Executors form a tree: a [SmartphoneDeploymentExecutor] runs a
+/// [TaskControlExecutor] per task control, which runs a [TriggerExecutor]
+/// and a [TaskExecutor], which runs a [Probe] per measure.
 ///
-/// The [state] property reveals the probe's current state.
-/// The [stateEvents] is a stream of state changes which can be listen to as a
-/// broadcast stream.
+/// The behavior of an executor is controlled by its lifecycle methods:
+/// [initialize], [resume], [pause], and [dispose]. A paused executor can be
+/// resumed again. [state] holds the current [ExecutorState] and [stateEvents]
+/// is a broadcast stream of state changes. If an error occurs, the state
+/// becomes [ExecutorState.Undefined].
 ///
-/// If an error occurs the state of a probe becomes undefined. This is, for example,
-/// used when an exception occurs.
-///
-/// An Executor returns collected data in the [measurements] stream.
-/// This is the main usage of an executor. For example, to listens to all
-/// measurements generated in all studies running in a client, use:
-///
-/// ```
-/// SmartPhoneClientManager().measurements.listen(
-///    (measurement) => print(measurement),
-/// );
-/// ```
+/// Collected data comes out of the [measurements] stream. To listen to all
+/// measurements from all studies on this phone, use
+/// [SmartPhoneClientManager.measurements].
 abstract class Executor<TConfig> {
   /// The deployment that this executor is part of executing.
   SmartphoneDeployment? get deployment;
@@ -105,19 +103,22 @@ abstract class Executor<TConfig> {
   /// The stream of [Measurement] collected by this executor.
   Stream<Measurement> get measurements;
 
-  /// Configure and initialize the executor before using it.
+  /// Configures and initializes the executor. Call before [resume].
   void initialize(TConfig configuration, [SmartphoneDeployment? deployment]);
 
-  /// Resume the executor.
+  /// Starts or resumes the executor.
   void resume();
 
-  /// Pause the executor. Paused until [resume] is called.
+  /// Pauses the executor until [resume] is called.
   void pause();
 
-  /// Pause the executor but mark it to be resumed when possible.
+  /// Pauses the executor and marks it to be resumed later.
+  ///
+  /// The state becomes [ExecutorState.PausedButShouldBeResumed], e.g. when
+  /// its device is temporarily disconnected.
   void pauseButShouldBeResumed();
 
-  /// Dispose of this executor.
+  /// Disposes this executor.
   ///
   /// If not already paused, [pause] will be called first.
   ///
@@ -126,7 +127,12 @@ abstract class Executor<TConfig> {
   void dispose();
 }
 
-/// An abstract implementation of a [Executor] to extend from.
+/// The base class for all executors in CAMS.
+///
+/// Implements the [Executor] state machine. Subclasses only implement the
+/// callbacks [onInitialize], [onResume], [onPause] and [onDispose]; the
+/// lifecycle methods themselves cannot be overridden. A synchronous exception
+/// in a lifecycle method moves the executor to [ExecutorState.Undefined].
 abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   final StreamController<Measurement> _measurementsController =
       StreamController.broadcast();
@@ -169,11 +175,11 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
     _stateEventController.add(state.state);
   }
 
-  /// Add [measurement] to the [measurements] stream.
+  /// Adds [measurement] to the [measurements] stream.
   void addMeasurement(Measurement measurement) =>
       _measurementsController.add(measurement);
 
-  /// Add [error] to the [measurements] stream.
+  /// Logs [error] as a warning and adds it to the [measurements] stream.
   void addError(Object error, [StackTrace? stacktrace]) {
     warning('$error');
     _measurementsController.addError(error, stacktrace);
@@ -246,23 +252,25 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
     }
   }
 
+  /// Moves this executor to [ExecutorState.Undefined].
   void error() => _stateMachine.error();
 
-  /// Callback when this executor is initialized.
-  /// Returns true if successfully initialized, false otherwise.
+  /// Called by [initialize]. Returns true if successfully initialized.
   ///
-  /// Note that this is a non-async method and should hence be 'light-weight'
-  /// and not block execution for a long duration.
+  /// If false, the executor stays in [ExecutorState.Created].
+  /// This is a synchronous method and must be light-weight.
   @protected
   bool onInitialize();
 
-  /// Callback when this executor is resumed.
-  /// Returns true if successfully resumed, false otherwise.
+  /// Called by [resume]. Returns true if successfully resumed.
+  ///
+  /// If false, the executor moves to [ExecutorState.PausedButShouldBeResumed].
   @protected
   Future<bool> onResume();
 
-  /// Callback when this executor is paused.
-  /// Returns true if successfully paused, false otherwise.
+  /// Called by [pause]. Returns true if successfully paused.
+  ///
+  /// If false, the state is not changed.
   @protected
   Future<bool> onPause();
 
@@ -277,9 +285,10 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   String toString() => '$runtimeType [$hashCode] (${state.name})';
 }
 
-/// An abstract class used to implement aggregated executors (i.e., executors
-/// with a set of underlying executors).
+/// An executor that runs a set of child [executors].
 ///
+/// Resuming, pausing or disposing it does the same to all children, and its
+/// [measurements] merges the measurements of all children.
 /// See [SmartphoneDeploymentExecutor] and [TaskExecutor] for examples.
 abstract class AggregateExecutor<TConfig> extends AbstractExecutor<TConfig> {
   static final DeviceInfoService deviceInfo = DeviceInfoService();
@@ -296,14 +305,13 @@ abstract class AggregateExecutor<TConfig> extends AbstractExecutor<TConfig> {
   @override
   Stream<Measurement> get measurements => _group.stream;
 
-  /// Add the [executor] to the list of [executors] and forwards its measurements
-  /// to this aggregate executor's stream of [measurements].
+  /// Adds [executor] to [executors] and forwards its [measurements].
   void addExecutor(Executor<dynamic> executor) {
     _executors.add(executor);
     _group.add(executor.measurements);
   }
 
-  /// Remove the [executor] to the list of [executors].
+  /// Removes [executor] from [executors] and stops forwarding its measurements.
   void removeExecutor(Executor<dynamic> executor) {
     _group.remove(executor.measurements);
     _executors.remove(executor);

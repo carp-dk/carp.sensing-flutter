@@ -5,6 +5,10 @@
  */
 part of 'carp_polar_package.dart';
 
+/// Base class for probes that stream data from a Polar device.
+///
+/// The [stream] is null (and the probe does not start) if the device is not
+/// connected or does not support the needed [PolarDataType].
 abstract class _PolarProbe extends StreamProbe {
   @override
   PolarDeviceManager get deviceManager =>
@@ -27,7 +31,8 @@ abstract class _PolarProbe extends StreamProbe {
   }
 }
 
-/// Collects accelerometer data from the Polar device.
+/// Collects [PolarAccelerometer] data for the
+/// [PolarSamplingPackage.ACCELEROMETER] measure.
 class PolarAccelerometerProbe extends _PolarProbe {
   @override
   Stream<Measurement>? get stream =>
@@ -42,7 +47,8 @@ class PolarAccelerometerProbe extends _PolarProbe {
       : null;
 }
 
-/// Collects gyroscope data from the Polar device.
+/// Collects [PolarGyroscope] data for the [PolarSamplingPackage.GYROSCOPE]
+/// measure.
 class PolarGyroscopeProbe extends _PolarProbe {
   @override
   Stream<Measurement>? get stream =>
@@ -57,7 +63,8 @@ class PolarGyroscopeProbe extends _PolarProbe {
       : null;
 }
 
-/// Collects magnetometer data from the Polar device.
+/// Collects [PolarMagnetometer] data for the
+/// [PolarSamplingPackage.MAGNETOMETER] measure.
 class PolarMagnetometerProbe extends _PolarProbe {
   @override
   Stream<Measurement>? get stream =>
@@ -72,7 +79,7 @@ class PolarMagnetometerProbe extends _PolarProbe {
       : null;
 }
 
-/// Collects PPG data from the Polar device.
+/// Collects [PolarPPG] data for the [PolarSamplingPackage.PPG] measure.
 class PolarPPGProbe extends _PolarProbe {
   @override
   Stream<Measurement>? get stream =>
@@ -84,7 +91,7 @@ class PolarPPGProbe extends _PolarProbe {
       : null;
 }
 
-/// Collects PPI data from the Polar device.
+/// Collects [PolarPPI] data for the [PolarSamplingPackage.PPI] measure.
 class PolarPPIProbe extends _PolarProbe {
   @override
   Stream<Measurement>? get stream =>
@@ -96,7 +103,7 @@ class PolarPPIProbe extends _PolarProbe {
       : null;
 }
 
-/// Collects ECG data from the Polar device.
+/// Collects [PolarECG] data for the [PolarSamplingPackage.ECG] measure.
 class PolarECGProbe extends _PolarProbe {
   @override
   Stream<Measurement>? get stream =>
@@ -108,7 +115,7 @@ class PolarECGProbe extends _PolarProbe {
       : null;
 }
 
-/// Collects HR data from the Polar device.
+/// Collects [PolarHR] data for the [PolarSamplingPackage.HR] measure.
 class PolarHRProbe extends _PolarProbe {
   @override
   Stream<Measurement>? get stream =>

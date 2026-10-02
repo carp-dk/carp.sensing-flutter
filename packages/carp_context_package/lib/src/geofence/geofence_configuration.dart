@@ -6,16 +6,18 @@
 
 part of '../../carp_context_package.dart';
 
-/// Position coordinated in Degrees (i.e. GPS-style).
+/// A position in degrees latitude/longitude (GPS-style).
+///
+/// Used as the center of a [GeofenceSamplingConfiguration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GeoPosition extends Serializable {
-  /// Earth radius in km.
+  /// Earth radius in meters.
   static const double earthRadius = 6371000.0;
 
-  /// Latitude in GPS coordinates.
+  /// Latitude in degrees.
   final double latitude;
 
-  /// Longitude in GPS coordinates.
+  /// Longitude in degrees.
   final double longitude;
 
   /// Convert degrees to radians.
@@ -26,14 +28,15 @@ class GeoPosition extends Serializable {
 
   GeoPosition(this.latitude, this.longitude);
 
+  /// Creates a [GeoPosition] from the latitude and longitude of a [Location].
   GeoPosition.fromLocation(Location location)
     : latitude = location.latitude,
       longitude = location.longitude,
       super();
 
-  /// Returns the approximate distance in meters between this location and the given location.
+  /// Returns the approximate distance in meters between this position and [destination].
   ///
-  /// For distance calculations we use the  'haversine' formula to calculate the great-circle distance between two points.
+  /// For distance calculations we use the 'haversine' formula to calculate the great-circle distance between two points.
   /// See http://www.movable-type.co.uk/scripts/latlong.html for details on how to
   /// calculate distance, bearing and more between latitude/longitude points.
   double distanceTo(GeoPosition destination) {
@@ -74,11 +77,10 @@ class GeoPosition extends Serializable {
       longitude == other.longitude;
 }
 
-/// Specify the configuration of a circular geofence measure, specifying the:
-///  - center
-///  - radius
-///  - name
-/// of the geofence.
+/// The sampling configuration for a [ContextSamplingPackage.GEOFENCE] measure:
+/// one circular geofence with a [center], [radius], [dwell] time and [name].
+///
+/// Read by [GeofenceProbe]. Use one measure per geofence.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GeofenceSamplingConfiguration extends PersistentSamplingConfiguration {
   /// The center of the geofence as a GPS location.
@@ -87,10 +89,11 @@ class GeofenceSamplingConfiguration extends PersistentSamplingConfiguration {
   /// The radius of the geofence in meters.
   double radius;
 
-  /// The dwell time of this geofence.
+  /// How long the phone must stay inside before a [GeofenceType.DWELL] event
+  /// is reported. Repeats every [dwell] while still inside.
   Duration dwell;
 
-  /// A label for this geofence.
+  /// A label for this geofence, copied to each [Geofence] event.
   String name;
 
   GeofenceSamplingConfiguration({

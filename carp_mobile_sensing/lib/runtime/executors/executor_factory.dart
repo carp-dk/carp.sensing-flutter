@@ -7,21 +7,17 @@
 
 part of '../../runtime.dart';
 
-/// A factory that holds the set of trigger and task executors used in all
-/// deployments. Accessed as a singleton using `ExecutorFactory()`.
+/// Creates and caches the trigger and task executors of all deployments.
 ///
-/// Use [getTaskExecutor] to get or create a new task executor.
-/// Use [getTriggerExecutor] to get an existing trigger executor.
-/// Use [createTriggerExecutor] to get create a new trigger executor using
-/// the available [TriggerFactory]s.
+/// A singleton used by [TaskControlExecutor]. Executors are cached per study
+/// deployment: task controls in the same deployment that share a trigger id or
+/// task name share one executor, while deployments never share executors.
 ///
-/// Note that each deployment needs its own set of trigger and task executors.
-/// This is because trigger and task executors can be reused across task controls
-/// in the same study deployment.
-///
-/// Therefore, each [SmartphoneDeploymentExecutor] has its own [ExecutorFactory]
-/// in order to avoiding executors to be reused across deployments (if the trigger
-/// or task has the same id/name).
+/// Use [getTaskExecutor] to get or create a task executor.
+/// Use [getTriggerExecutor] to get an existing trigger executor, and
+/// [createTriggerExecutor] to create a new one with the registered
+/// [TriggerFactory]s. Sampling packages with their own triggers register a
+/// factory with [registerTriggerFactory].
 class ExecutorFactory {
   static final ExecutorFactory _instance = ExecutorFactory._();
 
@@ -34,18 +30,18 @@ class ExecutorFactory {
   // deploymentId -> taskName => executor
   final Map<String, Map<String, TaskExecutor>> _taskExecutors = {};
 
-  /// Get the singleton instance of [ExecutorFactory].
+  /// Returns the singleton [ExecutorFactory].
   factory ExecutorFactory() => _instance;
 
   ExecutorFactory._() {
     registerTriggerFactory(SmartphoneTriggerFactory());
   }
 
-  /// Register [factory] which can create [TriggerExecutor]s
-  /// for the specified [TriggerFactory] runtime types.
+  /// Registers [factory] for all trigger types in [TriggerFactory.types].
   ///
-  /// This is used in the [createTriggerExecutor] method for creating new
-  /// [TriggerExecutor]s.
+  /// Also calls [TriggerFactory.onRegister].
+  /// A later factory for the same type replaces an earlier one.
+  /// Used by [createTriggerExecutor].
   void registerTriggerFactory(TriggerFactory factory) {
     for (var type in factory.types) {
       _triggerFactories[type] = factory;
@@ -53,16 +49,19 @@ class ExecutorFactory {
     factory.onRegister();
   }
 
-  /// Get a [TriggerExecutor] based on the [studyDeploymentId] and [triggerId].
-  /// Returns null if not found.
+  /// Returns the cached [TriggerExecutor] for [triggerId], or null if none.
+  ///
+  /// Executors are cached per [studyDeploymentId].
   TriggerExecutor? getTriggerExecutor(
     String studyDeploymentId,
     int triggerId,
   ) => _triggerExecutors[studyDeploymentId]?[triggerId];
 
-  /// Create a [TriggerExecutor] based on the [studyDeploymentId] and [triggerId].
-  /// Returns null if [trigger] is not supported by any registered [TriggerFactory]
-  /// factories.
+  /// Creates a [TriggerExecutor] for [trigger] and caches it.
+  ///
+  /// The cache key is [studyDeploymentId] and [triggerId].
+  /// Returns null if no registered [TriggerFactory] supports the runtime type
+  /// of [trigger].
   TriggerExecutor? createTriggerExecutor(
     String studyDeploymentId,
     int triggerId,
@@ -85,8 +84,10 @@ class ExecutorFactory {
     return _triggerExecutors[studyDeploymentId]?[triggerId];
   }
 
-  /// Get the [TaskExecutor] for a [task] based on the task name. If the task
-  /// executor does not exist, a new one is created based on the type of the task.
+  /// Returns the [TaskExecutor] for [task] in [studyDeploymentId].
+  ///
+  /// Executors are keyed by task name. Creates one if needed: a [BackgroundTaskExecutor], [AppTaskExecutor] or
+  /// [FunctionTaskExecutor] depending on the task type.
   /// Returns null if the type of [task] is unknown.
   TaskExecutor? getTaskExecutor(
     String studyDeploymentId,
@@ -107,20 +108,27 @@ class ExecutorFactory {
     return _taskExecutors[studyDeploymentId]?[task.name];
   }
 
-  /// Dispose of all trigger and task executors.
+  /// Clears the cache of trigger and task executors.
+  ///
+  /// The executors themselves are not disposed.
   void dispose() {
     _triggerExecutors.clear();
     _taskExecutors.clear();
   }
 }
 
-/// A factory which can [create] a [TriggerExecutor] based on the runtime type
-/// of an [TriggerConfiguration].
+/// Creates a [TriggerExecutor] for a [TriggerConfiguration] by runtime type.
+///
+/// Sampling packages that define their own triggers implement one and register
+/// it with [ExecutorFactory.registerTriggerFactory].
+/// See [SmartphoneTriggerFactory] for the built-in triggers.
 abstract class TriggerFactory {
-  /// The set of supported [TriggerConfiguration] runtime types.
+  /// The [TriggerConfiguration] runtime types this factory supports.
   Set<Type> get types => {};
 
-  /// Callback method when this package is being registered.
+  /// Called when this factory is registered in the [ExecutorFactory].
+  ///
+  /// Typically used to register the triggers' JSON deserializers.
   void onRegister();
 
   /// Create a [TriggerExecutor] based on [trigger].
@@ -128,7 +136,10 @@ abstract class TriggerFactory {
   TriggerExecutor? create(TriggerConfiguration trigger);
 }
 
-/// A [TriggerFactory] for all triggers coming with CAMS.
+/// The [TriggerFactory] for all triggers that come with CAMS.
+///
+/// Registered in the [ExecutorFactory] by default. [ScheduledTrigger] is not
+/// supported yet; [create] returns null for it.
 class SmartphoneTriggerFactory implements TriggerFactory {
   /// Mapping of available [TriggerConfiguration] types to corresponding
   /// [TriggerExecutor] constructors.

@@ -6,10 +6,11 @@
  */
 part of 'carp_services.dart';
 
-/// Provide a collection reference to a CARP web service.
+/// A reference to a collection of JSON documents in CAWS.
 ///
-/// The Collections endpoint allows you to store and query custom documents to
-/// suit your specific application's needs.
+/// Obtained from [CarpService.collection] or [DocumentReference.collection].
+/// Collections let an app store and query its own documents, like
+/// app resources or user notes, per study.
 ///
 /// Note that the collection / document structure is like this:
 ///
@@ -37,13 +38,12 @@ class CollectionReference extends CarpReference {
     assert(!(_path.startsWith('/')) || _path.isEmpty);
   }
 
-  /// The id of the study for this document.
+  /// The id of the study for this collection.
   String get studyId => _studyId;
 
   /// ID of the referenced collection.
   ///
-  /// Returns null if this collection is not available on the server.
-  /// It might not have been created yet, or has been deleted.
+  /// Is null until read from the server with [get], and -1 after [delete].
   int? get id => _id;
 
   /// The name of the referenced collection.
@@ -59,14 +59,16 @@ class CollectionReference extends CarpReference {
   String get collectionUri => "${service.app.uri.toString()}$cawsPath";
 
   /// The full URI for the collection endpoint for this [CollectionReference] by its unique [id].
+  ///
+  /// Used by [rename] and [delete], so [id] must be known first.
   String get collectionUriByID =>
       '${service.app.uri.toString()}/api/studies/$studyId/collections/id/$id';
 
   /// Reads the collection referenced by this [CollectionReference] from the
-  /// server.
+  /// server, and updates [id] and [path].
   ///
-  /// If no collection exists on the server (yet), this local [CollectionReference]
-  /// is returned.
+  /// Returns this reference. Throws a [CarpServiceRequestException] if the
+  /// collection does not exist on the server.
   Future<CollectionReference> get() async {
     final response = await service._get(collectionUri);
     Map<String, dynamic> responseJson =
@@ -77,7 +79,6 @@ class CollectionReference extends CarpReference {
       .._path = responseJson['name'].toString();
   }
 
-  /// Get the documents in this collection.
   Future<List<DocumentSnapshot>> get documents async {
     final response = await service._get(collectionUri);
 
@@ -115,12 +116,12 @@ class CollectionReference extends CarpReference {
     );
   }
 
-  /// Add a data document to this collection and returns a [DocumentReference]
+  /// Adds a data document to this collection and returns a [DocumentReference]
   /// to this document.
   ///
   /// If no [name] is provided, an auto-generated name is used.
-  /// If no [data] is provided, this can be set later using the [DocumentReference.setData()]
-  /// method.
+  /// If no [data] is provided, this can be set later using the
+  /// [DocumentReference.setData] method.
   Future<DocumentReference> add([
     String? name,
     Map<String, dynamic>? data,
@@ -130,7 +131,9 @@ class CollectionReference extends CarpReference {
     return newDocument;
   }
 
-  /// Rename this collection.
+  /// Renames this collection to [newName].
+  ///
+  /// Needs a known [id]; call [get] first.
   Future<void> rename(String newName) async {
     // PUT the new name of this collection to the CARP web service
     final response = await service._put(
@@ -147,6 +150,8 @@ class CollectionReference extends CarpReference {
   }
 
   /// Deletes the collection referred to by this [CollectionReference].
+  ///
+  /// Needs a known [id]; call [get] first.
   Future<void> delete() async {
     final response = await service._delete(collectionUriByID);
 

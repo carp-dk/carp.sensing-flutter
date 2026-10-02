@@ -6,10 +6,14 @@
 
 part of '../../carp_context_package.dart';
 
-/// An [OnlineService] for the [Open Weather](https://openweathermap.org/) service.
+/// A connected device for the [Open Weather](https://openweathermap.org/) web service.
+///
+/// Add it to a protocol with `addConnectedDevice` to enable the
+/// [ContextSamplingPackage.WEATHER] measure. Managed at runtime by
+/// [WeatherServiceManager].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class WeatherService extends ServiceConfiguration<ServiceRegistration> {
-  /// The type of a air quality service.
+  /// The type of a weather service.
   static const String DEVICE_TYPE =
       '${CamsDevice.CAMS_DEVICE_NAMESPACE}.WeatherService';
 
@@ -31,10 +35,12 @@ class WeatherService extends ServiceConfiguration<ServiceRegistration> {
 }
 
 /// A [DeviceManager] for the [WeatherService].
+///
+/// Connects when the configuration has an API key.
 class WeatherServiceManager extends ContextServiceManager<WeatherService> {
   weather.WeatherFactory? _service;
 
-  /// A handle to the [WeatherFactory] plugin.
+  /// A handle to the `weather` plugin's `WeatherFactory`, created on first use.
   /// Returns null if the service is not configured.
   weather.WeatherFactory? get service => (_service != null)
       ? _service
