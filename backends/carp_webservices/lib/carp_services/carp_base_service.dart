@@ -2,15 +2,22 @@
 
 part of 'carp_services.dart';
 
-/// An abstract base service class for all CARP Services:
-///  * [ParticipationService]
-///  * [DeploymentService]
-///  * [ProtocolService]
-///  * [CarpService]
+/// Base class for all CAWS client services.
 ///
-/// The (current) assumption is that each Flutter app (using this library) will
-/// only connect to one CARP web services backend.
-/// Therefore a all all CARP services are singletons and can be used like:
+/// Holds the shared state and plumbing of [CarpService],
+/// [CarpParticipationService], [CarpDeploymentService],
+/// [CarpProtocolService] and [CarpDataStreamService]: the [CarpApp] to talk
+/// to, an optional [study], authenticated [headers] and the HTTP/RPC calls.
+///
+/// Key points:
+///  * Call [configure] (or [configureFrom]) before use, or [app] throws.
+///  * Requests use the access token of [CarpAuthService.currentUser].
+///  * A 403 response triggers one [CarpAuthService.refresh] and one retry.
+///  * Network errors are retried by [HTTPRetry]; error responses are thrown
+///    as [CarpServiceRequestException]s.
+///
+/// Each app is assumed to connect to one CAWS backend only, so all services
+/// are singletons and can be used like:
 ///
 /// ```dart
 /// await CarpAuthService().configure(authProperties);
@@ -30,21 +37,22 @@ part of 'carp_services.dart';
 /// CarpParticipationService().configure(app);
 /// ```
 ///
-/// where `authProperties`, `username`, and `password` are parameters for setting up
-/// authentication, and `app` is configuring the participation service to use the
-/// right CAWS instance.
+/// where `authProperties`, `username`, and `password` set up authentication,
+/// and `app` points the participation service to the right CAWS instance.
 abstract class CarpBaseService {
   CarpApp? _app;
   String? _endpointName;
 
-  /// The study associated with this service, if available.
-  /// Can be set directly or as part of the [configure] methods.
+  /// The study this service is tied to, if any.
+  ///
+  /// Used as the default for study, study deployment and device role IDs that
+  /// are not passed explicitly. Can be set directly or via [configure].
   SmartphoneStudy? study;
 
-  /// The CARP app associated with the CARP Web Service.
+  /// The CAWS instance this service talks to.
   ///
-  /// Throws a [CarpServiceException] if this service has not yet been configured via the
-  /// [configure] method.
+  /// Throws a [CarpServiceException] if this service has not yet been
+  /// configured via the [configure] method.
   CarpApp get app {
     if (_app == null) {
       throw CarpServiceException(
@@ -61,28 +69,29 @@ abstract class CarpBaseService {
   @override
   String toString() => '$runtimeType - ${app.name} [${app.uri}]';
 
-  /// Configure the this instance of a Carp Service.
+  /// Configures this service.
   ///
   /// The [app] specifies the CAWS instance used.
   /// If [study] is specified, this service is 'tied' to this study deployment.
-  /// This is convenient if the application using this service is only handling
-  /// one study deployment (which is often the case).
+  /// This is convenient if the app only handles one study deployment (which is
+  /// often the case).
   void configure(CarpApp app, [SmartphoneStudy? study]) {
     _app = app;
     this.study = study;
   }
 
-  /// Configure from another [service] which has already been configured.
+  /// Copies [app] and [study] from another [service] that is already
+  /// configured.
   void configureFrom(CarpBaseService service) {
     _app = service.app;
     study = service.study;
   }
 
-  /// Resolve study ID.
+  /// Resolves a study ID.
   ///
-  /// Returns [studyId] if not null. Otherwise returns the studyId specified in
-  /// the [study], if available.
-  /// Throws an error if study id cannot be resolved.
+  /// Returns [studyId] if not null. Otherwise returns the study ID of
+  /// [study], if available.
+  /// Throws a [CarpServiceException] if the study ID cannot be resolved.
   String getStudyId([String? studyId]) {
     if (studyId != null) {
       return studyId;
@@ -93,11 +102,11 @@ abstract class CarpBaseService {
     }
   }
 
-  /// Resolve study deployment ID.
+  /// Resolves a study deployment ID.
   ///
   /// Returns [studyDeploymentId] if not null. Otherwise returns the study
-  /// deployment ID specified in the [study], if available.
-  /// Throws an error if study deployment id cannot be resolved.
+  /// deployment ID of [study], if available.
+  /// Throws a [CarpServiceException] if the ID cannot be resolved.
   String getStudyDeploymentId([String? studyDeploymentId]) {
     if (studyDeploymentId != null) return studyDeploymentId;
     if (study != null) return study!.studyDeploymentId;
@@ -107,11 +116,11 @@ abstract class CarpBaseService {
     );
   }
 
-  /// Resolve the primary device role name.
+  /// Resolves the primary device role name.
   ///
   /// Returns [deviceRoleName] if not null. Otherwise returns the device role
-  /// name specified in the [study], if available.
-  /// Throws an error if device role name cannot be resolved.
+  /// name of [study], if available.
+  /// Throws a [CarpServiceException] if the role name cannot be resolved.
   String getPrimaryDeviceRoleName([String? deviceRoleName]) {
     if (deviceRoleName != null) return deviceRoleName;
     if (study != null) return study!.deviceRoleName;
@@ -121,16 +130,20 @@ abstract class CarpBaseService {
     );
   }
 
-  /// The endpoint name for this service at CARP.
+  /// The name of this service's RPC endpoint at CAWS, like
+  /// `deployment-service`.
   String get rpcEndpointName;
 
-  /// The URL for this service's endpoint at CARP.
+  /// The URL of the endpoint used by the latest RPC request.
   ///
   /// Typically on the form:
   /// `{{PROTOCOL}}://{{SERVER_HOST}}:{{SERVER_PORT}}/api/...`
   String get rpcEndpointUri => "${app.uri}/api/$_endpointName";
 
   /// The headers for any authenticated HTTP REST call to a [CarpBaseService].
+  ///
+  /// Holds the bearer access token of [CarpAuthService.currentUser].
+  /// Throws a [CarpServiceException] if the user has no token.
   Map<String, String> get headers {
     if (CarpAuthService().currentUser.token == null) {
       throw CarpServiceException(
@@ -222,7 +235,7 @@ abstract class CarpBaseService {
     return _clean(response);
   }
 
-  /// Sends an generic HTTP SEND request.
+  /// Sends a generic HTTP multipart [request].
   Future<http.Response> _send(http.MultipartRequest request) async {
     debug('REQUEST: SEND $request');
 

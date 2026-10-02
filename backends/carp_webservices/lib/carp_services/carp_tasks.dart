@@ -6,13 +6,20 @@
  */
 part of 'carp_services.dart';
 
+/// The state of a [CarpServiceTask], like a file upload or download.
 enum TaskStateType { idle, working, canceled, success, failure }
 
+/// Base class for asynchronous file tasks started by a [FileStorageReference].
+///
+/// See [FileUploadTask] and [FileDownloadTask].
 abstract class CarpServiceTask {
   CarpServiceTask._(this.reference);
 
+  /// The file reference this task works on.
   FileStorageReference reference;
   TaskStateType _state = TaskStateType.idle;
+
+  /// The current state of this task.
   TaskStateType get state => _state;
 
   /// Start this task.
@@ -20,21 +27,28 @@ abstract class CarpServiceTask {
     _state = TaskStateType.working;
   }
 
-  /// Cancel this task
+  /// Cancels this task.
+  ///
+  /// Only sets [state]; a request already sent is not stopped.
   void cancel() {
     _state = TaskStateType.canceled;
   }
 }
 
-/// A task supporting asynchronous upload of a file.
+/// Uploads a local file to CAWS in the background.
+///
+/// Created and started by [FileStorageReference.upload]. Await [onComplete]
+/// to get the [CarpFileResponse] of the stored file.
 class FileUploadTask extends CarpServiceTask {
   /// The file to upload.
   File file;
 
-  /// The file name
+  /// The file name, i.e. the last segment of the file path.
   String get name => file.path.split('/').last;
 
   /// Metadata for the file.
+  ///
+  /// The `filename` and `size` entries are added when the upload starts.
   late Map<String, String> metadata;
 
   FileUploadTask._(
@@ -45,8 +59,11 @@ class FileUploadTask extends CarpServiceTask {
     this.metadata = (metadata == null) ? {} : metadata;
   }
 
-  /// Returns the [CarpFileResponse] when completed
   final Completer<CarpFileResponse> _completer = Completer<CarpFileResponse>();
+
+  /// Completes with the [CarpFileResponse] when the upload succeeds.
+  ///
+  /// Completes with an error if the upload fails or is canceled.
   Future<CarpFileResponse> get onComplete => _completer.future;
 
   /// Start the the upload task.
@@ -111,7 +128,7 @@ class FileUploadTask extends CarpServiceTask {
     return _completer.future;
   }
 
-  /// Cancel the upload task
+  /// Cancels the upload task and completes [onComplete] with an error.
   @override
   void cancel() {
     super.cancel();
@@ -119,7 +136,10 @@ class FileUploadTask extends CarpServiceTask {
   }
 }
 
-/// A task supporting asynchronous download of a file.
+/// Downloads a file from CAWS to a local file in the background.
+///
+/// Created and started by [FileStorageReference.download]. Await
+/// [onComplete] to know when the file is written.
 class FileDownloadTask extends CarpServiceTask {
   /// The file on the local device which this task is downloading to.
   /// The file has to be created before starting the download.
@@ -130,7 +150,9 @@ class FileDownloadTask extends CarpServiceTask {
 
   final Completer<int> _completer = Completer<int>();
 
-  /// Returns the HTTP status code when completed
+  /// Completes with the HTTP status code (200) when the download succeeds.
+  ///
+  /// Completes with an error if the download fails or is canceled.
   Future<int> get onComplete => _completer.future;
 
   /// Start the the download task.
@@ -171,7 +193,8 @@ class FileDownloadTask extends CarpServiceTask {
     return _completer.future;
   }
 
-  /// Cancel the download task
+  /// Cancels the download task and completes [onComplete] with an error
+  /// (408 Request Timeout).
   @override
   void cancel() {
     super.cancel();
@@ -179,7 +202,10 @@ class FileDownloadTask extends CarpServiceTask {
   }
 }
 
-/// A file object as retrieved from the CARP server.
+/// Metadata of a file stored in CAWS, as returned by the file endpoint.
+///
+/// Returned by [FileUploadTask.onComplete], [FileStorageReference.get] and
+/// [CarpService.queryFiles].
 class CarpFileResponse {
   CarpFileResponse._(this.map)
     : id = map['id'] as int,
@@ -194,9 +220,16 @@ class CarpFileResponse {
       updatedBy = map['updated_by'].toString(),
       updatedAt = DateTime.parse(map['updated_at'].toString());
 
+  /// The raw JSON map from CAWS.
   final Map<dynamic, dynamic> map;
+
+  /// The server-side ID of the file.
   final int id;
+
+  /// The name of the file as stored on the server.
   final String storageName;
+
+  /// The original name of the uploaded file.
   final String originalName;
   final Map<String, dynamic> metadata;
   final String studyId;

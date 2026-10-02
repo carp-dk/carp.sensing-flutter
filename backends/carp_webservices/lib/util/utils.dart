@@ -7,10 +7,10 @@
 
 part of '../carp_services/carp_services.dart';
 
-/// Zip the [json] JSON to a list of bytes.
+/// Gzips the [json] map to a list of bytes.
 List<int> zipJson(Map<String, dynamic> json) => zipString(toJsonString(json));
 // String zipJson(Map<String, dynamic> json) => zipString(toJsonString(json));
 
-/// Zip the [str] string to a list of bytes using UTF8 encoding.
+/// Gzips the [str] string to a list of bytes using UTF8 encoding.
 // String zipString(String str) => base64.encode(gzip.encode(utf8.encode(str)));
 List<int> zipString(String str) => gzip.encode(utf8.encode(str));

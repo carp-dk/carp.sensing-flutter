@@ -7,15 +7,24 @@
 
 part of 'carp_services.dart';
 
-/// Abstract CARP web service references.
+/// Base class for references to one CAWS resource, like a file, document,
+/// collection or deployment.
+///
+/// A reference is obtained from a service (for example
+/// [CarpService.document] or [CarpDeploymentService.deployment]) and sends
+/// its requests through that [service].
 abstract class CarpReference {
+  /// The service this reference sends its requests through.
   CarpBaseService service;
 
   CarpReference._(this.service);
 
+  /// The authenticated HTTP headers of [service].
   Map<String, String> get headers => service.headers;
 }
 
+/// A [CarpReference] to a CARP Core RPC endpoint, like the deployment,
+/// participation or data stream service.
 abstract class RPCCarpReference extends CarpReference {
   RPCCarpReference._(CarpBaseService service) : super._(service);
 
