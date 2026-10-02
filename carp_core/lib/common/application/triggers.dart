@@ -6,10 +6,21 @@
  */
 part of '../../common.dart';
 
-/// Any condition on a device ([DeviceConfiguration]) which starts or stops
-/// [TaskConfiguration]s at certain points in time when the condition applies.
-/// The condition can either be time-bound, based on data streams,
-/// initiated by a user of the platform, or a combination of these.
+/// A condition on a device that starts or stops tasks when it applies.
+///
+/// The condition can be time-bound, based on data streams, initiated by a
+/// user of the platform, or a combination of these. A trigger is paired with
+/// a [TaskConfiguration] via [StudyProtocol.addTaskControl], which creates a
+/// [TaskControl].
+///
+/// Key points:
+///  * [sourceDeviceRoleName] is the device that evaluates the trigger. If not
+///    set, the protocol fills it in when the trigger is added.
+///  * Triggers are stored in [StudyProtocol.triggers] by id ('0', '1', ...),
+///    in the order they are added.
+///  * CARP Core defines [ElapsedTimeTrigger], [ManualTrigger] and
+///    [ScheduledTrigger]. CARP Mobile Sensing adds many more (e.g.
+///    `ImmediateTrigger`, `PeriodicTrigger`), each run by a trigger executor.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TriggerConfiguration extends Serializable {
   final String _triggerNamespace = 'dk.cachet.carp.common.application.triggers';
@@ -21,6 +32,7 @@ class TriggerConfiguration extends Serializable {
   /// device ([PrimaryDeviceConfiguration]).
   /// For example, this is the case when the trigger is time bound and needs
   /// to be evaluated by a task scheduler running on a primary device.
+  /// Not serialized.
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool? requiresPrimaryDevice;
 
@@ -42,9 +54,10 @@ class TriggerConfiguration extends Serializable {
       '$runtimeType - sourceDeviceRoleName: $sourceDeviceRoleName';
 }
 
-/// An interface marking that a [TriggerConfiguration] can be scheduled.
+/// Marks a [TriggerConfiguration] whose firing times can be computed ahead.
 ///
-/// Used when scheduling user tasks persistently on a phone.
+/// Used when scheduling user tasks persistently on a phone, e.g. as
+/// notifications.
 abstract class Schedulable {}
 
 /// A trigger which starts a task after [elapsedTime] has elapsed since the start
@@ -76,6 +89,8 @@ class ElapsedTimeTrigger extends TriggerConfiguration implements Schedulable {
 }
 
 /// A trigger initiated by a user, i.e., the user decides when to start a task.
+///
+/// The [label] and [description] are shown to the user.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ManualTrigger extends TriggerConfiguration {
   /// A short label to describe the action performed once the user chooses
@@ -109,6 +124,14 @@ class ManualTrigger extends TriggerConfiguration {
 ///
 /// This trigger needs to be evaluated on a primary device since it is time bound
 /// and therefore requires a task scheduler.
+///
+/// ```dart
+/// // Every day at 8:30.
+/// ScheduledTrigger(
+///   time: const TimeOfDay(hour: 8, minute: 30),
+///   recurrenceRule: RecurrenceRule(Frequency.DAILY),
+/// );
+/// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ScheduledTrigger extends TriggerConfiguration implements Schedulable {
   /// The time of the day to trigger.
@@ -144,7 +167,7 @@ class ScheduledTrigger extends TriggerConfiguration implements Schedulable {
 /// part in a 24 hour time format.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TimeOfDay {
-  /// The hour in 24 hour format.
+  /// The hour in 24 hour format (0-23).
   final int hour;
 
   /// The minute 0-59.
@@ -170,7 +193,7 @@ class TimeOfDay {
   /// local time zone.
   factory TimeOfDay.now() => TimeOfDay.fromDateTime(DateTime.now());
 
-  /// Returns true if [this] occurs before [other].
+  /// Returns true if this time occurs before [other].
   ///
   /// The comparison is independent of whether the time is in UTC or in
   /// the local time zone.
@@ -183,7 +206,7 @@ class TimeOfDay {
     second,
   ).isBefore(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
 
-  /// Returns true if [this] occurs after [other].
+  /// Returns true if this time occurs after [other].
   ///
   /// The comparison is independent of whether the time is in UTC or in
   /// the local time zone.
@@ -197,9 +220,9 @@ class TimeOfDay {
   ).isAfter(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
 
   /// Returns a [Duration] with the difference when subtracting [other] from
-  /// [this].
+  /// this time.
   ///
-  ///  The returned [Duration] will be negative if [other] occurs after [this].
+  /// The returned [Duration] will be negative if [other] occurs after this time.
   Duration difference(TimeOfDay other) => DateTime(
     2021,
     1,
@@ -242,11 +265,16 @@ class RecurrenceRule {
   /// Default recurrence is forever.
   End end = End.never();
 
+  /// Create a rule repeating at [frequency], every [interval] times, until [end].
   RecurrenceRule(this.frequency, {this.interval = 1, End? end}) : super() {
     this.end = end ?? End.never();
   }
 
-  /// Initialize a [RecurrenceRule] based on a [rrule] string.
+  /// Initialize a [RecurrenceRule] based on a [rrule] string, as produced by
+  /// [toString].
+  ///
+  /// `UNTIL` is read as milliseconds after the study start, not as a date.
+  /// Unknown parts are ignored; [frequency] defaults to [Frequency.DAILY].
   factory RecurrenceRule.fromString(String rrule) {
     var str = rrule.substring(rrule.indexOf('RRULE:') + 6);
     var parameters = <String, String>{};
@@ -281,8 +309,8 @@ class RecurrenceRule {
   }
 
   /// A valid RFC 5545 string representation of this recurrence rule, except
-  /// when [end] is specified as [End.Until].
-  /// When [End.Until] is specified, 'UNTIL' holds the total number of microseconds
+  /// when [end] is of type [EndType.UNTIL].
+  /// In that case, 'UNTIL' holds the total number of milliseconds
   /// which need to be added to a desired start date.
   /// 'UNTIL' should be reassigned to a calculated end date time, formatted using
   /// the RFC 5545 specifications: https://tools.ietf.org/html/rfc5545#section-3.3.5
@@ -300,18 +328,25 @@ class RecurrenceRule {
   Map<String, dynamic> toJson() => _$RecurrenceRuleToJson(this);
 }
 
-/// Specify repeating events in a [RecurrenceRule] based on an interval of a
-/// chosen type or multiples thereof.
+/// The interval unit at which a [RecurrenceRule] repeats.
 enum Frequency { SECONDLY, MINUTELY, HOURLY, DAILY, WEEKLY, MONTHLY, YEARLY }
 
-/// Specify how a [RecurrenceRule] may end as specified in [End].
+/// The kinds of [End] of a [RecurrenceRule]: after a time ([UNTIL]),
+/// after a number of occurrences ([COUNT]), or [NEVER].
 enum EndType { UNTIL, COUNT, NEVER }
 
 /// Specify how a [RecurrenceRule] ends.
+///
+/// Create one with [End.until], [End.count] or [End.never].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class End {
+  /// How the recurrence ends.
   final EndType type;
+
+  /// Time after the start of the rule when it ends; only for [EndType.UNTIL].
   final Duration? elapsedTime;
+
+  /// Number of occurrences; only for [EndType.COUNT].
   final int? count;
 
   End(this.type, {this.elapsedTime, this.count}) : super();

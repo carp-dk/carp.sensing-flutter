@@ -7,8 +7,20 @@
 
 part of '../../deployment.dart';
 
-/// Contains the entire description and configuration for how a single primary
-/// device participates in running a study.
+/// Everything a single primary device needs to run its part of a study.
+///
+/// Created by a [StudyDeployment] (via [DeploymentService.getDeviceDeploymentFor])
+/// from the [StudyProtocol]. It holds the device's own configuration and
+/// registration, its connected devices, and the tasks, triggers and task
+/// controls it must run. A client stores it in [Study.deployment] and runs it.
+///
+/// Key points:
+///  * Holds the tasks for this device and its connected devices only.
+///  * [expectedDataStreams] is computed from the task controls on first access.
+///  * Is a [ChangeNotifier]; call [hasBeenUpdated] after changing it to notify
+///    listeners (e.g., the [Study]).
+///
+/// CARP Mobile Sensing extends it as `SmartphoneDeployment`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PrimaryDeviceDeployment with ChangeNotifier {
   /// The configuration for the primary device this deployment is intended for.
@@ -47,6 +59,8 @@ class PrimaryDeviceDeployment with ChangeNotifier {
   Set<ExpectedDataStream>? _expectedDataStreams;
 
   /// The set of expected data streams from this device deployment.
+  ///
+  /// Computed once from [taskControls] and cached.
   Set<ExpectedDataStream> get expectedDataStreams {
     if (_expectedDataStreams == null) {
       _expectedDataStreams = {};
@@ -81,7 +95,7 @@ class PrimaryDeviceDeployment with ChangeNotifier {
   // internal map, mapping task name to the task
   Map<String, TaskConfiguration>? _taskMap;
 
-  /// Get the task based on its task name in this deployment.
+  /// Get the task based on its task name in this deployment; null if not found.
   TaskConfiguration? getTaskByName(String name) {
     if (_taskMap == null) {
       _taskMap = {};
@@ -119,7 +133,10 @@ class PrimaryDeviceDeployment with ChangeNotifier {
   String toString() => '$runtimeType - device: ${deviceConfiguration.roleName}';
 }
 
-/// A [DeviceDeploymentStatus] represents the status of a device in a deployment.
+/// The status of one device in a study deployment.
+///
+/// Part of [StudyDeploymentStatus.deviceStatusList]. Tells whether the device
+/// is registered or deployed, and which other devices must be registered first.
 ///
 /// See [DeviceDeploymentStatus.kt](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/DeviceDeploymentStatus.kt).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
@@ -223,9 +240,14 @@ enum DeviceDeploymentStatusTypes {
 
 /// Primary [device] and its current [registration] assigned to participants as
 /// part of a participant group.
+///
+/// Listed in [ActiveParticipationInvitation.assignedDevices].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AssignedPrimaryDevice {
+  /// The primary device the participant is invited to use.
   PrimaryDeviceConfiguration device;
+
+  /// The current registration of [device]; null if not registered yet.
   DeviceRegistration? registration;
 
   AssignedPrimaryDevice({required this.device, this.registration}) : super();

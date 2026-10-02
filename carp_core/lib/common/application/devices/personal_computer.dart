@@ -6,7 +6,11 @@
  */
 part of '../../../common.dart';
 
-/// Configuration of an internet-connected personal computer with no built-in [sensors].
+/// Configuration of an internet-connected personal computer with no built-in
+/// sensors.
+///
+/// A [PrimaryDeviceConfiguration] registered with a
+/// [PersonalComputerRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PersonalComputer
     extends PrimaryDeviceConfiguration<PersonalComputerRegistration> {

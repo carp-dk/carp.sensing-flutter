@@ -6,14 +6,30 @@
  */
 part of '../../common.dart';
 
-/// Defines data that needs to be measured/collected passively as part of a
-/// task defined by [TaskConfiguration].
+/// Defines one type of data to collect passively as part of a task.
+///
+/// A measure names a data [type] (e.g., `dk.cachet.carp.geolocation`) and
+/// is added to a [TaskConfiguration]. When the task is triggered, the client
+/// collects this data type, typically through a probe.
+///
+/// Key points:
+///  * Two measures are equal if they have the same [type]; a task keeps only
+///    one measure per type.
+///  * [overrideSamplingConfiguration] overrides how the data is sampled; see
+///    [DataTypeSamplingScheme] for the order of priority.
+///
+/// ```dart
+/// var task = BackgroundTask(measures: [
+///   Measure(type: CarpDataTypes.STEP_COUNT),
+///   Measure(type: CarpDataTypes.GEOLOCATION),
+/// ]);
+/// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Measure extends Serializable {
   /// The type of measure to do.
   ///
-  /// Specifies the full name space of the data to be collected, e.g.,
-  /// "dk.cachet.carp.measure.location".
+  /// The fully qualified data type to collect, e.g.,
+  /// "dk.cachet.carp.geolocation". See [CarpDataTypes] for the core types.
   String type;
 
   /// The type of measure as a [DataType].

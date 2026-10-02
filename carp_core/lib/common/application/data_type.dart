@@ -6,13 +6,16 @@
  */
 part of '../../common.dart';
 
-/// Specifies the type of a [Measure].
+/// Identifies a type of data by [namespace] and [name].
 ///
 /// Defines a type of data which can be processed by the platform
 /// (e.g., measured / collected / uploaded).
 /// This is used by the infrastructure to determine whether the requested data
 /// can be collected on a device, how to upload it, how to process it in a
 /// secondary data stream, or how triggers can act on it.
+///
+/// Its string form `<namespace>.<name>` (e.g., `dk.cachet.carp.geolocation`)
+/// is what [Measure.type] holds; see [Measure.dataType] and [Data.dataType].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DataType {
   /// The data type namespace. See [NameSpace].
@@ -32,6 +35,9 @@ class DataType {
   /// Create a [DataType].
   const DataType(this.namespace, this.name) : super();
 
+  /// Parses a fully qualified [type] like `dk.cachet.carp.geolocation`.
+  ///
+  /// The part after the last '.' is the [name]; the rest is the [namespace].
   factory DataType.fromString(String type) {
     assert(
       type.contains('.'),
@@ -63,12 +69,12 @@ class DataType {
   Map<String, dynamic> toJson() => _$DataTypeToJson(this);
 }
 
-/// Enumeration of data type namespaces.
+/// Known data type namespaces, as used in [DataType.namespace].
 ///
-/// Namespaces are used in specification of [String] both when sensing
-/// and uploading [Data].
+/// Namespaces are used in data type names both when sensing and uploading
+/// [Data].
 ///
-/// Currently know namespaces include:
+/// Currently known namespaces include:
 /// * `dk.cachet.carp`   : Copenhagen Research Platform (CARP)
 /// * `org.openmhealth`  : Open mHealth (OMH)
 /// * `org.hl7.fhir`     : Health Level 7 Fast Healthcare Interoperability Resources (HL7 FHIR)

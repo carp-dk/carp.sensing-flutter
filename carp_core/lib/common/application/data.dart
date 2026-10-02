@@ -8,8 +8,22 @@ part of '../../common.dart';
 // This file holds all the CARP Core defined data type.
 // In CARP Core Kotlin, this is the "dk.cachet.carp.common.application.data" domain.
 
-/// Holds data of a specific [dataType].
-/// This is a base class and contains no data as such.
+/// Base class of all collected data, such as a location or a heart rate.
+///
+/// A probe or user task produces a [Data] object, which is wrapped in a
+/// [Measurement] with a timestamp and uploaded. This base class holds no
+/// values itself; subclasses add the fields.
+///
+/// Key points:
+///  * The data type ([dataType]) is derived from [jsonType]. By default this
+///    is `dk.cachet.carp.<classname in lowercase>`, e.g.
+///    `dk.cachet.carp.geolocation` for [Geolocation].
+///  * Each subclass must be registered in [FromJsonFactory] to be
+///    deserialized.
+///  * Override [equivalentTo] to let triggers react to specific data values.
+///
+/// See also [SensorData], [InputData] and the data type names in
+/// [CarpDataTypes].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Data extends Serializable {
   /// The type of this data as a [DataType].
@@ -18,7 +32,10 @@ class Data extends Serializable {
 
   Data() : super();
 
-  /// Stable identifier of the source record, if available.
+  /// Stable identifier of the source record, if available; null by default.
+  ///
+  /// Subclasses whose data comes from a store with record ids (e.g., health
+  /// data) can return it, e.g. to avoid duplicates. Not serialized.
   @JsonKey(includeFromJson: false, includeToJson: false)
   String? get recordId => null;
 
@@ -26,7 +43,8 @@ class Data extends Serializable {
   ///
   /// This is a custom 'soft' equal (==) operator used to compare two data objects.
   /// Used in triggering when some data is collected.
-  /// Override in subclasses to provide custom equivalence checking.
+  /// Returns false in this base class; override in subclasses to provide
+  /// custom equivalence checking.
   bool equivalentTo(Data other) => false;
 
   @override
@@ -42,6 +60,8 @@ class Data extends Serializable {
 
 /// Holds data for a [DataType] collected by a sensor which may include additional
 /// [sensorSpecificData].
+///
+/// Base class of the sensor data types, such as [Acceleration] and [HeartRate].
 abstract class SensorData extends Data {
   /// Additional sensor-specific data pertaining to this data point.
   /// This can be used to append highly-specific sensor data to an otherwise
@@ -52,6 +72,8 @@ abstract class SensorData extends Data {
 /// Change in velocity, including gravity, along perpendicular
 /// [x], [y], and [z] axes in meters per second squared (m/s^2).
 /// Typically captured by an accelerometer.
+///
+/// Data type [CarpDataTypes.ACCELERATION].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Acceleration extends SensorData {
   double x, y, z;
@@ -65,8 +87,10 @@ class Acceleration extends SensorData {
   Map<String, dynamic> toJson() => _$AccelerationToJson(this);
 }
 
-/// Rate of rotation of the device in 3D space.
+/// Rotation of the device in 3D space along [x], [y] and [z].
 /// Typically captured by a gyroscope.
+///
+/// Data type [CarpDataTypes.ROTATION].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Rotation extends SensorData {
   double x, y, z;
@@ -83,6 +107,8 @@ class Rotation extends SensorData {
 /// Magnetic field of the device in 3D space, measured in microteslas μT
 /// for each three-dimensional axis.
 /// Typically captured by a magnetometer sensor.
+///
+/// Data type [CarpDataTypes.MAGNETIC_FIELD].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MagneticField extends SensorData {
   double x, y, z;
@@ -98,6 +124,8 @@ class MagneticField extends SensorData {
 
 /// Geolocation data as latitude and longitude in decimal degrees within
 /// the World Geodetic System 1984.
+///
+/// Data type [CarpDataTypes.GEOLOCATION].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Geolocation extends SensorData {
   /// Latitude in GPS coordinates.
@@ -120,6 +148,8 @@ class Geolocation extends SensorData {
 /// The unit of the received signal strength indicator ([rssi]) is arbitrary
 /// and determined by the chip manufacturer, but the greater the value,
 /// the stronger the signal.
+///
+/// Data type [CarpDataTypes.SIGNAL_STRENGTH].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SignalStrength extends SensorData {
   int rssi;
@@ -133,7 +163,9 @@ class SignalStrength extends SensorData {
   Map<String, dynamic> toJson() => _$SignalStrengthToJson(this);
 }
 
-/// Step count data as number of steps taken in a corresponding time interval.
+/// Step count data as number of [steps] taken in a corresponding time interval.
+///
+/// Data type [CarpDataTypes.STEP_COUNT].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StepCount extends SensorData {
   int steps;
@@ -148,6 +180,8 @@ class StepCount extends SensorData {
 }
 
 /// Heart rate data in beats per minute ([bpm]).
+///
+/// Data type [CarpDataTypes.HEART_RATE].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HeartRate extends SensorData {
   int bpm;
@@ -162,6 +196,8 @@ class HeartRate extends SensorData {
 }
 
 /// Electrocardiogram data of a single lead.
+///
+/// Data type [CarpDataTypes.ECG].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ECG extends SensorData {
   /// The sampling frequency in hertz (Hz).
@@ -181,8 +217,11 @@ class ECG extends SensorData {
 
 /// Single-channel electrodermal activity (EDA) data, represented as skin conductance.
 /// Among others, also known as galvanic skin response (GSR) or skin conductance response/level.
+///
+/// Data type [CarpDataTypes.EDA].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class EDA extends SensorData {
+  /// Skin conductance in microsiemens (μS).
   double microSiemens;
   EDA({this.microSiemens = 0}) : super();
 
@@ -197,6 +236,8 @@ class EDA extends SensorData {
 /// Data about an interactive user task with [taskName], which has been completed.
 ///
 /// [taskData] holds the result of the task, or null if no result is collected.
+/// Data type [CarpDataTypes.COMPLETED_TASK]. Two completed tasks are
+/// [equivalentTo] each other if they have the same [taskName].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CompletedTask extends Data {
   /// The name of the task which was completed.
@@ -225,6 +266,8 @@ class CompletedTask extends Data {
 /// referring to identifiers in the study protocol.
 /// [triggerData] may contain additional information related to the circumstances
 /// which caused the trigger to fire.
+///
+/// Data type [CarpDataTypes.TRIGGERED_TASK].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TriggeredTask extends Data {
   int triggerId;
@@ -251,6 +294,9 @@ class TriggeredTask extends Data {
 
 /// Indicates that some error occurred during data collection. [message]
 /// holds any message about the error which might have been captured.
+///
+/// Data type [CarpDataTypes.ERROR]. Note that this class hides `dart:core`
+/// [Error] when carp_core is imported without a prefix.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Error extends Data {
   /// The original error message returned from the probe, if available.

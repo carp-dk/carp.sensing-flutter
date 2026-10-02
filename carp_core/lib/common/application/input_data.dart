@@ -6,9 +6,17 @@
  */
 part of '../../common.dart';
 
-/// All supported input data types.
+/// The type names of all supported participant input data.
+///
+/// Used as [ParticipantAttribute.inputDataType] and as the `__type` of the
+/// matching [InputData] subclass, e.g. [SEX] for [SexInput].
+/// [CUSTOM] and [SEX] are defined in CARP Core; the others by the CARP web
+/// services (CAWS).
 abstract class InputType {
+  /// Namespace of the input types defined in CARP Core.
   static const INPUT_TYPE_NAMESPACE = '${NameSpace.CARP}.input';
+
+  /// Namespace of the input types defined by the CARP web services.
   static const CAWS_INPUT_TYPE_NAMESPACE = 'dk.carp.webservices.input';
   static const CUSTOM = '${InputType.INPUT_TYPE_NAMESPACE}.custom';
   static const SEX = '${InputType.INPUT_TYPE_NAMESPACE}.sex';
@@ -30,7 +38,13 @@ abstract class InputType {
   static const OCCUPATION = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.occupation';
 }
 
-/// Base class for all input data types.
+/// Base class for data about a participant that is entered by a user.
+///
+/// Examples are name, sex or informed consent. This is participant data,
+/// not sensor data; it is stored per study deployment with a
+/// `ParticipationService` and declared in a protocol with
+/// [ExpectedParticipantData]. Its JSON `__type` is [type], one of the
+/// [InputType] names.
 abstract class InputData extends Data {
   /// The type of this input data.
   String get type;
@@ -39,7 +53,7 @@ abstract class InputData extends Data {
   String get jsonType => type;
 }
 
-/// Custom input data as requested by a researcher.
+/// Custom input data as requested by a researcher, of type [InputType.CUSTOM].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CustomInput extends InputData {
   @override
@@ -164,7 +178,8 @@ class InformedConsentInput extends InputData {
   @override
   String get type => InputType.INFORMED_CONSENT;
 
-  /// The time this informed consent was signed.
+  /// The time this informed consent was signed, in UTC.
+  /// Defaults to the time of creation.
   late DateTime signedTimestamp;
 
   /// The location where this informed consent was signed.
@@ -401,7 +416,7 @@ class OccupationInput extends InputData {
   @override
   String get type => InputType.OCCUPATION;
 
-  /// ISO 639-1 or 639-3 code (e.g., "en", "da").
+  /// One or more selected occupations of the participant.
   List<String> roles = [];
 
   /// Free-text occupation if none of the predefined roles fit.

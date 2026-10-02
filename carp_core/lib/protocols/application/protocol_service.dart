@@ -8,6 +8,9 @@ part of '../../protocol.dart';
 
 /// Application service which allows managing (multiple versions of)
 /// [StudyProtocol]s.
+///
+/// The protocol store in CARP Core. Clients usually call it through the CARP
+/// web services; a protocol is then deployed with a [DeploymentService].
 abstract class ProtocolService {
   static const String API_VERSION = "1.1";
 

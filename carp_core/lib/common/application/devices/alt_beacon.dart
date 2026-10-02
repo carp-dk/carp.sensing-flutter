@@ -7,6 +7,10 @@
 part of '../../../common.dart';
 
 /// A beacon meeting the open AltBeacon standard.
+///
+/// A connected device that provides [CarpDataTypes.SIGNAL_STRENGTH] data.
+/// Optional by default, with role name 'Beacon'. Registered with an
+/// [AltBeaconDeviceRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AltBeacon extends DeviceConfiguration<AltBeaconDeviceRegistration> {
   AltBeacon({super.roleName = 'Beacon'}) : super(isOptional: true);

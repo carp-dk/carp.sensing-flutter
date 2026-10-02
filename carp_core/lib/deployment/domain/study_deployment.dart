@@ -13,6 +13,19 @@ part of '../../deployment.dart';
 /// I.e., a [StudyDeployment] is responsible for registering the physical
 /// devices described in the [StudyProtocol], enabling a connection between them,
 /// tracking device connection issues, and assessing data quality.
+/// It lives on the deployment side, i.e. in a [DeploymentService]
+/// implementation; a client only sees its [status] and the
+/// [PrimaryDeviceDeployment] it creates.
+///
+/// Key points:
+///  * Lifecycle: [registerDevice] -> [getDeviceDeploymentFor] ->
+///    [deviceDeployed] -> [stop], reflected in
+///    [StudyDeploymentStatus.status] (see [StudyDeploymentStatusTypes]).
+///  * [getDeviceDeploymentFor] asserts (in debug mode) that the device is
+///    part of the protocol and registered, and marks all registered devices
+///    as deployed.
+///  * This Dart version is simpler than the Kotlin one; e.g., it does not
+///    check that all devices are ready before running.
 class StudyDeployment {
   late String _studyDeploymentId;
   late DateTime _creationDate;
@@ -87,8 +100,8 @@ class StudyDeployment {
   bool get isStopped => _isStopped;
 
   /// Create a new [StudyDeployment] based on a [StudyProtocol].
-  /// [studyDeploymentId] specify the study deployment id.
-  /// If not specified, an UUID v1 id is generated.
+  /// [studyDeploymentId] specifies the study deployment id.
+  /// If not specified, a UUID v4 id is generated.
   StudyDeployment(StudyProtocol protocol, [String? studyDeploymentId]) {
     _studyDeploymentId = studyDeploymentId ?? const Uuid().v4();
     _protocol = protocol;
@@ -97,7 +110,8 @@ class StudyDeployment {
     _status.createdOn = _creationDate;
   }
 
-  /// Get the status of this [StudyDeployment].
+  /// Get the status of this [StudyDeployment], with the current status of
+  /// all primary and connected devices.
   StudyDeploymentStatus get status {
     // set the status of each device - both primary and connected devices
     _status.deviceStatusList = [];
@@ -131,6 +145,10 @@ class StudyDeployment {
 
   /// Register the specified [device] for this deployment using the [registration]
   /// options.
+  ///
+  /// Moves the status from [StudyDeploymentStatusTypes.Invited] to
+  /// [StudyDeploymentStatusTypes.DeployingDevices]. A new registration
+  /// replaces the current one and is added to [deviceRegistrationHistory].
   void registerDevice(
     DeviceConfiguration device,
     DeviceRegistration registration,
@@ -159,6 +177,12 @@ class StudyDeployment {
 
   /// Get the deployment configuration for the specified primary [device] in
   /// this study deployment.
+  ///
+  /// The [device] must be part of the protocol and registered.
+  /// Marks all registered devices as deployed and sets the status to
+  /// [StudyDeploymentStatusTypes.Running]. The returned deployment holds the
+  /// tasks of [device] and all connected devices, and all triggers and task
+  /// controls of the protocol.
   PrimaryDeviceDeployment getDeviceDeploymentFor(
     PrimaryDeviceConfiguration device,
   ) {
@@ -223,6 +247,9 @@ class StudyDeployment {
 
   /// Indicate that the specified primary [device] was deployed successfully using
   /// the deployment with the specified [deviceDeploymentLastUpdateDate].
+  ///
+  /// Sets the status to [StudyDeploymentStatusTypes.Running] and [startTime]
+  /// to [deviceDeploymentLastUpdateDate].
   void deviceDeployed(
     PrimaryDeviceConfiguration device,
     DateTime deviceDeploymentLastUpdateDate,
@@ -259,17 +286,23 @@ enum StudyDeploymentStatusTypes {
   Stopped,
 }
 
-/// A [StudyDeploymentStatus] represents the status of a deployment as returned
-/// from the CARP web service.
+/// The status of a study deployment and of its devices and participants.
+///
+/// Returned by most [DeploymentService] calls and kept in
+/// [Study.deploymentStatus] on the client. A client reads
+/// [deviceStatusList] to see what is needed before its device can be deployed.
 ///
 /// See [StudyDeploymentStatus.kt](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/domain/StudyDeploymentStatus.kt).
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyDeploymentStatus extends Serializable {
-  /// The status of this device deployment:
+  /// The status of this study deployment:
   /// * Invited
   /// * DeployingDevices
   /// * Running
   /// * Stopped
+  ///
+  /// When created from CARP Core JSON, it is read from the last part of the
+  /// `__type` (e.g. `...StudyDeploymentStatus.Running`).
   // @JsonKey(includeFromJson: true, includeToJson: true)
   StudyDeploymentStatusTypes? status = StudyDeploymentStatusTypes.Invited;
 
@@ -290,10 +323,14 @@ class StudyDeploymentStatus extends Serializable {
   DateTime? startedOn;
 
   /// Get the status of a [device] in this study deployment.
+  ///
+  /// Throws a [StateError] if [device] is not in [deviceStatusList].
   DeviceDeploymentStatus getDeviceStatus(DeviceConfiguration device) =>
       deviceStatusList.firstWhere((status) => status.device == device);
 
   /// Get the status of a device with the given [roleName] in this study deployment.
+  ///
+  /// Throws a [StateError] if no device has [roleName].
   DeviceDeploymentStatus getDeviceStatusByRoleName(String roleName) =>
       deviceStatusList.firstWhere(
         (status) => status.device.roleName == roleName,

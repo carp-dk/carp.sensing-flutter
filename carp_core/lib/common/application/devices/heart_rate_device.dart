@@ -8,6 +8,10 @@ part of '../../../common.dart';
 
 /// A Bluetooth Low Energy (BLE) device which implements a GATT Heart
 /// Rate service (https://www.bluetooth.com/specifications/gatt/services/).
+///
+/// A connected device providing [CarpDataTypes.HEART_RATE],
+/// [CarpDataTypes.INTERBEAT_INTERVAL] and [CarpDataTypes.SENSOR_SKIN_CONTACT]
+/// data. Optional by default. Registered with a [MACAddressDeviceRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BLEHeartRateDevice
     extends DeviceConfiguration<MACAddressDeviceRegistration> {

@@ -7,13 +7,25 @@
 
 part of '../client.dart';
 
-/// A study deployment, identified by [studyDeploymentId], which a client
-/// device participates in with the role [deviceRoleName].
+/// A study deployment that this client device takes part in with one role.
 ///
-/// A study is a [ChangeNotifier] and updates to a study including its
-/// [deploymentStatus], [status], and [deployment] can be listened to.
-/// Moreover, the [events] stream emits a [StudyStatusEvent] event every
-/// time the status of a study changes.
+/// The study deployment is identified by [studyDeploymentId], and the device
+/// takes part as [deviceRoleName]. A study is created by the app and added
+/// with [ClientManager.addStudy]; it then holds what the client knows about
+/// the deployment: its [deploymentStatus] and, once received, its
+/// [deployment].
+///
+/// Key points:
+///  * [status] is derived from [deploymentStatus]; it is not stored.
+///  * Two studies are equal if they have the same [studyDeploymentId] and
+///    [deviceRoleName].
+///  * Is a [ChangeNotifier]: listeners are notified when the deployment
+///    status or deployment changes.
+///  * The [events] stream emits a [StudyStatusEvent] on each change,
+///    including errors ([StudyStatusEventTypes.DeploymentError]).
+///
+/// See also [StudyDeploymentProxy], which updates a study during deployment.
+/// CARP Mobile Sensing extends this class as `SmartphoneStudy`.
 class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
     with ChangeNotifier {
   final DateTime _createdOn;
@@ -48,13 +60,18 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// The date and time when this study was created and added to the [ClientManager].
   DateTime get createdOn => _createdOn;
 
-  /// The deployment status of this study, when known.
+  /// The deployment status of this study; null until received from the
+  /// deployment service.
   StudyDeploymentStatus? get deploymentStatus => _deploymentStatus;
 
-  /// The deployment for this study, when received from the deployment service.
+  /// The deployment for this study; null until received from the deployment
+  /// service.
   TDeviceDeployment? get deployment => _deployment;
 
-  /// The status of this study based on [deploymentStatus].
+  /// The status of this study, derived from [deploymentStatus].
+  ///
+  /// [StudyStatus.DeploymentNotAvailable] if no deployment status has been
+  /// received yet.
   StudyStatus get status => switch (deploymentStatus?.status) {
     null => StudyStatus.DeploymentNotAvailable,
     StudyDeploymentStatusTypes.Invited => StudyStatus.DeploymentNotStarted,
@@ -66,12 +83,15 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// Stream of study status events.
   Stream<StudyStatusEvent> get events => _eventController.stream;
 
-  /// Create a [StudyStatusEvent] of a specific [type].
+  /// Emits [event] on the [events] stream.
   void createEvent(StudyStatusEvent event) => _eventController.add(event);
 
   /// An updated [deploymentStatus] has been received.
-  /// If [deploymentStatus] is not specified, the previously received status is
-  /// marked as updated.
+  ///
+  /// Keeps the latest status. If [deploymentStatus] is not specified, the
+  /// previously received status is marked as updated.
+  /// Emits [StudyStatusEventTypes.DeploymentStatusReceived] and notifies
+  /// listeners.
   void deploymentStatusReceived([StudyDeploymentStatus? deploymentStatus]) {
     _deploymentStatus = deploymentStatus ?? _deploymentStatus;
     createEvent(
@@ -82,8 +102,13 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
 
   /// A new primary device [deployment] determining what data to collect for
   /// this study has been received.
+  ///
   /// If [deployment] is not specified, the previously received deployment is
-  /// marked as updated.
+  /// marked as updated. An already held deployment is not replaced.
+  /// Reports a deployment error instead if no [deploymentStatus] has been
+  /// received yet, or if the deployment is for another device role name.
+  /// Otherwise emits [StudyStatusEventTypes.DeviceDeploymentReceived] and
+  /// listens to updates of the deployment.
   void deviceDeploymentReceived([TDeviceDeployment? deployment]) {
     if (deploymentStatus == null) {
       deploymentError(
@@ -158,15 +183,20 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
 
 /// Describes the status of a [Study].
 ///
-/// This is based on the [state diagram for Study State](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-clients.md#study-state)
+/// This is based on the [state diagram for Study State](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-clients.md#study-state).
 /// However, all the "Deploying" states have been collapsed into a single
 /// [Deploying] state.
 ///
 /// If a study is in the [Deploying] state, the client can query the
 /// [DeviceDeploymentStatus.remainingDevicesToRegisterToObtainDeployment] or the
 /// [DeviceDeploymentStatus.remainingDevicesToRegisterBeforeDeployment]
-/// of this device with [deviceRoleName] to understand what is holding the
-/// deployment back.
+/// of the device with the study's [Study.deviceRoleName] to understand what is
+/// holding the deployment back.
+///
+/// The base [Study.status] maps deployment status to [DeploymentNotStarted],
+/// [Deploying], [Running], [Stopped] or [DeploymentNotAvailable]. The other
+/// values are used by subclasses, such as `SmartphoneStudy` in CARP Mobile
+/// Sensing.
 enum StudyStatus {
   /// The study deployment process hasn't been started yet.
   DeploymentNotStarted,
@@ -209,11 +239,11 @@ enum StudyStatus {
   Stopped,
 }
 
-/// Different types of event that happens to a study while running.
+/// The types of event that happen to a study.
 ///
-/// In contrast to [StudyStatus] which is a permanent state of a study during the
-/// deployment process, this [StudyStatusEventTypes] reflects changes to a study
-/// on runtime during the [StudyStatus.Running] phase.
+/// In contrast to [StudyStatus], which is the state of a study, these
+/// describe changes to a study. They are emitted as [StudyStatusEvent]s on
+/// [Study.events], both during deployment and while the study runs.
 enum StudyStatusEventTypes {
   /// Deployment status information has been made available.
   DeploymentStatusReceived,
@@ -225,13 +255,16 @@ enum StudyStatusEventTypes {
   DeploymentUpdated,
 
   /// Data sampling state has changed.
+  ///
+  /// Not emitted by carp_core; used by clients that run sampling, such as
+  /// CARP Mobile Sensing.
   SamplingStateChanged,
 
   /// An error has occurred during deployment.
   DeploymentError,
 }
 
-/// An event related to a running [study].
+/// An [event] that happened to a [study]; emitted on [Study.events].
 class StudyStatusEvent<TStudy extends Study> {
   final TStudy study;
   final StudyStatusEventTypes event;

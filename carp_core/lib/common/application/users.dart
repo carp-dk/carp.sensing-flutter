@@ -8,9 +8,16 @@ part of '../../common.dart';
 
 /// Describes a participant playing a [role] in a study, and whether this
 /// role [isOptional].
+///
+/// Added to a protocol with [StudyProtocol.addParticipantRole]. Devices and
+/// participant data can be assigned to roles with [AssignedTo].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ParticipantRole {
+  /// The name of the role, e.g. 'Patient' or 'Parent'.
   String role;
+
+  /// Whether the study can run without a participant in this role.
+  /// Defaults to false.
   bool isOptional;
 
   ParticipantRole(this.role, [this.isOptional = false]);
@@ -22,13 +29,18 @@ class ParticipantRole {
 
 /// Describes a participant [attribute] that pertains to all or specified
 /// participants in a study.
+///
+/// Added to a protocol with [StudyProtocol.addExpectedParticipantData].
+/// The values are set and read via a `ParticipationService`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ExpectedParticipantData {
+  /// The data that is expected.
   ParticipantAttribute? attribute;
 
   /// Determines whether the attribute can be set by all participants in the study
   /// (one field for all), or an individual attribute can be set by each of
-  /// the specified [AssignedTo.Roles] (one field per role).
+  /// the specified [AssignedTo.roleNames] (one field per role).
+  /// Defaults to [AssignedTo.all].
   late AssignedTo assignedTo;
 
   ExpectedParticipantData({required this.attribute, AssignedTo? assignedTo}) {
@@ -42,6 +54,8 @@ class ExpectedParticipantData {
 
 /// Describes expected data to be input by users related to one or multiple
 /// participants in a study.
+///
+/// [inputDataType] is one of the [InputType] names, e.g. [InputType.SEX].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ParticipantAttribute extends Serializable {
   /// Uniquely identifies the type of data represented by this participant attribute.
@@ -61,6 +75,9 @@ class ParticipantAttribute extends Serializable {
 }
 
 /// Determines which participant roles to assign to something.
+///
+/// Either all participants ([AssignedTo.all]) or the given [roleNames].
+/// Serializes as `AssignedTo.All` or `AssignedTo.Roles` in CARP Core.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AssignedTo extends Serializable {
   /// Assign this to the specified [roleNames] in the study protocol.

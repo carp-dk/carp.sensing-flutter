@@ -7,8 +7,15 @@
 
 part of '../client.dart';
 
-/// Perform deployment actions for a [Study] on a client device.
+/// Performs the deployment steps for a [Study] against a [DeploymentService].
+///
+/// Used by [ClientManager] (as [ClientManager.proxy]) to fetch the deployment
+/// status, register the device, get the [PrimaryDeviceDeployment], and
+/// stop studies. Results are written to the [Study]. Most errors are not
+/// thrown; they are reported on the study as
+/// [StudyStatusEventTypes.DeploymentError] events.
 class StudyDeploymentProxy {
+  /// The service used for all deployment calls.
   final DeploymentService deploymentService;
 
   StudyDeploymentProxy(this.deploymentService);
@@ -43,17 +50,23 @@ class StudyDeploymentProxy {
     return deploymentStatus;
   }
 
-  /// Tries to deploy the [study] if it's ready to be deployed by registering
-  /// the client device using [registration] and verifying the study is
-  /// ready for deployment on this device.
-  /// In case already deployed, nothing happens.
+  /// Tries to deploy the [study] by registering the client device using
+  /// [registration] and fetching the device deployment once it is available.
   ///
-  /// Throws [IllegalArgumentException] if:
-  /// - a deployment with study deployment ID matching this [study] does not exist
-  /// - device role name of [study] is not present in the deployment
-  ///   or is already registered and a different [registration] is specified
-  /// - [registration] of this client is invalid for the expected device role name
-  ///   or has a device ID which is already in use by the registration of a different device.
+  /// Steps:
+  ///  * Gets the deployment status. If it is already
+  ///    [StudyDeploymentStatusTypes.Running], only fetches the device deployment
+  ///    (e.g., after an app reinstall) and returns.
+  ///  * Registers the device. A failure (e.g., already registered) is reported
+  ///    on the study, and the deployment is still fetched.
+  ///  * Fetches the [PrimaryDeviceDeployment] if it can be obtained, and checks
+  ///    that its role name matches the study.
+  ///  * Marks the device as deployed once no other devices need to be
+  ///    registered first.
+  ///
+  /// Can be called again to refresh the deployment. Errors are reported on the
+  /// [study] as [StudyStatusEventTypes.DeploymentError] events, not thrown.
+  /// A failure to mark the device as deployed is only printed.
   Future<void> tryDeployment(
     Study study,
     DeviceRegistration registration,
@@ -191,8 +204,9 @@ class StudyDeploymentProxy {
 
   /// Permanently stop this [study].
   ///
-  /// Note that will mark the study as stopped in the deployment service.
-  /// Once stopped, a study cannot be restarted.
+  /// Marks the study as stopped in the deployment service. Once stopped, a
+  /// study cannot be restarted. Does nothing if already stopped; errors are
+  /// printed, not thrown.
   @mustCallSuper
   Future<void> stop(Study study) async {
     // Early out in case study has already been stopped.

@@ -1,8 +1,13 @@
-/// Contains all pseudonymized data. When combined with the original study protocol,
-/// the full provenance of the data (when/why it was collected) is known.
+/// Collected data and the service that stores it.
 ///
-/// Contains the core data classes like [Measurement], [DataStreamBatch],
-/// [DataStreamId], and defines the API of a [DataStreamService].
+/// Data is collected as [Measurement]s, grouped per data stream
+/// ([DataStreamId]) into [DataStreamBatch]es and uploaded through a
+/// [DataStreamService]. Data is pseudonymized: a measurement holds no
+/// participant information. Combined with the study protocol, the full
+/// provenance of the data (when and why it was collected) is known.
+///
+/// Main types: [Measurement], [DataStreamId], [DataStreamBatch],
+/// [DataStreamsConfiguration] and [DataStreamService].
 ///
 /// See the [`carp-data`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-data.md)
 /// definition in Kotlin.
