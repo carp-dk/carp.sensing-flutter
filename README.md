@@ -51,4 +51,6 @@ Please check existing issues and file any new issues, bugs, or feature requests 
 
 ## Contributing
 
+Code is formatted with `dart format .` (default settings), which CI enforces on every pull request.
+
 Contributing is not yet in place. However, if you wish to contribute a change to any of the existing components in this repo, please review our [contribution guide](https://github.com/cph-cachet/carp.sensing/CONTRIBUTING.md), and send a [pull request](https://github.com/cph-cachet/carp.sensing-flutter/pulls).
