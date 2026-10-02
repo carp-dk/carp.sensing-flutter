@@ -27,30 +27,47 @@
 
 part of '../../runtime.dart';
 
+/// Something that can step forward to the next value, e.g. a [CronIterator].
 abstract class HasNext<E> {
-  /// Find next suitable date
+  /// Moves to the next matching date and returns it.
   E next();
 }
 
+/// Something that can step back to the previous value, e.g. a [CronIterator].
 abstract class HasPrevious<E> {
-  /// Find previous suitable date
+  /// Moves to the previous matching date and returns it.
   E previous();
 }
 
+/// Steps through the dates matching a cron expression.
+///
+/// Created by [Cron.parse].
 mixin CronIterator<E> on HasPrevious<E>, HasNext<E> {
+  /// The date reached by the last [next] or [previous] call.
+  ///
+  /// Call one of them first.
   E current();
 }
 
+/// Parses cron expressions into an iterator of matching dates.
+///
+/// Used by [CronScheduledTriggerExecutor.getSchedule] to compute when a
+/// [CronScheduledTrigger] fires. Supports the standard 5 fields (minute, hour,
+/// day of month, month, day of week) with `*`, lists, ranges and `*/n` steps.
+/// Adapted from code by rbubke; see the license in this file.
 abstract class Cron {
+  /// Creates a cron parser and initializes the time zone database.
   factory Cron() {
     tz.initializeTimeZones();
     return _Cron();
   }
 
-  /// Takes a [cronString], a [locationName] and an optional [startTime].
-  /// It returns an iterator [HasNext] which delivers [TZDateTime] events. If no [startTime]
-  /// is provided [TZDateTime.now(getLocation(locationName)] is used.
-  /// The [locationName] string has to be in the format listed at http://www.iana.org/time-zones.
+  /// Returns a [CronIterator] over the times matching [cronString].
+  ///
+  /// Times are in the time zone [locationName], starting from [startTime].
+  /// If no [startTime] is provided, now in [locationName] is used.
+  /// [locationName] is an IANA time zone name, e.g. `Europe/Copenhagen`
+  /// (see http://www.iana.org/time-zones).
   CronIterator<tz.TZDateTime> parse(
     String cronString,
     String locationName, [

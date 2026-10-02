@@ -7,41 +7,42 @@
 
 part of '../runtime.dart';
 
-/// The possible states of the [SmartPhoneClientManager].
+/// The lifecycle states of the [SmartPhoneClientManager], in order.
+///
+/// Emitted on [SmartPhoneClientManager.events].
 enum ClientManagerState { created, configured, disposed }
 
-/// The singleton `SmartPhoneClientManager()` is the main entry point for CARP
-/// Mobile Sensing.
+/// The main entry point of CARP Mobile Sensing (CAMS) on the phone.
 ///
-/// Call [configure] before using this client.
+/// A singleton that holds all studies running on this phone, deploys them via a
+/// [DeploymentService], and gives one [SmartphoneStudyController] per study.
+/// An app calls [configure] once at startup, then adds studies with
+/// [addStudyFromProtocol], [addStudyFromInvitation] or [addStudy].
 ///
-/// It holds a set of [SmartphoneStudy] [studies], which can been added,
-/// deployed, stopped, and removed via the [addStudy], [tryDeployment],
-/// [stopStudy], and [removeStudy] methods.
+/// Key points:
+///  * [configure] must be called before adding studies. It initializes the
+///    infrastructure services, registers the built-in data managers, restores
+///    studies saved in earlier app runs and resumes their sampling.
+///  * Deploying a study ([tryDeployment]) does not resume its task controls.
+///    Use [resume] and [pause] to control sampling in all studies. (A
+///    connected device that connects does resume its own task controls.)
+///  * Permission requests go through [requestPermissions], one at a time.
+///  * [measurements] merges the measurements of all studies on this phone.
+///  * Is a [ChangeNotifier]: listeners are notified when the list of [studies]
+///    or the sampling state changes. [events] emits [ClientManagerState] changes.
 ///
-/// A client manager is also a [ChangeNotifier] which notifies its
-/// listeners on any changes to its list of [studies]. The [events] stream emits
-/// and event when the state of the client changes.
-///
-/// Assuming a `protocol` as a [StudyProtocol], this will configure and run a study
-/// in a client manager:
+/// See also [SmartphoneStudyController], which runs a single study, and
+/// [DeviceController], which manages the devices on this phone.
 ///
 /// ```dart
-/// // Create and configure a client manager for this phone.
 /// await SmartPhoneClientManager().configure();
-///
-/// // Create a study based on a protocol.
 /// var study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
-///
-/// // Deploy the study.
-///   await SmartPhoneClientManager().tryDeployment(
-///     study.studyDeploymentId,
-///     study.deviceRoleName,
-///   );
+/// await SmartPhoneClientManager().tryDeployment(
+///   study.studyDeploymentId,
+///   study.deviceRoleName,
+/// );
+/// SmartPhoneClientManager().resume();
 /// ```
-///
-/// Note that 'deploying' a study does not start data collection. Use the methods
-/// [resume] and [pause] to resume and pause data collection.
 class SmartPhoneClientManager
     extends ClientManager<Smartphone, SmartphoneRegistration, SmartphoneStudy>
     with ChangeNotifier {
@@ -58,20 +59,20 @@ class SmartPhoneClientManager
       StreamController.broadcast();
   final Map<Study, SmartphoneStudyController> _controllers = {};
 
-  /// Will this client manager ask for permission when a new study is deployed?
+  /// Whether permissions are asked for automatically when a study is deployed.
+  ///
+  /// Set in [configure].
   bool get askForPermissions => _askForPermissions;
 
-  /// Ask the user for [permissions], using the [PermissionRequester] this
-  /// client is configured with.
+  /// Asks the user for [permissions] with the configured [PermissionRequester].
   ///
-  /// This is the one place in CAMS that talks to the OS permission dialogs.
-  /// Requests are serialized: Android denies - without showing anything - any
-  /// request made while another dialog is up, so two callers asking at once
-  /// used to make dialogs "fail silently".
+  /// CAMS sends its permission requests through here (the notification
+  /// permission is asked by the [NotificationManager] itself). Requests are queued and run one at a time: Android denies, without showing
+  /// anything, any request made while another dialog is up.
   ///
-  /// A failed requester is logged, not rethrown: callers re-check the actual
-  /// permission status afterwards anyway, and an error must not block the
-  /// requests queued behind it.
+  /// A failing requester is logged, not rethrown. Callers re-check the actual
+  /// permission status afterwards, and an error must not block the requests
+  /// queued behind it.
   Future<void> requestPermissions(List<Permission> permissions) =>
       _asking = _asking.then((_) async {
         try {
@@ -82,6 +83,8 @@ class SmartPhoneClientManager
       });
 
   /// The runtime state of this client manager.
+  ///
+  /// Setting it emits the new state on [events] and notifies listeners.
   ClientManagerState get state => _state;
   set state(ClientManagerState state) {
     _state = state;
@@ -92,9 +95,11 @@ class SmartPhoneClientManager
   /// A stream of [ClientManagerState] events.
   Stream<ClientManagerState> get events => _controller.stream;
 
-  /// The stream of all [Measurement]s collected by this client manager.
-  /// This is the aggregation of all measurements collected by the
-  /// studies running on this client.
+  /// All [Measurement]s collected by all studies on this client.
+  ///
+  /// Merges [SmartphoneStudyController.measurements] of each study, so
+  /// measurements are already transformed by the study's privacy schema and
+  /// data format. A broadcast stream.
   Stream<Measurement> get measurements => _group.stream;
 
   SmartPhoneClientManager._()
@@ -103,20 +108,24 @@ class SmartPhoneClientManager
     CarpMobileSensing.ensureInitialized();
   }
 
-  /// Get the singleton [SmartPhoneClientManager].
+  /// Returns the singleton [SmartPhoneClientManager].
   ///
-  /// In CARP Mobile Sensing the [SmartPhoneClientManager] is a singleton,
-  /// which implies that only one client manager is used in an app.
+  /// An app has only one client manager.
   factory SmartPhoneClientManager() => _instance;
 
+  /// The [DeviceController] that manages all devices on this phone.
+  ///
+  /// Only available after [configure] has been called.
   DeviceController get deviceController =>
       super.dataCollectorFactory as DeviceController;
 
-  /// The [NotificationManager] responsible for sending notification on [AppTask]s.
+  /// The [NotificationManager] that shows notifications for [AppTask]s.
   NotificationManager get notificationManager => _notificationManager;
 
-  /// Get the study controller for a [study].
-  /// If a study controller is not available, a fresh controller will be created.
+  /// Returns the [SmartphoneStudyController] for [study].
+  ///
+  /// Creates a new controller the first time a study is looked up, and adds
+  /// its measurements to [measurements].
   SmartphoneStudyController? getStudyController(SmartphoneStudy study) {
     if (_controllers.containsKey(study)) return _controllers[study];
 
@@ -127,17 +136,16 @@ class SmartPhoneClientManager
     return controller;
   }
 
-  /// Configure this [SmartPhoneClientManager].
+  /// Configures this [SmartPhoneClientManager]. Call once, before adding studies.
   ///
-  /// If the [deploymentService] is not specified, the local
-  /// [SmartphoneDeploymentService] will be used.
-  /// If the [dataCollectorFactory] is not specified, the default [DeviceController]
-  /// is used.
-  /// The [registration] is a unique device registration for this client device.
-  /// If not specified, a registration is created from the [Smartphone.createRegistration]
-  /// factory method.
+  /// If [deploymentService] is not specified, the local
+  /// [SmartphoneDeploymentService] is used.
+  /// If [dataCollectorFactory] is not specified, the [DeviceController]
+  /// singleton is used.
+  /// The [registration] is a unique device registration for this phone.
+  /// If not specified, it is created with [Smartphone.createRegistration].
   ///
-  /// If [enableNotifications] is true (default), notifications is created when
+  /// If [enableNotifications] is true (default), a notification is shown when
   /// an [AppTask] is triggered.
   ///
   /// If [enableBackgroundMode] is true (default), data sampling will be enabled
@@ -150,23 +158,19 @@ class SmartPhoneClientManager
   /// titles and text, you can provide them here.
   /// Note that background mode is only supported on Android, and will be ignored on iOS.
   ///
-  /// If [askForPermissions] is true (default), this client manager will
-  /// automatically ask for permissions for all sampling packages when a study
-  /// is deployed. If you want the app to handle permissions itself, set this
-  /// to false.
+  /// If [askForPermissions] is true (default), this client manager
+  /// asks for the permissions of all measures in a study when it is deployed.
+  /// Set it to false if the app handles permissions itself.
   ///
-  /// The [permissionRequester] is how the user is asked, whenever CAMS needs a
-  /// permission. Defaults to [requestPermissionsInOrder], which shows the
-  /// system dialogs one at a time. Pass your own to, e.g., show a rationale
+  /// The [permissionRequester] decides how the user is asked whenever CAMS
+  /// needs a permission. Defaults to [requestPermissionsInOrder], which shows
+  /// the system dialogs one at a time. Pass your own to, e.g., show a rationale
   /// before each dialog.
   ///
-  /// When this method is called, the client manager will restore the state of
-  /// all previously added studies and resume data sampling in those studies if
-  /// they were previously resumed.
+  /// This method also restores all studies saved in earlier app runs and
+  /// resumes sampling in the ones that were resumed.
   ///
-  /// Note that the client manager needs to be configured before adding any studies.
-  ///
-  /// If the client manager is already configured, this method will do nothing.
+  /// Does nothing if the client manager is already configured.
   @override
   Future<void> configure({
     SmartphoneRegistration? registration,
@@ -279,11 +283,11 @@ class SmartPhoneClientManager
     return study;
   }
 
-  /// Add a study based on an [invitation] which needs to be executed on
-  /// this client.
+  /// Adds a study based on an [invitation], e.g. from a CARP server.
   ///
-  /// This is similar to the [addStudy] method, but the study is created from the
-  /// [invitation].
+  /// Same as [addStudy], but the study is created from the [invitation].
+  /// If the invitation has no device role name,
+  /// [Smartphone.DEFAULT_ROLE_NAME] is used.
   Future<SmartphoneStudy> addStudyFromInvitation(
     ActiveParticipationInvitation invitation,
   ) async => await addStudy(
@@ -296,12 +300,15 @@ class SmartPhoneClientManager
     ),
   );
 
-  /// Create and add a study based on the [protocol] which needs to be executed on
-  /// this client.
+  /// Creates a study deployment from [protocol] and adds it as a study.
   ///
-  /// This is similar to the [addStudy] method, but the study is created from the
-  /// [protocol]. If [studyDeploymentId] is specifies this id is used as the study
-  /// deployment id. If not specified, an UUID v1 id is generated.
+  /// Same as [addStudy], but first creates the deployment in the
+  /// [deploymentService]. If [studyDeploymentId] is specified, it is used as
+  /// the study deployment id. Otherwise the deployment service generates one.
+  ///
+  /// Meant for local protocols with one participant: the local user id from
+  /// [Settings.userId] is used as participant id, and the first participant
+  /// role in the protocol (or 'Participant') as participant role name.
   Future<SmartphoneStudy> addStudyFromProtocol(
     StudyProtocol protocol, [
     String? studyDeploymentId,
@@ -379,7 +386,10 @@ class SmartPhoneClientManager
     return status;
   }
 
-  /// Resume data sampling for all studies in this client manager.
+  /// Restarts data sampling in all studies on this client.
+  ///
+  /// Calls [SmartphoneStudyController.restart], so any stored sampling state
+  /// is ignored and all task controls are resumed.
   void resume() {
     for (var controller in _controllers.values) {
       // controller.resume();
@@ -391,7 +401,7 @@ class SmartPhoneClientManager
     notifyListeners();
   }
 
-  /// Pause data sampling for all studies in this client manager.
+  /// Pauses data sampling in all studies on this client.
   void pause() {
     for (var controller in _controllers.values) {
       controller.pause();
@@ -399,8 +409,11 @@ class SmartPhoneClientManager
     notifyListeners();
   }
 
-  /// Called when this client is disposed. Will dispose all studies running
-  /// in this client.
+  /// Pauses and disposes all studies on this client.
+  ///
+  /// Then closes the [ExecutorFactory] and [PersistenceService].
+  ///
+  /// The client manager cannot be used afterwards.
   @override
   @mustCallSuper
   void dispose() {
