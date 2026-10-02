@@ -33,22 +33,18 @@ class ESenseButton extends ESenseData {
   /// True if the button is pressed, false if it is released.
   bool pressed;
 
-  ESenseButton({required String deviceName, required this.pressed})
-    : super(deviceName);
+  ESenseButton({required String deviceName, required this.pressed}) : super(deviceName);
 
   /// Creates an [ESenseButton] from an `esense_flutter` [ButtonEventChanged].
   ///
   /// Note that [deviceName] is ignored and the device name is set to an
   /// empty string.
-  factory ESenseButton.fromButtonEventChanged(
-    String deviceName,
-    ButtonEventChanged event,
-  ) => ESenseButton(deviceName: '', pressed: event.pressed);
+  factory ESenseButton.fromButtonEventChanged(String deviceName, ButtonEventChanged event) =>
+      ESenseButton(deviceName: '', pressed: event.pressed);
 
   @override
   Function get fromJsonFunction => _$ESenseButtonFromJson;
-  factory ESenseButton.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as ESenseButton;
+  factory ESenseButton.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as ESenseButton;
   @override
   Map<String, dynamic> toJson() => _$ESenseButtonToJson(this);
 
@@ -78,19 +74,11 @@ class ESenseSensor extends ESenseData {
   /// sensor values.
   List<int>? gyro;
 
-  ESenseSensor({
-    required String deviceName,
-    DateTime? timestamp,
-    this.packetIndex,
-    this.accel,
-    this.gyro,
-  }) : super(deviceName, timestamp);
+  ESenseSensor({required String deviceName, DateTime? timestamp, this.packetIndex, this.accel, this.gyro})
+    : super(deviceName, timestamp);
 
   /// Creates an [ESenseSensor] from an `esense_flutter` [SensorEvent].
-  factory ESenseSensor.fromSensorEvent({
-    required String deviceName,
-    required SensorEvent event,
-  }) => ESenseSensor(
+  factory ESenseSensor.fromSensorEvent({required String deviceName, required SensorEvent event}) => ESenseSensor(
     deviceName: deviceName,
     timestamp: event.timestamp,
     packetIndex: event.packetIndex,
@@ -100,8 +88,7 @@ class ESenseSensor extends ESenseData {
 
   @override
   Function get fromJsonFunction => _$ESenseSensorFromJson;
-  factory ESenseSensor.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as ESenseSensor;
+  factory ESenseSensor.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as ESenseSensor;
   @override
   Map<String, dynamic> toJson() => _$ESenseSensorToJson(this);
 

@@ -6,14 +6,11 @@ class AppViewModel with ChangeNotifier {
   AppViewModel() : super() {
     // Listen to changes in the client and notify listeners
     // bloc.sensing.client.addListener(() => notifyListeners());
-    bloc.sensing.client.addListener(
-      () => bloc.study != null ? studyViewModel.study = bloc.study! : null,
-    );
+    bloc.sensing.client.addListener(() => bloc.study != null ? studyViewModel.study = bloc.study! : null);
   }
 
   /// Get the view model for the [study].
-  StudyViewModel get studyViewModel =>
-      _studyViewModel ??= StudyViewModel(bloc.study);
+  StudyViewModel get studyViewModel => _studyViewModel ??= StudyViewModel(bloc.study);
 
   /// Is the any study added yet?
   bool get hasStudy => bloc.study != null;

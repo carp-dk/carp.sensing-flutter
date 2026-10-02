@@ -14,8 +14,7 @@ part of '../../domain.dart';
 /// CAMS device namespace [CAMS_DEVICE_NAMESPACE], which is different from the
 /// carp_core device namespace. Sampling packages extend it (or [BLEDevice] /
 /// [ServiceConfiguration]) to define the devices they support.
-abstract class CamsDevice<TRegistration extends DeviceRegistration>
-    extends DeviceConfiguration<TRegistration> {
+abstract class CamsDevice<TRegistration extends DeviceRegistration> extends DeviceConfiguration<TRegistration> {
   /// The JSON type namespace of all CAMS devices and device registrations.
   static const CAMS_DEVICE_NAMESPACE = 'dk.carp.cams.devices';
 
@@ -53,18 +52,16 @@ abstract class PrimaryDevice<TRegistration extends DeviceRegistration>
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
   /// The type of a smartphone device.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.Smartphone';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.Smartphone';
 
   /// The default role name for a smartphone.
   static const String DEFAULT_ROLE_NAME = 'Smartphone';
 
   @override
-  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
-      DataTypeSamplingSchemeMap()
-        ..addSamplingSchema(MonitoringSamplingPackage().samplingSchemes)
-        ..addSamplingSchema(DeviceSamplingPackage().samplingSchemes)
-        ..addSamplingSchema(SensorSamplingPackage().samplingSchemes);
+  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes => DataTypeSamplingSchemeMap()
+    ..addSamplingSchema(MonitoringSamplingPackage().samplingSchemes)
+    ..addSamplingSchema(DeviceSamplingPackage().samplingSchemes)
+    ..addSamplingSchema(SensorSamplingPackage().samplingSchemes);
 
   /// Creates a new [Smartphone] device.
   ///
@@ -77,10 +74,7 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
   /// [deviceDisplayName] to a name built from platform, model, and SDK.
   /// Logs a warning if [DeviceInfoService] is not initialized.
   @override
-  SmartphoneRegistration createRegistration({
-    String? deviceId,
-    String? deviceDisplayName,
-  }) {
+  SmartphoneRegistration createRegistration({String? deviceId, String? deviceDisplayName}) {
     if (!DeviceInfoService().initialized) {
       warning(
         '$runtimeType - Initialize DeviceInfo before creating a Smartphone registration '
@@ -118,8 +112,7 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
 
   @override
   Function get fromJsonFunction => _$SmartphoneFromJson;
-  factory Smartphone.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Smartphone>(json);
+  factory Smartphone.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Smartphone>(json);
   @override
   Map<String, dynamic> toJson() => _$SmartphoneToJson(this);
 }
@@ -130,8 +123,7 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
 /// [BLEDeviceRegistration]. Extend it for a specific BLE device, like
 /// [BLEHeartRateDevice].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class BLEDevice<TRegistration extends BLEDeviceRegistration>
-    extends CamsDevice<TRegistration> {
+class BLEDevice<TRegistration extends BLEDeviceRegistration> extends CamsDevice<TRegistration> {
   /// Advertised service UUIDs to filter for. Empty means no filter.
   ///
   /// UUIDs as strings, for example: "0000180D-0000-1000-8000-00805f9b34fb".
@@ -167,8 +159,7 @@ class BLEDevice<TRegistration extends BLEDeviceRegistration>
 
   @override
   Function get fromJsonFunction => _$BLEDeviceFromJson;
-  factory BLEDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<BLEDevice<TRegistration>>(json);
+  factory BLEDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<BLEDevice<TRegistration>>(json);
 
   @override
   Map<String, dynamic> toJson() => _$BLEDeviceToJson(this);
@@ -191,23 +182,15 @@ class BLEHeartRateDevice extends BLEDevice<BLEDeviceRegistration> {
     super.allowDuplicates = true,
     super.timeout,
   }) {
-    this.serviceUuids =
-        serviceUuids ?? ["0000180D-0000-1000-8000-00805F9B34FB"];
+    this.serviceUuids = serviceUuids ?? ["0000180D-0000-1000-8000-00805F9B34FB"];
   }
 
   @override
-  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.HEART_RATE]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.INTERBEAT_INTERVAL]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.SENSOR_SKIN_CONTACT]!,
-        ),
-      ]);
+  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.HEART_RATE]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.INTERBEAT_INTERVAL]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.SENSOR_SKIN_CONTACT]!),
+  ]);
 
   @override
   Function get fromJsonFunction => _$BLEHeartRateDeviceFromJson;
@@ -223,8 +206,7 @@ class BLEHeartRateDevice extends BLEDevice<BLEDeviceRegistration> {
 /// reaches over the internet, or a local service on the phone, like a health
 /// service. Its registration is a [ServiceRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class ServiceConfiguration<TRegistration extends ServiceRegistration>
-    extends CamsDevice<TRegistration> {
+class ServiceConfiguration<TRegistration extends ServiceRegistration> extends CamsDevice<TRegistration> {
   ServiceConfiguration({required super.roleName, super.isOptional = true});
   @override
   Function get fromJsonFunction => _$ServiceConfigurationFromJson;

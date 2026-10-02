@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -8,16 +9,14 @@ import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_movesense_package/carp_movesense_package.dart';
 
-String _encode(Object object) =>
-    const JsonEncoder.withIndent(' ').convert(object);
+String _encode(Object object) => const JsonEncoder.withIndent(' ').convert(object);
 
 void main() {
   late StudyProtocol protocol;
   late Smartphone phone;
   late MovesenseDevice movesense;
 
-  Future<void> writeToFile(String json, String fileName) async =>
-      await File('test/json/$fileName').writeAsString(json);
+  Future<void> writeToFile(String json, String fileName) async => await File('test/json/$fileName').writeAsString(json);
 
   setUpAll(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -30,10 +29,7 @@ void main() {
     CarpMobileSensing.ensureInitialized();
 
     // Create a new study protocol.
-    protocol = StudyProtocol(
-      ownerId: 'alex@uni.dk',
-      name: 'Context package test',
-    );
+    protocol = StudyProtocol(ownerId: 'alex@uni.dk', name: 'Context package test');
     // Define which devices are used for data collection.
     phone = Smartphone(roleName: 'SM-A320FL');
     movesense = MovesenseDevice();
@@ -45,10 +41,7 @@ void main() {
     // adding all available measures to one one trigger and one task
     protocol.addTaskControl(
       ImmediateTrigger(),
-      BackgroundTask()
-        ..measures = SamplingPackageRegistry().dataTypes
-            .map((type) => Measure(type: type.type))
-            .toList(),
+      BackgroundTask()..measures = SamplingPackageRegistry().dataTypes.map((type) => Measure(type: type.type)).toList(),
       phone,
     );
 
@@ -80,9 +73,7 @@ void main() {
   test('StudyProtocol -> JSON -> StudyProtocol :: deep assert', () async {
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
-      json.decode(studyJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
     expect(toJsonString(protocolFromJson), studyJson);
   });
 
@@ -90,9 +81,7 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/protocol.json').readAsStringSync();
 
-    StudyProtocol protocol = StudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, phone.roleName);
@@ -118,37 +107,27 @@ void main() {
 
   test('Parsing Movesense JSON data format', () {
     String hrJson = File('test/json/hr.json').readAsStringSync();
-    var hr = Measurement.fromData(
-      MovesenseHR.fromMovesenseData(json.decode(hrJson)),
-    );
+    var hr = Measurement.fromData(MovesenseHR.fromMovesenseData(json.decode(hrJson)));
     expect(hr.dataType.toString(), MovesenseSamplingPackage.HR);
     print(_encode(hr.toJson()));
 
     String ecgJson = File('test/json/ecg.json').readAsStringSync();
-    var ecg = Measurement.fromData(
-      MovesenseECG.fromMovesenseData(json.decode(ecgJson)),
-    );
+    var ecg = Measurement.fromData(MovesenseECG.fromMovesenseData(json.decode(ecgJson)));
     expect(ecg.dataType.toString(), MovesenseSamplingPackage.ECG);
     print(_encode(ecg.toJson()));
 
     String imuJson = File('test/json/imu.json').readAsStringSync();
-    var imu = Measurement.fromData(
-      MovesenseIMU.fromMovesenseData(json.decode(imuJson)),
-    );
+    var imu = Measurement.fromData(MovesenseIMU.fromMovesenseData(json.decode(imuJson)));
     expect(imu.dataType.toString(), MovesenseSamplingPackage.IMU);
     print(_encode(imu.toJson()));
 
     String infoJson = File('test/json/info.json').readAsStringSync();
-    var info = Measurement.fromData(
-      MovesenseDeviceInformation.fromMovesenseData(json.decode(infoJson)),
-    );
+    var info = Measurement.fromData(MovesenseDeviceInformation.fromMovesenseData(json.decode(infoJson)));
     expect(info.dataType.toString(), MovesenseSamplingPackage.DEVICE_INFO);
     print(_encode(info.toJson()));
 
     String stateJson = File('test/json/state.json').readAsStringSync();
-    var state = Measurement.fromData(
-      MovesenseStateChange.fromMovesenseData(json.decode(stateJson)),
-    );
+    var state = Measurement.fromData(MovesenseStateChange.fromMovesenseData(json.decode(stateJson)));
     expect(state.dataType.toString(), MovesenseSamplingPackage.STATE);
     print(_encode(state.toJson()));
   });
@@ -169,9 +148,7 @@ void main() {
 
     for (var data in allData) {
       final dataJson = toJsonString(data);
-      final dataFromJson = Function.apply(data.fromJsonFunction, [
-        json.decode(dataJson) as Map<String, dynamic>,
-      ]);
+      final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
       print(toJsonString(dataFromJson));
       expect(toJsonString(dataFromJson), equals(dataJson));
     }

@@ -40,17 +40,16 @@ class SurveySamplingPackage extends SmartphoneSamplingPackage {
   }
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: SURVEY,
-            displayName: "User Survey",
-            timeType: DataTimeType.POINT,
-            dataEventType: DataEventType.ONE_TIME,
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: SURVEY,
+        displayName: "User Survey",
+        timeType: DataTimeType.POINT,
+        dataEventType: DataEventType.ONE_TIME,
+      ),
+    ),
+  ]);
 
   @override
   Probe? create(String type) => switch (type) {

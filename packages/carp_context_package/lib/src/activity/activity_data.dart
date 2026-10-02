@@ -63,15 +63,12 @@ class Activity extends Data {
   /// Creates an [Activity] from an `ActivityEvent` reported by the AR plugin.
   ///
   /// Plugin types without a CARP counterpart become [ActivityType.UNKNOWN].
-  factory Activity.fromActivityEvent(ar.ActivityEvent event) => Activity(
-    type: _activityTypeMap[event.type] ?? ActivityType.UNKNOWN,
-    confidence: event.confidence,
-  );
+  factory Activity.fromActivityEvent(ar.ActivityEvent event) =>
+      Activity(type: _activityTypeMap[event.type] ?? ActivityType.UNKNOWN, confidence: event.confidence);
 
   @override
   Function get fromJsonFunction => _$ActivityFromJson;
-  factory Activity.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Activity>(json);
+  factory Activity.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Activity>(json);
   @override
   Map<String, dynamic> toJson() => _$ActivityToJson(this);
 

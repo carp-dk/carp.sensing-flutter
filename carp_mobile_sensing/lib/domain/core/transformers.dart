@@ -32,8 +32,7 @@ abstract class DataTransformerFactory {
 /// schemas, and the [SmartphoneStudyController] uses them to transform each
 /// measurement before it reaches the [DataManager].
 class DataTransformerSchemaRegistry {
-  static final DataTransformerSchemaRegistry _instance =
-      DataTransformerSchemaRegistry._();
+  static final DataTransformerSchemaRegistry _instance = DataTransformerSchemaRegistry._();
 
   /// The map between the namespace of a transformer schema and the schema.
   Map<String, DataTransformerSchema> get schemas => _schemas;
@@ -86,8 +85,7 @@ abstract class DataTransformerSchema {
   void onRegister();
 
   /// Adds a [transformer] for data of type [format], replacing any existing one.
-  void add(String format, DataTransformer transformer) =>
-      transformers[format] = transformer;
+  void add(String format, DataTransformer transformer) => transformers[format] = transformer;
 
   /// Transforms [data] using the transformer for its data type.
   ///

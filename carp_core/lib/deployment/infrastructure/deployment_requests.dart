@@ -17,8 +17,7 @@ part of '../../deployment.dart';
 /// All deployment requests to the CARP Service are defined in
 /// [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt)
 abstract class DeploymentServiceRequest extends ServiceRequest {
-  final String _infrastructurePackageNamespace =
-      'dk.cachet.carp.deployments.infrastructure';
+  final String _infrastructurePackageNamespace = 'dk.cachet.carp.deployments.infrastructure';
 
   DeploymentServiceRequest([this.studyDeploymentId]) : super();
 
@@ -29,8 +28,7 @@ abstract class DeploymentServiceRequest extends ServiceRequest {
   String? studyDeploymentId;
 
   @override
-  String get jsonType =>
-      '$_infrastructurePackageNamespace.DeploymentServiceRequest.$runtimeType';
+  String get jsonType => '$_infrastructurePackageNamespace.DeploymentServiceRequest.$runtimeType';
 
   @override
   String toString() => '$runtimeType - studyDeploymentId: $studyDeploymentId';
@@ -48,11 +46,7 @@ class CreateStudyDeployment extends DeploymentServiceRequest {
   // ignore: overridden_fields
   String? studyDeploymentId;
 
-  CreateStudyDeployment(
-    this.protocol,
-    this.invitations, [
-    this.connectedDevicePreregistrations,
-  ]) : super();
+  CreateStudyDeployment(this.protocol, this.invitations, [this.connectedDevicePreregistrations]) : super();
 
   @override
   Function get fromJsonFunction => _$CreateStudyDeploymentFromJson;
@@ -96,11 +90,7 @@ class GetStudyDeploymentStatusList extends DeploymentServiceRequest {
 /// A request for registering a device in a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class RegisterDevice extends DeploymentServiceRequest {
-  RegisterDevice(
-    super.studyDeploymentId,
-    this.deviceRoleName,
-    this.registration,
-  );
+  RegisterDevice(super.studyDeploymentId, this.deviceRoleName, this.registration);
 
   /// The role name of this device.
   String deviceRoleName;
@@ -110,8 +100,7 @@ class RegisterDevice extends DeploymentServiceRequest {
 
   @override
   Function get fromJsonFunction => _$RegisterDeviceFromJson;
-  factory RegisterDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<RegisterDevice>(json);
+  factory RegisterDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<RegisterDevice>(json);
   @override
   Map<String, dynamic> toJson() => _$RegisterDeviceToJson(this);
 
@@ -129,8 +118,7 @@ class UnregisterDevice extends DeploymentServiceRequest {
 
   @override
   Function get fromJsonFunction => _$UnregisterDeviceFromJson;
-  factory UnregisterDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<UnregisterDevice>(json);
+  factory UnregisterDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<UnregisterDevice>(json);
   @override
   Map<String, dynamic> toJson() => _$UnregisterDeviceToJson(this);
 
@@ -154,8 +142,7 @@ class GetDeviceDeploymentFor extends DeploymentServiceRequest {
   Map<String, dynamic> toJson() => _$GetDeviceDeploymentForToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, primaryDeviceRoleName: $primaryDeviceRoleName';
+  String toString() => '${super.toString()}, primaryDeviceRoleName: $primaryDeviceRoleName';
 }
 
 /// A request for reporting a device deployment as successful.
@@ -165,22 +152,16 @@ class DeviceDeployed extends GetDeviceDeploymentFor {
   /// deployed, in UTC.
   DateTime deviceDeploymentLastUpdatedOn;
 
-  DeviceDeployed(
-    super.studyDeploymentId,
-    super.primaryDeviceRoleName,
-    this.deviceDeploymentLastUpdatedOn,
-  );
+  DeviceDeployed(super.studyDeploymentId, super.primaryDeviceRoleName, this.deviceDeploymentLastUpdatedOn);
 
   @override
   Function get fromJsonFunction => _$DeviceDeployedFromJson;
-  factory DeviceDeployed.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DeviceDeployed>(json);
+  factory DeviceDeployed.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DeviceDeployed>(json);
   @override
   Map<String, dynamic> toJson() => _$DeviceDeployedToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, primaryDeviceRoleName: $primaryDeviceRoleName';
+  String toString() => '${super.toString()}, primaryDeviceRoleName: $primaryDeviceRoleName';
 }
 
 /// A request for permanently stopping a study deployment.
@@ -190,8 +171,7 @@ class Stop extends DeploymentServiceRequest {
 
   @override
   Function get fromJsonFunction => _$StopFromJson;
-  factory Stop.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Stop>(json);
+  factory Stop.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Stop>(json);
   @override
   Map<String, dynamic> toJson() => _$StopToJson(this);
 }

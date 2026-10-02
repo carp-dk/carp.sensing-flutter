@@ -12,15 +12,11 @@ class OMHContextDataPoint extends Data {
   DataPoint datapoint;
 
   /// The OMH source name: the phone's device ID and the app name.
-  static String get source =>
-      '{smartphone:${DeviceInfoService().deviceID},app:${Settings().appName}}';
+  static String get source => '{smartphone:${DeviceInfoService().deviceID},app:${Settings().appName}}';
 
   /// The OMH provenance used for all data points: [source], sensed modality.
   static DataPointAcquisitionProvenance get provenance =>
-      DataPointAcquisitionProvenance(
-        sourceName: source,
-        modality: DataPointModality.SENSED,
-      );
+      DataPointAcquisitionProvenance(sourceName: source, modality: DataPointModality.SENSED);
 
   OMHContextDataPoint(this.datapoint);
 
@@ -37,55 +33,40 @@ class OMHContextDataPoint extends Data {
 
 /// Holds an OMH [Geoposition](https://pub.dartlang.org/documentation/openmhealth_schemas/latest/domain_omh_geoposition/Geoposition-class.html)
 /// data point, transformed from a [Location].
-class OMHGeopositionDataPoint extends OMHContextDataPoint
-    implements DataTransformerFactory {
+class OMHGeopositionDataPoint extends OMHContextDataPoint implements DataTransformerFactory {
   OMHGeopositionDataPoint(super.datapoint);
 
   factory OMHGeopositionDataPoint.fromLocationData(Location location) {
     var pos = Geoposition(
-      latitude: PlaneAngleUnitValue(
-        unit: PlaneAngleUnit.DEGREE_OF_ARC,
-        value: location.latitude,
-      ),
-      longitude: PlaneAngleUnitValue(
-        unit: PlaneAngleUnit.DEGREE_OF_ARC,
-        value: location.longitude,
-      ),
+      latitude: PlaneAngleUnitValue(unit: PlaneAngleUnit.DEGREE_OF_ARC, value: location.latitude),
+      longitude: PlaneAngleUnitValue(unit: PlaneAngleUnit.DEGREE_OF_ARC, value: location.longitude),
       positioningSystem: PositioningSystem.GPS,
     );
 
-    return OMHGeopositionDataPoint(
-      DataPoint(body: pos, provenance: OMHContextDataPoint.provenance),
-    );
+    return OMHGeopositionDataPoint(DataPoint(body: pos, provenance: OMHContextDataPoint.provenance));
   }
 
   factory OMHGeopositionDataPoint.fromJson(Map<String, dynamic> json) =>
       OMHGeopositionDataPoint(DataPoint.fromJson(json));
 
   /// A [DataTransformer] that maps a [Location] to an OMH geoposition.
-  static DataTransformer get transformer =>
-      ((data) => OMHGeopositionDataPoint.fromLocationData(data as Location));
+  static DataTransformer get transformer => ((data) => OMHGeopositionDataPoint.fromLocationData(data as Location));
 }
 
 /// Holds an OMH [PhysicalActivity](https://pub.dartlang.org/documentation/openmhealth_schemas/latest/domain_omh_activity/PhysicalActivity-class.html)
 /// data point, transformed from an [Activity].
-class OMHPhysicalActivityDataPoint extends OMHContextDataPoint
-    implements DataTransformerFactory {
+class OMHPhysicalActivityDataPoint extends OMHContextDataPoint implements DataTransformerFactory {
   OMHPhysicalActivityDataPoint(super.datapoint);
 
   factory OMHPhysicalActivityDataPoint.fromActivityData(Activity activity) {
     var act = PhysicalActivity(activityName: activity.typeString);
 
-    return OMHPhysicalActivityDataPoint(
-      DataPoint(body: act, provenance: OMHContextDataPoint.provenance),
-    );
+    return OMHPhysicalActivityDataPoint(DataPoint(body: act, provenance: OMHContextDataPoint.provenance));
   }
 
   factory OMHPhysicalActivityDataPoint.fromJson(Map<String, dynamic> json) =>
       OMHPhysicalActivityDataPoint(DataPoint.fromJson(json));
 
   /// A [DataTransformer] that maps an [Activity] to an OMH physical activity.
-  static DataTransformer get transformer =>
-      ((data) =>
-          OMHPhysicalActivityDataPoint.fromActivityData(data as Activity));
+  static DataTransformer get transformer => ((data) => OMHPhysicalActivityDataPoint.fromActivityData(data as Activity));
 }

@@ -10,12 +10,8 @@ Data bluetoothNameAnonymizer(Data data) {
   assert(data is Bluetooth);
   Bluetooth bt = data as Bluetooth;
   for (var result in bt.scanResult) {
-    result.bluetoothDeviceName = sha1
-        .convert(utf8.encode(result.bluetoothDeviceName))
-        .toString();
-    result.advertisementName = sha1
-        .convert(utf8.encode(result.advertisementName))
-        .toString();
+    result.bluetoothDeviceName = sha1.convert(utf8.encode(result.bluetoothDeviceName)).toString();
+    result.advertisementName = sha1.convert(utf8.encode(result.advertisementName)).toString();
   }
   return bt;
 }
@@ -28,8 +24,5 @@ Data bluetoothNameAnonymizer(Data data) {
 Data wifiNameAnonymizer(Data data) {
   assert(data is Wifi);
   Wifi wd = data as Wifi;
-  return wd
-    ..ssid = (wd.ssid != null)
-        ? sha1.convert(utf8.encode(wd.ssid!)).toString()
-        : wd.ssid;
+  return wd..ssid = (wd.ssid != null) ? sha1.convert(utf8.encode(wd.ssid!)).toString() : wd.ssid;
 }

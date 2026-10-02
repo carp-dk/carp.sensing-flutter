@@ -15,10 +15,7 @@ void main() async {
   SamplingPackageRegistry().register(SurveySamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Survey Example',
-  );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Survey Example');
 
   // Define which devices are used for data collection.
   // In this case, its only this smartphone
@@ -29,10 +26,7 @@ void main() async {
   // issuing a WHO-5 survey while also collecting device and
   // ambient light information when survey is initiated by the user.
   protocol.addTaskControl(
-    RecurrentScheduledTrigger(
-      type: RecurrentType.daily,
-      time: TimeOfDay(hour: 13),
-    ),
+    RecurrentScheduledTrigger(type: RecurrentType.daily, time: TimeOfDay(hour: 13)),
     RPAppTask(
       type: AppTask.SURVEY_TYPE,
       name: 'WHO-5 Survey',
@@ -79,11 +73,7 @@ void main() async {
                 "Hold the phone in your dominant hand and lift it in a straight arm until you hear the sound.",
             playSound: true,
           ),
-          RPFlankerActivity(
-            identifier: 'flanker_1',
-            lengthOfTest: 30,
-            numberOfCards: 10,
-          ),
+          RPFlankerActivity(identifier: 'flanker_1', lengthOfTest: 30, numberOfCards: 10),
           RPTappingActivity(identifier: 'tapping_1', lengthOfTest: 10),
         ],
       ),

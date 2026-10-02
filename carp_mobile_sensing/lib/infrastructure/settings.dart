@@ -126,8 +126,7 @@ class Settings {
   ///
   Future<String> getDeploymentBasePath(String studyDeploymentId) async {
     if (_deploymentBasePaths[studyDeploymentId] == null) {
-      final path =
-          '${await carpBasePath}/$CARP_DEPLOYMENT_FILE_PATH/$studyDeploymentId';
+      final path = '${await carpBasePath}/$CARP_DEPLOYMENT_FILE_PATH/$studyDeploymentId';
       _deploymentBasePaths[studyDeploymentId] = path;
       Directory(path).createSync(recursive: true);
     }
@@ -140,9 +139,7 @@ class Settings {
   ///
   ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/cache`
   ///
-  Future<String> getCacheBasePath(
-    String studyDeploymentId,
-  ) async => (await Directory(
+  Future<String> getCacheBasePath(String studyDeploymentId) async => (await Directory(
     '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_CACHE_FILE_PATH',
   ).create(recursive: true)).path;
 
@@ -151,9 +148,7 @@ class Settings {
   ///
   ///  `<localApplicationPath>/carp/deployments/<study_deployment_id>/data`
   ///
-  Future<String> getDataBasePath(
-    String studyDeploymentId,
-  ) async => (await Directory(
+  Future<String> getDataBasePath(String studyDeploymentId) async => (await Directory(
     '${await getDeploymentBasePath(studyDeploymentId)}/$CARP_DATA_FILE_PATH',
   ).create(recursive: true)).path;
 
@@ -204,10 +199,7 @@ class Settings {
   /// on the phone in-between sessions, and will therefore be the same for
   /// the same app on the same phone. Requires [init] to have been called.
   Future<String> get userId async {
-    assert(
-      _preferences != null,
-      "Setting is not initialized. Call 'Setting().init()' first.",
-    );
+    assert(_preferences != null, "Setting is not initialized. Call 'Setting().init()' first.");
     if (_userId == null) {
       _userId = preferences?.get(USER_ID_KEY) as String?;
       if (_userId == null) {

@@ -11,8 +11,7 @@ part of '../carp_services/carp_services.dart';
 /// https://firebase.googleblog.com/2015/02/the-2120-ways-to-ensure-unique_68.html
 class PushIdGenerator {
   /// The 64 characters used in generated keys, in sort order.
-  static const String PUSH_CHARS =
-      '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+  static const String PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
 
   static final Random _random = Random();
 

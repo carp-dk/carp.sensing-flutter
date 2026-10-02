@@ -37,8 +37,7 @@ class TriggerConfiguration extends Serializable {
   bool? requiresPrimaryDevice;
 
   /// Create a trigger.
-  TriggerConfiguration({this.sourceDeviceRoleName, this.requiresPrimaryDevice})
-    : super();
+  TriggerConfiguration({this.sourceDeviceRoleName, this.requiresPrimaryDevice}) : super();
 
   @override
   Function get fromJsonFunction => _$TriggerConfigurationFromJson;
@@ -50,8 +49,7 @@ class TriggerConfiguration extends Serializable {
   String get jsonType => '$_triggerNamespace.$runtimeType';
 
   @override
-  String toString() =>
-      '$runtimeType - sourceDeviceRoleName: $sourceDeviceRoleName';
+  String toString() => '$runtimeType - sourceDeviceRoleName: $sourceDeviceRoleName';
 }
 
 /// Marks a [TriggerConfiguration] whose firing times can be computed ahead.
@@ -74,11 +72,7 @@ class ElapsedTimeTrigger extends TriggerConfiguration implements Schedulable {
 
   /// Create a trigger that starts after [elapsedTime] has elapsed since the start
   /// of the study deployment.
-  ElapsedTimeTrigger({
-    super.sourceDeviceRoleName,
-    super.requiresPrimaryDevice = true,
-    this.elapsedTime,
-  });
+  ElapsedTimeTrigger({super.sourceDeviceRoleName, super.requiresPrimaryDevice = true, this.elapsedTime});
 
   @override
   Function get fromJsonFunction => _$ElapsedTimeTriggerFromJson;
@@ -101,17 +95,11 @@ class ManualTrigger extends TriggerConfiguration {
   /// this trigger.
   String? description;
 
-  ManualTrigger({
-    super.sourceDeviceRoleName,
-    super.requiresPrimaryDevice = false,
-    this.label,
-    this.description,
-  });
+  ManualTrigger({super.sourceDeviceRoleName, super.requiresPrimaryDevice = false, this.label, this.description});
 
   @override
   Function get fromJsonFunction => _$ManualTriggerFromJson;
-  factory ManualTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<ManualTrigger>(json);
+  factory ManualTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<ManualTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$ManualTriggerToJson(this);
 }
@@ -155,8 +143,7 @@ class ScheduledTrigger extends TriggerConfiguration implements Schedulable {
 
   @override
   Function get fromJsonFunction => _$ScheduledTriggerFromJson;
-  factory ScheduledTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<ScheduledTrigger>(json);
+  factory ScheduledTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<ScheduledTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$ScheduledTriggerToJson(this);
 }
@@ -184,10 +171,7 @@ class TimeOfDay {
       super();
 
   /// Creates a [TimeOfDay] based on the given [time].
-  TimeOfDay.fromDateTime(DateTime time)
-    : hour = time.hour,
-      minute = time.minute,
-      second = time.second;
+  TimeOfDay.fromDateTime(DateTime time) : hour = time.hour, minute = time.minute, second = time.second;
 
   /// Constructs a [TimeOfDay] instance with current time in the
   /// local time zone.
@@ -197,27 +181,15 @@ class TimeOfDay {
   ///
   /// The comparison is independent of whether the time is in UTC or in
   /// the local time zone.
-  bool isBefore(TimeOfDay other) => DateTime(
-    2021,
-    1,
-    1,
-    hour,
-    minute,
-    second,
-  ).isBefore(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
+  bool isBefore(TimeOfDay other) =>
+      DateTime(2021, 1, 1, hour, minute, second).isBefore(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
 
   /// Returns true if this time occurs after [other].
   ///
   /// The comparison is independent of whether the time is in UTC or in
   /// the local time zone.
-  bool isAfter(TimeOfDay other) => DateTime(
-    2021,
-    1,
-    1,
-    hour,
-    minute,
-    second,
-  ).isAfter(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
+  bool isAfter(TimeOfDay other) =>
+      DateTime(2021, 1, 1, hour, minute, second).isAfter(DateTime(2021, 1, 1, other.hour, other.minute, other.second));
 
   /// Returns a [Duration] with the difference when subtracting [other] from
   /// this time.
@@ -234,15 +206,13 @@ class TimeOfDay {
 
   static String _twoDigits(int n) => (n >= 10) ? '$n' : '0$n';
 
-  factory TimeOfDay.fromJson(Map<String, dynamic> json) =>
-      _$TimeOfDayFromJson(json);
+  factory TimeOfDay.fromJson(Map<String, dynamic> json) => _$TimeOfDayFromJson(json);
   Map<String, dynamic> toJson() => _$TimeOfDayToJson(this);
 
   /// Output as ISO 8601 extended time format with seconds accuracy, omitting
   /// the 24th hour and 60th leap second. E.g., "09:30:00".
   @override
-  String toString() =>
-      '${_twoDigits(hour)}:${_twoDigits(minute)}:${_twoDigits(second)}';
+  String toString() => '${_twoDigits(hour)}:${_twoDigits(minute)}:${_twoDigits(second)}';
 }
 
 /// Represents the iCalendar RFC 5545 standard recurrence rule to specify
@@ -323,8 +293,7 @@ class RecurrenceRule {
     return rule;
   }
 
-  factory RecurrenceRule.fromJson(Map<String, dynamic> json) =>
-      _$RecurrenceRuleFromJson(json);
+  factory RecurrenceRule.fromJson(Map<String, dynamic> json) => _$RecurrenceRuleFromJson(json);
   Map<String, dynamic> toJson() => _$RecurrenceRuleToJson(this);
 }
 
@@ -353,8 +322,7 @@ class End {
 
   /// Bounds the recurrence rule in an inclusive manner to the associated
   /// start date of this rule plus [elapsedTime].
-  factory End.until(Duration elapsedTime) =>
-      End(EndType.UNTIL, elapsedTime: elapsedTime);
+  factory End.until(Duration elapsedTime) => End(EndType.UNTIL, elapsedTime: elapsedTime);
 
   /// Specify a number of occurrences at which to range-bound the recurrence.
   /// The start date time always counts as the first occurrence.

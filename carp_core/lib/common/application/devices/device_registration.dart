@@ -29,13 +29,8 @@ class DeviceRegistration extends Serializable {
   /// The registration time in UTC. Defaults to the time of creation.
   late DateTime registrationCreatedOn;
 
-  DeviceRegistration({
-    String? deviceId,
-    this.deviceDisplayName,
-    DateTime? registrationCreatedOn,
-  }) : super() {
-    this.registrationCreatedOn =
-        registrationCreatedOn ?? DateTime.now().toUtc();
+  DeviceRegistration({String? deviceId, this.deviceDisplayName, DateTime? registrationCreatedOn}) : super() {
+    this.registrationCreatedOn = registrationCreatedOn ?? DateTime.now().toUtc();
     this.deviceId = deviceId ?? const Uuid().v4();
   }
 
@@ -46,8 +41,7 @@ class DeviceRegistration extends Serializable {
   @override
   Map<String, dynamic> toJson() => _$DeviceRegistrationToJson(this);
   @override
-  String get jsonType =>
-      'dk.cachet.carp.common.application.devices.$runtimeType';
+  String get jsonType => 'dk.cachet.carp.common.application.devices.$runtimeType';
 
   @override
   String toString() =>
@@ -66,11 +60,7 @@ class DefaultDeviceRegistration extends DeviceRegistration {
   ///    purposes describing the key specifications of the device.
   ///  * [registrationCreatedOn] - the time in UTC when this registration was created.
   ///    If not specified, the time of creation will be used.
-  DefaultDeviceRegistration({
-    super.deviceId,
-    super.deviceDisplayName,
-    super.registrationCreatedOn,
-  });
+  DefaultDeviceRegistration({super.deviceId, super.deviceDisplayName, super.registrationCreatedOn});
 
   @override
   Function get fromJsonFunction => _$DefaultDeviceRegistrationFromJson;

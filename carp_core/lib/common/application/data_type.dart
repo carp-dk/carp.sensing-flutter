@@ -39,10 +39,7 @@ class DataType {
   ///
   /// The part after the last '.' is the [name]; the rest is the [namespace].
   factory DataType.fromString(String type) {
-    assert(
-      type.contains('.'),
-      "A data type must contain both a namespace and a name separated with a '.'",
-    );
+    assert(type.contains('.'), "A data type must contain both a namespace and a name separated with a '.'");
     final String name = type.split('.').last;
     final String namespace = type.substring(0, type.indexOf(name) - 1);
     return DataType(namespace, name);
@@ -52,8 +49,7 @@ class DataType {
   String toString() => '$namespace.$name';
 
   @override
-  bool operator ==(other) =>
-      other is DataType && (other.namespace == namespace && other.name == name);
+  bool operator ==(other) => other is DataType && (other.namespace == namespace && other.name == name);
 
   // taken from https://dart.dev/guides/libraries/library-tour#implementing-map-keys
   @override
@@ -64,8 +60,7 @@ class DataType {
     return result;
   }
 
-  factory DataType.fromJson(Map<String, dynamic> json) =>
-      _$DataTypeFromJson(json);
+  factory DataType.fromJson(Map<String, dynamic> json) => _$DataTypeFromJson(json);
   Map<String, dynamic> toJson() => _$DataTypeToJson(this);
 }
 

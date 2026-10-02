@@ -44,11 +44,7 @@ part of 'carp_services.dart';
 ///  }
 /// }
 /// ```
-@JsonSerializable(
-  fieldRename: FieldRename.snake,
-  includeIfNull: false,
-  explicitToJson: true,
-)
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false, explicitToJson: true)
 class DataPoint {
   /// A unique, server-side generated ID for this data point.
   /// `null` if this data point is not yet stored.
@@ -91,8 +87,7 @@ class DataPoint {
   ///
   /// Note that we do *not* support type/schema checking in this data pay load.
   /// CARP allow for any json formatted data to be uploaded and stored.
-  Map<String, dynamic>? get carpBody =>
-      (data != null) ? data!.toJson() : _carpBody;
+  Map<String, dynamic>? get carpBody => (data != null) ? data!.toJson() : _carpBody;
 
   set carpBody(Map<String, dynamic>? data) => _carpBody = data;
 
@@ -101,17 +96,11 @@ class DataPoint {
 
   /// Creates a [DataPoint] from a [Data] object, with the data type as
   /// [DataPointHeader.dataFormat] and the current UTC time as start time.
-  factory DataPoint.fromData(Data data) => DataPoint(
-    DataPointHeader(
-      dataFormat: data.dataType,
-      startTime: DateTime.now().toUtc(),
-    ),
-    data,
-  );
+  factory DataPoint.fromData(Data data) =>
+      DataPoint(DataPointHeader(dataFormat: data.dataType, startTime: DateTime.now().toUtc()), data);
 
   /// Create a [DataPoint] from a JSON map.
-  factory DataPoint.fromJson(Map<String, dynamic> json) =>
-      _$DataPointFromJson(json);
+  factory DataPoint.fromJson(Map<String, dynamic> json) => _$DataPointFromJson(json);
 
   /// Serialize this [DataPoint] as a JSON map.
   Map<String, dynamic> toJson() => _$DataPointToJson(this);
@@ -119,11 +108,7 @@ class DataPoint {
 
 /// The header (meta-data) attached to all [DataPoint]s, like study,
 /// user, time span and data format.
-@JsonSerializable(
-  fieldRename: FieldRename.snake,
-  includeIfNull: false,
-  explicitToJson: true,
-)
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false, explicitToJson: true)
 class DataPointHeader {
   /// An ID of this study.
   ///
@@ -170,8 +155,7 @@ class DataPointHeader {
   }
 
   /// Create a [DataPointHeader] from a JSON map.
-  factory DataPointHeader.fromJson(Map<String, dynamic> json) =>
-      _$DataPointHeaderFromJson(json);
+  factory DataPointHeader.fromJson(Map<String, dynamic> json) => _$DataPointHeaderFromJson(json);
 
   /// Return a JSON encoding of this object.
   Map<String, dynamic> toJson() => _$DataPointHeaderToJson(this);

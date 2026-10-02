@@ -18,8 +18,7 @@ abstract class ParticipationService {
 
   /// Get all invitations of active study deployments the account
   /// with the given [accountId] has been invited to.
-  Future<List<ActiveParticipationInvitation>>
-  getActiveParticipationInvitations({String? accountId});
+  Future<List<ActiveParticipationInvitation>> getActiveParticipationInvitations({String? accountId});
 
   /// Get currently set data for all expected participant data in the study
   /// deployment with [studyDeploymentId].
@@ -29,9 +28,7 @@ abstract class ParticipationService {
   /// Get currently set data for all expected participant data for a set of study
   /// deployments with [studyDeploymentIds].
   /// Data which is not set equals null.
-  Future<List<ParticipantData>> getParticipantDataList(
-    List<String> studyDeploymentIds,
-  );
+  Future<List<ParticipantData>> getParticipantDataList(List<String> studyDeploymentIds);
 
   /// Set [data] that was [inputByParticipantRole] in the study deployment with
   /// [studyDeploymentId].

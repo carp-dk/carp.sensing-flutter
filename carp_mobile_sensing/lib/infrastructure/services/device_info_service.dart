@@ -88,9 +88,7 @@ class DeviceInfoService {
 
     try {
       if (Platform.isAndroid) {
-        deviceData = _parseAndroidDeviceInfo(
-          await _deviceInfoPlugin.androidInfo,
-        );
+        deviceData = _parseAndroidDeviceInfo(await _deviceInfoPlugin.androidInfo);
       } else if (Platform.isIOS) {
         deviceData = _parseIosDeviceInfo(await _deviceInfoPlugin.iosInfo);
       }

@@ -69,8 +69,7 @@ class Weather extends Data {
 
   @override
   Function get fromJsonFunction => _$WeatherFromJson;
-  factory Weather.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Weather>(json);
+  factory Weather.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Weather>(json);
   @override
   Map<String, dynamic> toJson() => _$WeatherToJson(this);
 }

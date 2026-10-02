@@ -57,9 +57,7 @@ abstract class CarpBaseService {
   /// configured via the [configure] method.
   CarpApp get app {
     if (_app == null) {
-      throw CarpServiceException(
-        "CARP Service not configured. Call 'configure()' first.",
-      );
+      throw CarpServiceException("CARP Service not configured. Call 'configure()' first.");
     } else {
       return _app!;
     }
@@ -113,9 +111,7 @@ abstract class CarpBaseService {
     if (studyDeploymentId != null) return studyDeploymentId;
     if (study != null) return study!.studyDeploymentId;
 
-    throw CarpServiceException(
-      'No study deployment ID specified for CAWS end point.',
-    );
+    throw CarpServiceException('No study deployment ID specified for CAWS end point.');
   }
 
   /// Resolves the primary device role name.
@@ -127,9 +123,7 @@ abstract class CarpBaseService {
     if (deviceRoleName != null) return deviceRoleName;
     if (study != null) return study!.deviceRoleName;
 
-    throw CarpServiceException(
-      'No primary device role name specified for CAWS end point.',
-    );
+    throw CarpServiceException('No primary device role name specified for CAWS end point.');
   }
 
   /// The name of this service's RPC endpoint at CAWS, like
@@ -148,15 +142,12 @@ abstract class CarpBaseService {
   /// Throws a [CarpServiceException] if the user has no token.
   Map<String, String> get headers {
     if (CarpAuthService().currentUser.token == null) {
-      throw CarpServiceException(
-        "OAuth token is null. Call 'CarpAuthService().authenticate()' first.",
-      );
+      throw CarpServiceException("OAuth token is null. Call 'CarpAuthService().authenticate()' first.");
     }
 
     return {
       "Content-Type": "application/json",
-      "Authorization":
-          "bearer ${CarpAuthService().currentUser.token!.accessToken}",
+      "Authorization": "bearer ${CarpAuthService().currentUser.token!.accessToken}",
       "cache-control": "no-cache",
     };
   }
@@ -175,11 +166,7 @@ abstract class CarpBaseService {
     final requestBody = toJsonString(request.toJson());
 
     debug('REQUEST: POST $rpcEndpointUri\n$requestBody');
-    http.Response response = await httpr.post(
-      Uri.encodeFull(rpcEndpointUri),
-      headers: headers,
-      body: requestBody,
-    );
+    http.Response response = await httpr.post(Uri.encodeFull(rpcEndpointUri), headers: headers, body: requestBody);
     // int httpStatusCode = response.statusCode;
     // String responseBody = response.body;
     debug('RESPONSE: ${response.statusCode}\n${response.body}');
@@ -274,8 +261,7 @@ abstract class CarpBaseService {
   /// convert it to a JSON error message.
   ///
   /// See issue : https://github.com/cph-cachet/carp.sensing-flutter/issues/369
-  http.Response _clean(http.Response response) =>
-      response.body.startsWith('<html>')
+  http.Response _clean(http.Response response) => response.body.startsWith('<html>')
       ? http.Response(
           '{'
           '"statusCode": 502,'

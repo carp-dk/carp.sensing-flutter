@@ -16,8 +16,7 @@ class Geofence extends Data {
 
   @override
   Function get fromJsonFunction => _$GeofenceFromJson;
-  factory Geofence.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Geofence>(json);
+  factory Geofence.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Geofence>(json);
   @override
   Map<String, dynamic> toJson() => _$GeofenceToJson(this);
 

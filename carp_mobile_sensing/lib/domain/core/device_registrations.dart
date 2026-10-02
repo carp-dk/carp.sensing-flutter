@@ -33,12 +33,11 @@ abstract class CamsDeviceRegistration extends DeviceRegistration {
   ///
   /// This is needed for registering the device in the [DeploymentService]
   /// due to issue #561 - right now CAWS only can process a [DefaultDeviceRegistration].
-  DefaultDeviceRegistration toDefaultDeviceRegistration() =>
-      DefaultDeviceRegistration(
-        deviceId: deviceId,
-        deviceDisplayName: deviceDisplayName,
-        registrationCreatedOn: registrationCreatedOn,
-      );
+  DefaultDeviceRegistration toDefaultDeviceRegistration() => DefaultDeviceRegistration(
+    deviceId: deviceId,
+    deviceDisplayName: deviceDisplayName,
+    registrationCreatedOn: registrationCreatedOn,
+  );
 
   @override
   String get jsonType => '${CamsDevice.CAMS_DEVICE_NAMESPACE}.$runtimeType';
@@ -59,14 +58,13 @@ class HardwareDeviceRegistration extends CamsDeviceRegistration {
   ///
   /// 0-10 is critical, 11-20 low, 21-90 normal, 91-100 full, and anything
   /// above 100 unknown.
-  static BatteryChargingState parseBatteryLevel(int batteryLevel) =>
-      switch (batteryLevel) {
-        <= 10 => BatteryChargingState.critical,
-        > 10 && <= 20 => BatteryChargingState.low,
-        > 20 && <= 90 => BatteryChargingState.normal,
-        > 90 && <= 100 => BatteryChargingState.full,
-        _ => BatteryChargingState.unknown,
-      };
+  static BatteryChargingState parseBatteryLevel(int batteryLevel) => switch (batteryLevel) {
+    <= 10 => BatteryChargingState.critical,
+    > 10 && <= 20 => BatteryChargingState.low,
+    > 20 && <= 90 => BatteryChargingState.normal,
+    > 90 && <= 100 => BatteryChargingState.full,
+    _ => BatteryChargingState.unknown,
+  };
 
   /// The hardware name of this device, if available.
   String? hardwareName;
@@ -83,11 +81,7 @@ class HardwareDeviceRegistration extends CamsDeviceRegistration {
     super.isConnected,
     this.batteryChargingState = BatteryChargingState.unknown,
     this.hardwareName,
-  }) : super(
-         deviceDisplayName:
-             deviceDisplayName ??
-             '$hardwareName [${batteryChargingState.name.toUpperCase()}]',
-       );
+  }) : super(deviceDisplayName: deviceDisplayName ?? '$hardwareName [${batteryChargingState.name.toUpperCase()}]');
 
   @override
   Function get fromJsonFunction => _$HardwareDeviceRegistrationFromJson;
@@ -209,12 +203,7 @@ class BLEDeviceRegistration extends HardwareDeviceRegistration {
 /// A [DeviceRegistration] for a [ServiceConfiguration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ServiceRegistration extends CamsDeviceRegistration {
-  ServiceRegistration({
-    super.deviceId,
-    super.deviceDisplayName,
-    super.registrationCreatedOn,
-    super.isConnected,
-  });
+  ServiceRegistration({super.deviceId, super.deviceDisplayName, super.registrationCreatedOn, super.isConnected});
 
   @override
   Function get fromJsonFunction => _$ServiceRegistrationFromJson;

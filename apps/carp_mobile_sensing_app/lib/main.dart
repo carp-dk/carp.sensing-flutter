@@ -58,7 +58,4 @@ void main() async {
   runApp(MobileSensingApp());
 }
 
-final bloc = SensingBLoC(
-  deploymentMode: DeploymentMode.local,
-  debugLevel: DebugLevel.debug,
-);
+final bloc = SensingBLoC(deploymentMode: DeploymentMode.local, debugLevel: DebugLevel.debug);

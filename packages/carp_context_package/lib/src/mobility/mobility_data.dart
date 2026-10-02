@@ -71,8 +71,7 @@ class Mobility extends Data {
 
   @override
   Function get fromJsonFunction => _$MobilityFromJson;
-  factory Mobility.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Mobility>(json);
+  factory Mobility.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Mobility>(json);
   @override
   Map<String, dynamic> toJson() => _$MobilityToJson(this);
 }

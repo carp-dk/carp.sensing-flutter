@@ -7,10 +7,7 @@ import 'package:test/test.dart';
 class _BluetoothProbe extends BluetoothProbe {
   @override
   PeriodicSamplingConfiguration get samplingConfiguration =>
-      PeriodicSamplingConfiguration(
-        interval: const Duration(minutes: 1),
-        duration: const Duration(seconds: 4),
-      );
+      PeriodicSamplingConfiguration(interval: const Duration(minutes: 1), duration: const Duration(seconds: 4));
 }
 
 void main() {

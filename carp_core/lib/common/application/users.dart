@@ -22,8 +22,7 @@ class ParticipantRole {
 
   ParticipantRole(this.role, [this.isOptional = false]);
 
-  factory ParticipantRole.fromJson(Map<String, dynamic> json) =>
-      _$ParticipantRoleFromJson(json);
+  factory ParticipantRole.fromJson(Map<String, dynamic> json) => _$ParticipantRoleFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantRoleToJson(this);
 }
 
@@ -46,8 +45,7 @@ class ExpectedParticipantData {
     this.assignedTo = assignedTo ?? AssignedTo.all();
   }
 
-  factory ExpectedParticipantData.fromJson(Map<String, dynamic> json) =>
-      _$ExpectedParticipantDataFromJson(json);
+  factory ExpectedParticipantData.fromJson(Map<String, dynamic> json) => _$ExpectedParticipantDataFromJson(json);
   Map<String, dynamic> toJson() => _$ExpectedParticipantDataToJson(this);
 }
 
@@ -69,8 +67,7 @@ class ParticipantAttribute extends Serializable {
   @override
   Map<String, dynamic> toJson() => _$ParticipantAttributeToJson(this);
   @override
-  String get jsonType =>
-      'dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute';
+  String get jsonType => 'dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute';
 }
 
 /// Determines which participant roles to assign to something.
@@ -94,8 +91,8 @@ class AssignedTo extends Serializable {
 
   @override
   Function get fromJsonFunction => _$AssignedToFromJson;
-  factory AssignedTo.fromJson(Map<String, dynamic> json) => FromJsonFactory()
-      .fromJson<AssignedTo>(json, notAvailable: AssignedTo.all());
+  factory AssignedTo.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<AssignedTo>(json, notAvailable: AssignedTo.all());
   @override
   Map<String, dynamic> toJson() => _$AssignedToToJson(this);
 

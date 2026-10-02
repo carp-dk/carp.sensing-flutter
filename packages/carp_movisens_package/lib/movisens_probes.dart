@@ -12,14 +12,11 @@ part of 'carp_movisens_package.dart';
 /// in [data]. The device is reached through [MovisensDeviceManager.device].
 abstract class MovisensProbe extends StreamProbe {
   @override
-  MovisensDeviceManager get deviceManager =>
-      super.deviceManager as MovisensDeviceManager;
+  MovisensDeviceManager get deviceManager => super.deviceManager as MovisensDeviceManager;
 
   @override
-  Stream<Measurement>? get stream => data?.map(
-    (event) =>
-        Measurement.fromData(event, event.timestamp.microsecondsSinceEpoch),
-  );
+  Stream<Measurement>? get stream =>
+      data?.map((event) => Measurement.fromData(event, event.timestamp.microsecondsSinceEpoch));
 
   /// The stream of data from the Movisens device. May be null if the device
   /// or the service is not available.
@@ -65,17 +62,13 @@ class MovisensActivityProbe extends MovisensProbe {
           Stream.empty(),
     );
     _group.add(
-      deviceManager.device?.physicalActivityService?.movementAccelerationEvents
-              ?.map(
-                (event) =>
-                    MovisensMovementAcceleration.fromMovisensEvent(event),
-              ) ??
+      deviceManager.device?.physicalActivityService?.movementAccelerationEvents?.map(
+            (event) => MovisensMovementAcceleration.fromMovisensEvent(event),
+          ) ??
           Stream.empty(),
     );
     _group.add(
-      deviceManager.device?.physicalActivityService?.metEvents?.map(
-            (event) => MovisensMET.fromMovisensEvent(event),
-          ) ??
+      deviceManager.device?.physicalActivityService?.metEvents?.map((event) => MovisensMET.fromMovisensEvent(event)) ??
           Stream.empty(),
     );
     _group.add(
@@ -119,21 +112,14 @@ class MovisensHRProbe extends MovisensProbe {
     if (deviceManager.device?.hrvService == null) return false;
 
     _group.add(
-      deviceManager.device?.hrvService?.hrMeanEvents?.map(
-            (event) => MovisensHR.fromMovisensEvent(event),
-          ) ??
+      deviceManager.device?.hrvService?.hrMeanEvents?.map((event) => MovisensHR.fromMovisensEvent(event)) ??
           Stream.empty(),
     );
     _group.add(
-      deviceManager.device?.hrvService?.rmssd?.map(
-            (event) => MovisensHRV.fromMovisensEvent(event),
-          ) ??
-          Stream.empty(),
+      deviceManager.device?.hrvService?.rmssd?.map((event) => MovisensHRV.fromMovisensEvent(event)) ?? Stream.empty(),
     );
     _group.add(
-      deviceManager.device?.hrvService?.hrvIsValidEvents?.map(
-            (event) => MovisensIsHrvValid.fromMovisensEvent(event),
-          ) ??
+      deviceManager.device?.hrvService?.hrvIsValidEvents?.map((event) => MovisensIsHrvValid.fromMovisensEvent(event)) ??
           Stream.empty(),
     );
 
@@ -157,11 +143,8 @@ class MovisensHRProbe extends MovisensProbe {
 /// the [MovisensSamplingPackage.EDA] measure.
 class MovisensEDAProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data => deviceManager
-      .device
-      ?.edaService
-      ?.edaSclMeanEvents
-      ?.map((event) => MovisensEDA.fromMovisensEvent(event));
+  Stream<MovisensData>? get data =>
+      deviceManager.device?.edaService?.edaSclMeanEvents?.map((event) => MovisensEDA.fromMovisensEvent(event));
 
   @override
   Future<bool> onResume() async {
@@ -180,11 +163,9 @@ class MovisensEDAProbe extends MovisensProbe {
 /// the [MovisensSamplingPackage.SKIN_TEMPERATURE] measure.
 class MovisensSkinTemperatureProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data => deviceManager
-      .device
-      ?.skinTemperatureService
-      ?.skinTemperatureEvents
-      ?.map((event) => MovisensSkinTemperature.fromMovisensEvent(event));
+  Stream<MovisensData>? get data => deviceManager.device?.skinTemperatureService?.skinTemperatureEvents?.map(
+    (event) => MovisensSkinTemperature.fromMovisensEvent(event),
+  );
 
   @override
   Future<bool> onResume() async {
@@ -206,11 +187,9 @@ class MovisensSkinTemperatureProbe extends MovisensProbe {
 /// service, not the respiration service, when resumed.
 class RespirationProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data => deviceManager
-      .device
-      ?.respirationService
-      ?.respiratoryMovementEvents
-      ?.map((event) => MovisensRespiration.fromMovisensEvent(event));
+  Stream<MovisensData>? get data => deviceManager.device?.respirationService?.respiratoryMovementEvents?.map(
+    (event) => MovisensRespiration.fromMovisensEvent(event),
+  );
 
   @override
   Future<bool> onResume() async {
@@ -229,11 +208,8 @@ class RespirationProbe extends MovisensProbe {
 /// [MovisensSamplingPackage.TAP_MARKER] measure.
 class MovisensTapMarkerProbe extends MovisensProbe {
   @override
-  Stream<MovisensData>? get data => deviceManager
-      .device
-      ?.markerService
-      ?.tapMarkerEvents
-      ?.map((event) => MovisensTapMarker.fromMovisensEvent(event));
+  Stream<MovisensData>? get data =>
+      deviceManager.device?.markerService?.tapMarkerEvents?.map((event) => MovisensTapMarker.fromMovisensEvent(event));
 
   @override
   Future<bool> onResume() async {

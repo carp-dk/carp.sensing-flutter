@@ -19,13 +19,10 @@ void main() {
   });
 
   test('1.x database is migrated to the 2.x schema', () async {
-    final databaseName =
-        '${await getDatabasesPath()}/${PersistenceService.DATABASE_NAME}.db';
+    final databaseName = '${await getDatabasesPath()}/${PersistenceService.DATABASE_NAME}.db';
     await deleteDatabase(databaseName);
 
-    final deploymentJson = File(
-      'test/json/cams_1.x_study_deployment.json',
-    ).readAsStringSync();
+    final deploymentJson = File('test/json/cams_1.x_study_deployment.json').readAsStringSync();
 
     final snapshot = UserTaskSnapshot(
       '7fb3fd47-f61b-48c5-add2-39d4762bfc67',
@@ -109,9 +106,7 @@ void main() {
 
     // The 1.x deployment table is removed after migration.
     db = await openDatabase(databaseName);
-    final tables = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'deployment'",
-    );
+    final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'deployment'");
     expect(tables, isEmpty);
     await db.close();
   });

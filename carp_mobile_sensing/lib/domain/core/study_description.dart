@@ -43,14 +43,12 @@ class StudyDescription extends Serializable {
 
   @override
   Function get fromJsonFunction => _$StudyDescriptionFromJson;
-  factory StudyDescription.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<StudyDescription>(json);
+  factory StudyDescription.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StudyDescription>(json);
   @override
   Map<String, dynamic> toJson() => _$StudyDescriptionToJson(this);
 
   @override
-  String toString() =>
-      '$runtimeType -  title: $title, description: $description. purpose: $purpose';
+  String toString() => '$runtimeType -  title: $title, description: $description. purpose: $purpose';
 }
 
 /// A person who is responsible for a [StudyProtocol].
@@ -69,19 +67,11 @@ class StudyResponsible extends Serializable {
   /// The institution this person belongs to.
   String? affiliation;
 
-  StudyResponsible({
-    required this.id,
-    required this.name,
-    this.title,
-    this.email,
-    this.affiliation,
-    this.address,
-  });
+  StudyResponsible({required this.id, required this.name, this.title, this.email, this.affiliation, this.address});
 
   @override
   Function get fromJsonFunction => _$StudyResponsibleFromJson;
-  factory StudyResponsible.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<StudyResponsible>(json);
+  factory StudyResponsible.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StudyResponsible>(json);
   @override
   Map<String, dynamic> toJson() => _$StudyResponsibleToJson(this);
 

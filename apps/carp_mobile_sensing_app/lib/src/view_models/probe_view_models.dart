@@ -19,11 +19,7 @@ class ProbeViewModel {
 
   /// A printer-friendly name for this probe.
   String? get name =>
-      SamplingPackageRegistry()
-          .samplingSchemes[measure?.type]
-          ?.dataType
-          .displayName ??
-      measure.runtimeType.toString();
+      SamplingPackageRegistry().samplingSchemes[measure?.type]?.dataType.displayName ?? measure.runtimeType.toString();
 
   /// A printer-friendly description of this probe.
   String? get description => ProbeDescription.descriptors[type]?.description;

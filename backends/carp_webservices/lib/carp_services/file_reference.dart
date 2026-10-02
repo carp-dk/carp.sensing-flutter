@@ -21,12 +21,10 @@ class FileStorageReference extends CarpReference {
   /// The id of the study this file belongs to.
   String get studyId => _studyId;
 
-  FileStorageReference._(CarpService service, this._studyId, [this.id = -1])
-    : super._(service);
+  FileStorageReference._(CarpService service, this._studyId, [this.id = -1]) : super._(service);
 
   /// The URL for the file end point for this [FileStorageReference].
-  String get fileEndpointUri =>
-      "${service.app.uri.toString()}/api/studies/$studyId/files";
+  String get fileEndpointUri => "${service.app.uri.toString()}/api/studies/$studyId/files";
 
   /// Starts an upload of [file] with optional [metadata] and returns the
   /// running [FileUploadTask].
@@ -55,8 +53,7 @@ class FileStorageReference extends CarpReference {
 
     final response = await service._get(url);
 
-    Map<String, dynamic> responseJson =
-        service._handleResponse(response) as Map<String, dynamic>;
+    Map<String, dynamic> responseJson = service._handleResponse(response) as Map<String, dynamic>;
     return CarpFileResponse._(responseJson);
   }
 
@@ -65,9 +62,7 @@ class FileStorageReference extends CarpReference {
     assert(id > 0);
     final String url = "$fileEndpointUri/$id";
 
-    await service
-        ._delete(url)
-        .then((response) => service._handleResponse(response));
+    await service._delete(url).then((response) => service._handleResponse(response));
   }
 }
 
@@ -92,9 +87,7 @@ class FileMetadata {
        creationTimeMillis = null,
        updatedTimeMillis = null,
        md5Hash = null,
-       customMetadata = (customMetadata == null)
-           ? null
-           : Map.unmodifiable(customMetadata);
+       customMetadata = (customMetadata == null) ? null : Map.unmodifiable(customMetadata);
 
   // FileMetadata._fromMap(Map<dynamic, dynamic> map)
   //     : carpServiceName = map['carpServiceName'],

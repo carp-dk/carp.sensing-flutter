@@ -31,15 +31,9 @@ class PolarAccelerometerSample extends PolarSample {
   /// z axis value in milli-G (including gravity).
   final int z;
 
-  PolarAccelerometerSample({
-    required super.timeStamp,
-    required this.x,
-    required this.y,
-    required this.z,
-  });
+  PolarAccelerometerSample({required super.timeStamp, required this.x, required this.y, required this.z});
 
-  factory PolarAccelerometerSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarAccelerometerSampleFromJson(json);
+  factory PolarAccelerometerSample.fromJson(Map<String, dynamic> json) => _$PolarAccelerometerSampleFromJson(json);
   Map<String, dynamic> toJson() => _$PolarAccelerometerSampleToJson(this);
 }
 
@@ -55,15 +49,9 @@ class PolarGyroscopeSample extends PolarSample {
   /// z axis value in degrees per second.
   final double z;
 
-  PolarGyroscopeSample({
-    required super.timeStamp,
-    required this.x,
-    required this.y,
-    required this.z,
-  });
+  PolarGyroscopeSample({required super.timeStamp, required this.x, required this.y, required this.z});
 
-  factory PolarGyroscopeSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarGyroscopeSampleFromJson(json);
+  factory PolarGyroscopeSample.fromJson(Map<String, dynamic> json) => _$PolarGyroscopeSampleFromJson(json);
   Map<String, dynamic> toJson() => _$PolarGyroscopeSampleToJson(this);
 }
 
@@ -79,15 +67,9 @@ class PolarMagnetometerSample extends PolarSample {
   /// z axis value in Gauss.
   final double z;
 
-  PolarMagnetometerSample({
-    required super.timeStamp,
-    required this.x,
-    required this.y,
-    required this.z,
-  });
+  PolarMagnetometerSample({required super.timeStamp, required this.x, required this.y, required this.z});
 
-  factory PolarMagnetometerSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarMagnetometerSampleFromJson(json);
+  factory PolarMagnetometerSample.fromJson(Map<String, dynamic> json) => _$PolarMagnetometerSampleFromJson(json);
   Map<String, dynamic> toJson() => _$PolarMagnetometerSampleToJson(this);
 }
 
@@ -101,8 +83,7 @@ class PolarPPGSample extends PolarSample {
 
   PolarPPGSample({required super.timeStamp, required this.channelSamples});
 
-  factory PolarPPGSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarPPGSampleFromJson(json);
+  factory PolarPPGSample.fromJson(Map<String, dynamic> json) => _$PolarPPGSampleFromJson(json);
   Map<String, dynamic> toJson() => _$PolarPPGSampleToJson(this);
 }
 
@@ -142,8 +123,7 @@ class PolarPPISample {
     required this.skinContactSupported,
   });
 
-  factory PolarPPISample.fromJson(Map<String, dynamic> json) =>
-      _$PolarPPISampleFromJson(json);
+  factory PolarPPISample.fromJson(Map<String, dynamic> json) => _$PolarPPISampleFromJson(json);
   Map<String, dynamic> toJson() => _$PolarPPISampleToJson(this);
 }
 
@@ -169,8 +149,7 @@ class PolarHRSample {
     required this.contactStatusSupported,
   });
 
-  factory PolarHRSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarHRSampleFromJson(json);
+  factory PolarHRSample.fromJson(Map<String, dynamic> json) => _$PolarHRSampleFromJson(json);
   Map<String, dynamic> toJson() => _$PolarHRSampleToJson(this);
 }
 
@@ -182,8 +161,7 @@ class PolarECGSample extends PolarSample {
 
   PolarECGSample({required super.timeStamp, required this.voltage});
 
-  factory PolarECGSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarECGSampleFromJson(json);
+  factory PolarECGSample.fromJson(Map<String, dynamic> json) => _$PolarECGSampleFromJson(json);
   Map<String, dynamic> toJson() => _$PolarECGSampleToJson(this);
 }
 
@@ -216,12 +194,7 @@ class PolarAccelerometer extends PolarSamples<PolarAccelerometerSample> {
     : this(
         samples: data.samples
             .map(
-              (sample) => PolarAccelerometerSample(
-                timeStamp: sample.timeStamp,
-                x: sample.x,
-                y: sample.y,
-                z: sample.z,
-              ),
+              (sample) => PolarAccelerometerSample(timeStamp: sample.timeStamp, x: sample.x, y: sample.y, z: sample.z),
             )
             .toList(),
       );
@@ -250,21 +223,13 @@ class PolarGyroscope extends PolarSamples<PolarGyroscopeSample> {
   PolarGyroscope.fromPolarData(PolarGyroData data)
     : this(
         samples: data.samples
-            .map(
-              (sample) => PolarGyroscopeSample(
-                timeStamp: sample.timeStamp,
-                x: sample.x,
-                y: sample.y,
-                z: sample.z,
-              ),
-            )
+            .map((sample) => PolarGyroscopeSample(timeStamp: sample.timeStamp, x: sample.x, y: sample.y, z: sample.z))
             .toList(),
       );
 
   @override
   Function get fromJsonFunction => _$PolarGyroscopeFromJson;
-  factory PolarGyroscope.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as PolarGyroscope;
+  factory PolarGyroscope.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as PolarGyroscope;
   @override
   Map<String, dynamic> toJson() => _$PolarGyroscopeToJson(this);
 
@@ -286,12 +251,7 @@ class PolarMagnetometer extends PolarSamples<PolarMagnetometerSample> {
     : this(
         samples: data.samples
             .map(
-              (sample) => PolarMagnetometerSample(
-                timeStamp: sample.timeStamp,
-                x: sample.x,
-                y: sample.y,
-                z: sample.z,
-              ),
+              (sample) => PolarMagnetometerSample(timeStamp: sample.timeStamp, x: sample.x, y: sample.y, z: sample.z),
             )
             .toList(),
       );
@@ -325,19 +285,13 @@ class PolarPPG extends PolarSamples<PolarPPGSample> {
     : this(
         type: data.type,
         samples: data.samples
-            .map(
-              (sample) => PolarPPGSample(
-                timeStamp: sample.timeStamp,
-                channelSamples: sample.channelSamples,
-              ),
-            )
+            .map((sample) => PolarPPGSample(timeStamp: sample.timeStamp, channelSamples: sample.channelSamples))
             .toList(),
       );
 
   @override
   Function get fromJsonFunction => _$PolarPPGFromJson;
-  factory PolarPPG.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as PolarPPG;
+  factory PolarPPG.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as PolarPPG;
   @override
   Map<String, dynamic> toJson() => _$PolarPPGToJson(this);
 
@@ -373,8 +327,7 @@ class PolarPPI extends PolarSamples<PolarPPISample> {
 
   @override
   Function get fromJsonFunction => _$PolarPPIFromJson;
-  factory PolarPPI.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as PolarPPI;
+  factory PolarPPI.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as PolarPPI;
   @override
   Map<String, dynamic> toJson() => _$PolarPPIToJson(this);
 
@@ -394,19 +347,13 @@ class PolarECG extends PolarSamples<PolarECGSample> {
   PolarECG.fromPolarData(PolarEcgData data)
     : this(
         samples: data.samples
-            .map(
-              (sample) => PolarECGSample(
-                timeStamp: sample.timeStamp,
-                voltage: sample.voltage,
-              ),
-            )
+            .map((sample) => PolarECGSample(timeStamp: sample.timeStamp, voltage: sample.voltage))
             .toList(),
       );
 
   @override
   Function get fromJsonFunction => _$PolarECGFromJson;
-  factory PolarECG.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as PolarECG;
+  factory PolarECG.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as PolarECG;
   @override
   Map<String, dynamic> toJson() => _$PolarECGToJson(this);
 
@@ -439,8 +386,7 @@ class PolarHR extends PolarSamples<PolarHRSample> {
 
   @override
   Function get fromJsonFunction => _$PolarHRFromJson;
-  factory PolarHR.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as PolarHR;
+  factory PolarHR.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as PolarHR;
   @override
   Map<String, dynamic> toJson() => _$PolarHRToJson(this);
   @override

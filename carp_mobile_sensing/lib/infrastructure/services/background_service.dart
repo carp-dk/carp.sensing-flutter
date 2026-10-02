@@ -46,10 +46,7 @@ class BackgroundService {
   ///
   /// Returns `true` if the background service was successfully initialized,
   /// `false` otherwise.
-  Future<bool> initialize({
-    String? notificationTitle,
-    String? notificationText,
-  }) async {
+  Future<bool> initialize({String? notificationTitle, String? notificationText}) async {
     if (Platform.isIOS) {
       warning('$runtimeType - Background services are not supported on iOS.');
       return false;
@@ -62,8 +59,7 @@ class BackgroundService {
 
     final config = FlutterBackgroundAndroidConfig(
       notificationTitle: notificationTitle ?? "CARP Mobile Sensing",
-      notificationText:
-          notificationText ?? "Data sampling will be running in the background",
+      notificationText: notificationText ?? "Data sampling will be running in the background",
       notificationImportance: AndroidNotificationImportance.normal,
     );
 

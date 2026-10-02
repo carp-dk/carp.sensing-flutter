@@ -56,6 +56,5 @@ class CarpAuthProperties {
   bool operator ==(other) => authURL == other;
 
   @override
-  String toString() =>
-      'CarpApp - auth URL: $authURL, studyDeploymentId: $studyDeploymentId, studyId: $studyId';
+  String toString() => 'CarpApp - auth URL: $authURL, studyDeploymentId: $studyDeploymentId, studyId: $studyId';
 }

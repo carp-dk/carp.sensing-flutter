@@ -52,21 +52,15 @@ class ExecutorFactory {
   /// Returns the cached [TriggerExecutor] for [triggerId], or null if none.
   ///
   /// Executors are cached per [studyDeploymentId].
-  TriggerExecutor? getTriggerExecutor(
-    String studyDeploymentId,
-    int triggerId,
-  ) => _triggerExecutors[studyDeploymentId]?[triggerId];
+  TriggerExecutor? getTriggerExecutor(String studyDeploymentId, int triggerId) =>
+      _triggerExecutors[studyDeploymentId]?[triggerId];
 
   /// Creates a [TriggerExecutor] for [trigger] and caches it.
   ///
   /// The cache key is [studyDeploymentId] and [triggerId].
   /// Returns null if no registered [TriggerFactory] supports the runtime type
   /// of [trigger].
-  TriggerExecutor? createTriggerExecutor(
-    String studyDeploymentId,
-    int triggerId,
-    TriggerConfiguration trigger,
-  ) {
+  TriggerExecutor? createTriggerExecutor(String studyDeploymentId, int triggerId, TriggerConfiguration trigger) {
     TriggerExecutor? executor;
 
     if (_triggerFactories[trigger.runtimeType] != null) {
@@ -74,9 +68,7 @@ class ExecutorFactory {
     }
 
     if (executor == null) {
-      warning(
-        "$runtimeType - Cannot create a TriggerExecutor for trigger type '${trigger.runtimeType}'.",
-      );
+      warning("$runtimeType - Cannot create a TriggerExecutor for trigger type '${trigger.runtimeType}'.");
     } else {
       _triggerExecutors[studyDeploymentId] ??= {};
       _triggerExecutors[studyDeploymentId]?[triggerId] = executor;
@@ -89,10 +81,7 @@ class ExecutorFactory {
   /// Executors are keyed by task name. Creates one if needed: a [BackgroundTaskExecutor], [AppTaskExecutor] or
   /// [FunctionTaskExecutor] depending on the task type.
   /// Returns null if the type of [task] is unknown.
-  TaskExecutor? getTaskExecutor(
-    String studyDeploymentId,
-    TaskConfiguration task,
-  ) {
+  TaskExecutor? getTaskExecutor(String studyDeploymentId, TaskConfiguration task) {
     if (_taskExecutors[studyDeploymentId]?[task.name] == null) {
       TaskExecutor? executor = switch (task) {
         BackgroundTask() => BackgroundTaskExecutor(),
@@ -154,8 +143,7 @@ class SmartphoneTriggerFactory implements TriggerFactory {
     RecurrentScheduledTrigger: () => RecurrentScheduledTriggerExecutor(),
     CronScheduledTrigger: () => CronScheduledTriggerExecutor(),
     SamplingEventTrigger: () => SamplingEventTriggerExecutor(),
-    ConditionalSamplingEventTrigger: () =>
-        ConditionalSamplingEventTriggerExecutor(),
+    ConditionalSamplingEventTrigger: () => ConditionalSamplingEventTriggerExecutor(),
     ConditionalPeriodicTrigger: () => ConditionalPeriodicTriggerExecutor(),
     RandomRecurrentTrigger: () => RandomRecurrentTriggerExecutor(),
     PassiveTrigger: () => PassiveTriggerExecutor(),
@@ -173,9 +161,7 @@ class SmartphoneTriggerFactory implements TriggerFactory {
 
   @override
   TriggerExecutor<TriggerConfiguration>? create(TriggerConfiguration trigger) {
-    debug(
-      '$runtimeType - Creating trigger executor for trigger type ${trigger.runtimeType}',
-    );
+    debug('$runtimeType - Creating trigger executor for trigger type ${trigger.runtimeType}');
     // TODO: implement specific handling of ScheduledTrigger
     if (trigger is ScheduledTrigger) {
       warning("ScheduledTrigger is not implemented yet.");
@@ -187,9 +173,7 @@ class SmartphoneTriggerFactory implements TriggerFactory {
         return _triggers[trigger.runtimeType]!();
       }
     } catch (e) {
-      warning(
-        "$runtimeType - Failed to instantiate trigger executor for trigger type '${trigger.runtimeType}': $e",
-      );
+      warning("$runtimeType - Failed to instantiate trigger executor for trigger type '${trigger.runtimeType}': $e");
     }
     return null;
   }

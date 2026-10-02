@@ -26,15 +26,13 @@ part of '../client.dart';
 ///
 /// See also [StudyDeploymentProxy], which updates a study during deployment.
 /// CARP Mobile Sensing extends this class as `SmartphoneStudy`.
-class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
-    with ChangeNotifier {
+class Study<TDeviceDeployment extends PrimaryDeviceDeployment> with ChangeNotifier {
   final DateTime _createdOn;
   final String _studyDeploymentId;
   final String _deviceRoleName;
   StudyDeploymentStatus? _deploymentStatus;
   TDeviceDeployment? _deployment;
-  final StreamController<StudyStatusEvent> _eventController =
-      StreamController<StudyStatusEvent>.broadcast();
+  final StreamController<StudyStatusEvent> _eventController = StreamController<StudyStatusEvent>.broadcast();
   late final void Function() _onDeploymentUpdated = () => deploymentUpdated();
 
   /// Create a study uniquely identified by its [studyDeploymentId] and
@@ -94,9 +92,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   /// listeners.
   void deploymentStatusReceived([StudyDeploymentStatus? deploymentStatus]) {
     _deploymentStatus = deploymentStatus ?? _deploymentStatus;
-    createEvent(
-      StudyStatusEvent(this, StudyStatusEventTypes.DeploymentStatusReceived),
-    );
+    createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentStatusReceived));
     notifyListeners();
   }
 
@@ -138,9 +134,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
       ?..removeListener(_onDeploymentUpdated)
       ..addListener(_onDeploymentUpdated);
 
-    createEvent(
-      StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived),
-    );
+    createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived));
     notifyListeners();
   }
 
@@ -150,9 +144,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   void deploymentUpdated([String? message]) {
     if (deployment != null) {
       if (message != null) print(message);
-      createEvent(
-        StudyStatusEvent(this, StudyStatusEventTypes.DeploymentUpdated),
-      );
+      createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentUpdated));
       notifyListeners();
     }
   }
@@ -177,8 +169,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment>
   int get hashCode => (studyDeploymentId + deviceRoleName).hashCode;
 
   @override
-  String toString() =>
-      '$runtimeType - studyDeploymentId: $studyDeploymentId, deviceRoleName: $deviceRoleName';
+  String toString() => '$runtimeType - studyDeploymentId: $studyDeploymentId, deviceRoleName: $deviceRoleName';
 }
 
 /// Describes the status of a [Study].

@@ -65,19 +65,19 @@ class FirebaseEndPoint {
   String gcmSenderID;
 
   /// Creates a [FirebaseEndPoint].
-  FirebaseEndPoint(
-      {required this.name,
-      required this.uri,
-      required this.firebaseAuthenticationMethod,
-      this.email,
-      this.password,
-      this.token,
-      required this.projectID,
-      required this.webAPIKey,
-      required this.androidGoogleAppID,
-      required this.iOSGoogleAppID,
-      required this.gcmSenderID})
-      : super();
+  FirebaseEndPoint({
+    required this.name,
+    required this.uri,
+    required this.firebaseAuthenticationMethod,
+    this.email,
+    this.password,
+    this.token,
+    required this.projectID,
+    required this.webAPIKey,
+    required this.androidGoogleAppID,
+    required this.iOSGoogleAppID,
+    required this.gcmSenderID,
+  }) : super();
 
   static Function get fromJsonFunction => _$FirebaseEndPointFromJson;
   factory FirebaseEndPoint.fromJson(Map<String, dynamic> json) =>
@@ -111,9 +111,10 @@ class FirebaseDatabaseDataEndPoint extends DataEndPoint
   String collection;
 
   /// Creates a [FirebaseDatabaseDataEndPoint].
-  FirebaseDatabaseDataEndPoint(FirebaseEndPoint firebaseEndPoint,
-      {required this.collection})
-      : super(type: DataEndPointTypes.FIREBASE_DATABSE) {
+  FirebaseDatabaseDataEndPoint(
+    FirebaseEndPoint firebaseEndPoint, {
+    required this.collection,
+  }) : super(type: DataEndPointTypes.FIREBASE_DATABSE) {
     this.firebaseEndPoint = firebaseEndPoint;
   }
 
@@ -141,17 +142,19 @@ class FirebaseStorageDataEndPoint extends FileDataEndPoint
   String path;
 
   /// Creates a [FirebaseStorageDataEndPoint].
-  FirebaseStorageDataEndPoint(FirebaseEndPoint firebaseEndPoint,
-      {required this.path,
-      required bufferSize,
-      zip = false,
-      encrypt = false,
-      publicKey})
-      : super(
-            type: DataEndPointTypes.FIREBASE_STORAGE,
-            bufferSize: bufferSize,
-            zip: zip,
-            encrypt: encrypt) {
+  FirebaseStorageDataEndPoint(
+    FirebaseEndPoint firebaseEndPoint, {
+    required this.path,
+    required bufferSize,
+    zip = false,
+    encrypt = false,
+    publicKey,
+  }) : super(
+          type: DataEndPointTypes.FIREBASE_STORAGE,
+          bufferSize: bufferSize,
+          zip: zip,
+          encrypt: encrypt,
+        ) {
     this.firebaseEndPoint = firebaseEndPoint;
   }
 

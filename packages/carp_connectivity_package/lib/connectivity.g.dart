@@ -12,13 +12,10 @@ Connectivity _$ConnectivityFromJson(Map<String, dynamic> json) => Connectivity()
       .map((e) => $enumDecode(_$ConnectivityStatusEnumMap, e))
       .toList();
 
-Map<String, dynamic> _$ConnectivityToJson(Connectivity instance) =>
-    <String, dynamic>{
-      '__type': ?instance.$type,
-      'connectivityStatus': instance.connectivityStatus
-          .map((e) => _$ConnectivityStatusEnumMap[e]!)
-          .toList(),
-    };
+Map<String, dynamic> _$ConnectivityToJson(Connectivity instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'connectivityStatus': instance.connectivityStatus.map((e) => _$ConnectivityStatusEnumMap[e]!).toList(),
+};
 
 const _$ConnectivityStatusEnumMap = {
   ConnectivityStatus.bluetooth: 'bluetooth',
@@ -32,12 +29,8 @@ const _$ConnectivityStatusEnumMap = {
 
 Bluetooth _$BluetoothFromJson(Map<String, dynamic> json) =>
     Bluetooth(
-        startScan: json['startScan'] == null
-            ? null
-            : DateTime.parse(json['startScan'] as String),
-        endScan: json['endScan'] == null
-            ? null
-            : DateTime.parse(json['endScan'] as String),
+        startScan: json['startScan'] == null ? null : DateTime.parse(json['startScan'] as String),
+        endScan: json['endScan'] == null ? null : DateTime.parse(json['endScan'] as String),
       )
       ..$type = json['__type'] as String?
       ..scanResult = (json['scanResult'] as List<dynamic>)
@@ -51,31 +44,27 @@ Map<String, dynamic> _$BluetoothToJson(Bluetooth instance) => <String, dynamic>{
   'scanResult': instance.scanResult.map((e) => e.toJson()).toList(),
 };
 
-BluetoothDevice _$BluetoothDeviceFromJson(Map<String, dynamic> json) =>
-    BluetoothDevice(
-      advertisementName: json['advertisementName'] as String,
-      bluetoothDeviceId: json['bluetoothDeviceId'] as String,
-      bluetoothDeviceName: json['bluetoothDeviceName'] as String,
-      connectable: json['connectable'] as bool,
-      rssi: (json['rssi'] as num).toInt(),
-      txPowerLevel: (json['txPowerLevel'] as num?)?.toInt(),
-    );
+BluetoothDevice _$BluetoothDeviceFromJson(Map<String, dynamic> json) => BluetoothDevice(
+  advertisementName: json['advertisementName'] as String,
+  bluetoothDeviceId: json['bluetoothDeviceId'] as String,
+  bluetoothDeviceName: json['bluetoothDeviceName'] as String,
+  connectable: json['connectable'] as bool,
+  rssi: (json['rssi'] as num).toInt(),
+  txPowerLevel: (json['txPowerLevel'] as num?)?.toInt(),
+);
 
-Map<String, dynamic> _$BluetoothDeviceToJson(BluetoothDevice instance) =>
-    <String, dynamic>{
-      'advertisementName': instance.advertisementName,
-      'bluetoothDeviceId': instance.bluetoothDeviceId,
-      'bluetoothDeviceName': instance.bluetoothDeviceName,
-      'connectable': instance.connectable,
-      'txPowerLevel': ?instance.txPowerLevel,
-      'rssi': instance.rssi,
-    };
+Map<String, dynamic> _$BluetoothDeviceToJson(BluetoothDevice instance) => <String, dynamic>{
+  'advertisementName': instance.advertisementName,
+  'bluetoothDeviceId': instance.bluetoothDeviceId,
+  'bluetoothDeviceName': instance.bluetoothDeviceName,
+  'connectable': instance.connectable,
+  'txPowerLevel': ?instance.txPowerLevel,
+  'rssi': instance.rssi,
+};
 
-Wifi _$WifiFromJson(Map<String, dynamic> json) => Wifi(
-  ssid: json['ssid'] as String?,
-  bssid: json['bssid'] as String?,
-  ip: json['ip'] as String?,
-)..$type = json['__type'] as String?;
+Wifi _$WifiFromJson(Map<String, dynamic> json) =>
+    Wifi(ssid: json['ssid'] as String?, bssid: json['bssid'] as String?, ip: json['ip'] as String?)
+      ..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$WifiToJson(Wifi instance) => <String, dynamic>{
   '__type': ?instance.$type,
@@ -84,19 +73,17 @@ Map<String, dynamic> _$WifiToJson(Wifi instance) => <String, dynamic>{
   'ip': ?instance.ip,
 };
 
-BeaconData _$BeaconDataFromJson(Map<String, dynamic> json) =>
-    BeaconData(region: json['region'] as String)
-      ..$type = json['__type'] as String?
-      ..scanResult = (json['scanResult'] as List<dynamic>)
-          .map((e) => BeaconDevice.fromJson(e as Map<String, dynamic>))
-          .toList();
+BeaconData _$BeaconDataFromJson(Map<String, dynamic> json) => BeaconData(region: json['region'] as String)
+  ..$type = json['__type'] as String?
+  ..scanResult = (json['scanResult'] as List<dynamic>)
+      .map((e) => BeaconDevice.fromJson(e as Map<String, dynamic>))
+      .toList();
 
-Map<String, dynamic> _$BeaconDataToJson(BeaconData instance) =>
-    <String, dynamic>{
-      '__type': ?instance.$type,
-      'region': instance.region,
-      'scanResult': instance.scanResult.map((e) => e.toJson()).toList(),
-    };
+Map<String, dynamic> _$BeaconDataToJson(BeaconData instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'region': instance.region,
+  'scanResult': instance.scanResult.map((e) => e.toJson()).toList(),
+};
 
 BeaconDevice _$BeaconDeviceFromJson(Map<String, dynamic> json) => BeaconDevice(
   rssi: (json['rssi'] as num).toInt(),
@@ -107,15 +94,14 @@ BeaconDevice _$BeaconDeviceFromJson(Map<String, dynamic> json) => BeaconDevice(
   proximity: $enumDecodeNullable(_$ProximityEnumMap, json['proximity']),
 );
 
-Map<String, dynamic> _$BeaconDeviceToJson(BeaconDevice instance) =>
-    <String, dynamic>{
-      'uuid': instance.uuid,
-      'rssi': instance.rssi,
-      'major': ?instance.major,
-      'minor': ?instance.minor,
-      'accuracy': ?instance.accuracy,
-      'proximity': ?_$ProximityEnumMap[instance.proximity],
-    };
+Map<String, dynamic> _$BeaconDeviceToJson(BeaconDevice instance) => <String, dynamic>{
+  'uuid': instance.uuid,
+  'rssi': instance.rssi,
+  'major': ?instance.major,
+  'minor': ?instance.minor,
+  'accuracy': ?instance.accuracy,
+  'proximity': ?_$ProximityEnumMap[instance.proximity],
+};
 
 const _$ProximityEnumMap = {
   Proximity.unknown: 'unknown',
@@ -124,22 +110,13 @@ const _$ProximityEnumMap = {
   Proximity.far: 'far',
 };
 
-BluetoothScanPeriodicSamplingConfiguration
-_$BluetoothScanPeriodicSamplingConfigurationFromJson(
+BluetoothScanPeriodicSamplingConfiguration _$BluetoothScanPeriodicSamplingConfigurationFromJson(
   Map<String, dynamic> json,
 ) => BluetoothScanPeriodicSamplingConfiguration(
   interval: Duration(microseconds: (json['interval'] as num).toInt()),
   duration: Duration(microseconds: (json['duration'] as num).toInt()),
-  withServices:
-      (json['withServices'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
-  withRemoteIds:
-      (json['withRemoteIds'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
+  withServices: (json['withServices'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
+  withRemoteIds: (json['withRemoteIds'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
 )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$BluetoothScanPeriodicSamplingConfigurationToJson(
@@ -152,8 +129,7 @@ Map<String, dynamic> _$BluetoothScanPeriodicSamplingConfigurationToJson(
   'withRemoteIds': instance.withRemoteIds,
 };
 
-BeaconRangingPeriodicSamplingConfiguration
-_$BeaconRangingPeriodicSamplingConfigurationFromJson(
+BeaconRangingPeriodicSamplingConfiguration _$BeaconRangingPeriodicSamplingConfigurationFromJson(
   Map<String, dynamic> json,
 ) => BeaconRangingPeriodicSamplingConfiguration(
   beaconRegions:
@@ -179,10 +155,9 @@ BeaconRegion _$BeaconRegionFromJson(Map<String, dynamic> json) => BeaconRegion(
   minor: (json['minor'] as num?)?.toInt(),
 );
 
-Map<String, dynamic> _$BeaconRegionToJson(BeaconRegion instance) =>
-    <String, dynamic>{
-      'identifier': instance.identifier,
-      'uuid': instance.uuid,
-      'major': ?instance.major,
-      'minor': ?instance.minor,
-    };
+Map<String, dynamic> _$BeaconRegionToJson(BeaconRegion instance) => <String, dynamic>{
+  'identifier': instance.identifier,
+  'uuid': instance.uuid,
+  'major': ?instance.major,
+  'minor': ?instance.minor,
+};

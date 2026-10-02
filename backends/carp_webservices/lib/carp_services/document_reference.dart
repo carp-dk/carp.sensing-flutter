@@ -27,11 +27,9 @@ class DocumentReference extends CarpReference {
   int? _id;
   String _path = '';
 
-  DocumentReference._id(CarpService service, this._studyId, this._id)
-    : super._(service);
+  DocumentReference._id(CarpService service, this._studyId, this._id) : super._(service);
 
-  DocumentReference._path(CarpService service, this._studyId, this._path)
-    : super._(service);
+  DocumentReference._path(CarpService service, this._studyId, this._path) : super._(service);
 
   /// The id of the study for this document.
   String get studyId => _studyId;
@@ -50,9 +48,8 @@ class DocumentReference extends CarpReference {
   ///
   /// If the id of this document is known, use the `documents` CARP endpoint,
   /// otherwise use the `collections` endpoint.
-  String get cawsPath => (_id != null)
-      ? "/api/studies/$studyId/documents/$id"
-      : "/api/studies/$studyId/collections/$path";
+  String get cawsPath =>
+      (_id != null) ? "/api/studies/$studyId/documents/$id" : "/api/studies/$studyId/collections/$path";
 
   /// The full URI for the document endpoint for this document.
   String get documentUri => "${service.app.uri.toString()}$cawsPath";
@@ -67,13 +64,9 @@ class DocumentReference extends CarpReference {
 
     // If this document does not already exist on the server (i.e., have an ID), then create it
     if (id == null) {
-      final response = await service._post(
-        documentUri,
-        body: json.encode(data),
-      );
+      final response = await service._post(documentUri, body: json.encode(data));
 
-      Map<String, dynamic> responseJson =
-          service._handleResponse(response) as Map<String, dynamic>;
+      Map<String, dynamic> responseJson = service._handleResponse(response) as Map<String, dynamic>;
       return DocumentSnapshot._(path, responseJson);
     } else {
       return updateData(data);
@@ -95,13 +88,9 @@ class DocumentReference extends CarpReference {
 
     Map<String, dynamic> payload = {'name': name, 'data': data};
 
-    final response = await service._put(
-      documentUri,
-      body: json.encode(payload),
-    );
+    final response = await service._put(documentUri, body: json.encode(payload));
 
-    Map<String, dynamic> responseJson =
-        service._handleResponse(response) as Map<String, dynamic>;
+    Map<String, dynamic> responseJson = service._handleResponse(response) as Map<String, dynamic>;
     return DocumentSnapshot._(path, responseJson);
   }
 
@@ -122,13 +111,9 @@ class DocumentReference extends CarpReference {
     }
 
     Map<String, dynamic> payload = {'name': name};
-    final response = await service._put(
-      Uri.encodeFull(documentUri),
-      body: json.encode(payload),
-    );
+    final response = await service._put(Uri.encodeFull(documentUri), body: json.encode(payload));
 
-    Map<String, dynamic> responseJson =
-        service._handleResponse(response) as Map<String, dynamic>;
+    Map<String, dynamic> responseJson = service._handleResponse(response) as Map<String, dynamic>;
     return DocumentSnapshot._(path, responseJson);
   }
 
@@ -140,8 +125,7 @@ class DocumentReference extends CarpReference {
     final response = await service._get(documentUri);
 
     try {
-      Map<String, dynamic> responseJson =
-          service._handleResponse(response) as Map<String, dynamic>;
+      Map<String, dynamic> responseJson = service._handleResponse(response) as Map<String, dynamic>;
 
       _id = responseJson['id'] as int;
       return DocumentSnapshot._(path, responseJson);
@@ -168,8 +152,7 @@ class DocumentReference extends CarpReference {
   }
 
   /// Returns the reference of a collection contained inside of this document.
-  CollectionReference collection(String name) =>
-      (service as CarpService).collection("$path/$name", studyId: studyId);
+  CollectionReference collection(String name) => (service as CarpService).collection("$path/$name", studyId: studyId);
 
   // TODO - this is deprecated and not working for now.
   //  /// Fetch the list of collections (names) in this collection.
@@ -258,9 +241,7 @@ class DocumentSnapshot {
   }
 
   /// Contains all the data of this snapshot. Empty if the document has no data.
-  Map<String, dynamic> get data => _snapshot['data'] != null
-      ? _snapshot['data'] as Map<String, dynamic>
-      : {};
+  Map<String, dynamic> get data => _snapshot['data'] != null ? _snapshot['data'] as Map<String, dynamic> : {};
 
   /// Reads individual data values from the snapshot
   dynamic operator [](String key) => data[key];
@@ -269,6 +250,5 @@ class DocumentSnapshot {
   // bool get exists => data != null;
 
   @override
-  String toString() =>
-      "$runtimeType - id: $id, name: $name, path: $path, size: ${data.length}";
+  String toString() => "$runtimeType - id: $id, name: $name, path: $path, size: ${data.length}";
 }

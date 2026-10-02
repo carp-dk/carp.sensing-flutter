@@ -37,23 +37,17 @@ enum PolarDeviceType {
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class PolarDevice extends BLEDevice<PolarDeviceRegistration> {
   /// The type of a Polar device.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.PolarDevice';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.PolarDevice';
 
   /// The default role name for a Polar device.
   static const String DEFAULT_ROLE_NAME = 'Polar HR Device';
 
   /// Create a new [PolarDevice].
-  PolarDevice({
-    super.roleName = PolarDevice.DEFAULT_ROLE_NAME,
-    super.isOptional = true,
-    super.namePrefix = 'Polar',
-  });
+  PolarDevice({super.roleName = PolarDevice.DEFAULT_ROLE_NAME, super.isOptional = true, super.namePrefix = 'Polar'});
 
   @override
   Function get fromJsonFunction => _$PolarDeviceFromJson;
-  factory PolarDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as PolarDevice;
+  factory PolarDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as PolarDevice;
   @override
   Map<String, dynamic> toJson() => _$PolarDeviceToJson(this);
 }
@@ -95,10 +89,7 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
     required this.polarDeviceType,
     this.supportedDataTypes,
     this.rssi,
-  }) : super(
-         deviceDisplayName: deviceDisplayName ?? bleName,
-         hardwareName: hardwareName ?? polarDeviceType.name,
-       );
+  }) : super(deviceDisplayName: deviceDisplayName ?? bleName, hardwareName: hardwareName ?? polarDeviceType.name);
 
   @override
   Function get fromJsonFunction => _$PolarDeviceRegistrationFromJson;
@@ -130,12 +121,10 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
 ///  * If connecting fails, it cancels its listeners so a later attempt does
 ///    not stack them.
 ///  * [onDisconnect] clears [batteryLevel] and [dataTypes].
-class PolarDeviceManager
-    extends BLEDeviceManager<PolarDevice, PolarDeviceRegistration> {
+class PolarDeviceManager extends BLEDeviceManager<PolarDevice, PolarDeviceRegistration> {
   int? _batteryLevel;
   Polar? _polar;
-  final StreamController<int> _batteryEventController =
-      StreamController.broadcast();
+  final StreamController<int> _batteryEventController = StreamController.broadcast();
   StreamSubscription<PolarBatteryLevelEvent>? _batterySubscription;
   StreamSubscription<PolarDeviceInfo>? _connectingSubscription;
   StreamSubscription<PolarDeviceInfo>? _connectedSubscription;
@@ -246,9 +235,7 @@ class PolarDeviceManager
   Future<DeviceStatus> onConnect() async {
     // fast out if no identifier is available for connecting
     if (polarIdentifier == null) {
-      warning(
-        '$runtimeType - cannot connect to device, the Polar identifier is null.',
-      );
+      warning('$runtimeType - cannot connect to device, the Polar identifier is null.');
       return DeviceStatus.configured;
     }
 
@@ -263,9 +250,7 @@ class PolarDeviceManager
       });
 
       // listen for connecting events
-      _connectingSubscription = polar.deviceConnecting.listen(
-        (_) => status = DeviceStatus.connecting,
-      );
+      _connectingSubscription = polar.deviceConnecting.listen((_) => status = DeviceStatus.connecting);
 
       // listen for connected events
       _connectedSubscription = polar.deviceConnected.listen((event) {
@@ -287,25 +272,21 @@ class PolarDeviceManager
       // Data types come from two SDK features that become ready independently -
       // a device delivering HR over the standard BLE HR service only (e.g.
       // Verity Sense) never reports the online streaming (PMD) one.
-      _sdkFeatureSubscription = polar.sdkFeatureReady
-          .where((event) => event.identifier == polarIdentifier)
-          .listen((event) async {
-            Set<PolarDataType> available = {};
-            if (event.feature == PolarSdkFeature.onlineStreaming) {
-              available = await polar.getAvailableOnlineStreamDataTypes(
-                polarIdentifier!,
-              );
-            } else if (event.feature == PolarSdkFeature.hr) {
-              available = await polar.getAvailableHrServiceDataTypes(
-                polarIdentifier!,
-              );
-            } else {
-              return;
-            }
+      _sdkFeatureSubscription = polar.sdkFeatureReady.where((event) => event.identifier == polarIdentifier).listen((
+        event,
+      ) async {
+        Set<PolarDataType> available = {};
+        if (event.feature == PolarSdkFeature.onlineStreaming) {
+          available = await polar.getAvailableOnlineStreamDataTypes(polarIdentifier!);
+        } else if (event.feature == PolarSdkFeature.hr) {
+          available = await polar.getAvailableHrServiceDataTypes(polarIdentifier!);
+        } else {
+          return;
+        }
 
-            dataTypes = {...?dataTypes, ...available}.toList();
-            status = DeviceStatus.connected;
-          });
+        dataTypes = {...?dataTypes, ...available}.toList();
+        status = DeviceStatus.connected;
+      });
 
       // now finally, start connecting to the device based on its identifier
       polar.connectToDevice(polarIdentifier!, requestPermissions: true);

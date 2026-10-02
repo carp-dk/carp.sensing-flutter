@@ -111,10 +111,7 @@ class LocationManager {
   Future<PermissionStatus> requestPermission() async {
     debug('$runtimeType - Requesting permission to access location...');
 
-    await SmartPhoneClientManager().requestPermissions([
-      Permission.locationWhenInUse,
-      Permission.locationAlways,
-    ]);
+    await SmartPhoneClientManager().requestPermissions([Permission.locationWhenInUse, Permission.locationAlways]);
 
     final granted = await hasPermission();
     if (!granted) {
@@ -210,9 +207,7 @@ class LocationManager {
         );
 
         // If not granted, try to request 'when in use' permission.
-        await SmartPhoneClientManager().requestPermissions([
-          Permission.locationWhenInUse,
-        ]);
+        await SmartPhoneClientManager().requestPermissions([Permission.locationWhenInUse]);
       }
 
       // Change notification options - only on Android.

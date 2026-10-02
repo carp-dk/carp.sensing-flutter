@@ -17,10 +17,8 @@ part of '../../../sampling_packages.dart';
 class PedometerProbe extends StreamProbe {
   @override
   Stream<Measurement> get stream => pedometer.Pedometer.stepCountStream.map(
-    (pedometer.StepCount count) => Measurement.fromData(
-      StepEvent(steps: count.steps),
-      count.timeStamp.microsecondsSinceEpoch,
-    ),
+    (pedometer.StepCount count) =>
+        Measurement.fromData(StepEvent(steps: count.steps), count.timeStamp.microsecondsSinceEpoch),
   );
 }
 
@@ -32,9 +30,7 @@ class PedometerProbe extends StreamProbe {
 class StepCountProbe extends StreamProbe {
   @override
   Stream<Measurement> get stream => pedometer.Pedometer.stepCountStream.map(
-    (pedometer.StepCount count) => Measurement.fromData(
-      StepCount(steps: count.steps),
-      count.timeStamp.microsecondsSinceEpoch,
-    ),
+    (pedometer.StepCount count) =>
+        Measurement.fromData(StepCount(steps: count.steps), count.timeStamp.microsecondsSinceEpoch),
   );
 }

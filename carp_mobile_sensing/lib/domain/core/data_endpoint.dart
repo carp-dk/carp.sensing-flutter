@@ -32,15 +32,13 @@ class DataEndPoint extends Serializable {
   /// Creates a [DataEndPoint] of [type] (see [DataEndPointTypes]).
   ///
   /// [dataFormat] is a [NameSpace]. Default is [NameSpace.CARP].
-  DataEndPoint({required this.type, this.dataFormat = NameSpace.CARP})
-    : super();
+  DataEndPoint({required this.type, this.dataFormat = NameSpace.CARP}) : super();
 
   @override
   Function get fromJsonFunction => _$DataEndPointFromJson;
 
   @override
-  factory DataEndPoint.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DataEndPoint>(json);
+  factory DataEndPoint.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DataEndPoint>(json);
 
   @override
   Map<String, dynamic> toJson() => _$DataEndPointToJson(this);
@@ -56,16 +54,21 @@ class DataEndPoint extends Serializable {
 /// carp_webservices package implements [CAWS].
 class DataEndPointTypes {
   static const String UNKNOWN = 'UNKNOWN';
+
   /// Prints measurements to the console, see [ConsoleDataManager].
   static const String PRINT = 'PRINT';
+
   /// Stores measurements in JSON files, see [FileDataManager].
   static const String FILE = 'FILE';
+
   /// Stores measurements in a local SQLite database, see [SQLiteDataManager].
   static const String SQLITE = 'SQLITE';
   static const String FIREBASE_STORAGE = 'FIREBASE_STORAGE';
   static const String FIREBASE_DATABASE = 'FIREBASE_DATABASE';
+
   /// Uploads measurements to the CARP Web Services (CAWS) backend.
   static const String CAWS = 'CAWS';
+
   /// An Open mHealth endpoint.
   static const String OMH = 'OMH';
   static const String AWS = 'AWS';
@@ -115,8 +118,7 @@ class FileDataEndPoint extends DataEndPoint {
   Function get fromJsonFunction => _$FileDataEndPointFromJson;
 
   @override
-  factory FileDataEndPoint.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<FileDataEndPoint>(json);
+  factory FileDataEndPoint.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<FileDataEndPoint>(json);
 
   @override
   Map<String, dynamic> toJson() => _$FileDataEndPointToJson(this);
@@ -134,8 +136,7 @@ class FileDataEndPoint extends DataEndPoint {
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SQLiteDataEndPoint extends DataEndPoint {
   /// Creates a [SQLiteDataEndPoint] of type [DataEndPointTypes.SQLITE].
-  SQLiteDataEndPoint({super.dataFormat = NameSpace.CARP})
-    : super(type: DataEndPointTypes.SQLITE);
+  SQLiteDataEndPoint({super.dataFormat = NameSpace.CARP}) : super(type: DataEndPointTypes.SQLITE);
 
   @override
   Function get fromJsonFunction => _$SQLiteDataEndPointFromJson;

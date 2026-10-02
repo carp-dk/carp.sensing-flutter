@@ -18,9 +18,7 @@ class CreateStudyProtocolCommand extends AbstractCommand {
   SmartphoneStudyProtocol get protocol {
     if (_protocol == null) {
       print('Checking that this is a valid Smartphone Study Protocol');
-      _protocol = SmartphoneStudyProtocol.fromJson(
-        json.decode(protocolJson) as Map<String, dynamic>,
-      );
+      _protocol = SmartphoneStudyProtocol.fromJson(json.decode(protocolJson) as Map<String, dynamic>);
 
       // set the ownerId of the protocol to the authenticated user
       _protocol?.ownerId = ownerId;

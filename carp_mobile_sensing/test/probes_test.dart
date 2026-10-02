@@ -19,24 +19,21 @@ void main() {
     CarpMobileSensing.ensureInitialized();
   });
 
-  test(
-    'Resuming a resumed stream probe collects each measurement once',
-    () async {
-      final probe = _TestStreamProbe();
+  test('Resuming a resumed stream probe collects each measurement once', () async {
+    final probe = _TestStreamProbe();
 
-      final collected = <Measurement>[];
-      probe.measurements.listen(collected.add);
+    final collected = <Measurement>[];
+    probe.measurements.listen(collected.add);
 
-      await probe.onResume();
-      await probe.onResume();
+    await probe.onResume();
+    await probe.onResume();
 
-      probe.controller.add(Measurement.fromData(FileData(filename: 'test')));
-      await Future.delayed(const Duration(milliseconds: 100));
+    probe.controller.add(Measurement.fromData(FileData(filename: 'test')));
+    await Future.delayed(const Duration(milliseconds: 100));
 
-      expect(collected.length, 1);
+    expect(collected.length, 1);
 
-      await probe.onPause();
-      await probe.controller.close();
-    },
-  );
+    await probe.onPause();
+    await probe.controller.close();
+  });
 }

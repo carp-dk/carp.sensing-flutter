@@ -38,12 +38,10 @@ abstract class NotificationManager {
 
   /// The description of the notification channel as shown in the Settings
   /// on Android phones.
-  static const CHANNEL_DESCRIPTION =
-      'Notifications about tasks that the user has to do.';
+  static const CHANNEL_DESCRIPTION = 'Notifications about tasks that the user has to do.';
 
   /// The id of the notification channel for scheduled notifications.
-  static const SCHEDULED_CHANNEL_ID =
-      'carp_mobile_sensing_scheduled_notifications';
+  static const SCHEDULED_CHANNEL_ID = 'carp_mobile_sensing_scheduled_notifications';
 
   /// The name of the notification channel as shown in the Settings
   /// on Android phones.
@@ -51,8 +49,7 @@ abstract class NotificationManager {
 
   /// The description of the notification channel as shown in the Settings
   /// on Android phones.
-  static const SCHEDULED_CHANNEL_DESCRIPTION =
-      'Notifications about scheduled tasks that the user has to do.';
+  static const SCHEDULED_CHANNEL_DESCRIPTION = 'Notifications about scheduled tasks that the user has to do.';
 
   /// Configures and sets up the notification manager.
   ///
@@ -64,12 +61,7 @@ abstract class NotificationManager {
   /// When tapped, [payload] is emitted on [notificationTaps].
   ///
   /// Returns the id of the notification created.
-  Future<int> createNotification({
-    int? id,
-    required String title,
-    String? body,
-    String? payload,
-  });
+  Future<int> createNotification({int? id, required String title, String? body, String? payload});
 
   /// The payloads of tapped notifications created with [createNotification].
   /// Taps on task notifications are handled by the [AppTaskController].
@@ -79,12 +71,7 @@ abstract class NotificationManager {
   /// If the [id] is not specified, a random id will be generated.
   ///
   /// Returns the id of the notification created.
-  Future<int> scheduleNotification({
-    int? id,
-    required String title,
-    String? body,
-    required DateTime schedule,
-  });
+  Future<int> scheduleNotification({int? id, required String title, String? body, required DateTime schedule});
 
   /// Schedules recurrent notifications with [id], [title], and [body] at the
   /// [schedule] time.
@@ -135,23 +122,14 @@ class NoOpNotificationManager implements NotificationManager {
   Future<void> configure() async {}
 
   @override
-  Future<int> createNotification({
-    int? id,
-    required String title,
-    String? body,
-    String? payload,
-  }) async => 0;
+  Future<int> createNotification({int? id, required String title, String? body, String? payload}) async => 0;
 
   @override
   Stream<String> get notificationTaps => const Stream.empty();
 
   @override
-  Future<int> scheduleNotification({
-    int? id,
-    required String title,
-    String? body,
-    required DateTime schedule,
-  }) async => 0;
+  Future<int> scheduleNotification({int? id, required String title, String? body, required DateTime schedule}) async =>
+      0;
 
   @override
   Future<int> scheduleRecurrentNotifications({

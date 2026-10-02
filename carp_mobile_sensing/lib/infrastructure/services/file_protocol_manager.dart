@@ -26,9 +26,7 @@ class FileStudyProtocolManager implements StudyProtocolManager {
 
     try {
       String jsonString = File(filename(studyId)).readAsStringSync();
-      study = SmartphoneStudyProtocol.fromJson(
-        json.decode(jsonString) as Map<String, dynamic>,
-      );
+      study = SmartphoneStudyProtocol.fromJson(json.decode(jsonString) as Map<String, dynamic>);
     } catch (exception) {
       warning("Failed to load study '$studyId' - $exception");
     }
@@ -39,10 +37,7 @@ class FileStudyProtocolManager implements StudyProtocolManager {
   /// Saves [study] as JSON to [filename].
   /// Returns `true` if successful.
   @override
-  Future<bool> saveStudyProtocol(
-    String studyId,
-    SmartphoneStudyProtocol study,
-  ) async {
+  Future<bool> saveStudyProtocol(String studyId, SmartphoneStudyProtocol study) async {
     bool success = true;
     info("Saving study protocol - id: '$studyId'.");
     try {
@@ -61,6 +56,5 @@ class FileStudyProtocolManager implements StudyProtocolManager {
   ///   `<localApplicationPath>/protocols/protocol-<study_id>.json`
   ///
   /// See [Settings.localApplicationPath].
-  String filename(String studyId) =>
-      '${Settings().localApplicationPath}/protocols/protocol-$studyId.json';
+  String filename(String studyId) => '${Settings().localApplicationPath}/protocols/protocol-$studyId.json';
 }

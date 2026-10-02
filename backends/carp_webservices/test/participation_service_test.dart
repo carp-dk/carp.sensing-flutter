@@ -27,39 +27,28 @@ void main() {
   /// and configure the [CarpParticipationService].
   setUpAll(() async {
     await CarpAuthService().configure(CarpProperties().authProperties);
-    CarpParticipationService().configure(
-      CarpProperties().app,
-      CarpProperties().study,
-    );
+    CarpParticipationService().configure(CarpProperties().app, CarpProperties().study);
 
-    user = await CarpAuthService().authenticateWithUsernamePassword(
-      username: username,
-      password: password,
-    );
+    user = await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
   });
 
   tearDownAll(() {});
 
   group("Base services", () {
     test('- authentication', () async {
-      debugPrint(
-        'CarpParticipationService : ${CarpParticipationService().app}',
-      );
+      debugPrint('CarpParticipationService : ${CarpParticipationService().app}');
       debugPrint(" - signed in as: $user");
     }, skip: false);
   });
 
   group("Participation Service", () {
     test('- get invitations for this user', () async {
-      final invitations = await CarpParticipationService()
-          .getActiveParticipationInvitations();
+      final invitations = await CarpParticipationService().getActiveParticipationInvitations();
 
       debugPrint(toJsonString(invitations));
       expect(invitations, isNotNull);
 
-      var invitation = invitations.firstWhere(
-        (invitation) => invitation.studyDeploymentId == testDeploymentId,
-      );
+      var invitation = invitations.firstWhere((invitation) => invitation.studyDeploymentId == testDeploymentId);
       expect(invitation, isNotNull);
       expect(invitation.studyId, testStudyId);
       expect(invitation.studyDeploymentId, testDeploymentId);
@@ -69,27 +58,21 @@ void main() {
     }, skip: false);
 
     test('- get participant data - single deployment', () async {
-      final data = await CarpParticipationService().getParticipantData(
-        testDeploymentId,
-      );
+      final data = await CarpParticipationService().getParticipantData(testDeploymentId);
       debugPrint(toJsonString(data));
     }, skip: false);
 
     test('- get participant data - multiple deployments', () async {
-      final data = await CarpParticipationService().getParticipantDataList([
-        testDeploymentId,
-        anotherTestDeploymentId,
-      ]);
+      final data = await CarpParticipationService().getParticipantDataList([testDeploymentId, anotherTestDeploymentId]);
       debugPrint(toJsonString(data));
     }, skip: false);
 
     test('- set participant data - common', () async {
       // this is a pretty bad example - setting sex as a common participant data....
       // but this is what is in the protocol
-      final data = await CarpParticipationService().setParticipantData(
-        testDeploymentId,
-        {InputType.SEX: SexInput(value: Sex.Male)},
-      );
+      final data = await CarpParticipationService().setParticipantData(testDeploymentId, {
+        InputType.SEX: SexInput(value: Sex.Male),
+      });
       debugPrint(toJsonString(data));
 
       expect(data.common[InputType.SEX], isA<SexInput>());
@@ -114,10 +97,7 @@ void main() {
       debugPrint(toJsonString(data));
 
       expect(data.common[InputType.ADDRESS], isA<AddressInput>());
-      expect(
-        (data.common[InputType.ADDRESS] as AddressInput).address1,
-        'Test Address',
-      );
+      expect((data.common[InputType.ADDRESS] as AddressInput).address1, 'Test Address');
     }, skip: false);
 
     test('- set Informed Consent', () async {

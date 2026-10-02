@@ -33,8 +33,7 @@ part of '../../infrastructure.dart';
 /// `<<application_name>>/android/app/src/main/res/drawable/` folder.
 /// You can use the default app icon, just make a copy in the drawable folder.
 class FlutterLocalNotificationManager implements NotificationManager {
-  static final FlutterLocalNotificationManager _instance =
-      FlutterLocalNotificationManager._();
+  static final FlutterLocalNotificationManager _instance = FlutterLocalNotificationManager._();
   FlutterLocalNotificationManager._() : super();
   final Random _random = Random();
 
@@ -50,49 +49,39 @@ class FlutterLocalNotificationManager implements NotificationManager {
         android: AndroidInitializationSettings('ic_launcher'),
         iOS: DarwinInitializationSettings(),
       ),
-      onDidReceiveBackgroundNotificationResponse:
-          onDidReceiveNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: onDidReceiveNotificationResponse,
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
     );
 
     // Not permission_handler: it never completes its future if the dialog is dismissed.
     var granted = await FlutterLocalNotificationsPlugin()
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
     debug('$runtimeType - Notification permission granted: $granted');
 
     info('$runtimeType configured.');
   }
 
-  final NotificationDetails _platformChannelSpecifics =
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          NotificationManager.CHANNEL_ID,
-          NotificationManager.CHANNEL_NAME,
-          channelDescription: NotificationManager.CHANNEL_DESCRIPTION,
-          importance: Importance.max,
-          priority: Priority.max,
-          ongoing: true,
-        ),
-        iOS: DarwinNotificationDetails(),
-      );
+  final NotificationDetails _platformChannelSpecifics = const NotificationDetails(
+    android: AndroidNotificationDetails(
+      NotificationManager.CHANNEL_ID,
+      NotificationManager.CHANNEL_NAME,
+      channelDescription: NotificationManager.CHANNEL_DESCRIPTION,
+      importance: Importance.max,
+      priority: Priority.max,
+      ongoing: true,
+    ),
+    iOS: DarwinNotificationDetails(),
+  );
 
   /// Exact alarms need `SCHEDULE_EXACT_ALARM`, which Android only grants
   /// through a settings screen - so use them when granted, inexact otherwise.
-  Future<AndroidScheduleMode> get _scheduleMode async =>
-      await Permission.scheduleExactAlarm.isGranted
+  Future<AndroidScheduleMode> get _scheduleMode async => await Permission.scheduleExactAlarm.isGranted
       ? AndroidScheduleMode.exactAllowWhileIdle
       : AndroidScheduleMode.inexactAllowWhileIdle;
 
   @override
-  Future<int> createNotification({
-    int? id,
-    required String title,
-    String? body,
-    String? payload,
-  }) async {
+  Future<int> createNotification({int? id, required String title, String? body, String? payload}) async {
     id ??= _random.nextInt(1000);
     await FlutterLocalNotificationsPlugin().show(
       id: id,
@@ -110,19 +99,11 @@ class FlutterLocalNotificationManager implements NotificationManager {
   Stream<String> get notificationTaps => _taps.stream;
 
   @override
-  Future<int> scheduleNotification({
-    int? id,
-    required String title,
-    String? body,
-    required DateTime schedule,
-  }) async {
+  Future<int> scheduleNotification({int? id, required String title, String? body, required DateTime schedule}) async {
     tz.initializeTimeZones(); // for some strange reason, the time zones are not always initialized when this method is called, so we initialize them here to be sure
 
     id ??= _random.nextInt(1000);
-    final time = tz.TZDateTime.from(
-      schedule,
-      tz.getLocation(Settings().timezone),
-    );
+    final time = tz.TZDateTime.from(schedule, tz.getLocation(Settings().timezone));
 
     await FlutterLocalNotificationsPlugin().zonedSchedule(
       id: id,
@@ -146,10 +127,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
     tz.initializeTimeZones(); // for some strange reason, the time zones are not always initialized when this method is called, so we initialize them here to be sure
 
     id ??= _random.nextInt(1000);
-    final time = tz.TZDateTime.from(
-      schedule.firstOccurrence,
-      tz.getLocation(Settings().timezone),
-    );
+    final time = tz.TZDateTime.from(schedule.firstOccurrence, tz.getLocation(Settings().timezone));
 
     DateTimeComponents recurrence = switch (schedule.type) {
       RecurrentType.daily => DateTimeComponents.time,
@@ -171,8 +149,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
   }
 
   @override
-  Future<void> cancelNotification(int id) async =>
-      await FlutterLocalNotificationsPlugin().cancel(id: id);
+  Future<void> cancelNotification(int id) async => await FlutterLocalNotificationsPlugin().cancel(id: id);
 
   @override
   Future<void> createTaskNotification(UserTask task) async {
@@ -196,10 +173,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
     if (task.triggerTime.isAfter(DateTime.now())) {
       tz.initializeTimeZones(); // for some strange reason, the time zones are not always initialized when this method is called, so we initialize them here to be sure
 
-      final time = tz.TZDateTime.from(
-        task.triggerTime,
-        tz.getLocation(Settings().timezone),
-      );
+      final time = tz.TZDateTime.from(task.triggerTime, tz.getLocation(Settings().timezone));
 
       await FlutterLocalNotificationsPlugin().zonedSchedule(
         id: task.id.hashCode,
@@ -222,8 +196,7 @@ class FlutterLocalNotificationManager implements NotificationManager {
 
   @override
   Future<int> get pendingNotificationRequestsCount async =>
-      (await FlutterLocalNotificationsPlugin().pendingNotificationRequests())
-          .length;
+      (await FlutterLocalNotificationsPlugin().pendingNotificationRequests()).length;
 
   @override
   Future<void> cancelTaskNotification(UserTask task) async {
@@ -246,9 +219,7 @@ void onDidReceiveNotificationResponse(NotificationResponse response) {
   debug('NotificationManager - callback on notification, payload: $payload');
 
   if (payload == null) {
-    warning(
-      "NotificationManager - Error in callback from notification - payload is '$payload'",
-    );
+    warning("NotificationManager - Error in callback from notification - payload is '$payload'");
   } else if (AppTaskController().getUserTask(payload) != null) {
     AppTaskController().onNotification(payload);
   } else {

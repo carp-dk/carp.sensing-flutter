@@ -17,11 +17,7 @@ class AltBeacon extends DeviceConfiguration<AltBeaconDeviceRegistration> {
 
   @override
   DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.SIGNAL_STRENGTH]!,
-        ),
-      ]);
+      DataTypeSamplingSchemeMap.from([DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.SIGNAL_STRENGTH]!)]);
 
   @override
   AltBeaconDeviceRegistration createRegistration({
@@ -44,8 +40,7 @@ class AltBeacon extends DeviceConfiguration<AltBeaconDeviceRegistration> {
 
   @override
   Function get fromJsonFunction => _$AltBeaconFromJson;
-  factory AltBeacon.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AltBeacon>(json);
+  factory AltBeacon.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AltBeacon>(json);
   @override
   Map<String, dynamic> toJson() => _$AltBeaconToJson(this);
 }

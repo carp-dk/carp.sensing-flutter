@@ -17,8 +17,7 @@ part of 'health_package.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HealthService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of the health service.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.HealthService';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.HealthService';
 
   /// The default role name for a health service.
   static const String DEFAULT_ROLE_NAME = 'Health Service';
@@ -28,8 +27,7 @@ class HealthService extends ServiceConfiguration<ServiceRegistration> {
 
   @override
   Function get fromJsonFunction => _$HealthServiceFromJson;
-  factory HealthService.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<HealthService>(json);
+  factory HealthService.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<HealthService>(json);
   @override
   Map<String, dynamic> toJson() => _$HealthServiceToJson(this);
 }
@@ -47,8 +45,7 @@ class HealthService extends ServiceConfiguration<ServiceRegistration> {
 ///    Apple Health does not disclose whether read access is granted.
 ///  * On Android below SDK level 34, it logs a warning that Health Connect must
 ///    be installed as a separate app.
-class HealthServiceManager
-    extends ServiceManager<HealthService, ServiceRegistration> {
+class HealthServiceManager extends ServiceManager<HealthService, ServiceRegistration> {
   Health? _service;
 
   /// The [Health] plugin, or null if this manager is not configured yet.
@@ -71,9 +68,8 @@ class HealthServiceManager
   /// Types not supported on the current platform are ignored and logged as a
   /// warning.
   void addTypes(List<HealthDataType> types) {
-    bool isSupported(HealthDataType type) => Platform.isIOS
-        ? dataTypeKeysIOS.contains(type)
-        : dataTypeKeysAndroid.contains(type);
+    bool isSupported(HealthDataType type) =>
+        Platform.isIOS ? dataTypeKeysIOS.contains(type) : dataTypeKeysAndroid.contains(type);
 
     final unsupported = types.where((type) => !isSupported(type));
     if (unsupported.isNotEmpty) {
@@ -97,8 +93,7 @@ class HealthServiceManager
   ///
   /// Called when this manager is configured.
   void gatherTypesFrom(HealthService? service) {
-    final config =
-        service?.defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH];
+    final config = service?.defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH];
     if (config is HealthSamplingConfiguration) {
       addTypes(config.healthDataTypes);
     }
@@ -122,11 +117,8 @@ class HealthServiceManager
   }
 
   @override
-  ServiceRegistration createRegistration() => ServiceRegistration(
-    deviceId: service?.deviceId,
-    deviceDisplayName: displayName,
-    isConnected: isConnected,
-  );
+  ServiceRegistration createRegistration() =>
+      ServiceRegistration(deviceId: service?.deviceId, deviceDisplayName: displayName, isConnected: isConnected);
 
   // There is an issue with Apple Health.
   // When asking for "hasPermissions" on the service, it always return "null".
@@ -143,9 +135,7 @@ class HealthServiceManager
   Future<bool> hasHealthPermissions(List<HealthDataType> types) async {
     if (types.isEmpty) return true;
 
-    info(
-      '$runtimeType - Checking permissions for health types: $types on ${Platform.operatingSystem}',
-    );
+    info('$runtimeType - Checking permissions for health types: $types on ${Platform.operatingSystem}');
 
     try {
       return await service?.hasPermissions(types) ?? false;
@@ -164,9 +154,7 @@ class HealthServiceManager
   Future<bool> requestHealthPermissions(List<HealthDataType> types) async {
     if (types.isEmpty) return true;
 
-    info(
-      '$runtimeType - Requesting permissions for health types: $types on ${Platform.operatingSystem}',
-    );
+    info('$runtimeType - Requesting permissions for health types: $types on ${Platform.operatingSystem}');
 
     try {
       return await service?.requestAuthorization(types) ?? false;

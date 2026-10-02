@@ -43,8 +43,7 @@ enum MovesenseDeviceType {
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseDevice extends BLEDevice<MovesenseDeviceRegistration> {
   /// The device type of a Movesense device.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovesenseDevice';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovesenseDevice';
 
   /// The default role name of a Movesense device in a protocol.
   static const String DEFAULT_ROLE_NAME = 'Movesense ECG Device';
@@ -57,8 +56,7 @@ class MovesenseDevice extends BLEDevice<MovesenseDeviceRegistration> {
 
   @override
   Function get fromJsonFunction => _$MovesenseDeviceFromJson;
-  factory MovesenseDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovesenseDevice;
+  factory MovesenseDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovesenseDevice;
   @override
   Map<String, dynamic> toJson() => _$MovesenseDeviceToJson(this);
 }
@@ -98,10 +96,7 @@ class MovesenseDeviceRegistration extends BLEDeviceRegistration {
     super.bleName,
     this.movesenseDeviceType = MovesenseDeviceType.UNKNOWN,
     this.deviceInfo,
-  }) : super(
-         deviceDisplayName: deviceDisplayName ?? bleName,
-         hardwareName: hardwareName ?? movesenseDeviceType.name,
-       );
+  }) : super(deviceDisplayName: deviceDisplayName ?? bleName, hardwareName: hardwareName ?? movesenseDeviceType.name);
 
   @override
   Function get fromJsonFunction => _$MovesenseDeviceRegistrationFromJson;
@@ -125,11 +120,9 @@ class MovesenseDeviceRegistration extends BLEDeviceRegistration {
 ///    [batteryLevel] of 80% or 10%.
 ///  * If a connection attempt fails, it disconnects so the native SDK stops
 ///    retrying in the background.
-class MovesenseDeviceManager
-    extends BLEDeviceManager<MovesenseDevice, MovesenseDeviceRegistration> {
+class MovesenseDeviceManager extends BLEDeviceManager<MovesenseDevice, MovesenseDeviceRegistration> {
   int? _batteryLevel;
-  final StreamController<int> _batteryEventController =
-      StreamController.broadcast();
+  final StreamController<int> _batteryEventController = StreamController.broadcast();
 
   /// Creates a device manager for the device [type], typically
   /// [MovesenseDevice.DEVICE_TYPE].
@@ -163,18 +156,17 @@ class MovesenseDeviceManager
   }
 
   @override
-  MovesenseDeviceRegistration createRegistration() =>
-      MovesenseDeviceRegistration(
-        deviceDisplayName: bleName,
-        isConnected: isConnected,
-        bleAddress: bleAddress ?? 'Unknown Movesense Device',
-        bleName: bleName,
-        batteryChargingState: batteryLevel != null
-            ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
-            : BatteryChargingState.unknown,
-        movesenseDeviceType: movesenseDeviceType,
-        deviceInfo: deviceInfo,
-      );
+  MovesenseDeviceRegistration createRegistration() => MovesenseDeviceRegistration(
+    deviceDisplayName: bleName,
+    isConnected: isConnected,
+    bleAddress: bleAddress ?? 'Unknown Movesense Device',
+    bleName: bleName,
+    batteryChargingState: batteryLevel != null
+        ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
+        : BatteryChargingState.unknown,
+    movesenseDeviceType: movesenseDeviceType,
+    deviceInfo: deviceInfo,
+  );
 
   @override
   bool get canConnect => bleAddress != null;
@@ -195,9 +187,7 @@ class MovesenseDeviceManager
   Future<DeviceStatus> onConnect() async {
     if (isConnected) return DeviceStatus.connected;
     if (bleAddress?.isEmpty ?? true) {
-      warning(
-        '$runtimeType - cannot connect to device, BLE address is missing.',
-      );
+      warning('$runtimeType - cannot connect to device, BLE address is missing.');
       return DeviceStatus.disconnected;
     }
 
@@ -246,9 +236,7 @@ class MovesenseDeviceManager
   void _connected(String serial) {
     this.serial = serial;
 
-    debug(
-      "$runtimeType - Successfully connected to Movesense device, serial: $serial",
-    );
+    debug("$runtimeType - Successfully connected to Movesense device, serial: $serial");
 
     _getDeviceInfo();
     _getBatteryStatus();
@@ -283,19 +271,14 @@ class MovesenseDeviceManager
     debug('$runtimeType - Setting up battery monitoring.');
 
     Timer.periodic(const Duration(minutes: 10), (_) {
-      Mds.get(
-        Mds.createRequestUri(serial!, "/System/States/1"),
-        "{}",
-        ((data, statusCode) {
-          final dataContent = json.decode(data);
-          num batteryState = dataContent["Content"] as num;
-          // Movesense only reports "OK" (0) or "LOW" (1) battery state
-          // This is translated to 80% & 10% battery level
-          _batteryLevel = batteryState == 0 ? 80 : 10;
-          _batteryEventController.add(_batteryLevel ?? 0);
-        }),
-        (error, statusCode) => {},
-      );
+      Mds.get(Mds.createRequestUri(serial!, "/System/States/1"), "{}", ((data, statusCode) {
+        final dataContent = json.decode(data);
+        num batteryState = dataContent["Content"] as num;
+        // Movesense only reports "OK" (0) or "LOW" (1) battery state
+        // This is translated to 80% & 10% battery level
+        _batteryLevel = batteryState == 0 ? 80 : 10;
+        _batteryEventController.add(_batteryLevel ?? 0);
+      }), (error, statusCode) => {});
     });
   }
 

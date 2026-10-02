@@ -26,22 +26,13 @@ class NoiseProbe extends BufferingPeriodicStreamProbe {
   void onSamplingEnd() => _endRecordingTime = DateTime.now();
 
   @override
-  void onSamplingData(dynamic event) =>
-      event is NoiseReading ? _noiseReadings.add(event) : null;
+  void onSamplingData(dynamic event) => event is NoiseReading ? _noiseReadings.add(event) : null;
 
   @override
   Future<Measurement?> getMeasurement() async {
     if (_noiseReadings.isNotEmpty) {
-      Stats meanStats = Stats.fromData(
-        _noiseReadings
-            .map((reading) => reading.meanDecibel)
-            .where((e) => e.isFinite),
-      );
-      Stats maxStats = Stats.fromData(
-        _noiseReadings
-            .map((reading) => reading.maxDecibel)
-            .where((e) => e.isFinite),
-      );
+      Stats meanStats = Stats.fromData(_noiseReadings.map((reading) => reading.meanDecibel).where((e) => e.isFinite));
+      Stats maxStats = Stats.fromData(_noiseReadings.map((reading) => reading.maxDecibel).where((e) => e.isFinite));
 
       num mean = meanStats.mean;
       num std = meanStats.sampleValues.standardDeviation;
@@ -50,9 +41,7 @@ class NoiseProbe extends BufferingPeriodicStreamProbe {
 
       if (mean.isFinite && std.isFinite && min.isFinite && max.isFinite) {
         return Measurement(
-          sensorStartTime:
-              _startRecordingTime?.microsecondsSinceEpoch ??
-              DateTime.now().microsecondsSinceEpoch,
+          sensorStartTime: _startRecordingTime?.microsecondsSinceEpoch ?? DateTime.now().microsecondsSinceEpoch,
           sensorEndTime: _endRecordingTime?.microsecondsSinceEpoch,
           data: Noise(
             meanDecibel: mean.toDouble(),

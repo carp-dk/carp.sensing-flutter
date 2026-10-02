@@ -81,8 +81,7 @@ class AppTask extends TaskConfiguration {
   bool notification;
 
   /// The list of background [measures] as a [BackgroundTask].
-  BackgroundTask get backgroundTask =>
-      BackgroundTask(name: name, measures: measures);
+  BackgroundTask get backgroundTask => BackgroundTask(name: name, measures: measures);
 
   /// Creates an app task that notifies the app when it is triggered.
   ///
@@ -104,9 +103,7 @@ class AppTask extends TaskConfiguration {
     measures ??= <Measure>[];
 
     // Ensure that the completed app task data type is included in the measures.
-    if (!measures.contains(
-      Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'),
-    )) {
+    if (!measures.contains(Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'))) {
       measures.add(Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'));
     }
 
@@ -116,8 +113,7 @@ class AppTask extends TaskConfiguration {
   @override
   Function get fromJsonFunction => _$AppTaskFromJson;
 
-  factory AppTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AppTask>(json);
+  factory AppTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AppTask>(json);
 
   @override
   Map<String, dynamic> toJson() => _$AppTaskToJson(this);

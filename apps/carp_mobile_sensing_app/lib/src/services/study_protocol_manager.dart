@@ -16,15 +16,11 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
       name: 'CAMS App - Demo Study Protocol',
       studyDescription: StudyDescription(
         title: 'CAMS App - Demo Study',
-        description:
-            'A study demonstrating most measures and probes. Used for the demo app.',
+        description: 'A study demonstrating most measures and probes. Used for the demo app.',
       ),
       dataEndPoint: (bloc.deploymentMode == DeploymentMode.local)
           ? SQLiteDataEndPoint()
-          : CarpDataEndPoint(
-              uploadMethod: CarpUploadMethod.stream,
-              deleteWhenUploaded: false,
-            ),
+          : CarpDataEndPoint(uploadMethod: CarpUploadMethod.stream, deleteWhenUploaded: false),
     );
 
     // Always add at least one participant role to the protocol
@@ -111,9 +107,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     // Activity measure using the phone
     protocol.addTaskControl(
       ImmediateTrigger(),
-      BackgroundTask(
-        measures: [Measure(type: ContextSamplingPackage.ACTIVITY)],
-      ),
+      BackgroundTask(measures: [Measure(type: ContextSamplingPackage.ACTIVITY)]),
       phone,
     );
 
@@ -243,9 +237,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     // Background task that collects SMS messages in/out
     protocol.addTaskControl(
       ImmediateTrigger(),
-      BackgroundTask(
-        measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)],
-      ),
+      BackgroundTask(measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)]),
       phone,
     );
 

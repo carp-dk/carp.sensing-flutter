@@ -21,29 +21,17 @@ class ProbeDescription {
     MonitoringSamplingPackage.TRIGGERED_TASK: ProbeDescriptor(
       'Triggered Task',
       'Triggered Task',
-      Icon(
-        Icons.dashboard_customize_outlined,
-        size: 50,
-        color: CachetColors.GREY_4,
-      ),
+      Icon(Icons.dashboard_customize_outlined, size: 50, color: CachetColors.GREY_4),
     ),
     MonitoringSamplingPackage.COMPLETED_TASK: ProbeDescriptor(
       'Completed Task',
       'Completed Task.',
-      Icon(
-        Icons.document_scanner_outlined,
-        size: 50,
-        color: CachetColors.GREY_4,
-      ),
+      Icon(Icons.document_scanner_outlined, size: 50, color: CachetColors.GREY_4),
     ),
     MonitoringSamplingPackage.COMPLETED_APP_TASK: ProbeDescriptor(
       'Completed App Task',
       'Completed App Task.',
-      Icon(
-        Icons.document_scanner_outlined,
-        size: 50,
-        color: CachetColors.GREY_4,
-      ),
+      Icon(Icons.document_scanner_outlined, size: 50, color: CachetColors.GREY_4),
     ),
     DeviceSamplingPackage.FREE_MEMORY: ProbeDescriptor(
       'Memory',
@@ -148,11 +136,7 @@ class ProbeDescription {
     DeviceSamplingPackage.SCREEN_EVENT: ProbeDescriptor(
       'Screen',
       'Screen events (on/off/unlock).',
-      Icon(
-        Icons.screen_lock_portrait,
-        size: 50,
-        color: CachetColors.LIGHT_PURPLE,
-      ),
+      Icon(Icons.screen_lock_portrait, size: 50, color: CachetColors.LIGHT_PURPLE),
     ),
     ContextSamplingPackage.LOCATION: ProbeDescriptor(
       'Location Tracking',
@@ -187,11 +171,7 @@ class ProbeDescription {
     ESenseSamplingPackage.ESENSE_BUTTON: ProbeDescriptor(
       'eSense Button',
       'eSense button events.',
-      Icon(
-        Icons.radio_button_checked,
-        size: 50,
-        color: CachetColors.LIGHT_PURPLE,
-      ),
+      Icon(Icons.radio_button_checked, size: 50, color: CachetColors.LIGHT_PURPLE),
     ),
     ESenseSamplingPackage.ESENSE_SENSOR: ProbeDescriptor(
       'eSense Movement',
@@ -356,18 +336,9 @@ class ProbeDescription {
 
   static Map<ExecutorState, Icon> get probeStateIcon => {
     ExecutorState.Created: Icon(Icons.child_care, color: CachetColors.GREY_4),
-    ExecutorState.Initialized: Icon(
-      Icons.check,
-      color: CachetColors.LIGHT_PURPLE,
-    ),
-    ExecutorState.Resumed: Icon(
-      Icons.radio_button_checked,
-      color: CachetColors.GREEN,
-    ),
-    ExecutorState.Paused: Icon(
-      Icons.radio_button_unchecked,
-      color: CachetColors.GREEN,
-    ),
+    ExecutorState.Initialized: Icon(Icons.check, color: CachetColors.LIGHT_PURPLE),
+    ExecutorState.Resumed: Icon(Icons.radio_button_checked, color: CachetColors.GREEN),
+    ExecutorState.Paused: Icon(Icons.radio_button_unchecked, color: CachetColors.GREEN),
     ExecutorState.Undefined: Icon(Icons.error_outline, color: CachetColors.RED),
   };
 }

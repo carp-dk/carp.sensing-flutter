@@ -70,10 +70,7 @@ class PrimaryDeviceDeployment with ChangeNotifier {
         control.task ??= getTaskByName(control.taskName);
         for (var type in control.task!.getAllExpectedDataTypes()) {
           _expectedDataStreams!.add(
-            ExpectedDataStream(
-              dataType: type,
-              deviceRoleName: control.destinationDeviceRoleName!,
-            ),
+            ExpectedDataStream(dataType: type, deviceRoleName: control.destinationDeviceRoleName!),
           );
         }
       }
@@ -114,8 +111,7 @@ class PrimaryDeviceDeployment with ChangeNotifier {
     var latestUpdate = registration.registrationCreatedOn;
 
     for (var registration in connectedDeviceRegistrations.values) {
-      if (registration != null &&
-          registration.registrationCreatedOn.isAfter(latestUpdate)) {
+      if (registration != null && registration.registrationCreatedOn.isAfter(latestUpdate)) {
         latestUpdate = registration.registrationCreatedOn;
       }
     }
@@ -126,8 +122,7 @@ class PrimaryDeviceDeployment with ChangeNotifier {
   /// Notify listeners that this deployment has been updated.
   void hasBeenUpdated() => notifyListeners();
 
-  factory PrimaryDeviceDeployment.fromJson(Map<String, dynamic> json) =>
-      _$PrimaryDeviceDeploymentFromJson(json);
+  factory PrimaryDeviceDeployment.fromJson(Map<String, dynamic> json) => _$PrimaryDeviceDeploymentFromJson(json);
   Map<String, dynamic> toJson() => _$PrimaryDeviceDeploymentToJson(this);
 
   @override
@@ -166,8 +161,7 @@ class DeviceDeploymentStatus extends Serializable {
   /// Determines whether the device and all dependent devices have been
   /// registered successfully and is ready for deployment.
   bool get isReadyForDeployment =>
-      (canBeDeployed ?? true) &&
-      (remainingDevicesToRegisterBeforeDeployment?.isEmpty ?? true);
+      (canBeDeployed ?? true) && (remainingDevicesToRegisterBeforeDeployment?.isEmpty ?? true);
 
   /// The role names of devices which need to be registered before the deployment
   /// information for this device can be obtained.
@@ -193,8 +187,7 @@ class DeviceDeploymentStatus extends Serializable {
   Function get fromJsonFunction => _$DeviceDeploymentStatusFromJson;
 
   factory DeviceDeploymentStatus.fromJson(Map<String, dynamic> json) {
-    DeviceDeploymentStatus status = FromJsonFactory()
-        .fromJson<DeviceDeploymentStatus>(json);
+    DeviceDeploymentStatus status = FromJsonFactory().fromJson<DeviceDeploymentStatus>(json);
 
     // when this object was create from json deserialization,
     // the last part of the $type reflects the status
@@ -253,7 +246,6 @@ class AssignedPrimaryDevice {
 
   AssignedPrimaryDevice({required this.device, this.registration}) : super();
 
-  factory AssignedPrimaryDevice.fromJson(Map<String, dynamic> json) =>
-      _$AssignedPrimaryDeviceFromJson(json);
+  factory AssignedPrimaryDevice.fromJson(Map<String, dynamic> json) => _$AssignedPrimaryDeviceFromJson(json);
   Map<String, dynamic> toJson() => _$AssignedPrimaryDeviceToJson(this);
 }

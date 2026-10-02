@@ -30,9 +30,7 @@ class StudyDeploymentProxy {
     StudyDeploymentStatus? deploymentStatus;
     // try to get the deployment status from the deployment service
     try {
-      deploymentStatus = await deploymentService.getStudyDeploymentStatus(
-        study.studyDeploymentId,
-      );
+      deploymentStatus = await deploymentService.getStudyDeploymentStatus(study.studyDeploymentId);
     } catch (error) {
       study.deploymentError(
         "$runtimeType - Could not get deployment status with id '${study.studyDeploymentId}' "
@@ -68,10 +66,7 @@ class StudyDeploymentProxy {
   /// [study] as [StudyStatusEventTypes.DeploymentError] events, not thrown.
   /// A missing device role in the returned deployment status throws a
   /// [StateError]. A failure to mark the device as deployed is only printed.
-  Future<void> tryDeployment(
-    Study study,
-    DeviceRegistration registration,
-  ) async {
+  Future<void> tryDeployment(Study study, DeviceRegistration registration) async {
     final studyDeploymentId = study.studyDeploymentId;
     final deviceRoleName = study.deviceRoleName;
     StudyDeploymentStatus? deploymentStatus = await getStudyDeploymentStatus(study);
@@ -84,27 +79,17 @@ class StudyDeploymentProxy {
     // the server-side deployment is running but the local copy was lost.
     if (deploymentStatus.status == StudyDeploymentStatusTypes.Running) {
       try {
-        final deployment = await deploymentService.getDeviceDeploymentFor(
-          studyDeploymentId,
-          deviceRoleName,
-        );
+        final deployment = await deploymentService.getDeviceDeploymentFor(studyDeploymentId, deviceRoleName);
         if (deployment != null) study.deviceDeploymentReceived(deployment);
       } catch (error) {
-        study.deploymentError(
-          "$runtimeType - Error getting deployment information.\n$error",
-        );
+        study.deploymentError("$runtimeType - Error getting deployment information.\n$error");
       }
       return;
     }
 
     try {
       deploymentStatus =
-          await deploymentService.registerDevice(
-            studyDeploymentId,
-            deviceRoleName,
-            registration,
-          ) ??
-          deploymentStatus;
+          await deploymentService.registerDevice(studyDeploymentId, deviceRoleName, registration) ?? deploymentStatus;
     } catch (error) {
       // The device may already be registered, e.g. after an app restart or
       // reinstallation. Report it, but keep obtaining the deployment.
@@ -117,9 +102,7 @@ class StudyDeploymentProxy {
     // Update study with new deployment status.
     study.deploymentStatusReceived(deploymentStatus);
 
-    final deviceStatus = deploymentStatus!.getDeviceStatusByRoleName(
-      deviceRoleName,
-    );
+    final deviceStatus = deploymentStatus!.getDeviceStatusByRoleName(deviceRoleName);
 
     // The following statement is from CARP Core Kotlin.
     // However, this has been removed here in order to allow for re-deployment,
@@ -137,14 +120,9 @@ class StudyDeploymentProxy {
     final device = deviceStatus.device;
     PrimaryDeviceDeployment? deployment;
     try {
-      deployment = await deploymentService.getDeviceDeploymentFor(
-        studyDeploymentId,
-        deviceRoleName,
-      );
+      deployment = await deploymentService.getDeviceDeploymentFor(studyDeploymentId, deviceRoleName);
     } catch (error) {
-      study.deploymentError(
-        "$runtimeType - Error getting deployment information.\n$error",
-      );
+      study.deploymentError("$runtimeType - Error getting deployment information.\n$error");
       // deploymentStatus = null;
       return;
     }
@@ -170,11 +148,7 @@ class StudyDeploymentProxy {
 
     final remainingDevicesToRegister = deploymentStatus.deviceStatusList
         .map((status) => status.device)
-        .where(
-          (it) =>
-              (deviceStatus.remainingDevicesToRegisterBeforeDeployment ?? [])
-                  .contains(it.roleName),
-        )
+        .where((it) => (deviceStatus.remainingDevicesToRegisterBeforeDeployment ?? []).contains(it.roleName))
         .toSet();
 
     // Stop here in case other devices need to be registered before being able to complete deployment.
@@ -197,9 +171,7 @@ class StudyDeploymentProxy {
       }
     } catch (error) {
       // we only print a warning - there is a bug in CAWS - see issue #561
-      print(
-        "$runtimeType - Error marking deployment '$studyDeploymentId' as deployed.\n$error",
-      );
+      print("$runtimeType - Error marking deployment '$studyDeploymentId' as deployed.\n$error");
     }
   }
 
@@ -216,9 +188,7 @@ class StudyDeploymentProxy {
     }
 
     try {
-      final deploymentStatus = await deploymentService.stop(
-        study.studyDeploymentId,
-      );
+      final deploymentStatus = await deploymentService.stop(study.studyDeploymentId);
       if (deploymentStatus != null) {
         study.deploymentStatusReceived(deploymentStatus);
       }

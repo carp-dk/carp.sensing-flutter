@@ -1,11 +1,7 @@
 part of 'carp_auth.dart';
 
 /// Holds information of a token issued by an OAuth authorization endpoint.
-@JsonSerializable(
-  fieldRename: FieldRename.snake,
-  includeIfNull: false,
-  explicitToJson: true,
-)
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false, explicitToJson: true)
 class OAuthToken {
   /// The OAuth access token.
   final String accessToken;
@@ -31,36 +27,21 @@ class OAuthToken {
   /// The date the access token was issued.
   final DateTime issuedDate = DateTime.now();
 
-  OAuthToken(
-    this.accessToken,
-    this.refreshToken,
-    this.tokenType,
-    this.expiresAt,
-    this.scope,
-    this.idToken,
-  );
+  OAuthToken(this.accessToken, this.refreshToken, this.tokenType, this.expiresAt, this.scope, this.idToken);
 
   factory OAuthToken.fromTokenResponse(OidcToken response) {
     return OAuthToken(
       response.accessToken.toString(),
       response.refreshToken.toString(),
       response.tokenType.toString(),
-      response
-          .calculateExpiresAt()!, // Throw an error if there is no access token expiration date
+      response.calculateExpiresAt()!, // Throw an error if there is no access token expiration date
       response.scope ?? [],
       response.idToken.toString(),
     );
   }
 
   /// Clone this token.
-  OAuthToken clone() => OAuthToken(
-    accessToken,
-    refreshToken,
-    tokenType,
-    expiresAt,
-    scope,
-    idToken,
-  );
+  OAuthToken clone() => OAuthToken(accessToken, refreshToken, tokenType, expiresAt, scope, idToken);
 
   /// Expire the authenticated OAuth token for this user.
   void expire() => expiresAt = DateTime.now();
@@ -73,8 +54,7 @@ class OAuthToken {
       "Refresh Token: $refreshToken, "
       "Expiry date: $expiresAt";
 
-  factory OAuthToken.fromJson(Map<String, dynamic> json) =>
-      _$OAuthTokenFromJson(json);
+  factory OAuthToken.fromJson(Map<String, dynamic> json) => _$OAuthTokenFromJson(json);
   Map<String, dynamic> toJson() => _$OAuthTokenToJson(this);
 
   @override

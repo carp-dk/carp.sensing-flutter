@@ -23,8 +23,7 @@ part of '../../domain.dart';
 ///
 /// See also [SmartphoneDeploymentExecutor], which runs it.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class SmartphoneDeployment extends PrimaryDeviceDeployment
-    with SmartphoneProtocolExtension {
+class SmartphoneDeployment extends PrimaryDeviceDeployment with SmartphoneProtocolExtension {
   late String _studyDeploymentId;
 
   /// The unique id of the study that this deployment is part of.
@@ -41,8 +40,7 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   /// All devices this deployment is using.
   ///
   /// This set combines the primary [deviceConfiguration] with all [connectedDevices].
-  Set<DeviceConfiguration> get devices =>
-      Set.from(connectedDevices)..add(deviceConfiguration);
+  Set<DeviceConfiguration> get devices => Set.from(connectedDevices)..add(deviceConfiguration);
 
   /// The timestamp (in UTC) when this deployment was deployed on this smartphone.
   // Missing in 1.x deployments, where deployed was nullable.
@@ -54,26 +52,24 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   @JsonKey(fromJson: _statusFromJson)
   StudyDeploymentStatusTypes status = StudyDeploymentStatusTypes.Invited;
 
-  static DateTime _deployedFromJson(String? json) =>
-      json != null ? DateTime.parse(json) : DateTime.now().toUtc();
+  static DateTime _deployedFromJson(String? json) => json != null ? DateTime.parse(json) : DateTime.now().toUtc();
 
   // Maps the 1.x StudyStatus enum values to StudyDeploymentStatusTypes.
-  static StudyDeploymentStatusTypes _statusFromJson(String? json) =>
-      switch (json) {
-        'Invited' ||
-        'DeploymentNotStarted' ||
-        'DeploymentStatusAvailable' ||
-        'DeploymentNotAvailable' => StudyDeploymentStatusTypes.Invited,
-        'DeployingDevices' ||
-        'Deploying' ||
-        'AwaitingOtherDeviceRegistrations' ||
-        'AwaitingDeviceDeployment' ||
-        'DeviceDeploymentReceived' ||
-        'RegisteringDevices' => StudyDeploymentStatusTypes.DeployingDevices,
-        'Running' || 'Deployed' => StudyDeploymentStatusTypes.Running,
-        'Stopped' => StudyDeploymentStatusTypes.Stopped,
-        _ => StudyDeploymentStatusTypes.Invited,
-      };
+  static StudyDeploymentStatusTypes _statusFromJson(String? json) => switch (json) {
+    'Invited' ||
+    'DeploymentNotStarted' ||
+    'DeploymentStatusAvailable' ||
+    'DeploymentNotAvailable' => StudyDeploymentStatusTypes.Invited,
+    'DeployingDevices' ||
+    'Deploying' ||
+    'AwaitingOtherDeviceRegistrations' ||
+    'AwaitingDeviceDeployment' ||
+    'DeviceDeploymentReceived' ||
+    'RegisteringDevices' => StudyDeploymentStatusTypes.DeployingDevices,
+    'Running' || 'Deployed' => StudyDeploymentStatusTypes.Running,
+    'Stopped' => StudyDeploymentStatusTypes.Stopped,
+    _ => StudyDeploymentStatusTypes.Invited,
+  };
 
   /// Creates a new [SmartphoneDeployment].
   ///
@@ -125,11 +121,8 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
 
     // check if this deployment has mapped study description in the application
     // data, i.e., a protocol generated from CAMS
-    if (deployment.applicationData != null &&
-        deployment.applicationData!.containsKey('studyDescription')) {
-      var data = SmartphoneApplicationData.fromJson(
-        deployment.applicationData!,
-      );
+    if (deployment.applicationData != null && deployment.applicationData!.containsKey('studyDescription')) {
+      var data = SmartphoneApplicationData.fromJson(deployment.applicationData!);
       _data.studyDescription = data.studyDescription;
       _data.dataEndPoint = data.dataEndPoint;
       _data.privacySchemaName = data.privacySchemaName;
@@ -154,15 +147,12 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
   }) : super(
          deviceConfiguration: deployment.deviceConfiguration,
          registration: deployment.registration,
-         connectedDevices:
-             protocol.connectedDevices ?? deployment.connectedDevices,
+         connectedDevices: protocol.connectedDevices ?? deployment.connectedDevices,
          connectedDeviceRegistrations: deployment.connectedDeviceRegistrations,
          tasks: protocol.tasks,
          triggers: protocol.triggers,
          taskControls: protocol.taskControls,
-         expectedParticipantData:
-             protocol.expectedParticipantData ??
-             deployment.expectedParticipantData,
+         expectedParticipantData: protocol.expectedParticipantData ?? deployment.expectedParticipantData,
        ) {
     _studyDeploymentId = studyDeploymentId ?? const Uuid().v4();
     _data.studyDescription = protocol.studyDescription;
@@ -218,8 +208,7 @@ class SmartphoneDeployment extends PrimaryDeviceDeployment
     }
   }
 
-  factory SmartphoneDeployment.fromJson(Map<String, dynamic> json) =>
-      _$SmartphoneDeploymentFromJson(json);
+  factory SmartphoneDeployment.fromJson(Map<String, dynamic> json) => _$SmartphoneDeploymentFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$SmartphoneDeploymentToJson(this);
 
