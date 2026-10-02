@@ -10,6 +10,7 @@ part of '../carp_services/carp_services.dart';
 /// This code is based on a Firebase blog post and ported to Dart.
 /// https://firebase.googleblog.com/2015/02/the-2120-ways-to-ensure-unique_68.html
 class PushIdGenerator {
+  /// The 64 characters used in generated keys, in sort order.
   static const String PUSH_CHARS =
       '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
 
@@ -19,6 +20,11 @@ class PushIdGenerator {
 
   static final List<int> _lastRandChars = List.filled(12, 0);
 
+  /// Generates a unique 20-character key.
+  ///
+  /// The first 8 characters encode the current time, so keys sort by
+  /// creation time. Used by [CollectionReference.document] when no name is
+  /// given.
   static String generatePushChildName() {
     int now = DateTime.now().millisecondsSinceEpoch;
     final bool duplicateTime = (now == _lastPushTime);

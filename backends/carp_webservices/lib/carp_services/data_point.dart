@@ -7,7 +7,12 @@
 
 part of 'carp_services.dart';
 
-/// A data point storing meta-information and the data.
+/// A data point for the legacy CAWS data point endpoint, holding a header
+/// and the data.
+///
+/// The data point endpoint is deprecated in CAWS; new code uploads
+/// [Measurement]s through [CarpDataStreamService]. Data points are uploaded
+/// with a [DataPointReference].
 ///
 /// CARP DataPoint definition accepted by the server, version 1.2 (example):
 ///
@@ -54,7 +59,8 @@ class DataPoint {
   ///
   /// This user id is the server-side generated user id (an integer), and **NOT**
   /// the user id that this data point belongs to, which is stored in the
-  /// [DataPointHeader] as the [userId] (a string, typically the email).
+  /// [DataPointHeader] as the [DataPointHeader.userId] (a string, typically
+  /// the email).
   ///
   /// This [createdByUserId] id may, or may not, be identical to the id of the
   /// user who this data point belongs to.
@@ -93,7 +99,8 @@ class DataPoint {
   /// Create a new [DataPoint].
   DataPoint(this.carpHeader, [this.data]);
 
-  /// Create a [DataPoint] from a [Data] object.
+  /// Creates a [DataPoint] from a [Data] object, with the data type as
+  /// [DataPointHeader.dataFormat] and the current UTC time as start time.
   factory DataPoint.fromData(Data data) => DataPoint(
     DataPointHeader(
       dataFormat: data.dataType,
@@ -110,7 +117,8 @@ class DataPoint {
   Map<String, dynamic> toJson() => _$DataPointToJson(this);
 }
 
-/// The header (meta-data) attached to all [DataPoint]s.
+/// The header (meta-data) attached to all [DataPoint]s, like study,
+/// user, time span and data format.
 @JsonSerializable(
   fieldRename: FieldRename.snake,
   includeIfNull: false,
@@ -119,15 +127,14 @@ class DataPoint {
 class DataPointHeader {
   /// An ID of this study.
   ///
-  /// This is the [studyId] from the [CAMSStudyProtocol], if specified.
-  /// If not specified in the [CAMSStudyProtocol], it is the study deployment
-  /// id of the [StudyDeployment] from which this data point was generated.
+  /// CAWS expects the study deployment ID of the [StudyDeployment] from which
+  /// this data point was generated.
   String? studyId;
 
   /// The role of the device that collected this data point.
   String? deviceRoleName;
 
-  /// The id of the [Trigger] in the study deployment that generated this data point.
+  /// The id of the trigger in the study deployment that generated this data point.
   String? triggerId;
 
   /// The ID of the user (if known).

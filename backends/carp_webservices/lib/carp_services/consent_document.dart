@@ -6,8 +6,11 @@
  */
 part of 'carp_services.dart';
 
-/// A [ConsentDocument] contains data read from a consent document in the CARP
-/// web service
+/// A signed consent document read from the legacy CAWS consent endpoint.
+///
+/// Returned by the deprecated [CarpService.createConsentDocument] and
+/// [CarpService.getConsentDocument]. New code stores informed consent as
+/// participant data via [ParticipationReference.setInformedConsent].
 ///
 /// The document can be extracted with the [document] property or by using
 /// subscript syntax to access a specific field.
@@ -22,7 +25,7 @@ class ConsentDocument {
   /// The ID of the snapshot's document
   int get id => snapshot['id'] as int;
 
-  /// The id of the study of this document
+  /// The id of the study deployment of this document
   String? get deploymentId => snapshot['deployment_id'].toString();
 
   /// The id of the user who created this document

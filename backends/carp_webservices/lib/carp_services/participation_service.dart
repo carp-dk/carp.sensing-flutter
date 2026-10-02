@@ -7,7 +7,28 @@
 
 part of 'carp_services.dart';
 
-/// A [ParticipationService] that talks to the CARP backend server(s).
+/// A CARP Core [ParticipationService] that talks to CAWS.
+///
+/// A participant app uses it first: to find the study invitations of the
+/// signed-in user, and to read and write participant data (like informed
+/// consent or address) for a study deployment.
+///
+/// Key points:
+///  * A singleton; call [configure] (or [configureFrom]) and authenticate
+///    with [CarpAuthService] before use.
+///  * [getStudyInvitation] can show an [ActiveParticipationInvitationDialog]
+///    to let the user pick an invitation.
+///  * [participation] returns a [ParticipationReference] bound to one study
+///    deployment, which is the easier way to handle participant data.
+///
+/// The selected invitation gives the study deployment used by
+/// [CarpDeploymentService] to fetch the deployment.
+///
+/// ```dart
+/// CarpParticipationService().configureFrom(CarpService());
+/// final invitation =
+///     await CarpParticipationService().getStudyInvitation(context);
+/// ```
 class CarpParticipationService extends CarpBaseService
     implements ParticipationService {
   static final CarpParticipationService _instance =
@@ -23,11 +44,14 @@ class CarpParticipationService extends CarpBaseService
   String get rpcEndpointName => "participation-service";
 
   /// Gets a [ParticipationReference] for a [studyDeploymentId].
+  ///
+  /// [studyDeploymentId] can be omitted if specified as part of this
+  /// service's [study].
   ParticipationReference participation([String? studyDeploymentId]) =>
       ParticipationReference._(this, getStudyDeploymentId(studyDeploymentId));
 
-  /// Get the list of active participation invitations for an [accountId]
-  /// and for a app named [applicationName].
+  /// Gets the list of active participation invitations for an [accountId]
+  /// and for an app named [applicationName].
   ///
   /// Note that the [accountId] is the unique CARP account id (and not the
   /// username). The [applicationName] is typically the Flutter application name
@@ -36,6 +60,8 @@ class CarpParticipationService extends CarpBaseService
   /// If [accountId] is not specified, the account id of the currently
   /// authenticated [CarpUser] is used.
   /// If [applicationName] is not specified, all types of applications are considered.
+  /// Otherwise only invitations whose `applicationData` holds a matching
+  /// `applicationName` are returned.
   @override
   Future<List<ActiveParticipationInvitation>>
   getActiveParticipationInvitations({
@@ -81,21 +107,23 @@ class CarpParticipationService extends CarpBaseService
     return invitations;
   }
 
-  /// Get a study invitation from CARP by allowing the user to select from
-  /// multiple invitations (if more than one is available).
+  /// Gets a study invitation for the current user, letting the user select
+  /// one if more than one is available.
   ///
   /// Returns the selected invitation. Returns `null` if the user has no invitation(s)
   /// or if the user closes the dialog (if [allowClose] is true).
   ///
   /// If the user is invited to more than one study and [showInvitations] is `true`,
-  /// a user-interface dialog for selecting amongst the invitations is shown.
-  /// If not, the study id of the first invitation is returned.
-  /// If [device] is specified, only invitations for that device are considered.
-  /// The [device] is the full namespace of the device, e.g.,
-  /// "dk.carp.cams.devices.Smartphone".
+  /// an [ActiveParticipationInvitationDialog] is shown in [context].
+  /// If not, the first invitation is returned.
+  /// If [device] is specified, it is used as the `applicationName` filter of
+  /// [getActiveParticipationInvitations].
   ///
-  /// [allowClose] specifies whether the user can close the window without
+  /// [allowClose] specifies whether the user can close the dialog without
   /// selecting an invitation.
+  ///
+  /// Throws a [CarpServiceException] if this service is not configured or
+  /// no user is authenticated.
   Future<ActiveParticipationInvitation?> getStudyInvitation(
     BuildContext context, {
     bool showInvitations = true,

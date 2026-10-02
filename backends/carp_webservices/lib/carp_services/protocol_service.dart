@@ -7,10 +7,12 @@
 
 part of 'carp_services.dart';
 
-/// A [ProtocolService] that talks to the CARP Web Services.
+/// A CARP Core [ProtocolService] and [ProtocolFactoryService] that talks to
+/// CAWS.
 ///
-/// In order to use this service and manage protocols the user must be
-/// authenticated as a researcher.
+/// Stores, versions and fetches [StudyProtocol]s on the server. The user must
+/// be authenticated as a researcher. Participant apps normally do not need
+/// it; they get their deployment from [CarpDeploymentService].
 class CarpProtocolService extends CarpBaseService
     implements ProtocolService, ProtocolFactoryService {
   static final CarpProtocolService _instance = CarpProtocolService._();
@@ -32,8 +34,8 @@ class CarpProtocolService extends CarpBaseService
   Future<void> addVersion(StudyProtocol protocol, [String? versionTag]) async =>
       await _rpc(AddVersion(protocol, versionTag));
 
-  /// Find all [StudyProtocol]'s owned by the owner with [ownerId].
-  /// In the CARP web service, the [ownerId] is the logged in user's [accountId].
+  /// Finds all [StudyProtocol]s owned by the owner with [ownerId].
+  /// In CAWS, the [ownerId] is the [CarpUser.id] of the signed-in user.
   ///
   /// Returns the last version of each [StudyProtocol] owned by the requested owner,
   /// or an empty list when none are found.
