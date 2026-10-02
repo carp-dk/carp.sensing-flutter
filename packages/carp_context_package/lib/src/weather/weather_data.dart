@@ -6,11 +6,23 @@
 
 part of '../../carp_context_package.dart';
 
-/// Holds weather information collected through OpenWeather API.
+/// Current weather at the phone's location, from the OpenWeather API.
+///
+/// Produced by [WeatherProbe] for the [ContextSamplingPackage.WEATHER]
+/// measure. Field values follow the OpenWeather "current weather" response:
+/// temperatures in degrees Celsius, wind speed in m/s, wind direction in
+/// degrees, humidity and cloudiness in percent, pressure in hPa, and
+/// rain/snow in mm.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Weather extends Data {
+  /// Location names and a short ([weatherMain]) and long
+  /// ([weatherDescription]) text, e.g. "Rain" and "light rain".
   String? country, areaName, weatherMain, weatherDescription;
+
+  /// Time of the weather report, and today's sunrise and sunset.
   DateTime? date, sunrise, sunset;
+
+  /// Weather values; see the class description for units.
   double? latitude,
       longitude,
       pressure,
@@ -28,6 +40,9 @@ class Weather extends Data {
 
   Weather() : super();
 
+  /// Creates a [Weather] from the `weather` plugin's `Weather` object.
+  ///
+  /// Throws if the plugin data has no temperature values.
   Weather.fromWeatherData(weather.Weather weather)
     : country = weather.country,
       areaName = weather.areaName,

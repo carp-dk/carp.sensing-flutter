@@ -1,6 +1,11 @@
 part of '../../carp_context_package.dart';
 
-/// Collects local weather information using the [WeatherServiceManager].
+/// Collects local weather for [ContextSamplingPackage.WEATHER].
+///
+/// A [MeasurementProbe] that gets the phone's location from [LocationManager]
+/// and asks the OpenWeather API (through [WeatherServiceManager]) for a
+/// [Weather] measurement. Returns an `Error` measurement if no
+/// [WeatherService] is in the protocol or the lookup fails.
 class WeatherProbe extends MeasurementProbe {
   @override
   WeatherServiceManager get deviceManager =>

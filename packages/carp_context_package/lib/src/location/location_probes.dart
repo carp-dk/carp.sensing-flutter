@@ -6,9 +6,11 @@
 
 part of '../../carp_context_package.dart';
 
-/// Collects streaming location information from the underlying OS's location API.
-/// Is a [StreamProbe] that generates a [Location] data point every time
-/// location is changed.
+/// Collects streaming location information from the OS's location API.
+///
+/// A [StreamProbe] that emits a [Location] every time the location changes.
+/// Not used by [LocationSamplingPackage], which uses
+/// [ConfigurableLocationProbe] instead.
 class LocationProbe extends StreamProbe {
   @override
   LocationServiceManager get deviceManager =>
@@ -20,16 +22,19 @@ class LocationProbe extends StreamProbe {
   );
 }
 
-/// A probe that collects location data from the underlying OS's location API.
+/// Collects [Location] data for the [ContextSamplingPackage.LOCATION] measure.
 ///
-/// This probe can be configured to collect location data continuously (default)
-/// or only once using a [LocationSamplingConfiguration].
-/// If the configuration is set to collect location data only once, the probe
-/// will automatically stop after collecting one location.
+/// Collects location continuously (default) or only once, set by a
+/// [LocationSamplingConfiguration]. In one-time mode it pauses itself 5
+/// seconds after collecting one location; the next resume (e.g. from a
+/// periodic trigger) collects a new one. Uses the [LocationManager] of its
+/// [LocationServiceManager]. Asks for location permission on resume and
+/// collects nothing if it is not granted.
 class ConfigurableLocationProbe extends Probe {
   LocationSamplingConfiguration? _configuration;
   StreamSubscription<Measurement>? _subscription;
 
+  /// True if the [LocationSamplingConfiguration] asks for one location only.
   bool get oneTimeSampling => _configuration?.once ?? false;
 
   @override
