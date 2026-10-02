@@ -4,11 +4,24 @@
  * found in the LICENSE file.
  */
 
-/// The sampling package library holds the built-in sampling packages:
+/// The built-in CAMS sampling packages, which collect data from the phone itself.
 ///
-///  * [DeviceSamplingPackage] - a sampling package for collecting information from the device hardware.
-///  * [SensorSamplingPackage] - a sampling package for collecting data from the basic phone sensors:
-///  * [MonitoringSamplingPackage] - a sampling package for monitoring data sampling (e.g, errors, completed tasks,etc.)
+///  * [DeviceSamplingPackage] - information about the phone and the app.
+///    Measure types: `dk.cachet.carp.deviceinformation`,
+///    `dk.cachet.carp.applicationinformation`, `dk.cachet.carp.freememory`,
+///    `dk.cachet.carp.batterystate`, `dk.cachet.carp.screenevent`
+///    (Android only), `dk.cachet.carp.applifecycleevent`,
+///    `dk.cachet.carp.timezone`, and `dk.cachet.carp.heartbeat`.
+///  * [SensorSamplingPackage] - the basic phone sensors.
+///    Measure types: `dk.cachet.carp.acceleration`,
+///    `dk.cachet.carp.nongravitationalacceleration`,
+///    `dk.cachet.carp.accelerationfeatures`, `dk.cachet.carp.rotation`,
+///    `dk.cachet.carp.magneticfield`, `dk.cachet.carp.ambientlight`
+///    (Android only), `dk.cachet.carp.stepevent`, and `dk.cachet.carp.stepcount`.
+///
+/// Both run on Android and iOS (except where noted) and need no extra device:
+/// they use the [Smartphone]. The monitoring package
+/// ([MonitoringSamplingPackage]) is part of the [domain] library.
 library;
 
 import 'dart:async';

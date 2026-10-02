@@ -7,6 +7,10 @@
 
 part of '../../domain.dart';
 
+/// A human-readable description of a study: title, purpose, and who runs it.
+///
+/// Stored as [SmartphoneStudyProtocol.studyDescription] and copied to each
+/// [SmartphoneDeployment], so the app can show it to the participant.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyDescription extends Serializable {
   /// A longer printer-friendly title for this study.
@@ -25,7 +29,7 @@ class StudyDescription extends Serializable {
   /// The URL pointing to a web page with the privacy policy of this study.
   String? privacyPolicyUrl;
 
-  /// The primary investigator (PI) responsible of this study.
+  /// The principal investigator (PI) responsible for this study.
   StudyResponsible? responsible;
 
   StudyDescription({
@@ -53,11 +57,16 @@ class StudyDescription extends Serializable {
 /// Typically the Principal Investigator (PI) who is responsible for the study.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyResponsible extends Serializable {
+  /// A unique id of this person.
   String id;
   String name;
+
+  /// The job title, e.g. "Professor".
   String? title;
   String? email;
   String? address;
+
+  /// The institution this person belongs to.
   String? affiliation;
 
   StudyResponsible({

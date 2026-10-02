@@ -8,12 +8,15 @@ part of '../../domain.dart';
 
 // This file contains device configurations used in CAMS protocols.
 
-/// Root class for all CAMS device configurations.
+/// Base class for CAMS connected-device configurations.
 ///
-/// Note that we define a new CAMS-specific device namespace which is
-/// different from the CARP Core device namespace.
+/// Extends the carp_core [DeviceConfiguration] and puts the JSON type in the
+/// CAMS device namespace [CAMS_DEVICE_NAMESPACE], which is different from the
+/// carp_core device namespace. Sampling packages extend it (or [BLEDevice] /
+/// [ServiceConfiguration]) to define the devices they support.
 abstract class CamsDevice<TRegistration extends DeviceRegistration>
     extends DeviceConfiguration<TRegistration> {
+  /// The JSON type namespace of all CAMS devices and device registrations.
   static const CAMS_DEVICE_NAMESPACE = 'dk.carp.cams.devices';
 
   CamsDevice({required super.roleName, super.isOptional});
@@ -22,10 +25,11 @@ abstract class CamsDevice<TRegistration extends DeviceRegistration>
   String get jsonType => '$CAMS_DEVICE_NAMESPACE.$runtimeType';
 }
 
-/// Root class for all CAMS primary device configurations.
+/// Base class for CAMS primary device configurations.
 ///
-/// This can be used to defined different types of primary devices, which
-/// are supported by different CAMS applications. See #546 for details.
+/// A primary device runs the study and collects data from connected devices.
+/// [Smartphone] is the built-in one; extend this class to define other types
+/// of primary devices supported by different CAMS apps (see issue #546).
 abstract class PrimaryDevice<TRegistration extends DeviceRegistration>
     extends PrimaryDeviceConfiguration<TRegistration> {
   PrimaryDevice({required super.roleName});
@@ -34,8 +38,18 @@ abstract class PrimaryDevice<TRegistration extends DeviceRegistration>
   String get jsonType => '${CamsDevice.CAMS_DEVICE_NAMESPACE}.$runtimeType';
 }
 
-/// Configuration of a smartphone that can be part of CAMS mobile
-/// sensing study protocols.
+/// The smartphone that runs a CAMS study: the primary device of a protocol.
+///
+/// Add it with [SmartphoneStudyProtocol.addPrimaryDevice]. It supports the
+/// measures of the built-in [MonitoringSamplingPackage], [DeviceSamplingPackage],
+/// and [SensorSamplingPackage].
+///
+/// Key points:
+///  * The default [roleName] is [DEFAULT_ROLE_NAME].
+///  * [createRegistration] reads the phone details from [DeviceInfoService];
+///    initialize it first to get correct values.
+///
+/// See also [SmartphoneRegistration], the registration it creates.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
   /// The type of a smartphone device.
@@ -52,10 +66,16 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
         ..addSamplingSchema(DeviceSamplingPackage().samplingSchemes)
         ..addSamplingSchema(SensorSamplingPackage().samplingSchemes);
 
-  /// Create a new [Smartphone] device.
-  /// If [roleName] is not specified, then the [Smartphone.DEFAULT_ROLE_NAME] is used.
+  /// Creates a new [Smartphone] device.
+  ///
+  /// If [roleName] is not specified, [Smartphone.DEFAULT_ROLE_NAME] is used.
   Smartphone({super.roleName = Smartphone.DEFAULT_ROLE_NAME});
 
+  /// Creates a [SmartphoneRegistration] with details of this phone.
+  ///
+  /// [deviceId] defaults to [DeviceInfoService.deviceID] and
+  /// [deviceDisplayName] to a name built from platform, model, and SDK.
+  /// Logs a warning if [DeviceInfoService] is not initialized.
   @override
   SmartphoneRegistration createRegistration({
     String? deviceId,
@@ -104,14 +124,17 @@ class Smartphone extends PrimaryDevice<SmartphoneRegistration> {
   Map<String, dynamic> toJson() => _$SmartphoneToJson(this);
 }
 
-/// A Bluetooth Low Energy (BLE) device configuration.
+/// A connected device that talks to the phone over Bluetooth Low Energy (BLE).
 ///
-/// Holds high-level scan configuration for BLE devices.
+/// Holds the scan settings used to find the device. Its registration is a
+/// [BLEDeviceRegistration]. Extend it for a specific BLE device, like
+/// [BLEHeartRateDevice].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BLEDevice<TRegistration extends BLEDeviceRegistration>
     extends CamsDevice<TRegistration> {
-  /// Advertised service UUIDs to filter for.
-  /// String representation of UUIDs, for example: "0000180D-0000-1000-8000-00805f9b34fb"
+  /// Advertised service UUIDs to filter for. Empty means no filter.
+  ///
+  /// UUIDs as strings, for example: "0000180D-0000-1000-8000-00805f9b34fb".
   @JsonKey(defaultValue: [])
   List<String> serviceUuids = [];
 
@@ -123,11 +146,11 @@ class BLEDevice<TRegistration extends BLEDeviceRegistration>
   int? minRssi;
 
   /// Whether to receive repeated scan results for the same device.
-  /// Useful for RSSI updates.
+  /// Useful for RSSI updates. Default is `true`.
   @JsonKey(defaultValue: true)
   bool allowDuplicates = true;
 
-  /// Scan timeout.
+  /// Scan timeout. If `null`, the scan has no timeout.
   Duration? timeout;
 
   BLEDevice({
@@ -151,11 +174,12 @@ class BLEDevice<TRegistration extends BLEDeviceRegistration>
   Map<String, dynamic> toJson() => _$BLEDeviceToJson(this);
 }
 
-/// A Bluetooth Low Energy (BLE) device which implements a GATT Heart
-/// Rate service (https://www.bluetooth.com/specifications/gatt/services/).
+/// A [BLEDevice] that implements the standard GATT Heart Rate service
+/// (https://www.bluetooth.com/specifications/gatt/services/).
 ///
-/// If no service UUIDs are specified, then the standard Heart Rate service UUID
-/// is used.
+/// Supports the heart rate, interbeat interval, and skin contact measures of
+/// [CarpDataTypes]. If no service UUIDs are specified, the standard Heart Rate
+/// service UUID (`0x180D`) is used.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BLEHeartRateDevice extends BLEDevice<BLEDeviceRegistration> {
   BLEHeartRateDevice({
@@ -193,11 +217,11 @@ class BLEHeartRateDevice extends BLEDevice<BLEDeviceRegistration> {
   Map<String, dynamic> toJson() => _$BLEHeartRateDeviceToJson(this);
 }
 
-/// An 'connected device' which is a service.
+/// A connected device that is a software service rather than hardware.
 ///
-/// Examples include online services, like a weather service, which the phone
-/// app connects to via the internet, or a local service running on the phone,
-/// where data can be collected from the service directly, like a health service.
+/// Examples are an online service, like a weather service, which the app
+/// reaches over the internet, or a local service on the phone, like a health
+/// service. Its registration is a [ServiceRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ServiceConfiguration<TRegistration extends ServiceRegistration>
     extends CamsDevice<TRegistration> {

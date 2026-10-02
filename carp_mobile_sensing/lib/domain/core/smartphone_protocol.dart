@@ -7,11 +7,19 @@
 
 part of '../../domain.dart';
 
-/// A mixin holding smartphone-specific data for a [SmartphoneStudyProtocol] and
+/// Adds the CAMS-specific fields to a [SmartphoneStudyProtocol] and a
 /// [SmartphoneDeployment].
+///
+/// The fields (study description, data endpoint, privacy schema, etc.) are kept
+/// in a [SmartphoneApplicationData] object, which is serialized as the
+/// `applicationData` of the carp_core [StudyProtocol] / [PrimaryDeviceDeployment].
+/// This way a CAMS protocol can be stored and deployed by any CARP backend.
 mixin SmartphoneProtocolExtension {
   SmartphoneApplicationData _data = SmartphoneApplicationData();
 
+  /// The [SmartphoneApplicationData] as JSON.
+  ///
+  /// Setting it to `null` resets all CAMS-specific fields.
   Map<String, dynamic>? get applicationData => _data.toJson();
 
   set applicationData(Map<String, dynamic>? data) => _data = (data != null)
@@ -37,15 +45,16 @@ mixin SmartphoneProtocolExtension {
   set studyDescription(StudyDescription? description) =>
       _data.studyDescription = description;
 
+  /// The description from [studyDescription], or an empty string if none.
   String get description => studyDescription?.description ?? '';
 
-  /// The PI responsible for this protocol.
+  /// The PI responsible for this protocol, taken from [studyDescription].
   @JsonKey(includeFromJson: false, includeToJson: false)
   StudyResponsible? get responsible => studyDescription?.responsible;
 
-  /// Specifies where and how to stored or upload the data collected from this
-  /// deployment. If `null`, the sensed data is not stored, but may still be
-  /// used in the app.
+  /// Where and how to store or upload the data collected in this study.
+  ///
+  /// If `null`, the data is not stored, but can still be used in the app.
   @JsonKey(includeFromJson: false, includeToJson: false)
   DataEndPoint? get dataEndPoint => _data.dataEndPoint;
   set dataEndPoint(DataEndPoint? dataEndPoint) =>
@@ -54,22 +63,30 @@ mixin SmartphoneProtocolExtension {
   /// The name of a [PrivacySchema] to be used for protecting sensitive data.
   ///
   /// Use [PrivacySchema.DEFAULT] for the default, built-in schema.
-  /// If  not specified, no privacy schema is used and data is saved as collected.
+  /// If not specified, no privacy schema is used and data is saved as collected.
   @JsonKey(includeFromJson: false, includeToJson: false)
   String? get privacySchemaName => _data.privacySchemaName;
   set privacySchemaName(String? name) => _data.privacySchemaName = name;
 
+  /// Adds app-specific [value] under [key].
+  ///
+  /// Use this to store your own data in the protocol. It is copied to all
+  /// deployments of the protocol and can be read with [getApplicationData].
   void addApplicationData(String key, dynamic value) {
     _data.applicationData ??= {};
     _data.applicationData?[key] = value;
   }
 
+  /// The app-specific value stored under [key], or `null` if none.
   dynamic getApplicationData(String key) => _data.applicationData?[key];
 
   void removeApplicationData(String key) => _data.applicationData?.remove(key);
 }
 
-/// Holds application-specific configuration for a [SmartphoneStudyProtocol].
+/// The CAMS-specific data of a [SmartphoneStudyProtocol] or [SmartphoneDeployment].
+///
+/// Serialized as the `applicationData` of the carp_core protocol and deployment.
+/// You normally access these fields through [SmartphoneProtocolExtension].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SmartphoneApplicationData {
   /// The version tag of the study protocol snapshot.
@@ -91,15 +108,15 @@ class SmartphoneApplicationData {
   /// purpose, and the responsible researcher for this study.
   StudyDescription? studyDescription;
 
-  /// Specifies where and how to stored or upload the data collected from this
-  /// deployment. If `null`, the sensed data is not stored, but may still be
-  /// used in the app.
+  /// Where and how to store or upload the data collected in this study.
+  ///
+  /// If `null`, the data is not stored, but can still be used in the app.
   DataEndPoint? dataEndPoint;
 
   /// The name of a [PrivacySchema].
   ///
   /// Use [PrivacySchema.DEFAULT] for the default, built-in privacy schema.
-  /// If  not specified, no privacy schema is used and data is saved as collected.
+  /// If not specified, no privacy schema is used and data is saved as collected.
   String? privacySchemaName;
 
   /// Application-specific data to be stored as part of the study protocol
@@ -119,15 +136,26 @@ class SmartphoneApplicationData {
   Map<String, dynamic> toJson() => _$SmartphoneApplicationDataToJson(this);
 }
 
-/// A description of how a study is to be executed on a smartphone.
+/// A study protocol that runs on a smartphone.
 ///
-/// A study protocol defines how a study is to be executed, defining the type(s) of
-/// primary device(s) ([PrimaryDeviceConfiguration]) responsible for
-/// aggregating data, the optional devices ([DeviceConfiguration]) connected
-/// to them, and the [TaskControl]'s which lead to data collection on
-/// said devices.
+/// A protocol says *what* to measure and *when*. It holds the primary device
+/// ([PrimaryDeviceConfiguration]) that collects data, the connected devices
+/// ([DeviceConfiguration]), and the task controls ([TaskControl]) that pair a
+/// trigger with a task. CAMS adds a [studyDescription], a [dataEndPoint] that
+/// says where data goes, and a [privacySchemaName].
+/// You build one in code (or load it from JSON) and add it with
+/// [SmartPhoneClientManager.addStudyFromProtocol].
 ///
-/// A simple study protocol can be specified like this:
+/// Key points:
+///  * The first device added with [addPrimaryDevice] is the phone running the study.
+///  * [addTaskControl] pairs one [TriggerConfiguration] with one [TaskConfiguration].
+///  * Adding a device also adds a [MonitoringTask] that collects errors and
+///    triggered and completed tasks from that device.
+///  * Serializes to JSON, so the same protocol can be deployed from a server.
+///  * [SmartphoneStudyProtocol.local] creates a ready-to-use local protocol.
+///
+/// See also [SmartphoneDeployment], which is created from a protocol, and
+/// [SmartphoneDeploymentExecutor], which runs it.
 ///
 /// ```dart
 /// // Create a study protocol storing data in a local SQLite database.
@@ -143,7 +171,7 @@ class SmartphoneApplicationData {
 /// protocol.addPrimaryDevice(phone);
 ///
 /// // Automatically collect step count, ambient light, screen activity, and
-/// // battery level. Sampling is delaying by 10 seconds.
+/// // battery level. Sampling starts immediately.
 /// protocol.addTaskControl(
 ///   ImmediateTrigger(),
 ///   BackgroundTask(measures: [
@@ -166,18 +194,21 @@ class SmartphoneStudyProtocol extends StudyProtocol
   // These static app names can be used as [applicationName] in the protocol.
   // It is the name of the Flutter app as specified in the pubspec.yaml file.
 
-  // The example app included in the CARP Mobile Sensing framework.
+  /// The [applicationName] of the example app included in CAMS.
   static const String CAMS_EXAMPLE_APP_NAME = 'carp_mobile_sensing_example';
 
-  // The CARP Mobile Sensing framework demo app.
+  /// The [applicationName] of the CARP Mobile Sensing demo app.
   static const String CAMS_DEMO_APP_NAME = 'carp_mobile_sensing_app';
 
-  // The Pulmonary Monitor demo app.
+  /// The [applicationName] of the Pulmonary Monitor demo app.
   static const String PULMONARY_MONITOR_APP_NAME = 'pulmonary_monitor_app';
 
-  // The CARP Studies app.
+  /// The [applicationName] of the CARP Studies app.
   static const String CARP_STUDY_APP_NAME = 'carp_study_app';
 
+  /// Sets the description in [studyDescription].
+  ///
+  /// Creates a [StudyDescription] titled with [name] if there is none.
   @override
   set description(String? description) {
     if (studyDescription != null) {
@@ -190,7 +221,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
     }
   }
 
-  /// Create a new [SmartphoneStudyProtocol] with a unique [name].
+  /// Creates a new [SmartphoneStudyProtocol] with a unique [name].
   ///
   /// The [ownerId] is typically the ID of the user uploading this protocol to CAWS.
   /// If [ownerId] is not specified, a UUID will be generated.
@@ -205,13 +236,13 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// The [studyDescription] contains the title, description, purpose, and the
   /// responsible researcher for this study.
   ///
-  /// The [dataEndPoint] specifies where and how to stored or upload the data
-  /// collected from this deployment. If `null`, the sensed data is not stored, but
-  /// may still be used in the app.
+  /// The [dataEndPoint] specifies where and how to store or upload the data
+  /// collected in this study. If `null`, the data is not stored, but can still
+  /// be used in the app.
   ///
   /// The [privacySchemaName] is the name of a [PrivacySchema] to be used for
   /// protecting sensitive data. Use [PrivacySchema.DEFAULT] for the default,
-  /// built-in schema. If  not specified, no privacy schema is used and data is
+  /// built-in schema. If not specified, no privacy schema is used and data is
   /// saved as collected.
   SmartphoneStudyProtocol({
     String? ownerId,
@@ -233,7 +264,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
     );
   }
 
-  /// Create a [SmartphoneStudyProtocol] for local data collection
+  /// Creates a [SmartphoneStudyProtocol] for local data collection
   /// using this smartphone as the primary device and with just one
   /// participant role called "Participant".
   ///
@@ -278,6 +309,9 @@ class SmartphoneStudyProtocol extends StudyProtocol
     return protocol;
   }
 
+  /// Adds [primaryDevice] and a [MonitoringTask] for it.
+  ///
+  /// Always returns `true`.
   @override
   bool addPrimaryDevice(PrimaryDeviceConfiguration primaryDevice) {
     super.addPrimaryDevice(primaryDevice);
@@ -286,6 +320,10 @@ class SmartphoneStudyProtocol extends StudyProtocol
     return true;
   }
 
+  /// Adds [device] as connected to [primaryDevice], plus a [MonitoringTask]
+  /// for it.
+  ///
+  /// Always returns `true`.
   @override
   bool addConnectedDevice(
     DeviceConfiguration device,
@@ -313,9 +351,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
     );
   }
 
-  /// Get the [DeviceConfiguration] for the device with the given [roleName].
-  /// This can be either a primary device or a connected device.
-  /// Returns `null` if no such device is found.
+  /// The primary or connected device with [roleName], or `null` if not found.
   DeviceConfiguration? getDeviceByRoleName(String roleName) {
     for (var device in devices) {
       if (device.roleName == roleName) {

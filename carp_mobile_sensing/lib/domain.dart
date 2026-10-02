@@ -4,19 +4,16 @@
  * found in the LICENSE file.
  */
 
-/// This library hold the CAMS-specific extensions and implementation of the
-/// [carp_core](https://pub.dev/packages/carp_core) domain classes like
-/// [SmartphoneStudyProtocol] and [PeriodicTrigger].
+/// The CAMS domain model: what a study runs, on which devices, and where data goes.
 ///
-/// Also hold JSON logic to handle de/serialization of the domain objects.
-///
-/// In terms of Domain-Driven Design (DDD), "the domain layer is responsible for
-/// implementing the core business logic and rules of the system. It contains
-/// the domain model, which is a representation of the concepts and behaviors
-/// that are relevant to the problem domain. The domain model consists of entities,
-/// value objects, aggregates, services, events, and other elements that capture
-/// the essence and meaning of the domain."
-/// From [Domain-Driven Design (DDD): A Guide to Building Scalable, High-Performance Systems](https://romanglushach.medium.com/domain-driven-design-ddd-a-guide-to-building-scalable-high-performance-systems-5314a7fe053c) by Roman Glushach.
+/// Extends the [carp_core](https://pub.dev/packages/carp_core) domain model with
+/// smartphone-specific classes, like the protocol ([SmartphoneStudyProtocol]),
+/// devices ([Smartphone], [BLEHeartRateDevice]), triggers ([PeriodicTrigger],
+/// [RecurrentScheduledTrigger]), tasks ([AppTask], [FunctionTask]), and
+/// data endpoints ([SQLiteDataEndPoint]). It also defines the service interfaces
+/// that the runtime and infrastructure layers implement: [DataManager],
+/// [NotificationManager], [StudyProtocolManager], and [SamplingPackage].
+/// All domain classes can be serialized to and from JSON.
 library;
 
 import 'dart:io';
