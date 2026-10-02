@@ -7,32 +7,40 @@
 
 part of carp_firebase_backend;
 
-/// Specify a Google Firebase endpoint.
+/// The Google Firebase project and the credentials used to sign in to it.
+///
+/// Shared by [FirebaseStorageDataEndPoint] and [FirebaseDatabaseDataEndPoint]
+/// through [FirebaseDataEndPoint.firebaseEndPoint].
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class FirebaseEndPoint {
-  /// The name of the Firebase endpoint. Can be anything, but its recommended
-  /// to name it according to the Firebase bucket.
+  /// The name of the Firebase endpoint.
+  ///
+  /// Can be anything, but it is recommended to use the name of the Firebase
+  /// bucket. Also used as the name of the Firebase app.
   String name;
 
-  /// The URI of the Firebase endpoint.
+  /// The URI of the Firebase endpoint, used as the Firebase Storage bucket.
   String uri;
 
-  /// The authentization method used for Firebase.
-  /// See [FireBaseAuthenticationMethods] for options.
+  /// The authentication method used for Firebase.
+  ///
+  /// One of [FireBaseAuthenticationMethods]. Only
+  /// [FireBaseAuthenticationMethods.GOOGLE] and
+  /// [FireBaseAuthenticationMethods.PASSWORD] are implemented.
   ///
   /// See [Firebase Authentication](https://firebase.google.com/docs/auth/)
   /// for a list of authentication options.
   String firebaseAuthenticationMethod;
 
-  /// Email (used as username) if using password authentication.
+  /// Email (used as username), required for password authentication.
   String? email;
 
-  /// Password if using password authentication.
+  /// Password, required for password authentication.
   ///
   /// TODO : right now in clear text -- not so good.
   String? password;
 
-  /// Custom token, if using custom auth system integration.
+  /// Custom token, if using custom auth system integration. Not used yet.
   String? token;
 
   /// The Firebase project ID (not the Name!).
@@ -51,8 +59,9 @@ class FirebaseEndPoint {
   /// Should be set up in the Firebase project settings.
   String iOSGoogleAppID;
 
-  // The Firebase GCM (Google Cloud Messaging) Sender ID.
-  // See project setting under the 'Cloud Messaging' tab.
+  /// The Firebase GCM (Google Cloud Messaging) Sender ID.
+  ///
+  /// See the project settings under the 'Cloud Messaging' tab.
   String gcmSenderID;
 
   /// Creates a [FirebaseEndPoint].
@@ -76,25 +85,29 @@ class FirebaseEndPoint {
   Map<String, dynamic> toJson() => _$FirebaseEndPointToJson(this);
 }
 
+/// A data endpoint that refers to a [FirebaseEndPoint].
+///
+/// Mixed into [FirebaseStorageDataEndPoint] and [FirebaseDatabaseDataEndPoint].
 abstract class FirebaseDataEndPoint {
   /// The Firebase endpoint.
   late FirebaseEndPoint firebaseEndPoint;
 }
 
-/// Specify a Google Firebase Database (Cloud Firestore) document endpoint.
+/// A data endpoint that uploads each measurement as a JSON document to
+/// Cloud Firestore.
 ///
-/// See [Cloud Firestore](https://firebase.google.com/docs/firestore) for description of the Firebase cloud database.
+/// Handled by a [FirebaseDatabaseDataManager]. Needs the phone to be online.
+/// See [Cloud Firestore](https://firebase.google.com/docs/firestore) for a
+/// description of the Firebase cloud database.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class FirebaseDatabaseDataEndPoint extends DataEndPoint
     with FirebaseDataEndPoint {
-  /// When uploading to the Firebase Database using the [FirebaseDatabaseDataManager],
-  /// [collection] hold the name of the collection to store json objects.
-  /// May contain sub-collections separated with `/`.
+  /// The name of the Firestore collection that holds the JSON objects.
   ///
-  /// JSON objects will be stored in collections named <study_id>/<device_id>
-  /// relative to this path.
-  /// For example, if collection = "carp_data", study_id = "1234" and device_id = "987234",
-  /// the data will be stored as documents in "carp_data/1234/987234/".
+  /// JSON objects are stored in `<collection>/<study_deployment_id>/<device_id>/upload/<data_type>`.
+  /// For example, if collection = "carp_data", study_deployment_id = "1234" and
+  /// device_id = "987234", location data is stored as documents in
+  /// "carp_data/1234/987234/upload/location".
   String collection;
 
   /// Creates a [FirebaseDatabaseDataEndPoint].
@@ -110,21 +123,21 @@ class FirebaseDatabaseDataEndPoint extends DataEndPoint
   Map<String, dynamic> toJson() => _$FirebaseDatabaseDataEndPointToJson(this);
 }
 
-/// Specify a Google Firebase Storage file endpoint.
+/// A data endpoint that uploads (zipped) JSON files to Firebase Storage.
 ///
-/// See [Firebase Storage](https://firebase.google.com/docs/storage) for
+/// Handled by a [FirebaseStorageDataManager], which writes files locally with
+/// a [FileDataManager] and uploads each file when it is closed.
+/// See [Firebase Storage](https://firebase.google.com/docs/storage) for a
 /// description of Firebase file storage.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class FirebaseStorageDataEndPoint extends FileDataEndPoint
     with FirebaseDataEndPoint {
-  /// When uploading to the Firebase Storage using the [FirebaseStorageDataManager],
-  /// [path] hold the folder path where to store files. May contain sub-folders
-  /// separated with `/`.
+  /// The folder path in Firebase Storage where files are stored.
   ///
-  /// Data (zip files) will be stored in folders named <study_id>/<device_id>
-  /// relative to this path.
-  /// For example, if path = "sensing/data", study_id = "1234" and device_id = "987234",
-  /// the data will be stored in "sensing/data/1234/987234/".
+  /// May contain sub-folders separated with `/`. Files are stored in
+  /// `<path>/<study_deployment_id>/<device_id>/`. For example, if
+  /// path = "sensing/data", study_deployment_id = "1234" and device_id = "987234",
+  /// files are stored in "sensing/data/1234/987234/".
   String path;
 
   /// Creates a [FirebaseStorageDataEndPoint].
@@ -148,7 +161,10 @@ class FirebaseStorageDataEndPoint extends FileDataEndPoint
   Map<String, dynamic> toJson() => _$FirebaseStorageDataEndPointToJson(this);
 }
 
-/// A enumeration of possible authentication methods in Firebase.
+/// The authentication methods in Firebase, used in
+/// [FirebaseEndPoint.firebaseAuthenticationMethod].
+///
+/// Only [GOOGLE] and [PASSWORD] are implemented by [FirebaseDataManager].
 class FireBaseAuthenticationMethods {
   static const String PASSWORD = "password";
   static const String GOOGLE = "google";
