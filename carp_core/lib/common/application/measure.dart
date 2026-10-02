@@ -45,20 +45,17 @@ class Measure extends Serializable {
 
   /// Create a measure by specifying its [type] and optionally a
   /// [samplingConfiguration] to override the default sampling configuration.
-  Measure({required this.type, SamplingConfiguration? samplingConfiguration})
-    : super() {
+  Measure({required this.type, SamplingConfiguration? samplingConfiguration}) : super() {
     overrideSamplingConfiguration = samplingConfiguration;
   }
 
   @override
   Function get fromJsonFunction => _$MeasureFromJson;
-  factory Measure.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Measure>(json);
+  factory Measure.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Measure>(json);
   @override
   Map<String, dynamic> toJson() => _$MeasureToJson(this);
   @override
-  String get jsonType =>
-      'dk.cachet.carp.common.application.tasks.Measure.DataStream';
+  String get jsonType => 'dk.cachet.carp.common.application.tasks.Measure.DataStream';
 
   @override
   int get hashCode => type.hashCode;

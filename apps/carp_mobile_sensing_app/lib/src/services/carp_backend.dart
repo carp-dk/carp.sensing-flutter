@@ -54,20 +54,13 @@ class CarpBackend {
   }
 
   /// Open the web-based authentication screen to ask for username & password.
-  Future<CarpUser> authenticate() async =>
-      await CarpAuthService().authenticate();
+  Future<CarpUser> authenticate() async => await CarpAuthService().authenticate();
 
   /// Authenticate to the CAWS host using [username] and [password].
-  Future<CarpUser> authenticateWithUsernamePassword(
-    String username,
-    String password,
-  ) async => await CarpAuthService().authenticateWithUsernamePassword(
-    username: username,
-    password: password,
-  );
+  Future<CarpUser> authenticateWithUsernamePassword(String username, String password) async =>
+      await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
 
   /// Get the study invitation by opening the CAWS study invitation page.
-  Future<ActiveParticipationInvitation?> getStudyInvitation(
-    BuildContext context,
-  ) async => await CarpParticipationService().getStudyInvitation(context);
+  Future<ActiveParticipationInvitation?> getStudyInvitation(BuildContext context) async =>
+      await CarpParticipationService().getStudyInvitation(context);
 }

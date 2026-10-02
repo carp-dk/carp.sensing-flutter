@@ -54,11 +54,7 @@ void main() {
     await Future.delayed(Duration.zero);
 
     expect(
-      events
-          .where(
-            (event) => event.event == StudyStatusEventTypes.DeploymentUpdated,
-          )
-          .length,
+      events.where((event) => event.event == StudyStatusEventTypes.DeploymentUpdated).length,
       1,
       reason: 'a measurement should not be saved once per received deployment',
     );

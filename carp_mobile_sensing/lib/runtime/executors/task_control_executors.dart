@@ -23,12 +23,10 @@ class TaskControlExecutorSamplingState extends SamplingState {
 
   @override
   Function get fromJsonFunction => _$TaskControlExecutorSamplingStateFromJson;
-  factory TaskControlExecutorSamplingState.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<TaskControlExecutorSamplingState>(json);
+  factory TaskControlExecutorSamplingState.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<TaskControlExecutorSamplingState>(json);
   @override
-  Map<String, dynamic> toJson() =>
-      _$TaskControlExecutorSamplingStateToJson(this);
+  Map<String, dynamic> toJson() => _$TaskControlExecutorSamplingStateToJson(this);
 }
 
 /// Runs a [TaskControl]: starts or stops a task each time its trigger fires.
@@ -47,8 +45,7 @@ class TaskControlExecutorSamplingState extends SamplingState {
 ///
 /// See [AppTaskControlExecutor] for app tasks with schedulable triggers.
 class TaskControlExecutor extends AbstractExecutor<TaskControl> {
-  final StreamController<Measurement> _controller =
-      StreamController<Measurement>.broadcast();
+  final StreamController<Measurement> _controller = StreamController<Measurement>.broadcast();
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
 
   final TriggerConfiguration _trigger;
@@ -67,9 +64,8 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   TaskExecutor? get taskExecutor => _taskExecutor;
 
   /// The [DeviceManager] of [targetDevice], or null if none is available.
-  DeviceManager? get targetDeviceManager => SmartPhoneClientManager()
-      .deviceController
-      .getDeviceManager(_targetDevice.type);
+  DeviceManager? get targetDeviceManager =>
+      SmartPhoneClientManager().deviceController.getDeviceManager(_targetDevice.type);
 
   /// Creates an executor for [taskControl].
   ///
@@ -86,27 +82,17 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
       super();
 
   @override
-  SamplingState get samplingState => TaskControlExecutorSamplingState(
-    state,
-    taskControl.triggerId,
-    taskControl.taskName,
-  );
+  SamplingState get samplingState =>
+      TaskControlExecutorSamplingState(state, taskControl.triggerId, taskControl.taskName);
 
   @override
   bool onInitialize() {
     _group.add(_controller.stream);
 
     // Get or create the trigger executor and initialize with this task control executor
-    _triggerExecutor = ExecutorFactory().getTriggerExecutor(
-      studyDeploymentId,
-      taskControl.triggerId,
-    );
+    _triggerExecutor = ExecutorFactory().getTriggerExecutor(studyDeploymentId, taskControl.triggerId);
     if (_triggerExecutor == null) {
-      _triggerExecutor = ExecutorFactory().createTriggerExecutor(
-        studyDeploymentId,
-        taskControl.triggerId,
-        trigger,
-      );
+      _triggerExecutor = ExecutorFactory().createTriggerExecutor(studyDeploymentId, taskControl.triggerId, trigger);
 
       _triggerExecutor?.initialize(trigger, deployment);
     }
@@ -116,9 +102,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
     // get the task executor and add the measurements it collects to the stream group
     _taskExecutor = ExecutorFactory().getTaskExecutor(studyDeploymentId, task);
     if (_taskExecutor == null) {
-      warning(
-        "$runtimeType - Cannot find a TaskExecutor for task type '${task.runtimeType}'.",
-      );
+      warning("$runtimeType - Cannot find a TaskExecutor for task type '${task.runtimeType}'.");
       return false;
     }
     _taskExecutor?.initialize(task, deployment);
@@ -155,9 +139,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   @override
   Future<bool> onResume() async {
     if (triggerExecutor == null) {
-      warning(
-        '$runtimeType - No TriggerExecutor found - call initialize() before resume this task control executor.',
-      );
+      warning('$runtimeType - No TriggerExecutor found - call initialize() before resume this task control executor.');
       return false;
     }
 
@@ -169,8 +151,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
       return false;
     }
 
-    if (triggerExecutor?.state != ExecutorState.Resumed &&
-        !triggerExecutor!._isResuming) {
+    if (triggerExecutor?.state != ExecutorState.Resumed && !triggerExecutor!._isResuming) {
       triggerExecutor?.resume();
     }
     return true;
@@ -195,9 +176,7 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   }
 
   @override
-  Stream<Measurement> get measurements => _group.stream.map(
-    (measurement) => measurement..taskControl = taskControl,
-  );
+  Stream<Measurement> get measurements => _group.stream.map((measurement) => measurement..taskControl = taskControl);
 
   /// The probes of the [taskExecutor]. Empty if there is none.
   List<Probe> get probes => taskExecutor?.probes ?? [];
@@ -211,25 +190,17 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
 /// them as notifications. It then pauses, and resumes again when the last
 /// scheduled time has passed, if the app is still running.
 class AppTaskControlExecutor extends TaskControlExecutor {
-  AppTaskControlExecutor(
-    super.taskControl,
-    super.trigger,
-    super.task,
-    super.targetDevice,
-  );
+  AppTaskControlExecutor(super.taskControl, super.trigger, super.task, super.targetDevice);
 
   @override
   AppTaskExecutor get taskExecutor => super.taskExecutor as AppTaskExecutor;
 
   @override
-  SchedulableTriggerExecutor get triggerExecutor =>
-      super.triggerExecutor as SchedulableTriggerExecutor;
+  SchedulableTriggerExecutor get triggerExecutor => super.triggerExecutor as SchedulableTriggerExecutor;
 
   @override
   Future<bool> onResume() async {
-    debug(
-      '$runtimeType - ${taskControl.taskName} hasBeenScheduledUntil: ${taskControl.hasBeenScheduledUntil}',
-    );
+    debug('$runtimeType - ${taskControl.taskName} hasBeenScheduledUntil: ${taskControl.hasBeenScheduledUntil}');
     final from = taskControl.hasBeenScheduledUntil ?? DateTime.now();
     final to = DateTime.now().add(const Duration(days: 15)); // 15 days ahead
     // get all the instances where the task should be scheduled in the given range
@@ -237,24 +208,16 @@ class AppTaskControlExecutor extends TaskControlExecutor {
 
     if (schedule.isEmpty) {
       // Pause since the schedule is empty and there is not more to schedule.
-      info(
-        '$runtimeType - No scheduled app tasks for task ${taskExecutor.task.name} - pausing executor again.',
-      );
+      info('$runtimeType - No scheduled app tasks for task ${taskExecutor.task.name} - pausing executor again.');
       pause();
     } else {
-      info(
-        '$runtimeType - Buffering ${schedule.length} app tasks ($schedule) for task ${taskExecutor.task.name}',
-      );
+      info('$runtimeType - Buffering ${schedule.length} app tasks ($schedule) for task ${taskExecutor.task.name}');
 
       Iterator<DateTime> it = schedule.iterator;
       DateTime current = DateTime.now();
       while (it.moveNext()) {
         current = it.current;
-        AppTaskController().buffer(
-          taskExecutor,
-          taskControl,
-          triggerTime: current,
-        );
+        AppTaskController().buffer(taskExecutor, taskControl, triggerTime: current);
       }
 
       // Now stop since the schedule has all been enqueued.
@@ -262,9 +225,7 @@ class AppTaskControlExecutor extends TaskControlExecutor {
 
       // .. but start again when the scheduled time has passed.
       // This in the case where the app keeps running in the background
-      var duration =
-          current.millisecondsSinceEpoch -
-          DateTime.now().millisecondsSinceEpoch;
+      var duration = current.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch;
 
       Timer(Duration(milliseconds: duration), () => resume());
     }

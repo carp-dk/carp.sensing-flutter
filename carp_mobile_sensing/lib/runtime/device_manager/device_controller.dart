@@ -37,12 +37,10 @@ class DeviceController extends DeviceDataCollectorFactory {
   /// The device manager of this phone (the primary device).
   ///
   /// Throws a [StateError] if none is registered.
-  SmartphoneDeviceManager get smartphoneDeviceManager =>
-      devices.values.whereType<SmartphoneDeviceManager>().first;
+  SmartphoneDeviceManager get smartphoneDeviceManager => devices.values.whereType<SmartphoneDeviceManager>().first;
 
   /// The device managers whose device is connected now.
-  List<DeviceManager> get connectedDevices =>
-      _devices.values.where((manager) => manager.isConnected).toList();
+  List<DeviceManager> get connectedDevices => _devices.values.where((manager) => manager.isConnected).toList();
 
   /// Whether a registered [SamplingPackage] provides the device [deviceType].
   bool supportsDevice(String deviceType) {
@@ -56,10 +54,8 @@ class DeviceController extends DeviceDataCollectorFactory {
   bool hasDevice(String deviceType) => _devices.containsKey(deviceType);
 
   @override
-  DeviceManager? createConnectedDataCollector(
-    String deviceType,
-    DeviceRegistration deviceRegistration,
-  ) => getDeviceManager(deviceType);
+  DeviceManager? createConnectedDataCollector(String deviceType, DeviceRegistration deviceRegistration) =>
+      getDeviceManager(deviceType);
 
   /// Returns the device manager for [deviceType].
   ///
@@ -120,8 +116,7 @@ class DeviceController extends DeviceDataCollectorFactory {
   }
 
   /// The short names of all device types in [devices], for logging.
-  String devicesToString() =>
-      _devices.keys.map((key) => key.split('.').last).toString();
+  String devicesToString() => _devices.keys.map((key) => key.split('.').last).toString();
 
   @override
   String toString() => '$runtimeType (${_devices.length} devices registered)';

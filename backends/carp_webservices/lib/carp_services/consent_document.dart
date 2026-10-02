@@ -44,6 +44,5 @@ class ConsentDocument {
   dynamic operator [](String key) => document[key];
 
   @override
-  String toString() =>
-      "ConsentDocument - id : $id, deployment: $deploymentId, document size: ${document.length}";
+  String toString() => "ConsentDocument - id : $id, deployment: $deploymentId, document size: ${document.length}";
 }

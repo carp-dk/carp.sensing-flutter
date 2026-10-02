@@ -105,8 +105,7 @@ abstract class AbstractDataManager implements DataManager {
   late SmartphoneDeployment _deployment;
   DataEndPoint? _dataEndPoint;
   StreamSubscription<Measurement>? _subscription;
-  final StreamController<DataManagerEvent> _controller =
-      StreamController.broadcast();
+  final StreamController<DataManagerEvent> _controller = StreamController.broadcast();
 
   /// The [DataEndPoint] that this data manager is handling.
   ///
@@ -138,11 +137,7 @@ abstract class AbstractDataManager implements DataManager {
     info('Configuring $runtimeType...');
     _deployment = deployment;
     _dataEndPoint = dataEndPoint;
-    _subscription = measurements.listen(
-      (measurement) => onMeasurement(measurement),
-      onError: onError,
-      onDone: onDone,
-    );
+    _subscription = measurements.listen((measurement) => onMeasurement(measurement), onError: onError, onDone: onDone);
     addEvent(DataManagerEvent(DataManagerEventTypes.configured));
   }
 
@@ -155,9 +150,8 @@ abstract class AbstractDataManager implements DataManager {
 
   /// Saves [error] as an [Error] measurement via [onMeasurement].
   @override
-  Future<void> onError(Object? error) async => await onMeasurement(
-    Measurement.fromData(Error(message: error.toString())),
-  );
+  Future<void> onError(Object? error) async =>
+      await onMeasurement(Measurement.fromData(Error(message: error.toString())));
 
   @override
   @mustCallSuper
@@ -197,8 +191,7 @@ class DataManagerRegistry {
 
   /// Registers a [factory] for its [DataManagerFactory.type], replacing any
   /// existing one.
-  void register(DataManagerFactory factory) =>
-      _registry[factory.type] = factory;
+  void register(DataManagerFactory factory) => _registry[factory.type] = factory;
 
   /// Registers all [factories], see [register].
   void registerAll(List<DataManagerFactory> factories) {

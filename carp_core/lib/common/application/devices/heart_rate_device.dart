@@ -13,23 +13,15 @@ part of '../../../common.dart';
 /// [CarpDataTypes.INTERBEAT_INTERVAL] and [CarpDataTypes.SENSOR_SKIN_CONTACT]
 /// data. Optional by default. Registered with a [MACAddressDeviceRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class BLEHeartRateDevice
-    extends DeviceConfiguration<MACAddressDeviceRegistration> {
+class BLEHeartRateDevice extends DeviceConfiguration<MACAddressDeviceRegistration> {
   BLEHeartRateDevice({required super.roleName, super.isOptional = true});
 
   @override
-  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.HEART_RATE]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.INTERBEAT_INTERVAL]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.SENSOR_SKIN_CONTACT]!,
-        ),
-      ]);
+  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.HEART_RATE]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.INTERBEAT_INTERVAL]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.SENSOR_SKIN_CONTACT]!),
+  ]);
 
   @override
   MACAddressDeviceRegistration createRegistration({
@@ -41,9 +33,7 @@ class BLEHeartRateDevice
     deviceId: deviceId,
     deviceDisplayName: deviceDisplayName,
     registrationCreatedOn: registrationCreatedOn,
-    macAddress:
-        address ??
-        '00-1B-44-11-3A-B7', // Random MAC address for testing purposes.
+    macAddress: address ?? '00-1B-44-11-3A-B7', // Random MAC address for testing purposes.
   );
 
   @override

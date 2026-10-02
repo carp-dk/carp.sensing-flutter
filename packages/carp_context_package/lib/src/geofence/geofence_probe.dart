@@ -9,8 +9,7 @@ part of '../../carp_context_package.dart';
 /// the events.
 class GeofenceProbe extends StreamProbe {
   /// Controller for the [stream] of geofence measurements.
-  StreamController<Measurement> geoFenceStreamController =
-      StreamController.broadcast();
+  StreamController<Measurement> geoFenceStreamController = StreamController.broadcast();
 
   /// Distance filter for geofence location tracking, in meters (always 10).
   ///
@@ -18,8 +17,7 @@ class GeofenceProbe extends StreamProbe {
   double get distanceFilter => 10;
 
   @override
-  LocationServiceManager get deviceManager =>
-      super.deviceManager as LocationServiceManager;
+  LocationServiceManager get deviceManager => super.deviceManager as LocationServiceManager;
 
   @override
   Future<bool> onResume() async {
@@ -28,16 +26,14 @@ class GeofenceProbe extends StreamProbe {
     );
 
     // listen in on the location service
-    deviceManager.manager.onLocationChanged
-        .map((location) => GeoPosition.fromLocation(location))
-        .listen((location) {
-          // when a location event is fired, check if the new location creates a new [GeofenceData] event.
-          // if so -- add it to the main stream.
-          Geofence? data = fence.moved(location);
-          if (data != null) {
-            geoFenceStreamController.add(Measurement.fromData(data));
-          }
-        });
+    deviceManager.manager.onLocationChanged.map((location) => GeoPosition.fromLocation(location)).listen((location) {
+      // when a location event is fired, check if the new location creates a new [GeofenceData] event.
+      // if so -- add it to the main stream.
+      Geofence? data = fence.moved(location);
+      if (data != null) {
+        geoFenceStreamController.add(Measurement.fromData(data));
+      }
+    });
 
     return await super.onResume();
   }
@@ -75,22 +71,16 @@ class CircularGeofence {
   String name;
 
   /// Specify a geofence.
-  CircularGeofence({
-    required this.center,
-    required this.radius,
-    required this.dwell,
-    required this.name,
-  }) : super();
+  CircularGeofence({required this.center, required this.radius, required this.dwell, required this.name}) : super();
 
   /// Creates a [CircularGeofence] from a [GeofenceSamplingConfiguration].
-  factory CircularGeofence.fromGeofenceSamplingConfiguration(
-    GeofenceSamplingConfiguration configuration,
-  ) => CircularGeofence(
-    center: configuration.center,
-    radius: configuration.radius,
-    dwell: configuration.dwell,
-    name: configuration.name,
-  );
+  factory CircularGeofence.fromGeofenceSamplingConfiguration(GeofenceSamplingConfiguration configuration) =>
+      CircularGeofence(
+        center: configuration.center,
+        radius: configuration.radius,
+        dwell: configuration.dwell,
+        name: configuration.name,
+      );
 
   /// Updates the [state] with a new [location] and returns the resulting
   /// [Geofence] event, or null if nothing happened.
@@ -134,6 +124,5 @@ class CircularGeofence {
   }
 
   @override
-  String toString() =>
-      'Geofence - center: $center, radius: $radius, dwell: $dwell, name: $name, state: $state';
+  String toString() => 'Geofence - center: $center, radius: $radius, dwell: $dwell, name: $name, state: $state';
 }

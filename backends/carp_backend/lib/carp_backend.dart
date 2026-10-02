@@ -23,6 +23,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -105,14 +106,12 @@ class CarpDataEndPoint extends DataEndPoint {
   @override
   Function get fromJsonFunction => _$CarpDataEndPointFromJson;
 
-  factory CarpDataEndPoint.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<CarpDataEndPoint>(json);
+  factory CarpDataEndPoint.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<CarpDataEndPoint>(json);
   @override
   Map<String, dynamic> toJson() => _$CarpDataEndPointToJson(this);
 
   @override
-  String toString() =>
-      '$runtimeType [$name] - method: ${uploadMethod.name}, interval: $uploadInterval';
+  String toString() => '$runtimeType [$name] - method: ${uploadMethod.name}, interval: $uploadInterval';
 }
 
 /// The ways a [CarpDataManager] can upload data to CAWS.

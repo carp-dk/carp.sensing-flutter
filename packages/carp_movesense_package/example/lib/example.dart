@@ -17,10 +17,7 @@ void main() async {
   SamplingPackageRegistry().register(MovesenseSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Movesense Sensing Example',
-  );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Movesense Sensing Example');
 
   // Define which devices are used for data collection - both phone and eSense
   // and add them to the protocol.

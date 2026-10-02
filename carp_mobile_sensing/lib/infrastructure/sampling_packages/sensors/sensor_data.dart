@@ -30,18 +30,12 @@ class AmbientLight extends SensorData {
   /// Create an [AmbientLight] from a list of lux value readings.
   factory AmbientLight.fromLuxReadings(List<num> luxValues) {
     var statistics = luxValues.statistics;
-    return AmbientLight(
-      statistics.mean,
-      statistics.standardDeviation,
-      statistics.min,
-      statistics.max,
-    );
+    return AmbientLight(statistics.mean, statistics.standardDeviation, statistics.min, statistics.max);
   }
 
   @override
   Function get fromJsonFunction => _$AmbientLightFromJson;
-  factory AmbientLight.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AmbientLight>(json);
+  factory AmbientLight.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AmbientLight>(json);
   @override
   Map<String, dynamic> toJson() => _$AmbientLightToJson(this);
 }
@@ -140,9 +134,7 @@ class AccelerationFeatures extends SensorData {
   AccelerationFeatures() : super();
 
   /// Calculates the features from a non-empty list of accelerometer [readings].
-  factory AccelerationFeatures.fromAccelerometerReadings(
-    List<UserAccelerometerEvent> readings,
-  ) {
+  factory AccelerationFeatures.fromAccelerometerReadings(List<UserAccelerometerEvent> readings) {
     final n = readings.length;
 
     final List<num> xList = readings.map((event) => event.x).toList();
@@ -271,8 +263,7 @@ class StepEvent extends SensorData {
 
   @override
   Function get fromJsonFunction => _$StepEventFromJson;
-  factory StepEvent.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<StepEvent>(json);
+  factory StepEvent.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StepEvent>(json);
   @override
   Map<String, dynamic> toJson() => _$StepEventToJson(this);
 }

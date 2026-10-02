@@ -35,8 +35,7 @@ class ParticipantInvitation {
     this.participantId = participantId ?? const Uuid().v4();
   }
 
-  factory ParticipantInvitation.fromJson(Map<String, dynamic> json) =>
-      _$ParticipantInvitationFromJson(json);
+  factory ParticipantInvitation.fromJson(Map<String, dynamic> json) => _$ParticipantInvitationFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantInvitationToJson(this);
 }
 
@@ -55,16 +54,13 @@ class Participation {
   /// is assigned to.
   AssignedTo assignedRoles;
 
-  Participation(this.studyDeploymentId, this.participantId, this.assignedRoles)
-    : super();
+  Participation(this.studyDeploymentId, this.participantId, this.assignedRoles) : super();
 
-  factory Participation.fromJson(Map<String, dynamic> json) =>
-      _$ParticipationFromJson(json);
+  factory Participation.fromJson(Map<String, dynamic> json) => _$ParticipationFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipationToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, participantId: $participantId, studyDeploymentId: $studyDeploymentId';
+  String toString() => '${super.toString()}, participantId: $participantId, studyDeploymentId: $studyDeploymentId';
 }
 
 /// A description of a study, shared with participants once they are invited to a study.
@@ -89,16 +85,13 @@ class StudyInvitation {
   /// [ActiveParticipationInvitation.studyId].
   dynamic applicationData;
 
-  StudyInvitation(this.name, [this.description, this.applicationData])
-    : super();
+  StudyInvitation(this.name, [this.description, this.applicationData]) : super();
 
-  factory StudyInvitation.fromJson(Map<String, dynamic> json) =>
-      _$StudyInvitationFromJson(json);
+  factory StudyInvitation.fromJson(Map<String, dynamic> json) => _$StudyInvitationFromJson(json);
   Map<String, dynamic> toJson() => _$StudyInvitationToJson(this);
 
   @override
-  String toString() =>
-      '$runtimeType - name: $name, description: $description, applicationData: $applicationData';
+  String toString() => '$runtimeType - name: $name, description: $description, applicationData: $applicationData';
 }
 
 /// An [invitation] to participate in an active study deployment using the
@@ -163,8 +156,7 @@ class ActiveParticipationInvitation {
   String get participantId => participation.participantId;
 
   /// The first role name of the participant; null if assigned to all roles.
-  String? get participantRoleName =>
-      participation.assignedRoles.roleNames?.first;
+  String? get participantRoleName => participation.assignedRoles.roleNames?.first;
 
   ActiveParticipationInvitation(this.participation, this.invitation) : super();
 
@@ -191,12 +183,7 @@ class ParticipantStatus {
   /// Role names of the primary devices the participant uses.
   Set<String> assignedPrimaryDeviceRoleNames;
 
-  ParticipantStatus(
-    this.participantId,
-    this.assignedParticipantRoles,
-    this.assignedPrimaryDeviceRoleNames,
-  ) : super();
-  factory ParticipantStatus.fromJson(Map<String, dynamic> json) =>
-      _$ParticipantStatusFromJson(json);
+  ParticipantStatus(this.participantId, this.assignedParticipantRoles, this.assignedPrimaryDeviceRoleNames) : super();
+  factory ParticipantStatus.fromJson(Map<String, dynamic> json) => _$ParticipantStatusFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantStatusToJson(this);
 }

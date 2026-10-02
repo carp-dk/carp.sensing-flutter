@@ -65,13 +65,11 @@ class DeviceInformation extends Data {
 
   /// Returns `true` if the [deviceId] is equal.
   @override
-  bool equivalentTo(Data other) =>
-      (other is DeviceInformation) ? deviceId == other.deviceId : false;
+  bool equivalentTo(Data other) => (other is DeviceInformation) ? deviceId == other.deviceId : false;
 
   @override
   Function get fromJsonFunction => _$DeviceInformationFromJson;
-  factory DeviceInformation.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DeviceInformation>(json);
+  factory DeviceInformation.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DeviceInformation>(json);
   @override
   Map<String, dynamic> toJson() => _$DeviceInformationToJson(this);
 }
@@ -160,8 +158,7 @@ class ApplicationInformation extends Data {
 
   /// Returns `true` if the [appName] is equal.
   @override
-  bool equivalentTo(Data other) =>
-      (other is ApplicationInformation) ? appName == other.appName : false;
+  bool equivalentTo(Data other) => (other is ApplicationInformation) ? appName == other.appName : false;
 
   @override
   Function get fromJsonFunction => _$ApplicationInformationFromJson;
@@ -203,20 +200,17 @@ class BatteryState extends Data {
       batteryStatus = _parseBatteryState(state),
       super();
 
-  static String _parseBatteryState(battery.BatteryState state) =>
-      switch (state) {
-        battery.BatteryState.full => STATE_FULL,
-        battery.BatteryState.charging => STATE_CHARGING,
-        battery.BatteryState.discharging => STATE_DISCHARGING,
-        battery.BatteryState.connectedNotCharging =>
-          STATE_CONNECTED_NOT_CHARGING,
-        _ => STATE_UNKNOWN,
-      };
+  static String _parseBatteryState(battery.BatteryState state) => switch (state) {
+    battery.BatteryState.full => STATE_FULL,
+    battery.BatteryState.charging => STATE_CHARGING,
+    battery.BatteryState.discharging => STATE_DISCHARGING,
+    battery.BatteryState.connectedNotCharging => STATE_CONNECTED_NOT_CHARGING,
+    _ => STATE_UNKNOWN,
+  };
 
   /// Returns `true` if the [batteryLevel] is equal.
   @override
-  bool equivalentTo(Data other) =>
-      (other is BatteryState) ? batteryLevel == other.batteryLevel : false;
+  bool equivalentTo(Data other) => (other is BatteryState) ? batteryLevel == other.batteryLevel : false;
 
   @override
   int get hashCode => Object.hash(batteryLevel, batteryStatus);
@@ -231,8 +225,7 @@ class BatteryState extends Data {
 
   @override
   Function get fromJsonFunction => _$BatteryStateFromJson;
-  factory BatteryState.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<BatteryState>(json);
+  factory BatteryState.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<BatteryState>(json);
   @override
   Map<String, dynamic> toJson() => _$BatteryStateToJson(this);
 }
@@ -253,8 +246,7 @@ class FreeMemory extends Data {
 
   @override
   Function get fromJsonFunction => _$FreeMemoryFromJson;
-  factory FreeMemory.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<FreeMemory>(json);
+  factory FreeMemory.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<FreeMemory>(json);
   @override
   Map<String, dynamic> toJson() => _$FreeMemoryToJson(this);
 }
@@ -293,13 +285,11 @@ class ScreenEvent extends Data {
 
   /// Returns `true` if the [screenEvent] is equal.
   @override
-  bool equivalentTo(Data other) =>
-      (other is ScreenEvent) ? screenEvent == other.screenEvent : false;
+  bool equivalentTo(Data other) => (other is ScreenEvent) ? screenEvent == other.screenEvent : false;
 
   @override
   Function get fromJsonFunction => _$ScreenEventFromJson;
-  factory ScreenEvent.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<ScreenEvent>(json);
+  factory ScreenEvent.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<ScreenEvent>(json);
   @override
   Map<String, dynamic> toJson() => _$ScreenEventToJson(this);
 }
@@ -320,13 +310,11 @@ class Timezone extends Data {
 
   /// Returns `true` if the timezone of [other] is the same as this [timezone].
   @override
-  bool equivalentTo(Data other) =>
-      (other is Timezone) ? timezone == other.timezone : false;
+  bool equivalentTo(Data other) => (other is Timezone) ? timezone == other.timezone : false;
 
   @override
   Function get fromJsonFunction => _$TimezoneFromJson;
-  factory Timezone.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Timezone>(json);
+  factory Timezone.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Timezone>(json);
   @override
   Map<String, dynamic> toJson() => _$TimezoneToJson(this);
 }
@@ -352,13 +340,11 @@ class AppLifecycleEvent extends Data {
   AppLifecycleEvent(this.state) : super();
 
   @override
-  bool equivalentTo(Data other) =>
-      (other is AppLifecycleEvent) ? state == other.state : false;
+  bool equivalentTo(Data other) => (other is AppLifecycleEvent) ? state == other.state : false;
 
   @override
   Function get fromJsonFunction => _$AppLifecycleEventFromJson;
-  factory AppLifecycleEvent.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AppLifecycleEvent>(json);
+  factory AppLifecycleEvent.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AppLifecycleEvent>(json);
   @override
   Map<String, dynamic> toJson() => _$AppLifecycleEventToJson(this);
 }
@@ -380,8 +366,7 @@ class Heartbeat extends Data {
 
   @override
   Function get fromJsonFunction => _$HeartbeatFromJson;
-  factory Heartbeat.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Heartbeat>(json);
+  factory Heartbeat.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Heartbeat>(json);
   @override
   Map<String, dynamic> toJson() => _$HeartbeatToJson(this);
 }

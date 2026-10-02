@@ -23,10 +23,7 @@ class ProbeListState extends State<ProbesListPage> {
     return Scaffold(
       appBar: AppBar(title: Text('Probes')),
       body: Scrollbar(
-        child: ListView(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          children: probes.toList(),
-        ),
+        child: ListView(padding: EdgeInsets.symmetric(vertical: 8.0), children: probes.toList()),
       ),
     );
   }
@@ -35,8 +32,7 @@ class ProbeListState extends State<ProbesListPage> {
     return StreamBuilder<ExecutorState>(
       stream: probe.stateEvents,
       initialData: ExecutorState.Created,
-      builder: (context, AsyncSnapshot<ExecutorState> snapshot) =>
-          (snapshot.hasData)
+      builder: (context, AsyncSnapshot<ExecutorState> snapshot) => (snapshot.hasData)
           ? ListTile(
               isThreeLine: true,
               leading: probe.icon,

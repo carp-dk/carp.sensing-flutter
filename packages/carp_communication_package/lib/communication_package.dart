@@ -57,57 +57,47 @@ class CommunicationSamplingPackage extends SmartphoneSamplingPackage {
   /// use a [HistoricSamplingConfiguration] of one day back and one day forward
   /// in time.
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: PHONE_LOG,
-            displayName: "Phone Log",
-            timeType: DataTimeType.TIME_SPAN,
-            dataEventType: DataEventType.ONE_TIME,
-            permissions: [Permission.phone],
-          ),
-          HistoricSamplingConfiguration(
-            past: const Duration(days: 1),
-            future: const Duration(days: 1),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: TEXT_MESSAGE_LOG,
-            displayName: "Text Message Log",
-            timeType: DataTimeType.TIME_SPAN,
-            dataEventType: DataEventType.ONE_TIME,
-            permissions: [Permission.sms],
-          ),
-          HistoricSamplingConfiguration(
-            past: const Duration(days: 1),
-            future: const Duration(days: 1),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: TEXT_MESSAGE,
-            displayName: "Text Messages",
-            timeType: DataTimeType.POINT,
-            dataEventType: DataEventType.EVENT,
-            permissions: [Permission.phone],
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: CALENDAR,
-            displayName: "Calendar Entries",
-            timeType: DataTimeType.TIME_SPAN,
-            dataEventType: DataEventType.ONE_TIME,
-            permissions: [Permission.calendarFullAccess],
-          ),
-          HistoricSamplingConfiguration(
-            past: const Duration(days: 1),
-            future: const Duration(days: 1),
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: PHONE_LOG,
+        displayName: "Phone Log",
+        timeType: DataTimeType.TIME_SPAN,
+        dataEventType: DataEventType.ONE_TIME,
+        permissions: [Permission.phone],
+      ),
+      HistoricSamplingConfiguration(past: const Duration(days: 1), future: const Duration(days: 1)),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: TEXT_MESSAGE_LOG,
+        displayName: "Text Message Log",
+        timeType: DataTimeType.TIME_SPAN,
+        dataEventType: DataEventType.ONE_TIME,
+        permissions: [Permission.sms],
+      ),
+      HistoricSamplingConfiguration(past: const Duration(days: 1), future: const Duration(days: 1)),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: TEXT_MESSAGE,
+        displayName: "Text Messages",
+        timeType: DataTimeType.POINT,
+        dataEventType: DataEventType.EVENT,
+        permissions: [Permission.phone],
+      ),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: CALENDAR,
+        displayName: "Calendar Entries",
+        timeType: DataTimeType.TIME_SPAN,
+        dataEventType: DataEventType.ONE_TIME,
+        permissions: [Permission.calendarFullAccess],
+      ),
+      HistoricSamplingConfiguration(past: const Duration(days: 1), future: const Duration(days: 1)),
+    ),
+  ]);
 
   @override
   Probe? create(String type) {
@@ -136,17 +126,9 @@ class CommunicationSamplingPackage extends SmartphoneSamplingPackage {
     ]);
 
     // register the default privacy transformers
-    DataTransformerSchemaRegistry()
-        .lookup(PrivacySchema.DEFAULT)!
-        .add(TEXT_MESSAGE, textMessageAnonymizer);
-    DataTransformerSchemaRegistry()
-        .lookup(PrivacySchema.DEFAULT)!
-        .add(TEXT_MESSAGE_LOG, textMessageLogAnonymizer);
-    DataTransformerSchemaRegistry()
-        .lookup(PrivacySchema.DEFAULT)!
-        .add(PHONE_LOG, phoneLogAnonymizer);
-    DataTransformerSchemaRegistry()
-        .lookup(PrivacySchema.DEFAULT)!
-        .add(CALENDAR, calendarAnonymizer);
+    DataTransformerSchemaRegistry().lookup(PrivacySchema.DEFAULT)!.add(TEXT_MESSAGE, textMessageAnonymizer);
+    DataTransformerSchemaRegistry().lookup(PrivacySchema.DEFAULT)!.add(TEXT_MESSAGE_LOG, textMessageLogAnonymizer);
+    DataTransformerSchemaRegistry().lookup(PrivacySchema.DEFAULT)!.add(PHONE_LOG, phoneLogAnonymizer);
+    DataTransformerSchemaRegistry().lookup(PrivacySchema.DEFAULT)!.add(CALENDAR, calendarAnonymizer);
   }
 }

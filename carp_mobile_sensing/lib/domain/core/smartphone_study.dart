@@ -39,32 +39,22 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   ///
   /// Setting it adds a [StudyStatusEventTypes.SamplingStateChanged] event to
   /// [events].
-  SmartphoneDeploymentExecutorSamplingState? get samplingState =>
-      _samplingState;
+  SmartphoneDeploymentExecutorSamplingState? get samplingState => _samplingState;
   set samplingState(SmartphoneDeploymentExecutorSamplingState? state) {
     _samplingState = state;
 
-    createEvent(
-      SmartphoneStudyStatusEvent(
-        this,
-        StudyStatusEventTypes.SamplingStateChanged,
-        samplingState,
-      ),
-    );
+    createEvent(SmartphoneStudyStatusEvent(this, StudyStatusEventTypes.SamplingStateChanged, samplingState));
   }
 
   /// Whether the [deployment] is available.
   bool get isDeployed => deployment != null;
 
   /// Whether the study is sampling data, i.e. its [samplingState] is resumed.
-  bool get isSampling =>
-      (samplingState?.state ?? ExecutorState.Undefined) ==
-      ExecutorState.Resumed;
+  bool get isSampling => (samplingState?.state ?? ExecutorState.Undefined) == ExecutorState.Resumed;
 
   @override
-  Stream<SmartphoneStudyStatusEvent> get events => super.events.map(
-    (event) => SmartphoneStudyStatusEvent(this, event.event, samplingState),
-  );
+  Stream<SmartphoneStudyStatusEvent> get events =>
+      super.events.map((event) => SmartphoneStudyStatusEvent(this, event.event, samplingState));
 
   /// Creates a [SmartphoneStudy].
   SmartphoneStudy({
@@ -76,13 +66,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
     DateTime? createdOn,
     StudyDeploymentStatus? deploymentStatus,
     SmartphoneDeployment? deployment,
-  }) : super(
-         studyDeploymentId,
-         deviceRoleName,
-         createdOn,
-         deploymentStatus,
-         deployment,
-       );
+  }) : super(studyDeploymentId, deviceRoleName, createdOn, deploymentStatus, deployment);
 
   /// Creates a [SmartphoneStudy] from an [invitation] to a study.
   ///
@@ -91,8 +75,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
     : this(
         studyId: invitation.studyId,
         studyDeploymentId: invitation.studyDeploymentId,
-        deviceRoleName:
-            invitation.deviceRoleName ?? Smartphone.DEFAULT_ROLE_NAME,
+        deviceRoleName: invitation.deviceRoleName ?? Smartphone.DEFAULT_ROLE_NAME,
         participantId: invitation.participantId,
         participantRoleName: invitation.participantRoleName,
       );
@@ -100,42 +83,29 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   /// Creates a [SmartphoneStudy] from a database row saved by the
   /// [PersistenceService].
   factory SmartphoneStudy.fromMap(Map<String, Object?> map) {
-    final statusJson =
-        map[PersistenceService.DEPLOYMENT_STATUS_COLUMN] as String?;
+    final statusJson = map[PersistenceService.DEPLOYMENT_STATUS_COLUMN] as String?;
     final status = statusJson != null && statusJson != 'null'
-        ? StudyDeploymentStatus.fromJson(
-            json.decode(statusJson) as Map<String, dynamic>,
-          )
+        ? StudyDeploymentStatus.fromJson(json.decode(statusJson) as Map<String, dynamic>)
         : null;
 
     final deploymentJson = map[PersistenceService.DEPLOYMENT_COLUMN] as String?;
     final deployment = deploymentJson != null && deploymentJson != 'null'
-        ? SmartphoneDeployment.fromJson(
-            json.decode(deploymentJson) as Map<String, dynamic>,
-          )
+        ? SmartphoneDeployment.fromJson(json.decode(deploymentJson) as Map<String, dynamic>)
         : null;
 
-    final samplingStateJson =
-        map[PersistenceService.SAMPLING_STATUS_COLUMN] as String?;
-    final samplingState =
-        samplingStateJson != null && samplingStateJson != 'null'
-        ? SmartphoneDeploymentExecutorSamplingState.fromJson(
-            json.decode(samplingStateJson) as Map<String, dynamic>,
-          )
+    final samplingStateJson = map[PersistenceService.SAMPLING_STATUS_COLUMN] as String?;
+    final samplingState = samplingStateJson != null && samplingStateJson != 'null'
+        ? SmartphoneDeploymentExecutorSamplingState.fromJson(json.decode(samplingStateJson) as Map<String, dynamic>)
         : null;
 
     return SmartphoneStudy(
       studyId: map[PersistenceService.STUDY_ID_COLUMN] as String?,
-      studyDeploymentId:
-          map[PersistenceService.STUDY_DEPLOYMENT_ID_COLUMN] as String,
+      studyDeploymentId: map[PersistenceService.STUDY_DEPLOYMENT_ID_COLUMN] as String,
       deviceRoleName: map[PersistenceService.DEVICE_ROLE_NAME_COLUMN] as String,
       participantId: map[PersistenceService.PARTICIPANT_ID_COLUMN] as String?,
-      participantRoleName:
-          map[PersistenceService.PARTICIPANT_ROLE_NAME_COLUMN] as String?,
+      participantRoleName: map[PersistenceService.PARTICIPANT_ROLE_NAME_COLUMN] as String?,
       createdOn: map[PersistenceService.CREATED_ON_COLUMN] != null
-          ? DateTime.tryParse(
-              map[PersistenceService.CREATED_ON_COLUMN] as String,
-            )
+          ? DateTime.tryParse(map[PersistenceService.CREATED_ON_COLUMN] as String)
           : null,
       deploymentStatus: status,
       deployment: deployment,

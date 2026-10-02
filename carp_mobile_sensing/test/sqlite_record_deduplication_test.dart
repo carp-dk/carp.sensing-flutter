@@ -12,28 +12,15 @@ void main() {
   test('ignores duplicate source records', () async {
     final manager = await _manager();
 
+    await manager.onMeasurement(Measurement.fromData(_IdentifiedData('record-1', 'original')));
     await manager.onMeasurement(
-      Measurement.fromData(_IdentifiedData('record-1', 'original')),
-    );
-    await manager.onMeasurement(
-      Measurement.fromData(
-        _IdentifiedData(
-          'record-1',
-          'duplicate',
-          jsonType: 'dk.cachet.carp.health.sleep',
-        ),
-      ),
+      Measurement.fromData(_IdentifiedData('record-1', 'duplicate', jsonType: 'dk.cachet.carp.health.sleep')),
     );
     await manager.close(); // flushes the pending batch
 
-    final rows = await manager.database!.query(
-      SQLiteDataManager.MEASUREMENT_TABLE_NAME,
-    );
+    final rows = await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME);
     expect(rows, hasLength(1));
-    expect(
-      rows.single[SQLiteDataManager.MEASUREMENT_COLUMN],
-      contains('original'),
-    );
+    expect(rows.single[SQLiteDataManager.MEASUREMENT_COLUMN], contains('original'));
 
     await manager.database?.close();
   });
@@ -45,10 +32,7 @@ void main() {
     await manager.onMeasurement(Measurement.fromData(Error(message: 'second')));
     await Future<void>.delayed(const Duration(milliseconds: 700));
 
-    expect(
-      await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME),
-      hasLength(2),
-    );
+    expect(await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME), hasLength(2));
 
     await manager.database?.close();
   });
@@ -67,23 +51,13 @@ void main() {
         '${SQLiteDataManager.DATATYPE_COLUMN} TEXT)',
       ),
     );
-    await legacy.insert(SQLiteDataManager.MEASUREMENT_TABLE_NAME, {
-      SQLiteDataManager.DEPLOYMENT_ID_COLUMN: 'study-a',
-    });
+    await legacy.insert(SQLiteDataManager.MEASUREMENT_TABLE_NAME, {SQLiteDataManager.DEPLOYMENT_ID_COLUMN: 'study-a'});
     await legacy.close();
 
     final manager = await _manager(reset: false);
-    final columns = await manager.database!.rawQuery(
-      'PRAGMA table_info(${SQLiteDataManager.MEASUREMENT_TABLE_NAME})',
-    );
-    expect(
-      columns.map((column) => column['name']),
-      contains(SQLiteDataManager.RECORD_ID_COLUMN),
-    );
-    expect(
-      await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME),
-      hasLength(1),
-    );
+    final columns = await manager.database!.rawQuery('PRAGMA table_info(${SQLiteDataManager.MEASUREMENT_TABLE_NAME})');
+    expect(columns.map((column) => column['name']), contains(SQLiteDataManager.RECORD_ID_COLUMN));
+    expect(await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME), hasLength(1));
 
     await manager.database?.close();
   });
@@ -108,16 +82,11 @@ void main() {
       'ALTER TABLE ${SQLiteDataManager.MEASUREMENT_TABLE_NAME} '
       'ADD COLUMN ${SQLiteDataManager.RECORD_ID_COLUMN} TEXT',
     );
-    await legacy.insert(SQLiteDataManager.MEASUREMENT_TABLE_NAME, {
-      SQLiteDataManager.DEPLOYMENT_ID_COLUMN: 'study-a',
-    });
+    await legacy.insert(SQLiteDataManager.MEASUREMENT_TABLE_NAME, {SQLiteDataManager.DEPLOYMENT_ID_COLUMN: 'study-a'});
     await legacy.close();
 
     final manager = await _manager(reset: false);
-    expect(
-      await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME),
-      hasLength(1),
-    );
+    expect(await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME), hasLength(1));
 
     await manager.database?.close();
   });
@@ -138,17 +107,14 @@ Future<SQLiteDataManager> _manager({bool reset = true}) async {
   return manager;
 }
 
-Future<String> _databasePath() async =>
-    '${await getDatabasesPath()}/${SQLiteDataManager.DATABASE_NAME}.db';
+Future<String> _databasePath() async => '${await getDatabasesPath()}/${SQLiteDataManager.DATABASE_NAME}.db';
 
 class _IdentifiedData extends Error {
   @override
   final String recordId;
   final String? _jsonType;
 
-  _IdentifiedData(this.recordId, String message, {String? jsonType})
-    : _jsonType = jsonType,
-      super(message: message);
+  _IdentifiedData(this.recordId, String message, {String? jsonType}) : _jsonType = jsonType, super(message: message);
 
   @override
   String get jsonType => _jsonType ?? super.jsonType;

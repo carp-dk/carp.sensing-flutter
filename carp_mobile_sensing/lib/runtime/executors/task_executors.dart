@@ -12,8 +12,7 @@ part of '../../runtime.dart';
 /// Created by the [ExecutorFactory] and started or stopped by a
 /// [TaskControlExecutor]. Each task type has its own executor:
 /// [BackgroundTaskExecutor], [AppTaskExecutor] and [FunctionTaskExecutor].
-abstract class TaskExecutor<TConfig extends TaskConfiguration>
-    extends AggregateExecutor<TConfig> {
+abstract class TaskExecutor<TConfig extends TaskConfiguration> extends AggregateExecutor<TConfig> {
   final StreamGroup<ExecutorState> _statesGroup = StreamGroup.broadcast();
 
   /// The [TaskConfiguration] for this task executor.
@@ -36,12 +35,10 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   StreamSubscription<ExecutorState>? _subscription;
 
   @override
-  List<Probe> get probes =>
-      executors.map((executor) => executor as Probe).toList();
+  List<Probe> get probes => executors.map((executor) => executor as Probe).toList();
 
   /// Are all [probes] in a paused state?
-  bool get haveAllProbesPaused =>
-      !probes.any((probe) => probe.state != ExecutorState.Paused);
+  bool get haveAllProbesPaused => !probes.any((probe) => probe.state != ExecutorState.Paused);
 
   @override
   bool onInitialize() {
@@ -76,34 +73,25 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
 
     // Early out if already running (this is a background task)
     if (state == ExecutorState.Resumed) {
-      warning(
-        '$runtimeType - Trying to resume $this but it is already resumed. Ignoring this.',
-      );
+      warning('$runtimeType - Trying to resume $this but it is already resumed. Ignoring this.');
       return false;
     }
 
     // Listen to pause this background executor when all of its underlying
     // probes have paused - Issue #384
-    _subscription = states
-        .where((event) => event == ExecutorState.Paused)
-        .listen((_) {
-          if (haveAllProbesPaused && state == ExecutorState.Resumed) {
-            debug(
-              '$runtimeType - All probes are paused - pausing this $this too.',
-            );
-            pause();
-          }
-        });
+    _subscription = states.where((event) => event == ExecutorState.Paused).listen((_) {
+      if (haveAllProbesPaused && state == ExecutorState.Resumed) {
+        debug('$runtimeType - All probes are paused - pausing this $this too.');
+        pause();
+      }
+    });
 
     // Check if the devices for this task is connected.
     await connectAllConnectableDevices();
 
     if (configuration?.duration != null) {
       // If the task has a duration (optional), stop it again after this duration has passed.
-      Timer(
-        Duration(seconds: configuration!.duration!.inSeconds.truncate()),
-        () => pause(),
-      );
+      Timer(Duration(seconds: configuration!.duration!.inSeconds.truncate()), () => pause());
     }
 
     // Now - finally - we can start the probes.
@@ -114,9 +102,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   ///
   /// Skips devices already connecting. Does not wait for the connections.
   Future<void> connectAllConnectableDevices() async {
-    debug(
-      '$runtimeType - Trying to connect to all connectable devices for this background executor.',
-    );
+    debug('$runtimeType - Trying to connect to all connectable devices for this background executor.');
 
     probes
         .where((probe) => !probe.deviceManager.isConnecting)

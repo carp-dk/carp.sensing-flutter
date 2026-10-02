@@ -26,8 +26,7 @@ class SensingUserTaskFactory implements UserTaskFactory {
   List<String> types = [AppTask.SENSING_TYPE];
 
   @override
-  UserTask create(AppTaskExecutor executor) =>
-      BackgroundSensingUserTask(executor);
+  UserTask create(AppTaskExecutor executor) => BackgroundSensingUserTask(executor);
 }
 
 /// A task the user needs to do, e.g. fill in a survey.
@@ -49,8 +48,7 @@ class SensingUserTaskFactory implements UserTaskFactory {
 abstract class UserTask {
   late AppTaskExecutor _executor;
   UserTaskState _state = UserTaskState.initialized;
-  final StreamController<UserTaskState> _stateController =
-      StreamController.broadcast();
+  final StreamController<UserTaskState> _stateController = StreamController.broadcast();
 
   /// The [AppTask] this user task was created from.
   AppTask get task => _executor.task;
@@ -58,8 +56,7 @@ abstract class UserTask {
   /// The id of the study deployment this task belongs to.
   ///
   /// Null if the executor has no deployment.
-  String? get studyDeploymentId =>
-      appTaskExecutor.deployment?.studyDeploymentId;
+  String? get studyDeploymentId => appTaskExecutor.deployment?.studyDeploymentId;
 
   /// A unique id of this user task, a v4 UUID.
   late String id;
@@ -84,9 +81,7 @@ abstract class UserTask {
   /// The time left until this task expires, based on [AppTask.expire].
   ///
   /// Negative if this task has expired. `null` if it never expires.
-  Duration? get expiresIn => (task.expire != null)
-      ? triggerTime.add(task.expire!).difference(DateTime.now())
-      : null;
+  Duration? get expiresIn => (task.expire != null) ? triggerTime.add(task.expire!).difference(DateTime.now()) : null;
 
   /// The state of this task. Setting it emits the new state on [stateEvents].
   UserTaskState get state => _state;
@@ -99,9 +94,7 @@ abstract class UserTask {
   ///
   /// True if it is enqueued, notified or canceled.
   bool get availableForUser =>
-      (_state == UserTaskState.enqueued ||
-      _state == UserTaskState.canceled ||
-      _state == UserTaskState.notified);
+      (_state == UserTaskState.enqueued || _state == UserTaskState.canceled || _state == UserTaskState.notified);
 
   /// Whether the [NotificationManager] has created a notification for it.
   bool hasNotificationBeenCreated = false;
@@ -146,10 +139,7 @@ abstract class UserTask {
   @mustCallSuper
   void onStart() {
     // initialize the background task which holds any measures added to the app task
-    backgroundTaskExecutor.initialize(
-      task.backgroundTask,
-      _executor.deployment,
-    );
+    backgroundTaskExecutor.initialize(task.backgroundTask, _executor.deployment);
 
     state = UserTaskState.started;
   }
@@ -267,13 +257,9 @@ class BackgroundSensingUserTask extends UserTask {
     // Listen to when the background sensing pauses.
     // We do this because this background sensing task is never explicitly
     // marked as done - it just runs until the background sensing pauses.
-    backgroundTaskExecutor.stateEvents
-        .where((state) => state == ExecutorState.Paused)
-        .listen((state) {
-          debug(
-            '$runtimeType - Background sensing has paused - making this user task done.',
-          );
-          onDone();
-        });
+    backgroundTaskExecutor.stateEvents.where((state) => state == ExecutorState.Paused).listen((state) {
+      debug('$runtimeType - Background sensing has paused - making this user task done.');
+      onDone();
+    });
   }
 }

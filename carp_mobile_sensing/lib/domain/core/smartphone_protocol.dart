@@ -22,9 +22,8 @@ mixin SmartphoneProtocolExtension {
   /// Setting it to `null` resets all CAMS-specific fields.
   Map<String, dynamic>? get applicationData => _data.toJson();
 
-  set applicationData(Map<String, dynamic>? data) => _data = (data != null)
-      ? SmartphoneApplicationData.fromJson(data)
-      : SmartphoneApplicationData();
+  set applicationData(Map<String, dynamic>? data) =>
+      _data = (data != null) ? SmartphoneApplicationData.fromJson(data) : SmartphoneApplicationData();
 
   /// The version tag of the study protocol snapshot.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -42,8 +41,7 @@ mixin SmartphoneProtocolExtension {
   /// purpose, and the responsible researcher for this study.
   @JsonKey(includeFromJson: false, includeToJson: false)
   StudyDescription? get studyDescription => _data.studyDescription;
-  set studyDescription(StudyDescription? description) =>
-      _data.studyDescription = description;
+  set studyDescription(StudyDescription? description) => _data.studyDescription = description;
 
   /// The description from [studyDescription], or an empty string if none.
   String get description => studyDescription?.description ?? '';
@@ -57,8 +55,7 @@ mixin SmartphoneProtocolExtension {
   /// If `null`, the data is not stored, but can still be used in the app.
   @JsonKey(includeFromJson: false, includeToJson: false)
   DataEndPoint? get dataEndPoint => _data.dataEndPoint;
-  set dataEndPoint(DataEndPoint? dataEndPoint) =>
-      _data.dataEndPoint = dataEndPoint;
+  set dataEndPoint(DataEndPoint? dataEndPoint) => _data.dataEndPoint = dataEndPoint;
 
   /// The name of a [PrivacySchema] to be used for protecting sensitive data.
   ///
@@ -131,8 +128,7 @@ class SmartphoneApplicationData {
     this.applicationData,
   }) : super();
 
-  factory SmartphoneApplicationData.fromJson(Map<String, dynamic> json) =>
-      _$SmartphoneApplicationDataFromJson(json);
+  factory SmartphoneApplicationData.fromJson(Map<String, dynamic> json) => _$SmartphoneApplicationDataFromJson(json);
   Map<String, dynamic> toJson() => _$SmartphoneApplicationDataToJson(this);
 }
 
@@ -184,8 +180,7 @@ class SmartphoneApplicationData {
 /// );
 /// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class SmartphoneStudyProtocol extends StudyProtocol
-    with SmartphoneProtocolExtension {
+class SmartphoneStudyProtocol extends StudyProtocol with SmartphoneProtocolExtension {
   /// The API level used by study protocols.
   /// This reflects the **major** version of the CARP Mobile Sensing framework
   /// as set in the pubspec.yaml file.
@@ -214,10 +209,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
     if (studyDescription != null) {
       studyDescription!.description = description;
     } else {
-      studyDescription = StudyDescription(
-        title: name,
-        description: description,
-      );
+      studyDescription = StudyDescription(title: name, description: description);
     }
   }
 
@@ -251,10 +243,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
     StudyDescription? studyDescription,
     DataEndPoint? dataEndPoint,
     String? privacySchemaName,
-  }) : super(
-         ownerId: ownerId ?? const Uuid().v4(),
-         description: studyDescription?.description ?? '',
-       ) {
+  }) : super(ownerId: ownerId ?? const Uuid().v4(), description: studyDescription?.description ?? '') {
     // add the smartphone specific protocol data as application-specific data
     _data = SmartphoneApplicationData(
       applicationName: applicationName,
@@ -276,15 +265,9 @@ class SmartphoneStudyProtocol extends StudyProtocol
   /// Optionally, a list of [measures] can be provided which will be collected
   /// as part of a default background sampling task by this smartphone.
   /// Additional measures can be added later using [addTaskControl], if needed.
-  factory SmartphoneStudyProtocol.local({
-    String? name,
-    List<Measure>? measures,
-  }) {
+  factory SmartphoneStudyProtocol.local({String? name, List<Measure>? measures}) {
     var protocol =
-        SmartphoneStudyProtocol(
-            name: name ?? 'Local Smartphone Study Protocol',
-            dataEndPoint: SQLiteDataEndPoint(),
-          )
+        SmartphoneStudyProtocol(name: name ?? 'Local Smartphone Study Protocol', dataEndPoint: SQLiteDataEndPoint())
           ..addPrimaryDevice(Smartphone())
           ..addParticipantRole(ParticipantRole('Participant'));
 
@@ -301,10 +284,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
 
     // add measures, if any, as a background sampling task
     if (measures != null && measures.isNotEmpty) {
-      protocol.addTaskControl(
-        ImmediateTrigger(),
-        BackgroundTask(measures: measures),
-      );
+      protocol.addTaskControl(ImmediateTrigger(), BackgroundTask(measures: measures));
     }
     return protocol;
   }
@@ -325,10 +305,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
   ///
   /// Always returns `true`.
   @override
-  bool addConnectedDevice(
-    DeviceConfiguration device,
-    PrimaryDeviceConfiguration primaryDevice,
-  ) {
+  bool addConnectedDevice(DeviceConfiguration device, PrimaryDeviceConfiguration primaryDevice) {
     super.addConnectedDevice(device, primaryDevice);
     _addSamplingTaskControl(device);
 
@@ -344,11 +321,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
       Measure(type: CarpDataTypes.COMPLETED_TASK),
     ];
 
-    addTaskControl(
-      NoOpTrigger(),
-      MonitoringTask(name: "Monitoring ${device.roleName}", measures: measures),
-      device,
-    );
+    addTaskControl(NoOpTrigger(), MonitoringTask(name: "Monitoring ${device.roleName}", measures: measures), device);
   }
 
   /// The primary or connected device with [roleName], or `null` if not found.
@@ -361,8 +334,7 @@ class SmartphoneStudyProtocol extends StudyProtocol
     return null;
   }
 
-  factory SmartphoneStudyProtocol.fromJson(Map<String, dynamic> json) =>
-      _$SmartphoneStudyProtocolFromJson(json);
+  factory SmartphoneStudyProtocol.fromJson(Map<String, dynamic> json) => _$SmartphoneStudyProtocolFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$SmartphoneStudyProtocolToJson(this);
 }

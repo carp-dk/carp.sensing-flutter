@@ -18,8 +18,7 @@ class Apps extends Data {
 
   @override
   Function get fromJsonFunction => _$AppsFromJson;
-  factory Apps.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Apps>(json);
+  factory Apps.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Apps>(json);
   @override
   Map<String, dynamic> toJson() => _$AppsToJson(this);
 
@@ -56,13 +55,7 @@ class App {
   ///  * native_or_others
   String? framework;
 
-  App({
-    this.name,
-    this.packageName,
-    this.versionName,
-    this.versionCode,
-    this.installTimeMillis,
-  }) : super();
+  App({this.name, this.packageName, this.versionName, this.versionCode, this.installTimeMillis}) : super();
 
   /// Creates an [App] from an [AppInfo] object from the `installed_apps` plugin.
   App.fromAppInfo(AppInfo app) : super() {
@@ -105,14 +98,12 @@ class AppUsage extends Data {
 
   @override
   Function get fromJsonFunction => _$AppUsageFromJson;
-  factory AppUsage.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AppUsage>(json);
+  factory AppUsage.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AppUsage>(json);
   @override
   Map<String, dynamic> toJson() => _$AppUsageToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, start: $start, end: $end, usage: $usage';
+  String toString() => '${super.toString()}, start: $start, end: $end, usage: $usage';
 }
 
 /// The usage of a single app, as listed in [AppUsage].
@@ -137,31 +128,15 @@ class AppUsageInfo {
   /// The last time the app was in the foreground.
   DateTime lastForeground;
 
-  AppUsageInfo(
-    this.name,
-    this.packageName,
-    this.usage,
-    this.startDate,
-    this.endDate,
-    this.lastForeground,
-  );
+  AppUsageInfo(this.name, this.packageName, this.usage, this.startDate, this.endDate, this.lastForeground);
 
   /// Creates an [AppUsageInfo] from the `app_usage` plugin's usage info.
   AppUsageInfo.fromAppUsageInfo(app_usage.AppUsageInfo info)
-    : this(
-        info.appName,
-        info.packageName,
-        info.usage,
-        info.startDate,
-        info.endDate,
-        info.lastForeground,
-      );
+    : this(info.appName, info.packageName, info.usage, info.startDate, info.endDate, info.lastForeground);
 
-  factory AppUsageInfo.fromJson(Map<String, dynamic> json) =>
-      _$AppUsageInfoFromJson(json);
+  factory AppUsageInfo.fromJson(Map<String, dynamic> json) => _$AppUsageInfoFromJson(json);
   Map<String, dynamic> toJson() => _$AppUsageInfoToJson(this);
 
   @override
-  String toString() =>
-      'App Usage: $packageName - $name, duration: $usage [$startDate, $endDate]';
+  String toString() => 'App Usage: $packageName - $name, duration: $usage [$startDate, $endDate]';
 }

@@ -12,10 +12,8 @@ part of '../runtime.dart';
 /// A singleton [ClientRepository] that keeps studies in memory and saves them
 /// with the [PersistenceService], so they survive app restarts.
 class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
-  static final SmartphoneClientRepository _instance =
-      SmartphoneClientRepository._();
-  final StreamGroup<StudyStatusEvent<SmartphoneStudy>> _studyStatusEventGroup =
-      StreamGroup.broadcast();
+  static final SmartphoneClientRepository _instance = SmartphoneClientRepository._();
+  final StreamGroup<StudyStatusEvent<SmartphoneStudy>> _studyStatusEventGroup = StreamGroup.broadcast();
 
   /// Creates the singleton instance. Studies are loaded later, in [init].
   SmartphoneClientRepository._();
@@ -27,8 +25,7 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   Set<SmartphoneStudy> _repository = {};
 
   /// The [StudyStatusEvent]s of all studies in this repository.
-  Stream<StudyStatusEvent<SmartphoneStudy>> get studyStatusEvents =>
-      _studyStatusEventGroup.stream;
+  Stream<StudyStatusEvent<SmartphoneStudy>> get studyStatusEvents => _studyStatusEventGroup.stream;
 
   @override
   DeviceRegistration? deviceRegistration;
@@ -57,9 +54,7 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   SmartphoneStudy? getStudy(String studyDeploymentId, String deviceRoleName) {
     try {
       return _repository.firstWhere(
-        (study) =>
-            study.studyDeploymentId == studyDeploymentId &&
-            study.deviceRoleName == deviceRoleName,
+        (study) => study.studyDeploymentId == studyDeploymentId && study.deviceRoleName == deviceRoleName,
       );
     } catch (_) {
       return null;
@@ -80,8 +75,7 @@ class SmartphoneClientRepository implements ClientRepository<SmartphoneStudy> {
   }
 
   @override
-  void updateStudy(SmartphoneStudy study) =>
-      PersistenceService().updateStudy(study);
+  void updateStudy(SmartphoneStudy study) => PersistenceService().updateStudy(study);
 
   @override
   String toString() => '$runtimeType [${_repository.length}]';

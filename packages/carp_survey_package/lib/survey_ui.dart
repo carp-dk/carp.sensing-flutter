@@ -14,19 +14,10 @@ class SurveyPage extends StatelessWidget {
   /// The [RPTaskResult] is optional and can be `null` if no results were created.
   final void Function([RPTaskResult?])? onSurveyCancel;
 
-  const SurveyPage({
-    super.key,
-    required this.task,
-    required this.resultCallback,
-    this.onSurveyCancel,
-  }) : super();
+  const SurveyPage({super.key, required this.task, required this.resultCallback, this.onSurveyCancel}) : super();
 
   @override
   Widget build(BuildContext context) {
-    return RPUITask(
-      task: task as RPOrderedTask,
-      onSubmit: resultCallback,
-      onCancel: onSurveyCancel,
-    );
+    return RPUITask(task: task as RPOrderedTask, onSubmit: resultCallback, onCancel: onSurveyCancel);
   }
 }

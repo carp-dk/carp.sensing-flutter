@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -27,8 +28,7 @@ void main() {
 
   StudyProtocol? protocol;
 
-  Future<void> writeToFile(String json, String fileName) async =>
-      await File('test/json/$fileName').writeAsString(json);
+  Future<void> writeToFile(String json, String fileName) async => await File('test/json/$fileName').writeAsString(json);
 
   setUpAll(() async {
     // Initialization of serialization
@@ -71,10 +71,9 @@ void main() {
       // print(toJsonString(protocol));
       final studyJson = toJsonString(protocol);
 
-      SmartphoneStudyProtocol protocolFromJson =
-          SmartphoneStudyProtocol.fromJson(
-            json.decode(studyJson) as Map<String, dynamic>,
-          );
+      SmartphoneStudyProtocol protocolFromJson = SmartphoneStudyProtocol.fromJson(
+        json.decode(studyJson) as Map<String, dynamic>,
+      );
       // print(toJsonString(protocolFromJson));
       expect(toJsonString(protocolFromJson), equals(studyJson));
     });
@@ -82,9 +81,7 @@ void main() {
     test('JSON File -> StudyProtocol', () async {
       final plainJson = File('test/json/protocol.json').readAsStringSync();
 
-      final p = SmartphoneStudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      final p = SmartphoneStudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       // need to set the id and date, since it is auto-generated each time.
       p.id = protocol!.id;

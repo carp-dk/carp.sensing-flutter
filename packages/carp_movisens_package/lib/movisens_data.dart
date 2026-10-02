@@ -18,33 +18,35 @@ part of 'carp_movisens_package.dart';
 abstract class MovisensData extends Data {
   /// Data type of [MovisensStepCount].
   static const String STEPS = "${MovisensSamplingPackage.ACTIVITY}.steps";
+
   /// Data type of [MovisensBodyPosition].
-  static const String BODY_POSITION =
-      "${MovisensSamplingPackage.ACTIVITY}.body_position";
+  static const String BODY_POSITION = "${MovisensSamplingPackage.ACTIVITY}.body_position";
+
   /// Data type of [MovisensInclination].
-  static const String INCLINATION =
-      "${MovisensSamplingPackage.ACTIVITY}.inclination";
+  static const String INCLINATION = "${MovisensSamplingPackage.ACTIVITY}.inclination";
+
   /// Data type of [MovisensMovementAcceleration].
-  static const String MOVEMENT_ACCELERATION =
-      "${MovisensSamplingPackage.ACTIVITY}.movement_acceleration";
+  static const String MOVEMENT_ACCELERATION = "${MovisensSamplingPackage.ACTIVITY}.movement_acceleration";
+
   /// Data type of [MovisensMET].
   static const String MET = "${MovisensSamplingPackage.ACTIVITY}.met";
+
   /// Data type of [MovisensMETLevel].
-  static const String MET_LEVEL =
-      "${MovisensSamplingPackage.ACTIVITY}.met_level";
+  static const String MET_LEVEL = "${MovisensSamplingPackage.ACTIVITY}.met_level";
 
   /// Data type of [MovisensHR].
   ///
   /// Note that [MovisensHRV] and [MovisensIsHrvValid] currently also use this
   /// type as their [jsonType].
   static const String HR_MEAN = "${MovisensSamplingPackage.HR}.hr_mean";
+
   /// Data type of heart rate variability. Not used by [MovisensHRV] at the
   /// moment, which uses [HR_MEAN].
   static const String HRV = "${MovisensSamplingPackage.HR}.hrv";
+
   /// Data type of HRV validity. Not used by [MovisensIsHrvValid] at the
   /// moment, which uses [HR_MEAN].
-  static const String IS_HRV_VALID =
-      "${MovisensSamplingPackage.HR}.is_hrv_valid";
+  static const String IS_HRV_VALID = "${MovisensSamplingPackage.HR}.is_hrv_valid";
 
   /// The timestamp of the Movisens event.
   ///
@@ -61,11 +63,7 @@ abstract class MovisensData extends Data {
   String type;
 
   /// Creates Movisens data. [timestamp] defaults to now.
-  MovisensData({
-    required this.deviceId,
-    required this.type,
-    DateTime? timestamp,
-  }) : super() {
+  MovisensData({required this.deviceId, required this.type, DateTime? timestamp}) : super() {
     this.timestamp = timestamp ?? DateTime.now();
   }
 
@@ -83,21 +81,11 @@ class MovisensStepCount extends MovisensData {
   /// Number of steps taken by the user in the last interval.
   int steps;
 
-  MovisensStepCount({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.steps,
-  });
+  MovisensStepCount({required super.deviceId, required super.type, super.timestamp, required this.steps});
 
   @override
   factory MovisensStepCount.fromMovisensEvent(movisens.StepsEvent event) =>
-      MovisensStepCount(
-        deviceId: event.deviceId,
-        type: event.type.name,
-        timestamp: event.time,
-        steps: event.steps,
-      );
+      MovisensStepCount(deviceId: event.deviceId, type: event.type.name, timestamp: event.time, steps: event.steps);
 
   @override
   Function get fromJsonFunction => _$MovisensStepCountFromJson;
@@ -116,17 +104,10 @@ class MovisensBodyPosition extends MovisensData {
   /// plugin (like "standing" or "lyingSupine").
   String bodyPosition;
 
-  MovisensBodyPosition({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.bodyPosition,
-  });
+  MovisensBodyPosition({required super.deviceId, required super.type, super.timestamp, required this.bodyPosition});
 
   @override
-  factory MovisensBodyPosition.fromMovisensEvent(
-    movisens.BodyPositionEvent event,
-  ) => MovisensBodyPosition(
+  factory MovisensBodyPosition.fromMovisensEvent(movisens.BodyPositionEvent event) => MovisensBodyPosition(
     deviceId: event.deviceId,
     type: event.type.name,
     timestamp: event.time,
@@ -166,9 +147,7 @@ class MovisensInclination extends MovisensData {
   });
 
   @override
-  factory MovisensInclination.fromMovisensEvent(
-    movisens.InclinationEvent event,
-  ) => MovisensInclination(
+  factory MovisensInclination.fromMovisensEvent(movisens.InclinationEvent event) => MovisensInclination(
     deviceId: event.deviceId,
     type: event.type.name,
     timestamp: event.time,
@@ -203,14 +182,13 @@ class MovisensMovementAcceleration extends MovisensData {
   });
 
   @override
-  factory MovisensMovementAcceleration.fromMovisensEvent(
-    movisens.MovementAccelerationEvent event,
-  ) => MovisensMovementAcceleration(
-    deviceId: event.deviceId,
-    type: event.type.name,
-    timestamp: event.time,
-    movementAcceleration: event.movementAcceleration,
-  );
+  factory MovisensMovementAcceleration.fromMovisensEvent(movisens.MovementAccelerationEvent event) =>
+      MovisensMovementAcceleration(
+        deviceId: event.deviceId,
+        type: event.type.name,
+        timestamp: event.time,
+        movementAcceleration: event.movementAcceleration,
+      );
 
   @override
   Function get fromJsonFunction => _$MovisensMovementAccelerationFromJson;
@@ -230,25 +208,15 @@ class MovisensMET extends MovisensData {
   /// task to a reference metabolic rate.
   int met;
 
-  MovisensMET({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.met,
-  });
+  MovisensMET({required super.deviceId, required super.type, super.timestamp, required this.met});
 
   @override
-  factory MovisensMET.fromMovisensEvent(movisens.MetEvent event) => MovisensMET(
-    deviceId: event.deviceId,
-    type: event.type.name,
-    timestamp: event.time,
-    met: event.met,
-  );
+  factory MovisensMET.fromMovisensEvent(movisens.MetEvent event) =>
+      MovisensMET(deviceId: event.deviceId, type: event.type.name, timestamp: event.time, met: event.met);
 
   @override
   Function get fromJsonFunction => _$MovisensMETFromJson;
-  factory MovisensMET.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovisensMET;
+  factory MovisensMET.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovisensMET;
   @override
   Map<String, dynamic> toJson() => _$MovisensMETToJson(this);
   @override
@@ -273,21 +241,19 @@ class MovisensMETLevel extends MovisensData {
   });
 
   @override
-  factory MovisensMETLevel.fromMovisensEvent(movisens.MetLevelEvent event) =>
-      MovisensMETLevel(
-        deviceId: event.deviceId,
-        type: event.type.name,
-        timestamp: event.time,
-        sedentary: event.sedentary,
-        light: event.light,
-        moderate: event.moderate,
-        vigorous: event.vigorous,
-      );
+  factory MovisensMETLevel.fromMovisensEvent(movisens.MetLevelEvent event) => MovisensMETLevel(
+    deviceId: event.deviceId,
+    type: event.type.name,
+    timestamp: event.time,
+    sedentary: event.sedentary,
+    light: event.light,
+    moderate: event.moderate,
+    vigorous: event.vigorous,
+  );
 
   @override
   Function get fromJsonFunction => _$MovisensMETLevelFromJson;
-  factory MovisensMETLevel.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovisensMETLevel;
+  factory MovisensMETLevel.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovisensMETLevel;
   @override
   Map<String, dynamic> toJson() => _$MovisensMETLevelToJson(this);
   @override
@@ -303,26 +269,15 @@ class MovisensHR extends MovisensData {
   /// Mean heart rate (HR) of the previous 60 seconds in beats per minute (BPM).
   int hr;
 
-  MovisensHR({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.hr,
-  });
+  MovisensHR({required super.deviceId, required super.type, super.timestamp, required this.hr});
 
   @override
   factory MovisensHR.fromMovisensEvent(movisens.HrMeanEvent event) =>
-      MovisensHR(
-        deviceId: event.deviceId,
-        type: event.type.name,
-        timestamp: event.time,
-        hr: event.hrMean,
-      );
+      MovisensHR(deviceId: event.deviceId, type: event.type.name, timestamp: event.time, hr: event.hrMean);
 
   @override
   Function get fromJsonFunction => _$MovisensHRFromJson;
-  factory MovisensHR.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovisensHR;
+  factory MovisensHR.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovisensHR;
   @override
   Map<String, dynamic> toJson() => _$MovisensHRToJson(this);
 
@@ -343,26 +298,15 @@ class MovisensHRV extends MovisensData {
   /// The unit is milliseconds.
   int hrv;
 
-  MovisensHRV({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.hrv,
-  });
+  MovisensHRV({required super.deviceId, required super.type, super.timestamp, required this.hrv});
 
   @override
   factory MovisensHRV.fromMovisensEvent(movisens.RmssdEvent event) =>
-      MovisensHRV(
-        deviceId: event.deviceId,
-        type: event.type.name,
-        timestamp: event.time,
-        hrv: event.rmssd,
-      );
+      MovisensHRV(deviceId: event.deviceId, type: event.type.name, timestamp: event.time, hrv: event.rmssd);
 
   @override
   Function get fromJsonFunction => _$MovisensHRVFromJson;
-  factory MovisensHRV.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovisensHRV;
+  factory MovisensHRV.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovisensHRV;
   @override
   Map<String, dynamic> toJson() => _$MovisensHRVToJson(this);
   @override
@@ -378,17 +322,10 @@ class MovisensIsHrvValid extends MovisensData {
   /// Are the current HRV measurements valid?
   bool isHrvValid;
 
-  MovisensIsHrvValid({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.isHrvValid,
-  });
+  MovisensIsHrvValid({required super.deviceId, required super.type, super.timestamp, required this.isHrvValid});
 
   @override
-  factory MovisensIsHrvValid.fromMovisensEvent(
-    movisens.HrvIsValidEvent event,
-  ) => MovisensIsHrvValid(
+  factory MovisensIsHrvValid.fromMovisensEvent(movisens.HrvIsValidEvent event) => MovisensIsHrvValid(
     deviceId: event.deviceId,
     type: event.type.name,
     timestamp: event.time,
@@ -411,26 +348,15 @@ class MovisensEDA extends MovisensData {
   /// The Mean Skin Conductance Level (SCL) value in micro Siemens.
   double edaSclMean;
 
-  MovisensEDA({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.edaSclMean,
-  });
+  MovisensEDA({required super.deviceId, required super.type, super.timestamp, required this.edaSclMean});
 
   @override
   factory MovisensEDA.fromMovisensEvent(movisens.EdaSclMeanEvent event) =>
-      MovisensEDA(
-        deviceId: event.deviceId,
-        type: event.type.name,
-        timestamp: event.time,
-        edaSclMean: event.edaSclMean,
-      );
+      MovisensEDA(deviceId: event.deviceId, type: event.type.name, timestamp: event.time, edaSclMean: event.edaSclMean);
 
   @override
   Function get fromJsonFunction => _$MovisensEDAFromJson;
-  factory MovisensEDA.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovisensEDA;
+  factory MovisensEDA.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovisensEDA;
   @override
   Map<String, dynamic> toJson() => _$MovisensEDAToJson(this);
   @override
@@ -451,9 +377,7 @@ class MovisensSkinTemperature extends MovisensData {
   });
 
   @override
-  factory MovisensSkinTemperature.fromMovisensEvent(
-    movisens.SkinTemperatureEvent event,
-  ) => MovisensSkinTemperature(
+  factory MovisensSkinTemperature.fromMovisensEvent(movisens.SkinTemperatureEvent event) => MovisensSkinTemperature(
     deviceId: event.deviceId,
     type: event.type.name,
     timestamp: event.time,
@@ -477,22 +401,11 @@ class MovisensRespiration extends MovisensData {
   /// Its unit and meaning are not documented by the `movisens_flutter` plugin.
   int value;
 
-  MovisensRespiration({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.value,
-  });
+  MovisensRespiration({required super.deviceId, required super.type, super.timestamp, required this.value});
 
   @override
-  factory MovisensRespiration.fromMovisensEvent(
-    movisens.RespiratoryMovementEvent event,
-  ) => MovisensRespiration(
-    deviceId: event.deviceId,
-    type: event.type.name,
-    timestamp: event.time,
-    value: event.values,
-  );
+  factory MovisensRespiration.fromMovisensEvent(movisens.RespiratoryMovementEvent event) =>
+      MovisensRespiration(deviceId: event.deviceId, type: event.type.name, timestamp: event.time, value: event.values);
 
   @override
   Function get fromJsonFunction => _$MovisensRespirationFromJson;
@@ -510,21 +423,15 @@ class MovisensTapMarker extends MovisensData {
   /// The tap marker value.
   int tapMarker;
 
-  MovisensTapMarker({
-    required super.deviceId,
-    required super.type,
-    super.timestamp,
-    required this.tapMarker,
-  });
+  MovisensTapMarker({required super.deviceId, required super.type, super.timestamp, required this.tapMarker});
 
   @override
-  factory MovisensTapMarker.fromMovisensEvent(movisens.TapMarkerEvent event) =>
-      MovisensTapMarker(
-        deviceId: event.deviceId,
-        type: event.type.name,
-        timestamp: event.time,
-        tapMarker: event.tapMarkerValue,
-      );
+  factory MovisensTapMarker.fromMovisensEvent(movisens.TapMarkerEvent event) => MovisensTapMarker(
+    deviceId: event.deviceId,
+    type: event.type.name,
+    timestamp: event.time,
+    tapMarker: event.tapMarkerValue,
+  );
 
   @override
   Function get fromJsonFunction => _$MovisensTapMarkerFromJson;

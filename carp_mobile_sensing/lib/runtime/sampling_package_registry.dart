@@ -56,10 +56,7 @@ class SamplingPackageRegistry {
     CarpDataTypes().add(package.samplingSchemes.dataTypes);
 
     // register the package's device in the device registry
-    DeviceController().registerDevice(
-      package.deviceType,
-      package.deviceManager,
-    );
+    DeviceController().registerDevice(package.deviceType, package.deviceManager);
 
     // call back to the package
     package.onRegister();

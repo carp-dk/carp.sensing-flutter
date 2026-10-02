@@ -22,10 +22,7 @@ abstract class DeviceDataCollectorFactory {
   /// using connection options specified in [deviceRegistration].
   ///
   /// Returns null in case the [ConnectedDeviceDataCollector] cannot be created.
-  ConnectedDeviceDataCollector? createConnectedDataCollector(
-    String deviceType,
-    DeviceRegistration deviceRegistration,
-  );
+  ConnectedDeviceDataCollector? createConnectedDataCollector(String deviceType, DeviceRegistration deviceRegistration);
 }
 
 /// Collects [Data] for a single device.

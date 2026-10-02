@@ -16,10 +16,7 @@ void main() async {
   SamplingPackageRegistry().register(HealthSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Health Sensing Example',
-  );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Health Sensing Example');
 
   // Define which devices are used for data collection.
 

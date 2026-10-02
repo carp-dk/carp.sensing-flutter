@@ -43,20 +43,17 @@ enum ClientManagerState { created, configured, disposed }
 /// );
 /// SmartPhoneClientManager().resume();
 /// ```
-class SmartPhoneClientManager
-    extends ClientManager<Smartphone, SmartphoneRegistration, SmartphoneStudy>
+class SmartPhoneClientManager extends ClientManager<Smartphone, SmartphoneRegistration, SmartphoneStudy>
     with ChangeNotifier {
   static final SmartPhoneClientManager _instance = SmartPhoneClientManager._();
 
-  final NotificationManager _notificationManager =
-      FlutterLocalNotificationManager();
+  final NotificationManager _notificationManager = FlutterLocalNotificationManager();
   bool _askForPermissions = true;
   PermissionRequester _permissionRequester = requestPermissionsInOrder;
   Future<void> _asking = Future.value();
   final StreamGroup<Measurement> _group = StreamGroup.broadcast();
   ClientManagerState _state = ClientManagerState.created;
-  final StreamController<ClientManagerState> _controller =
-      StreamController.broadcast();
+  final StreamController<ClientManagerState> _controller = StreamController.broadcast();
   final Map<Study, SmartphoneStudyController> _controllers = {};
 
   /// Whether permissions are asked for automatically when a study is deployed.
@@ -73,14 +70,13 @@ class SmartPhoneClientManager
   /// A failing requester is logged, not rethrown. Callers re-check the actual
   /// permission status afterwards, and an error must not block the requests
   /// queued behind it.
-  Future<void> requestPermissions(List<Permission> permissions) =>
-      _asking = _asking.then((_) async {
-        try {
-          await _permissionRequester(permissions);
-        } catch (error) {
-          warning('$runtimeType - Permission requester failed - $error');
-        }
-      });
+  Future<void> requestPermissions(List<Permission> permissions) => _asking = _asking.then((_) async {
+    try {
+      await _permissionRequester(permissions);
+    } catch (error) {
+      warning('$runtimeType - Permission requester failed - $error');
+    }
+  });
 
   /// The runtime state of this client manager.
   ///
@@ -102,8 +98,7 @@ class SmartPhoneClientManager
   /// data format. A broadcast stream.
   Stream<Measurement> get measurements => _group.stream;
 
-  SmartPhoneClientManager._()
-    : super(repository: SmartphoneClientRepository()) {
+  SmartPhoneClientManager._() : super(repository: SmartphoneClientRepository()) {
     WidgetsFlutterBinding.ensureInitialized();
     CarpMobileSensing.ensureInitialized();
   }
@@ -116,8 +111,7 @@ class SmartPhoneClientManager
   /// The [DeviceController] that manages all devices on this phone.
   ///
   /// Only available after [configure] has been called.
-  DeviceController get deviceController =>
-      super.dataCollectorFactory as DeviceController;
+  DeviceController get deviceController => super.dataCollectorFactory as DeviceController;
 
   /// The [NotificationManager] that shows notifications for [AppTask]s.
   NotificationManager get notificationManager => _notificationManager;
@@ -230,9 +224,7 @@ class SmartPhoneClientManager
 
     // Initialize the app task controller.
     // This will restore previous queue from persistent storage.
-    await AppTaskController().initialize(
-      enableNotifications: enableNotifications,
-    );
+    await AppTaskController().initialize(enableNotifications: enableNotifications);
 
     var statusMsg =
         '===========================================================\n'
@@ -249,9 +241,7 @@ class SmartPhoneClientManager
     debugPrint(statusMsg);
 
     // Now add previously stored studies to this client.
-    debug(
-      '$runtimeType - Loaded ${studies.length} studies. Now starting them...',
-    );
+    debug('$runtimeType - Loaded ${studies.length} studies. Now starting them...');
     for (var study in studies) {
       await addStudy(study);
 
@@ -276,9 +266,7 @@ class SmartPhoneClientManager
     // Will create a fresh controller, if this is a new study.
     getStudyController(study);
 
-    info(
-      '$runtimeType - Adding study, deployment: ${study.deployment?.studyDeploymentId}',
-    );
+    info('$runtimeType - Adding study, deployment: ${study.deployment?.studyDeploymentId}');
     notifyListeners();
     return study;
   }
@@ -288,9 +276,7 @@ class SmartPhoneClientManager
   /// Same as [addStudy], but the study is created from the [invitation].
   /// If the invitation has no device role name,
   /// [Smartphone.DEFAULT_ROLE_NAME] is used.
-  Future<SmartphoneStudy> addStudyFromInvitation(
-    ActiveParticipationInvitation invitation,
-  ) async => await addStudy(
+  Future<SmartphoneStudy> addStudyFromInvitation(ActiveParticipationInvitation invitation) async => await addStudy(
     SmartphoneStudy(
       studyId: invitation.studyId,
       studyDeploymentId: invitation.studyDeploymentId,
@@ -309,15 +295,8 @@ class SmartPhoneClientManager
   /// Meant for local protocols with one participant: the local user id from
   /// [Settings.userId] is used as participant id, and the first participant
   /// role in the protocol (or 'Participant') as participant role name.
-  Future<SmartphoneStudy> addStudyFromProtocol(
-    StudyProtocol protocol, [
-    String? studyDeploymentId,
-  ]) async {
-    final status = await deploymentService.createStudyDeployment(
-      protocol,
-      [],
-      studyDeploymentId,
-    );
+  Future<SmartphoneStudy> addStudyFromProtocol(StudyProtocol protocol, [String? studyDeploymentId]) async {
+    final status = await deploymentService.createStudyDeployment(protocol, [], studyDeploymentId);
 
     // no participant is specified in a protocol so look up the local user id
     var userId = await Settings().userId;
@@ -328,9 +307,7 @@ class SmartPhoneClientManager
       // we expect that this is a "local" protocol where we use the user id as
       // participant id and with just one participant
       participantId: userId,
-      participantRoleName:
-          protocol.participantRoles == null ||
-              protocol.participantRoles!.isEmpty
+      participantRoleName: protocol.participantRoles == null || protocol.participantRoles!.isEmpty
           ? 'Participant'
           : protocol.participantRoles?.first.role,
     );
@@ -339,10 +316,7 @@ class SmartPhoneClientManager
 
   @override
   @mustCallSuper
-  Future<void> removeStudy(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
+  Future<void> removeStudy(String studyDeploymentId, String deviceRoleName) async {
     var study = getStudy(studyDeploymentId, deviceRoleName);
     // fast out if not a valid study
     if (study == null) return;
@@ -360,10 +334,7 @@ class SmartPhoneClientManager
 
   @override
   @mustCallSuper
-  Future<StudyStatus> stopStudy(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
+  Future<StudyStatus> stopStudy(String studyDeploymentId, String deviceRoleName) async {
     var study = getStudy(studyDeploymentId, deviceRoleName);
     // fast out if not a valid study
     if (study == null) {

@@ -16,23 +16,16 @@ class ConnectivityProbe extends StreamProbe {
   @override
   Future<bool> onResume() async {
     // collect the current connectivity status on sampling start
-    var connectivityStatus = await connectivity.Connectivity()
-        .checkConnectivity();
-    addMeasurement(
-      Measurement.fromData(
-        Connectivity.fromConnectivityResult(connectivityStatus),
-      ),
-    );
+    var connectivityStatus = await connectivity.Connectivity().checkConnectivity();
+    addMeasurement(Measurement.fromData(Connectivity.fromConnectivityResult(connectivityStatus)));
 
     return super.onResume();
   }
 
   @override
-  Stream<Measurement> get stream =>
-      connectivity.Connectivity().onConnectivityChanged.map(
-        (event) =>
-            Measurement.fromData(Connectivity.fromConnectivityResult(event)),
-      );
+  Stream<Measurement> get stream => connectivity.Connectivity().onConnectivityChanged.map(
+    (event) => Measurement.fromData(Connectivity.fromConnectivityResult(event)),
+  );
 }
 
 // This probe requests access to location permissions (both on Android and iOS).
@@ -80,8 +73,7 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
   Stream<dynamic> get bufferingStream => FlutterBluePlus.scanResults;
 
   @override
-  Future<Measurement?> getMeasurement() async =>
-      _data != null ? Measurement.fromData(_data!) : null;
+  Future<Measurement?> getMeasurement() async => _data != null ? Measurement.fromData(_data!) : null;
 
   // if a BT-specific sampling configuration is used, we need to
   // extract the services and remoteIds from it so FlutterBluePlus can
@@ -89,20 +81,14 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
 
   /// The service UUIDs to filter the scan on. Empty if no
   /// [BluetoothScanPeriodicSamplingConfiguration] is used.
-  List<Guid> get services =>
-      (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
-      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration)
-            .withServices
-            .map((e) => Guid(e))
-            .toList()
+  List<Guid> get services => (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
+      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration).withServices.map((e) => Guid(e)).toList()
       : [];
 
   /// The remote device ids to filter the scan on. Empty if no
   /// [BluetoothScanPeriodicSamplingConfiguration] is used.
-  List<String> get remoteIds =>
-      (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
-      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration)
-            .withRemoteIds
+  List<String> get remoteIds => (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
+      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration).withRemoteIds
       : [];
 
   @override
@@ -114,9 +100,7 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
     FlutterBluePlus.startScan(
       withServices: services,
       withRemoteIds: remoteIds,
-      timeout:
-          samplingConfiguration?.duration ??
-          const Duration(milliseconds: DEFAULT_TIMEOUT),
+      timeout: samplingConfiguration?.duration ?? const Duration(milliseconds: DEFAULT_TIMEOUT),
     ).catchError((Object error) {
       _data = Error(message: 'Error scanning for bluetooth - $error');
     });
@@ -153,10 +137,7 @@ class BeaconProbe extends StreamProbe {
 
   /// The configured regions, converted to the beacon plugin's [Region] type.
   List<Region> get beaconRegions =>
-      samplingConfiguration?.beaconRegions
-          .map((region) => region.toRegion())
-          .toList() ??
-      [];
+      samplingConfiguration?.beaconRegions.map((region) => region.toRegion()).toList() ?? [];
 
   /// The maximum beacon distance in meters. Default is 2.
   int get beaconDistance => samplingConfiguration?.beaconDistance ?? 2;
@@ -165,9 +146,7 @@ class BeaconProbe extends StreamProbe {
   bool onInitialize() {
     super.onInitialize();
     if (beaconRegions.isEmpty) {
-      warning(
-        '$runtimeType - No beacon regions specified for monitoring. Will not start monitoring.',
-      );
+      warning('$runtimeType - No beacon regions specified for monitoring. Will not start monitoring.');
       return false;
     }
 
@@ -192,30 +171,19 @@ class BeaconProbe extends StreamProbe {
 
   @override
   Stream<Measurement> get stream async* {
-    await for (final monitoringResult in flutterBeacon.monitoring(
-      beaconRegions,
-    )) {
+    await for (final monitoringResult in flutterBeacon.monitoring(beaconRegions)) {
       if (monitoringResult.monitoringState == MonitoringState.inside) {
-        debug(
-          '$runtimeType - Entered region: ${monitoringResult.region.identifier}',
-        );
+        debug('$runtimeType - Entered region: ${monitoringResult.region.identifier}');
 
         yield* flutterBeacon.ranging(beaconRegions).map((rangingResult) {
-          final closeBeacons = rangingResult.beacons
-              .where((beacon) => beacon.accuracy <= beaconDistance)
-              .toList();
+          final closeBeacons = rangingResult.beacons.where((beacon) => beacon.accuracy <= beaconDistance).toList();
 
           return Measurement.fromData(
-            BeaconData.fromRegionAndBeacons(
-              region: rangingResult.region.identifier,
-              beacons: closeBeacons,
-            ),
+            BeaconData.fromRegionAndBeacons(region: rangingResult.region.identifier, beacons: closeBeacons),
           );
         });
       } else if (monitoringResult.monitoringState == MonitoringState.outside) {
-        debug(
-          '$runtimeType - Exited region: ${monitoringResult.region.identifier}',
-        );
+        debug('$runtimeType - Exited region: ${monitoringResult.region.identifier}');
       }
     }
   }

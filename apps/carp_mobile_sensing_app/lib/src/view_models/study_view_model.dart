@@ -23,41 +23,32 @@ class StudyViewModel with ChangeNotifier {
       ? 'No study has yet been added. Press the "+" button to add a study.'
       : deployment?.studyDescription?.description ??
             'The study has not been deployed yet. Press the "Refresh" button to begin deployment. ';
-  String get studyDeploymentId =>
-      _study != null ? '...-${_study?.studyDeploymentId.split('-').last}' : '';
+  String get studyDeploymentId => _study != null ? '...-${_study?.studyDeploymentId.split('-').last}' : '';
   String get deviceRoleName => _study?.deviceRoleName ?? '';
   String get participantRoleName => _study?.participantRoleName ?? '';
   String? get dataEndpointType => deployment?.dataEndPoint?.type;
 
-  StudyDeploymentStatusTypes? get studyDeploymentStatus =>
-      _study?.deploymentStatus?.status;
+  StudyDeploymentStatusTypes? get studyDeploymentStatus => _study?.deploymentStatus?.status;
 
   StudyStatus? get studyStatus => bloc.sensing.controller?.study.status;
 
   /// Events on the study status of the client manager
   Stream<StudyStatus> get studyStatusEvents =>
-      bloc.sensing.controller?.study.events.map(
-        (event) => event.study.status,
-      ) ??
-      Stream.empty();
+      bloc.sensing.controller?.study.events.map((event) => event.study.status) ?? Stream.empty();
 
   /// Current state of the study executor (e.g., started, stopped, ...)
-  ExecutorState get executorState =>
-      bloc.sensing.controller?.executor.state ?? ExecutorState.Undefined;
+  ExecutorState get executorState => bloc.sensing.controller?.executor.state ?? ExecutorState.Undefined;
 
   /// Events on the state of the study executor
-  Stream<ExecutorState> get executorStateEvents =>
-      bloc.sensing.controller?.executor.stateEvents ?? Stream.empty();
+  Stream<ExecutorState> get executorStateEvents => bloc.sensing.controller?.executor.stateEvents ?? Stream.empty();
 
   /// Get all sensing events (i.e. all [Measurement] objects being collected).
-  Stream<Measurement> get measurements =>
-      bloc.sensing.controller?.measurements ?? Stream.empty();
+  Stream<Measurement> get measurements => bloc.sensing.controller?.measurements ?? Stream.empty();
 
   /// The total sampling size so far since this study was started.
   int get samplingSize => bloc.sensing.samplingSize;
 
   /// Get the latest status of the study deployment.
-  Future<void> refreshStudyDeploymentStatus() async => (_study != null)
-      ? await bloc.sensing.client.getStudyDeploymentStatus(_study!)
-      : null;
+  Future<void> refreshStudyDeploymentStatus() async =>
+      (_study != null) ? await bloc.sensing.client.getStudyDeploymentStatus(_study!) : null;
 }

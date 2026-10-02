@@ -49,8 +49,7 @@ class MediaSamplingPackage extends SmartphoneSamplingPackage {
   static const String NOISE = "${NameSpace.CARP}.noise";
 
   @override
-  DataTypeSamplingSchemeMap
-  get samplingSchemes => DataTypeSamplingSchemeMap.from([
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
     DataTypeSamplingScheme(
       CamsDataTypeMetaData(
         type: AUDIO,
@@ -88,10 +87,7 @@ class MediaSamplingPackage extends SmartphoneSamplingPackage {
         dataEventType: DataEventType.EVENT,
         permissions: [Permission.microphone],
       ),
-      PeriodicSamplingConfiguration(
-        interval: const Duration(minutes: 5),
-        duration: const Duration(seconds: 10),
-      ),
+      PeriodicSamplingConfiguration(interval: const Duration(minutes: 5), duration: const Duration(seconds: 10)),
     ),
   ]);
 

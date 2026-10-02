@@ -114,9 +114,7 @@ class StudyPageState extends State<StudyPage> {
     // Direct location stream: subscribe straight to the OS location stream via
     // the LocationManager, bypassing the CARP probe/measurement pipeline.
     // Logs every fix (no throttle) for a true 1:1 comparison with LOC-CARP.
-    _directLocationSub = LocationManager().onLocationChanged.listen(
-      (location) => _logLocation('LOC-DIRECT', location),
-    );
+    _directLocationSub = LocationManager().onLocationChanged.listen((location) => _logLocation('LOC-DIRECT', location));
 
     // Third source: the `geolocator` package's own position stream, independent
     // of both CARP and the `location` plugin. Logs every fix (no throttle).
@@ -125,9 +123,7 @@ class StudyPageState extends State<StudyPage> {
           locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 0),
         ).listen((position) {
           final time = position.timestamp.toIso8601String();
-          debugPrint(
-            '[LOC-GEO] $time  ${position.latitude}, ${position.longitude}  ±${position.accuracy}m',
-          );
+          debugPrint('[LOC-GEO] $time  ${position.latitude}, ${position.longitude}  ±${position.accuracy}m');
         });
   }
 

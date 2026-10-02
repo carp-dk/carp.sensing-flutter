@@ -80,17 +80,16 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
   static const String WEATHER = "${NameSpace.CARP}.weather";
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: ACTIVITY,
-            displayName: "Activity",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.activityRecognition],
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: ACTIVITY,
+        displayName: "Activity",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.activityRecognition],
+      ),
+    ),
+  ]);
 
   @override
   Probe? create(String type) => type == ACTIVITY ? ActivityProbe() : null;
@@ -101,12 +100,7 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
     FromJsonFactory().registerAll([
       LocationSamplingConfiguration(),
       MobilitySamplingConfiguration(),
-      GeofenceSamplingConfiguration(
-        name: '',
-        center: GeoPosition(1.1, 1.1),
-        dwell: const Duration(),
-        radius: 1.0,
-      ),
+      GeofenceSamplingConfiguration(name: '', center: GeoPosition(1.1, 1.1), dwell: const Duration(), radius: 1.0),
       LocationService(),
       WeatherService(apiKey: ''),
       AirQualityService(apiKey: ''),
@@ -115,10 +109,7 @@ class ContextSamplingPackage extends SmartphoneSamplingPackage {
 
     // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
     // these services used the carp_core device namespace.
-    FromJsonFactory().register(
-      LocationService(),
-      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.LocationService',
-    );
+    FromJsonFactory().register(LocationService(), type: '${DeviceConfiguration.DEVICE_NAMESPACE}.LocationService');
     FromJsonFactory().register(
       WeatherService(apiKey: ''),
       type: '${DeviceConfiguration.DEVICE_NAMESPACE}.WeatherService',
@@ -162,39 +153,38 @@ class LocationSamplingPackage extends SmartphoneSamplingPackage {
   final _deviceManager = LocationServiceManager();
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: ContextSamplingPackage.LOCATION,
-            displayName: "Location",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.locationAlways],
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: ContextSamplingPackage.GEOFENCE,
-            displayName: "Geofence",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.locationAlways],
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: ContextSamplingPackage.MOBILITY,
-            displayName: "Mobility",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.locationAlways],
-          ),
-          MobilitySamplingConfiguration(
-            placeRadius: 50,
-            stopRadius: 5,
-            usePriorContexts: true,
-            stopDuration: const Duration(seconds: 30),
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: ContextSamplingPackage.LOCATION,
+        displayName: "Location",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.locationAlways],
+      ),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: ContextSamplingPackage.GEOFENCE,
+        displayName: "Geofence",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.locationAlways],
+      ),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: ContextSamplingPackage.MOBILITY,
+        displayName: "Mobility",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.locationAlways],
+      ),
+      MobilitySamplingConfiguration(
+        placeRadius: 50,
+        stopRadius: 5,
+        usePriorContexts: true,
+        stopDuration: const Duration(seconds: 30),
+      ),
+    ),
+  ]);
 
   @override
   Probe? create(String type) => switch (type) {
@@ -219,21 +209,19 @@ class AirQualitySamplingPackage extends SmartphoneSamplingPackage {
   final DeviceManager _deviceManager = AirQualityServiceManager();
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: ContextSamplingPackage.AIR_QUALITY,
-            displayName: "Air Quality",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.locationWhenInUse],
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: ContextSamplingPackage.AIR_QUALITY,
+        displayName: "Air Quality",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.locationWhenInUse],
+      ),
+    ),
+  ]);
 
   @override
-  Probe? create(String type) =>
-      type == ContextSamplingPackage.AIR_QUALITY ? AirQualityProbe() : null;
+  Probe? create(String type) => type == ContextSamplingPackage.AIR_QUALITY ? AirQualityProbe() : null;
 
   @override
   String get deviceType => AirQualityService.DEVICE_TYPE;
@@ -250,21 +238,19 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
   final DeviceManager _deviceManager = WeatherServiceManager();
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: ContextSamplingPackage.WEATHER,
-            displayName: "Weather",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.locationWhenInUse],
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: ContextSamplingPackage.WEATHER,
+        displayName: "Weather",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.locationWhenInUse],
+      ),
+    ),
+  ]);
 
   @override
-  Probe? create(String type) =>
-      type == ContextSamplingPackage.WEATHER ? WeatherProbe() : null;
+  Probe? create(String type) => type == ContextSamplingPackage.WEATHER ? WeatherProbe() : null;
 
   @override
   String get deviceType => WeatherService.DEVICE_TYPE;
@@ -279,9 +265,7 @@ class WeatherSamplingPackage extends SmartphoneSamplingPackage {
 /// Services always try to connect, need no extra configuration, and use
 /// location permissions via [LocationManager]. Subclasses override
 /// [canConnect] when a precondition (like an API key) applies.
-abstract class ContextServiceManager<
-  TDeviceConfiguration extends ServiceConfiguration<ServiceRegistration>
->
+abstract class ContextServiceManager<TDeviceConfiguration extends ServiceConfiguration<ServiceRegistration>>
     extends ServiceManager<TDeviceConfiguration, ServiceRegistration> {
   ContextServiceManager(super.type, {super.configuration});
 
@@ -289,18 +273,14 @@ abstract class ContextServiceManager<
   void onConfigure() {} // most services do not need further configuration
 
   @override
-  ServiceRegistration createRegistration() => ServiceRegistration(
-    deviceDisplayName: displayName,
-    isConnected: isConnected,
-  );
+  ServiceRegistration createRegistration() =>
+      ServiceRegistration(deviceDisplayName: displayName, isConnected: isConnected);
 
   @override
-  Future<bool> onHasPermissions() async =>
-      await LocationManager().hasPermission();
+  Future<bool> onHasPermissions() async => await LocationManager().hasPermission();
 
   @override
-  Future<void> onRequestPermissions() async =>
-      await LocationManager().requestPermission();
+  Future<void> onRequestPermissions() async => await LocationManager().requestPermission();
 
   @override
   bool get canConnect => true; // most online services can always connect - override if not...

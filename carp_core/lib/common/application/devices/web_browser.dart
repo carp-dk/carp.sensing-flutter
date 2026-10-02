@@ -13,8 +13,7 @@ part of '../../../common.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class WebBrowser extends PrimaryDeviceConfiguration<WebBrowserRegistration> {
   /// The type of a web browser device.
-  static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.WebBrowser';
+  static const String DEVICE_TYPE = '${DeviceConfiguration.DEVICE_NAMESPACE}.WebBrowser';
 
   /// The default role name for a web browser device.
   static const String DEFAULT_ROLE_NAME = 'Primary Web Browser';
@@ -46,8 +45,7 @@ class WebBrowser extends PrimaryDeviceConfiguration<WebBrowserRegistration> {
 
   @override
   Function get fromJsonFunction => _$WebBrowserFromJson;
-  factory WebBrowser.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<WebBrowser>(json);
+  factory WebBrowser.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<WebBrowser>(json);
   @override
   Map<String, dynamic> toJson() => _$WebBrowserToJson(this);
 }

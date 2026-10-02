@@ -21,9 +21,7 @@ void main() {
       registration: DeviceRegistration(),
     );
     final measurements = StreamController<Measurement>.broadcast();
-    await deleteDatabase(
-      '${await getDatabasesPath()}/${SQLiteDataManager.DATABASE_NAME}.db',
-    );
+    await deleteDatabase('${await getDatabasesPath()}/${SQLiteDataManager.DATABASE_NAME}.db');
 
     Future<void> configure(SQLiteDataManager manager) => manager.configure(
       dataEndPoint: SQLiteDataEndPoint(),
@@ -43,12 +41,7 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 700)); // batched write
 
     // One measurement must yield one row - not one per manager.
-    expect(
-      (await replacement.database!.query(
-        SQLiteDataManager.MEASUREMENT_TABLE_NAME,
-      )).length,
-      1,
-    );
+    expect((await replacement.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME)).length, 1);
 
     await measurements.close();
     await replacement.database?.close();

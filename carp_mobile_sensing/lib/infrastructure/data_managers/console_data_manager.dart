@@ -17,8 +17,7 @@ class ConsoleDataManager extends AbstractDataManager {
   String get type => DataEndPointTypes.PRINT;
 
   @override
-  Future<void> onMeasurement(Measurement measurement) async =>
-      debugPrint(jsonEncode(measurement));
+  Future<void> onMeasurement(Measurement measurement) async => debugPrint(jsonEncode(measurement));
 }
 
 /// Creates a [ConsoleDataManager] for data endpoints of type

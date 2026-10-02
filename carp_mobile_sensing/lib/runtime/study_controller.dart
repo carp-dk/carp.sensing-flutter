@@ -73,23 +73,16 @@ class SmartphoneStudyController {
   /// Includes both the primary device and connected devices.
   ///
   /// Returns an empty list if the deployment status is not available yet.
-  List<DeviceConfiguration> get remainingDevicesToRegister =>
-      (deploymentStatus == null)
+  List<DeviceConfiguration> get remainingDevicesToRegister => (deploymentStatus == null)
       ? []
       : deploymentStatus!.deviceStatusList
-            .where(
-              (deviceStatus) =>
-                  deviceStatus.status ==
-                  DeviceDeploymentStatusTypes.Unregistered,
-            )
+            .where((deviceStatus) => deviceStatus.status == DeviceDeploymentStatusTypes.Unregistered)
             .map((deviceStatus) => deviceStatus.device)
             .toList();
 
-  DeviceController get _deviceController =>
-      SmartPhoneClientManager().deviceController;
+  DeviceController get _deviceController => SmartPhoneClientManager().deviceController;
 
-  DeploymentService get _deploymentService =>
-      SmartPhoneClientManager().deploymentService;
+  DeploymentService get _deploymentService => SmartPhoneClientManager().deploymentService;
 
   /// The status of each permission needed by this study.
   ///
@@ -115,8 +108,7 @@ class SmartphoneStudyController {
   ///
   /// Taken from the deployment. Defaults to [NameSpace.CARP], which leaves
   /// data unchanged.
-  String get privacySchemaName =>
-      deployment?.privacySchemaName ?? NameSpace.CARP;
+  String get privacySchemaName => deployment?.privacySchemaName ?? NameSpace.CARP;
 
   /// The stream of all sampled measurements.
   ///
@@ -130,17 +122,12 @@ class SmartphoneStudyController {
     (measurement) => measurement
       ..data = DataTransformerSchemaRegistry()
           .lookup(deployment?.dataEndPoint?.dataFormat ?? NameSpace.CARP)!
-          .transform(
-            DataTransformerSchemaRegistry()
-                .lookup(privacySchemaName)!
-                .transform(measurement.data),
-          ),
+          .transform(DataTransformerSchemaRegistry().lookup(privacySchemaName)!.transform(measurement.data)),
   );
 
   /// The [measurements] of data [type], e.g. `dk.cachet.carp.steps`.
-  Stream<Measurement> measurementsByType(String type) => measurements.where(
-    (measurement) => measurement.data.dataType.toString() == type,
-  );
+  Stream<Measurement> measurementsByType(String type) =>
+      measurements.where((measurement) => measurement.data.dataType.toString() == type);
 
   /// Handles updates of the [deployment] status - stops sampling for good and
   /// removes the tasks once the deployment has been stopped, e.g. on the server.
@@ -168,19 +155,16 @@ class SmartphoneStudyController {
   ///
   /// A failed run is logged, not rethrown - nothing awaits the event handler,
   /// and an error must not block the runs queued behind it.
-  Future<void> _deviceDeploymentReceived() =>
-      _configuring = _configuring.then((_) async {
-        try {
-          await _configureDeployment();
-        } catch (error) {
-          warning('$runtimeType - Configuring deployment failed - $error');
-        }
-      });
+  Future<void> _deviceDeploymentReceived() => _configuring = _configuring.then((_) async {
+    try {
+      await _configureDeployment();
+    } catch (error) {
+      warning('$runtimeType - Configuring deployment failed - $error');
+    }
+  });
 
   Future<void> _configureDeployment() async {
-    debug(
-      '$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}',
-    );
+    debug('$runtimeType - Received device deployment: ${deployment?.studyDeploymentId}');
     // fast out if study has been stopped
     if (study.deploymentStatus?.status == StudyDeploymentStatusTypes.Stopped) {
       info('$runtimeType - Study has been stopped and cannot be started.');
@@ -205,9 +189,7 @@ class SmartphoneStudyController {
     // Close the existing data manager before replacing it - otherwise its
     // timer and subscriptions stay alive and keep handling measurements.
     await _dataManager?.close();
-    _dataManager = dataEndPoint == null
-        ? null
-        : DataManagerRegistry().create(dataEndPoint!.type);
+    _dataManager = dataEndPoint == null ? null : DataManagerRegistry().create(dataEndPoint!.type);
 
     if (_dataManager == null) {
       warning(
@@ -216,11 +198,7 @@ class SmartphoneStudyController {
       );
     }
 
-    await _dataManager?.configure(
-      dataEndPoint: dataEndPoint!,
-      deployment: deployment!,
-      measurements: measurements,
-    );
+    await _dataManager?.configure(dataEndPoint: dataEndPoint!, deployment: deployment!, measurements: measurements);
 
     // Initialize all devices from the deployment, incl. this smartphone.
     _configureAllDevices();
@@ -299,9 +277,7 @@ class SmartphoneStudyController {
     }
 
     // Check if the device is connected.
-    DeviceManager deviceManager = _deviceController.getDeviceManager(
-      deviceType,
-    )!;
+    DeviceManager deviceManager = _deviceController.getDeviceManager(deviceType)!;
 
     if (!deviceManager.isConnected) {
       warning(
@@ -347,17 +323,14 @@ class SmartphoneStudyController {
   ///
   /// Syncs the devices needed by the deployment with the devices on this
   /// phone. Does not wait for the registrations.
-  Future<void> tryRegisterRemainingDevicesToRegister() async =>
-      remainingDevicesToRegister.forEach((device) async {
-        await tryRegisterConnectedDevice(device);
-      });
+  Future<void> tryRegisterRemainingDevicesToRegister() async => remainingDevicesToRegister.forEach((device) async {
+    await tryRegisterConnectedDevice(device);
+  });
 
   /// Tries to unregister the [device] with the deployment service.
   ///
   /// Failures are logged, not thrown.
-  Future<void> tryUnregisterDisconnectedDevice(
-    DeviceConfiguration device,
-  ) async {
+  Future<void> tryUnregisterDisconnectedDevice(DeviceConfiguration device) async {
     final deviceRoleName = device.roleName;
 
     info(
@@ -366,10 +339,7 @@ class SmartphoneStudyController {
     );
 
     try {
-      final deploymentStatus = await _deploymentService.unregisterDevice(
-        study.studyDeploymentId,
-        deviceRoleName,
-      );
+      final deploymentStatus = await _deploymentService.unregisterDevice(study.studyDeploymentId, deviceRoleName);
 
       // Also update local deployment information about the connected device registrations,
       // so that it is in sync with the deployment service.
@@ -397,10 +367,7 @@ class SmartphoneStudyController {
     await tryUnregisterDisconnectedDevice(device);
     // Wait for a few seconds before trying to register the device again,
     // to give the deployment service some time to process the un-registration.
-    Future.delayed(
-      Duration(seconds: 5),
-      () async => await tryRegisterConnectedDevice(device),
-    );
+    Future.delayed(Duration(seconds: 5), () async => await tryRegisterConnectedDevice(device));
   }
 
   /// Asks for the permissions needed by all measures in this [study].
@@ -414,9 +381,7 @@ class SmartphoneStudyController {
   /// The result is stored in [permissions].
   Future<void> askForAllPermissions() async {
     if (deployment == null) {
-      warning(
-        '$runtimeType - No deployment available. Skipping requesting permissions.',
-      );
+      warning('$runtimeType - No deployment available. Skipping requesting permissions.');
       return;
     }
 
@@ -425,25 +390,17 @@ class SmartphoneStudyController {
     for (var measure in deployment?.measures ?? <Measure>[]) {
       var schema = SamplingPackageRegistry().samplingSchemes[measure.type];
       if (schema != null && schema.dataType is CamsDataTypeMetaData) {
-        permissions.addAll(
-          (schema.dataType as CamsDataTypeMetaData).permissions,
-        );
+        permissions.addAll((schema.dataType as CamsDataTypeMetaData).permissions);
       }
     }
 
-    debug(
-      '$runtimeType - Required permissions for this deployment: $permissions',
-    );
+    debug('$runtimeType - Required permissions for this deployment: $permissions');
 
     if (permissions.isNotEmpty) {
-      info(
-        '$runtimeType - Asking for permissions for all measures in this deployment...',
-      );
+      info('$runtimeType - Asking for permissions for all measures in this deployment...');
       await SmartPhoneClientManager().requestPermissions(permissions.toList());
 
-      _permissions = {
-        for (final permission in permissions) permission: await permission.status,
-      };
+      _permissions = {for (final permission in permissions) permission: await permission.status};
       debug('$runtimeType - Permissions: $_permissions');
     }
   }
@@ -482,8 +439,7 @@ class SmartphoneStudyController {
         : null;
 
     // Now configure the device incl. any pre-registration information from the deployment
-    var registration =
-        deployment?.connectedDeviceRegistrations[configuration.roleName];
+    var registration = deployment?.connectedDeviceRegistrations[configuration.roleName];
 
     // TODO - due to issue # 561 in CAWS we cannot use the device registration
     // information to configure the device manager, since CAWS does not properly
@@ -537,17 +493,12 @@ class SmartphoneStudyController {
       return;
     }
 
-    info(
-      '$runtimeType - Starting study deployment: ${study.studyDeploymentId}',
-    );
+    info('$runtimeType - Starting study deployment: ${study.studyDeploymentId}');
 
     // If this study has not yet been deployed, do this first.
     if (!study.isDeployed) {
       debug('$runtimeType - Study not yet deployed - trying to deploy...');
-      await SmartPhoneClientManager().tryDeployment(
-        study.studyDeploymentId,
-        study.deviceRoleName,
-      );
+      await SmartPhoneClientManager().tryDeployment(study.studyDeploymentId, study.deviceRoleName);
     }
 
     // Ask for permissions for all measures in this deployment, then retry

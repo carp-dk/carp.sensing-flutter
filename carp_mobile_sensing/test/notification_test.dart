@@ -19,8 +19,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     AndroidFlutterLocalNotificationsPlugin.registerWith();
 
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
     messenger.setMockMethodCallHandler(_notifications, (call) async {
       calls.add(call.method);
@@ -54,8 +53,7 @@ void main() {
     expect(calls, ['initialize', 'requestNotificationsPermission']);
   });
 
-  test('notifications schedule inexactly without SCHEDULE_EXACT_ALARM',
-      () async {
+  test('notifications schedule inexactly without SCHEDULE_EXACT_ALARM', () async {
     final calls = fakeAndroid();
 
     await FlutterLocalNotificationManager().scheduleNotification(
@@ -68,8 +66,7 @@ void main() {
     expect(calls, contains('scheduleMode=inexactAllowWhileIdle'));
   });
 
-  test('notifications schedule exactly when the permission is granted',
-      () async {
+  test('notifications schedule exactly when the permission is granted', () async {
     final calls = fakeAndroid(exactAlarmGranted: true);
 
     await FlutterLocalNotificationManager().scheduleNotification(

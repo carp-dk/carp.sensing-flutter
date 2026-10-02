@@ -35,9 +35,7 @@ class AudioProbe extends Probe {
     if (await requestPermissions()) {
       try {
         await _startAudioRecording();
-        debug(
-          '$runtimeType [$hashCode] - Audio recording started - sound file : $_soundFileName',
-        );
+        debug('$runtimeType [$hashCode] - Audio recording started - sound file : $_soundFileName');
       } catch (error) {
         warning('An error occurred trying to start audio recording - $error');
         addError(error);
@@ -89,10 +87,7 @@ class AudioProbe extends Probe {
       return;
     }
 
-    _data = AudioMedia(
-      filename: 'no_file_available',
-      startRecordingTime: DateTime.now().toUtc(),
-    );
+    _data = AudioMedia(filename: 'no_file_available', startRecordingTime: DateTime.now().toUtc());
     _soundFileName = await _filePath;
     _data!.path = _soundFileName;
     _data!.filename = _soundFileName!.split("/").last;

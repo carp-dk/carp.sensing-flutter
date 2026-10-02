@@ -49,8 +49,7 @@ class Data extends Serializable {
 
   @override
   Function get fromJsonFunction => _$DataFromJson;
-  factory Data.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Data>(json);
+  factory Data.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Data>(json);
   @override
   Map<String, dynamic> toJson() => _$DataToJson(this);
 
@@ -81,8 +80,7 @@ class Acceleration extends SensorData {
 
   @override
   Function get fromJsonFunction => _$AccelerationFromJson;
-  factory Acceleration.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Acceleration>(json);
+  factory Acceleration.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Acceleration>(json);
   @override
   Map<String, dynamic> toJson() => _$AccelerationToJson(this);
 }
@@ -98,8 +96,7 @@ class Rotation extends SensorData {
 
   @override
   Function get fromJsonFunction => _$RotationFromJson;
-  factory Rotation.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Rotation>(json);
+  factory Rotation.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Rotation>(json);
   @override
   Map<String, dynamic> toJson() => _$RotationToJson(this);
 }
@@ -116,8 +113,7 @@ class MagneticField extends SensorData {
 
   @override
   Function get fromJsonFunction => _$MagneticFieldFromJson;
-  factory MagneticField.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<MagneticField>(json);
+  factory MagneticField.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<MagneticField>(json);
   @override
   Map<String, dynamic> toJson() => _$MagneticFieldToJson(this);
 }
@@ -138,8 +134,7 @@ class Geolocation extends SensorData {
 
   @override
   Function get fromJsonFunction => _$GeolocationFromJson;
-  factory Geolocation.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Geolocation>(json);
+  factory Geolocation.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Geolocation>(json);
   @override
   Map<String, dynamic> toJson() => _$GeolocationToJson(this);
 }
@@ -157,8 +152,7 @@ class SignalStrength extends SensorData {
 
   @override
   Function get fromJsonFunction => _$SignalStrengthFromJson;
-  factory SignalStrength.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<SignalStrength>(json);
+  factory SignalStrength.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<SignalStrength>(json);
   @override
   Map<String, dynamic> toJson() => _$SignalStrengthToJson(this);
 }
@@ -173,8 +167,7 @@ class StepCount extends SensorData {
 
   @override
   Function get fromJsonFunction => _$StepCountFromJson;
-  factory StepCount.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<StepCount>(json);
+  factory StepCount.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StepCount>(json);
   @override
   Map<String, dynamic> toJson() => _$StepCountToJson(this);
 }
@@ -189,8 +182,7 @@ class HeartRate extends SensorData {
 
   @override
   Function get fromJsonFunction => _$HeartRateFromJson;
-  factory HeartRate.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<HeartRate>(json);
+  factory HeartRate.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<HeartRate>(json);
   @override
   Map<String, dynamic> toJson() => _$HeartRateToJson(this);
 }
@@ -209,8 +201,7 @@ class ECG extends SensorData {
 
   @override
   Function get fromJsonFunction => _$ECGFromJson;
-  factory ECG.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<ECG>(json);
+  factory ECG.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<ECG>(json);
   @override
   Map<String, dynamic> toJson() => _$ECGToJson(this);
 }
@@ -227,8 +218,7 @@ class EDA extends SensorData {
 
   @override
   Function get fromJsonFunction => _$EDAFromJson;
-  factory EDA.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<EDA>(json);
+  factory EDA.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<EDA>(json);
   @override
   Map<String, dynamic> toJson() => _$EDAToJson(this);
 }
@@ -250,13 +240,11 @@ class CompletedTask extends Data {
   CompletedTask({required this.taskName, this.taskData}) : super();
 
   @override
-  bool equivalentTo(Data other) =>
-      other is CompletedTask && taskName == other.taskName;
+  bool equivalentTo(Data other) => other is CompletedTask && taskName == other.taskName;
 
   @override
   Function get fromJsonFunction => _$CompletedTaskFromJson;
-  factory CompletedTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<CompletedTask>(json);
+  factory CompletedTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<CompletedTask>(json);
   @override
   Map<String, dynamic> toJson() => _$CompletedTaskToJson(this);
 }
@@ -286,8 +274,7 @@ class TriggeredTask extends Data {
 
   @override
   Function get fromJsonFunction => _$TriggeredTaskFromJson;
-  factory TriggeredTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<TriggeredTask>(json);
+  factory TriggeredTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<TriggeredTask>(json);
   @override
   Map<String, dynamic> toJson() => _$TriggeredTaskToJson(this);
 }
@@ -306,8 +293,7 @@ class Error extends Data {
 
   @override
   Function get fromJsonFunction => _$ErrorFromJson;
-  factory Error.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Error>(json);
+  factory Error.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Error>(json);
   @override
   Map<String, dynamic> toJson() => _$ErrorToJson(this);
 }

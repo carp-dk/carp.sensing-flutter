@@ -25,8 +25,7 @@ part of '../../../common.dart';
 /// CARP Mobile Sensing and its sampling packages add more device types,
 /// each handled at runtime by a `DeviceManager`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class DeviceConfiguration<TRegistration extends DeviceRegistration>
-    extends Serializable {
+class DeviceConfiguration<TRegistration extends DeviceRegistration> extends Serializable {
   /// The JSON namespace of the CARP Core device types.
   static const DEVICE_NAMESPACE = 'dk.cachet.carp.common.application.devices';
 
@@ -66,19 +65,11 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
     'Use createRegistration on a DeviceManager instead, '
     'which allows for hardware-specific runtime registration options.',
   )
-  TRegistration createRegistration({
-    String? deviceId,
-    String? deviceDisplayName,
-  }) =>
-      DefaultDeviceRegistration(
-            deviceId: deviceId,
-            deviceDisplayName: deviceDisplayName,
-          )
-          as TRegistration;
+  TRegistration createRegistration({String? deviceId, String? deviceDisplayName}) =>
+      DefaultDeviceRegistration(deviceId: deviceId, deviceDisplayName: deviceDisplayName) as TRegistration;
 
   @override
-  String toString() =>
-      '$runtimeType - roleName: $roleName, isOptional: $isOptional';
+  String toString() => '$runtimeType - roleName: $roleName, isOptional: $isOptional';
 
   @override
   Function get fromJsonFunction => _$DeviceConfigurationFromJson;
@@ -96,18 +87,12 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration>
 ///
 /// Also used as a placeholder when deserializing device-dependent objects.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class DefaultDeviceConfiguration
-    extends DeviceConfiguration<DefaultDeviceRegistration> {
+class DefaultDeviceConfiguration extends DeviceConfiguration<DefaultDeviceRegistration> {
   DefaultDeviceConfiguration({required super.roleName, super.isOptional});
 
   @override
-  DefaultDeviceRegistration createRegistration({
-    String? deviceId,
-    String? deviceDisplayName,
-  }) => DefaultDeviceRegistration(
-    deviceId: deviceId,
-    deviceDisplayName: deviceDisplayName,
-  );
+  DefaultDeviceRegistration createRegistration({String? deviceId, String? deviceDisplayName}) =>
+      DefaultDeviceRegistration(deviceId: deviceId, deviceDisplayName: deviceDisplayName);
 
   @override
   Function get fromJsonFunction => _$DefaultDeviceConfigurationFromJson;
@@ -125,10 +110,8 @@ class DefaultDeviceConfiguration
 /// ([Smartphone]). Each primary device receives its own
 /// [PrimaryDeviceDeployment]. The constructor sets [isOptional] to false.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
-    extends DeviceConfiguration<TRegistration> {
-  PrimaryDeviceConfiguration({required super.roleName})
-    : super(isOptional: false);
+class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration> extends DeviceConfiguration<TRegistration> {
+  PrimaryDeviceConfiguration({required super.roleName}) : super(isOptional: false);
 
   /// Defaults to true. Only here for (de)serialization: for unknown device
   /// types, the JSON tells whether to treat them as primary devices.
@@ -136,17 +119,13 @@ class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
 
   /// A new trigger which fires immediately at the start of a study deployment
   /// on this device.
-  TriggerConfiguration get atStartOfStudy => ElapsedTimeTrigger(
-    sourceDeviceRoleName: roleName,
-    elapsedTime: const Duration(),
-  );
+  TriggerConfiguration get atStartOfStudy =>
+      ElapsedTimeTrigger(sourceDeviceRoleName: roleName, elapsedTime: const Duration());
 
   @override
   Function get fromJsonFunction => _$PrimaryDeviceConfigurationFromJson;
   factory PrimaryDeviceConfiguration.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<PrimaryDeviceConfiguration<TRegistration>>(
-        json,
-      );
+      FromJsonFactory().fromJson<PrimaryDeviceConfiguration<TRegistration>>(json);
   @override
   Map<String, dynamic> toJson() => _$PrimaryDeviceConfigurationToJson(this);
 }
@@ -154,16 +133,13 @@ class PrimaryDeviceConfiguration<TRegistration extends DeviceRegistration>
 /// A general-purpose primary device for custom protocols.
 /// Only used when downloading custom protocols from the CARP web service.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class CustomProtocolDevice
-    extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
+class CustomProtocolDevice extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
   /// The default role name for a custom protocol device.
   static const String DEFAULT_ROLE_NAME = 'Custom device';
 
   /// Create a new [CustomProtocolDevice] device descriptor.
   /// If [roleName] is not specified, then the  [DEFAULT_ROLE_NAME] is used.
-  CustomProtocolDevice({
-    super.roleName = CustomProtocolDevice.DEFAULT_ROLE_NAME,
-  });
+  CustomProtocolDevice({super.roleName = CustomProtocolDevice.DEFAULT_ROLE_NAME});
 
   @override
   Function get fromJsonFunction => _$CustomProtocolDeviceFromJson;

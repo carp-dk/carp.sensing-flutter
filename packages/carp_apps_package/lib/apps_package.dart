@@ -32,29 +32,25 @@ class AppsSamplingPackage extends SmartphoneSamplingPackage {
   static const String APP_USAGE = "${NameSpace.CARP}.appusage";
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: APPS,
-            displayName: "Installed Apps",
-            timeType: DataTimeType.POINT,
-            dataEventType: DataEventType.ONE_TIME,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: APP_USAGE,
-            displayName: "App Usage",
-            timeType: DataTimeType.TIME_SPAN,
-            dataEventType: DataEventType.ONE_TIME,
-          ),
-          HistoricSamplingConfiguration(
-            future: Duration.zero,
-            past: Duration(days: 1),
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: APPS,
+        displayName: "Installed Apps",
+        timeType: DataTimeType.POINT,
+        dataEventType: DataEventType.ONE_TIME,
+      ),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: APP_USAGE,
+        displayName: "App Usage",
+        timeType: DataTimeType.TIME_SPAN,
+        dataEventType: DataEventType.ONE_TIME,
+      ),
+      HistoricSamplingConfiguration(future: Duration.zero, past: Duration(days: 1)),
+    ),
+  ]);
 
   @override
   Probe? create(String type) => switch (type) {
@@ -64,8 +60,5 @@ class AppsSamplingPackage extends SmartphoneSamplingPackage {
   };
 
   @override
-  void onRegister() => FromJsonFactory().registerAll([
-    Apps([]),
-    AppUsage(DateTime.now(), DateTime.now()),
-  ]);
+  void onRegister() => FromJsonFactory().registerAll([Apps([]), AppUsage(DateTime.now(), DateTime.now())]);
 }

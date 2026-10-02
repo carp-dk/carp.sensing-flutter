@@ -1,11 +1,7 @@
 part of 'carp_auth.dart';
 
 /// Represents a CARP Web Service (CAWS) account and user.
-@JsonSerializable(
-  fieldRename: FieldRename.snake,
-  includeIfNull: false,
-  explicitToJson: true,
-)
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false, explicitToJson: true)
 class CarpUser {
   /// Unique CARP username
   String username;
@@ -79,14 +75,12 @@ class CarpUser {
     );
   }
 
-  factory CarpUser.fromJson(Map<String, dynamic> json) =>
-      _$CarpUserFromJson(json);
+  factory CarpUser.fromJson(Map<String, dynamic> json) => _$CarpUserFromJson(json);
   Map<String, dynamic> toJson() => _$CarpUserToJson(this);
 
   @Deprecated('Use id instead')
   String get accountId => id;
 
   @override
-  String toString() =>
-      'CARP User: $username [$id] - $firstName $lastName [account id: $id]';
+  String toString() => 'CARP User: $username [$id] - $firstName $lastName [account id: $id]';
 }

@@ -8,8 +8,7 @@ part of 'esense.dart';
 
 abstract class _ESenseProbe extends StreamProbe {
   @override
-  ESenseDeviceManager get deviceManager =>
-      super.deviceManager as ESenseDeviceManager;
+  ESenseDeviceManager get deviceManager => super.deviceManager as ESenseDeviceManager;
 }
 
 /// Collects eSense button events for the [ESenseSamplingPackage.ESENSE_BUTTON]
@@ -48,10 +47,7 @@ class ESenseSensorProbe extends _ESenseProbe {
       ? deviceManager.manager!.sensorEvents
             .map(
               (event) => Measurement.fromData(
-                ESenseSensor.fromSensorEvent(
-                  deviceName: deviceManager.manager!.deviceName,
-                  event: event,
-                ),
+                ESenseSensor.fromSensorEvent(deviceName: deviceManager.manager!.deviceName, event: event),
                 event.timestamp.microsecondsSinceEpoch,
               ),
             )

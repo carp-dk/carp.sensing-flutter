@@ -17,23 +17,14 @@ class SmartphoneDeploymentExecutorSamplingState extends SamplingState {
 
   /// The sampling state of each [TaskControlExecutor] in the deployment.
   List<TaskControlExecutorSamplingState> taskControlSamplingStates = [];
-  SmartphoneDeploymentExecutorSamplingState(
-    super.state,
-    this.studyDeploymentId,
-    this.taskControlSamplingStates,
-  );
+  SmartphoneDeploymentExecutorSamplingState(super.state, this.studyDeploymentId, this.taskControlSamplingStates);
 
   @override
-  Function get fromJsonFunction =>
-      _$SmartphoneDeploymentExecutorSamplingStateFromJson;
-  factory SmartphoneDeploymentExecutorSamplingState.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<SmartphoneDeploymentExecutorSamplingState>(
-    json,
-  );
+  Function get fromJsonFunction => _$SmartphoneDeploymentExecutorSamplingStateFromJson;
+  factory SmartphoneDeploymentExecutorSamplingState.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<SmartphoneDeploymentExecutorSamplingState>(json);
   @override
-  Map<String, dynamic> toJson() =>
-      _$SmartphoneDeploymentExecutorSamplingStateToJson(this);
+  Map<String, dynamic> toJson() => _$SmartphoneDeploymentExecutorSamplingStateToJson(this);
 }
 
 /// Runs a [SmartphoneDeployment]: the root of the executor tree of a study.
@@ -53,34 +44,26 @@ class SmartphoneDeploymentExecutorSamplingState extends SamplingState {
 ///    app tasks are enqueued in the [AppTaskController].
 ///
 /// See also [Executor] for the lifecycle.
-class SmartphoneDeploymentExecutor
-    extends AggregateExecutor<SmartphoneDeployment> {
-  final StreamController<Measurement> _manualMeasurementController =
-      StreamController.broadcast();
+class SmartphoneDeploymentExecutor extends AggregateExecutor<SmartphoneDeployment> {
+  final StreamController<Measurement> _manualMeasurementController = StreamController.broadcast();
   SmartphoneDeploymentExecutorSamplingState? _samplingState;
 
   @override
-  SmartphoneDeploymentExecutorSamplingState get samplingState =>
-      SmartphoneDeploymentExecutorSamplingState(
-        state,
-        configuration!.studyDeploymentId,
-        executors
-            .whereType<TaskControlExecutor>()
-            .map(
-              (executor) =>
-                  executor.samplingState as TaskControlExecutorSamplingState,
-            )
-            .toList(),
-      );
+  SmartphoneDeploymentExecutorSamplingState get samplingState => SmartphoneDeploymentExecutorSamplingState(
+    state,
+    configuration!.studyDeploymentId,
+    executors
+        .whereType<TaskControlExecutor>()
+        .map((executor) => executor.samplingState as TaskControlExecutorSamplingState)
+        .toList(),
+  );
 
   /// Sets the sampling state to restore on the next [resume].
   ///
   /// E.g. the state saved before the app was restarted.
   /// Does not change the current [samplingState], which is always computed from
   /// the running executors.
-  void setSamplingState(
-    SmartphoneDeploymentExecutorSamplingState? samplingState,
-  ) => _samplingState = samplingState;
+  void setSamplingState(SmartphoneDeploymentExecutorSamplingState? samplingState) => _samplingState = samplingState;
 
   /// Clears the state set with [setSamplingState].
   ///
@@ -103,9 +86,7 @@ class SmartphoneDeploymentExecutor
       // get the trigger and task based on the trigger id and task name
       final trigger = configuration!.triggers['${taskControl.triggerId}']!;
       final task = configuration!.getTaskByName(taskControl.taskName)!;
-      final targetDevice = configuration!.getDeviceFromRoleName(
-        taskControl.destinationDeviceRoleName!,
-      )!;
+      final targetDevice = configuration!.getDeviceFromRoleName(taskControl.destinationDeviceRoleName!)!;
 
       // Only create an executor for "real" tasks
       if (task is! MonitoringTask) {
@@ -114,41 +95,25 @@ class SmartphoneDeploymentExecutor
         // A TriggeredAppTaskExecutor need BOTH a [Schedulable] trigger and an [AppTask]
         // to schedule
         if (trigger is Schedulable && task is AppTask) {
-          executor = AppTaskControlExecutor(
-            taskControl,
-            trigger,
-            task,
-            targetDevice,
-          );
+          executor = AppTaskControlExecutor(taskControl, trigger, task, targetDevice);
         } else {
           // All other cases we use the normal background triggering relying on the app
           // running in the background
-          executor = TaskControlExecutor(
-            taskControl,
-            trigger,
-            task,
-            targetDevice,
-          );
+          executor = TaskControlExecutor(taskControl, trigger, task, targetDevice);
         }
 
         executor.initialize(taskControl, deployment!);
         addExecutor(executor);
 
         // let the device manger know about this executor
-        getDeviceManagerFromRoleName(
-          executor.taskControl.destinationDeviceRoleName,
-        )?.executors.add(executor);
+        getDeviceManagerFromRoleName(executor.taskControl.destinationDeviceRoleName)?.executors.add(executor);
       }
     }
 
     // listen for "done" tasks and add them as a [CompletedAppTask] measurement
     AppTaskController().userTaskEvents
         .where((userTask) => userTask.state == UserTaskState.done)
-        .listen(
-          (userTask) => addMeasurement(
-            Measurement.fromData(CompletedAppTask.fromUserTask(userTask)),
-          ),
-        );
+        .listen((userTask) => addMeasurement(Measurement.fromData(CompletedAppTask.fromUserTask(userTask))));
 
     return true;
   }
@@ -167,17 +132,13 @@ class SmartphoneDeploymentExecutor
     } else {
       for (var executor in _executors) {
         if (executor is TaskControlExecutor) {
-          var taskControlSamplingState = _samplingState!
-              .taskControlSamplingStates
-              .firstWhere(
-                (state) =>
-                    state.triggerId == executor.taskControl.triggerId &&
-                    state.taskName == executor.taskControl.taskName,
-              );
+          var taskControlSamplingState = _samplingState!.taskControlSamplingStates.firstWhere(
+            (state) =>
+                state.triggerId == executor.taskControl.triggerId && state.taskName == executor.taskControl.taskName,
+          );
 
           if (taskControlSamplingState.state == ExecutorState.Resumed ||
-              taskControlSamplingState.state ==
-                  ExecutorState.PausedButShouldBeResumed) {
+              taskControlSamplingState.state == ExecutorState.PausedButShouldBeResumed) {
             executor.resume();
           } else if (taskControlSamplingState.state == ExecutorState.Paused) {
             executor.pause();
@@ -202,9 +163,7 @@ class SmartphoneDeploymentExecutor
     for (var element in executors) {
       TaskControlExecutor executor = element as TaskControlExecutor;
 
-      getDeviceManagerFromRoleName(
-        executor.taskControl.destinationDeviceRoleName,
-      )?.executors.remove(executor);
+      getDeviceManagerFromRoleName(executor.taskControl.destinationDeviceRoleName)?.executors.remove(executor);
     }
   }
 
@@ -212,8 +171,7 @@ class SmartphoneDeploymentExecutor
   ///
   /// Used for executors outside the tree, e.g. app tasks restored by the
   /// [AppTaskController].
-  void addMeasurements(Stream<Measurement> measurements) =>
-      _group.add(measurements);
+  void addMeasurements(Stream<Measurement> measurements) => _group.add(measurements);
 
   /// Returns the [DeviceManager] of the device with [roleName].
   ///
@@ -223,9 +181,7 @@ class SmartphoneDeploymentExecutor
     if (roleName == null) return null;
 
     var targetDevice = configuration?.getDeviceFromRoleName(roleName);
-    return (targetDevice != null)
-        ? DeviceController().getDeviceManager(targetDevice.type)
-        : null;
+    return (targetDevice != null) ? DeviceController().getDeviceManager(targetDevice.type) : null;
   }
 
   /// All probes in this deployment executor. May be empty.

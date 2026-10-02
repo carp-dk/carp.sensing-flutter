@@ -6,11 +6,9 @@ part of 'apps.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Apps _$AppsFromJson(Map<String, dynamic> json) => Apps(
-  (json['installedApps'] as List<dynamic>)
-      .map((e) => App.fromJson(e as Map<String, dynamic>))
-      .toList(),
-)..$type = json['__type'] as String?;
+Apps _$AppsFromJson(Map<String, dynamic> json) =>
+    Apps((json['installedApps'] as List<dynamic>).map((e) => App.fromJson(e as Map<String, dynamic>)).toList())
+      ..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$AppsToJson(Apps instance) => <String, dynamic>{
   '__type': ?instance.$type,
@@ -59,12 +57,11 @@ AppUsageInfo _$AppUsageInfoFromJson(Map<String, dynamic> json) => AppUsageInfo(
   DateTime.parse(json['lastForeground'] as String),
 );
 
-Map<String, dynamic> _$AppUsageInfoToJson(AppUsageInfo instance) =>
-    <String, dynamic>{
-      'name': instance.name,
-      'packageName': instance.packageName,
-      'usage': instance.usage.inMicroseconds,
-      'startDate': instance.startDate.toIso8601String(),
-      'endDate': instance.endDate.toIso8601String(),
-      'lastForeground': instance.lastForeground.toIso8601String(),
-    };
+Map<String, dynamic> _$AppUsageInfoToJson(AppUsageInfo instance) => <String, dynamic>{
+  'name': instance.name,
+  'packageName': instance.packageName,
+  'usage': instance.usage.inMicroseconds,
+  'startDate': instance.startDate.toIso8601String(),
+  'endDate': instance.endDate.toIso8601String(),
+  'lastForeground': instance.lastForeground.toIso8601String(),
+};

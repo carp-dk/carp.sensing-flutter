@@ -47,8 +47,7 @@ class ProtocolVersion {
     date = DateTime.now();
   }
 
-  factory ProtocolVersion.fromJson(Map<String, dynamic> json) =>
-      _$ProtocolVersionFromJson(json);
+  factory ProtocolVersion.fromJson(Map<String, dynamic> json) => _$ProtocolVersionFromJson(json);
   Map<String, dynamic> toJson() => _$ProtocolVersionToJson(this);
 
   @override

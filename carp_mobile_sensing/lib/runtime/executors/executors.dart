@@ -63,8 +63,7 @@ class SamplingState extends Serializable {
 
   @override
   Function get fromJsonFunction => _$SamplingStateFromJson;
-  factory SamplingState.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<SamplingState>(json);
+  factory SamplingState.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<SamplingState>(json);
   @override
   Map<String, dynamic> toJson() => _$SamplingStateToJson(this);
 }
@@ -134,10 +133,8 @@ abstract class Executor<TConfig> {
 /// lifecycle methods themselves cannot be overridden. A synchronous exception
 /// in a lifecycle method moves the executor to [ExecutorState.Undefined].
 abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
-  final StreamController<Measurement> _measurementsController =
-      StreamController.broadcast();
-  final StreamController<ExecutorState> _stateEventController =
-      StreamController.broadcast();
+  final StreamController<Measurement> _measurementsController = StreamController.broadcast();
+  final StreamController<ExecutorState> _stateEventController = StreamController.broadcast();
   late _ExecutorStateMachine _stateMachine;
   SmartphoneDeployment? _deployment;
   TConfig? _configuration;
@@ -154,8 +151,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   TConfig? get configuration => _configuration;
 
   @override
-  Stream<ExecutorState> get stateEvents =>
-      _stateEventController.stream.distinct();
+  Stream<ExecutorState> get stateEvents => _stateEventController.stream.distinct();
 
   @override
   Stream<Measurement> get measurements => _measurementsController.stream;
@@ -176,8 +172,7 @@ abstract class AbstractExecutor<TConfig> implements Executor<TConfig> {
   }
 
   /// Adds [measurement] to the [measurements] stream.
-  void addMeasurement(Measurement measurement) =>
-      _measurementsController.add(measurement);
+  void addMeasurement(Measurement measurement) => _measurementsController.add(measurement);
 
   /// Logs [error] as a warning and adds it to the [measurements] stream.
   void addError(Object error, [StackTrace? stacktrace]) {
@@ -409,10 +404,8 @@ abstract class _AbstractExecutorState implements _ExecutorStateMachine {
   String toString() => state.name;
 }
 
-class _CreatedState extends _AbstractExecutorState
-    implements _ExecutorStateMachine {
-  _CreatedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+class _CreatedState extends _AbstractExecutorState implements _ExecutorStateMachine {
+  _CreatedState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Created;
@@ -431,19 +424,13 @@ class _CreatedState extends _AbstractExecutorState
 }
 
 /// Any state that can be resumed - initialized, resumed, paused states.
-abstract class _ResumableState extends _AbstractExecutorState
-    implements _ExecutorStateMachine {
-  _ResumableState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+abstract class _ResumableState extends _AbstractExecutorState implements _ExecutorStateMachine {
+  _ResumableState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   void resume() {
     executor.onResume().then((resumed) {
-      executor._setState(
-        resumed
-            ? _ResumedState(executor)
-            : _PausedButShouldBeResumedState(executor),
-      );
+      executor._setState(resumed ? _ResumedState(executor) : _PausedButShouldBeResumedState(executor));
       executor._isResuming = false;
     });
   }
@@ -456,10 +443,8 @@ abstract class _ResumableState extends _AbstractExecutorState
   }
 }
 
-class _InitializedState extends _ResumableState
-    implements _ExecutorStateMachine {
-  _InitializedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+class _InitializedState extends _ResumableState implements _ExecutorStateMachine {
+  _InitializedState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Initialized;
@@ -473,8 +458,7 @@ class _InitializedState extends _ResumableState
 }
 
 class _ResumedState extends _ResumableState implements _ExecutorStateMachine {
-  _ResumedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+  _ResumedState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Resumed;
@@ -488,35 +472,28 @@ class _ResumedState extends _ResumableState implements _ExecutorStateMachine {
 }
 
 class _PausedState extends _ResumedState implements _ExecutorStateMachine {
-  _PausedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+  _PausedState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Paused;
 }
 
-class _PausedButShouldBeResumedState extends _ResumedState
-    implements _ExecutorStateMachine {
-  _PausedButShouldBeResumedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+class _PausedButShouldBeResumedState extends _ResumedState implements _ExecutorStateMachine {
+  _PausedButShouldBeResumedState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.PausedButShouldBeResumed;
 }
 
-class _DisposedState extends _AbstractExecutorState
-    implements _ExecutorStateMachine {
-  _DisposedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+class _DisposedState extends _AbstractExecutorState implements _ExecutorStateMachine {
+  _DisposedState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Disposed;
 }
 
-class _UndefinedState extends _AbstractExecutorState
-    implements _ExecutorStateMachine {
-  _UndefinedState(Executor<dynamic> executor)
-    : super(executor as AbstractExecutor);
+class _UndefinedState extends _AbstractExecutorState implements _ExecutorStateMachine {
+  _UndefinedState(Executor<dynamic> executor) : super(executor as AbstractExecutor);
 
   @override
   ExecutorState get state => ExecutorState.Undefined;

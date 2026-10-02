@@ -31,10 +31,7 @@ void _registerFromJsonFunctions() {
   // device configurations and registrations used the carp_core device
   // namespace. Maps old type names to the corresponding CAMS 2.x classes so
   // that old protocols and deployments still can be deserialized.
-  FromJsonFactory().register(
-    Smartphone(),
-    type: '${DeviceConfiguration.DEVICE_NAMESPACE}.Smartphone',
-  );
+  FromJsonFactory().register(Smartphone(), type: '${DeviceConfiguration.DEVICE_NAMESPACE}.Smartphone');
   FromJsonFactory().register(
     BLEHeartRateDevice(roleName: ''),
     type: '${DeviceConfiguration.DEVICE_NAMESPACE}.BLEHeartRateDevice',
@@ -45,11 +42,7 @@ void _registerFromJsonFunctions() {
   );
 
   // Task classes
-  FromJsonFactory().registerAll([
-    AppTask(type: ''),
-    FunctionTask(),
-    MonitoringTask(),
-  ]);
+  FromJsonFactory().registerAll([AppTask(type: ''), FunctionTask(), MonitoringTask()]);
 
   // Trigger classes
   FromJsonFactory().registerAll([
@@ -73,24 +66,14 @@ void _registerFromJsonFunctions() {
   // Data classes
   FromJsonFactory().registerAll([
     Error(message: ''),
-    TriggeredTask(
-      triggerId: 0,
-      taskName: '',
-      destinationDeviceRoleName: '',
-      control: Control.Start,
-    ),
+    TriggeredTask(triggerId: 0, taskName: '', destinationDeviceRoleName: '', control: Control.Start),
     AppLifecycleEvent(''),
     CompletedTask(taskName: ''),
     CompletedAppTask(taskName: '', taskType: ''),
     Heartbeat(deviceRoleName: '', deviceType: ''),
     FileData(filename: ''),
     DeviceInformation(),
-    ApplicationInformation(
-      appName: '',
-      packageName: '',
-      version: '',
-      buildNumber: '',
-    ),
+    ApplicationInformation(appName: '', packageName: '', version: '', buildNumber: ''),
     BatteryState(),
     FreeMemory(),
     ScreenEvent(),
@@ -115,10 +98,7 @@ void _registerFromJsonFunctions() {
     PersistentSamplingConfiguration(),
     HistoricSamplingConfiguration(),
     IntervalSamplingConfiguration(interval: Duration.zero),
-    PeriodicSamplingConfiguration(
-      interval: Duration.zero,
-      duration: Duration.zero,
-    ),
+    PeriodicSamplingConfiguration(interval: Duration.zero, duration: Duration.zero),
     BatteryAwareSamplingConfiguration(
       normal: PersistentSamplingConfiguration(),
       low: PersistentSamplingConfiguration(),

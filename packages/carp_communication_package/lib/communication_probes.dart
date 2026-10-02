@@ -22,10 +22,7 @@ class PhoneLogProbe extends MeasurementProbe {
         ? m.lastTime!.millisecondsSinceEpoch
         : DateTime.now().subtract(m.past).millisecondsSinceEpoch;
     int now = DateTime.now().millisecondsSinceEpoch;
-    Iterable<CallLogEntry> entries = await CallLog.query(
-      dateFrom: from,
-      dateTo: now,
-    );
+    Iterable<CallLogEntry> entries = await CallLog.query(dateFrom: from, dateTo: now);
     return Measurement.fromData(
       PhoneLog(
         DateTime.fromMillisecondsSinceEpoch(from).toUtc(),
@@ -68,11 +65,7 @@ class TextMessageLogProbe extends MeasurementProbe {
     allSms
       ..addAll(await _telephony.getInboxSms(columns: ALL_SMS_COLUMNS))
       ..addAll(await _telephony.getSentSms(columns: ALL_SMS_COLUMNS));
-    return Measurement.fromData(
-      TextMessageLog(
-        allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList(),
-      ),
-    );
+    return Measurement.fromData(TextMessageLog(allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList()));
   }
 }
 
@@ -81,17 +74,14 @@ class TextMessageLogProbe extends MeasurementProbe {
 Telephony get _telephony => Telephony.backgroundInstance;
 
 // A private stream controller to be used in the call-back from the SMS probe.
-StreamController<Measurement> _textMessageProbeController =
-    StreamController.broadcast();
+StreamController<Measurement> _textMessageProbeController = StreamController.broadcast();
 
 /// Handles incoming SMS messages while the app is in the background.
 ///
 /// Must be a top-level function so the telephony plugin can call it from a
 /// background isolate. Passed to `listenIncomingSms` by [TextMessageProbe].
 void backgroundMessageHandler(SmsMessage message) async {
-  _textMessageProbeController.add(
-    Measurement.fromData(TextMessage.fromSmsMessage(message)),
-  );
+  _textMessageProbeController.add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
 }
 
 /// Collects a [TextMessage] every time this device receives an SMS message.
@@ -109,9 +99,7 @@ class TextMessageProbe extends StreamProbe {
   Future<bool> onResume() async {
     _telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
-        _textMessageProbeController.add(
-          Measurement.fromData(TextMessage.fromSmsMessage(message)),
-        );
+        _textMessageProbeController.add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
       },
       onBackgroundMessage: backgroundMessageHandler,
     );
@@ -164,14 +152,10 @@ class CalendarProbe extends MeasurementProbe {
 
     // Fast out if calendars could not be retrieved, e.g. due to missing permissions.
     if (_calendars == null) {
-      return Measurement.fromData(
-        Error(message: 'The list of calendars could not be retrieved.'),
-      );
+      return Measurement.fromData(Error(message: 'The list of calendars could not be retrieved.'));
     }
 
-    DateTime startDate =
-        samplingConfiguration.lastTime ??
-        DateTime.now().subtract(samplingConfiguration.past);
+    DateTime startDate = samplingConfiguration.lastTime ?? DateTime.now().subtract(samplingConfiguration.past);
     DateTime endDate = DateTime.now();
 
     // Get all events from all calendars.
@@ -181,9 +165,7 @@ class CalendarProbe extends MeasurementProbe {
       sensorStartTime: startDate.microsecondsSinceEpoch,
       sensorEndTime: endDate.microsecondsSinceEpoch,
       data: Calendar(startDate, endDate)
-        ..calendarEvents = events
-            .map((event) => CalendarEvent.fromEvent(event))
-            .toList(),
+        ..calendarEvents = events.map((event) => CalendarEvent.fromEvent(event)).toList(),
     );
   }
 }

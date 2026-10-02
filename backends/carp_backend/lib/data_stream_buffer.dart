@@ -38,17 +38,10 @@ class DataStreamBuffer {
   factory DataStreamBuffer() => _instance;
 
   /// Starts buffering [measurements] from [deployment].
-  Future<void> initialize(
-    SmartphoneDeployment deployment,
-    Stream<Measurement> measurements,
-  ) async {
+  Future<void> initialize(SmartphoneDeployment deployment, Stream<Measurement> measurements) async {
     info('Initializing $runtimeType...');
     _deployment = deployment;
-    await _manager.configure(
-      dataEndPoint: SQLiteDataEndPoint(),
-      deployment: deployment,
-      measurements: measurements,
-    );
+    await _manager.configure(dataEndPoint: SQLiteDataEndPoint(), deployment: deployment, measurements: measurements);
   }
 
   /// All buffered data not yet uploaded, one [DataStreamBatch] per data stream.
@@ -96,12 +89,7 @@ class DataStreamBuffer {
         await database?.query(
           SQLiteDataManager.MEASUREMENT_TABLE_NAME,
           where: where,
-          whereArgs: [
-            0,
-            dataStream.studyDeploymentId,
-            dataStream.deviceRoleName,
-            dataStream.dataType,
-          ],
+          whereArgs: [0, dataStream.studyDeploymentId, dataStream.deviceRoleName, dataStream.dataType],
         ) ??
         [];
 
@@ -109,20 +97,14 @@ class DataStreamBuffer {
     if (maps.isEmpty) return null;
 
     for (var element in maps) {
-      int row =
-          int.tryParse(element[SQLiteDataManager.ID_COLUMN].toString()) ?? 0;
+      int row = int.tryParse(element[SQLiteDataManager.ID_COLUMN].toString()) ?? 0;
       // save the row id of what is uploaded
       rows.add(row);
-      int? triggerId = int.tryParse(
-        element[SQLiteDataManager.TRIGGER_ID_COLUMN].toString(),
-      );
+      int? triggerId = int.tryParse(element[SQLiteDataManager.TRIGGER_ID_COLUMN].toString());
       if (triggerId != null) triggerIds.add(triggerId);
 
-      final jsonString =
-          element[SQLiteDataManager.MEASUREMENT_COLUMN] as String;
-      final measurement = Measurement.fromJson(
-        json.decode(jsonString) as Map<String, dynamic>,
-      );
+      final jsonString = element[SQLiteDataManager.MEASUREMENT_COLUMN] as String;
+      final measurement = Measurement.fromJson(json.decode(jsonString) as Map<String, dynamic>);
       measurements.add(measurement);
     }
     firstSequenceId = rows.reduce(min);

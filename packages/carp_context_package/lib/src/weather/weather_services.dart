@@ -14,8 +14,7 @@ part of '../../carp_context_package.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class WeatherService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a weather service.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.WeatherService';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.WeatherService';
 
   /// The default role name for a weather service.
   static const String DEFAULT_ROLE_NAME = 'Weather Service';
@@ -23,13 +22,11 @@ class WeatherService extends ServiceConfiguration<ServiceRegistration> {
   /// API key for the Open Weather API.
   String apiKey;
 
-  WeatherService({String? roleName, required this.apiKey})
-    : super(roleName: roleName ?? DEFAULT_ROLE_NAME);
+  WeatherService({String? roleName, required this.apiKey}) : super(roleName: roleName ?? DEFAULT_ROLE_NAME);
 
   @override
   Function get fromJsonFunction => _$WeatherServiceFromJson;
-  factory WeatherService.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<WeatherService>(json);
+  factory WeatherService.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<WeatherService>(json);
   @override
   Map<String, dynamic> toJson() => _$WeatherServiceToJson(this);
 }
@@ -58,6 +55,5 @@ class WeatherServiceManager extends ContextServiceManager<WeatherService> {
   bool get canConnect => configuration?.apiKey != null;
 
   @override
-  Future<DeviceStatus> onConnect() async =>
-      (service != null) ? DeviceStatus.connected : DeviceStatus.disconnected;
+  Future<DeviceStatus> onConnect() async => (service != null) ? DeviceStatus.connected : DeviceStatus.disconnected;
 }
