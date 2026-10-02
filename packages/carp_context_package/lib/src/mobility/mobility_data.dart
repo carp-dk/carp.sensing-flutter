@@ -1,13 +1,17 @@
 part of '../../carp_context_package.dart';
 
-/// Holds mobility features information.
+/// Daily mobility features computed from the phone's location.
+///
+/// Produced by [MobilityProbe] for the [ContextSamplingPackage.MOBILITY]
+/// measure, using the `mobility_features` plugin. Features are for one day
+/// ([date]) and are updated during the day.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Mobility extends Data {
-  /// The time this data was collected.
+  /// The time this data was computed. Defaults to now.
   DateTime? timestamp;
 
   // TODO - make this a day instead of a date time.
-  /// The day of this mobility features.
+  /// The day these mobility features are for.
   DateTime? date;
 
   /// Number of stops made on [date].
@@ -19,7 +23,7 @@ class Mobility extends Data {
   /// Number of significant places visited on [date].
   int? numberOfPlaces;
 
-  /// Location Variance on [date].
+  /// Location variance on [date].
   double? locationVariance;
 
   /// Location entropy on [date].
@@ -27,10 +31,10 @@ class Mobility extends Data {
   ///  * Low  entropy: Time is mainly spent at a few of the places
   double? entropy;
 
-  /// Normalized entropy on [date]. A scalar between 0 and 1
+  /// Normalized entropy on [date]. A scalar between 0 and 1.
   double? normalizedEntropy;
 
-  /// Home Stay on [date]. A scalar between 0 and 1.
+  /// Home stay on [date]: the fraction of time spent at home, between 0 and 1.
   double? homeStay;
 
   /// Distance traveled on [date], in meters.
@@ -51,6 +55,8 @@ class Mobility extends Data {
     timestamp ??= DateTime.now();
   }
 
+  /// Creates a [Mobility] from a `MobilityContext` from the
+  /// `mobility_features` plugin.
   factory Mobility.fromMobilityContext(MobilityContext context) => Mobility()
     ..timestamp = context.timestamp
     ..date = context.date
