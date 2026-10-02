@@ -7,8 +7,11 @@
 
 part of '../connectivity.dart';
 
-/// The [ConnectivityProbe] listens to the connectivity status of the phone and
-/// collect a [Connectivity] data point every time the connectivity state changes.
+/// Collects a [Connectivity] measurement every time the phone's connectivity
+/// status changes.
+///
+/// Used for the [ConnectivitySamplingPackage.CONNECTIVITY] measure. Also
+/// collects the current status when sampling is resumed.
 class ConnectivityProbe extends StreamProbe {
   @override
   Future<bool> onResume() async {
@@ -34,17 +37,18 @@ class ConnectivityProbe extends StreamProbe {
 
 // This probe requests access to location permissions (both on Android and iOS).
 // See https://pub.dev/packages/network_info_plus
-/// The [WifiProbe] get the wifi connectivity status of the phone and
-/// collect a [Wifi].
+/// Collects the phone's wifi connection (SSID, BSSID and IP) as [Wifi] data.
 ///
-/// Note, that in order to make this probe work on iOS (especially after iOS
-/// 12 and 13), there is a set of requirements to meet for the app using this
-/// probe. See
+/// Used for the [ConnectivitySamplingPackage.WIFI] measure, at the interval
+/// set in an [IntervalSamplingConfiguration].
+///
+/// To make this probe work on iOS (especially after iOS 12 and 13), the app
+/// must meet a set of requirements. See
 ///
 ///  * [network_info_plus](https://pub.dev/packages/network_info_plus)
 ///  * [CNCopyCurrentNetworkInfo](https://developer.apple.com/documentation/systemconfiguration/1614126-cncopycurrentnetworkinfo)
 ///
-/// Please note that it this probes does not work on emulators (returns null).
+/// Does not work on emulators (values are null).
 ///
 /// From Android 10.0 onwards the `ACCESS_FINE_LOCATION` permission must be
 /// granted.
@@ -59,14 +63,16 @@ class WifiProbe extends IntervalProbe {
   }
 }
 
-/// The [BluetoothProbe] scans for nearby and visible Bluetooth devices and
-/// collects a [Bluetooth] measurement that lists each device found during the scan.
+/// Scans for nearby, visible Bluetooth devices and collects a [Bluetooth]
+/// measurement that lists each device found during the scan.
 ///
-/// Uses a [PeriodicSamplingConfiguration] for configuration the interval
-/// and duration of the scan. Can also be configured to filter by
-/// [services] and [remoteIds] by using a [BluetoothScanPeriodicSamplingConfiguration].
+/// Used for the [ConnectivitySamplingPackage.BLUETOOTH] measure. Uses a
+/// [PeriodicSamplingConfiguration] for the interval and duration of the scan.
+/// Use a [BluetoothScanPeriodicSamplingConfiguration] to filter by [services]
+/// and [remoteIds]. If the scan fails, the measurement holds an [Error].
 class BluetoothProbe extends BufferingPeriodicStreamProbe {
-  /// Default timeout for bluetooth scan - 4 secs
+  /// Default scan timeout in milliseconds (4 seconds), used if no duration
+  /// is configured.
   static const DEFAULT_TIMEOUT = 4 * 1000;
   Data? _data;
 
@@ -80,6 +86,9 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
   // if a BT-specific sampling configuration is used, we need to
   // extract the services and remoteIds from it so FlutterBluePlus can
   // perform filtered scanning
+
+  /// The service UUIDs to filter the scan on. Empty if no
+  /// [BluetoothScanPeriodicSamplingConfiguration] is used.
   List<Guid> get services =>
       (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
       ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration)
@@ -88,6 +97,8 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
             .toList()
       : [];
 
+  /// The remote device ids to filter the scan on. Empty if no
+  /// [BluetoothScanPeriodicSamplingConfiguration] is used.
   List<String> get remoteIds =>
       (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
       ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration)
@@ -128,22 +139,26 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
   }
 }
 
-/// A Probe that constantly scans for nearby and visible iBeacon devices and collects a
-/// [Beacon] measurement that lists each [BeaconDevice] found during the scan.
+/// Monitors iBeacon regions and collects a [BeaconData] measurement listing
+/// each nearby [BeaconDevice] while the phone is inside a region.
 ///
-/// Uses a [BeaconRangingPeriodicSamplingConfiguration] for configuration the
-/// [beaconRegions] to include and the [beaconDistance].
+/// Used for the [ConnectivitySamplingPackage.BEACON] measure. Uses a
+/// [BeaconRangingPeriodicSamplingConfiguration] for the [beaconRegions] to
+/// monitor and the [beaconDistance]. Only beacons closer than [beaconDistance]
+/// are included. Does not start if no regions are configured.
 class BeaconProbe extends StreamProbe {
   @override
   BeaconRangingPeriodicSamplingConfiguration? get samplingConfiguration =>
       super.samplingConfiguration as BeaconRangingPeriodicSamplingConfiguration;
 
+  /// The configured regions, converted to the beacon plugin's [Region] type.
   List<Region> get beaconRegions =>
       samplingConfiguration?.beaconRegions
           .map((region) => region.toRegion())
           .toList() ??
       [];
 
+  /// The maximum beacon distance in meters. Default is 2.
   int get beaconDistance => samplingConfiguration?.beaconDistance ?? 2;
 
   @override

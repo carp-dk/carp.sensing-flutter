@@ -31,14 +31,18 @@ enum ConnectivityStatus {
   unknown,
 }
 
-/// Holds connectivity status of the phone.
+/// The connectivity status of the phone.
+///
+/// Collected by [ConnectivityProbe] for the
+/// [ConnectivitySamplingPackage.CONNECTIVITY] measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Connectivity extends Data {
-  /// The status of the connectivity.
+  /// The active connection types. Can hold more than one, e.g. wifi and vpn.
   List<ConnectivityStatus> connectivityStatus = [];
 
   Connectivity() : super();
 
+  /// Creates a [Connectivity] from the `connectivity_plus` plugin's results.
   Connectivity.fromConnectivityResult(
     List<connectivity.ConnectivityResult> result,
   ) : super() {
@@ -80,7 +84,11 @@ class Connectivity extends Data {
       '${super.toString()}, connectivityStatus: $connectivityStatus';
 }
 
-/// A [Data] holding information of nearby Bluetooth devices.
+/// The nearby Bluetooth devices found in one scan.
+///
+/// Collected by [BluetoothProbe] for the [ConnectivitySamplingPackage.BLUETOOTH]
+/// measure. Each device appears only once, keyed by its
+/// [BluetoothDevice.bluetoothDeviceId].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Bluetooth extends Data {
   /// Timestamp of scan start.
@@ -89,11 +97,13 @@ class Bluetooth extends Data {
   /// Timestamp of scan end, if available.
   DateTime? endScan;
 
-  /// A map of [BluetoothDevice] indexed by their [bluetoothDeviceId] to make
-  /// sure that the same device only appears once.
+  // A map of [BluetoothDevice] indexed by their id to make
+  // sure that the same device only appears once.
   final Map<String, BluetoothDevice> _scanResult = {};
 
   /// The list of [BluetoothDevice] found in a scan.
+  ///
+  /// Setting it adds the devices to the existing result.
   List<BluetoothDevice> get scanResult => _scanResult.values.toList();
   set scanResult(List<BluetoothDevice> devices) => _scanResult.addEntries(
     devices.map((device) => MapEntry(device.bluetoothDeviceId, device)),
@@ -103,15 +113,18 @@ class Bluetooth extends Data {
     this.startScan = startScan ?? DateTime.now();
   }
 
+  /// Adds [device], replacing any device with the same id.
   void addBluetoothDevice(BluetoothDevice device) =>
       _scanResult[device.bluetoothDeviceId] = device;
 
+  /// Adds the devices in a list of `flutter_blue_plus` scan results.
   void addBluetoothDevicesFromScanResults(List<ScanResult> results) {
     for (var scanResult in results) {
       addBluetoothDevice(BluetoothDevice.fromScanResult(scanResult));
     }
   }
 
+  /// Adds a beacon found by ranging as a device named [beaconName].
   void addBluetoothDevicesFromRangingResults(Beacon result, String beaconName) {
     addBluetoothDevice(BluetoothDevice.fromRangingResult(result, beaconName));
   }
@@ -127,7 +140,7 @@ class Bluetooth extends Data {
   String toString() => '${super.toString()}, scanResult: $scanResult';
 }
 
-/// Bluetooth device data.
+/// A Bluetooth device found in a scan, as listed in [Bluetooth].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BluetoothDevice {
   /// The bluetooth advertising name of the device.
@@ -139,13 +152,13 @@ class BluetoothDevice {
   /// The bluetooth name of the nearby device.
   String bluetoothDeviceName;
 
-  /// Is the device connectable.
+  /// Whether the device is connectable.
   bool connectable;
 
-  /// The power level of the device in percentage.
+  /// The advertised transmit power level, if available.
   int? txPowerLevel;
 
-  /// The RSSI signal strength to the device.
+  /// The RSSI signal strength to the device, in dBm.
   int rssi;
 
   BluetoothDevice({
@@ -157,6 +170,7 @@ class BluetoothDevice {
     this.txPowerLevel,
   }) : super();
 
+  /// Creates a [BluetoothDevice] from a `flutter_blue_plus` [ScanResult].
   factory BluetoothDevice.fromScanResult(ScanResult result) => BluetoothDevice(
     bluetoothDeviceId: result.device.remoteId.str,
     bluetoothDeviceName: result.device.platformName,
@@ -166,6 +180,8 @@ class BluetoothDevice {
     rssi: result.rssi,
   );
 
+  /// Creates a [BluetoothDevice] from a ranged [Beacon], using [beaconName]
+  /// as id and names.
   factory BluetoothDevice.fromRangingResult(Beacon result, String beaconName) =>
       BluetoothDevice(
         bluetoothDeviceId: beaconName,
@@ -190,19 +206,19 @@ class BluetoothDevice {
       ', rssi: $rssi';
 }
 
-/// A [Data] holding wifi connectivity status in terms of connected SSID
-/// and BSSID.
+/// The wifi network the phone is connected to (SSID, BSSID and IP).
 ///
-/// Note that it wifi information cannot be collected on emulators.
+/// Collected by [WifiProbe] for the [ConnectivitySamplingPackage.WIFI] measure.
+/// Wifi information cannot be collected on emulators.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Wifi extends Data {
-  /// The wifi service set ID (SSID) of the connected network
+  /// The wifi service set ID (SSID) of the connected network.
   String? ssid;
 
-  /// The basic service set identifier (BSSID) of the connected network
+  /// The basic service set identifier (BSSID) of the connected network.
   String? bssid;
 
-  /// The internet protocol (IP) address of the connected network
+  /// The IP address of the phone on the connected network.
   String? ip;
 
   Wifi({this.ssid, this.bssid, this.ip}) : super();
@@ -219,17 +235,22 @@ class Wifi extends Data {
       '${super.toString()}, SSID: $ssid, BSSID: $bssid, IP: $ip';
 }
 
-/// A [Data] holding information of nearby Beacon devices.
+/// The nearby beacons found in a monitored beacon region.
+///
+/// Collected by [BeaconProbe] for the [ConnectivitySamplingPackage.BEACON]
+/// measure. Each beacon appears only once, keyed by its [BeaconDevice.uuid].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BeaconData extends Data {
   /// The unique identifier of the region that this beacon belongs to.
   String region;
 
-  /// A map of [BeaconDevice] indexed by their UUID to make
-  /// sure that the same device only appears once.
+  // A map of [BeaconDevice] indexed by their UUID to make
+  // sure that the same device only appears once.
   final Map<String, BeaconDevice> _scanResult = {};
 
   /// The list of [BeaconDevice] found in a scan.
+  ///
+  /// Setting it adds the devices to the existing result.
   List<BeaconDevice> get scanResult => _scanResult.values.toList();
   set scanResult(List<BeaconDevice> devices) => _scanResult.addEntries(
     devices.map((device) => MapEntry(device.uuid, device)),
@@ -257,9 +278,11 @@ class BeaconData extends Data {
         .toList();
   }
 
+  /// Adds [device], replacing any device with the same UUID.
   void addBeaconDevice(BeaconDevice device) =>
       _scanResult[device.uuid] = device;
 
+  /// Sets [region] and adds all beacons from a beacon plugin [RangingResult].
   void addBeaconDevicesFromRangingResults(RangingResult result) {
     region = result.region.identifier;
     for (var beacon in result.beacons) {
@@ -281,13 +304,13 @@ class BeaconData extends Data {
   String toString() => '${super.toString()}, scanResult: $scanResult';
 }
 
-/// Beacon device data.
+/// A beacon found by ranging, as listed in [BeaconData].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BeaconDevice {
-  /// The proximity UUID of beacon.
+  /// The proximity UUID of the beacon.
   String uuid;
 
-  /// The RSSI signal strength to the device.
+  /// The RSSI signal strength to the device, in dBm.
   int rssi;
 
   /// Major value (for iBeacon).
@@ -296,10 +319,10 @@ class BeaconDevice {
   /// Minor value (for iBeacon).
   int? minor;
 
-  /// The accuracy of distance of beacon in meter.
+  /// The estimated distance to the beacon, in meters.
   double? accuracy;
 
-  /// The proximity of beacon.
+  /// The proximity zone of the beacon (e.g., immediate, near, far).
   final Proximity? proximity;
 
   BeaconDevice({
@@ -311,6 +334,7 @@ class BeaconDevice {
     this.proximity,
   }) : super();
 
+  /// Creates a [BeaconDevice] from a ranged [Beacon].
   BeaconDevice.fromRegionAndBeacon(Beacon beacon)
     : this(
         rssi: beacon.rssi,
