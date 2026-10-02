@@ -7,46 +7,55 @@
 
 part of 'communication.dart';
 
-/// This is the base class for this communication sampling package.
+/// The sampling package for collecting phone calls, text messages and calendar entries.
 ///
-/// To use this package, register it in the [carp_mobile_sensing] package using
+/// Register it before you deploy a protocol that uses its measure types:
 ///
+/// ```dart
+/// SamplingPackageRegistry().register(CommunicationSamplingPackage());
 /// ```
-///   SamplingPackageRegistry.register(CommunicationSamplingPackage());
-/// ```
+///
+/// Key points:
+///  * [PHONE_LOG], [TEXT_MESSAGE_LOG] and [TEXT_MESSAGE] only work on Android.
+///    On other platforms [create] returns `null`, so no probe runs.
+///  * [CALENDAR] works on Android and iOS.
+///  * On registration, adds anonymizers for all four measure types to the
+///    default [PrivacySchema] (see [textMessageAnonymizer], [textMessageLogAnonymizer],
+///    [phoneLogAnonymizer] and [calendarAnonymizer]).
 class CommunicationSamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for collection of the phone log for a specific time period.
+  ///  * Collected as [PhoneLog] data. Android only.
   ///  * One-time measure.
-  ///  * Uses the [Smartphone] master device for data collection.
-  ///  * Use the [HistoricSamplingConfiguration] for configuration.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use a [HistoricSamplingConfiguration] for configuration.
   static const String PHONE_LOG = "${NameSpace.CARP}.phonelog";
-
-  // static const String TELEPHONY = "dk.cachet.carp.telephony";
 
   /// Measure type for collection of the text message (SMS) log for a specific
   /// time period.
+  ///  * Collected as [TextMessageLog] data. Android only.
   ///  * One-time measure.
-  ///  * Uses the [Smartphone] master device for data collection.
-  ///  * Use the [HistoricSamplingConfiguration] for configuration.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use a [HistoricSamplingConfiguration] for configuration.
   static const String TEXT_MESSAGE_LOG = "${NameSpace.CARP}.textmessagelog";
 
-  /// Measure type for collection of text message (SMS) as they are received.
+  /// Measure type for collection of text messages (SMS) as they are received.
+  ///  * Collected as [TextMessage] data. Android only.
   ///  * Event-based measure.
-  ///  * Uses the [Smartphone] master device for data collection.
+  ///  * Uses the [Smartphone] primary device for data collection.
   ///  * No sampling configuration needed.
   static const String TEXT_MESSAGE = "${NameSpace.CARP}.textmessage";
 
   /// Measure type for collection of calendar entries from the calendar on the
   /// phone for a specific time period.
+  ///  * Collected as [Calendar] data.
   ///  * One-time measure.
-  ///  * Uses the [Smartphone] master device for data collection.
-  ///  * Use the [HistoricSamplingConfiguration] for configuration.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use a [HistoricSamplingConfiguration] for configuration.
   static const String CALENDAR = "${NameSpace.CARP}.calendar";
 
-  /// Default samplings schema for:
-  ///  * [PHONE_LOG] - a period one day back in time and one day into the future
-  ///  * [TEXT_MESSAGE_LOG] - a period one day back in time and one day into the future
-  ///  * [CALENDAR] - a period one day back in time and one day into the future
+  /// Default sampling schemes. [PHONE_LOG], [TEXT_MESSAGE_LOG] and [CALENDAR]
+  /// use a [HistoricSamplingConfiguration] of one day back and one day forward
+  /// in time.
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
@@ -109,8 +118,6 @@ class CommunicationSamplingPackage extends SmartphoneSamplingPackage {
         return (Platform.isAndroid) ? TextMessageLogProbe() : null;
       case TEXT_MESSAGE:
         return (Platform.isAndroid) ? TextMessageProbe() : null;
-      // case TELEPHONY:
-      //   throw "Not implemented yet";
       case CALENDAR:
         return CalendarProbe();
       default:

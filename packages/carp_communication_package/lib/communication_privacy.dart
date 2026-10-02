@@ -7,9 +7,10 @@
 
 part of 'communication.dart';
 
-/// A [TextMessage] anonymizer function. Anonymizes:
-///  - address
-///  - body
+/// Anonymizes a [TextMessage] by replacing its address and body with SHA-1 hashes.
+///
+/// Registered in the default [PrivacySchema] for the
+/// [CommunicationSamplingPackage.TEXT_MESSAGE] measure.
 TextMessage textMessageAnonymizer(Data data) {
   assert(data is TextMessage);
   var msg = data as TextMessage;
@@ -23,8 +24,10 @@ TextMessage textMessageAnonymizer(Data data) {
   return msg;
 }
 
-/// A [TextMessageLog] anonymizer function. Anonymizes each [TextMessage]
-/// entry in the log using the [textMessageAnonymizer] function.
+/// Anonymizes each [TextMessage] in a [TextMessageLog] using [textMessageAnonymizer].
+///
+/// Registered in the default [PrivacySchema] for the
+/// [CommunicationSamplingPackage.TEXT_MESSAGE_LOG] measure.
 Data textMessageLogAnonymizer(Data data) {
   assert(data is TextMessageLog);
   TextMessageLog log = data as TextMessageLog;
@@ -34,8 +37,10 @@ Data textMessageLogAnonymizer(Data data) {
   return log;
 }
 
-/// A [PhoneLog] anonymizer function. Anonymizes each [PhoneCall]
-/// entry in the log using the [phoneCallAnonymizer] function.
+/// Anonymizes each [PhoneCall] in a [PhoneLog] using [phoneCallAnonymizer].
+///
+/// Registered in the default [PrivacySchema] for the
+/// [CommunicationSamplingPackage.PHONE_LOG] measure.
 Data phoneLogAnonymizer(Data data) {
   assert(data is PhoneLog);
   PhoneLog log = data as PhoneLog;
@@ -45,10 +50,8 @@ Data phoneLogAnonymizer(Data data) {
   return log;
 }
 
-/// A [PhoneCall] anonymizer function. Anonymizes:
-///  - formattedNumber
-///  - number
-///  - name
+/// Anonymizes a [PhoneCall] by replacing its formatted number, number and
+/// name with SHA-1 hashes.
 PhoneCall phoneCallAnonymizer(PhoneCall call) {
   if (call.formattedNumber != null) {
     call.formattedNumber = sha1
@@ -65,8 +68,10 @@ PhoneCall phoneCallAnonymizer(PhoneCall call) {
   return call;
 }
 
-/// A [Calendar] anonymizer function. Anonymizes each [CalendarEvent]
-/// entry in the calendar using the [calendarEventAnonymizer] function.
+/// Anonymizes each [CalendarEvent] in a [Calendar] using [calendarEventAnonymizer].
+///
+/// Registered in the default [PrivacySchema] for the
+/// [CommunicationSamplingPackage.CALENDAR] measure.
 Data calendarAnonymizer(Data data) {
   assert(data is Calendar);
   Calendar calendar = data as Calendar;
@@ -76,10 +81,8 @@ Data calendarAnonymizer(Data data) {
   return calendar;
 }
 
-/// A [CalendarEvent] anonymizer function. Anonymizes:
-///  - title
-///  - description
-///  - names of all attendees
+/// Anonymizes a [CalendarEvent] by replacing its title and description with
+/// SHA-1 hashes.
 CalendarEvent calendarEventAnonymizer(CalendarEvent event) {
   if (event.title != null) {
     event.title = sha1.convert(utf8.encode(event.title!)).toString();
