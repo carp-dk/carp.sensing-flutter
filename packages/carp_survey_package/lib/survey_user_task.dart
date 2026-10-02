@@ -1,12 +1,18 @@
 part of 'survey.dart';
 
-/// A [UserTask] that contains a survey.
+/// A [UserTask] that shows a survey or cognitive test from an [RPAppTask].
 ///
-/// A [SurveyUserTask] is enqueued on the [AppTaskController]'s [userTaskQueue]
-/// and can be accessed from here. When a user starts this user task, the
-/// [onStart] method should be called.
+/// Created by [SurveyUserTaskFactory] and put on the
+/// [AppTaskController.userTaskQueue] when the [RPAppTask] is triggered.
+/// The app shows the [widget] (a [SurveyPage]) to the user.
 ///
-/// The survey page to show in the app is available as the [widget].
+/// Key points:
+///  * Call [onStart] when the user starts the task. This resumes background
+///    sampling of the task's measures.
+///  * On submit, adds an [RPTaskResultData] measurement with status
+///    [SurveyStatus.submitted], pauses background sampling and marks the task done.
+///  * On cancel, also adds the partial result (status [SurveyStatus.canceled]),
+///    pauses background sampling and marks the task canceled.
 class SurveyUserTask extends UserTask {
   /// The [RPAppTask] from which this user task originates from.
   RPAppTask get rpAppTask => task as RPAppTask;
@@ -50,6 +56,10 @@ class SurveyUserTask extends UserTask {
   }
 }
 
+/// Creates a [SurveyUserTask] for app tasks of type informed consent, survey
+/// and cognitive assessment.
+///
+/// Registered with the [AppTaskController] by [SurveySamplingPackage].
 class SurveyUserTaskFactory implements UserTaskFactory {
   @override
   List<String> types = [

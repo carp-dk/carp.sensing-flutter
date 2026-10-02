@@ -1,7 +1,15 @@
-/// A library for collecting communication data, from
-///  * text messages (sms)
-///  * phone calls
-///  * calendar entries
+/// A sampling package that collects phone calls, text messages and calendar entries.
+///
+/// Register [CommunicationSamplingPackage] in the `SamplingPackageRegistry` to
+/// use these measure types in a protocol:
+///  * `dk.cachet.carp.phonelog` - the phone call log ([PhoneLog]). Android only.
+///  * `dk.cachet.carp.textmessagelog` - the text message (SMS) log ([TextMessageLog]). Android only.
+///  * `dk.cachet.carp.textmessage` - incoming text messages ([TextMessage]). Android only.
+///  * `dk.cachet.carp.calendar` - calendar entries ([Calendar]). Android and iOS.
+///
+/// All measures use the [Smartphone] primary device. Phone numbers, message
+/// content and calendar titles are hashed by the default `PrivacySchema`
+/// (see [textMessageAnonymizer] and related functions).
 library;
 
 import 'dart:async';

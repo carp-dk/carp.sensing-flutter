@@ -1,17 +1,34 @@
 part of 'apps.dart';
 
+/// The sampling package for collecting installed apps and app usage.
+///
+/// Register it before you deploy a protocol that uses [APPS] or [APP_USAGE]:
+///
+/// ```dart
+/// SamplingPackageRegistry().register(AppsSamplingPackage());
+/// ```
+///
+/// Key points:
+///  * Both measures only work on Android. On other platforms [create] returns
+///    `null`, so no probe runs.
+///  * Registers [Apps] and [AppUsage] for JSON deserialization.
+///
+/// See also [AppsProbe] and [AppUsageProbe], which do the collection.
 class AppsSamplingPackage extends SmartphoneSamplingPackage {
-  /// Measure type for one-time collection of apps installed on this phone.
+  /// Measure type for one-time collection of the apps installed on this phone.
   ///  * One-time measure.
-  ///  * Uses the [Smartphone] master device for data collection.
+  ///  * Uses the [Smartphone] primary device for data collection.
   ///  * No sampling configuration needed.
+  ///  * Collected as [Apps] data.
   static const String APPS = "${NameSpace.CARP}.apps";
 
-  /// Measure type for one-time collection app usage information on apps that
-  /// are installed on the phone.
+  /// Measure type for one-time collection of app usage information on apps
+  /// that are installed on the phone.
   ///  * One-time measure.
-  ///  * Uses the [Smartphone] master device for data collection.
-  ///  * Use the [HistoricSamplingConfiguration] for configuration.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use a [HistoricSamplingConfiguration] for configuration. Default is
+  ///    one day back in time.
+  ///  * Collected as [AppUsage] data.
   static const String APP_USAGE = "${NameSpace.CARP}.appusage";
 
   @override

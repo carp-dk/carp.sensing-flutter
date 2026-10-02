@@ -1,18 +1,19 @@
 part of 'media.dart';
 
-/// A probe recording audio from the microphone. It starts recording on [onResume]
-/// and stops recording on [onPause], and post the recorded [MediaData] object to the
-/// [measurements] stream.
+/// Records audio from the microphone to a file.
 ///
-/// Note that this probe generates a lot of data and should be used with caution.
+/// Used for the [MediaSamplingPackage.AUDIO] measure. Recording starts on
+/// [onResume] and stops on [onPause]. On stop, the probe adds an [AudioMedia]
+/// measurement to the [measurements] stream.
 ///
-/// Also note that this probe records raw sound directly from the microphone
-/// and hence records everything - including human speech - in its proximity.
-///
-/// The audio probe generates an [MediaData] data measurement that holds the
-/// meta-data for each recording along with the actual recording in an audio file.
-/// How to upload or store this data to a data backend is up to the implementation
-/// of the [DataManager], which is used in the [Study].
+/// Key points:
+///  * Only one recording can run at a time.
+///  * Records raw sound, including any human speech nearby, and produces a lot
+///    of data. Use with caution.
+///  * The sound file is stored as AAC in an `.mp4` file in the
+///    [MediaSamplingPackage.MEDIA_FILES_PATH] folder, named by the [MediaData.id].
+///  * The [AudioMedia] data holds the metadata and file name. How the file is
+///    uploaded is up to the [DataManager] used in the deployment.
 class AudioProbe extends Probe {
   final _recorder = FlutterSoundRecorder();
   String? _path;
@@ -20,6 +21,7 @@ class AudioProbe extends Probe {
   MediaData? _data;
   String? _soundFileName;
 
+  /// Whether a recording is in progress.
   bool get isRecording => _isRecording;
 
   @override
