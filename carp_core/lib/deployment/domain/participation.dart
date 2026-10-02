@@ -23,14 +23,9 @@ class ParticipantData {
   /// Data that is related to specific roles in the study deployment.
   List<RoleData> roles;
 
-  ParticipantData({
-    required this.studyDeploymentId,
-    this.common = const {},
-    this.roles = const [],
-  }) : super();
+  ParticipantData({required this.studyDeploymentId, this.common = const {}, this.roles = const []}) : super();
 
-  factory ParticipantData.fromJson(Map<String, dynamic> json) =>
-      _$ParticipantDataFromJson(json);
+  factory ParticipantData.fromJson(Map<String, dynamic> json) => _$ParticipantDataFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantDataToJson(this);
 }
 
@@ -47,7 +42,6 @@ class RoleData {
 
   RoleData({required this.roleName, this.data = const {}}) : super();
 
-  factory RoleData.fromJson(Map<String, dynamic> json) =>
-      _$RoleDataFromJson(json);
+  factory RoleData.fromJson(Map<String, dynamic> json) => _$RoleDataFromJson(json);
   Map<String, dynamic> toJson() => _$RoleDataToJson(this);
 }

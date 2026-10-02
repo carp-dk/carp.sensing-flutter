@@ -24,8 +24,7 @@ class SamplingConfiguration extends Serializable {
   Map<String, dynamic> toJson() => _$SamplingConfigurationToJson(this);
 
   @override
-  String get jsonType =>
-      'dk.cachet.carp.common.application.sampling.$runtimeType';
+  String get jsonType => 'dk.cachet.carp.common.application.sampling.$runtimeType';
 }
 
 /// A sampling configuration which does not provide any configuration options.
@@ -56,20 +55,14 @@ class BatteryAwareSamplingConfiguration extends SamplingConfiguration {
   /// By default, sampling should be disabled at this point.
   SamplingConfiguration? critical;
 
-  BatteryAwareSamplingConfiguration({
-    required this.normal,
-    required this.low,
-    this.critical,
-  }) : super();
+  BatteryAwareSamplingConfiguration({required this.normal, required this.low, this.critical}) : super();
 
   @override
   Function get fromJsonFunction => _$BatteryAwareSamplingConfigurationFromJson;
   @override
-  Map<String, dynamic> toJson() =>
-      _$BatteryAwareSamplingConfigurationToJson(this);
-  factory BatteryAwareSamplingConfiguration.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<BatteryAwareSamplingConfiguration>(json);
+  Map<String, dynamic> toJson() => _$BatteryAwareSamplingConfigurationToJson(this);
+  factory BatteryAwareSamplingConfiguration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<BatteryAwareSamplingConfiguration>(json);
 }
 
 /// The level of detail a data stream should be sampled at, corresponding to
@@ -99,11 +92,9 @@ class GranularitySamplingConfiguration extends SamplingConfiguration {
   @override
   Function get fromJsonFunction => _$GranularitySamplingConfigurationFromJson;
 
-  factory GranularitySamplingConfiguration.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<GranularitySamplingConfiguration>(json);
+  factory GranularitySamplingConfiguration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<GranularitySamplingConfiguration>(json);
 
   @override
-  Map<String, dynamic> toJson() =>
-      _$GranularitySamplingConfigurationToJson(this);
+  Map<String, dynamic> toJson() => _$GranularitySamplingConfigurationToJson(this);
 }

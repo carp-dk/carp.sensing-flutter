@@ -16,15 +16,10 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
+    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
     expect(protocol.ownerId, 'user@dtu.dk');
-    expect(
-      protocol.primaryDevices.first.roleName,
-      SmartphoneDeploymentService().thisPhone.roleName,
-    );
+    expect(protocol.primaryDevices.first.roleName, SmartphoneDeploymentService().thisPhone.roleName);
     print(toJsonString(protocol));
   });
 
@@ -32,18 +27,12 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
+    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
     expect(protocol.ownerId, 'user@dtu.dk');
-    expect(
-      protocol.primaryDevices.first.roleName,
-      SmartphoneDeploymentService().thisPhone.roleName,
-    );
+    expect(protocol.primaryDevices.first.roleName, SmartphoneDeploymentService().thisPhone.roleName);
 
-    StudyDeploymentStatus status = await SmartphoneDeploymentService()
-        .createStudyDeployment(protocol);
+    StudyDeploymentStatus status = await SmartphoneDeploymentService().createStudyDeployment(protocol);
     print(toJsonString(status));
   });
 
@@ -51,14 +40,12 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
+    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
-    StudyDeploymentStatus status = await SmartphoneDeploymentService()
-        .createStudyDeployment(protocol);
-    SmartphoneDeployment? deployment = await SmartphoneDeploymentService()
-        .getDeviceDeployment(status.studyDeploymentId);
+    StudyDeploymentStatus status = await SmartphoneDeploymentService().createStudyDeployment(protocol);
+    SmartphoneDeployment? deployment = await SmartphoneDeploymentService().getDeviceDeployment(
+      status.studyDeploymentId,
+    );
 
     expect(status.studyDeploymentId, deployment?.studyDeploymentId);
     print(toJsonString(deployment));

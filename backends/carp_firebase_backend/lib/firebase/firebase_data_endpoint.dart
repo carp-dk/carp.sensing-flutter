@@ -150,11 +150,11 @@ class FirebaseStorageDataEndPoint extends FileDataEndPoint
     encrypt = false,
     publicKey,
   }) : super(
-         type: DataEndPointTypes.FIREBASE_STORAGE,
-         bufferSize: bufferSize,
-         zip: zip,
-         encrypt: encrypt,
-       ) {
+          type: DataEndPointTypes.FIREBASE_STORAGE,
+          bufferSize: bufferSize,
+          zip: zip,
+          encrypt: encrypt,
+        ) {
     this.firebaseEndPoint = firebaseEndPoint;
   }
 

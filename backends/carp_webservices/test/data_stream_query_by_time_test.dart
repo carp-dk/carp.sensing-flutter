@@ -16,10 +16,7 @@ void main() {
   });
 
   test('query-by-time endpoint path and request shape', () {
-    expect(
-      CarpDataStreamService.DATA_STREAM_QUERY_BY_TIME_ENDPOINT_NAME,
-      'data-stream-service/query-by-time',
-    );
+    expect(CarpDataStreamService.DATA_STREAM_QUERY_BY_TIME_ENDPOINT_NAME, 'data-stream-service/query-by-time');
 
     final dataStream = DataStreamId(
       studyDeploymentId: '00000000-0000-0000-0000-000000000000',

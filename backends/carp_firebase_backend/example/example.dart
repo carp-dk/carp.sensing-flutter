@@ -18,12 +18,12 @@ void main() {
 
   final FirebaseStorageDataEndPoint storageEndPoint =
       new FirebaseStorageDataEndPoint(
-        firebaseEndPoint_1,
-        path: 'sensing/data',
-        bufferSize: 500 * 1000,
-        zip: true,
-        encrypt: false,
-      );
+    firebaseEndPoint_1,
+    path: 'sensing/data',
+    bufferSize: 500 * 1000,
+    zip: true,
+    encrypt: false,
+  );
 
   MasterDeviceDeployment deployment = MasterDeviceDeployment(
     deviceDescriptor: Smartphone(),
@@ -46,9 +46,9 @@ void main() {
 
   final FirebaseDatabaseDataEndPoint databaseEndPoint =
       new FirebaseDatabaseDataEndPoint(
-        firebaseEndPoint_2,
-        collection: 'carp_data',
-      );
+    firebaseEndPoint_2,
+    collection: 'carp_data',
+  );
 
   deployment..dataEndPoint = databaseEndPoint;
 

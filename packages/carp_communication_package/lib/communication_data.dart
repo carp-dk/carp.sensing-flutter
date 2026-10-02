@@ -20,8 +20,7 @@ class TextMessageLog extends Data {
 
   @override
   Function get fromJsonFunction => _$TextMessageLogFromJson;
-  factory TextMessageLog.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<TextMessageLog>(json);
+  factory TextMessageLog.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<TextMessageLog>(json);
   @override
   Map<String, dynamic> toJson() => _$TextMessageLogToJson(this);
 }
@@ -86,8 +85,7 @@ class TextMessage extends Data {
 
   @override
   Function get fromJsonFunction => _$TextMessageFromJson;
-  factory TextMessage.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<TextMessage>(json);
+  factory TextMessage.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<TextMessage>(json);
 
   @override
   Map<String, dynamic> toJson() => _$TextMessageToJson(this);
@@ -109,8 +107,7 @@ class PhoneLog extends Data {
 
   @override
   Function get fromJsonFunction => _$PhoneLogFromJson;
-  factory PhoneLog.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<PhoneLog>(json);
+  factory PhoneLog.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<PhoneLog>(json);
 
   @override
   Map<String, dynamic> toJson() => _$PhoneLogToJson(this);
@@ -145,14 +142,7 @@ class PhoneCall {
   /// The name of the caller (if available).
   String? name;
 
-  PhoneCall([
-    this.timestamp,
-    this.callType,
-    this.duration,
-    this.formattedNumber,
-    this.number,
-    this.name,
-  ]);
+  PhoneCall([this.timestamp, this.callType, this.duration, this.formattedNumber, this.number, this.name]);
 
   /// Creates a [PhoneCall] from a [CallLogEntry] from the call log plugin.
   factory PhoneCall.fromCallLogEntry(CallLogEntry call) {
@@ -186,18 +176,10 @@ class PhoneCall {
         break;
     }
 
-    return PhoneCall(
-      timestamp,
-      type,
-      call.duration,
-      call.formattedNumber,
-      call.number,
-      call.name,
-    );
+    return PhoneCall(timestamp, type, call.duration, call.formattedNumber, call.number, call.name);
   }
 
-  factory PhoneCall.fromJson(Map<String, dynamic> json) =>
-      _$PhoneCallFromJson(json);
+  factory PhoneCall.fromJson(Map<String, dynamic> json) => _$PhoneCallFromJson(json);
   Map<String, dynamic> toJson() => _$PhoneCallToJson(this);
 }
 
@@ -217,8 +199,7 @@ class Calendar extends Data {
 
   @override
   Function get fromJsonFunction => _$CalendarFromJson;
-  factory Calendar.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Calendar>(json);
+  factory Calendar.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Calendar>(json);
   @override
   Map<String, dynamic> toJson() => _$CalendarToJson(this);
 }
@@ -292,7 +273,6 @@ class CalendarEvent {
     );
   }
 
-  factory CalendarEvent.fromJson(Map<String, dynamic> json) =>
-      _$CalendarEventFromJson(json);
+  factory CalendarEvent.fromJson(Map<String, dynamic> json) => _$CalendarEventFromJson(json);
   Map<String, dynamic> toJson() => _$CalendarEventToJson(this);
 }

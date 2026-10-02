@@ -35,10 +35,7 @@ class MobileSensingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      useMaterial3: true,
-    ),
+    theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue), useMaterial3: true),
     darkTheme: ThemeData.dark(),
     home: const StudyPage(),
   );
@@ -117,23 +114,16 @@ class StudyPageState extends State<StudyPage> {
     // Direct location stream: subscribe straight to the OS location stream via
     // the LocationManager, bypassing the CARP probe/measurement pipeline.
     // Logs every fix (no throttle) for a true 1:1 comparison with LOC-CARP.
-    _directLocationSub = LocationManager().onLocationChanged.listen(
-      (location) => _logLocation('LOC-DIRECT', location),
-    );
+    _directLocationSub = LocationManager().onLocationChanged.listen((location) => _logLocation('LOC-DIRECT', location));
 
     // Third source: the `geolocator` package's own position stream, independent
     // of both CARP and the `location` plugin. Logs every fix (no throttle).
     _geoLocationSub =
         Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 0,
-          ),
+          locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 0),
         ).listen((position) {
           final time = position.timestamp.toIso8601String();
-          debugPrint(
-            '[LOC-GEO] $time  ${position.latitude}, ${position.longitude}  ±${position.accuracy}m',
-          );
+          debugPrint('[LOC-GEO] $time  ${position.latitude}, ${position.longitude}  ±${position.accuracy}m');
         });
   }
 
@@ -142,9 +132,7 @@ class StudyPageState extends State<StudyPage> {
   /// `[LOC-CARP]`, `[LOC-DIRECT]`, or `[LOC-GEO]`.
   void _logLocation(String tag, Location location) {
     final time = (location.time ?? DateTime.now()).toIso8601String();
-    debugPrint(
-      '[$tag] $time  ${location.latitude}, ${location.longitude}  ±${location.accuracy}m',
-    );
+    debugPrint('[$tag] $time  ${location.latitude}, ${location.longitude}  ±${location.accuracy}m');
   }
 
   @override
@@ -166,10 +154,7 @@ class StudyPageState extends State<StudyPage> {
           itemBuilder: studyTileWithBorder,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addStudy,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: addStudy, child: const Icon(Icons.add)),
     );
   }
 
@@ -189,13 +174,7 @@ class StudyPageState extends State<StudyPage> {
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12.0),
               border: Border.all(color: Colors.grey.shade300, width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).shadowColor,
-                  blurRadius: 8.0,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Theme.of(context).shadowColor, blurRadius: 8.0, offset: const Offset(0, 4))],
             ),
             child: ListTile(
               isThreeLine: true,
@@ -203,10 +182,7 @@ class StudyPageState extends State<StudyPage> {
                 ExecutorState.Resumed => Icons.pause,
                 _ => Icons.play_arrow,
               }, size: 40),
-              title: Text(
-                'Study Deployment #$index',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              title: Text('Study Deployment #$index', style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Text(
                 'ID: ...-${study.studyDeploymentId.split('-').last}\n'
                 'Status: ${study.status.name}\n'
@@ -237,14 +213,10 @@ class StudyPageState extends State<StudyPage> {
   /// Thus, all studies will be identical in terms of data collection.
   void addStudy() => client
       .addStudyFromProtocol(protocol)
-      .then(
-        (study) =>
-            client.tryDeployment(study.studyDeploymentId, study.deviceRoleName),
-      );
+      .then((study) => client.tryDeployment(study.studyDeploymentId, study.deviceRoleName));
 
   /// Remove [study] from the client's list of studies.
-  void removeStudy(SmartphoneStudy study) =>
-      client.removeStudy(study.studyDeploymentId, study.deviceRoleName);
+  void removeStudy(SmartphoneStudy study) => client.removeStudy(study.studyDeploymentId, study.deviceRoleName);
 
   /// Resume or pause [study] based on its current state.
   void runStudy(SmartphoneStudy study) async {
@@ -286,11 +258,7 @@ class StudyPageState extends State<StudyPage> {
   /// but you can uncomment them to see how they work.
   SmartphoneStudyProtocol get protocol {
     if (_protocol == null) {
-      _protocol = SmartphoneStudyProtocol(
-        ownerId: 'AB',
-        name: 'Demo Protocol',
-        dataEndPoint: SQLiteDataEndPoint(),
-      );
+      _protocol = SmartphoneStudyProtocol(ownerId: 'AB', name: 'Demo Protocol', dataEndPoint: SQLiteDataEndPoint());
 
       // Define which devices are used for data collection.
       //
@@ -335,9 +303,7 @@ class StudyPageState extends State<StudyPage> {
           measures: [
             Measure(type: DeviceSamplingPackage.TIMEZONE),
             Measure(type: DeviceSamplingPackage.HEARTBEAT)
-              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-                interval: const Duration(minutes: 1),
-              ),
+              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(interval: const Duration(minutes: 1)),
           ],
         ),
         phone,
@@ -350,9 +316,7 @@ class StudyPageState extends State<StudyPage> {
       // trigger, which is useful for many other types of measures.
       _protocol?.addTaskControl(
         PeriodicTrigger(period: const Duration(seconds: 10)),
-        BackgroundTask(
-          measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)],
-        ),
+        BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.TIMEZONE)]),
         phone,
       );
 
@@ -379,9 +343,7 @@ class StudyPageState extends State<StudyPage> {
           name: 'Background Measures Task',
           measures: [
             Measure(type: DeviceSamplingPackage.FREE_MEMORY)
-              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(
-                interval: const Duration(seconds: 10),
-              ),
+              ..overrideSamplingConfiguration = IntervalSamplingConfiguration(interval: const Duration(seconds: 10)),
             Measure(type: DeviceSamplingPackage.BATTERY_STATE),
             Measure(type: DeviceSamplingPackage.SCREEN_EVENT),
             Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),

@@ -37,8 +37,7 @@ class BLEScannerPage extends StatefulWidget {
   final ble.FlutterReactiveBle plugin;
   final BLEDevice? configuration;
 
-  BLEScannerPage({ble.FlutterReactiveBle? plugin, this.configuration})
-    : plugin = plugin ?? ble.FlutterReactiveBle();
+  BLEScannerPage({ble.FlutterReactiveBle? plugin, this.configuration}) : plugin = plugin ?? ble.FlutterReactiveBle();
 
   @override
   BLEScannerPageState createState() => BLEScannerPageState();
@@ -51,9 +50,7 @@ class BLEScannerPageState extends State<BLEScannerPage> {
 
   ble.FlutterReactiveBle get plugin => widget.plugin;
   BLEDevice? get configuration => widget.configuration;
-  List<ble.Uuid> get serviceUuids =>
-      configuration?.serviceUuids.map((str) => ble.Uuid.parse(str)).toList() ??
-      [];
+  List<ble.Uuid> get serviceUuids => configuration?.serviceUuids.map((str) => ble.Uuid.parse(str)).toList() ?? [];
 
   @override
   void initState() {
@@ -78,9 +75,7 @@ class BLEScannerPageState extends State<BLEScannerPage> {
         .listen(
           (device) {
             // Avoid duplicates
-            final index = _discoveredDevices.indexWhere(
-              (d) => d.id == device.id,
-            );
+            final index = _discoveredDevices.indexWhere((d) => d.id == device.id);
 
             if (index >= 0) {
               // Update existing device with new RSSI value
@@ -124,12 +119,7 @@ class BLEScannerPageState extends State<BLEScannerPage> {
       builder: (context) => AlertDialog(
         title: const Text('Error'),
         content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
       ),
     );
   }
@@ -140,10 +130,7 @@ class BLEScannerPageState extends State<BLEScannerPage> {
     child: Scaffold(
       appBar: AppBar(
         title: const Text('Scan for BLE Devices'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: _cancelScan,
-        ),
+        leading: IconButton(icon: const Icon(Icons.close), onPressed: _cancelScan),
       ),
       body: Column(
         children: [
@@ -152,16 +139,9 @@ class BLEScannerPageState extends State<BLEScannerPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Devices found: ${_discoveredDevices.length}',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text('Devices found: ${_discoveredDevices.length}', style: Theme.of(context).textTheme.titleMedium),
                 if (_isScanning)
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                  const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 else
                   ElevatedButton.icon(
                     onPressed: _startScan,
@@ -175,9 +155,7 @@ class BLEScannerPageState extends State<BLEScannerPage> {
             child: _discoveredDevices.isEmpty
                 ? Center(
                     child: Text(
-                      _isScanning
-                          ? 'Scanning for devices...'
-                          : 'No devices found',
+                      _isScanning ? 'Scanning for devices...' : 'No devices found',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   )
@@ -185,8 +163,7 @@ class BLEScannerPageState extends State<BLEScannerPage> {
                     child: ListView.builder(
                       itemCount: _discoveredDevices.length,
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      itemBuilder: (context, index) =>
-                          _buildDeviceCard(context, _discoveredDevices[index]),
+                      itemBuilder: (context, index) => _buildDeviceCard(context, _discoveredDevices[index]),
                     ),
                   ),
           ),
@@ -195,37 +172,27 @@ class BLEScannerPageState extends State<BLEScannerPage> {
     ),
   );
 
-  Widget _buildDeviceCard(BuildContext context, ble.DiscoveredDevice device) =>
-      Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        child: ListTile(
-          leading: const Icon(Icons.bluetooth),
-          title: Text(
-            device.name.isNotEmpty ? device.name : 'Unknown Device',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                'Address: ${device.id}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              Text(
-                'RSSI: ${device.rssi} dBm',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              if (device.serviceUuids.isNotEmpty)
-                Text(
-                  'Services: ${device.serviceUuids.length}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-            ],
-          ),
-          isThreeLine: true,
-          trailing: const Icon(Icons.arrow_forward),
-          onTap: () => _selectDevice(device),
-        ),
-      );
+  Widget _buildDeviceCard(BuildContext context, ble.DiscoveredDevice device) => Card(
+    margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+    child: ListTile(
+      leading: const Icon(Icons.bluetooth),
+      title: Text(
+        device.name.isNotEmpty ? device.name : 'Unknown Device',
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          Text('Address: ${device.id}', style: Theme.of(context).textTheme.bodySmall),
+          Text('RSSI: ${device.rssi} dBm', style: Theme.of(context).textTheme.bodySmall),
+          if (device.serviceUuids.isNotEmpty)
+            Text('Services: ${device.serviceUuids.length}', style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
+      isThreeLine: true,
+      trailing: const Icon(Icons.arrow_forward),
+      onTap: () => _selectDevice(device),
+    ),
+  );
 }

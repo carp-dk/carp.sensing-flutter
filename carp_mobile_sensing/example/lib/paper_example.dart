@@ -42,15 +42,11 @@ void sensing() async {
     participantId: const Uuid().v4(),
     assignedRoles: AssignedTo.all(),
     identity: EmailAccountIdentity("test@test.com"),
-    invitation: StudyInvitation(
-      "Movement study",
-      "This study tracks your movements.",
-    ),
+    invitation: StudyInvitation("Movement study", "This study tracks your movements."),
   );
 
   // deploy this protocol using the on-phone deployment service
-  StudyDeploymentStatus status = await SmartphoneDeploymentService()
-      .createStudyDeployment(protocol, [invitation]);
+  StudyDeploymentStatus status = await SmartphoneDeploymentService().createStudyDeployment(protocol, [invitation]);
 
   // create and configure a client manager for this phone
   SmartPhoneClientManager client = SmartPhoneClientManager();
@@ -58,10 +54,7 @@ void sensing() async {
 
   // add the study and get the study runtime (controller)
   final study = await client.addStudy(
-    SmartphoneStudy(
-      studyDeploymentId: status.studyDeploymentId,
-      deviceRoleName: phone.roleName,
-    ),
+    SmartphoneStudy(studyDeploymentId: status.studyDeploymentId, deviceRoleName: phone.roleName),
   );
   await client.tryDeployment(study.studyDeploymentId, study.deviceRoleName);
 
@@ -78,7 +71,5 @@ void sensing() async {
   });
 
   // listening on events of a specific type
-  controller
-      ?.measurementsByType(DeviceSamplingPackage.SCREEN_EVENT)
-      .forEach(print);
+  controller?.measurementsByType(DeviceSamplingPackage.SCREEN_EVENT).forEach(print);
 }

@@ -54,15 +54,11 @@ abstract class DeploymentService {
 
   /// Get the status for a study deployment with the given [studyDeploymentId].
   /// Returns null if [studyDeploymentId] is not found.
-  Future<StudyDeploymentStatus?> getStudyDeploymentStatus(
-    String studyDeploymentId,
-  );
+  Future<StudyDeploymentStatus?> getStudyDeploymentStatus(String studyDeploymentId);
 
   /// Get the statuses for a set of deployments with the specified [studyDeploymentIds].
   /// Returns null for IDs in [studyDeploymentIds] for which no deployment exists.
-  Future<List<StudyDeploymentStatus?>> getStudyDeploymentStatusList(
-    List<String> studyDeploymentIds,
-  );
+  Future<List<StudyDeploymentStatus?>> getStudyDeploymentStatusList(List<String> studyDeploymentIds);
 
   /// Register the device with the specified [deviceRoleName] for the study
   /// deployment with [studyDeploymentId].
@@ -78,18 +74,12 @@ abstract class DeploymentService {
   /// Unregister the device with the specified [deviceRoleName] for the study
   /// deployment with [studyDeploymentId].
   /// Returns null if [studyDeploymentId] is not found.
-  Future<StudyDeploymentStatus?> unregisterDevice(
-    String studyDeploymentId,
-    String deviceRoleName,
-  );
+  Future<StudyDeploymentStatus?> unregisterDevice(String studyDeploymentId, String deviceRoleName);
 
   /// Get the deployment configuration for the primary device with
   /// [primaryDeviceRoleName] in the study deployment with [studyDeploymentId].
   /// Returns null if [studyDeploymentId] is not found.
-  Future<PrimaryDeviceDeployment?> getDeviceDeploymentFor(
-    String studyDeploymentId,
-    String primaryDeviceRoleName,
-  );
+  Future<PrimaryDeviceDeployment?> getDeviceDeploymentFor(String studyDeploymentId, String primaryDeviceRoleName);
 
   /// Indicate to stakeholders in the study deployment with [studyDeploymentId]
   /// that the device with [primaryDeviceRoleName] was deployed successfully,

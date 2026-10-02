@@ -85,9 +85,7 @@ class _QRViewExampleState extends State<QRViewExample> {
 
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
-    var scanArea =
-        (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.height < 400)
+    var scanArea = (MediaQuery.of(context).size.width < 400 || MediaQuery.of(context).size.height < 400)
         ? 150.0
         : 300.0;
     // To ensure the Scanner view is properly sizes after rotation
@@ -120,23 +118,16 @@ class _QRViewExampleState extends State<QRViewExample> {
       final qrcode = scanData.code;
 
       if (qrcode != null && Uri.tryParse(qrcode)?.hasAbsolutePath == true) {
-        bloc.currentUser = await CarpAuthService()
-            .authenticateWithMagicLink(qrcode)
-            .then((_) {
-              Navigator.of(context).pop();
-            });
+        bloc.currentUser = await CarpAuthService().authenticateWithMagicLink(qrcode).then((_) {
+          Navigator.of(context).pop();
+        });
       }
     });
   }
 
-  void _onPermissionSet(
-    BuildContext context,
-    qr.QRViewController ctrl,
-    bool p,
-  ) {
+  void _onPermissionSet(BuildContext context, qr.QRViewController ctrl, bool p) {
     if (!p) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('no Permission')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('no Permission')));
     }
   }
 }

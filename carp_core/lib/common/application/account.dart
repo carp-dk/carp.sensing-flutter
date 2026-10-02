@@ -23,19 +23,15 @@ class Account {
   }
 
   /// Create a new [Account] uniquely identified by the specified [emailAddress].
-  Account.withEmailIdentity(String emailAddress)
-    : this(identity: EmailAccountIdentity(emailAddress));
+  Account.withEmailIdentity(String emailAddress) : this(identity: EmailAccountIdentity(emailAddress));
 
   /// Create a new [Account] uniquely identified by the specified [username].
-  Account.withUsernameIdentity(String username)
-    : this(identity: UsernameAccountIdentity(username));
+  Account.withUsernameIdentity(String username) : this(identity: UsernameAccountIdentity(username));
 
   /// Determines whether this account has the same [identity] as [otherAccount].
-  bool hasSameIdentity(Account otherAccount) =>
-      identity == otherAccount.identity;
+  bool hasSameIdentity(Account otherAccount) => identity == otherAccount.identity;
 
-  factory Account.fromJson(Map<String, dynamic> json) =>
-      _$AccountFromJson(json);
+  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
   Map<String, dynamic> toJson() => _$AccountToJson(this);
 }
 
@@ -51,8 +47,7 @@ class AccountIdentity extends Serializable {
   String get jsonType => 'dk.cachet.carp.common.application.users.$runtimeType';
   @override
   Function get fromJsonFunction => _$AccountIdentityFromJson;
-  factory AccountIdentity.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AccountIdentity>(json);
+  factory AccountIdentity.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AccountIdentity>(json);
   @override
   Map<String, dynamic> toJson() => _$AccountIdentityToJson(this);
 }

@@ -12,8 +12,7 @@ void main() {
   late StudyProtocol protocol;
   Smartphone phone;
 
-  Future<void> writeToFile(String json, String fileName) async =>
-      await File('test/json/$fileName').writeAsString(json);
+  Future<void> writeToFile(String json, String fileName) async => await File('test/json/$fileName').writeAsString(json);
 
   setUpAll(() {
     // Initialization of serialization
@@ -23,10 +22,7 @@ void main() {
     SamplingPackageRegistry().register(MediaSamplingPackage());
 
     // Create a new study protocol.
-    protocol = StudyProtocol(
-      ownerId: 'alex@uni.dk',
-      name: 'Audio package test',
-    );
+    protocol = StudyProtocol(ownerId: 'alex@uni.dk', name: 'Audio package test');
 
     // Define which devices are used for data collection.
     phone = Smartphone();
@@ -35,10 +31,7 @@ void main() {
     // adding all available measures to one one trigger and one task
     protocol.addTaskControl(
       ImmediateTrigger(),
-      BackgroundTask()
-        ..measures = SamplingPackageRegistry().dataTypes
-            .map((type) => Measure(type: type.type))
-            .toList(),
+      BackgroundTask()..measures = SamplingPackageRegistry().dataTypes.map((type) => Measure(type: type.type)).toList(),
       phone,
     );
   });
@@ -56,9 +49,7 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
-      json.decode(studyJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -66,9 +57,7 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/protocol.json').readAsStringSync();
 
-    StudyProtocol protocol = StudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, Smartphone.DEFAULT_ROLE_NAME);

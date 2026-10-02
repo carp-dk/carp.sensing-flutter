@@ -56,28 +56,17 @@ class ESenseSamplingPackage implements SamplingPackage {
   /// (accelerometer and gyroscope) as [ESenseSensor] data.
   static const String ESENSE_SENSOR = "$ESENSE_NAMESPACE.sensor";
 
-  final DeviceManager _deviceManager = ESenseDeviceManager(
-    ESenseDevice.DEVICE_TYPE,
-  );
+  final DeviceManager _deviceManager = ESenseDeviceManager(ESenseDevice.DEVICE_TYPE);
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: ESENSE_BUTTON,
-            displayName: "eSense Button Events",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: ESENSE_SENSOR,
-            displayName: "eSense Movement Events",
-            timeType: DataTimeType.TIME_SPAN,
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: ESENSE_BUTTON, displayName: "eSense Button Events", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: ESENSE_SENSOR, displayName: "eSense Movement Events", timeType: DataTimeType.TIME_SPAN),
+    ),
+  ]);
 
   @override
   List<DataTypeMetaData> get dataTypes => samplingSchemes.dataTypes;
@@ -91,17 +80,11 @@ class ESenseSamplingPackage implements SamplingPackage {
 
   @override
   void onRegister() {
-    FromJsonFactory().registerAll([
-      ESenseDevice(),
-      BLEDeviceRegistration(bleAddress: ''),
-    ]);
+    FromJsonFactory().registerAll([ESenseDevice(), BLEDeviceRegistration(bleAddress: '')]);
 
     // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
     // the eSense device used the carp_core device namespace.
-    FromJsonFactory().register(
-      ESenseDevice(),
-      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.ESenseDevice',
-    );
+    FromJsonFactory().register(ESenseDevice(), type: '${DeviceConfiguration.DEVICE_NAMESPACE}.ESenseDevice');
 
     // register all data types
     FromJsonFactory().registerAll([

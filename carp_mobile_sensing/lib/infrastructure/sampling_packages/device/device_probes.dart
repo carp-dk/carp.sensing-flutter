@@ -34,10 +34,7 @@ class HeartbeatProbe extends IntervalProbe {
   @override
   Future<Measurement?> getMeasurement() async => Measurement.fromData(
     Heartbeat(
-      deviceType: SmartPhoneClientManager()
-          .deviceController
-          .smartphoneDeviceManager
-          .deviceType,
+      deviceType: SmartPhoneClientManager().deviceController.smartphoneDeviceManager.deviceType,
       deviceRoleName: deployment?.deviceRoleName ?? 'unknown',
     ),
   );
@@ -51,9 +48,7 @@ class ApplicationProbe extends MeasurementProbe {
   Future<Measurement?> getMeasurement() async {
     if (!Settings().initialized) return null;
 
-    return Measurement.fromData(
-      ApplicationInformation.fromPackageInfo(Settings().packageInfo!),
-    );
+    return Measurement.fromData(ApplicationInformation.fromPackageInfo(Settings().packageInfo!));
   }
 }
 
@@ -89,9 +84,8 @@ class ScreenProbe extends StreamProbe {
   Screen screen = Screen();
 
   @override
-  Stream<Measurement> get stream => screen.screenStateStream.map(
-    (event) => Measurement.fromData(ScreenEvent.fromScreenStateEvent(event)),
-  );
+  Stream<Measurement> get stream =>
+      screen.screenStateStream.map((event) => Measurement.fromData(ScreenEvent.fromScreenStateEvent(event)));
 }
 
 /// Collects free physical and virtual memory as [FreeMemory] on a regular basis
@@ -107,25 +101,22 @@ class MemoryProbe extends IntervalProbe {
   }
 
   @override
-  Future<Measurement?> getMeasurement() async => Measurement.fromData(
-    FreeMemory(SysInfo.getFreePhysicalMemory(), SysInfo.getFreeVirtualMemory()),
-  );
+  Future<Measurement?> getMeasurement() async =>
+      Measurement.fromData(FreeMemory(SysInfo.getFreePhysicalMemory(), SysInfo.getFreeVirtualMemory()));
 }
 
 /// Collects the phone's current [Timezone] once.
 class TimezoneProbe extends MeasurementProbe {
   @override
-  Future<Measurement?> getMeasurement() async => Measurement.fromData(
-    Timezone((await FlutterTimezone.getLocalTimezone()).identifier),
-  );
+  Future<Measurement?> getMeasurement() async =>
+      Measurement.fromData(Timezone((await FlutterTimezone.getLocalTimezone()).identifier));
 }
 
 /// Collects an [AppLifecycleEvent] each time the app lifecycle state changes.
 ///
 /// Observes [WidgetsBinding] while resumed.
 class AppLifecycleProbe extends StreamProbe with WidgetsBindingObserver {
-  final StreamController<Measurement> _controller =
-      StreamController.broadcast();
+  final StreamController<Measurement> _controller = StreamController.broadcast();
 
   @override
   Stream<Measurement> get stream => _controller.stream;

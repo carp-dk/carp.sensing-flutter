@@ -20,11 +20,7 @@ class DataTypeMetaData {
   /// as a time span).
   DataTimeType timeType;
 
-  DataTypeMetaData({
-    required this.type,
-    this.displayName = '',
-    this.timeType = DataTimeType.POINT,
-  });
+  DataTypeMetaData({required this.type, this.displayName = '', this.timeType = DataTimeType.POINT});
 }
 
 /// Describes how [Data] for a [DataType] is stored temporally.
@@ -84,8 +80,7 @@ class CarpDataTypes {
 
   /// Rate of change in velocity, excluding gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
-  static const String NON_GRAVITATIONAL_ACCELERATION =
-      "$CARP_NAMESPACE.nongravitationalacceleration";
+  static const String NON_GRAVITATIONAL_ACCELERATION = "$CARP_NAMESPACE.nongravitationalacceleration";
 
   /// Rotation of the device in x,y,z (typically measured by a gyroscope).
   static const String ROTATION = "$CARP_NAMESPACE.rotation";
@@ -126,42 +121,21 @@ class CarpDataTypes {
   CarpDataTypes._() {
     add([
       DataTypeMetaData(type: GEOLOCATION, displayName: "Location"),
-      DataTypeMetaData(
-        type: STEP_COUNT,
-        displayName: "Step Count",
-        timeType: DataTimeType.TIME_SPAN,
-      ),
+      DataTypeMetaData(type: STEP_COUNT, displayName: "Step Count", timeType: DataTimeType.TIME_SPAN),
       DataTypeMetaData(type: ECG, displayName: "Electrocardiography (ECG)"),
       DataTypeMetaData(type: PPG, displayName: "Photoplethysmography (PPG)"),
       DataTypeMetaData(type: HEART_RATE, displayName: "Heart Rate"),
-      DataTypeMetaData(
-        type: INTERBEAT_INTERVAL,
-        displayName: "Interbeat Interval",
-        timeType: DataTimeType.TIME_SPAN,
-      ),
-      DataTypeMetaData(
-        type: SENSOR_SKIN_CONTACT,
-        displayName: "Sensor Skin Contact",
-      ),
-      DataTypeMetaData(
-        type: NON_GRAVITATIONAL_ACCELERATION,
-        displayName: "Acceleration excl. Gravity",
-      ),
+      DataTypeMetaData(type: INTERBEAT_INTERVAL, displayName: "Interbeat Interval", timeType: DataTimeType.TIME_SPAN),
+      DataTypeMetaData(type: SENSOR_SKIN_CONTACT, displayName: "Sensor Skin Contact"),
+      DataTypeMetaData(type: NON_GRAVITATIONAL_ACCELERATION, displayName: "Acceleration excl. Gravity"),
       DataTypeMetaData(type: EDA, displayName: "Electrodermal Activity"),
-      DataTypeMetaData(
-        type: ACCELERATION,
-        displayName: "Acceleration incl. Gravity",
-      ),
+      DataTypeMetaData(type: ACCELERATION, displayName: "Acceleration incl. Gravity"),
       DataTypeMetaData(type: ROTATION, displayName: "Rotation"),
       DataTypeMetaData(type: MAGNETIC_FIELD, displayName: "Magnetic Field"),
       DataTypeMetaData(type: ANGULAR_VELOCITY, displayName: "Angular Velocity"),
       DataTypeMetaData(type: SIGNAL_STRENGTH, displayName: "Signal Strength"),
       DataTypeMetaData(type: TRIGGERED_TASK, displayName: "Triggered Task"),
-      DataTypeMetaData(
-        type: COMPLETED_TASK,
-        displayName: "Completed Task",
-        timeType: DataTimeType.TIME_SPAN,
-      ),
+      DataTypeMetaData(type: COMPLETED_TASK, displayName: "Completed Task", timeType: DataTimeType.TIME_SPAN),
       DataTypeMetaData(type: ERROR, displayName: "Error"),
     ]);
   }

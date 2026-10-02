@@ -54,9 +54,7 @@ Data phoneLogAnonymizer(Data data) {
 /// name with SHA-1 hashes.
 PhoneCall phoneCallAnonymizer(PhoneCall call) {
   if (call.formattedNumber != null) {
-    call.formattedNumber = sha1
-        .convert(utf8.encode(call.formattedNumber!))
-        .toString();
+    call.formattedNumber = sha1.convert(utf8.encode(call.formattedNumber!)).toString();
   }
   if (call.number != null) {
     call.number = sha1.convert(utf8.encode(call.number!)).toString();
@@ -88,9 +86,7 @@ CalendarEvent calendarEventAnonymizer(CalendarEvent event) {
     event.title = sha1.convert(utf8.encode(event.title!)).toString();
   }
   if (event.description != null) {
-    event.description = sha1
-        .convert(utf8.encode(event.description!))
-        .toString();
+    event.description = sha1.convert(utf8.encode(event.description!)).toString();
   }
 
   return event;

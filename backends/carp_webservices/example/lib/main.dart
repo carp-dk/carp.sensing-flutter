@@ -63,25 +63,15 @@ class HomePageState extends State<HomePage> {
                     children: [
                       TextButton.icon(
                         onPressed: () {
-                          showDialog<void>(
-                            context: context,
-                            builder: (context) => QRViewExample(),
-                          );
+                          showDialog<void>(context: context, builder: (context) => QRViewExample());
                         },
                         icon: const Icon(Icons.login),
-                        label: const Text(
-                          'SCAN',
-                          style: TextStyle(fontSize: 35),
-                        ),
+                        label: const Text('SCAN', style: TextStyle(fontSize: 35)),
                       ),
                       TextButton.icon(
-                        onPressed: () async => bloc.currentUser =
-                            await CarpAuthService().authenticate(),
+                        onPressed: () async => bloc.currentUser = await CarpAuthService().authenticate(),
                         icon: const Icon(Icons.login),
-                        label: const Text(
-                          'LOGIN',
-                          style: TextStyle(fontSize: 35),
-                        ),
+                        label: const Text('LOGIN', style: TextStyle(fontSize: 35)),
                       ),
                     ],
                   );
@@ -101,16 +91,15 @@ class HomePageState extends State<HomePage> {
             ),
             StreamBuilder(
               stream: CarpAuthService().authStateChanges,
-              builder: (BuildContext context, AsyncSnapshot<AuthEvent> event) =>
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
-                    child: Text(
-                      (CarpAuthService().authenticated)
-                          ? 'Authenticated as ${CarpAuthService().currentUser.username} ${CarpAuthService().currentUser.firstName} ${CarpAuthService().currentUser.lastName}'
-                          : 'Not authenticated',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+              builder: (BuildContext context, AsyncSnapshot<AuthEvent> event) => Padding(
+                padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
+                child: Text(
+                  (CarpAuthService().authenticated)
+                      ? 'Authenticated as ${CarpAuthService().currentUser.username} ${CarpAuthService().currentUser.firstName} ${CarpAuthService().currentUser.lastName}'
+                      : 'Not authenticated',
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ],
         ),
@@ -149,9 +138,7 @@ class AppBLoC {
 
   void dispose() async {}
 
-  Future<ActiveParticipationInvitation?> getStudyInvitation(
-    BuildContext context,
-  ) async {
+  Future<ActiveParticipationInvitation?> getStudyInvitation(BuildContext context) async {
     // configure a participant service based on the carp service already configured
     CarpParticipationService().configureFrom(CarpService());
     _invitation = await CarpParticipationService().getStudyInvitation(context);

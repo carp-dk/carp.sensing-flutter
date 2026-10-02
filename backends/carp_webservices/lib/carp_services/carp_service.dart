@@ -47,18 +47,15 @@ class CarpService extends CarpBaseService {
   // --------------------------------------------------------------------------
 
   /// The URL of the file endpoint for the study with id [studyId].
-  String getFileEndpointUri([String? studyId]) =>
-      "${app.uri.toString()}/api/studies/${getStudyId(studyId)}/files";
+  String getFileEndpointUri([String? studyId]) => "${app.uri.toString()}/api/studies/${getStudyId(studyId)}/files";
 
   /// Gets a [FileStorageReference] to the file with [id] in the study with
   /// id [studyId].
   ///
   /// Omit [id] (defaults to -1) for a file that is not uploaded yet.
   /// [studyId] can be omitted if specified as part of this service's [study].
-  FileStorageReference getFileStorageReference([
-    int id = -1,
-    String? studyId,
-  ]) => FileStorageReference._(this, getStudyId(studyId), id);
+  FileStorageReference getFileStorageReference([int id = -1, String? studyId]) =>
+      FileStorageReference._(this, getStudyId(studyId), id);
 
   /// Gets a [FileStorageReference] to the file with the original name [name]
   /// in the study with id [studyId].
@@ -67,38 +64,24 @@ class CarpService extends CarpBaseService {
   ///
   /// If more than one file with the same name exists, the first one is returned.
   /// If no files with that name exists, `null` is returned.
-  Future<FileStorageReference?> getFileStorageReferenceByName(
-    String name, {
-    String? studyId,
-  }) async {
-    final List<CarpFileResponse> files = await queryFiles(
-      'original_name==$name',
-      studyId: getStudyId(studyId),
-    );
+  Future<FileStorageReference?> getFileStorageReferenceByName(String name, {String? studyId}) async {
+    final List<CarpFileResponse> files = await queryFiles('original_name==$name', studyId: getStudyId(studyId));
 
-    return (files.isNotEmpty)
-        ? FileStorageReference._(this, getStudyId(studyId), files[0].id)
-        : null;
+    return (files.isNotEmpty) ? FileStorageReference._(this, getStudyId(studyId), files[0].id) : null;
   }
 
   /// Gets all file objects in the study.
   ///
   /// [studyId] can be omitted if specified as part of this service's [study].
-  Future<List<CarpFileResponse>> getAllFiles([String? studyId]) async =>
-      await queryFiles(null, studyId: studyId);
+  Future<List<CarpFileResponse>> getAllFiles([String? studyId]) async => await queryFiles(null, studyId: studyId);
 
   /// Returns file objects in the study based on an RSQL [query], like
   /// `original_name==notes.txt`.
   ///
   /// [studyId] can be omitted if specified as part of this service's [study].
   /// If [query] is null, all file objects are returned.
-  Future<List<CarpFileResponse>> queryFiles(
-    String? query, {
-    String? studyId,
-  }) async {
-    final String url = (query != null)
-        ? "${getFileEndpointUri(studyId)}?query=$query"
-        : getFileEndpointUri(studyId);
+  Future<List<CarpFileResponse>> queryFiles(String? query, {String? studyId}) async {
+    final String url = (query != null) ? "${getFileEndpointUri(studyId)}?query=$query" : getFileEndpointUri(studyId);
 
     http.Response response = await _get(Uri.encodeFull(url));
 
@@ -118,8 +101,7 @@ class CarpService extends CarpBaseService {
   /// Gets a [DocumentReference] for the specified unique [id] for study with id [studyId].
   ///
   /// [studyId] can be omitted if specified as part of this service's [study].
-  DocumentReference documentById(int id, {String? studyId}) =>
-      DocumentReference._id(this, getStudyId(studyId), id);
+  DocumentReference documentById(int id, {String? studyId}) => DocumentReference._id(this, getStudyId(studyId), id);
 
   /// Gets a [DocumentReference] for the specified [path], like
   /// `activities/running`.
@@ -140,14 +122,9 @@ class CarpService extends CarpBaseService {
   /// See the [RSQL Documentation](https://developer.here.com/documentation/data-client-library/dev_guide/client/rsql.html).
   ///
   /// Can only be accessed by users who are authenticated as researchers.
-  Future<List<DocumentSnapshot>> documentsByQuery(
-    String query, {
-    String? studyId,
-  }) async {
+  Future<List<DocumentSnapshot>> documentsByQuery(String query, {String? studyId}) async {
     // GET the list of documents in this collection from the CARP web service
-    http.Response response = await _get(
-      Uri.encodeFull('${getDocumentEndpointUri(studyId)}?query=$query'),
-    );
+    http.Response response = await _get(Uri.encodeFull('${getDocumentEndpointUri(studyId)}?query=$query'));
 
     // we expect a list of documents in the response
     List<dynamic> documentsJson = _handleResponse(response) as List<dynamic>;
@@ -167,9 +144,7 @@ class CarpService extends CarpBaseService {
   /// Note that this might return a very long list of documents and the
   /// request may time out.
   Future<List<DocumentSnapshot>> documents([String? studyId]) async {
-    http.Response response = await _get(
-      Uri.encodeFull(getDocumentEndpointUri(studyId)),
-    );
+    http.Response response = await _get(Uri.encodeFull(getDocumentEndpointUri(studyId)));
 
     // we expect a list of documents in the response
     List<dynamic> documentsJson = _handleResponse(response) as List<dynamic>;
@@ -208,14 +183,8 @@ class CarpService extends CarpBaseService {
     'Informed Consent is uploaded as [InformedConsentInput] participant input '
     'data using a [ParticipationReference].',
   )
-  Future<ConsentDocument> createConsentDocument(
-    Map<String, dynamic> document, {
-    String? studyDeploymentId,
-  }) async {
-    http.Response response = await _post(
-      getConsentDocumentEndpointUri(studyDeploymentId),
-      body: json.encode(document),
-    );
+  Future<ConsentDocument> createConsentDocument(Map<String, dynamic> document, {String? studyDeploymentId}) async {
+    http.Response response = await _post(getConsentDocumentEndpointUri(studyDeploymentId), body: json.encode(document));
 
     return ConsentDocument._(_handleResponse(response) as Map<String, dynamic>);
   }
@@ -229,10 +198,7 @@ class CarpService extends CarpBaseService {
     'Informed Consent is uploaded as [InformedConsentInput] participant input '
     'data using a [ParticipationReference].',
   )
-  Future<ConsentDocument> getConsentDocument(
-    int id, {
-    String? studyDeploymentId,
-  }) async {
+  Future<ConsentDocument> getConsentDocument(int id, {String? studyDeploymentId}) async {
     String url = "${getConsentDocumentEndpointUri(studyDeploymentId)}/$id";
     http.Response response = await _get(Uri.encodeFull(url));
     return ConsentDocument._(_handleResponse(response) as Map<String, dynamic>);

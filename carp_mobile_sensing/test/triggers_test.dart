@@ -23,10 +23,7 @@ void main() {
       RecurrentScheduledTrigger t;
 
       // collect every day at 13:30
-      t = RecurrentScheduledTrigger(
-        type: RecurrentType.daily,
-        time: const TimeOfDay(hour: 18, minute: 55),
-      );
+      t = RecurrentScheduledTrigger(type: RecurrentType.daily, time: const TimeOfDay(hour: 18, minute: 55));
       //print(toJsonString(t));
       print('${t.firstOccurrence} - ${t.period}');
       expect(t.period.inHours, 24);
@@ -78,9 +75,7 @@ void main() {
         time: const TimeOfDay(hour: 14, minute: 00),
         duration: const Duration(seconds: 1),
       );
-      print(
-        'weekly, Thursday at 14:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
-      );
+      print('weekly, Thursday at 14:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
       expect(t.period.inDays, 2 * 7);
 
       // the monthly trigger from iPDM-GO app
@@ -90,9 +85,7 @@ void main() {
         time: const TimeOfDay(hour: 18),
         duration: const Duration(seconds: 1),
       );
-      print(
-        'monthly, 1st day of month at 18:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
-      );
+      print('monthly, 1st day of month at 18:00 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
       expect(t.period.inDays, 1 * 30);
 
       // collect quarterly on the 11th day of the first month
@@ -104,9 +97,7 @@ void main() {
         time: const TimeOfDay(hour: 21, minute: 30),
         duration: const Duration(seconds: 1),
       );
-      print(
-        'quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
-      );
+      print('quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
       expect(t.period.inDays, 3 * 30);
 
       // collect monthly in the second week on a monday at 14:30
@@ -131,9 +122,7 @@ void main() {
         time: const TimeOfDay(hour: 21, minute: 30),
         duration: const Duration(seconds: 1),
       );
-      print(
-        'quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}',
-      );
+      print('quarterly, 11th day of month at 21:30 :: first : ${t.firstOccurrence} - period : ${t.period.inDays}');
       expect(t.period.inDays, 3 * 30);
     });
 
@@ -200,10 +189,7 @@ void main() {
           time: const TimeOfDay(hour: 13, minute: 30),
         ),
         // weekly recurrence requires dayOfWeek
-        () => RecurrentScheduledTrigger(
-          type: RecurrentType.weekly,
-          time: const TimeOfDay(hour: 12, minute: 23),
-        ),
+        () => RecurrentScheduledTrigger(type: RecurrentType.weekly, time: const TimeOfDay(hour: 12, minute: 23)),
         // monthly recurrence requires weekOfMonth or dayOfMonth
         () => RecurrentScheduledTrigger(
           type: RecurrentType.monthly,
@@ -233,9 +219,7 @@ void main() {
 
     test(' - CronScheduledTrigger', () {
       print('cron job at 12:00 every day.');
-      CronScheduledTrigger t = CronScheduledTrigger.parse(
-        cronExpression: '0 12 * * *',
-      );
+      CronScheduledTrigger t = CronScheduledTrigger.parse(cronExpression: '0 12 * * *');
       print(t);
       print(toJsonString(t));
 
@@ -306,8 +290,7 @@ void main() {
       );
       print(toJsonString(t));
 
-      ConditionalPeriodicTriggerExecutor ex =
-          ConditionalPeriodicTriggerExecutor();
+      ConditionalPeriodicTriggerExecutor ex = ConditionalPeriodicTriggerExecutor();
       print(ex);
     });
   });
@@ -393,11 +376,7 @@ void main() {
         // Resumed: trigger() fires.
         trigger.trigger();
         fake.flushMicrotasks();
-        expect(
-          events,
-          hasLength(1),
-          reason: 'fires on trigger() while resumed',
-        );
+        expect(events, hasLength(1), reason: 'fires on trigger() while resumed');
 
         // Paused: trigger() is ignored, so pausing actually stops the task.
         ex.pause();
@@ -418,8 +397,7 @@ void main() {
     test(' - DelayedTrigger - fires once, exactly after the delay', () {
       // Use case: start sampling 50 ms into the study, once.
       FakeAsync().run((fake) {
-        final ex = DelayedTriggerExecutor()
-          ..initialize(DelayedTrigger(delay: const Duration(milliseconds: 50)));
+        final ex = DelayedTriggerExecutor()..initialize(DelayedTrigger(delay: const Duration(milliseconds: 50)));
         final events = firings(ex);
 
         ex.resume();
@@ -441,10 +419,7 @@ void main() {
       // Use case: sample now, then on a fixed cadence for as long as the study
       // runs. With a 30 ms period, by t=110ms expect 4 fires: t = 0, 30, 60, 90.
       FakeAsync().run((fake) {
-        final ex = PeriodicTriggerExecutor()
-          ..initialize(
-            PeriodicTrigger(period: const Duration(milliseconds: 30)),
-          );
+        final ex = PeriodicTriggerExecutor()..initialize(PeriodicTrigger(period: const Duration(milliseconds: 30)));
         final events = firings(ex);
 
         ex.resume();
@@ -468,11 +443,7 @@ void main() {
       // Use case: fire at a specific (future) wall-clock time.
       FakeAsync().run((fake) {
         final ex = DateTimeTriggerExecutor()
-          ..initialize(
-            DateTimeTrigger(
-              schedule: DateTime.now().add(const Duration(milliseconds: 50)),
-            ),
-          );
+          ..initialize(DateTimeTrigger(schedule: DateTime.now().add(const Duration(milliseconds: 50))));
         final events = firings(ex);
 
         ex.resume();
@@ -494,10 +465,7 @@ void main() {
       FakeAsync().run((fake) {
         final ex = ConditionalPeriodicTriggerExecutor()
           ..initialize(
-            ConditionalPeriodicTrigger(
-              period: const Duration(milliseconds: 30),
-              triggerCondition: () => true,
-            ),
+            ConditionalPeriodicTrigger(period: const Duration(milliseconds: 30), triggerCondition: () => true),
           );
         final events = firings(ex);
 
@@ -515,26 +483,20 @@ void main() {
       });
     });
 
-    test(
-      ' - ConditionalPeriodicTrigger - never fires while condition false',
-      () {
-        FakeAsync().run((fake) {
-          final ex = ConditionalPeriodicTriggerExecutor()
-            ..initialize(
-              ConditionalPeriodicTrigger(
-                period: const Duration(milliseconds: 30),
-                triggerCondition: () => false,
-              ),
-            );
-          final events = firings(ex);
+    test(' - ConditionalPeriodicTrigger - never fires while condition false', () {
+      FakeAsync().run((fake) {
+        final ex = ConditionalPeriodicTriggerExecutor()
+          ..initialize(
+            ConditionalPeriodicTrigger(period: const Duration(milliseconds: 30), triggerCondition: () => false),
+          );
+        final events = firings(ex);
 
-          ex.resume();
-          fake.elapse(const Duration(milliseconds: 110));
-          expect(events, isEmpty);
-          ex.pause();
-        });
-      },
-    );
+        ex.resume();
+        fake.elapse(const Duration(milliseconds: 110));
+        expect(events, isEmpty);
+        ex.pause();
+      });
+    });
 
     // The triggers below fire from runtime sources that need a running client
     // (study controller measurements, the AppTask queue, or Flutter's widget
@@ -561,44 +523,36 @@ void main() {
       () {},
       skip: 'needs a live AppTaskController user-task stream',
     );
-    test(
-      ' - NoUserTaskTrigger - fires only while the task is not on the list',
-      () async {
-        const name = 'no-user-task-trigger-test';
-        final appTask = AppTaskExecutor()
-          ..initialize(AppTask(name: name, type: AppTask.SENSING_TYPE));
+    test(' - NoUserTaskTrigger - fires only while the task is not on the list', () async {
+      const name = 'no-user-task-trigger-test';
+      final appTask = AppTaskExecutor()..initialize(AppTask(name: name, type: AppTask.SENSING_TYPE));
 
-        Future<int> triggers() async {
-          final trigger = NoUserTaskTriggerExecutor()
-            ..initialize(NoUserTaskTrigger(taskName: name));
-          var count = 0;
-          final sub = trigger.triggerEvents.listen((_) => count++);
-          trigger.resume();
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-          trigger.pause();
-          await sub.cancel();
-          return count;
-        }
-
-        expect(await triggers(), 1);
-
-        final task = (await AppTaskController().enqueue(
-          appTask,
-          sendNotification: false,
-        ))!;
+      Future<int> triggers() async {
+        final trigger = NoUserTaskTriggerExecutor()..initialize(NoUserTaskTrigger(taskName: name));
+        var count = 0;
+        final sub = trigger.triggerEvents.listen((_) => count++);
+        trigger.resume();
         await Future<void>.delayed(const Duration(milliseconds: 10));
+        trigger.pause();
+        await sub.cancel();
+        return count;
+      }
 
-        // A started or canceled task is still on the list.
-        for (final state in [UserTaskState.started, UserTaskState.canceled]) {
-          task.state = state;
-          expect(await triggers(), 0, reason: '$state');
-        }
+      expect(await triggers(), 1);
 
-        task.state = UserTaskState.done;
-        expect(await triggers(), 1);
-        AppTaskController().dequeue(task.id);
-      },
-    );
+      final task = (await AppTaskController().enqueue(appTask, sendNotification: false))!;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      // A started or canceled task is still on the list.
+      for (final state in [UserTaskState.started, UserTaskState.canceled]) {
+        task.state = state;
+        expect(await triggers(), 0, reason: '$state');
+      }
+
+      task.state = UserTaskState.done;
+      expect(await triggers(), 1);
+      AppTaskController().dequeue(task.id);
+    });
     test(
       ' - AppLifecycleTrigger - fires on app lifecycle changes',
       () {},

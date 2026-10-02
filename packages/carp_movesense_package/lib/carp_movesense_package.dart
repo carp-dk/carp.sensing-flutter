@@ -106,9 +106,7 @@ class MovesenseSamplingPackage implements SamplingPackage {
   /// Measure type for IMU data ([MovesenseIMU]).
   static const String IMU = "$MOVESENSE_NAMESPACE.imu";
 
-  final MovesenseDeviceManager _deviceManager = MovesenseDeviceManager(
-    MovesenseDevice.DEVICE_TYPE,
-  );
+  final MovesenseDeviceManager _deviceManager = MovesenseDeviceManager(MovesenseDevice.DEVICE_TYPE);
 
   @override
   List<DataTypeMetaData> get dataTypes => samplingSchemes.dataTypes;
@@ -126,10 +124,7 @@ class MovesenseSamplingPackage implements SamplingPackage {
     HR => MovesenseHRProbe(),
     ECG => MovesenseECGProbe(),
     // Only the Movesense Medical (MD) device supports temperature measurement.
-    TEMPERATURE =>
-      deviceManager.movesenseDeviceType == MovesenseDeviceType.MD
-          ? MovesenseTemperatureProbe()
-          : null,
+    TEMPERATURE => deviceManager.movesenseDeviceType == MovesenseDeviceType.MD ? MovesenseTemperatureProbe() : null,
     IMU => MovesenseIMUProbe(),
     _ => null,
   };
@@ -148,56 +143,26 @@ class MovesenseSamplingPackage implements SamplingPackage {
 
     // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
     // the Movesense device used the carp_core device namespace.
-    FromJsonFactory().register(
-      MovesenseDevice(),
-      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.MovesenseDevice',
-    );
+    FromJsonFactory().register(MovesenseDevice(), type: '${DeviceConfiguration.DEVICE_NAMESPACE}.MovesenseDevice');
   }
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: DEVICE_INFO,
-            displayName: "Device Information",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: STATE,
-            displayName: "Device State Changes",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: HR,
-            displayName: "Heart Rate (HR)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: ECG,
-            displayName: "Electrocardiography (ECG)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: TEMPERATURE,
-            displayName: "Device Temperature",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: IMU,
-            displayName: "Inertial Movement Unit (IMU)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: DEVICE_INFO, displayName: "Device Information", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: STATE, displayName: "Device State Changes", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(DataTypeMetaData(type: HR, displayName: "Heart Rate (HR)", timeType: DataTimeType.POINT)),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: ECG, displayName: "Electrocardiography (ECG)", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: TEMPERATURE, displayName: "Device Temperature", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: IMU, displayName: "Inertial Movement Unit (IMU)", timeType: DataTimeType.POINT),
+    ),
+  ]);
 }

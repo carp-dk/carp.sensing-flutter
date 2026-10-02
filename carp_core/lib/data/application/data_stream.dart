@@ -19,12 +19,8 @@ class DataStreamsConfiguration {
   /// The data streams to accept data for.
   Set<ExpectedDataStream> expectedDataStreams;
 
-  DataStreamsConfiguration({
-    required this.studyDeploymentId,
-    required this.expectedDataStreams,
-  });
-  factory DataStreamsConfiguration.fromJson(Map<String, dynamic> json) =>
-      _$DataStreamsConfigurationFromJson(json);
+  DataStreamsConfiguration({required this.studyDeploymentId, required this.expectedDataStreams});
+  factory DataStreamsConfiguration.fromJson(Map<String, dynamic> json) => _$DataStreamsConfigurationFromJson(json);
   Map<String, dynamic> toJson() => _$DataStreamsConfigurationToJson(this);
 }
 
@@ -38,15 +34,12 @@ class ExpectedDataStream {
   String dataType;
 
   ExpectedDataStream({required this.deviceRoleName, required this.dataType});
-  factory ExpectedDataStream.fromJson(Map<String, dynamic> json) =>
-      _$ExpectedDataStreamFromJson(json);
+  factory ExpectedDataStream.fromJson(Map<String, dynamic> json) => _$ExpectedDataStreamFromJson(json);
   Map<String, dynamic> toJson() => _$ExpectedDataStreamToJson(this);
 
   @override
   bool operator ==(other) =>
-      other is ExpectedDataStream &&
-      deviceRoleName == other.deviceRoleName &&
-      dataType == other.dataType;
+      other is ExpectedDataStream && deviceRoleName == other.deviceRoleName && dataType == other.dataType;
 
   @override
   int get hashCode => Object.hash(deviceRoleName.hashCode, dataType.hashCode);
@@ -62,13 +55,8 @@ class DataStreamId {
   String deviceRoleName;
   String dataType;
 
-  DataStreamId({
-    required this.studyDeploymentId,
-    required this.deviceRoleName,
-    required this.dataType,
-  });
-  factory DataStreamId.fromJson(Map<String, dynamic> json) =>
-      _$DataStreamIdFromJson(json);
+  DataStreamId({required this.studyDeploymentId, required this.deviceRoleName, required this.dataType});
+  factory DataStreamId.fromJson(Map<String, dynamic> json) => _$DataStreamIdFromJson(json);
   Map<String, dynamic> toJson() => _$DataStreamIdToJson(this);
 }
 
@@ -98,8 +86,7 @@ class DataStreamBatch {
     required this.measurements,
     required this.triggerIds,
   });
-  factory DataStreamBatch.fromJson(Map<String, dynamic> json) =>
-      _$DataStreamBatchFromJson(json);
+  factory DataStreamBatch.fromJson(Map<String, dynamic> json) => _$DataStreamBatchFromJson(json);
   Map<String, dynamic> toJson() => _$DataStreamBatchToJson(this);
 }
 
@@ -148,23 +135,14 @@ class Measurement {
   Data data;
 
   /// Create a new measurement based on [data].
-  Measurement({
-    required this.sensorStartTime,
-    this.sensorEndTime,
-    required this.data,
-  });
+  Measurement({required this.sensorStartTime, this.sensorEndTime, required this.data});
 
   /// Create a measurement from [data] based on the [sensorStartTime] provided
   /// by the sensor. If [sensorStartTime] is not specified, the phones current
   /// time stamp as microseconds since epoch is used.
   factory Measurement.fromData(Data data, [int? sensorStartTime]) =>
-      Measurement(
-        sensorStartTime:
-            sensorStartTime ?? DateTime.now().microsecondsSinceEpoch,
-        data: data,
-      );
+      Measurement(sensorStartTime: sensorStartTime ?? DateTime.now().microsecondsSinceEpoch, data: data);
 
-  factory Measurement.fromJson(Map<String, dynamic> json) =>
-      _$MeasurementFromJson(json);
+  factory Measurement.fromJson(Map<String, dynamic> json) => _$MeasurementFromJson(json);
   Map<String, dynamic> toJson() => _$MeasurementToJson(this);
 }

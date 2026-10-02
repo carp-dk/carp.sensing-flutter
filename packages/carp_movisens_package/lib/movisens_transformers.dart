@@ -26,17 +26,13 @@ class OMHMovisensDataPoint extends Data {
         '"sensor_type": "movisens", '
         '"sensor_name": "${data.deviceId}" '
         '}';
-    return omh.DataPointAcquisitionProvenance(
-      sourceName: source,
-      modality: omh.DataPointModality.SENSED,
-    );
+    return omh.DataPointAcquisitionProvenance(sourceName: source, modality: omh.DataPointModality.SENSED);
   }
 
   OMHMovisensDataPoint(this.datapoint);
 
   @override
-  Map<String, dynamic> toJson() =>
-      {Serializable.CLASS_IDENTIFIER: dataType}..addAll(datapoint.toJson());
+  Map<String, dynamic> toJson() => {Serializable.CLASS_IDENTIFIER: dataType}..addAll(datapoint.toJson());
   @override
   String get jsonType => "${NameSpace.OMH}.${omh.SchemaSupport.DATA_POINT}";
 }
@@ -44,8 +40,7 @@ class OMHMovisensDataPoint extends Data {
 /// An [OMHMovisensDataPoint] that holds an OMH [HeartRate](https://www.openmhealth.org/documentation/#/schema-docs/schema-library/schemas/omh_heart-rate) data point.
 ///
 /// Its [transformer] converts [MovisensHR] to OMH.
-class OMHHeartRateDataPoint extends OMHMovisensDataPoint
-    implements DataTransformerFactory {
+class OMHHeartRateDataPoint extends OMHMovisensDataPoint implements DataTransformerFactory {
   /// The OMH heart rate unit.
   static const String DEFAULT_HR_UNIT = "beats/min";
 
@@ -53,10 +48,7 @@ class OMHHeartRateDataPoint extends OMHMovisensDataPoint
 
   factory OMHHeartRateDataPoint.fromMovisensHRData(MovisensHR data) {
     var hr = omh.HeartRate(
-      heartRate: omh.HeartRateUnitValue(
-        unit: DEFAULT_HR_UNIT,
-        value: data.hr.toDouble(),
-      ),
+      heartRate: omh.HeartRateUnitValue(unit: DEFAULT_HR_UNIT, value: data.hr.toDouble()),
     );
     var source =
         '{'
@@ -69,10 +61,7 @@ class OMHHeartRateDataPoint extends OMHMovisensDataPoint
     return OMHHeartRateDataPoint(
       omh.DataPoint(
         body: hr,
-        provenance: omh.DataPointAcquisitionProvenance(
-          sourceName: source,
-          modality: omh.DataPointModality.SENSED,
-        ),
+        provenance: omh.DataPointAcquisitionProvenance(sourceName: source, modality: omh.DataPointModality.SENSED),
       ),
     );
   }
@@ -82,27 +71,20 @@ class OMHHeartRateDataPoint extends OMHMovisensDataPoint
 
   /// A [DataTransformer] that converts a [MovisensHR] to an
   /// [OMHHeartRateDataPoint].
-  static DataTransformer get transformer =>
-      ((data) => OMHHeartRateDataPoint.fromMovisensHRData(data as MovisensHR));
+  static DataTransformer get transformer => ((data) => OMHHeartRateDataPoint.fromMovisensHRData(data as MovisensHR));
 }
 
 /// An [OMHMovisensDataPoint] that holds an OMH [StepCount](https://pub.dev/documentation/openmhealth_schemas/latest/domain_omh_activity/StepCount-class.html)
 /// data point.
 ///
 /// Its [transformer] converts [MovisensStepCount] to OMH.
-class OMHStepCountDataPoint extends OMHMovisensDataPoint
-    implements DataTransformerFactory {
+class OMHStepCountDataPoint extends OMHMovisensDataPoint implements DataTransformerFactory {
   OMHStepCountDataPoint(super.datapoint);
 
-  factory OMHStepCountDataPoint.fromMovisensStepCountData(
-    MovisensStepCount data,
-  ) {
+  factory OMHStepCountDataPoint.fromMovisensStepCountData(MovisensStepCount data) {
     var steps = omh.StepCount(stepCount: data.steps)
       ..effectiveTimeFrame = (omh.TimeFrame()
-        ..timeInterval = omh.TimeInterval(
-          startDateTime: data.timestamp,
-          endDateTime: data.timestamp,
-        ));
+        ..timeInterval = omh.TimeInterval(startDateTime: data.timestamp, endDateTime: data.timestamp));
     var source =
         '{'
         '"smartphone": "${DeviceInfoService().deviceID}", '
@@ -114,10 +96,7 @@ class OMHStepCountDataPoint extends OMHMovisensDataPoint
     return OMHStepCountDataPoint(
       omh.DataPoint(
         body: steps,
-        provenance: omh.DataPointAcquisitionProvenance(
-          sourceName: source,
-          modality: omh.DataPointModality.SENSED,
-        ),
+        provenance: omh.DataPointAcquisitionProvenance(sourceName: source, modality: omh.DataPointModality.SENSED),
       ),
     );
   }
@@ -127,10 +106,8 @@ class OMHStepCountDataPoint extends OMHMovisensDataPoint
 
   /// A [DataTransformer] that converts a [MovisensStepCount] to an
   /// [OMHStepCountDataPoint].
-  static DataTransformer get transformer => ((data) =>
-      OMHStepCountDataPoint.fromMovisensStepCountData(
-        data as MovisensStepCount,
-      ));
+  static DataTransformer get transformer =>
+      ((data) => OMHStepCountDataPoint.fromMovisensStepCountData(data as MovisensStepCount));
 }
 
 /// A [Data] that holds a FHIR [Heart Rate Observation](http://hl7.org/fhir/heartrate.html).
@@ -192,24 +169,18 @@ class FHIRHeartRateObservation extends Data implements DataTransformerFactory {
         '}'
         '}';
 
-    return FHIRHeartRateObservation(
-      json.decode(fhirString) as Map<String, dynamic>,
-    );
+    return FHIRHeartRateObservation(json.decode(fhirString) as Map<String, dynamic>);
   }
 
   @override
-  Map<String, dynamic> toJson() =>
-      {Serializable.CLASS_IDENTIFIER: dataType}..addAll(fhirJson);
+  Map<String, dynamic> toJson() => {Serializable.CLASS_IDENTIFIER: dataType}..addAll(fhirJson);
 
-  factory FHIRHeartRateObservation.fromJson(Map<String, dynamic> json) =>
-      FHIRHeartRateObservation(json);
+  factory FHIRHeartRateObservation.fromJson(Map<String, dynamic> json) => FHIRHeartRateObservation(json);
 
   @override
   String get jsonType => "${NameSpace.FHIR}.observation-vitalsigns";
 
   /// A [DataTransformer] that converts a [MovisensHR] to a
   /// [FHIRHeartRateObservation].
-  static DataTransformer get transformer =>
-      ((data) =>
-          FHIRHeartRateObservation.fromMovisensHRData(data as MovisensHR));
+  static DataTransformer get transformer => ((data) => FHIRHeartRateObservation.fromMovisensHRData(data as MovisensHR));
 }

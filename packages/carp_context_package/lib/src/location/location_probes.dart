@@ -13,13 +13,11 @@ part of '../../carp_context_package.dart';
 /// [ConfigurableLocationProbe] instead.
 class LocationProbe extends StreamProbe {
   @override
-  LocationServiceManager get deviceManager =>
-      super.deviceManager as LocationServiceManager;
+  LocationServiceManager get deviceManager => super.deviceManager as LocationServiceManager;
 
   @override
-  Stream<Measurement> get stream => deviceManager.manager.onLocationChanged.map(
-    (location) => Measurement.fromData(location),
-  );
+  Stream<Measurement> get stream =>
+      deviceManager.manager.onLocationChanged.map((location) => Measurement.fromData(location));
 }
 
 /// Collects [Location] data for the [ContextSamplingPackage.LOCATION] measure.
@@ -38,8 +36,7 @@ class ConfigurableLocationProbe extends Probe {
   bool get oneTimeSampling => _configuration?.once ?? false;
 
   @override
-  LocationServiceManager get deviceManager =>
-      super.deviceManager as LocationServiceManager;
+  LocationServiceManager get deviceManager => super.deviceManager as LocationServiceManager;
 
   @override
   bool onInitialize() {
@@ -64,9 +61,7 @@ class ConfigurableLocationProbe extends Probe {
         // automatically pause this probe after it is done collecting the measurement
         Future.delayed(const Duration(seconds: 5), () => pause());
       } else {
-        var stream = deviceManager.manager.onLocationChanged.map(
-          (location) => Measurement.fromData(location),
-        );
+        var stream = deviceManager.manager.onLocationChanged.map((location) => Measurement.fromData(location));
 
         _subscription = stream.listen(
           (measurement) => addMeasurement(measurement),

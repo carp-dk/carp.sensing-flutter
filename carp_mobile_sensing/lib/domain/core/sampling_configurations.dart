@@ -22,8 +22,7 @@ class PersistentSamplingConfiguration extends SamplingConfiguration {
   PersistentSamplingConfiguration() : super();
 
   @override
-  Map<String, dynamic> toJson() =>
-      _$PersistentSamplingConfigurationToJson(this);
+  Map<String, dynamic> toJson() => _$PersistentSamplingConfigurationToJson(this);
   @override
   Function get fromJsonFunction => _$PersistentSamplingConfigurationFromJson;
   factory PersistentSamplingConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -87,10 +86,7 @@ class PeriodicSamplingConfiguration extends IntervalSamplingConfiguration {
   /// How long each sampling window lasts.
   late Duration duration;
 
-  PeriodicSamplingConfiguration({
-    required super.interval,
-    required this.duration,
-  });
+  PeriodicSamplingConfiguration({required super.interval, required this.duration});
 
   @override
   Map<String, dynamic> toJson() => _$PeriodicSamplingConfigurationToJson(this);

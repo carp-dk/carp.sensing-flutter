@@ -29,10 +29,8 @@ part of 'carp_services.dart';
 /// final invitation =
 ///     await CarpParticipationService().getStudyInvitation(context);
 /// ```
-class CarpParticipationService extends CarpBaseService
-    implements ParticipationService {
-  static final CarpParticipationService _instance =
-      CarpParticipationService._();
+class CarpParticipationService extends CarpBaseService implements ParticipationService {
+  static final CarpParticipationService _instance = CarpParticipationService._();
 
   CarpParticipationService._();
 
@@ -63,29 +61,20 @@ class CarpParticipationService extends CarpBaseService
   /// Otherwise only invitations whose `applicationData` holds a matching
   /// `applicationName` are returned.
   @override
-  Future<List<ActiveParticipationInvitation>>
-  getActiveParticipationInvitations({
+  Future<List<ActiveParticipationInvitation>> getActiveParticipationInvitations({
     String? accountId,
     String? applicationName,
   }) async {
     accountId ??= CarpAuthService().currentUser.id;
 
-    debug(
-      "$runtimeType - Getting invitations for '$accountId' for application: '$applicationName'.",
-    );
+    debug("$runtimeType - Getting invitations for '$accountId' for application: '$applicationName'.");
 
-    dynamic responseJson = await _rpc(
-      GetActiveParticipationInvitations(accountId),
-    );
+    dynamic responseJson = await _rpc(GetActiveParticipationInvitations(accountId));
 
     // we expect a list of invitations
     List<dynamic> list = responseJson as List<dynamic>;
     List<ActiveParticipationInvitation> invitations = list
-        .map(
-          (item) => ActiveParticipationInvitation.fromJson(
-            item as Map<String, dynamic>,
-          ),
-        )
+        .map((item) => ActiveParticipationInvitation.fromJson(item as Map<String, dynamic>))
         .toList();
 
     // if a applicationName is specified, filter on that
@@ -95,8 +84,7 @@ class CarpParticipationService extends CarpBaseService
         if (invitation.invitation.applicationData is! Map<String, dynamic>) {
           return false;
         }
-        return invitation.invitation.applicationData?['applicationName'] ==
-            applicationName;
+        return invitation.invitation.applicationData?['applicationName'] == applicationName;
       }).toList();
     }
 
@@ -127,9 +115,7 @@ class CarpParticipationService extends CarpBaseService
     bool allowClose = false,
   }) async {
     if (!isConfigured) {
-      throw CarpServiceException(
-        "CARP Service not initialized. Call 'CarpService().configure()' first.",
-      );
+      throw CarpServiceException("CARP Service not initialized. Call 'CarpService().configure()' first.");
     }
 
     if (!CarpAuthService().authenticated) {
@@ -138,8 +124,7 @@ class CarpParticipationService extends CarpBaseService
       );
     }
 
-    List<ActiveParticipationInvitation> invitations =
-        await getActiveParticipationInvitations(applicationName: device);
+    List<ActiveParticipationInvitation> invitations = await getActiveParticipationInvitations(applicationName: device);
 
     ActiveParticipationInvitation? invitation;
 
@@ -152,8 +137,7 @@ class CarpParticipationService extends CarpBaseService
         invitation = await showDialog<ActiveParticipationInvitation>(
           context: context,
           barrierDismissible: allowClose,
-          builder: (BuildContext context) =>
-              ActiveParticipationInvitationDialog().build(context, invitations),
+          builder: (BuildContext context) => ActiveParticipationInvitationDialog().build(context, invitations),
         );
       }
     }
@@ -166,15 +150,11 @@ class CarpParticipationService extends CarpBaseService
       await participation(studyDeploymentId).getParticipantData();
 
   @override
-  Future<List<ParticipantData>> getParticipantDataList(
-    List<String> studyDeploymentIds,
-  ) async {
+  Future<List<ParticipantData>> getParticipantDataList(List<String> studyDeploymentIds) async {
     // early out if empty list
     if (studyDeploymentIds.isEmpty) return [];
 
-    dynamic responseJson = await _rpc(
-      GetParticipantDataList(studyDeploymentIds),
-    );
+    dynamic responseJson = await _rpc(GetParticipantDataList(studyDeploymentIds));
 
     // we expect a list of participant data
     List<dynamic> items = responseJson as List<dynamic>;
@@ -193,7 +173,5 @@ class CarpParticipationService extends CarpBaseService
     String studyDeploymentId,
     Map<String, Data> data, [
     String? inputByParticipantRole,
-  ]) async =>
-      await participation(studyDeploymentId)
-          .setParticipantData(data, inputByParticipantRole);
+  ]) async => await participation(studyDeploymentId).setParticipantData(data, inputByParticipantRole);
 }

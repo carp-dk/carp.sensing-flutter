@@ -88,11 +88,7 @@ class SQLiteDataManager extends AbstractDataManager {
     required Stream<Measurement> measurements,
   }) async {
     assert(dataEndPoint is SQLiteDataEndPoint);
-    await super.configure(
-      dataEndPoint: dataEndPoint,
-      deployment: deployment,
-      measurements: measurements,
-    );
+    await super.configure(dataEndPoint: dataEndPoint, deployment: deployment, measurements: measurements);
 
     info('Initializing $runtimeType...');
 
@@ -128,12 +124,8 @@ class SQLiteDataManager extends AbstractDataManager {
         if (oldVersion < 2) {
           // The column/index may already exist, so guard both statements
           // instead of crashing the upgrade on "already exists".
-          final columns = await db.rawQuery(
-            'PRAGMA table_info($MEASUREMENT_TABLE_NAME)',
-          );
-          final hasRecordIdColumn = columns.any(
-            (column) => column['name'] == RECORD_ID_COLUMN,
-          );
+          final columns = await db.rawQuery('PRAGMA table_info($MEASUREMENT_TABLE_NAME)');
+          final hasRecordIdColumn = columns.any((column) => column['name'] == RECORD_ID_COLUMN);
           if (!hasRecordIdColumn) {
             await db.execute(
               'ALTER TABLE $MEASUREMENT_TABLE_NAME '
@@ -155,10 +147,7 @@ class SQLiteDataManager extends AbstractDataManager {
   Future<void> onMeasurement(Measurement measurement) async {
     // If the database hasn't been created yet, wait for 3 secs
     if (database == null) {
-      return Future.delayed(
-        const Duration(seconds: 3),
-        () => onMeasurement(measurement),
-      );
+      return Future.delayed(const Duration(seconds: 3), () => onMeasurement(measurement));
     }
 
     final Map<String, dynamic> map = {
@@ -166,8 +155,7 @@ class SQLiteDataManager extends AbstractDataManager {
       DEPLOYMENT_ID_COLUMN: deployment.studyDeploymentId,
       TRIGGER_ID_COLUMN: measurement.taskControl?.triggerId ?? 0,
       DEVICE_ROLE_NAME_COLUMN:
-          measurement.taskControl?.destinationDeviceRoleName ??
-          deployment.deviceConfiguration.roleName,
+          measurement.taskControl?.destinationDeviceRoleName ?? deployment.deviceConfiguration.roleName,
       DATATYPE_COLUMN: measurement.dataType.toString(),
       RECORD_ID_COLUMN: measurement.data.recordId,
       MEASUREMENT_COLUMN: jsonEncode(measurement),
@@ -192,11 +180,7 @@ class SQLiteDataManager extends AbstractDataManager {
     if (_rows.isEmpty || database?.isOpen != true) return;
     final batch = database!.batch();
     for (final row in _rows) {
-      batch.insert(
-        MEASUREMENT_TABLE_NAME,
-        row,
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+      batch.insert(MEASUREMENT_TABLE_NAME, row, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
     final count = _rows.length;
     _rows.clear();

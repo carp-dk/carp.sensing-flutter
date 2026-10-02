@@ -37,8 +37,7 @@ class TaskConfiguration extends Serializable {
   ///
   /// Always includes [CarpDataTypes.COMPLETED_TASK].
   Set<String> getAllExpectedDataTypes() =>
-      (measures?.map((measure) => measure.type).toSet() ?? {})
-        ..add(CarpDataTypes.COMPLETED_TASK);
+      (measures?.map((measure) => measure.type).toSet() ?? {})..add(CarpDataTypes.COMPLETED_TASK);
 
   /// Add [measure] to this task.
   void addMeasure(Measure measure) => measures!.add(measure);
@@ -51,8 +50,7 @@ class TaskConfiguration extends Serializable {
 
   /// Create a task. The [name] uniquely identifies the task.
   /// If [name] is not specified, a name is generated.
-  TaskConfiguration({String? name, this.description, List<Measure>? measures})
-    : super() {
+  TaskConfiguration({String? name, this.description, List<Measure>? measures}) : super() {
     this.name = name ?? 'Task #${_counter++}';
     // Remove duplicates by converting to a set and back to a list.
     this.measures = measures?.toSet().toList() ?? [];
@@ -60,16 +58,14 @@ class TaskConfiguration extends Serializable {
 
   @override
   Function get fromJsonFunction => _$TaskConfigurationFromJson;
-  factory TaskConfiguration.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<TaskConfiguration>(json);
+  factory TaskConfiguration.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<TaskConfiguration>(json);
   @override
   Map<String, dynamic> toJson() => _$TaskConfigurationToJson(this);
   @override
   String get jsonType => 'dk.cachet.carp.common.application.tasks.$runtimeType';
 
   @override
-  String toString() =>
-      '$runtimeType - name: $name, measures size: ${measures?.length}';
+  String toString() => '$runtimeType - name: $name, measures size: ${measures?.length}';
 }
 
 /// A task which is used for monitoring the execution of the data sampling
@@ -84,8 +80,7 @@ class MonitoringTask extends TaskConfiguration {
 
   @override
   Function get fromJsonFunction => _$MonitoringTaskFromJson;
-  factory MonitoringTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<MonitoringTask>(json);
+  factory MonitoringTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<MonitoringTask>(json);
   @override
   Map<String, dynamic> toJson() => _$MonitoringTaskToJson(this);
 }
@@ -105,17 +100,11 @@ class BackgroundTask extends TaskConfiguration {
   Duration? duration;
 
   /// Create a new task which can run in the background.
-  BackgroundTask({
-    super.name,
-    super.description,
-    super.measures,
-    this.duration,
-  });
+  BackgroundTask({super.name, super.description, super.measures, this.duration});
 
   @override
   Function get fromJsonFunction => _$BackgroundTaskFromJson;
-  factory BackgroundTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<BackgroundTask>(json);
+  factory BackgroundTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<BackgroundTask>(json);
   @override
   Map<String, dynamic> toJson() => _$BackgroundTaskToJson(this);
 }
@@ -176,19 +165,14 @@ class WebTask extends TaskConfiguration {
   /// replaced by [participantId], [studyDeploymentId] and [triggerId].
   ///
   /// Only the first occurrence of each variable is replaced.
-  String getUrl(
-    String participantId,
-    String studyDeploymentId,
-    int triggerId,
-  ) => url
+  String getUrl(String participantId, String studyDeploymentId, int triggerId) => url
       .replaceFirst('\$PARTICIPANT_ID', participantId)
       .replaceFirst('\$DEPLOYMENT_ID', studyDeploymentId)
       .replaceFirst('\$TRIGGER_ID', triggerId.toString());
 
   @override
   Function get fromJsonFunction => _$WebTaskFromJson;
-  factory WebTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<WebTask>(json);
+  factory WebTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<WebTask>(json);
   @override
   Map<String, dynamic> toJson() => _$WebTaskToJson(this);
 

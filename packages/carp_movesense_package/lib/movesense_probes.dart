@@ -13,12 +13,10 @@ part of 'carp_movesense_package.dart';
 abstract class _MovesenseStreamProbe extends StreamProbe {
   int? _subscriptionId;
 
-  final StreamController<String> _streamController =
-      StreamController.broadcast();
+  final StreamController<String> _streamController = StreamController.broadcast();
 
   @override
-  MovesenseDeviceManager get deviceManager =>
-      super.deviceManager as MovesenseDeviceManager;
+  MovesenseDeviceManager get deviceManager => super.deviceManager as MovesenseDeviceManager;
 
   String? get _serial => deviceManager.serial;
 
@@ -30,11 +28,7 @@ abstract class _MovesenseStreamProbe extends StreamProbe {
   @override
   Stream<Measurement>? get stream => deviceManager.isConnected
       ? _streamController.stream
-            .map(
-              (event) => Measurement.fromData(
-                _converter.call(jsonDecode(event)) as Data,
-              ),
-            )
+            .map((event) => Measurement.fromData(_converter.call(jsonDecode(event)) as Data))
             .skip(10) // skip first 10 measurements to allow sensor to stabilize
       : null;
 
@@ -80,11 +74,7 @@ abstract class _MovesenseStreamProbe extends StreamProbe {
         (error, status) => handleError('Subscription Error', error, status),
       );
     } catch (error) {
-      handleError(
-        'Error when trying to subscribe to device - serial: $_serial, uri: $_uri',
-        error,
-        0,
-      );
+      handleError('Error when trying to subscribe to device - serial: $_serial, uri: $_uri', error, 0);
     }
 
     return completer.future;
@@ -121,8 +111,7 @@ class MovesenseECGProbe extends _MovesenseStreamProbe {
 /// Movesense MD supports temperature, so [MovesenseSamplingPackage.create]
 /// only creates this probe for that device.
 class MovesenseTemperatureProbe extends _MovesenseStreamProbe {
-  MovesenseTemperatureProbe()
-    : super("Meas/Temp", MovesenseTemperature.fromMovesenseData);
+  MovesenseTemperatureProbe() : super("Meas/Temp", MovesenseTemperature.fromMovesenseData);
 }
 
 /// A probe collecting [MovesenseIMU] data at 13 Hz (the lowest rate).
@@ -146,8 +135,7 @@ class MovesenseIMUProbe extends _MovesenseStreamProbe {
 ///
 /// Therefore, this probe **only** listens to single tap events.
 class MovesenseStateChangeProbe extends _MovesenseStreamProbe {
-  MovesenseStateChangeProbe()
-    : super("System/States/4", MovesenseStateChange.fromMovesenseData);
+  MovesenseStateChangeProbe() : super("System/States/4", MovesenseStateChange.fromMovesenseData);
 }
 
 /// A probe collecting [MovesenseDeviceInformation] from the connected
@@ -171,9 +159,7 @@ class MovesenseDeviceProbe extends MeasurementProbe {
       Mds.createRequestUri(serial, "/Info"),
       "{}",
       ((info, statusCode) {
-        var data = MovesenseDeviceInformation.fromMovesenseData(
-          json.decode(info),
-        );
+        var data = MovesenseDeviceInformation.fromMovesenseData(json.decode(info));
         completer.complete(Measurement.fromData(data));
       }),
       (error, statusCode) {
@@ -218,12 +204,10 @@ enum MovesenseState { movement, battery, connectors, doubleTap, tap, freeFall }
 class MovesenseMultiStateChangeProbe extends StreamProbe {
   /// A map from state id to subscription id.
   final Map<int, int> _subscriptionIDs = {};
-  final StreamController<String> _subscriptionController =
-      StreamController.broadcast();
+  final StreamController<String> _subscriptionController = StreamController.broadcast();
 
   @override
-  MovesenseDeviceManager get deviceManager =>
-      super.deviceManager as MovesenseDeviceManager;
+  MovesenseDeviceManager get deviceManager => super.deviceManager as MovesenseDeviceManager;
 
   @override
   Future<bool> onResume() async {
@@ -239,9 +223,7 @@ class MovesenseMultiStateChangeProbe extends StreamProbe {
   @override
   Stream<Measurement>? get stream => deviceManager.isConnected
       ? _subscriptionController.stream.map(
-          (event) => Measurement.fromData(
-            MovesenseStateChange.fromMovesenseData(jsonDecode(event)),
-          ),
+          (event) => Measurement.fromData(MovesenseStateChange.fromMovesenseData(jsonDecode(event))),
         )
       : null;
 
@@ -256,26 +238,18 @@ class MovesenseMultiStateChangeProbe extends StreamProbe {
         "${deviceManager.serial}/System/States/$stateId",
         "{}",
         (data, status) {
-          debug(
-            '$runtimeType - OnSuccess, stateId: $stateId, data: $data, status: $status',
-          );
+          debug('$runtimeType - OnSuccess, stateId: $stateId, data: $data, status: $status');
         },
         (error, status) {
-          warning(
-            '$runtimeType - OnError, stateId: $stateId, error: $error, status: $status',
-          );
+          warning('$runtimeType - OnError, stateId: $stateId, error: $error, status: $status');
           _subscriptionController.addError(error);
         },
         (data) {
-          debug(
-            '$runtimeType - OnNotification, stateId: $stateId, data: $data',
-          );
+          debug('$runtimeType - OnNotification, stateId: $stateId, data: $data');
           _subscriptionController.add(data);
         },
         (error, status) {
-          warning(
-            '$runtimeType - OnSubscriptionError, stateId: $stateId, error: $error, status: $status',
-          );
+          warning('$runtimeType - OnSubscriptionError, stateId: $stateId, error: $error, status: $status');
           _subscriptionController.addError(error);
         },
       );

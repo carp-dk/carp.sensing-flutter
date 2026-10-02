@@ -23,10 +23,8 @@ class TriggerEvent {
 ///
 /// To add a new trigger type, extend this class and register a
 /// [TriggerFactory] that creates it.
-abstract class TriggerExecutor<TConfig extends TriggerConfiguration>
-    extends AbstractExecutor<TConfig> {
-  final StreamController<TriggerEvent> _controller =
-      StreamController.broadcast();
+abstract class TriggerExecutor<TConfig extends TriggerConfiguration> extends AbstractExecutor<TConfig> {
+  final StreamController<TriggerEvent> _controller = StreamController.broadcast();
 
   /// The stream of events triggered from this trigger executor.
   Stream<TriggerEvent> get triggerEvents => _controller.stream;
@@ -69,8 +67,7 @@ abstract class TriggerExecutor<TConfig extends TriggerConfiguration>
 /// Its fire times can be computed ahead.
 /// Used by [AppTaskControlExecutor] to schedule [AppTask] notifications in
 /// advance, so they show up even if the app is not running.
-abstract class SchedulableTriggerExecutor<TConfig extends TriggerConfiguration>
-    extends TriggerExecutor<TConfig> {
+abstract class SchedulableTriggerExecutor<TConfig extends TriggerConfiguration> extends TriggerExecutor<TConfig> {
   /// Returns the times this trigger fires between [from] and [to].
   ///
   /// Ordered by time, except for [RandomRecurrentTriggerExecutor].
@@ -151,8 +148,7 @@ class DelayedTriggerExecutor extends TriggerExecutor<DelayedTrigger> {
 ///
 /// The time is counted from when the study was deployed on this phone.
 /// Does not fire if that time has already passed.
-class ElapsedTimeTriggerExecutor
-    extends SchedulableTriggerExecutor<ElapsedTimeTrigger> {
+class ElapsedTimeTriggerExecutor extends SchedulableTriggerExecutor<ElapsedTimeTrigger> {
   @override
   List<DateTime> getSchedule(DateTime from, DateTime to, [int? max]) {
     if (deployment?.deployed == null) return [];
@@ -164,9 +160,7 @@ class ElapsedTimeTriggerExecutor
   @override
   Future<bool> onResume() async {
     if (deployment?.deployed == null) {
-      warning(
-        '$runtimeType - This deployment does not have a start time. Cannot execute this trigger.',
-      );
+      warning('$runtimeType - This deployment does not have a start time. Cannot execute this trigger.');
       return false;
     }
 
@@ -179,15 +173,12 @@ class ElapsedTimeTriggerExecutor
 
     int delay =
         configuration!.elapsedTime!.inMilliseconds -
-        (DateTime.now().millisecondsSinceEpoch -
-            (deployment?.deployed.millisecondsSinceEpoch ?? 0));
+        (DateTime.now().millisecondsSinceEpoch - (deployment?.deployed.millisecondsSinceEpoch ?? 0));
 
     if (delay > 0) {
       timer = Timer(Duration(milliseconds: delay), () => onTrigger());
     } else {
-      warning(
-        '$runtimeType - the trigger time is in the past and should have happened already.',
-      );
+      warning('$runtimeType - the trigger time is in the past and should have happened already.');
       return false;
     }
 
@@ -196,8 +187,7 @@ class ElapsedTimeTriggerExecutor
 }
 
 /// Runs a [PeriodicTrigger]: fires when resumed, then once per period.
-class PeriodicTriggerExecutor
-    extends SchedulableTriggerExecutor<PeriodicTrigger> {
+class PeriodicTriggerExecutor extends SchedulableTriggerExecutor<PeriodicTrigger> {
   @override
   List<DateTime> getSchedule(DateTime from, DateTime to, [int max = 100]) {
     final List<DateTime> schedule = [];
@@ -226,14 +216,10 @@ class PeriodicTriggerExecutor
 /// Runs a [DateTimeTrigger]: fires once at the specified date and time.
 ///
 /// Resuming fails if that time is in the past.
-class DateTimeTriggerExecutor
-    extends SchedulableTriggerExecutor<DateTimeTrigger> {
+class DateTimeTriggerExecutor extends SchedulableTriggerExecutor<DateTimeTrigger> {
   @override
   List<DateTime> getSchedule(DateTime from, DateTime to, [int? max]) =>
-      (configuration!.schedule.isAfter(from) &&
-          configuration!.schedule.isBefore(to))
-      ? [configuration!.schedule]
-      : [];
+      (configuration!.schedule.isAfter(from) && configuration!.schedule.isBefore(to)) ? [configuration!.schedule] : [];
 
   @override
   Future<bool> onResume() async {
@@ -249,8 +235,7 @@ class DateTimeTriggerExecutor
 }
 
 /// Runs a [RecurrentScheduledTrigger], e.g. every Monday at 9:00.
-class RecurrentScheduledTriggerExecutor
-    extends SchedulableTriggerExecutor<RecurrentScheduledTrigger> {
+class RecurrentScheduledTriggerExecutor extends SchedulableTriggerExecutor<RecurrentScheduledTrigger> {
   @override
   List<DateTime> getSchedule(DateTime from, DateTime to, [int max = 100]) {
     List<DateTime> schedule = [];
@@ -269,8 +254,7 @@ class RecurrentScheduledTriggerExecutor
   @override
   Future<bool> onResume() async {
     Duration delay = configuration!.firstOccurrence.difference(DateTime.now());
-    if (configuration!.end == null ||
-        configuration!.end!.isAfter(DateTime.now())) {
+    if (configuration!.end == null || configuration!.end!.isAfter(DateTime.now())) {
       timer = Timer(delay, () async => onTrigger());
     }
     return true;
@@ -278,8 +262,7 @@ class RecurrentScheduledTriggerExecutor
 }
 
 /// Runs a [CronScheduledTrigger]: fires at the times of its cron expression.
-class CronScheduledTriggerExecutor
-    extends SchedulableTriggerExecutor<CronScheduledTrigger> {
+class CronScheduledTriggerExecutor extends SchedulableTriggerExecutor<CronScheduledTrigger> {
   late cron.Cron _cron;
   cron.ScheduledTask? _task;
 
@@ -327,8 +310,7 @@ class CronScheduledTriggerExecutor
 /// A measurement matches if its type is [SamplingEventTrigger.measureType]
 /// and its data is equivalent to [SamplingEventTrigger.triggerCondition].
 /// Fires on every measurement of that type if there is no condition.
-class SamplingEventTriggerExecutor
-    extends TriggerExecutor<SamplingEventTrigger> {
+class SamplingEventTriggerExecutor extends TriggerExecutor<SamplingEventTrigger> {
   StreamSubscription<Measurement>? _subscription;
 
   @override
@@ -370,8 +352,7 @@ class SamplingEventTriggerExecutor
 /// A measurement matches if its type is
 /// [ConditionalSamplingEventTrigger.measureType] and
 /// [ConditionalSamplingEventTrigger.triggerCondition] returns true for it.
-class ConditionalSamplingEventTriggerExecutor
-    extends TriggerExecutor<ConditionalSamplingEventTrigger> {
+class ConditionalSamplingEventTriggerExecutor extends TriggerExecutor<ConditionalSamplingEventTrigger> {
   StreamSubscription<Measurement>? _subscription;
 
   @override
@@ -388,8 +369,7 @@ class ConditionalSamplingEventTriggerExecutor
         .getStudyController(study!)
         ?.measurementsByType(configuration!.measureType)
         .listen((measurement) {
-          if (configuration!.triggerCondition != null &&
-              configuration!.triggerCondition!(measurement)) {
+          if (configuration!.triggerCondition != null && configuration!.triggerCondition!(measurement)) {
             onTrigger();
           }
         });
@@ -406,13 +386,11 @@ class ConditionalSamplingEventTriggerExecutor
 /// Runs a [ConditionalPeriodicTrigger]: fires when its condition returns true.
 ///
 /// The condition is checked when resumed and then once per period.
-class ConditionalPeriodicTriggerExecutor
-    extends TriggerExecutor<ConditionalPeriodicTrigger> {
+class ConditionalPeriodicTriggerExecutor extends TriggerExecutor<ConditionalPeriodicTrigger> {
   @override
   Future<bool> onResume() async {
     void check() {
-      if (configuration!.triggerCondition != null &&
-          configuration!.triggerCondition!()) {
+      if (configuration!.triggerCondition != null && configuration!.triggerCondition!()) {
         onTrigger();
       }
     }
@@ -430,8 +408,7 @@ class ConditionalPeriodicTriggerExecutor
 /// at [startTime] sets up the timers for the day. If resumed after
 /// [startTime], the timers for today are set up right away, unless
 /// [hasBeenScheduledForToday] is true.
-class RandomRecurrentTriggerExecutor
-    extends SchedulableTriggerExecutor<RandomRecurrentTrigger> {
+class RandomRecurrentTriggerExecutor extends SchedulableTriggerExecutor<RandomRecurrentTrigger> {
   final cron.Cron _cron = cron.Cron();
   List<Timer> _timers = [];
 
@@ -441,8 +418,7 @@ class RandomRecurrentTriggerExecutor
   int get maxNumberOfTriggers => configuration!.maxNumberOfTriggers;
 
   /// A new random number of triggers for a day. Changes on every read.
-  int get numberOfSampling =>
-      Random().nextInt(maxNumberOfTriggers) + minNumberOfTriggers;
+  int get numberOfSampling => Random().nextInt(maxNumberOfTriggers) + minNumberOfTriggers;
 
   /// A new list of random times between [startTime] and [endTime].
   /// Changes on every read.
@@ -460,10 +436,7 @@ class RandomRecurrentTriggerExecutor
     TimeOfDay randomTime = const TimeOfDay();
     do {
       int randomHour =
-          startTime.hour +
-          ((endTime.hour - startTime.hour == 0)
-              ? 0
-              : Random().nextInt(endTime.hour - startTime.hour));
+          startTime.hour + ((endTime.hour - startTime.hour == 0) ? 0 : Random().nextInt(endTime.hour - startTime.hour));
       int randomMinutes = Random().nextInt(60);
       randomTime = TimeOfDay(hour: randomHour, minute: randomMinutes);
     } while (!(randomTime.isAfter(startTime) && randomTime.isBefore(endTime)));
@@ -486,8 +459,7 @@ class RandomRecurrentTriggerExecutor
 
     final now = DateTime.now();
     final midnight = DateTime(now.year, now.month, now.day);
-    final sinceLastTime =
-        now.millisecond - configuration!.lastTriggerTimestamp!.millisecond;
+    final sinceLastTime = now.millisecond - configuration!.lastTriggerTimestamp!.millisecond;
     final sinceMidnight = now.millisecond - midnight.millisecond;
 
     return (sinceLastTime < sinceMidnight);
@@ -505,14 +477,7 @@ class RandomRecurrentTriggerExecutor
 
     while (day.isBefore(toDay) && count < max) {
       for (var time in samplingTimes) {
-        final date = DateTime(
-          day.year,
-          day.month,
-          day.day,
-          time.hour,
-          time.minute,
-          time.second,
-        );
+        final date = DateTime(day.year, day.month, day.day, time.hour, time.minute, time.second);
         if (date.isAfter(from) && date.isBefore(to)) schedule.add(date);
       }
 
@@ -528,9 +493,7 @@ class RandomRecurrentTriggerExecutor
     // therefore, first check if the random timers have been scheduled for today
     if (TimeOfDay.now().isAfter(startTime)) {
       if (!hasBeenScheduledForToday) {
-        debug(
-          '$runtimeType - timers has not been scheduled for today ($todayString) - scheduling now',
-        );
+        debug('$runtimeType - timers has not been scheduled for today ($todayString) - scheduling now');
         _scheduleTimers();
       }
     }
@@ -576,11 +539,8 @@ class UserTaskTriggerExecutor extends TriggerExecutor<UserTaskTrigger> {
   @override
   Future<bool> onResume() async {
     // listen for event of the specified type and trigger as needed
-    _subscription ??= AppTaskController().userTaskEvents.listen((
-      userTask,
-    ) async {
-      if (userTask.task.name == configuration!.taskName &&
-          userTask.state == configuration!.triggerCondition) {
+    _subscription ??= AppTaskController().userTaskEvents.listen((userTask) async {
+      if (userTask.task.name == configuration!.taskName && userTask.state == configuration!.triggerCondition) {
         onTrigger();
       }
     });
@@ -628,8 +588,7 @@ class NoUserTaskTriggerExecutor extends TriggerExecutor<NoUserTaskTrigger> {
 /// Runs an [AppLifecycleTrigger]: fires when the app enters a listed state.
 ///
 /// The states are the trigger's [AppLifecycleState]s.
-class AppLifecycleTriggerExecutor extends TriggerExecutor<AppLifecycleTrigger>
-    with WidgetsBindingObserver {
+class AppLifecycleTriggerExecutor extends TriggerExecutor<AppLifecycleTrigger> with WidgetsBindingObserver {
   @override
   Future<bool> onResume() async {
     WidgetsBinding.instance.addObserver(this);

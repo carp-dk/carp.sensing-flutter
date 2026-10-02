@@ -109,9 +109,7 @@ class MovisensSamplingPackage implements SamplingPackage {
   /// Measure type for user taps on the sensor ([MovisensTapMarker]).
   static const String TAP_MARKER = "$MOVISENS_NAMESPACE.tap_marker";
 
-  final DeviceManager _deviceManager = MovisensDeviceManager(
-    MovisensDevice.DEVICE_TYPE,
-  );
+  final DeviceManager _deviceManager = MovisensDeviceManager(MovisensDevice.DEVICE_TYPE);
 
   @override
   void onRegister() {
@@ -119,30 +117,16 @@ class MovisensSamplingPackage implements SamplingPackage {
 
     // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
     // the Movisens device used the carp_core device namespace.
-    FromJsonFactory().register(
-      MovisensDevice(),
-      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice',
-    );
+    FromJsonFactory().register(MovisensDevice(), type: '${DeviceConfiguration.DEVICE_NAMESPACE}.MovisensDevice');
 
     // register all data types
     FromJsonFactory().registerAll([
       MovisensStepCount(deviceId: '', type: '', steps: 0),
       MovisensBodyPosition(deviceId: '', type: '', bodyPosition: 'Chest'),
       MovisensInclination(deviceId: '', type: '', x: 0, y: 0, z: 0),
-      MovisensMovementAcceleration(
-        deviceId: '',
-        type: '',
-        movementAcceleration: 0,
-      ),
+      MovisensMovementAcceleration(deviceId: '', type: '', movementAcceleration: 0),
       MovisensMET(deviceId: '', type: '', met: 0),
-      MovisensMETLevel(
-        deviceId: '',
-        type: '',
-        sedentary: 0,
-        light: 0,
-        moderate: 0,
-        vigorous: 0,
-      ),
+      MovisensMETLevel(deviceId: '', type: '', sedentary: 0, light: 0, moderate: 0, vigorous: 0),
       MovisensHR(deviceId: '', type: '', hr: 0),
       MovisensEDA(deviceId: '', type: '', edaSclMean: 0),
       MovisensSkinTemperature(deviceId: '', type: '', skinTemperature: 0),
@@ -152,12 +136,8 @@ class MovisensSamplingPackage implements SamplingPackage {
 
     // registering the transformers from CARP to OMH and FHIR for heart rate and step count.
     // we assume that there are OMH and FHIR schemas created and registered already...
-    DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)
-        ?.add(MovisensData.HR_MEAN, OMHHeartRateDataPoint.transformer);
-    DataTransformerSchemaRegistry()
-        .lookup(NameSpace.OMH)
-        ?.add(MovisensData.STEPS, OMHStepCountDataPoint.transformer);
+    DataTransformerSchemaRegistry().lookup(NameSpace.OMH)?.add(MovisensData.HR_MEAN, OMHHeartRateDataPoint.transformer);
+    DataTransformerSchemaRegistry().lookup(NameSpace.OMH)?.add(MovisensData.STEPS, OMHStepCountDataPoint.transformer);
     DataTransformerSchemaRegistry()
         .lookup(NameSpace.FHIR)
         ?.add(MovisensData.HR_MEAN, FHIRHeartRateObservation.transformer);
@@ -195,51 +175,26 @@ class MovisensSamplingPackage implements SamplingPackage {
   List<DataTypeMetaData> get dataTypes => samplingSchemes.dataTypes;
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: ACTIVITY,
-            displayName: "Physical Activity",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: HR,
-            displayName: "Heart Rate (HR) data",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: EDA,
-            displayName: "Elecrodermal Activity (EDA)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: SKIN_TEMPERATURE,
-            displayName: "Skin Temperature",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: RESPIRATION,
-            displayName: "Respiration",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: TAP_MARKER,
-            displayName: "Tap markers by the user.",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: ACTIVITY, displayName: "Physical Activity", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: HR, displayName: "Heart Rate (HR) data", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: EDA, displayName: "Elecrodermal Activity (EDA)", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: SKIN_TEMPERATURE, displayName: "Skin Temperature", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: RESPIRATION, displayName: "Respiration", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: TAP_MARKER, displayName: "Tap markers by the user.", timeType: DataTimeType.POINT),
+    ),
+  ]);
 }
 
 /// The location on the body where the Movisens device is placed.

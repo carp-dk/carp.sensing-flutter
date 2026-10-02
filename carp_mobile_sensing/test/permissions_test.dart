@@ -16,34 +16,27 @@ void main() {
 
   /// Fake the OS: records the calls; grants whatever is asked for, unless
   /// [denyAll] - then the user taps "Don't allow" on every dialog.
-  List<String> fakePermissionHandler({
-    Set<int> alreadyGranted = const {},
-    bool denyAll = false,
-  }) {
+  List<String> fakePermissionHandler({Set<int> alreadyGranted = const {}, bool denyAll = false}) {
     final calls = <String>[];
     final granted = {...alreadyGranted};
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_channel, (call) async {
-          switch (call.method) {
-            case 'checkPermissionStatus':
-              return granted.contains(call.arguments as int)
-                  ? _granted
-                  : _denied;
-            case 'requestPermissions':
-              final requested = (call.arguments as List).cast<int>();
-              calls.add('request(${requested.join(',')})');
-              if (denyAll) return {for (final p in requested) p: _denied};
-              granted.addAll(requested);
-              return {for (final p in requested) p: _granted};
-            default:
-              return null;
-          }
-        });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(_channel, (call) async {
+      switch (call.method) {
+        case 'checkPermissionStatus':
+          return granted.contains(call.arguments as int) ? _granted : _denied;
+        case 'requestPermissions':
+          final requested = (call.arguments as List).cast<int>();
+          calls.add('request(${requested.join(',')})');
+          if (denyAll) return {for (final p in requested) p: _denied};
+          granted.addAll(requested);
+          return {for (final p in requested) p: _granted};
+        default:
+          return null;
+      }
+    });
 
     addTearDown(
-      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(_channel, null),
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(_channel, null),
     );
     return calls;
   }
@@ -53,27 +46,18 @@ void main() {
   test('permissions are requested one at a time, in declared order', () async {
     final calls = fakePermissionHandler();
 
-    await requestPermissionsInOrder([
-      Permission.locationWhenInUse,
-      Permission.locationAlways,
-    ]);
+    await requestPermissionsInOrder([Permission.locationWhenInUse, Permission.locationAlways]);
 
     // One request per permission, in order. Batching them into a single
     // request() would break Android's location ladder: locationAlways is only
     // offered once locationWhenInUse is granted.
-    expect(calls, [
-      request(Permission.locationWhenInUse),
-      request(Permission.locationAlways),
-    ]);
+    expect(calls, [request(Permission.locationWhenInUse), request(Permission.locationAlways)]);
   });
 
   test('locationAlways always climbs the ladder, however declared', () async {
     final calls = fakePermissionHandler();
 
-    await requestPermissionsInOrder([
-      Permission.bluetoothScan,
-      Permission.locationAlways,
-    ]);
+    await requestPermissionsInOrder([Permission.bluetoothScan, Permission.locationAlways]);
 
     expect(calls, [
       request(Permission.bluetoothScan),
@@ -90,21 +74,13 @@ void main() {
       Permission.locationWhenInUse, // already covered by the ladder above
     ]);
 
-    expect(calls, [
-      request(Permission.locationWhenInUse),
-      request(Permission.locationAlways),
-    ]);
+    expect(calls, [request(Permission.locationWhenInUse), request(Permission.locationAlways)]);
   });
 
   test('already granted permissions are not asked for again', () async {
-    final calls = fakePermissionHandler(
-      alreadyGranted: {Permission.locationWhenInUse.value},
-    );
+    final calls = fakePermissionHandler(alreadyGranted: {Permission.locationWhenInUse.value});
 
-    await requestPermissionsInOrder([
-      Permission.locationWhenInUse,
-      Permission.locationAlways,
-    ]);
+    await requestPermissionsInOrder([Permission.locationWhenInUse, Permission.locationAlways]);
 
     expect(calls, [request(Permission.locationAlways)]);
   });
@@ -116,37 +92,30 @@ void main() {
     final dialogs = <Completer<void>>[];
     var inFlight = 0, maxInFlight = 0;
     final granted = <int>{};
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_channel, (call) async {
-          switch (call.method) {
-            case 'checkPermissionStatus':
-              return granted.contains(call.arguments as int)
-                  ? _granted
-                  : _denied;
-            case 'requestPermissions':
-              final dialog = Completer<void>();
-              dialogs.add(dialog);
-              maxInFlight = max(maxInFlight, ++inFlight);
-              await dialog.future;
-              inFlight--;
-              final asked = (call.arguments as List).cast<int>();
-              granted.addAll(asked);
-              return {for (final p in asked) p: _granted};
-            default:
-              return null;
-          }
-        });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(_channel, (call) async {
+      switch (call.method) {
+        case 'checkPermissionStatus':
+          return granted.contains(call.arguments as int) ? _granted : _denied;
+        case 'requestPermissions':
+          final dialog = Completer<void>();
+          dialogs.add(dialog);
+          maxInFlight = max(maxInFlight, ++inFlight);
+          await dialog.future;
+          inFlight--;
+          final asked = (call.arguments as List).cast<int>();
+          granted.addAll(asked);
+          return {for (final p in asked) p: _granted};
+        default:
+          return null;
+      }
+    });
     addTearDown(
-      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(_channel, null),
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(_channel, null),
     );
 
     // Deployment events, probes and devices all ask at once on a normal launch.
     final client = SmartPhoneClientManager();
-    final permissions = [
-      Permission.locationWhenInUse,
-      Permission.locationAlways,
-    ];
+    final permissions = [Permission.locationWhenInUse, Permission.locationAlways];
     final done = Future.wait([
       client.requestPermissions(permissions),
       client.requestPermissions(permissions),
@@ -170,22 +139,20 @@ void main() {
     // A request that throws must not poison the queue - a study that fails
     // must not block permissions for every study after it.
     var requests = 0;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_channel, (call) async {
-          switch (call.method) {
-            case 'checkPermissionStatus':
-              return _denied;
-            case 'requestPermissions':
-              if (++requests == 1) throw PlatformException(code: 'ERROR');
-              final asked = (call.arguments as List).cast<int>();
-              return {for (final p in asked) p: _granted};
-            default:
-              return null;
-          }
-        });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(_channel, (call) async {
+      switch (call.method) {
+        case 'checkPermissionStatus':
+          return _denied;
+        case 'requestPermissions':
+          if (++requests == 1) throw PlatformException(code: 'ERROR');
+          final asked = (call.arguments as List).cast<int>();
+          return {for (final p in asked) p: _granted};
+        default:
+          return null;
+      }
+    });
     addTearDown(
-      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(_channel, null),
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(_channel, null),
     );
 
     final client = SmartPhoneClientManager();

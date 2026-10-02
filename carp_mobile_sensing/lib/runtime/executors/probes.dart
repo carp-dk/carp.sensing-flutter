@@ -62,15 +62,9 @@ abstract class Probe extends AbstractExecutor<Measure> {
   /// as the 4th possible configuration in the list above.
   SamplingConfiguration? get samplingConfiguration =>
       measure?.overrideSamplingConfiguration ??
-      deployment?.deviceConfiguration.defaultSamplingConfiguration?[measure
-          ?.type] ??
-      deployment
-          ?.deviceConfiguration
-          .dataTypeSamplingSchemes?[measure?.type]
-          ?.defaultSamplingConfiguration ??
-      SamplingPackageRegistry()
-          .samplingSchemes[measure?.type]
-          ?.defaultSamplingConfiguration;
+      deployment?.deviceConfiguration.defaultSamplingConfiguration?[measure?.type] ??
+      deployment?.deviceConfiguration.dataTypeSamplingSchemes?[measure?.type]?.defaultSamplingConfiguration ??
+      SamplingPackageRegistry().samplingSchemes[measure?.type]?.defaultSamplingConfiguration;
 
   /// Adds [measurement] to [measurements].
   ///
@@ -81,8 +75,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
   void addMeasurement(Measurement measurement) {
     // timestamp this sampling
     if (samplingConfiguration is PersistentSamplingConfiguration) {
-      (samplingConfiguration as PersistentSamplingConfiguration).lastTime =
-          DateTime.now().toUtc();
+      (samplingConfiguration as PersistentSamplingConfiguration).lastTime = DateTime.now().toUtc();
       // Save the checkpoint once per burst, not once per measurement.
       _saveCheckpoint ??= Timer(const Duration(seconds: 1), () {
         _saveCheckpoint = null;
@@ -122,9 +115,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
         granted = granted && await permission.isGranted;
       }
     } catch (error) {
-      addError(
-        '$runtimeType - Error trying to check permissions, error: $error',
-      );
+      addError('$runtimeType - Error trying to check permissions, error: $error');
       return false;
     }
     return granted;
@@ -149,8 +140,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
   /// check. Always true on iOS: `permission_handler` reports Android-only groups
   /// (e.g. activityRecognition, phone) as denied there, and iOS prompts on
   /// first use.
-  Future<bool> hasRequiredPermissions() async =>
-      Platform.isIOS ? true : await arePermissionsGranted();
+  Future<bool> hasRequiredPermissions() async => Platform.isIOS ? true : await arePermissionsGranted();
 
   // default no-op implementation of callback methods below
 
@@ -179,15 +169,11 @@ abstract class MeasurementProbe extends Probe {
   @override
   Future<bool> onResume() async {
     if (await hasRequiredPermissions()) {
-      getMeasurement().then(
-        (measurement) {
-          if (measurement != null) addMeasurement(measurement);
-          // automatically stop this probe after it is done collecting the measurement
-          Future.delayed(const Duration(seconds: 5), () => pause());
-        },
-        onError: (Object error, StackTrace? stackTrace) =>
-            addError(error, stackTrace),
-      );
+      getMeasurement().then((measurement) {
+        if (measurement != null) addMeasurement(measurement);
+        // automatically stop this probe after it is done collecting the measurement
+        Future.delayed(const Duration(seconds: 5), () => pause());
+      }, onError: (Object error, StackTrace? stackTrace) => addError(error, stackTrace));
       return true;
     } else {
       return false;
@@ -274,11 +260,7 @@ abstract class StreamProbe extends Probe {
         // Resuming an already resumed probe would otherwise orphan the old
         // subscription, which keeps delivering.
         await _subscription?.cancel();
-        _subscription = _stream?.listen(
-          _onData,
-          onError: _onError,
-          onDone: _onDone,
-        );
+        _subscription = _stream?.listen(_onData, onError: _onError, onDone: _onDone);
       }
       return true;
     } else {
@@ -327,11 +309,7 @@ abstract class PeriodicStreamProbe extends StreamProbe {
         if (interval != null && duration != null) {
           // create a recurrent timer that starts sampling
           _timer = Timer.periodic(interval, (timer) {
-            _subscription = stream?.listen(
-              _onData,
-              onError: _onError,
-              onDone: _onDone,
-            );
+            _subscription = stream?.listen(_onData, onError: _onError, onDone: _onDone);
             // create a timer that stops the sampling after the specified duration.
             Timer(duration, () async => await _subscription?.cancel());
           });
@@ -455,11 +433,7 @@ abstract class BufferingIntervalStreamProbe extends StreamProbe {
     if (await hasRequiredPermissions()) {
       Duration? interval = samplingConfiguration?.interval;
       if (interval != null) {
-        _bufferingStreamSubscription = bufferingStream.listen(
-          onSamplingData,
-          onError: _onError,
-          onDone: _onDone,
-        );
+        _bufferingStreamSubscription = bufferingStream.listen(onSamplingData, onError: _onError, onDone: _onDone);
         _timer = Timer.periodic(interval, (_) async {
           try {
             Measurement? measurement = await getMeasurement();
@@ -531,11 +505,7 @@ abstract class BufferingPeriodicStreamProbe extends PeriodicStreamProbe {
       if (interval != null && duration != null) {
         _timer = Timer.periodic(interval, (Timer t) {
           onSamplingStart();
-          _bufferingStreamSubscription = bufferingStream.listen(
-            onSamplingData,
-            onError: _onError,
-            onDone: _onDone,
-          );
+          _bufferingStreamSubscription = bufferingStream.listen(onSamplingData, onError: _onError, onDone: _onDone);
           _durationTimer = Timer(duration, () async {
             await _bufferingStreamSubscription?.cancel();
             onSamplingEnd();

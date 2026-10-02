@@ -27,9 +27,6 @@ void main() {
   });
 
   test('unknown code throws CarpNotFoundException', () {
-    expect(
-      CarpAuthService().magicLinkForCode('ZZZZZ'),
-      throwsA(isA<CarpNotFoundException>()),
-    );
+    expect(CarpAuthService().magicLinkForCode('ZZZZZ'), throwsA(isA<CarpNotFoundException>()));
   });
 }

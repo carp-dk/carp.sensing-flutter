@@ -4,9 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _notifications = MethodChannel(
-  'dexterous.com/flutter/local_notifications',
-);
+const _notifications = MethodChannel('dexterous.com/flutter/local_notifications');
 const _permissions = MethodChannel('flutter.baseflow.com/permissions/methods');
 
 // The values permission_handler sends over its method channel.
@@ -21,8 +19,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     AndroidFlutterLocalNotificationsPlugin.registerWith();
 
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
     messenger.setMockMethodCallHandler(_notifications, (call) async {
       calls.add(call.method);
@@ -56,33 +53,27 @@ void main() {
     expect(calls, ['initialize', 'requestNotificationsPermission']);
   });
 
-  test(
-    'notifications schedule inexactly without SCHEDULE_EXACT_ALARM',
-    () async {
-      final calls = fakeAndroid();
+  test('notifications schedule inexactly without SCHEDULE_EXACT_ALARM', () async {
+    final calls = fakeAndroid();
 
-      await FlutterLocalNotificationManager().scheduleNotification(
-        title: 'test',
-        schedule: DateTime.now().add(const Duration(hours: 1)),
-      );
+    await FlutterLocalNotificationManager().scheduleNotification(
+      title: 'test',
+      schedule: DateTime.now().add(const Duration(hours: 1)),
+    );
 
-      // Exact scheduling throws without the permission, which Android only
-      // grants through a settings screen.
-      expect(calls, contains('scheduleMode=inexactAllowWhileIdle'));
-    },
-  );
+    // Exact scheduling throws without the permission, which Android only
+    // grants through a settings screen.
+    expect(calls, contains('scheduleMode=inexactAllowWhileIdle'));
+  });
 
-  test(
-    'notifications schedule exactly when the permission is granted',
-    () async {
-      final calls = fakeAndroid(exactAlarmGranted: true);
+  test('notifications schedule exactly when the permission is granted', () async {
+    final calls = fakeAndroid(exactAlarmGranted: true);
 
-      await FlutterLocalNotificationManager().scheduleNotification(
-        title: 'test',
-        schedule: DateTime.now().add(const Duration(hours: 1)),
-      );
+    await FlutterLocalNotificationManager().scheduleNotification(
+      title: 'test',
+      schedule: DateTime.now().add(const Duration(hours: 1)),
+    );
 
-      expect(calls, contains('scheduleMode=exactAllowWhileIdle'));
-    },
-  );
+    expect(calls, contains('scheduleMode=exactAllowWhileIdle'));
+  });
 }

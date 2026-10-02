@@ -15,10 +15,7 @@ part of '../carp_services/carp_services.dart';
 /// result; Cancel pops `null`.
 class ActiveParticipationInvitationDialog {
   /// Builds the dialog for the given [invitations].
-  AlertDialog build(
-    BuildContext context,
-    List<ActiveParticipationInvitation> invitations,
-  ) => AlertDialog(
+  AlertDialog build(BuildContext context, List<ActiveParticipationInvitation> invitations) => AlertDialog(
     title: const Text('Select invitation'),
     titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
     contentPadding: EdgeInsets.zero,
@@ -26,29 +23,18 @@ class ActiveParticipationInvitationDialog {
       width: double.maxFinite,
       child: ListView.builder(
         itemCount: invitations.length,
-        itemBuilder: (context, index) =>
-            _buildInvitationCard(context, invitations[index]),
+        itemBuilder: (context, index) => _buildInvitationCard(context, invitations[index]),
       ),
     ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel'),
-      ),
-    ],
+    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel'))],
   );
 
   /// Shortens [studyDescription] to at most 100 characters, ending in `...`
   /// if cut.
   String shortStudyDescription(String studyDescription) =>
-      (studyDescription.length < 100)
-      ? studyDescription
-      : '${studyDescription.substring(0, 97)}...';
+      (studyDescription.length < 100) ? studyDescription : '${studyDescription.substring(0, 97)}...';
 
-  Widget _buildInvitationCard(
-    BuildContext context,
-    ActiveParticipationInvitation invitation,
-  ) => Material(
+  Widget _buildInvitationCard(BuildContext context, ActiveParticipationInvitation invitation) => Material(
     child: InkWell(
       onTap: () {
         Navigator.pop(context, invitation);
@@ -59,9 +45,7 @@ class ActiveParticipationInvitationDialog {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
+            side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -74,11 +58,7 @@ class ActiveParticipationInvitationDialog {
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.mail_outline,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 24,
-                  ),
+                  child: Icon(Icons.mail_outline, color: Theme.of(context).colorScheme.primary, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -88,22 +68,18 @@ class ActiveParticipationInvitationDialog {
                     children: [
                       Text(
                         invitation.invitation.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        (invitation.invitation.description == null ||
-                                invitation.invitation.description!.isEmpty)
+                        (invitation.invitation.description == null || invitation.invitation.description!.isEmpty)
                             ? 'No description provided'
-                            : shortStudyDescription(
-                                invitation.invitation.description!,
-                              ),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                            : shortStudyDescription(invitation.invitation.description!),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -111,11 +87,7 @@ class ActiveParticipationInvitationDialog {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ],
             ),
           ),

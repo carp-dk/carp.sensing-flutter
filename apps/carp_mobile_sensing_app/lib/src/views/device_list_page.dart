@@ -31,9 +31,7 @@ class DevicesListPageState extends State<DevicesListPage> {
     return Center(
       child: Card(
         elevation: 10,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
         child: StreamBuilder<DeviceStatus>(
           stream: device.deviceEvents,
           initialData: DeviceStatus.unknown,
@@ -50,9 +48,7 @@ class DevicesListPageState extends State<DevicesListPage> {
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            CachetColors.BLUE,
-                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(CachetColors.BLUE),
                         ),
                       )
                     : device.stateIcon,
@@ -63,17 +59,12 @@ class DevicesListPageState extends State<DevicesListPage> {
                   final hasPermissions = snapshot.data ?? true;
                   final showPermissionButton = !hasPermissions;
                   final showScanButton =
-                      hasPermissions &&
-                      device.isBleDevice &&
-                      device.status.index < DeviceStatus.paired.index;
+                      hasPermissions && device.isBleDevice && device.status.index < DeviceStatus.paired.index;
                   final showConnectButton =
                       hasPermissions &&
-                      (device.status == DeviceStatus.paired ||
-                          device.status == DeviceStatus.disconnected);
+                      (device.status == DeviceStatus.paired || device.status == DeviceStatus.disconnected);
 
-                  if (!showPermissionButton &&
-                      !showScanButton &&
-                      !showConnectButton) {
+                  if (!showPermissionButton && !showScanButton && !showConnectButton) {
                     return const SizedBox.shrink();
                   }
 
@@ -88,21 +79,15 @@ class DevicesListPageState extends State<DevicesListPage> {
                           children: [
                             if (showPermissionButton)
                               ElevatedButton(
-                                onPressed: () =>
-                                    device.deviceManager.requestPermissions(),
+                                onPressed: () => device.deviceManager.requestPermissions(),
                                 child: const Text('Request Permissions'),
                               ),
                             if (showScanButton)
                               ElevatedButton(
                                 onPressed: () async {
-                                  final selectedDevice =
-                                      await Navigator.of(context)
-                                          .push<ble.DiscoveredDevice?>(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  BLEScannerPage(),
-                                            ),
-                                          );
+                                  final selectedDevice = await Navigator.of(context).push<ble.DiscoveredDevice?>(
+                                    MaterialPageRoute(builder: (context) => BLEScannerPage()),
+                                  );
                                   if (selectedDevice != null) {
                                     setState(() {
                                       device.pairWithDevice(selectedDevice);
@@ -112,10 +97,7 @@ class DevicesListPageState extends State<DevicesListPage> {
                                 child: const Text('Scan for Devices'),
                               ),
                             if (showConnectButton)
-                              ElevatedButton(
-                                onPressed: () => device.connectToDevice(),
-                                child: const Text('Connect'),
-                              ),
+                              ElevatedButton(onPressed: () => device.connectToDevice(), child: const Text('Connect')),
                           ],
                         ),
                       ),

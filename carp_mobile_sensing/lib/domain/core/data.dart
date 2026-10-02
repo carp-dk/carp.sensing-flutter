@@ -31,13 +31,11 @@ class FileData extends Data {
   FileData({required this.filename, this.upload = true}) : super();
 
   @override
-  bool equivalentTo(Data other) =>
-      other is FileData && filename == other.filename;
+  bool equivalentTo(Data other) => other is FileData && filename == other.filename;
 
   @override
   Function get fromJsonFunction => _$FileDataFromJson;
-  factory FileData.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<FileData>(json);
+  factory FileData.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<FileData>(json);
   @override
   Map<String, dynamic> toJson() => _$FileDataToJson(this);
 }
@@ -68,27 +66,17 @@ class CompletedAppTask extends CompletedTask {
 
   /// Creates a completed app task with the given `taskName` and [taskType],
   /// and optional `taskData`.
-  CompletedAppTask({
-    required super.taskName,
-    required this.taskType,
-    super.taskData,
-  }) : super() {
+  CompletedAppTask({required super.taskName, required this.taskType, super.taskData}) : super() {
     completedAt = DateTime.now().toUtc();
   }
 
   /// Creates a completed app task based on the given [userTask].
   CompletedAppTask.fromUserTask(UserTask userTask)
-    : this(
-        taskName: userTask.name,
-        taskType: userTask.type,
-        taskData: userTask.result,
-      );
+    : this(taskName: userTask.name, taskType: userTask.type, taskData: userTask.result);
 
   @override
   bool equivalentTo(Data other) =>
-      other is CompletedAppTask &&
-      taskName == other.taskName &&
-      taskType == other.taskType;
+      other is CompletedAppTask && taskName == other.taskName && taskType == other.taskType;
 
   // note that the jsonType is overridden to include the task type
   // in the form of 'completedapptask.<taskType>'
@@ -97,8 +85,7 @@ class CompletedAppTask extends CompletedTask {
 
   @override
   Function get fromJsonFunction => _$CompletedAppTaskFromJson;
-  factory CompletedAppTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<CompletedAppTask>(json);
+  factory CompletedAppTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<CompletedAppTask>(json);
   @override
   Map<String, dynamic> toJson() => _$CompletedAppTaskToJson(this);
 }

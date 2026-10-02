@@ -224,10 +224,8 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
       "Upload to Firestore started - path : '$firebasePath', filename : '$filename'",
     );
 
-    final Reference ref = FirebaseStorage.instance
-        .ref()
-        .child(firebasePath)
-        .child(filename);
+    final Reference ref =
+        FirebaseStorage.instance.ref().child(firebasePath).child(filename);
     final File file = new File(localFilePath);
     final String deviceID = DeviceInfo().deviceID.toString();
     final String? userID = (await user)!.email;
@@ -384,7 +382,7 @@ class FirebaseDataManagerEvent extends DataManagerEvent {
 
   /// Creates an event of [type], with an optional local [path] and [firebaseUri].
   FirebaseDataManagerEvent(String type, [this.path, this.firebaseUri])
-    : super(type);
+      : super(type);
 
   String toString() =>
       'FirebaseDataManagerEvent - type: $type, path: $path, firebaseUri: $firebaseUri';

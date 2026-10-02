@@ -50,11 +50,7 @@ class FileUploadTask extends CarpServiceTask {
   /// The `filename` and `size` entries are added when the upload starts.
   late Map<String, String> metadata;
 
-  FileUploadTask._(
-    FileStorageReference reference,
-    this.file, [
-    Map<String, String>? metadata,
-  ]) : super._(reference) {
+  FileUploadTask._(FileStorageReference reference, this.file, [Map<String, String>? metadata]) : super._(reference) {
     this.metadata = (metadata == null) ? {} : metadata;
   }
 
@@ -87,8 +83,7 @@ class FileUploadTask extends CarpServiceTask {
 
     if (reference.service.study != null) {
       // add deployment id if available
-      request.fields['deployment_id'] =
-          reference.service.study!.studyDeploymentId;
+      request.fields['deployment_id'] = reference.service.study!.studyDeploymentId;
     }
 
     request.files.add(ClonableMultipartFile.fromFileSync(file.path));
@@ -96,8 +91,7 @@ class FileUploadTask extends CarpServiceTask {
     httpr.send(request).then((http.StreamedResponse response) {
       response.stream.toStringStream().first.then((body) {
         final int httpStatusCode = response.statusCode;
-        final Map<String, dynamic> responseJson =
-            json.decode(body) as Map<String, dynamic>;
+        final Map<String, dynamic> responseJson = json.decode(body) as Map<String, dynamic>;
 
         debugPrint(toJsonString(responseJson));
 
@@ -117,10 +111,7 @@ class FileUploadTask extends CarpServiceTask {
             {
               _state = TaskStateType.failure;
               _completer.completeError(HTTPStatus(httpStatusCode));
-              throw CarpServiceRequestException.fromHttpStatus(
-                httpStatusCode,
-                responseJson,
-              );
+              throw CarpServiceRequestException.fromHttpStatus(httpStatusCode, responseJson);
             }
         }
       });
@@ -147,8 +138,7 @@ class FileDownloadTask extends CarpServiceTask {
   /// The file has to be created before starting the download.
   File file;
 
-  FileDownloadTask._(FileStorageReference reference, this.file)
-    : super._(reference);
+  FileDownloadTask._(FileStorageReference reference, this.file) : super._(reference);
 
   final Completer<int> _completer = Completer<int>();
 
@@ -182,14 +172,10 @@ class FileDownloadTask extends CarpServiceTask {
         default:
           {
             _state = TaskStateType.failure;
-            final Map<String, dynamic> responseJson =
-                json.decode(response.body) as Map<String, dynamic>;
+            final Map<String, dynamic> responseJson = json.decode(response.body) as Map<String, dynamic>;
 
             _completer.completeError(HTTPStatus(httpStatusCode));
-            throw CarpServiceRequestException.fromHttpStatus(
-              httpStatusCode,
-              responseJson,
-            );
+            throw CarpServiceRequestException.fromHttpStatus(httpStatusCode, responseJson);
           }
       }
     });
@@ -215,9 +201,7 @@ class CarpFileResponse {
     : id = map['id'] as int,
       storageName = map['storage_name'].toString(),
       originalName = map['original_name'].toString(),
-      metadata = (map['metadata'] != null)
-          ? map['metadata'] as Map<String, dynamic>
-          : {},
+      metadata = (map['metadata'] != null) ? map['metadata'] as Map<String, dynamic> : {},
       studyId = map['study_id'].toString(),
       createdBy = map['created_by'].toString(),
       createdAt = DateTime.parse(map['created_at'].toString()),

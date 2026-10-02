@@ -42,14 +42,12 @@ class AirQuality extends Data {
       airQualityIndex = airQualityData.airQualityIndex,
       source = airQualityData.source,
       place = airQualityData.place,
-      airQualityLevel =
-          AirQualityLevel.values[airQualityData.airQualityLevel.index],
+      airQualityLevel = AirQualityLevel.values[airQualityData.airQualityLevel.index],
       super();
 
   @override
   Function get fromJsonFunction => _$AirQualityFromJson;
-  factory AirQuality.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AirQuality>(json);
+  factory AirQuality.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AirQuality>(json);
   @override
   Map<String, dynamic> toJson() => _$AirQualityToJson(this);
 
@@ -58,12 +56,4 @@ class AirQuality extends Data {
 }
 
 /// Health category of an air quality index, following the WAQI scale.
-enum AirQualityLevel {
-  UNKNOWN,
-  GOOD,
-  MODERATE,
-  UNHEALTHY_FOR_SENSITIVE_GROUPS,
-  UNHEALTHY,
-  VERY_UNHEALTHY,
-  HAZARDOUS,
-}
+enum AirQualityLevel { UNKNOWN, GOOD, MODERATE, UNHEALTHY_FOR_SENSITIVE_GROUPS, UNHEALTHY, VERY_UNHEALTHY, HAZARDOUS }

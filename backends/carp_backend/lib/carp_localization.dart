@@ -34,18 +34,15 @@ class CarpLocalizations {
   ///
   /// Returns [key] itself if it has no translation.
   /// Throws if [load] has not completed or found no translations.
-  String? translate(String key) =>
-      (_localizedStrings!.containsKey(key)) ? _localizedStrings![key] : key;
+  String? translate(String key) => (_localizedStrings!.containsKey(key)) ? _localizedStrings![key] : key;
 
   /// The delegate to add to `MaterialApp.localizationsDelegates`.
   ///
   /// Supports every locale (see [CarpResourceManager.isSupported]) and never reloads.
-  static const LocalizationsDelegate<CarpLocalizations> delegate =
-      _CarpLocalizationsDelegate();
+  static const LocalizationsDelegate<CarpLocalizations> delegate = _CarpLocalizationsDelegate();
 }
 
-class _CarpLocalizationsDelegate
-    extends LocalizationsDelegate<CarpLocalizations> {
+class _CarpLocalizationsDelegate extends LocalizationsDelegate<CarpLocalizations> {
   // This delegate instance will never change (it doesn't even have fields!)
   // It can provide a constant constructor.
   const _CarpLocalizationsDelegate();

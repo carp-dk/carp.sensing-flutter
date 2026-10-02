@@ -6,14 +6,7 @@ part of 'survey.dart';
 /// use it as the [RPAppTask.rpTask].
 RPOrderedTask who5Task = RPOrderedTask(
   identifier: "who5_task",
-  steps: [
-    _who5Question1,
-    _who5Question2,
-    _who5Question3,
-    _who5Question4,
-    _who5Question5,
-    _completionStep,
-  ],
+  steps: [_who5Question1, _who5Question2, _who5Question3, _who5Question4, _who5Question5, _completionStep],
 );
 
 List<RPChoice> _who5Choices = [

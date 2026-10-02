@@ -13,10 +13,7 @@ void main() async {
   SamplingPackageRegistry().register(MediaSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Audio Sensing Example',
-  );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Audio Sensing Example');
 
   // Define which devices are used for data collection
   // In this case, its only this smartphone
@@ -46,22 +43,10 @@ void main() async {
   );
 
   // Sample an audio recording
-  var audioTask = BackgroundTask(
-    measures: [Measure(type: MediaSamplingPackage.AUDIO)],
-  );
+  var audioTask = BackgroundTask(measures: [Measure(type: MediaSamplingPackage.AUDIO)]);
 
   // Start the audio task after 20 secs and stop it after 40 secs
   protocol
-    ..addTaskControl(
-      DelayedTrigger(delay: const Duration(seconds: 20)),
-      audioTask,
-      phone,
-      Control.Start,
-    )
-    ..addTaskControl(
-      DelayedTrigger(delay: const Duration(seconds: 40)),
-      audioTask,
-      phone,
-      Control.Stop,
-    );
+    ..addTaskControl(DelayedTrigger(delay: const Duration(seconds: 20)), audioTask, phone, Control.Start)
+    ..addTaskControl(DelayedTrigger(delay: const Duration(seconds: 40)), audioTask, phone, Control.Stop);
 }

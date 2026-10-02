@@ -106,12 +106,7 @@ class CarpServiceRequestException extends CarpServiceException {
   /// The URL path that caused the exception.
   String? path;
 
-  CarpServiceRequestException(
-    super.message, {
-    required this.httpStatus,
-    this.exception,
-    this.path,
-  });
+  CarpServiceRequestException(super.message, {required this.httpStatus, this.exception, this.path});
 
   /// Creates the matching exception from an HTTP [httpStatusCode] and the
   /// decoded JSON [response] body.
@@ -123,10 +118,7 @@ class CarpServiceRequestException extends CarpServiceException {
   /// There are two types of error messages - from CAWS and from NGINX.
   /// CAWS errors contain 'path' and 'exception' fields,
   /// whereas NGINX errors contain an 'instance' field.
-  factory CarpServiceRequestException.fromHttpStatus(
-    int httpStatusCode,
-    dynamic response,
-  ) {
+  factory CarpServiceRequestException.fromHttpStatus(int httpStatusCode, dynamic response) {
     String? message = 'Unknown error', exception, path;
 
     if (response is Map<String, dynamic>) {
@@ -147,23 +139,11 @@ class CarpServiceRequestException extends CarpServiceException {
     }
 
     return switch (httpStatusCode) {
-      HttpStatus.badRequest => CarpBadRequestException(
-        message,
-        exception: exception,
-        path: path,
-      ),
-      HttpStatus.unauthorized || HttpStatus.forbidden =>
-        CarpUnauthorizedException(message, exception: exception, path: path),
-      HttpStatus.notFound => CarpNotFoundException(
-        message,
-        exception: exception,
-        path: path,
-      ),
-      HttpStatus.internalServerError => CarpInternalServerException(
-        message,
-        exception: exception,
-        path: path,
-      ),
+      HttpStatus.badRequest => CarpBadRequestException(message, exception: exception, path: path),
+      HttpStatus.unauthorized ||
+      HttpStatus.forbidden => CarpUnauthorizedException(message, exception: exception, path: path),
+      HttpStatus.notFound => CarpNotFoundException(message, exception: exception, path: path),
+      HttpStatus.internalServerError => CarpInternalServerException(message, exception: exception, path: path),
       _ => CarpServiceRequestException(
         message,
         httpStatus: HTTPStatus(httpStatusCode),
@@ -240,8 +220,7 @@ class HTTPStatus {
 
   /// The reason phrase for [httpResponseCode], or "Unknown Status Code" if
   /// it is not in [httpStatusPhrases].
-  String get httpReasonPhrase =>
-      httpStatusPhrases[httpResponseCode] ?? "Unknown Status Code";
+  String get httpReasonPhrase => httpStatusPhrases[httpResponseCode] ?? "Unknown Status Code";
 
   const HTTPStatus(this.httpResponseCode);
 

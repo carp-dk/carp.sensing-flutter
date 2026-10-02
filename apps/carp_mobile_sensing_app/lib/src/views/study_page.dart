@@ -23,18 +23,11 @@ class StudyPageState extends State<StudyPage> {
             floating: false,
             snap: false,
             actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.refresh, size: 30),
-                tooltip: 'Refresh',
-                onPressed: _refreshDeploymentStatus,
-              ),
+              IconButton(icon: Icon(Icons.refresh, size: 30), tooltip: 'Refresh', onPressed: _refreshDeploymentStatus),
             ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text(model.title),
-              background: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[model.image],
-              ),
+              background: Stack(fit: StackFit.expand, children: <Widget>[model.image]),
             ),
           ),
           SliverList(delegate: SliverChildListDelegate(_studyPanel())),
@@ -45,18 +38,14 @@ class StudyPageState extends State<StudyPage> {
 
   /// Show an info [message] in a snackbar.
   void _showInfo(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message, softWrap: true)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message, softWrap: true)));
   }
 
   List<Widget> _studyPanel() {
     List<Widget> children = [];
 
     children.add(
-      AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark,
-        child: _studyControllerPanel(),
-      ),
+      AnnotatedRegion<SystemUiOverlayStyle>(value: SystemUiOverlayStyle.dark, child: _studyControllerPanel()),
     );
 
     for (var task in model.deployment?.tasks ?? <TaskConfiguration>[]) {
@@ -91,44 +80,20 @@ class StudyPageState extends State<StudyPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _StudyControllerLine(model.description),
-                    _StudyControllerLine(
-                      model.studyStatus?.name,
-                      heading: 'Study Status',
-                    ),
-                    _StudyControllerLine(
-                      bloc.deploymentMode.name.toUpperCase(),
-                      heading: 'Deployment Mode',
-                    ),
-                    _StudyControllerLine(
-                      model.studyDeploymentId,
-                      heading: 'Deployment ID',
-                    ),
-                    _StudyControllerLine(
-                      model.deviceRoleName,
-                      heading: 'Device Role',
-                    ),
-                    _StudyControllerLine(
-                      model.participantRoleName,
-                      heading: 'Participant Role',
-                    ),
-                    _StudyControllerLine(
-                      model.dataEndpointType,
-                      heading: 'Data Endpoint',
-                    ),
+                    _StudyControllerLine(model.studyStatus?.name, heading: 'Study Status'),
+                    _StudyControllerLine(bloc.deploymentMode.name.toUpperCase(), heading: 'Deployment Mode'),
+                    _StudyControllerLine(model.studyDeploymentId, heading: 'Deployment ID'),
+                    _StudyControllerLine(model.deviceRoleName, heading: 'Device Role'),
+                    _StudyControllerLine(model.participantRoleName, heading: 'Participant Role'),
+                    _StudyControllerLine(model.dataEndpointType, heading: 'Data Endpoint'),
                     StreamBuilder<ExecutorState>(
                       stream: model.executorStateEvents,
                       initialData: ExecutorState.Created,
-                      builder: (_, __) => _StudyControllerLine(
-                        model.executorState.name,
-                        heading: 'Executor State',
-                      ),
+                      builder: (_, __) => _StudyControllerLine(model.executorState.name, heading: 'Executor State'),
                     ),
                     StreamBuilder<Measurement>(
                       stream: model.measurements,
-                      builder: (_, _) => _StudyControllerLine(
-                        '${model.samplingSize}',
-                        heading: 'Sample Size',
-                      ),
+                      builder: (_, _) => _StudyControllerLine('${model.samplingSize}', heading: 'Sample Size'),
                     ),
                   ],
                 ),
@@ -183,8 +148,7 @@ class _TaskPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final List<Widget> children =
-        task!.measures?.map((measure) => _MeasureLine(measure)).toList() ?? [];
+    final List<Widget> children = task!.measures?.map((measure) => _MeasureLine(measure)).toList() ?? [];
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -201,10 +165,7 @@ class _TaskPanel extends StatelessWidget {
               Row(
                 children: <Widget>[
                   Icon(Icons.description, size: 40, color: CachetColors.ORANGE),
-                  Text(
-                    '  ${task!.name}',
-                    style: themeData.textTheme.titleLarge,
-                  ),
+                  Text('  ${task!.name}', style: themeData.textTheme.titleLarge),
                 ],
               ),
               Column(children: children),
@@ -230,38 +191,25 @@ class _MeasureLine extends StatelessWidget {
         : Icon(Icons.error, size: 25);
 
     final String name =
-        SamplingPackageRegistry()
-            .samplingSchemes[measure.type]
-            ?.dataType
-            .displayName ??
+        SamplingPackageRegistry().samplingSchemes[measure.type]?.dataType.displayName ??
         measure.type.split('.').last.toUpperCase();
 
     final List<Widget> columnChildren = [];
     columnChildren.add(Text(name));
-    columnChildren.add(
-      Text(measure.toString(), style: themeData.textTheme.bodySmall),
-    );
+    columnChildren.add(Text(measure.toString(), style: themeData.textTheme.bodySmall));
 
     final List<Widget> rowChildren = [];
-    rowChildren.add(
-      SizedBox(width: 72.0, child: IconButton(icon: icon, onPressed: null)),
-    );
+    rowChildren.add(SizedBox(width: 72.0, child: IconButton(icon: icon, onPressed: null)));
 
     rowChildren.addAll([
       Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: columnChildren,
-        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: columnChildren),
       ),
     ]);
     return MergeSemantics(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: rowChildren,
-        ),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: rowChildren),
       ),
     );
   }

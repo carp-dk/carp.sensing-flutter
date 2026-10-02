@@ -36,10 +36,7 @@ abstract class DataStreamService {
   ///
   /// Throws IllegalStateException when data streams for [studyDeploymentId]
   /// have been closed.
-  Future<void> appendToDataStreams(
-    String studyDeploymentId,
-    List<DataStreamBatch> batch,
-  );
+  Future<void> appendToDataStreams(String studyDeploymentId, List<DataStreamBatch> batch);
 
   /// Retrieve all data points in [dataStream] that fall within the inclusive range
   /// defined by [fromSequenceId] and [toSequenceIdInclusive].

@@ -24,10 +24,7 @@ class LoadingPage extends StatelessWidget {
     // Request location "always" permissions upfront.
     // Note that this is a two-step process on Android, where the user first has
     // to grant "when in use" permissions, and then "always" permissions.
-    await SmartPhoneClientManager().requestPermissions([
-      Permission.locationWhenInUse,
-      Permission.locationAlways,
-    ]);
+    await SmartPhoneClientManager().requestPermissions([Permission.locationWhenInUse, Permission.locationAlways]);
 
     // Initialize and use the CAWS backend if not in local deployment mode
     if (bloc.deploymentMode != DeploymentMode.local) {
@@ -49,10 +46,7 @@ class LoadingPage extends StatelessWidget {
           ? Scaffold(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [CircularProgressIndicator()],
-                ),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [CircularProgressIndicator()]),
               ),
             )
           : HomePage(),

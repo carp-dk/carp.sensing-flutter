@@ -96,10 +96,7 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
   /// The first collection fetches data [days] days back in time. Defaults to
   /// 30 days, which is the maximum that Google Health Connect allows. Later
   /// collections start from the last time data was collected.
-  static Measure getHealthMeasure(
-    List<HealthDataType> types, [
-    int days = 30,
-  ]) =>
+  static Measure getHealthMeasure(List<HealthDataType> types, [int days = 30]) =>
       Measure(type: HealthSamplingPackage.HEALTH)
         ..overrideSamplingConfiguration = HealthSamplingConfiguration(
           past: Duration(days: days),
@@ -107,20 +104,12 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
         );
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: HEALTH,
-            displayName: "Health Data",
-            timeType: DataTimeType.TIME_SPAN,
-          ),
-          HealthSamplingConfiguration(
-            past: Duration(days: 30),
-            healthDataTypes: [HealthDataType.STEPS],
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: HEALTH, displayName: "Health Data", timeType: DataTimeType.TIME_SPAN),
+      HealthSamplingConfiguration(past: Duration(days: 30), healthDataTypes: [HealthDataType.STEPS]),
+    ),
+  ]);
 
   @override
   Probe? create(String type) => type == HEALTH ? HealthProbe() : null;
@@ -144,10 +133,7 @@ class HealthSamplingPackage extends SmartphoneSamplingPackage {
 
     // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
     // the health service used the carp_core device namespace.
-    FromJsonFactory().register(
-      HealthService(),
-      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.HealthService',
-    );
+    FromJsonFactory().register(HealthService(), type: '${DeviceConfiguration.DEVICE_NAMESPACE}.HealthService');
 
     AppTaskController().registerUserTaskFactory(HealthUserTaskFactory());
   }

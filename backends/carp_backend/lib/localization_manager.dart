@@ -25,10 +25,7 @@ abstract class LocalizationManager {
   /// If [refresh] is `true`, any local cache is skipped.
   ///
   /// Returns `null` if there are no translations for [locale].
-  Future<Map<String, String>?> getLocalizations(
-    Locale locale, {
-    bool refresh = false,
-  });
+  Future<Map<String, String>?> getLocalizations(Locale locale, {bool refresh = false});
 
   /// Stores the [localizations] for [locale].
   ///
@@ -36,10 +33,7 @@ abstract class LocalizationManager {
   /// for example, the Danish translation is named `da`.
   ///
   /// Returns `true` if successful, `false` otherwise.
-  Future<bool> setLocalizations(
-    Locale locale,
-    Map<String, dynamic> localizations,
-  );
+  Future<bool> setLocalizations(Locale locale, Map<String, dynamic> localizations);
 
   /// Deletes the translations for [locale].
   ///

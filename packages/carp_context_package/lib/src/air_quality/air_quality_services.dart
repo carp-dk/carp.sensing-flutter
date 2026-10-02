@@ -14,8 +14,7 @@ part of '../../carp_context_package.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AirQualityService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of an air quality service.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.AirQualityService';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.AirQualityService';
 
   /// The default role name for an air quality service.
   static const String DEFAULT_ROLE_NAME = 'Air Quality Service';
@@ -23,13 +22,11 @@ class AirQualityService extends ServiceConfiguration<ServiceRegistration> {
   /// API key for the WAQI API. Get one at https://aqicn.org/data-platform/token/.
   String apiKey;
 
-  AirQualityService({String? roleName, required this.apiKey})
-    : super(roleName: roleName ?? DEFAULT_ROLE_NAME);
+  AirQualityService({String? roleName, required this.apiKey}) : super(roleName: roleName ?? DEFAULT_ROLE_NAME);
 
   @override
   Function get fromJsonFunction => _$AirQualityServiceFromJson;
-  factory AirQualityService.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AirQualityService>(json);
+  factory AirQualityService.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AirQualityService>(json);
   @override
   Map<String, dynamic> toJson() => _$AirQualityServiceToJson(this);
 }
@@ -37,8 +34,7 @@ class AirQualityService extends ServiceConfiguration<ServiceRegistration> {
 /// A [DeviceManager] for the [AirQualityService].
 ///
 /// Connects when the configuration has an API key.
-class AirQualityServiceManager
-    extends ContextServiceManager<AirQualityService> {
+class AirQualityServiceManager extends ContextServiceManager<AirQualityService> {
   waqi.AirQuality? _service;
 
   /// A handle to the WAQI plugin, created on first use.
@@ -60,6 +56,5 @@ class AirQualityServiceManager
   bool get canConnect => configuration?.apiKey != null;
 
   @override
-  Future<DeviceStatus> onConnect() async =>
-      (service != null) ? DeviceStatus.connected : DeviceStatus.disconnected;
+  Future<DeviceStatus> onConnect() async => (service != null) ? DeviceStatus.connected : DeviceStatus.disconnected;
 }

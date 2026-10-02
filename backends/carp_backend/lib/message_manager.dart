@@ -11,11 +11,7 @@ part of 'carp_backend.dart';
 ///
 /// Messages are stored and fetched by a [MessageManager], such as
 /// [CarpResourceManager].
-@JsonSerializable(
-  fieldRename: FieldRename.snake,
-  includeIfNull: false,
-  explicitToJson: true,
-)
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false, explicitToJson: true)
 class Message {
   /// ID of the message. A UUID is generated if none is given.
   late String id;
@@ -67,8 +63,7 @@ class Message {
     this.timestamp = timestamp ?? DateTime.now();
   }
 
-  factory Message.fromJson(Map<String, dynamic> json) =>
-      _$MessageFromJson(json);
+  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
   Map<String, dynamic> toJson() => _$MessageToJson(this);
 
   @override
@@ -96,11 +91,7 @@ abstract class MessageManager {
   /// If [end] is `null`, all messages up to now are included.
   ///
   /// The list is **not** sorted. Sorting, e.g. by date, is up to the app.
-  Future<List<Message>> getMessages({
-    DateTime? start,
-    DateTime? end,
-    int? count = 20,
-  });
+  Future<List<Message>> getMessages({DateTime? start, DateTime? end, int? count = 20});
 
   /// Stores [message], replacing any message with the same [Message.id].
   ///

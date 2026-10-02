@@ -91,12 +91,7 @@ abstract class BLEDeviceManager<
   /// Optionally sets its [bleName], [serviceUuids], and [manufacturerData].
   /// Sets [status] to [DeviceStatus.paired] if [onPaired] returns true.
   @nonVirtual
-  void pair({
-    required String bleAddress,
-    String? bleName,
-    List<String>? serviceUuids,
-    List<int>? manufacturerData,
-  }) {
+  void pair({required String bleAddress, String? bleName, List<String>? serviceUuids, List<int>? manufacturerData}) {
     this.bleAddress = bleAddress;
     this.bleName = bleName;
     this.serviceUuids = serviceUuids ?? [];
@@ -130,31 +125,28 @@ abstract class BLEDeviceManager<
 
   @override
   @mustCallSuper
-  Future<void> onRequestPermissions() =>
-      SmartPhoneClientManager().requestPermissions(
-        Platform.isAndroid
-            ? [
-                Permission.bluetoothScan,
-                Permission.bluetoothConnect,
-                // BLE scanning on Android also requires location permission.
-                Permission.locationWhenInUse,
-              ]
-            : [Permission.bluetooth],
-      );
+  Future<void> onRequestPermissions() => SmartPhoneClientManager().requestPermissions(
+    Platform.isAndroid
+        ? [
+            Permission.bluetoothScan,
+            Permission.bluetoothConnect,
+            // BLE scanning on Android also requires location permission.
+            Permission.locationWhenInUse,
+          ]
+        : [Permission.bluetooth],
+  );
 }
 
 /// The device manager for this phone, the primary device.
 ///
 /// Always connectable. Supports the data types of all registered
 /// [SmartphoneSamplingPackage]s, and reports the phone's battery level.
-class SmartphoneDeviceManager
-    extends HardwareDeviceManager<Smartphone, SmartphoneRegistration> {
+class SmartphoneDeviceManager extends HardwareDeviceManager<Smartphone, SmartphoneRegistration> {
   int _batteryLevel = 0;
   final _battery = Battery();
   final Set<DataType> _supportedDataTypes = {};
 
-  SmartphoneDeviceManager([Smartphone? configuration])
-    : super(Smartphone.DEVICE_TYPE, configuration: configuration);
+  SmartphoneDeviceManager([Smartphone? configuration]) : super(Smartphone.DEVICE_TYPE, configuration: configuration);
 
   @override
   Set<DataType> get supportedDataTypes => _supportedDataTypes;
@@ -167,9 +159,7 @@ class SmartphoneDeviceManager
     deviceId: DeviceInfoService().deviceID,
     deviceDisplayName: displayName,
     platform: DeviceInfoService().platform,
-    batteryChargingState: HardwareDeviceRegistration.parseBatteryLevel(
-      batteryLevel,
-    ),
+    batteryChargingState: HardwareDeviceRegistration.parseBatteryLevel(batteryLevel),
     hardwareName: DeviceInfoService().hardware,
     deviceManufacturer: DeviceInfoService().deviceManufacturer,
     deviceModel: DeviceInfoService().deviceModel,
@@ -193,9 +183,7 @@ class SmartphoneDeviceManager
     // find the supported data types
     for (var package in SamplingPackageRegistry().packages) {
       if (package is SmartphoneSamplingPackage) {
-        _supportedDataTypes.addAll(
-          package.dataTypes.map((type) => DataType.fromString(type.type)),
-        );
+        _supportedDataTypes.addAll(package.dataTypes.map((type) => DataType.fromString(type.type)));
       }
     }
   }
@@ -204,8 +192,7 @@ class SmartphoneDeviceManager
   int get batteryLevel => _batteryLevel;
 
   @override
-  Stream<int> get batteryEvents =>
-      _battery.onBatteryStateChanged.map((_) => _batteryLevel);
+  Stream<int> get batteryEvents => _battery.onBatteryStateChanged.map((_) => _batteryLevel);
 
   @override
   bool get canConnect => true; // can always connect to the phone

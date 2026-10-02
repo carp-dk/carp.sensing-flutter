@@ -73,8 +73,7 @@ void main() {
   test('JSON string -> A & B & C', () async {
     const a = '{"__type": "A", "index": 1 }';
     const b = '{"__type": "dk.carp.B", "index": 2, "str": "abc" }';
-    const c =
-        '{"__type": "C", "index": 3, "b": {"__type": "dk.carp.B", "index": 2, "str": "abc"} }';
+    const c = '{"__type": "C", "index": 3, "b": {"__type": "dk.carp.B", "index": 2, "str": "abc"} }';
 
     var newA = A.fromJson(json.decode(a) as Map<String, dynamic>);
     var newB = B.fromJson(json.decode(b) as Map<String, dynamic>);
@@ -91,8 +90,7 @@ void main() {
 
   test('JSON string -> missing type', () async {
     // in this case the B __type is wrong (should be "dk.carp.B" and not just "B")
-    const c =
-        '{"__type": "C", "index": 3, "b": {"__type": "B", "index": 2, "str": "abc"} }';
+    const c = '{"__type": "C", "index": 3, "b": {"__type": "B", "index": 2, "str": "abc"} }';
 
     var newC = C.fromJson(json.decode(c) as Map<String, dynamic>);
 

@@ -9,8 +9,7 @@ part of '../../data.dart';
 
 /// An abstract RPC request to a [DataStreamService].
 abstract class DataStreamServiceRequest extends ServiceRequest {
-  final String _infrastructurePackageNamespace =
-      'dk.cachet.carp.data.infrastructure';
+  final String _infrastructurePackageNamespace = 'dk.cachet.carp.data.infrastructure';
 
   @override
   String get apiVersion => DataStreamService.API_VERSION;
@@ -18,8 +17,7 @@ abstract class DataStreamServiceRequest extends ServiceRequest {
   DataStreamServiceRequest() : super();
 
   @override
-  String get jsonType =>
-      '$_infrastructurePackageNamespace.DataStreamServiceRequest.$runtimeType';
+  String get jsonType => '$_infrastructurePackageNamespace.DataStreamServiceRequest.$runtimeType';
 }
 
 /// An RPC request for [DataStreamService.openDataStreams].
@@ -30,8 +28,7 @@ class OpenDataStreams extends DataStreamServiceRequest {
 
   @override
   Function get fromJsonFunction => _$OpenDataStreamsFromJson;
-  factory OpenDataStreams.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<OpenDataStreams>(json);
+  factory OpenDataStreams.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<OpenDataStreams>(json);
   @override
   Map<String, dynamic> toJson() => _$OpenDataStreamsToJson(this);
 }
@@ -59,16 +56,11 @@ class GetDataStream extends DataStreamServiceRequest {
   int fromSequenceId;
   int? toSequenceIdInclusive;
 
-  GetDataStream(
-    this.dataStream,
-    this.fromSequenceId, [
-    this.toSequenceIdInclusive,
-  ]) : super();
+  GetDataStream(this.dataStream, this.fromSequenceId, [this.toSequenceIdInclusive]) : super();
 
   @override
   Function get fromJsonFunction => _$GetDataStreamFromJson;
-  factory GetDataStream.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<GetDataStream>(json);
+  factory GetDataStream.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<GetDataStream>(json);
   @override
   Map<String, dynamic> toJson() => _$GetDataStreamToJson(this);
 }
@@ -81,8 +73,7 @@ class CloseDataStreams extends DataStreamServiceRequest {
 
   @override
   Function get fromJsonFunction => _$CloseDataStreamsFromJson;
-  factory CloseDataStreams.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<CloseDataStreams>(json);
+  factory CloseDataStreams.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<CloseDataStreams>(json);
   @override
   Map<String, dynamic> toJson() => _$CloseDataStreamsToJson(this);
 }
@@ -95,8 +86,7 @@ class RemoveDataStreams extends DataStreamServiceRequest {
 
   @override
   Function get fromJsonFunction => _$RemoveDataStreamsFromJson;
-  factory RemoveDataStreams.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<RemoveDataStreams>(json);
+  factory RemoveDataStreams.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<RemoveDataStreams>(json);
   @override
   Map<String, dynamic> toJson() => _$RemoveDataStreamsToJson(this);
 }

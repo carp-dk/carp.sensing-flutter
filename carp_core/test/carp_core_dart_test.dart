@@ -54,10 +54,7 @@ void main() {
     );
 
     protocol.addTaskControl(
-      ElapsedTimeTrigger(
-        sourceDeviceRoleName: phone_1.roleName,
-        elapsedTime: const Duration(hours: 1),
-      ),
+      ElapsedTimeTrigger(sourceDeviceRoleName: phone_1.roleName, elapsedTime: const Duration(hours: 1)),
       BackgroundTask(
         // name: 'Start Heart Monitor',
         duration: const Duration(hours: 1),
@@ -115,23 +112,17 @@ void main() {
   });
 
   test('Invitation & Registration -> JSON', () async {
-    StudyProtocol trackPatientStudy = StudyProtocol(
-      ownerId: 'abc@dtu.dk',
-      name: 'Tracking',
-    )..addPrimaryDevice(Smartphone());
+    StudyProtocol trackPatientStudy = StudyProtocol(ownerId: 'abc@dtu.dk', name: 'Tracking')
+      ..addPrimaryDevice(Smartphone());
 
-    Smartphone patientPhone =
-        trackPatientStudy.primaryDevices.first as Smartphone;
+    Smartphone patientPhone = trackPatientStudy.primaryDevices.first as Smartphone;
 
     // This is called by `StudyService` when deploying a participant group.
     var invitation = ParticipantInvitation(
       participantId: const Uuid().v4(),
       assignedRoles: AssignedTo.all(),
       identity: EmailAccountIdentity("test@test.com"),
-      invitation: StudyInvitation(
-        "Movement study",
-        "This study tracks your movements.",
-      ),
+      invitation: StudyInvitation("Movement study", "This study tracks your movements."),
     );
 
     print(toJsonString(invitation));
@@ -151,45 +142,29 @@ void main() {
   });
 
   test('JSON -> StudyProtocol', () async {
-    final loadedJson = File('test/json/carp.core-dart/study_protocol.json')
-        .readAsStringSync();
+    final loadedJson = File('test/json/carp.core-dart/study_protocol.json').readAsStringSync();
 
-    final loadedProtocol = StudyProtocol.fromJson(
-      json.decode(loadedJson) as Map<String, dynamic>,
-    );
+    final loadedProtocol = StudyProtocol.fromJson(json.decode(loadedJson) as Map<String, dynamic>);
     print(toJsonString(loadedProtocol));
 
     expect(loadedProtocol.ownerId, protocol.ownerId);
-    expect(
-      loadedProtocol.primaryDevices.first.roleName,
-      protocol.primaryDevices.first.roleName,
-    );
+    expect(loadedProtocol.primaryDevices.first.roleName, protocol.primaryDevices.first.roleName);
     expect(loadedProtocol.triggers['1'], isA<ElapsedTimeTrigger>());
-    expect(
-      (loadedProtocol.triggers['1'] as ElapsedTimeTrigger).elapsedTime?.inHours,
-      1,
-    );
+    expect((loadedProtocol.triggers['1'] as ElapsedTimeTrigger).elapsedTime?.inHours, 1);
 
     final studyJson = toJsonString(loadedProtocol);
 
-    final protocolFromJson = StudyProtocol.fromJson(
-      json.decode(studyJson) as Map<String, dynamic>,
-    );
+    final protocolFromJson = StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
     expect(toJsonString(protocolFromJson), equals(studyJson));
   });
 
   test('JSON -> Invitations', () async {
-    final loadedJson = File('test/json/carp.core-dart/invitations.json')
-        .readAsStringSync();
+    final loadedJson = File('test/json/carp.core-dart/invitations.json').readAsStringSync();
 
     final jsonList = json.decode(loadedJson) as List<dynamic>;
 
     final invitations = jsonList
-        .map(
-          (invitation) => ActiveParticipationInvitation.fromJson(
-            invitation as Map<String, dynamic>,
-          ),
-        )
+        .map((invitation) => ActiveParticipationInvitation.fromJson(invitation as Map<String, dynamic>))
         .toList();
 
     print(toJsonString(invitations));
@@ -206,11 +181,8 @@ void main() {
     //     macAddress: '00:00:00:00:00:00', deviceDisplayName: 'Test MAC Address');
     // print(toJsonString(macAddress));
 
-    final loadedJson = File('test/json/carp.core-dart/mac_address.json')
-        .readAsStringSync();
-    final loadedMacAddress = MACAddressDeviceRegistration.fromJson(
-      json.decode(loadedJson) as Map<String, dynamic>,
-    );
+    final loadedJson = File('test/json/carp.core-dart/mac_address.json').readAsStringSync();
+    final loadedMacAddress = MACAddressDeviceRegistration.fromJson(json.decode(loadedJson) as Map<String, dynamic>);
     expect(loadedMacAddress.macAddress, '00:00:00:00:00:00');
     expect(loadedMacAddress.deviceDisplayName, 'Test MAC Address');
 
@@ -222,39 +194,23 @@ void main() {
       time: const TimeOfDay(hour: 12),
       recurrenceRule: RecurrenceRule(Frequency.DAILY, interval: 2),
     );
-    expect(
-      st.recurrenceRule.toString(),
-      RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2').toString(),
-    );
+    expect(st.recurrenceRule.toString(), RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2').toString());
     print(st);
 
     st = ScheduledTrigger(
       time: const TimeOfDay(hour: 12),
-      recurrenceRule: RecurrenceRule(
-        Frequency.DAILY,
-        interval: 2,
-        end: End.count(3),
-      ),
+      recurrenceRule: RecurrenceRule(Frequency.DAILY, interval: 2, end: End.count(3)),
     );
-    expect(
-      st.recurrenceRule.toString(),
-      RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2;COUNT=3')
-          .toString(),
-    );
+    expect(st.recurrenceRule.toString(), RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2;COUNT=3').toString());
     print(st);
 
     st = ScheduledTrigger(
       time: const TimeOfDay(hour: 12),
-      recurrenceRule: RecurrenceRule(
-        Frequency.DAILY,
-        interval: 2,
-        end: End.until(const Duration(days: 30)),
-      ),
+      recurrenceRule: RecurrenceRule(Frequency.DAILY, interval: 2, end: End.until(const Duration(days: 30))),
     );
     expect(
       st.recurrenceRule.toString(),
-      RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2;UNTIL=2592000000')
-          .toString(),
+      RecurrenceRule.fromString('RRULE:FREQ=DAILY;INTERVAL=2;UNTIL=2592000000').toString(),
     );
     print(st);
   });
@@ -271,18 +227,12 @@ void main() {
       measurements: [
         Measurement(
           sensorStartTime: DateTime.now().millisecondsSinceEpoch,
-          data: Geolocation(
-            latitude: 55.68061908805645,
-            longitude: 12.582050313435703,
-          ),
+          data: Geolocation(latitude: 55.68061908805645, longitude: 12.582050313435703),
           // ..sensorSpecificData = SignalStrength(rssi: 23),
         ),
         Measurement(
           sensorStartTime: DateTime.now().millisecondsSinceEpoch,
-          data: Geolocation(
-            latitude: 55.680802203873114,
-            longitude: 12.581802212861367,
-          ),
+          data: Geolocation(latitude: 55.680802203873114, longitude: 12.581802212861367),
         ),
       ],
       triggerIds: {0},
@@ -300,7 +250,8 @@ void main() {
 
   test('WebTask', () async {
     var task = WebTask(
-      url: 'https://cans.cachet.dk/portal/playground/studies/\$DEPLOYMENT_ID/settings?participant=\$PARTICIPANT_ID&trigger_id=\$TRIGGER_ID',
+      url:
+          'https://cans.cachet.dk/portal/playground/studies/\$DEPLOYMENT_ID/settings?participant=\$PARTICIPANT_ID&trigger_id=\$TRIGGER_ID',
     );
 
     expect(
@@ -311,34 +262,23 @@ void main() {
 
   group('Study Deployment Status', () {
     test(' - Invited', () async {
-      String plainJson = File(
-        'test/json/carp.core-dart/study_deployment_status_invited.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/carp.core-dart/study_deployment_status_invited.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       print(toJsonString(status));
 
       expect(status.status, StudyDeploymentStatusTypes.Invited);
       var deviceStatus = status.getDeviceStatusByRoleName('Primary Phone');
-      expect(
-        deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length,
-        1,
-      );
+      expect(deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length, 1);
       expect(deviceStatus.canBeDeployed, true);
       expect(deviceStatus.canObtainDeviceDeployment, false);
       expect(deviceStatus.isReadyForDeployment, false);
     });
 
     test(' - Running', () async {
-      String plainJson = File(
-        'test/json/carp.core-dart/study_deployment_status_running.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/carp.core-dart/study_deployment_status_running.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       print(toJsonString(status));
 
       expect(status.status, StudyDeploymentStatusTypes.Running);
@@ -349,96 +289,66 @@ void main() {
     });
 
     test(' - Family - Invited', () async {
-      String plainJson = File(
-        'test/json/carp.core-dart/study_deployment_status_family_1.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/carp.core-dart/study_deployment_status_family_1.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       print(toJsonString(status));
 
       expect(status.status, StudyDeploymentStatusTypes.Invited);
       var deviceStatus = status.getDeviceStatusByRoleName("Father's Phone");
       expect(deviceStatus.status, DeviceDeploymentStatusTypes.Unregistered);
-      expect(
-        deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length,
-        2,
-      );
+      expect(deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length, 2);
       expect(deviceStatus.canBeDeployed, true);
       expect(deviceStatus.canObtainDeviceDeployment, false);
       expect(deviceStatus.isReadyForDeployment, false);
 
       deviceStatus = status.getDeviceStatusByRoleName("Mother's Phone");
       expect(deviceStatus.status, DeviceDeploymentStatusTypes.Unregistered);
-      expect(
-        deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length,
-        2,
-      );
+      expect(deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length, 2);
       expect(deviceStatus.canBeDeployed, true);
       expect(deviceStatus.canObtainDeviceDeployment, false);
       expect(deviceStatus.isReadyForDeployment, false);
     });
 
     test(' - Family - Mother Registered', () async {
-      String plainJson = File(
-        'test/json/carp.core-dart/study_deployment_status_family_2.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/carp.core-dart/study_deployment_status_family_2.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       print(toJsonString(status));
 
       expect(status.status, StudyDeploymentStatusTypes.DeployingDevices);
       var deviceStatus = status.getDeviceStatusByRoleName("Father's Phone");
       expect(deviceStatus.status, DeviceDeploymentStatusTypes.Unregistered);
-      expect(
-        deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length,
-        1,
-      );
+      expect(deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length, 1);
       expect(deviceStatus.canBeDeployed, true);
       expect(deviceStatus.canObtainDeviceDeployment, false);
       expect(deviceStatus.isReadyForDeployment, false);
 
       deviceStatus = status.getDeviceStatusByRoleName("Mother's Phone");
       expect(deviceStatus.status, DeviceDeploymentStatusTypes.Registered);
-      expect(
-        deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length,
-        1,
-      );
+      expect(deviceStatus.remainingDevicesToRegisterBeforeDeployment!.length, 1);
       expect(deviceStatus.canBeDeployed, true);
       expect(deviceStatus.canObtainDeviceDeployment, false);
       expect(deviceStatus.isReadyForDeployment, false);
     });
 
     test(' - Family - Mother & Father Registered', () async {
-      String plainJson = File(
-        'test/json/carp.core-dart/study_deployment_status_family_3.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/carp.core-dart/study_deployment_status_family_3.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       print(toJsonString(status));
 
       expect(status.status, StudyDeploymentStatusTypes.DeployingDevices);
       var deviceStatus = status.getDeviceStatusByRoleName("Father's Phone");
       expect(deviceStatus.status, DeviceDeploymentStatusTypes.Registered);
-      expect(
-        deviceStatus.remainingDevicesToRegisterBeforeDeployment!.isEmpty,
-        true,
-      );
+      expect(deviceStatus.remainingDevicesToRegisterBeforeDeployment!.isEmpty, true);
       expect(deviceStatus.canBeDeployed, true);
       expect(deviceStatus.canObtainDeviceDeployment, true);
       expect(deviceStatus.isReadyForDeployment, true);
 
       deviceStatus = status.getDeviceStatusByRoleName("Mother's Phone");
       expect(deviceStatus.status, DeviceDeploymentStatusTypes.Registered);
-      expect(
-        deviceStatus.remainingDevicesToRegisterBeforeDeployment!.isEmpty,
-        true,
-      );
+      expect(deviceStatus.remainingDevicesToRegisterBeforeDeployment!.isEmpty, true);
       expect(deviceStatus.canBeDeployed, true);
       expect(deviceStatus.canObtainDeviceDeployment, true);
       expect(deviceStatus.isReadyForDeployment, true);
@@ -450,14 +360,8 @@ void main() {
     DataStreamsConfiguration configuration = DataStreamsConfiguration(
       studyDeploymentId: studyDeploymentId,
       expectedDataStreams: {
-        ExpectedDataStream(
-          deviceRoleName: 'phone',
-          dataType: 'dk.cachet.carp.geolocation',
-        ),
-        ExpectedDataStream(
-          deviceRoleName: 'phone',
-          dataType: 'dk.cachet.carp.stepcount',
-        ),
+        ExpectedDataStream(deviceRoleName: 'phone', dataType: 'dk.cachet.carp.geolocation'),
+        ExpectedDataStream(deviceRoleName: 'phone', dataType: 'dk.cachet.carp.stepcount'),
       },
     );
 
@@ -480,20 +384,13 @@ void main() {
         HeartRate(bpm: 72),
         StepCount(steps: 1000),
         CompletedTask(taskName: 'Test Task'),
-        TriggeredTask(
-          triggerId: 1,
-          taskName: 'Test Task',
-          destinationDeviceRoleName: 'phone',
-          control: Control.Start,
-        ),
+        TriggeredTask(triggerId: 1, taskName: 'Test Task', destinationDeviceRoleName: 'phone', control: Control.Start),
         Error(message: 'An error occurred'),
       ];
 
       for (var data in allData) {
         final dataJson = toJsonString(data);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [
-          json.decode(dataJson) as Map<String, dynamic>,
-        ]);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }
@@ -504,41 +401,25 @@ void main() {
         CustomInput(value: {'key': 'value'}),
         SexInput(value: Sex.Female),
         PhoneNumberInput(countryCode: '+45', number: '12345678'),
-        SocialSecurityNumberInput(
-          country: 'DK',
-          socialSecurityNumber: '123456-7890',
-        ),
+        SocialSecurityNumberInput(country: 'DK', socialSecurityNumber: '123456-7890'),
         FullNameInput(firstName: 'John', middleName: 'A.', lastName: 'Doe'),
         AddressInput(street: 'Main St', city: 'Anytown'),
         DiagnosisInput(diagnosis: 'Flu', icd11Code: '123456'),
-        InformedConsentInput(
-          userId: '12345',
-          name: 'John Doe',
-          consent: 'true',
-          signatureImage: 'blob',
-        ),
+        InformedConsentInput(userId: '12345', name: 'John Doe', consent: 'true', signatureImage: 'blob'),
         NoteInput(note: 'This is a note.'),
-        EducationalDegreeInput(
-          level: IscedLevel.ISCED_6,
-          details: 'BSc in Computer Science',
-        ),
+        EducationalDegreeInput(level: IscedLevel.ISCED_6, details: 'BSc in Computer Science'),
         OnboardingResearcherInput(
           researcherId: 'res-123',
           researcherName: 'Dr. Smith',
           institutionName: 'University X',
         ),
         PreferredLanguageInput(languageCode: 'en', region: 'UK'),
-        OccupationInput(
-          roles: ['Software Developer', 'Tester', 'Manager'],
-          other: '',
-        ),
+        OccupationInput(roles: ['Software Developer', 'Tester', 'Manager'], other: ''),
       ];
 
       for (var data in allData) {
         final dataJson = toJsonString(data);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [
-          json.decode(dataJson) as Map<String, dynamic>,
-        ]);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }

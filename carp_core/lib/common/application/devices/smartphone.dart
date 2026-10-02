@@ -15,33 +15,22 @@ part of '../../../common.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Smartphone extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
   /// The type of a smartphone device.
-  static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.Smartphone';
+  static const String DEVICE_TYPE = '${DeviceConfiguration.DEVICE_NAMESPACE}.Smartphone';
 
   /// The default role name for a smartphone.
   static const String DEFAULT_ROLE_NAME = 'Primary Phone';
 
   @override
-  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.GEOLOCATION]!,
-          GranularitySamplingConfiguration(Granularity.Balanced),
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.STEP_COUNT]!,
-          NoOptionsSamplingConfiguration(),
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ACCELERATION]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ANGULAR_VELOCITY]!,
-        ),
-      ]);
+  DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CarpDataTypes().types[CarpDataTypes.GEOLOCATION]!,
+      GranularitySamplingConfiguration(Granularity.Balanced),
+    ),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.STEP_COUNT]!, NoOptionsSamplingConfiguration()),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.ACCELERATION]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.ANGULAR_VELOCITY]!),
+  ]);
 
   /// Create a new Smartphone device descriptor.
   /// If [roleName] is not specified, then the [DEFAULT_ROLE_NAME] is used.
@@ -67,8 +56,7 @@ class Smartphone extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
 
   @override
   Function get fromJsonFunction => _$SmartphoneFromJson;
-  factory Smartphone.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Smartphone>(json);
+  factory Smartphone.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Smartphone>(json);
   @override
   Map<String, dynamic> toJson() => _$SmartphoneToJson(this);
 }

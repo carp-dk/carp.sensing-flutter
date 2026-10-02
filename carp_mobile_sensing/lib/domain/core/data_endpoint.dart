@@ -32,15 +32,13 @@ class DataEndPoint extends Serializable {
   /// Creates a [DataEndPoint] of [type] (see [DataEndPointTypes]).
   ///
   /// [dataFormat] is a [NameSpace]. Default is [NameSpace.CARP].
-  DataEndPoint({required this.type, this.dataFormat = NameSpace.CARP})
-    : super();
+  DataEndPoint({required this.type, this.dataFormat = NameSpace.CARP}) : super();
 
   @override
   Function get fromJsonFunction => _$DataEndPointFromJson;
 
   @override
-  factory DataEndPoint.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DataEndPoint>(json);
+  factory DataEndPoint.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DataEndPoint>(json);
 
   @override
   Map<String, dynamic> toJson() => _$DataEndPointToJson(this);
@@ -120,8 +118,7 @@ class FileDataEndPoint extends DataEndPoint {
   Function get fromJsonFunction => _$FileDataEndPointFromJson;
 
   @override
-  factory FileDataEndPoint.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<FileDataEndPoint>(json);
+  factory FileDataEndPoint.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<FileDataEndPoint>(json);
 
   @override
   Map<String, dynamic> toJson() => _$FileDataEndPointToJson(this);
@@ -139,8 +136,7 @@ class FileDataEndPoint extends DataEndPoint {
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SQLiteDataEndPoint extends DataEndPoint {
   /// Creates a [SQLiteDataEndPoint] of type [DataEndPointTypes.SQLITE].
-  SQLiteDataEndPoint({super.dataFormat = NameSpace.CARP})
-    : super(type: DataEndPointTypes.SQLITE);
+  SQLiteDataEndPoint({super.dataFormat = NameSpace.CARP}) : super(type: DataEndPointTypes.SQLITE);
 
   @override
   Function get fromJsonFunction => _$SQLiteDataEndPointFromJson;

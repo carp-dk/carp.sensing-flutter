@@ -64,10 +64,5 @@ abstract class ProtocolFactoryService {
   /// The [customProtocol] is stored in a single [CustomProtocolTask] which in
   /// the CARP study protocol model is described as being triggered at the start
   /// of the study for a [CustomProtocolDevice] with role name "Custom device".
-  Future<StudyProtocol> createCustomProtocol(
-    String ownerId,
-    String name,
-    String description,
-    String customProtocol,
-  );
+  Future<StudyProtocol> createCustomProtocol(String ownerId, String name, String description, String customProtocol);
 }

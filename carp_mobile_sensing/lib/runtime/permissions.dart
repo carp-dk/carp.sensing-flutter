@@ -19,9 +19,7 @@ part of '../runtime.dart';
 /// A requester runs *inside* the permission queue, so it must call
 /// `permission_handler` directly and never
 /// [SmartPhoneClientManager.requestPermissions] - that would wait on itself.
-typedef PermissionRequester = Future<void> Function(
-  List<Permission> permissions,
-);
+typedef PermissionRequester = Future<void> Function(List<Permission> permissions);
 
 /// Requests [permissions] one at a time, skipping those already granted.
 ///
@@ -46,6 +44,4 @@ Future<void> requestPermissionsInOrder(List<Permission> permissions) async {
 /// and only in a separate dialog. Climbing that ladder here means callers can
 /// declare the permissions they need in any order and still get asked correctly.
 Iterable<Permission> _withPrerequisite(Permission permission) =>
-    permission == Permission.locationAlways
-    ? [Permission.locationWhenInUse, permission]
-    : [permission];
+    permission == Permission.locationAlways ? [Permission.locationWhenInUse, permission] : [permission];

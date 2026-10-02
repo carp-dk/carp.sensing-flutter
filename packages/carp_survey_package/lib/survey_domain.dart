@@ -50,9 +50,7 @@ class RPAppTask extends AppTask {
       measures.add(Measure(type: SurveySamplingPackage.SURVEY));
     }
     // Ensure that the completed app task data type is included in the measures.
-    if (!measures.contains(
-      Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'),
-    )) {
+    if (!measures.contains(Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'))) {
       measures.add(Measure(type: '${CamsDataTypes.COMPLETED_APP_TASK}.$type'));
     }
 
@@ -61,8 +59,7 @@ class RPAppTask extends AppTask {
 
   @override
   Function get fromJsonFunction => _$RPAppTaskFromJson;
-  factory RPAppTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<RPAppTask>(json);
+  factory RPAppTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<RPAppTask>(json);
 
   @override
   Map<String, dynamic> toJson() => _$RPAppTaskToJson(this);
@@ -90,8 +87,7 @@ class RPTaskResultData extends Data {
 
   @override
   Function get fromJsonFunction => _$RPTaskResultDataFromJson;
-  factory RPTaskResultData.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<RPTaskResultData>(json);
+  factory RPTaskResultData.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<RPTaskResultData>(json);
 
   @override
   Map<String, dynamic> toJson() => _$RPTaskResultDataToJson(this);

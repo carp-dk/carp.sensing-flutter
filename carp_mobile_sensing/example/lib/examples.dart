@@ -47,10 +47,7 @@ Future<void> minimalExample() async {
   var study = await SmartPhoneClientManager().addStudyFromProtocol(protocol);
 
   // Deploy the study.
-  await SmartPhoneClientManager().tryDeployment(
-    study.studyDeploymentId,
-    study.deviceRoleName,
-  );
+  await SmartPhoneClientManager().tryDeployment(study.studyDeploymentId, study.deviceRoleName);
 
   // Resume sampling.
   SmartPhoneClientManager().resume();
@@ -72,10 +69,7 @@ Future<void> minimalExample() async {
 
   // Permanently stop the study.
   // This will mark the study as stopped and remove it from the client manager.
-  SmartPhoneClientManager().stopStudy(
-    study.studyDeploymentId,
-    study.deviceRoleName,
-  );
+  SmartPhoneClientManager().stopStudy(study.studyDeploymentId, study.deviceRoleName);
 }
 
 Future<void> oneLineExample1() async {
@@ -84,12 +78,7 @@ Future<void> oneLineExample1() async {
   SmartPhoneClientManager().configure().then(
     (_) => SmartPhoneClientManager()
         .addStudyFromProtocol(protocol)
-        .then(
-          (study) => SmartPhoneClientManager().tryDeployment(
-            study.studyDeploymentId,
-            study.deviceRoleName,
-          ),
-        ),
+        .then((study) => SmartPhoneClientManager().tryDeployment(study.studyDeploymentId, study.deviceRoleName)),
   );
 
   SmartPhoneClientManager().configure().then(
@@ -134,10 +123,7 @@ Future<void> example_0() async {
   // STEP I -- DEFINE PROTOCOL
 
   // Create a study protocol
-  SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
-    ownerId: 'AB',
-    name: 'Track patient movement',
-  );
+  SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(ownerId: 'AB', name: 'Track patient movement');
 
   // Define which devices are used for data collection.
   // In this case, its only this smartphone
@@ -231,10 +217,7 @@ void example_1() async {
   // Add the study to the client manager and get a study runtime to
   // control this deployment
   final study = await client.addStudy(
-    SmartphoneStudy(
-      studyDeploymentId: status.studyDeploymentId,
-      deviceRoleName: phone.roleName,
-    ),
+    SmartphoneStudy(studyDeploymentId: status.studyDeploymentId, deviceRoleName: phone.roleName),
   );
 
   await client.tryDeployment(study.studyDeploymentId, study.deviceRoleName);
@@ -269,11 +252,7 @@ void example_2() async {
         name: 'Alex B. Christensen',
       ),
     ),
-    dataEndPoint: FileDataEndPoint(
-      bufferSize: 500 * 1000,
-      zip: true,
-      encrypt: false,
-    ),
+    dataEndPoint: FileDataEndPoint(bufferSize: 500 * 1000, zip: true, encrypt: false),
   );
 
   // define which devices are used for data collection
@@ -306,11 +285,7 @@ void example_2() async {
   );
 
   // add it to the protocol
-  protocol.addTaskControl(
-    ImmediateTrigger(),
-    BackgroundTask(name: 'Light')..addMeasure(lightMeasure),
-    phone,
-  );
+  protocol.addTaskControl(ImmediateTrigger(), BackgroundTask(name: 'Light')..addMeasure(lightMeasure), phone);
 
   // Alternatively override the sampling configuration of the light measure in the protocol directly.
   protocol.addTaskControl(
@@ -332,9 +307,7 @@ void example_2() async {
 
   // create a study deployment based on the protocol
   // no need for any invitation when deploying locally
-  StudyDeploymentStatus status = await deploymentService.createStudyDeployment(
-    protocol,
-  );
+  StudyDeploymentStatus status = await deploymentService.createStudyDeployment(protocol);
 
   // create and configure a client manager for this phone
   SmartPhoneClientManager client = SmartPhoneClientManager();
@@ -342,10 +315,7 @@ void example_2() async {
 
   // create a study runtime to control this deployment
   final study = await client.addStudy(
-    SmartphoneStudy(
-      studyDeploymentId: status.studyDeploymentId,
-      deviceRoleName: phone.roleName,
-    ),
+    SmartphoneStudy(studyDeploymentId: status.studyDeploymentId, deviceRoleName: phone.roleName),
   );
 
   await client.tryDeployment(study.studyDeploymentId, study.deviceRoleName);
@@ -360,24 +330,16 @@ void example_2() async {
 
   // listen only on CARP measurements
   controller?.measurements
-      .where(
-        (measurement) => measurement.data.dataType.namespace == NameSpace.CARP,
-      )
+      .where((measurement) => measurement.data.dataType.namespace == NameSpace.CARP)
       .listen((event) => print(event));
 
   // listen on ambient light measurements only
   controller?.measurements
-      .where(
-        (measurement) =>
-            measurement.data.dataType.toString() ==
-            SensorSamplingPackage.AMBIENT_LIGHT,
-      )
+      .where((measurement) => measurement.data.dataType.toString() == SensorSamplingPackage.AMBIENT_LIGHT)
       .listen((measurement) => print(measurement));
 
   // map measurements to JSON and then print
-  controller?.measurements
-      .map((measurement) => measurement.toJson())
-      .listen((json) => print(json));
+  controller?.measurements.map((measurement) => measurement.toJson()).listen((json) => print(json));
 
   // subscribe to the stream of measurements
   var subscription = controller?.measurements.listen((Measurement measurement) {
@@ -388,19 +350,14 @@ void example_2() async {
   // Listen to a specific probe
   controller?.executor
       .lookupProbe(CarpDataTypes.ACCELERATION)
-      .forEach(
-        (probe) =>
-            probe.measurements.listen((measurement) => print(measurement)),
-      );
+      .forEach((probe) => probe.measurements.listen((measurement) => print(measurement)));
 
   // Sampling can be stopped and started
   controller?.executor.pause();
   controller?.executor.resume();
 
   // Stop specific probe(s)
-  controller?.executor
-      .lookupProbe(CarpDataTypes.ACCELERATION)
-      .forEach((probe) => probe.pause());
+  controller?.executor.lookupProbe(CarpDataTypes.ACCELERATION).forEach((probe) => probe.pause());
 
   // Adapt a measure
   //
@@ -439,10 +396,7 @@ void privacySchemaExample() async {
 
 /// Example of different configuration options.
 void example_3() async {
-  var protocol = SmartphoneStudyProtocol(
-    ownerId: 'abc@dtu.dk',
-    name: 'Tracking',
-  );
+  var protocol = SmartphoneStudyProtocol(ownerId: 'abc@dtu.dk', name: 'Tracking');
 
   // create and configure a client manager for this phone
   final client = SmartPhoneClientManager();
@@ -480,8 +434,7 @@ void example_4() async {
   String studyDeploymentId = '2938y4h-rfhklwe98-erhui';
 
   // get the status of this deployment
-  StudyDeploymentStatus? status = await SmartphoneDeploymentService()
-      .getStudyDeploymentStatus(studyDeploymentId);
+  StudyDeploymentStatus? status = await SmartphoneDeploymentService().getStudyDeploymentStatus(studyDeploymentId);
 
   // register the needed devices - listed in the deployment status
   status?.deviceStatusList.forEach((deviceStatus) async {
@@ -494,22 +447,15 @@ void example_4() async {
     // if the device manager is created successfully on the phone
     if (DeviceController().hasDevice(type)) {
       // create a registration for this device
-      var registration = DeviceController()
-          .getDeviceManager(type)!
-          .createRegistration();
+      var registration = DeviceController().getDeviceManager(type)!.createRegistration();
 
       // register the device in the deployment service
-      await SmartphoneDeploymentService().registerDevice(
-        studyDeploymentId,
-        deviceRoleName,
-        registration,
-      );
+      await SmartphoneDeploymentService().registerDevice(studyDeploymentId, deviceRoleName, registration);
     }
   });
 
   // now get the study deployment for this smartphone device and its registered devices
-  SmartphoneDeployment? deployment = await SmartphoneDeploymentService()
-      .getDeviceDeployment(studyDeploymentId);
+  SmartphoneDeployment? deployment = await SmartphoneDeploymentService().getDeviceDeployment(studyDeploymentId);
 
   print(deployment);
 }
@@ -519,12 +465,7 @@ void transformedExample() async {
   var protocol = SmartphoneStudyProtocol(
     ownerId: 'AB',
     name: 'Track patient movement',
-    dataEndPoint: FileDataEndPoint(
-      bufferSize: 500 * 1000,
-      zip: true,
-      encrypt: false,
-      dataFormat: NameSpace.OMH,
-    ),
+    dataEndPoint: FileDataEndPoint(bufferSize: 500 * 1000, zip: true, encrypt: false, dataFormat: NameSpace.OMH),
   );
 }
 
@@ -555,9 +496,7 @@ void protocolExample() async {
   // Collect device info only once, when this study is deployed.
   protocol.addTaskControl(
     OneTimeTrigger(),
-    BackgroundTask(
-      measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)],
-    ),
+    BackgroundTask(measures: [Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)]),
     phone,
   );
 
@@ -614,12 +553,7 @@ void protocolExample() async {
   protocol.addTaskControl(ImmediateTrigger(), imuTask, phone, Control.Start);
 
   // After a while, stop it again
-  protocol.addTaskControl(
-    DelayedTrigger(delay: Duration(seconds: 10)),
-    imuTask,
-    phone,
-    Control.Stop,
-  );
+  protocol.addTaskControl(DelayedTrigger(delay: Duration(seconds: 10)), imuTask, phone, Control.Stop);
 
   // // add a random trigger to collect device info at random times
   // protocol.addTaskControl(
@@ -637,12 +571,8 @@ void protocolExample() async {
 
   // add a ConditionalPeriodicTrigger to check periodically
   protocol.addTaskControl(
-    ConditionalPeriodicTrigger(
-      period: Duration(seconds: 20),
-      triggerCondition: () => ('jakob'.length == 5),
-    ),
-    BackgroundTask()
-      ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+    ConditionalPeriodicTrigger(period: Duration(seconds: 20), triggerCondition: () => ('jakob'.length == 5)),
+    BackgroundTask()..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
     phone,
     Control.Start,
   );
@@ -869,32 +799,23 @@ void recurrentScheduledTriggerExample() {
 void appTaskExample() async {
   Smartphone phone = Smartphone(roleName: 'phone');
 
-  StudyProtocol protocol =
-      StudyProtocol(ownerId: 'user@dtu.dk', name: 'Tracking')
-        // collect device info as an app task
-        ..addTaskControl(
-          ImmediateTrigger(),
-          AppTask(
-            type: AppTask.SENSING_TYPE,
-            title: 'Device',
-            description: 'Collect device info',
-          )..addMeasure(
-            Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION),
-          ),
-          phone,
-          Control.Start,
-        )
-        // start collecting screen events as an app task
-        ..addTaskControl(
-          ImmediateTrigger(),
-          AppTask(
-            type: AppTask.SENSING_TYPE,
-            title: 'Screen',
-            description: 'Collect screen events',
-          )..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT)),
-          phone,
-          Control.Start,
-        );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'user@dtu.dk', name: 'Tracking')
+    // collect device info as an app task
+    ..addTaskControl(
+      ImmediateTrigger(),
+      AppTask(type: AppTask.SENSING_TYPE, title: 'Device', description: 'Collect device info')
+        ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+      phone,
+      Control.Start,
+    )
+    // start collecting screen events as an app task
+    ..addTaskControl(
+      ImmediateTrigger(),
+      AppTask(type: AppTask.SENSING_TYPE, title: 'Screen', description: 'Collect screen events')
+        ..addMeasure(Measure(type: DeviceSamplingPackage.SCREEN_EVENT)),
+      phone,
+      Control.Start,
+    );
 
   print(protocol);
 }

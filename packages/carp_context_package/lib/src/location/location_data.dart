@@ -99,9 +99,7 @@ class Location extends Geolocation {
     speed = location.speed;
     speedAccuracy = location.speedAccuracy;
     heading = location.heading;
-    time = (location.time != null)
-        ? DateTime.fromMillisecondsSinceEpoch(location.time!.toInt())
-        : null;
+    time = (location.time != null) ? DateTime.fromMillisecondsSinceEpoch(location.time!.toInt()) : null;
     isMock = location.isMock;
     headingAccuracy = location.headingAccuracy;
     elapsedRealtimeNanos = location.elapsedRealtimeNanos;
@@ -141,8 +139,7 @@ class Location extends Geolocation {
 
   @override
   Function get fromJsonFunction => _$LocationFromJson;
-  factory Location.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Location>(json);
+  factory Location.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Location>(json);
   @override
   Map<String, dynamic> toJson() => _$LocationToJson(this);
 }

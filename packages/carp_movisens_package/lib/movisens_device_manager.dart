@@ -22,8 +22,7 @@ part of 'carp_movisens_package.dart';
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of a Movisens device.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovisensDevice';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovisensDevice';
 
   /// The default role name for a Movisens device.
   static const String DEFAULT_ROLE_NAME = 'movisens';
@@ -59,8 +58,7 @@ class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
 
   @override
   Function get fromJsonFunction => _$MovisensDeviceFromJson;
-  factory MovisensDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovisensDevice;
+  factory MovisensDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovisensDevice;
   @override
   Map<String, dynamic> toJson() => _$MovisensDeviceToJson(this);
 }
@@ -78,8 +76,7 @@ class MovisensDevice extends BLEDevice<BLEDeviceRegistration> {
 ///    false.
 ///  * On connect, it writes the user data from the [MovisensDevice]
 ///    configuration to the device and listens for battery level events.
-class MovisensDeviceManager
-    extends BLEDeviceManager<MovisensDevice, BLEDeviceRegistration> {
+class MovisensDeviceManager extends BLEDeviceManager<MovisensDevice, BLEDeviceRegistration> {
   // the last known battery level of the Movisens device
   int? _batteryLevel;
   String? _connectionStatus;
@@ -90,9 +87,8 @@ class MovisensDeviceManager
   /// The Movisens device handler from the `movisens_flutter` plugin.
   ///
   /// Null until [deviceName] has been set.
-  movisens.MovisensDevice? get device => deviceName != null
-      ? _device ??= movisens.MovisensDevice(name: deviceName!)
-      : _device = null;
+  movisens.MovisensDevice? get device =>
+      deviceName != null ? _device ??= movisens.MovisensDevice(name: deviceName!) : _device = null;
 
   /// The name of the device used for connecting to the device.
   ///
@@ -153,31 +149,21 @@ class MovisensDeviceManager
       device?.batteryService?.events.listen((event) {
         debug('$runtimeType :: Movisens event : $event');
 
-        _batteryLevel = (event is movisens.BatteryLevelEvent)
-            ? event.batteryLevel
-            : _batteryLevel;
+        _batteryLevel = (event is movisens.BatteryLevelEvent) ? event.batteryLevel : _batteryLevel;
       });
 
       if (configuration != null) {
         // set user data parameters
-        await device?.userDataService?.setAgeFloat(
-          configuration!.age.toDouble(),
-        );
+        await device?.userDataService?.setAgeFloat(configuration!.age.toDouble());
         await device?.userDataService?.setSensorLocation(
           movisens.SensorLocation.values[configuration!.sensorLocation.index],
         );
-        await device?.userDataService?.setWeight(
-          configuration!.weight.toDouble(),
-        );
+        await device?.userDataService?.setWeight(configuration!.weight.toDouble());
         await device?.userDataService?.setHeight(configuration!.height);
-        await device?.userDataService?.setGender(
-          movisens.Gender.values[configuration!.sex.index],
-        );
+        await device?.userDataService?.setGender(movisens.Gender.values[configuration!.sex.index]);
       }
     } catch (error) {
-      warning(
-        "$runtimeType - could not connect to device of type '$deviceType' - error: $error",
-      );
+      warning("$runtimeType - could not connect to device of type '$deviceType' - error: $error");
       return DeviceStatus.disconnected;
     }
 

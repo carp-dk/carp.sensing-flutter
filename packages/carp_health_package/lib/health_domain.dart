@@ -138,25 +138,23 @@ class HealthData extends Data {
   }
 
   /// Creates a [HealthData] from a `health` plugin [HealthDataPoint].
-  factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) =>
-      HealthData(
-        uuid: healthDataPoint.uuid,
-        value: healthDataPoint.value,
-        unit: healthDataPoint.unitString,
-        healthDataType: healthDataPoint.typeString,
-        dateFrom: healthDataPoint.dateFrom.toUtc(),
-        dateTo: healthDataPoint.dateTo.toUtc(),
-        platform: HealthPlatform.values[healthDataPoint.sourcePlatform.index],
-        deviceId: healthDataPoint.sourceDeviceId,
-        sourceId: healthDataPoint.sourceId,
-        sourceName: healthDataPoint.sourceName,
-      );
+  factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) => HealthData(
+    uuid: healthDataPoint.uuid,
+    value: healthDataPoint.value,
+    unit: healthDataPoint.unitString,
+    healthDataType: healthDataPoint.typeString,
+    dateFrom: healthDataPoint.dateFrom.toUtc(),
+    dateTo: healthDataPoint.dateTo.toUtc(),
+    platform: HealthPlatform.values[healthDataPoint.sourcePlatform.index],
+    deviceId: healthDataPoint.sourceDeviceId,
+    sourceId: healthDataPoint.sourceId,
+    sourceName: healthDataPoint.sourceName,
+  );
 
   @override
   Function get fromJsonFunction => _$HealthDataFromJson;
 
-  factory HealthData.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<HealthData>(json);
+  factory HealthData.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<HealthData>(json);
 
   @override
   Map<String, dynamic> toJson() => _$HealthDataToJson(this);
@@ -164,9 +162,8 @@ class HealthData extends Data {
   @override
   // The uuid is the Health Connect record id, shared by all samples/stages of
   // one record (e.g. heart rate), so add type and time to make it per point.
-  String? get recordId => uuid.isEmpty
-      ? null
-      : '$uuid|$healthDataType|${dateFrom.toIso8601String()}|${dateTo.toIso8601String()}';
+  String? get recordId =>
+      uuid.isEmpty ? null : '$uuid|$healthDataType|${dateFrom.toIso8601String()}|${dateTo.toIso8601String()}';
 
   /// The JSON type of all health data, `dk.cachet.carp.health`
   /// ([HealthSamplingPackage.HEALTH]), whatever the [healthDataType].
@@ -197,8 +194,7 @@ class DummyHealthData extends Data {
   @override
   Function get fromJsonFunction => _$DummyHealthDataFromJson;
 
-  factory DummyHealthData.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DummyHealthData>(json);
+  factory DummyHealthData.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DummyHealthData>(json);
 
   @override
   Map<String, dynamic> toJson() => _$DummyHealthDataToJson(this);
@@ -253,8 +249,7 @@ class HealthAppTask extends AppTask {
 
   @override
   Function get fromJsonFunction => _$HealthAppTaskFromJson;
-  factory HealthAppTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<HealthAppTask>(json);
+  factory HealthAppTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<HealthAppTask>(json);
 
   @override
   Map<String, dynamic> toJson() => _$HealthAppTaskToJson(this);

@@ -41,40 +41,31 @@ class Sensing {
   /// Returns `null` if no study is deployed (yet).
   /// If multiple studies are deployed, returns the first one (this app only
   /// supports a single study at a time).
-  SmartphoneStudy? get study =>
-      client.studies.isEmpty ? null : client.studies.first;
+  SmartphoneStudy? get study => client.studies.isEmpty ? null : client.studies.first;
 
   /// The deployment service used to deploy studies.
   /// If in local deployment mode, this is a [SmartphoneDeploymentService],
   /// otherwise a [CarpDeploymentService].
   DeploymentService get deploymentService =>
-      bloc.deploymentMode == DeploymentMode.local
-      ? SmartphoneDeploymentService()
-      : CarpDeploymentService();
+      bloc.deploymentMode == DeploymentMode.local ? SmartphoneDeploymentService() : CarpDeploymentService();
 
   /// The deployment running on this phone, if the study is deployed.
   SmartphoneDeployment? get deployment => study?.deployment;
 
   /// The study runtime controller for this [study], if deployed.
-  SmartphoneStudyController? get controller =>
-      (study != null) ? client.getStudyController(study!) : null;
+  SmartphoneStudyController? get controller => (study != null) ? client.getStudyController(study!) : null;
 
   /// The total number of measurements sampled so far.
   /// Note that this is not persisted, so it will be reset when the app is restarted.
   int samplingSize = 0;
 
   /// The list of running - i.e. used - probes in this study.
-  List<Probe> get runningProbes =>
-      (controller != null) ? controller!.executor.probes : [];
+  List<Probe> get runningProbes => (controller != null) ? controller!.executor.probes : [];
 
   /// The list of devices in the current deployment.
   List<DeviceManager> get deployedDevices => deployment != null
       ? client.deviceController.devices.values
-            .where(
-              (manager) => deployment!.devices.any(
-                (configuration) => configuration.type == manager.deviceType,
-              ),
-            )
+            .where((manager) => deployment!.devices.any((configuration) => configuration.type == manager.deviceType))
             .toList()
       : <DeviceManager>[];
 
@@ -83,10 +74,7 @@ class Sensing {
     info('Initializing $runtimeType - mode: ${bloc.deploymentMode}');
 
     // Configure the client manager using the deployment service above (local or CAWS).
-    await client.configure(
-      deploymentService: deploymentService,
-      askForPermissions: true,
-    );
+    await client.configure(deploymentService: deploymentService, askForPermissions: true);
 
     // Listen on the measurements stream and count measurements and print them as they come in.
     client.measurements.listen((measurement) {
@@ -102,10 +90,7 @@ class Sensing {
   }
 
   // Deploy the current [study], if not deployed yet.
-  Future<void> deploy() async => await client.tryDeployment(
-    study!.studyDeploymentId,
-    study!.deviceRoleName,
-  );
+  Future<void> deploy() async => await client.tryDeployment(study!.studyDeploymentId, study!.deviceRoleName);
 
   // Resume the current [study].
   Future<void> resume() async {

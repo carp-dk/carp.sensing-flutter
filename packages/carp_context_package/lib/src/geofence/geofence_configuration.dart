@@ -29,10 +29,7 @@ class GeoPosition extends Serializable {
   GeoPosition(this.latitude, this.longitude);
 
   /// Creates a [GeoPosition] from the latitude and longitude of a [Location].
-  GeoPosition.fromLocation(Location location)
-    : latitude = location.latitude,
-      longitude = location.longitude,
-      super();
+  GeoPosition.fromLocation(Location location) : latitude = location.latitude, longitude = location.longitude, super();
 
   /// Returns the approximate distance in meters between this position and [destination].
   ///
@@ -40,18 +37,9 @@ class GeoPosition extends Serializable {
   /// See http://www.movable-type.co.uk/scripts/latlong.html for details on how to
   /// calculate distance, bearing and more between latitude/longitude points.
   double distanceTo(GeoPosition destination) {
-    final sDLat = math.sin(
-      (degToRad(destination.latitude) - degToRad(latitude)) / 2,
-    );
-    final sDLng = math.sin(
-      (degToRad(destination.longitude) - degToRad(longitude)) / 2,
-    );
-    final a =
-        sDLat * sDLat +
-        sDLng *
-            sDLng *
-            math.cos(degToRad(latitude)) *
-            math.cos(degToRad(destination.latitude));
+    final sDLat = math.sin((degToRad(destination.latitude) - degToRad(latitude)) / 2);
+    final sDLng = math.sin((degToRad(destination.longitude) - degToRad(longitude)) / 2);
+    final a = sDLat * sDLat + sDLng * sDLng * math.cos(degToRad(latitude)) * math.cos(degToRad(destination.latitude));
     final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 
     return earthRadius * c;
@@ -59,8 +47,7 @@ class GeoPosition extends Serializable {
 
   @override
   Function get fromJsonFunction => _$GeoPositionFromJson;
-  factory GeoPosition.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<GeoPosition>(json);
+  factory GeoPosition.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<GeoPosition>(json);
   @override
   Map<String, dynamic> toJson() => _$GeoPositionToJson(this);
 
@@ -71,10 +58,7 @@ class GeoPosition extends Serializable {
   int get hashCode => latitude.hashCode + longitude.hashCode;
 
   @override
-  bool operator ==(Object other) =>
-      other is GeoPosition &&
-      latitude == other.latitude &&
-      longitude == other.longitude;
+  bool operator ==(Object other) => other is GeoPosition && latitude == other.latitude && longitude == other.longitude;
 }
 
 /// The sampling configuration for a [ContextSamplingPackage.GEOFENCE] measure:
@@ -96,12 +80,8 @@ class GeofenceSamplingConfiguration extends PersistentSamplingConfiguration {
   /// A label for this geofence, copied to each [Geofence] event.
   String name;
 
-  GeofenceSamplingConfiguration({
-    required this.center,
-    required this.radius,
-    required this.dwell,
-    required this.name,
-  }) : super();
+  GeofenceSamplingConfiguration({required this.center, required this.radius, required this.dwell, required this.name})
+    : super();
 
   @override
   Function get fromJsonFunction => _$GeofenceSamplingConfigurationFromJson;

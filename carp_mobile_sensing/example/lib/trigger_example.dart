@@ -12,10 +12,7 @@ part 'trigger_example.g.dart';
 /// A trigger that triggers based on event from a remote server.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class RemoteTrigger extends TriggerConfiguration {
-  RemoteTrigger({
-    required this.uri,
-    this.interval = const Duration(minutes: 10),
-  }) : super();
+  RemoteTrigger({required this.uri, this.interval = const Duration(minutes: 10)}) : super();
 
   /// The URI of the resource to listen to.
   String uri;
@@ -25,8 +22,7 @@ class RemoteTrigger extends TriggerConfiguration {
 
   @override
   Function get fromJsonFunction => _$RemoteTriggerFromJson;
-  factory RemoteTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<RemoteTrigger>(json);
+  factory RemoteTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<RemoteTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$RemoteTriggerToJson(this);
 }
@@ -40,9 +36,7 @@ class RemoteTriggerExecutor extends TriggerExecutor<RemoteTrigger> {
   Future<bool> onResume() async {
     // Set up a periodic timer to look for a resource at the specified URI
     timer = Timer.periodic(configuration!.interval, (_) async {
-      var response = await client.get(
-        Uri.parse(Uri.encodeFull(configuration!.uri)),
-      );
+      var response = await client.get(Uri.parse(Uri.encodeFull(configuration!.uri)));
 
       if (response.statusCode == HttpStatus.ok) {
         // If there is a resource at the specified URI, then trigger this executor
@@ -68,11 +62,10 @@ class RemoteTriggerFactory implements TriggerFactory {
   }
 
   @override
-  TriggerExecutor<TriggerConfiguration> create(TriggerConfiguration trigger) =>
-      switch (trigger) {
-        RemoteTrigger _ => RemoteTriggerExecutor(),
-        _ => ImmediateTriggerExecutor(),
-      };
+  TriggerExecutor<TriggerConfiguration> create(TriggerConfiguration trigger) => switch (trigger) {
+    RemoteTrigger _ => RemoteTriggerExecutor(),
+    _ => ImmediateTriggerExecutor(),
+  };
 }
 
 class Sensing {

@@ -25,12 +25,10 @@ class HealthProbe extends Probe {
   Stream<Measurement> get stream => _ctrl.stream;
 
   @override
-  HealthSamplingConfiguration get samplingConfiguration =>
-      super.samplingConfiguration as HealthSamplingConfiguration;
+  HealthSamplingConfiguration get samplingConfiguration => super.samplingConfiguration as HealthSamplingConfiguration;
 
   @override
-  HealthServiceManager get deviceManager =>
-      super.deviceManager as HealthServiceManager;
+  HealthServiceManager get deviceManager => super.deviceManager as HealthServiceManager;
 
   /// Removes the health data types in [samplingConfiguration] that are not
   /// supported on the current platform (iOS or Android).
@@ -40,9 +38,7 @@ class HealthProbe extends Probe {
     List<HealthDataType> toRemove = [];
     for (var type in samplingConfiguration.healthDataTypes) {
       // is this type supported on the current platform?
-      bool supported = (Platform.isIOS)
-          ? dataTypeKeysIOS.contains(type)
-          : dataTypeKeysAndroid.contains(type);
+      bool supported = (Platform.isIOS) ? dataTypeKeysIOS.contains(type) : dataTypeKeysAndroid.contains(type);
 
       if (!supported) {
         warning(
@@ -54,9 +50,7 @@ class HealthProbe extends Probe {
       }
     }
     // remove all types we don't support on this platform
-    samplingConfiguration.healthDataTypes.removeWhere(
-      (element) => toRemove.contains(element),
-    );
+    samplingConfiguration.healthDataTypes.removeWhere((element) => toRemove.contains(element));
   }
 
   @override
@@ -70,8 +64,8 @@ class HealthProbe extends Probe {
   /// [samplingConfiguration].
   ///
   /// See [HealthServiceManager.hasHealthPermissions] for the iOS caveat.
-  Future<bool> hasPermissions() async => await deviceManager
-      .hasHealthPermissions(samplingConfiguration.healthDataTypes);
+  Future<bool> hasPermissions() async =>
+      await deviceManager.hasHealthPermissions(samplingConfiguration.healthDataTypes);
 
   /// Requests permission to read the health data types in the
   /// [samplingConfiguration], if not already granted.
@@ -89,9 +83,7 @@ class HealthProbe extends Probe {
   Future<bool> requestPermissions() async {
     bool permission = await hasPermissions();
     if (!permission) {
-      permission = await deviceManager.requestHealthPermissions(
-        samplingConfiguration.healthDataTypes,
-      );
+      permission = await deviceManager.requestHealthPermissions(samplingConfiguration.healthDataTypes);
     }
     return permission;
   }
@@ -101,19 +93,14 @@ class HealthProbe extends Probe {
     // Check if we have permissions to access health data and fast out if not.
     bool permission = await deviceManager.hasPermissions();
     if (!permission) {
-      warning(
-        "$runtimeType - Cannot resume probe since we don't have permissions to access health data.",
-      );
+      warning("$runtimeType - Cannot resume probe since we don't have permissions to access health data.");
       return false;
     }
 
     if (await super.onResume()) {
-      DateTime start =
-          samplingConfiguration.lastTime ??
-          DateTime.now().subtract(samplingConfiguration.past);
+      DateTime start = samplingConfiguration.lastTime ?? DateTime.now().subtract(samplingConfiguration.past);
       DateTime end = DateTime.now();
-      List<HealthDataType> healthDataTypes =
-          samplingConfiguration.healthDataTypes;
+      List<HealthDataType> healthDataTypes = samplingConfiguration.healthDataTypes;
 
       if (healthDataTypes.isEmpty) {
         warning(
@@ -142,9 +129,7 @@ class HealthProbe extends Probe {
               types: healthDataTypes,
             ) ??
             [];
-        debug(
-          '$runtimeType - Retrieved ${healthDataPoints.length} health data points of types: $healthDataTypes',
-        );
+        debug('$runtimeType - Retrieved ${healthDataPoints.length} health data points of types: $healthDataTypes');
 
         // Convert HealthDataPoint to measurements and add them the measurements stream.
         for (var data in healthDataPoints) {

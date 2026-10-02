@@ -123,63 +123,28 @@ class PolarSamplingPackage implements SamplingPackage {
   /// Measure type for heart rate data ([PolarHR]).
   static const String HR = "$POLAR_NAMESPACE.hr";
 
-  final DeviceManager _deviceManager = PolarDeviceManager(
-    PolarDevice.DEVICE_TYPE,
-  );
+  final DeviceManager _deviceManager = PolarDeviceManager(PolarDevice.DEVICE_TYPE);
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: ACCELEROMETER,
-            displayName: "Accelerometer",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: GYROSCOPE,
-            displayName: "Gyroscope",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: MAGNETOMETER,
-            displayName: "Magnetometer",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: ECG,
-            displayName: "Electrocardiography (ECG)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: PPI,
-            displayName: "Peak-to-Peak Interval (PPI)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: PPG,
-            displayName: "Photoplethysmograpy (PPG)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          DataTypeMetaData(
-            type: HR,
-            displayName: "Heart Rate (HR)",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: ACCELEROMETER, displayName: "Accelerometer", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(DataTypeMetaData(type: GYROSCOPE, displayName: "Gyroscope", timeType: DataTimeType.POINT)),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: MAGNETOMETER, displayName: "Magnetometer", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: ECG, displayName: "Electrocardiography (ECG)", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: PPI, displayName: "Peak-to-Peak Interval (PPI)", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      DataTypeMetaData(type: PPG, displayName: "Photoplethysmograpy (PPG)", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(DataTypeMetaData(type: HR, displayName: "Heart Rate (HR)", timeType: DataTimeType.POINT)),
+  ]);
 
   @override
   List<DataTypeMetaData> get dataTypes => samplingSchemes.dataTypes;
@@ -189,11 +154,7 @@ class PolarSamplingPackage implements SamplingPackage {
     // register all data types
     FromJsonFactory().registerAll([
       PolarDevice(),
-      PolarDeviceRegistration(
-        identifier: '',
-        bleAddress: '',
-        polarDeviceType: PolarDeviceType.H10,
-      ),
+      PolarDeviceRegistration(identifier: '', bleAddress: '', polarDeviceType: PolarDeviceType.H10),
       PolarAccelerometer(samples: []),
       PolarGyroscope(samples: []),
       PolarMagnetometer(samples: []),
@@ -205,10 +166,7 @@ class PolarSamplingPackage implements SamplingPackage {
 
     // Backwards compatibility with CAMS 1.x (protocol API level < 2.0) where
     // the Polar device used the carp_core device namespace.
-    FromJsonFactory().register(
-      PolarDevice(),
-      type: '${DeviceConfiguration.DEVICE_NAMESPACE}.PolarDevice',
-    );
+    FromJsonFactory().register(PolarDevice(), type: '${DeviceConfiguration.DEVICE_NAMESPACE}.PolarDevice');
   }
 
   @override

@@ -40,8 +40,7 @@ class CarpAuthService {
   CarpAuthProperties? _authProperties;
   CarpUser? _currentUser;
 
-  final StreamController<AuthEvent> _authEventController =
-      StreamController.broadcast();
+  final StreamController<AuthEvent> _authEventController = StreamController.broadcast();
 
   CarpAuthService._();
 
@@ -75,8 +74,7 @@ class CarpAuthService {
 
   /// Notifies about changes to the user's authentication state (such as sign-in
   /// or sign-out) as defined in [AuthEvent].
-  Stream<AuthEvent> get authStateChanges =>
-      _authEventController.stream.asBroadcastStream();
+  Stream<AuthEvent> get authStateChanges => _authEventController.stream.asBroadcastStream();
 
   /// The URI for the authenticated endpoint for this [CarpService].
   Uri get authEndpointUri => authProperties.authURL;
@@ -86,25 +84,15 @@ class CarpAuthService {
     _authProperties = authProperties;
 
     _manager = OidcUserManager.lazy(
-      discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(
-        Uri.parse(authProperties.discoveryURL.toString()),
-      ),
-      clientCredentials: OidcClientAuthentication.none(
-        clientId: authProperties.clientId,
-      ),
+      discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(Uri.parse(authProperties.discoveryURL.toString())),
+      clientCredentials: OidcClientAuthentication.none(clientId: authProperties.clientId),
       store: OidcDefaultStore(),
       settings: OidcUserManagerSettings(
         redirectUri: Uri.parse(authProperties.redirectURI.toString()),
         scope: ['openid', 'offline_access'],
-        postLogoutRedirectUri: Uri.parse(
-          (authProperties.logoutRedirectURI ?? authProperties.redirectURI)
-              .toString(),
-        ),
+        postLogoutRedirectUri: Uri.parse((authProperties.logoutRedirectURI ?? authProperties.redirectURI).toString()),
         options: const OidcPlatformSpecificOptions(
-          web: OidcPlatformSpecificOptions_Web(
-            navigationMode:
-                OidcPlatformSpecificOptions_Web_NavigationMode.newPage,
-          ),
+          web: OidcPlatformSpecificOptions_Web(navigationMode: OidcPlatformSpecificOptions_Web_NavigationMode.newPage),
         ),
       ),
     );
@@ -149,9 +137,7 @@ class CarpAuthService {
       _currentUser = getCurrentUserProfile(response);
 
       if (_currentUser != null) {
-        _currentUser!.authenticated(
-          OAuthToken.fromTokenResponse(response.token),
-        );
+        _currentUser!.authenticated(OAuthToken.fromTokenResponse(response.token));
         _authEventController.add(AuthEvent.authenticated);
         return currentUser;
       }
@@ -183,8 +169,7 @@ class CarpAuthService {
           options: FlutterWebAuth2Options(preferEphemeral: true),
         ).then((result) async {
           code = Uri.parse(result).queryParameters['code'];
-          if ((_currentUser == null || _currentUser!.isAuthenticated) &&
-              code != null) {
+          if ((_currentUser == null || _currentUser!.isAuthenticated) && code != null) {
             return await FlutterAppAuth().token(
               TokenRequest(
                 clientId!,
@@ -218,9 +203,7 @@ class CarpAuthService {
   /// The returned link can be passed to [authenticateWithMagicLink].
   /// Throws a [CarpNotFoundException] if CAWS does not know the code.
   Future<String> magicLinkForCode(String code) async {
-    final url = authProperties.authURL
-        .replace(path: '/api/self-signup/$code')
-        .toString();
+    final url = authProperties.authURL.replace(path: '/api/self-signup/$code').toString();
     debug('REQUEST: POST $url');
     final response = await httpr.post(url);
     // The body holds a one-time auth token, so only the status is logged.
@@ -228,36 +211,24 @@ class CarpAuthService {
 
     final body = json.decode(response.body.isEmpty ? '{}' : response.body);
     if (response.statusCode != HttpStatus.ok) {
-      throw CarpServiceRequestException.fromHttpStatus(
-        response.statusCode,
-        body,
-      );
+      throw CarpServiceRequestException.fromHttpStatus(response.statusCode, body);
     }
     return body['magicLink'] as String;
   }
 
   String get _discoveryUrl => _authProperties!.discoveryURL
-      .replace(
-        pathSegments: [
-          ..._authProperties!.discoveryURL.pathSegments,
-          '.well-known',
-          'openid-configuration',
-        ],
-      )
+      .replace(pathSegments: [..._authProperties!.discoveryURL.pathSegments, '.well-known', 'openid-configuration'])
       .toString();
 
   OAuthToken _oauthTokenFromTokenResponse(TokenResponse tokenResponse) {
     final idToken = tokenResponse.idToken;
-    final scopeString =
-        tokenResponse.tokenAdditionalParameters?['scope'] ??
-        tokenResponse.tokenType;
+    final scopeString = tokenResponse.tokenAdditionalParameters?['scope'] ?? tokenResponse.tokenType;
     final scope = (scopeString is String) ? scopeString.split(' ') : <String>[];
     return OAuthToken(
       tokenResponse.accessToken ?? '',
       tokenResponse.refreshToken ?? '',
       idToken ?? '',
-      tokenResponse.accessTokenExpirationDateTime ??
-          DateTime.now().add(const Duration(hours: 1)),
+      tokenResponse.accessTokenExpirationDateTime ?? DateTime.now().add(const Duration(hours: 1)),
       scope,
       idToken ?? '',
     );
@@ -274,20 +245,14 @@ class CarpAuthService {
   ///
   /// Returns the signed in user (with an [OAuthToken] access token), if successful.
   /// Throws a [CarpServiceException] if not successful.
-  Future<CarpUser> authenticateWithUsernamePassword({
-    required String username,
-    required String password,
-  }) async {
+  Future<CarpUser> authenticateWithUsernamePassword({required String username, required String password}) async {
     assert(_manager != null, 'Manager not configured. Call configure() first.');
     if (!_manager!.didInit) await initManager();
 
     OidcUser? response;
 
     try {
-      response = await manager?.loginPassword(
-        username: username,
-        password: password,
-      );
+      response = await manager?.loginPassword(username: username, password: password);
     } catch (error) {
       throw CarpUnauthorizedException(
         'Authentication failed.',
@@ -300,9 +265,7 @@ class CarpAuthService {
       _currentUser = getCurrentUserProfile(response);
 
       if (_currentUser != null) {
-        _currentUser!.authenticated(
-          OAuthToken.fromTokenResponse(response.token),
-        );
+        _currentUser!.authenticated(OAuthToken.fromTokenResponse(response.token));
         _authEventController.add(AuthEvent.authenticated);
         return currentUser;
       }
@@ -310,10 +273,7 @@ class CarpAuthService {
 
     // All other cases are treated as a failed attempt
     _authEventController.add(AuthEvent.failed);
-    throw CarpUnauthorizedException(
-      'Authentication failed.',
-      path: authEndpointUri.toString(),
-    );
+    throw CarpUnauthorizedException('Authentication failed.', path: authEndpointUri.toString());
   }
 
   /// Get a new access token for the current user based on the
@@ -325,8 +285,7 @@ class CarpAuthService {
   ///
   /// Returns the signed in user (with a new [OAuthToken] access token), if successful.
   /// Throws a [CarpServiceException] if not successful.
-  Future<CarpUser> refresh() =>
-      _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
+  Future<CarpUser> refresh() => _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
 
   /// Concurrent callers (e.g. parallel uploads all hitting a 403) share one
   /// refresh - a rotated refresh token is single-use.
@@ -362,9 +321,7 @@ class CarpAuthService {
         );
         _currentUser = getCurrentUserProfileFromTokenResponse(tokenResponse);
         if (_currentUser != null) {
-          _currentUser!.authenticated(
-            _oauthTokenFromTokenResponse(tokenResponse),
-          );
+          _currentUser!.authenticated(_oauthTokenFromTokenResponse(tokenResponse));
           _authEventController.add(AuthEvent.refreshed);
           return currentUser;
         }
@@ -392,9 +349,7 @@ class CarpAuthService {
       } else {
         _currentUser = getCurrentUserProfile(response);
         if (_currentUser != null) {
-          _currentUser!.authenticated(
-            OAuthToken.fromTokenResponse(response.token),
-          );
+          _currentUser!.authenticated(OAuthToken.fromTokenResponse(response.token));
           _authEventController.add(AuthEvent.refreshed);
           return currentUser;
         }
@@ -403,10 +358,7 @@ class CarpAuthService {
 
     // All other cases are treated as a failed attempt
     _authEventController.add(AuthEvent.failed);
-    throw CarpUnauthorizedException(
-      'Authentication failed.',
-      path: authEndpointUri.toString(),
-    );
+    throw CarpUnauthorizedException('Authentication failed.', path: authEndpointUri.toString());
   }
 
   /// Log out from this CARP service
@@ -452,16 +404,12 @@ class CarpAuthService {
   /// Gets the CARP profile of the current user from a [TokenResponse].
   /// Using the parameters in the [TokenResponse] we create an [OAuthToken]
   /// to generate the CarpUser.
-  CarpUser? getCurrentUserProfileFromTokenResponse(
-    TokenResponse tokenResponse,
-  ) {
+  CarpUser? getCurrentUserProfileFromTokenResponse(TokenResponse tokenResponse) {
     final accessToken = tokenResponse.accessToken;
     final refreshToken = tokenResponse.refreshToken;
     final idToken = tokenResponse.idToken;
     final tokenType = 'bearer';
-    final scopeString =
-        tokenResponse.tokenAdditionalParameters?['scope'] ??
-        tokenResponse.tokenType;
+    final scopeString = tokenResponse.tokenAdditionalParameters?['scope'] ?? tokenResponse.tokenType;
     final scope = (scopeString is String) ? scopeString.split(' ') : <String>[];
 
     if (accessToken == null || accessToken.isEmpty) {
@@ -469,18 +417,9 @@ class CarpAuthService {
     }
 
     final jwt = JwtDecoder.decode(accessToken);
-    final expiresAt =
-        tokenResponse.accessTokenExpirationDateTime ??
-        DateTime.now().add(const Duration(hours: 1));
+    final expiresAt = tokenResponse.accessTokenExpirationDateTime ?? DateTime.now().add(const Duration(hours: 1));
 
-    final oauthToken = OAuthToken(
-      accessToken,
-      refreshToken ?? '',
-      tokenType,
-      expiresAt,
-      scope,
-      idToken ?? '',
-    );
+    final oauthToken = OAuthToken(accessToken, refreshToken ?? '', tokenType, expiresAt, scope, idToken ?? '');
 
     return CarpUser.fromJWTOAuth(jwt, oauthToken);
   }
@@ -490,13 +429,9 @@ class CarpAuthService {
   /// reached).
   T nonNullAble<T>(T? argument) {
     if (argument == null && argument is CarpApp) {
-      throw CarpServiceException(
-        "CARP Service not initialized. Call 'CarpAuthService().configure()' first.",
-      );
+      throw CarpServiceException("CARP Service not initialized. Call 'CarpAuthService().configure()' first.");
     } else if (argument == null && argument is CarpUser) {
-      throw CarpServiceException(
-        "CARP User not authenticated. Call 'CarpAuthService().authenticate()' first.",
-      );
+      throw CarpServiceException("CARP User not authenticated. Call 'CarpAuthService().authenticate()' first.");
     } else {
       return argument!;
     }

@@ -13,8 +13,7 @@ part of 'carp_services.dart';
 /// Stores, versions and fetches [StudyProtocol]s on the server. The user must
 /// be authenticated as a researcher. Participant apps normally do not need
 /// it; they get their deployment from [CarpDeploymentService].
-class CarpProtocolService extends CarpBaseService
-    implements ProtocolService, ProtocolFactoryService {
+class CarpProtocolService extends CarpBaseService implements ProtocolService, ProtocolFactoryService {
   static final CarpProtocolService _instance = CarpProtocolService._();
 
   CarpProtocolService._();
@@ -27,8 +26,7 @@ class CarpProtocolService extends CarpBaseService
   String get rpcEndpointName => "protocol-service";
 
   @override
-  Future<void> add(StudyProtocol protocol, [String? versionTag]) async =>
-      await _rpc(Add(protocol, versionTag));
+  Future<void> add(StudyProtocol protocol, [String? versionTag]) async => await _rpc(Add(protocol, versionTag));
 
   @override
   Future<void> addVersion(StudyProtocol protocol, [String? versionTag]) async =>
@@ -43,25 +41,18 @@ class CarpProtocolService extends CarpBaseService
   Future<List<StudyProtocol>> getAllForOwner(String ownerId) async {
     final response = await _rpc(GetAllForOwner(ownerId));
     List<dynamic> items = response['items'] as List<dynamic>;
-    return items
-        .map((item) => StudyProtocol.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return items.map((item) => StudyProtocol.fromJson(item as Map<String, dynamic>)).toList();
   }
 
   @override
   Future<StudyProtocol> getBy(String protocolId, [String? versionTag]) async =>
-      StudyProtocol.fromJson(
-        await _rpc(GetBy(protocolId, versionTag)) as Map<String, dynamic>,
-      );
+      StudyProtocol.fromJson(await _rpc(GetBy(protocolId, versionTag)) as Map<String, dynamic>);
 
   @override
   Future<List<ProtocolVersion>> getVersionHistoryFor(String protocolId) async {
-    Map<String, dynamic> responseJson =
-        (await _rpc(GetVersionHistoryFor(protocolId)) as Map<String, dynamic>);
+    Map<String, dynamic> responseJson = (await _rpc(GetVersionHistoryFor(protocolId)) as Map<String, dynamic>);
     final items = responseJson['items'] as List<dynamic>;
-    return items
-        .map((item) => ProtocolVersion.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return items.map((item) => ProtocolVersion.fromJson(item as Map<String, dynamic>)).toList();
   }
 
   @override
@@ -70,13 +61,8 @@ class CarpProtocolService extends CarpBaseService
     String versionTag,
     List<ExpectedParticipantData> expectedParticipantData,
   ) async => StudyProtocol.fromJson(
-    await _rpc(
-      UpdateParticipantDataConfiguration(
-        protocolId,
-        versionTag,
-        expectedParticipantData,
-      ),
-    ) as Map<String, dynamic>,
+    await _rpc(UpdateParticipantDataConfiguration(protocolId, versionTag, expectedParticipantData))
+        as Map<String, dynamic>,
   );
 
   @override
@@ -86,9 +72,7 @@ class CarpProtocolService extends CarpBaseService
     String description,
     String customProtocol,
   ) async => StudyProtocol.fromJson(
-    await _rpc(
-      CreateCustomProtocol(ownerId, name, description, customProtocol),
-      'protocol-factory-service',
-    ) as Map<String, dynamic>,
+    await _rpc(CreateCustomProtocol(ownerId, name, description, customProtocol), 'protocol-factory-service')
+        as Map<String, dynamic>,
   );
 }

@@ -100,19 +100,12 @@ class MonitoringSamplingPackage extends SmartphoneSamplingPackage {
   static const String COMPLETED_APP_TASK = CamsDataTypes.COMPLETED_APP_TASK;
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.ERROR]!),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.TRIGGERED_TASK]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.COMPLETED_TASK]!,
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CamsDataTypes.COMPLETED_APP_TASK]!,
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.ERROR]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.TRIGGERED_TASK]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.COMPLETED_TASK]!),
+    DataTypeSamplingScheme(CarpDataTypes().types[CamsDataTypes.COMPLETED_APP_TASK]!),
+  ]);
 
   @override
   Probe? create(String type) => StubProbe(); // No probes created - these types of measures are handled in the core sampling logic

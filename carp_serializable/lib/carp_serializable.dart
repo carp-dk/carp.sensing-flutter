@@ -218,10 +218,7 @@ class FromJsonFactory {
   /// If the type is not registered, or the result is not a [T],
   /// [notAvailable] is returned (and a debug message printed) if specified.
   /// Otherwise, a [SerializationException] is thrown.
-  T fromJson<T extends Serializable>(
-    Map<String, dynamic> json, {
-    T? notAvailable,
-  }) {
+  T fromJson<T extends Serializable>(Map<String, dynamic> json, {T? notAvailable}) {
     var message = '';
     final type = json[Serializable.CLASS_IDENTIFIER];
     if (!_registry.containsKey(type)) {
@@ -270,5 +267,4 @@ class SerializationException implements Exception {
 /// Converts [object] to an indented JSON [String].
 ///
 /// Useful for logging and debugging [Serializable] objects.
-String toJsonString(Object? object) =>
-    const JsonEncoder.withIndent(' ').convert(object);
+String toJsonString(Object? object) => const JsonEncoder.withIndent(' ').convert(object);

@@ -18,8 +18,7 @@ class NoOpTrigger extends TriggerConfiguration {
 
   @override
   Function get fromJsonFunction => _$NoOpTriggerFromJson;
-  factory NoOpTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<NoOpTrigger>(json);
+  factory NoOpTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<NoOpTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$NoOpTriggerToJson(this);
 }
@@ -35,8 +34,7 @@ class ImmediateTrigger extends TriggerConfiguration {
 
   @override
   Function get fromJsonFunction => _$ImmediateTriggerFromJson;
-  factory ImmediateTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<ImmediateTrigger>(json);
+  factory ImmediateTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<ImmediateTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$ImmediateTriggerToJson(this);
 }
@@ -62,8 +60,7 @@ class OneTimeTrigger extends TriggerConfiguration {
 
   @override
   Function get fromJsonFunction => _$OneTimeTriggerFromJson;
-  factory OneTimeTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<OneTimeTrigger>(json);
+  factory OneTimeTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<OneTimeTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$OneTimeTriggerToJson(this);
 }
@@ -91,8 +88,7 @@ class PassiveTrigger extends TriggerConfiguration {
 
   @override
   Function get fromJsonFunction => _$PassiveTriggerFromJson;
-  factory PassiveTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<PassiveTrigger>(json);
+  factory PassiveTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<PassiveTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$PassiveTriggerToJson(this);
 }
@@ -113,8 +109,7 @@ class DelayedTrigger extends TriggerConfiguration {
 
   @override
   Function get fromJsonFunction => _$DelayedTriggerFromJson;
-  factory DelayedTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DelayedTrigger>(json);
+  factory DelayedTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DelayedTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$DelayedTriggerToJson(this);
 }
@@ -134,8 +129,7 @@ class PeriodicTrigger extends TriggerConfiguration implements Schedulable {
 
   @override
   Function get fromJsonFunction => _$PeriodicTriggerFromJson;
-  factory PeriodicTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<PeriodicTrigger>(json);
+  factory PeriodicTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<PeriodicTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$PeriodicTriggerToJson(this);
 }
@@ -151,8 +145,7 @@ class DateTimeTrigger extends TriggerConfiguration implements Schedulable {
 
   @override
   Function get fromJsonFunction => _$DateTimeTriggerFromJson;
-  factory DateTimeTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DateTimeTrigger>(json);
+  factory DateTimeTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DateTimeTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$DateTimeTriggerToJson(this);
 }
@@ -188,8 +181,7 @@ class DateTimeTrigger extends TriggerConfiguration implements Schedulable {
 /// [Again and Again! Managing Recurring Events In a Data Model](https://www.vertabelo.com/blog/technical-articles/again-and-again-managing-recurring-events-in-a-data-model).
 /// We are, however, not using yearly recurrence.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class RecurrentScheduledTrigger extends TriggerConfiguration
-    implements Schedulable {
+class RecurrentScheduledTrigger extends TriggerConfiguration implements Schedulable {
   static const int daysPerWeek = 7;
 
   /// The number of days used as one month when computing [period].
@@ -256,67 +248,44 @@ class RecurrentScheduledTrigger extends TriggerConfiguration
   }) : super() {
     assert(separationCount >= 0, 'Separation count must be zero or positive.');
     if (type == RecurrentType.weekly) {
-      assert(
-        dayOfWeek != null,
-        'dayOfWeek must be specified in a weekly recurrence.',
-      );
+      assert(dayOfWeek != null, 'dayOfWeek must be specified in a weekly recurrence.');
     } else if (type == RecurrentType.monthly) {
       assert(
         weekOfMonth != null || dayOfMonth != null,
         'Specify monthly recurrence using either dayOfMonth or weekOfMonth',
       );
-      assert(
-        dayOfMonth == null || (dayOfMonth! >= 1 && dayOfMonth! <= 31),
-        'dayOfMonth must be in the range [1-31]',
-      );
-      assert(
-        weekOfMonth == null || (weekOfMonth! >= 1 && weekOfMonth! <= 4),
-        'weekOfMonth must be in the range [1-4]',
-      );
+      assert(dayOfMonth == null || (dayOfMonth! >= 1 && dayOfMonth! <= 31), 'dayOfMonth must be in the range [1-31]');
+      assert(weekOfMonth == null || (weekOfMonth! >= 1 && weekOfMonth! <= 4), 'weekOfMonth must be in the range [1-4]');
     }
   }
 
   /// The next day in a monthly occurrence from the given [fromDate].
-  DateTime nextMonthlyDay(DateTime fromDate) => fromDate
-      .subtract(Duration(days: fromDate.weekday - 1))
-      .add(Duration(days: 7 * weekOfMonth! + dayOfWeek! - 1));
+  DateTime nextMonthlyDay(DateTime fromDate) =>
+      fromDate.subtract(Duration(days: fromDate.weekday - 1)).add(Duration(days: 7 * weekOfMonth! + dayOfWeek! - 1));
 
   /// The date and time of the first occurrence of this trigger after now.
   DateTime get firstOccurrence {
     late DateTime firstDay;
     DateTime now = DateTime.now();
-    DateTime start = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      time.hour,
-      time.minute,
-      time.second,
-    );
+    DateTime start = DateTime(now.year, now.month, now.day, time.hour, time.minute, time.second);
 
     switch (type) {
       case RecurrentType.daily:
-        firstDay = (start.isAfter(now))
-            ? start
-            : start.add(const Duration(hours: 24));
+        firstDay = (start.isAfter(now)) ? start : start.add(const Duration(hours: 24));
         break;
       case RecurrentType.weekly:
         int days = dayOfWeek! - now.weekday;
         days = (days < 0) ? days + daysPerWeek : days;
         firstDay = start.add(Duration(days: days));
         // check if this is the same day, but a time slot earlier this day
-        firstDay = (firstDay.isBefore(now))
-            ? firstDay.add(const Duration(days: daysPerWeek))
-            : firstDay;
+        firstDay = (firstDay.isBefore(now)) ? firstDay.add(const Duration(days: daysPerWeek)) : firstDay;
         break;
       case RecurrentType.monthly:
         if (dayOfMonth != null) {
           // we have a trigger of the following type: collect quarterly on the 11th day of the first month in each quarter at 21:30
           //   RecurrentScheduledTrigger(type: RecurrentType.monthly, dayOfMonth: 11, separationCount: 2, time: Time(hour: 21, minute: 30));
           int days = dayOfMonth! - now.day;
-          int month = (days > 0)
-              ? now.month + separationCount
-              : now.month + separationCount + 1;
+          int month = (days > 0) ? now.month + separationCount : now.month + separationCount + 1;
           int year = now.year;
           if (month > 12) {
             year = now.year + 1;
@@ -335,14 +304,7 @@ class RecurrentScheduledTrigger extends TriggerConfiguration
         break;
     }
 
-    return DateTime(
-      firstDay.year,
-      firstDay.month,
-      firstDay.day,
-      time.hour,
-      time.minute,
-      time.second,
-    );
+    return DateTime(firstDay.year, firstDay.month, firstDay.day, time.hour, time.minute, time.second);
   }
 
   /// The time between two triggers.
@@ -399,36 +361,19 @@ class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
   ///   * [day] - The day of the month to trigger. `int` [1-31] or `null` (= match all).
   ///   * [month] - The month to trigger. `int` [1-12] or `null` (= match all).
   ///   * [weekday] - The week day to trigger. `int` [0-6] or `null` (= match all).
-  factory CronScheduledTrigger({
-    int? minute,
-    int? hour,
-    int? day,
-    int? month,
-    int? weekday,
-  }) {
+  factory CronScheduledTrigger({int? minute, int? hour, int? day, int? month, int? weekday}) {
     assert(
       minute == null || (minute >= 0 && minute <= 59),
       'minute must be in the range of [0-59] or null (=match all).',
     );
-    assert(
-      hour == null || (hour >= 0 && hour <= 23),
-      'hour must be in the range of [0-23] or null (=match all).',
-    );
-    assert(
-      day == null || (day >= 1 && day <= 31),
-      'day must be in the range of [1-31] or null (=match all).',
-    );
-    assert(
-      month == null || (month >= 1 && month <= 12),
-      'month must be in the range of [1-12] or null (=match all).',
-    );
+    assert(hour == null || (hour >= 0 && hour <= 23), 'hour must be in the range of [0-23] or null (=match all).');
+    assert(day == null || (day >= 1 && day <= 31), 'day must be in the range of [1-31] or null (=match all).');
+    assert(month == null || (month >= 1 && month <= 12), 'month must be in the range of [1-12] or null (=match all).');
     assert(
       weekday == null || (weekday >= 0 && weekday <= 6),
       'weekday must be in the range of [0-6] or null (=match all).',
     );
-    return CronScheduledTrigger._(
-      cronExpression: _cronToString(minute, hour, day, month, weekday),
-    );
+    return CronScheduledTrigger._(cronExpression: _cronToString(minute, hour, day, month, weekday));
   }
 
   /// Creates a [CronScheduledTrigger] based on a cron-formatted string expression.
@@ -454,20 +399,13 @@ class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
   /// * that number are to be stated as integers, and not a string with leading zeros (e.g., use `9` and not `09` for 9 o'clock)
   ///
   /// See e.g. [crontab guru](https://crontab.guru/) for help in formatting cron jobs.
-  factory CronScheduledTrigger.parse({
-    required String cronExpression,
-    Duration? duration,
-  }) => CronScheduledTrigger._(cronExpression: cronExpression);
+  factory CronScheduledTrigger.parse({required String cronExpression, Duration? duration}) =>
+      CronScheduledTrigger._(cronExpression: cronExpression);
 
   CronScheduledTrigger._({required this.cronExpression}) : super();
 
-  static String _cronToString(
-    int? minute,
-    int? hour,
-    int? day,
-    int? month,
-    int? weekday,
-  ) => '${_cf(minute)} ${_cf(hour)} ${_cf(day)} ${_cf(month)} ${_cf(weekday)}';
+  static String _cronToString(int? minute, int? hour, int? day, int? month, int? weekday) =>
+      '${_cf(minute)} ${_cf(hour)} ${_cf(day)} ${_cf(month)} ${_cf(weekday)}';
   static String _cf(int? exp) => (exp == null) ? '*' : exp.toString();
 
   @override
@@ -509,8 +447,7 @@ class SamplingEventTrigger extends TriggerConfiguration {
 
   /// Creates a trigger that triggers when a measure of [measureType] is collected,
   /// and checks the [triggerCondition] to determine if it should trigger.
-  SamplingEventTrigger({required this.measureType, this.triggerCondition})
-    : super();
+  SamplingEventTrigger({required this.measureType, this.triggerCondition}) : super();
 
   @override
   Function get fromJsonFunction => _$SamplingEventTriggerFromJson;
@@ -553,18 +490,14 @@ class ConditionalSamplingEventTrigger extends TriggerConfiguration {
   /// Creates a trigger that triggers when a measure of [measureType] is collected,
   /// and checks the [triggerCondition] to determine if the
   /// task should be triggered.
-  ConditionalSamplingEventTrigger({
-    required this.measureType,
-    this.triggerCondition,
-  }) : super();
+  ConditionalSamplingEventTrigger({required this.measureType, this.triggerCondition}) : super();
 
   @override
   Function get fromJsonFunction => _$ConditionalSamplingEventTriggerFromJson;
   factory ConditionalSamplingEventTrigger.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<ConditionalSamplingEventTrigger>(json);
   @override
-  Map<String, dynamic> toJson() =>
-      _$ConditionalSamplingEventTriggerToJson(this);
+  Map<String, dynamic> toJson() => _$ConditionalSamplingEventTriggerToJson(this);
 }
 
 /// Evaluates if a [ConditionalPeriodicTrigger] should trigger.
@@ -595,8 +528,7 @@ class ConditionalPeriodicTrigger extends TriggerConfiguration {
   ConditionalEvaluator? triggerCondition;
 
   /// Creates a [ConditionalPeriodicTrigger].
-  ConditionalPeriodicTrigger({required this.period, this.triggerCondition})
-    : super();
+  ConditionalPeriodicTrigger({required this.period, this.triggerCondition}) : super();
 
   @override
   Function get fromJsonFunction => _$ConditionalPeriodicTriggerFromJson;
@@ -613,8 +545,7 @@ class ConditionalPeriodicTrigger extends TriggerConfiguration {
 /// numbers specified.
 /// The time period is defined by a [startTime] and an [endTime].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class RandomRecurrentTrigger extends TriggerConfiguration
-    implements Schedulable {
+class RandomRecurrentTrigger extends TriggerConfiguration implements Schedulable {
   /// Start time of the day where the trigger can happen.
   TimeOfDay startTime;
 
@@ -643,10 +574,7 @@ class RandomRecurrentTrigger extends TriggerConfiguration
     this.startTime = const TimeOfDay(hour: 8),
     this.endTime = const TimeOfDay(hour: 20),
   }) : super() {
-    assert(
-      startTime.isBefore(endTime),
-      'startTime must be before endTime with a 24 hour period.',
-    );
+    assert(startTime.isBefore(endTime), 'startTime must be before endTime with a 24 hour period.');
   }
 
   @override
@@ -699,15 +627,11 @@ class UserTaskTrigger extends TriggerConfiguration {
   UserTaskState triggerCondition;
 
   /// Creates a [UserTaskTrigger].
-  UserTaskTrigger({
-    required this.taskName,
-    this.triggerCondition = UserTaskState.done,
-  }) : super();
+  UserTaskTrigger({required this.taskName, this.triggerCondition = UserTaskState.done}) : super();
 
   @override
   Function get fromJsonFunction => _$UserTaskTriggerFromJson;
-  factory UserTaskTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<UserTaskTrigger>(json);
+  factory UserTaskTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<UserTaskTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$UserTaskTriggerToJson(this);
 }
@@ -729,8 +653,7 @@ class NoUserTaskTrigger extends TriggerConfiguration {
 
   @override
   Function get fromJsonFunction => _$NoUserTaskTriggerFromJson;
-  factory NoUserTaskTrigger.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<NoUserTaskTrigger>(json);
+  factory NoUserTaskTrigger.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<NoUserTaskTrigger>(json);
   @override
   Map<String, dynamic> toJson() => _$NoUserTaskTriggerToJson(this);
 }

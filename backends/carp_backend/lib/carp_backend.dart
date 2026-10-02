@@ -106,14 +106,12 @@ class CarpDataEndPoint extends DataEndPoint {
   @override
   Function get fromJsonFunction => _$CarpDataEndPointFromJson;
 
-  factory CarpDataEndPoint.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<CarpDataEndPoint>(json);
+  factory CarpDataEndPoint.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<CarpDataEndPoint>(json);
   @override
   Map<String, dynamic> toJson() => _$CarpDataEndPointToJson(this);
 
   @override
-  String toString() =>
-      '$runtimeType [$name] - method: ${uploadMethod.name}, interval: $uploadInterval';
+  String toString() => '$runtimeType [$name] - method: ${uploadMethod.name}, interval: $uploadInterval';
 }
 
 /// The ways a [CarpDataManager] can upload data to CAWS.

@@ -74,10 +74,7 @@ void main() {
     await CarpAuthService().configure(authProperties);
     CarpService().configure(app);
 
-    user = await CarpAuthService().authenticateWithUsernamePassword(
-      username: username,
-      password: password,
-    );
+    user = await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
 
     CarpParticipationService().configureFrom(CarpService());
     CarpDeploymentService().configureFrom(CarpService());
@@ -92,16 +89,12 @@ void main() {
     });
 
     test('- get study deployment status', () async {
-      final status = await CarpDeploymentService().getStudyDeploymentStatus(
-        testDeploymentId,
-      );
+      final status = await CarpDeploymentService().getStudyDeploymentStatus(testDeploymentId);
       print(toJsonString(status));
     });
 
     test('- get study deployment status list', () async {
-      final status = await CarpDeploymentService().getStudyDeploymentStatusList(
-        [testDeploymentId],
-      );
+      final status = await CarpDeploymentService().getStudyDeploymentStatusList([testDeploymentId]);
       print(toJsonString(status));
     });
 
@@ -115,10 +108,7 @@ void main() {
     });
 
     test("- unregister Smartphone", () async {
-      final status = await CarpDeploymentService().unregisterDevice(
-        testDeploymentId,
-        "Smartphone",
-      );
+      final status = await CarpDeploymentService().unregisterDevice(testDeploymentId, "Smartphone");
       print(toJsonString(status));
     });
 
@@ -172,32 +162,21 @@ void main() {
 
     // You can unregister the same device multiple times - no exception is thrown.
     test("- unregister Location Service", () async {
-      final status = await CarpDeploymentService().unregisterDevice(
-        testDeploymentId,
-        "Location Service",
-      );
+      final status = await CarpDeploymentService().unregisterDevice(testDeploymentId, "Location Service");
       print(toJsonString(status));
     });
 
     test('- get study deployment ', () async {
-      final status = await CarpDeploymentService().getStudyDeploymentStatus(
-        testDeploymentId,
-      );
+      final status = await CarpDeploymentService().getStudyDeploymentStatus(testDeploymentId);
 
       await writeToFile(toJsonString(status), 'deployment_status.json');
 
-      final deployment = await CarpDeploymentService().getDeviceDeploymentFor(
-        status.studyDeploymentId,
-        "Smartphone",
-      );
+      final deployment = await CarpDeploymentService().getDeviceDeploymentFor(status.studyDeploymentId, "Smartphone");
       await writeToFile(toJsonString(deployment), 'deployment.json');
     });
 
     test('- mark deployed ', () async {
-      final deployment = await CarpDeploymentService().getDeviceDeploymentFor(
-        testDeploymentId,
-        "Smartphone",
-      );
+      final deployment = await CarpDeploymentService().getDeviceDeploymentFor(testDeploymentId, "Smartphone");
 
       await writeToFile(toJsonString(deployment), 'deployment_2.json');
 
@@ -220,8 +199,8 @@ void main() {
 
   group("CARP Participation Service", () {
     test('- get invitations', () async {
-      List<ActiveParticipationInvitation> invitations =
-          await CarpParticipationService().getActiveParticipationInvitations();
+      List<ActiveParticipationInvitation> invitations = await CarpParticipationService()
+          .getActiveParticipationInvitations();
 
       for (var invitation in invitations) {
         print(toJsonString(invitation));
@@ -231,25 +210,15 @@ void main() {
     test('- set participant data - SEX', () async {
       var participation = CarpParticipationService().participation();
 
-      var data = await participation.setParticipantData({
-        InputType.SEX: SexInput(value: Sex.Male),
-      });
+      var data = await participation.setParticipantData({InputType.SEX: SexInput(value: Sex.Male)});
 
       print(toJsonString(data));
     });
 
     test('- set participant data - NAME', () async {
-      var data = await CarpParticipationService().setParticipantData(
-        testDeploymentId,
-        {
-          InputType.FULL_NAME: FullNameInput(
-            firstName: 'Eva',
-            middleName: 'G.',
-            lastName: 'Olsen',
-          ),
-        },
-        "Mother",
-      );
+      var data = await CarpParticipationService().setParticipantData(testDeploymentId, {
+        InputType.FULL_NAME: FullNameInput(firstName: 'Eva', middleName: 'G.', lastName: 'Olsen'),
+      }, "Mother");
       print(toJsonString(data));
     });
 
@@ -257,12 +226,7 @@ void main() {
       var participation = CarpParticipationService().participation();
 
       await participation.setInformedConsent(
-        InformedConsentInput(
-          userId: 'jakba@dtu.dk',
-          name: 'JEB',
-          consent: 'I agree',
-          signatureImage: 'blob',
-        ),
+        InformedConsentInput(userId: 'jakba@dtu.dk', name: 'JEB', consent: 'I agree', signatureImage: 'blob'),
         '',
       );
     });

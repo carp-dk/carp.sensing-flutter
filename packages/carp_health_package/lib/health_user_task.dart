@@ -20,22 +20,16 @@ class HealthUserTask extends UserTask {
 
     // then check for permission to access health data
     try {
-      var healthProbe = backgroundTaskExecutor.probes.firstWhere(
-        (probe) => probe is HealthProbe,
-      ) as HealthProbe;
+      var healthProbe = backgroundTaskExecutor.probes.firstWhere((probe) => probe is HealthProbe) as HealthProbe;
 
       // Always request permissions when starting the health user task.
       healthProbe.requestPermissions().then((granted) {
         if (granted) {
-          debug(
-            '$runtimeType - Got permissions to access health data. Now starting data collection.',
-          );
+          debug('$runtimeType - Got permissions to access health data. Now starting data collection.');
           backgroundTaskExecutor.resume();
           Timer(const Duration(seconds: 30), () => onDone());
         } else {
-          warning(
-            '$runtimeType - Could not get permissions to access health data.',
-          );
+          warning('$runtimeType - Could not get permissions to access health data.');
           return;
         }
       });

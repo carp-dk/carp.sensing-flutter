@@ -43,8 +43,7 @@ class CamsDataTypeMetaData extends DataTypeMetaData {
   /// Declare the Android group; on iOS the Android-only groups are returned as
   /// their iOS counterpart ([Permission.activityRecognition] ->
   /// [Permission.sensors], [Permission.bluetoothScan] -> [Permission.bluetooth]).
-  List<Permission> get permissions =>
-      Platform.isIOS ? _permissions.map(_onIOS).toList() : _permissions;
+  List<Permission> get permissions => Platform.isIOS ? _permissions.map(_onIOS).toList() : _permissions;
   set permissions(List<Permission> permissions) => _permissions = permissions;
   List<Permission> _permissions;
 
@@ -96,24 +95,15 @@ class CamsDataTypes {
   factory CamsDataTypes() => _instance;
 
   /// The data type of [CompletedAppTask].
-  static const String COMPLETED_APP_TASK =
-      '${CarpDataTypes.CARP_NAMESPACE}.completedapptask';
+  static const String COMPLETED_APP_TASK = '${CarpDataTypes.CARP_NAMESPACE}.completedapptask';
 
   /// The data type of [FileData].
   static const String FILE = '${CarpDataTypes.CARP_NAMESPACE}.file';
 
   CamsDataTypes._() {
     CarpDataTypes().add([
-      DataTypeMetaData(
-        type: COMPLETED_APP_TASK,
-        displayName: "Completed AppTask",
-        timeType: DataTimeType.POINT,
-      ),
-      DataTypeMetaData(
-        type: FILE,
-        displayName: "File",
-        timeType: DataTimeType.POINT,
-      ),
+      DataTypeMetaData(type: COMPLETED_APP_TASK, displayName: "Completed AppTask", timeType: DataTimeType.POINT),
+      DataTypeMetaData(type: FILE, displayName: "File", timeType: DataTimeType.POINT),
     ]);
   }
 }

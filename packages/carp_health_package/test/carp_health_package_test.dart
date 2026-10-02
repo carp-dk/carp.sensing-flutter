@@ -10,8 +10,7 @@ import 'package:carp_health_package/health_package.dart';
 import 'package:health/health.dart';
 import 'package:test/test.dart';
 
-String _encode(Object object) =>
-    const JsonEncoder.withIndent(' ').convert(object);
+String _encode(Object object) => const JsonEncoder.withIndent(' ').convert(object);
 
 void main() {
   group("Protocol", () {
@@ -32,10 +31,7 @@ void main() {
       Health();
 
       // Create a new study protocol.
-      protocol = StudyProtocol(
-        ownerId: 'alex@uni.dk',
-        name: 'Context package test',
-      );
+      protocol = StudyProtocol(ownerId: 'alex@uni.dk', name: 'Context package test');
 
       // Define which devices are used for data collection.
       phone = Smartphone();
@@ -45,9 +41,7 @@ void main() {
       protocol.addTaskControl(
         ImmediateTrigger(),
         BackgroundTask()
-          ..measures = SamplingPackageRegistry().dataTypes
-              .map((type) => Measure(type: type.type))
-              .toList(),
+          ..measures = SamplingPackageRegistry().dataTypes.map((type) => Measure(type: type.type)).toList(),
         phone,
       );
 
@@ -70,15 +64,10 @@ void main() {
       );
 
       protocol.addTaskControl(
-        RecurrentScheduledTrigger(
-          type: RecurrentType.daily,
-          time: TimeOfDay(hour: 23, minute: 00),
-        ),
+        RecurrentScheduledTrigger(type: RecurrentType.daily, time: TimeOfDay(hour: 23, minute: 00)),
         BackgroundTask()..addMeasure(
           Measure(type: HealthSamplingPackage.HEALTH)
-            ..overrideSamplingConfiguration = HealthSamplingConfiguration(
-              healthDataTypes: [HealthDataType.WEIGHT],
-            ),
+            ..overrideSamplingConfiguration = HealthSamplingConfiguration(healthDataTypes: [HealthDataType.WEIGHT]),
         ),
         phone,
       );
@@ -115,9 +104,7 @@ void main() {
       print('#1 : $protocol');
       final studyJson = toJsonString(protocol);
 
-      StudyProtocol protocolFromJson = StudyProtocol.fromJson(
-        json.decode(studyJson) as Map<String, dynamic>,
-      );
+      StudyProtocol protocolFromJson = StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
       expect(toJsonString(protocolFromJson), equals(studyJson));
       print('#2 : $protocolFromJson');
     });
@@ -125,9 +112,7 @@ void main() {
     test('JSON File -> StudyProtocol', () async {
       String plainJson = File('test/json/protocol.json').readAsStringSync();
 
-      StudyProtocol protocol = StudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       expect(protocol.ownerId, 'alex@uni.dk');
       expect(protocol.primaryDevice.roleName, Smartphone.DEFAULT_ROLE_NAME);
@@ -137,16 +122,11 @@ void main() {
     test(' HealthSamplingConfiguration -> JSON -> Object', () async {
       HealthSamplingConfiguration configuration = HealthSamplingConfiguration(
         past: Duration(minutes: 60),
-        healthDataTypes: [
-          HealthDataType.STEPS,
-          HealthDataType.ACTIVE_ENERGY_BURNED,
-        ],
+        healthDataTypes: [HealthDataType.STEPS, HealthDataType.ACTIVE_ENERGY_BURNED],
       );
       final dataJson = toJsonString(configuration);
       print(toJsonString(configuration));
-      final dataFromJson = HealthSamplingConfiguration.fromJson(
-        json.decode(dataJson) as Map<String, dynamic>,
-      );
+      final dataFromJson = HealthSamplingConfiguration.fromJson(json.decode(dataJson) as Map<String, dynamic>);
       print(toJsonString(dataFromJson));
       expect(toJsonString(dataFromJson), equals(dataJson));
     });
@@ -157,54 +137,36 @@ void main() {
         types: [HealthDataType.WEIGHT, HealthDataType.HEIGHT],
       );
 
-      final configuration =
-          task.measures!.single.overrideSamplingConfiguration
-              as HealthSamplingConfiguration;
+      final configuration = task.measures!.single.overrideSamplingConfiguration as HealthSamplingConfiguration;
+
+      expect(configuration.healthDataTypes, containsAll([HealthDataType.WEIGHT, HealthDataType.HEIGHT]));
+    });
+
+    test('HealthAppTask merges types into an existing health configuration', () {
+      final task = HealthAppTask(
+        measures: [
+          HealthSamplingPackage.getHealthMeasure([HealthDataType.STEPS]),
+        ],
+        types: [HealthDataType.WEIGHT, HealthDataType.HEIGHT],
+      );
+
+      final configuration = task.measures!.single.overrideSamplingConfiguration as HealthSamplingConfiguration;
 
       expect(
         configuration.healthDataTypes,
-        containsAll([HealthDataType.WEIGHT, HealthDataType.HEIGHT]),
+        containsAll([HealthDataType.STEPS, HealthDataType.WEIGHT, HealthDataType.HEIGHT]),
       );
     });
 
-    test(
-      'HealthAppTask merges types into an existing health configuration',
-      () {
-        final task = HealthAppTask(
-          measures: [
-            HealthSamplingPackage.getHealthMeasure([HealthDataType.STEPS]),
-          ],
-          types: [HealthDataType.WEIGHT, HealthDataType.HEIGHT],
-        );
-
-        final configuration =
-            task.measures!.single.overrideSamplingConfiguration
-                as HealthSamplingConfiguration;
-
-        expect(
-          configuration.healthDataTypes,
-          containsAll([
-            HealthDataType.STEPS,
-            HealthDataType.WEIGHT,
-            HealthDataType.HEIGHT,
-          ]),
-        );
-      },
-    );
-
     test('the health types are gathered from the service configuration', () {
       final service = HealthService()
-        ..defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH] =
-            HealthSamplingConfiguration(
-              healthDataTypes: [HealthDataType.STEPS, HealthDataType.WEIGHT],
-            );
+        ..defaultSamplingConfiguration?[HealthSamplingPackage.HEALTH] = HealthSamplingConfiguration(
+          healthDataTypes: [HealthDataType.STEPS, HealthDataType.WEIGHT],
+        );
 
       final manager = HealthServiceManager()..gatherTypesFrom(service);
 
-      expect(
-        manager.types,
-        containsAll([HealthDataType.STEPS, HealthDataType.WEIGHT]),
-      );
+      expect(manager.types, containsAll([HealthDataType.STEPS, HealthDataType.WEIGHT]));
     });
   });
 
@@ -261,8 +223,7 @@ void main() {
       DateTime to = DateTime.now();
       DateTime from = to.subtract(Duration(milliseconds: 10000));
       double value = 500;
-      String unit =
-          dasesDataTypeToUnit[DasesHealthDataType.CALORIES_INTAKE]?.name ?? '';
+      String unit = dasesDataTypeToUnit[DasesHealthDataType.CALORIES_INTAKE]?.name ?? '';
       String type = DasesHealthDataType.CALORIES_INTAKE.name;
       HealthPlatform platform = HealthPlatform.APPLE_HEALTH;
       String deviceId = '1234';
@@ -311,10 +272,7 @@ void main() {
           HealthData(
             uuid: '4321',
             value: NumericHealthValue(numericValue: 12),
-            unit:
-                dasesDataTypeToUnit[DasesHealthDataType.SMOKED_CIGARETTES]
-                    ?.name ??
-                '',
+            unit: dasesDataTypeToUnit[DasesHealthDataType.SMOKED_CIGARETTES]?.name ?? '',
             healthDataType: DasesHealthDataType.SMOKED_CIGARETTES.name,
             dateFrom: from,
             dateTo: to,
@@ -359,10 +317,7 @@ void main() {
       for (var data in healthData) {
         final measurement = Measurement.fromData(data);
         print(_encode(measurement));
-        expect(
-          measurement.data.dataType.toString(),
-          HealthSamplingPackage.HEALTH,
-        );
+        expect(measurement.data.dataType.toString(), HealthSamplingPackage.HEALTH);
         expect(measurement.data, isA<HealthData>());
         // expect(
         //   (measurement.data as HealthData).healthDataType,
@@ -376,9 +331,7 @@ void main() {
         final measurement = Measurement.fromData(data);
         final dataJson = toJsonString(measurement);
         print(dataJson);
-        final dataFromJson = Measurement.fromJson(
-          json.decode(dataJson) as Map<String, dynamic>,
-        );
+        final dataFromJson = Measurement.fromJson(json.decode(dataJson) as Map<String, dynamic>);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }

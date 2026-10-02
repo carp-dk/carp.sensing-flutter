@@ -24,9 +24,7 @@ void main() {
       registration: DeviceRegistration(),
     );
     final measurements = StreamController<Measurement>.broadcast();
-    await deleteDatabase(
-      '${await getDatabasesPath()}/${SQLiteDataManager.DATABASE_NAME}.db',
-    );
+    await deleteDatabase('${await getDatabasesPath()}/${SQLiteDataManager.DATABASE_NAME}.db');
 
     await buffer.initialize(deployment, measurements.stream);
 
@@ -50,5 +48,4 @@ void main() {
 }
 
 Future<int> _rowCount(DataStreamBuffer buffer) async =>
-    (await buffer.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME))
-        .length;
+    (await buffer.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME)).length;

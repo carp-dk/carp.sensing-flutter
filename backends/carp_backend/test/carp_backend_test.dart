@@ -24,8 +24,7 @@ import 'package:research_package/research_package.dart';
 
 import 'credentials.dart';
 
-String _encode(Object? object) =>
-    const JsonEncoder.withIndent(' ').convert(object);
+String _encode(Object? object) => const JsonEncoder.withIndent(' ').convert(object);
 
 void main() {
   SharedPreferences.setMockInitialValues({});
@@ -79,10 +78,7 @@ void main() {
     // create a carp data manager in order to initialize json serialization
     CarpDataManager();
 
-    await CarpAuthService().authenticateWithUsernamePassword(
-      username: username,
-      password: password,
-    );
+    await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
 
     // configure the other services needed
     CarpParticipationService().configureFrom(CarpService());
@@ -95,10 +91,7 @@ void main() {
 
   group('Base Services', () {
     test('- authentication w. username and password', () async {
-      CarpUser user = await CarpAuthService().authenticateWithUsernamePassword(
-        username: username,
-        password: password,
-      );
+      CarpUser user = await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
 
       expect(user.token, isNotNull);
       expect(user.isAuthenticated, true);
@@ -110,8 +103,7 @@ void main() {
 
   group("Informed Consent", () {
     test('- get', () async {
-      RPOrderedTask? informedConsent = await CarpResourceManager()
-          .getConsentDocument(refresh: true);
+      RPOrderedTask? informedConsent = await CarpResourceManager().getConsentDocument(refresh: true);
 
       print(_encode(informedConsent));
     });
@@ -120,25 +112,14 @@ void main() {
       RPOrderedTask anotherInformedConsent = RPOrderedTask(
         identifier: '12',
         steps: [
-          RPInstructionStep(
-            identifier: "1",
-            title: "Welcome!",
-            text: "Welcome to this study!",
-          ),
-          RPCompletionStep(
-            identifier: "2",
-            title: "Thank You!",
-            text: "We saved your consent document - VIII",
-          ),
+          RPInstructionStep(identifier: "1", title: "Welcome!", text: "Welcome to this study!"),
+          RPCompletionStep(identifier: "2", title: "Thank You!", text: "We saved your consent document - VIII"),
         ],
       );
 
-      bool success = await CarpResourceManager().setConsentDocument(
-        anotherInformedConsent,
-      );
+      bool success = await CarpResourceManager().setConsentDocument(anotherInformedConsent);
       print('updated: $success');
-      RPOrderedTask? informedConsent = await CarpResourceManager()
-          .getConsentDocument(refresh: true);
+      RPOrderedTask? informedConsent = await CarpResourceManager().getConsentDocument(refresh: true);
 
       print(_encode(informedConsent));
     });
@@ -153,8 +134,11 @@ void main() {
     Locale locale = const Locale('en');
 
     test('- get', () async {
-      Map<String, String>? localizations = await CarpResourceManager()
-          .getLocalizations(locale, refresh: true, cache: false);
+      Map<String, String>? localizations = await CarpResourceManager().getLocalizations(
+        locale,
+        refresh: true,
+        cache: false,
+      );
 
       print(_encode(localizations));
     });
@@ -162,14 +146,10 @@ void main() {
     test('- set', () async {
       Map<String, String> daLocalizations = {'Hi': 'Hej', 'Bye': 'Farvel'};
 
-      bool success = await CarpResourceManager().setLocalizations(
-        locale,
-        daLocalizations,
-      );
+      bool success = await CarpResourceManager().setLocalizations(locale, daLocalizations);
       print('updated: $success');
 
-      Map<String, String>? localizations = await CarpResourceManager()
-          .getLocalizations(locale);
+      Map<String, String>? localizations = await CarpResourceManager().getLocalizations(locale);
       expect(localizations, localizations);
       print(_encode(localizations));
     });
@@ -225,9 +205,7 @@ void main() {
     });
 
     test('- get specific', () async {
-      final message = await CarpResourceManager().getMessage(
-        'fc8539f0-2eb2-11ee-b8d3-af65eeff3f6f',
-      );
+      final message = await CarpResourceManager().getMessage('fc8539f0-2eb2-11ee-b8d3-af65eeff3f6f');
       print(_encode(message));
       expect(message, isNotNull);
       // expect(message_2!.id, message_1.id);
@@ -287,14 +265,11 @@ void main() {
     test('- upload mp4', () async {
       final File myFile = File("test/files/1730232460529.mp4");
 
-      final uploadTask = CarpService().getFileStorageReference().upload(
-        myFile,
-        {
-          'content-type': 'audio/mpeg',
-          'content-language': 'en',
-          'activity': 'test',
-        },
-      );
+      final uploadTask = CarpService().getFileStorageReference().upload(myFile, {
+        'content-type': 'audio/mpeg',
+        'content-language': 'en',
+        'activity': 'test',
+      });
 
       final response = await uploadTask.onComplete;
       expect(response.id, greaterThan(0));
@@ -304,14 +279,11 @@ void main() {
     test('- upload jpg', () async {
       final File myFile = File("test/files/CAP7858089012525879504.jpg");
 
-      final uploadTask = CarpService().getFileStorageReference().upload(
-        myFile,
-        {
-          'content-type': 'image/jpg',
-          'content-language': 'en',
-          'activity': 'test',
-        },
-      );
+      final uploadTask = CarpService().getFileStorageReference().upload(myFile, {
+        'content-type': 'image/jpg',
+        'content-language': 'en',
+        'activity': 'test',
+      });
 
       final response = await uploadTask.onComplete;
       expect(response.id, greaterThan(0));

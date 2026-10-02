@@ -27,10 +27,7 @@ class CarpApp {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CarpApp &&
-          runtimeType == other.runtimeType &&
-          name == other.name &&
-          uri == other.uri;
+      other is CarpApp && runtimeType == other.runtimeType && name == other.name && uri == other.uri;
 
   @override
   String toString() => 'CarpApp - name: $name, uri: $uri';

@@ -23,11 +23,8 @@ class SurveyUserTask extends UserTask {
   SurveyUserTask(super.executor);
 
   @override
-  Widget? get widget => SurveyPage(
-    task: rpAppTask.rpTask,
-    resultCallback: _onSurveySubmit,
-    onSurveyCancel: _onSurveyCancel,
-  );
+  Widget? get widget =>
+      SurveyPage(task: rpAppTask.rpTask, resultCallback: _onSurveySubmit, onSurveyCancel: _onSurveyCancel);
 
   @override
   void onStart() {
@@ -48,9 +45,7 @@ class SurveyUserTask extends UserTask {
 
   void _onSurveyCancel([RPTaskResult? result]) {
     // also save result even though it was canceled by the user
-    backgroundTaskExecutor.addMeasurement(
-      Measurement.fromData(RPTaskResultData(SurveyStatus.canceled, result)),
-    );
+    backgroundTaskExecutor.addMeasurement(Measurement.fromData(RPTaskResultData(SurveyStatus.canceled, result)));
     backgroundTaskExecutor.pause();
     super.onCancel();
   }
@@ -62,11 +57,7 @@ class SurveyUserTask extends UserTask {
 /// Registered with the [AppTaskController] by [SurveySamplingPackage].
 class SurveyUserTaskFactory implements UserTaskFactory {
   @override
-  List<String> types = [
-    AppTask.INFORMED_CONSENT_TYPE,
-    AppTask.SURVEY_TYPE,
-    AppTask.COGNITIVE_ASSESSMENT_TYPE,
-  ];
+  List<String> types = [AppTask.INFORMED_CONSENT_TYPE, AppTask.SURVEY_TYPE, AppTask.COGNITIVE_ASSESSMENT_TYPE];
 
   // always create a [SurveyUserTask]
   @override

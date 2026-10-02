@@ -49,20 +49,14 @@ class TaskControl {
   ///
   /// [taskName] and [destinationDeviceRoleName] are taken from [task] and
   /// [targetDevice] when given. [control] defaults to [Control.Start].
-  TaskControl({
-    required this.triggerId,
-    this.task,
-    this.targetDevice,
-    this.control = Control.Start,
-  }) : super() {
+  TaskControl({required this.triggerId, this.task, this.targetDevice, this.control = Control.Start}) : super() {
     if (task != null) taskName = task!.name;
     if (targetDevice != null) {
       destinationDeviceRoleName = targetDevice!.roleName;
     }
   }
 
-  factory TaskControl.fromJson(Map<String, dynamic> json) =>
-      _$TaskControlFromJson(json);
+  factory TaskControl.fromJson(Map<String, dynamic> json) => _$TaskControlFromJson(json);
   Map<String, dynamic> toJson() => _$TaskControlToJson(this);
 
   @override

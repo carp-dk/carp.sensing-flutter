@@ -54,8 +54,7 @@ part of 'esense.dart';
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of an eSense device.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.ESenseDevice';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.ESenseDevice';
 
   /// The default role name for an eSense device.
   static const String DEFAULT_ROLE_NAME = 'eSense';
@@ -65,16 +64,11 @@ class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
   int samplingRate;
 
   /// Creates an [ESenseDevice] configuration.
-  ESenseDevice({
-    super.roleName = ESenseDevice.DEFAULT_ROLE_NAME,
-    super.isOptional = true,
-    this.samplingRate = 10,
-  });
+  ESenseDevice({super.roleName = ESenseDevice.DEFAULT_ROLE_NAME, super.isOptional = true, this.samplingRate = 10});
 
   @override
   Function get fromJsonFunction => _$ESenseDeviceFromJson;
-  factory ESenseDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as ESenseDevice;
+  factory ESenseDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as ESenseDevice;
   @override
   Map<String, dynamic> toJson() => _$ESenseDeviceToJson(this);
 }
@@ -92,20 +86,17 @@ class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
 ///    connection events.
 ///  * While connected, it reads the battery voltage every 2 minutes and emits
 ///    an estimated level on [batteryEvents].
-class ESenseDeviceManager
-    extends BLEDeviceManager<ESenseDevice, BLEDeviceRegistration> {
+class ESenseDeviceManager extends BLEDeviceManager<ESenseDevice, BLEDeviceRegistration> {
   Timer? _batteryTimer;
   StreamSubscription<ESenseEvent>? _batterySubscription;
   double? _voltageLevel;
-  final StreamController<int> _batteryEventController =
-      StreamController.broadcast();
+  final StreamController<int> _batteryEventController = StreamController.broadcast();
 
   ESenseManager? _manager;
 
   /// The `esense_flutter` [ESenseManager] that talks to the device.
   /// Null until [bleName] has been set.
-  ESenseManager? get manager =>
-      bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
+  ESenseManager? get manager => bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
 
   @override
   String? get displayName => bleName;
@@ -131,9 +122,7 @@ class ESenseDeviceManager
   ///
   /// See e.g. https://en.wikipedia.org/wiki/State_of_charge#Voltage_method
   @override
-  int? get batteryLevel => (_voltageLevel != null)
-      ? ((1.19 * _voltageLevel! - 3.91) * 100).toInt()
-      : null;
+  int? get batteryLevel => (_voltageLevel != null) ? ((1.19 * _voltageLevel! - 3.91) * 100).toInt() : null;
 
   @override
   Stream<int> get batteryEvents => _batteryEventController.stream;
@@ -210,9 +199,7 @@ class ESenseDeviceManager
       // try to connect to the manager with the [bleName]
       manager?.connect();
     } catch (error) {
-      warning(
-        '$runtimeType - Error connecting to eSense device: $bleName - $error',
-      );
+      warning('$runtimeType - Error connecting to eSense device: $bleName - $error');
       return DeviceStatus.disconnected;
     }
 
