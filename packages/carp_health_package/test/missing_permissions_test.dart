@@ -7,11 +7,15 @@ void main() {
 
   // Fake Health Connect: only STEPS and HEART_RATE are granted.
   const granted = {'STEPS', 'HEART_RATE'};
-  setUp(() => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(const MethodChannel('flutter_health'), (call) async {
+  setUp(
+    () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('flutter_health'),
+      (call) async {
         final types = (call.arguments['types'] as List).cast<String>();
         return types.every(granted.contains);
-      }));
+      },
+    ),
+  );
 
   test('missingHealthPermissions names the types that are not granted', () async {
     final manager = HealthServiceManager(HealthService())

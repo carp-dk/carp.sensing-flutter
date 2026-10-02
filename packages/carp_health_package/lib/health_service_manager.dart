@@ -185,9 +185,7 @@ class HealthServiceManager extends ServiceManager<HealthService, ServiceRegistra
   /// The health [types] this service cannot read, checked one type at a time.
   ///
   /// On iOS, only types never requested, since Apple Health does not disclose read access.
-  Future<List<HealthDataType>> missingHealthPermissions(
-    List<HealthDataType> types,
-  ) async {
+  Future<List<HealthDataType>> missingHealthPermissions(List<HealthDataType> types) async {
     final missing = <HealthDataType>[];
     for (final type in types) {
       if (!await hasHealthPermissions([type])) missing.add(type);
