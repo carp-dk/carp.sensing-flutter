@@ -7,9 +7,16 @@
 
 part of '../../runtime.dart';
 
+/// The sampling state of one [TaskControlExecutor].
+///
+/// Identified by its [triggerId] and [taskName].
+/// Part of a [SmartphoneDeploymentExecutorSamplingState].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TaskControlExecutorSamplingState extends SamplingState {
+  /// The [TaskControl.triggerId] of the task control.
   int triggerId;
+
+  /// The [TaskControl.taskName] of the task control.
   String taskName;
 
   TaskControlExecutorSamplingState(super.state, this.triggerId, this.taskName);
@@ -24,11 +31,21 @@ class TaskControlExecutorSamplingState extends SamplingState {
       _$TaskControlExecutorSamplingStateToJson(this);
 }
 
-/// Responsible for handling the execution of a [TaskControl].
+/// Runs a [TaskControl]: starts or stops a task each time its trigger fires.
 ///
-/// This executor runs in real-time and triggers the task using timers. This
-/// entails that tasks are only triggered if the app is actively running, either
-/// in the foreground or in a background process.
+/// Created by the [SmartphoneDeploymentExecutor]. It gets its [TriggerExecutor]
+/// and [TaskExecutor] from the [ExecutorFactory]. On each trigger event, it adds
+/// a [TriggeredTask] measurement and resumes or pauses the task executor,
+/// depending on [TaskControl.control].
+///
+/// Key points:
+///  * Runs in real time using timers, so tasks only trigger while the app runs,
+///    in the foreground or in a background process.
+///  * Resuming fails while the [targetDevice] is not connected. The
+///    [DeviceManager] of the target device resumes it once connected.
+///  * Every measurement it emits has [Measurement.taskControl] set.
+///
+/// See [AppTaskControlExecutor] for app tasks with schedulable triggers.
 class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   final StreamController<Measurement> _controller =
       StreamController<Measurement>.broadcast();
@@ -49,23 +66,14 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
   TriggerExecutor? get triggerExecutor => _triggerExecutor;
   TaskExecutor? get taskExecutor => _taskExecutor;
 
+  /// The [DeviceManager] of [targetDevice], or null if none is available.
   DeviceManager? get targetDeviceManager => SmartPhoneClientManager()
       .deviceController
       .getDeviceManager(_targetDevice.type);
 
-  // DeviceManager? get deviceManager =>
-  //     SmartPhoneClientManager().deviceController.getDeviceManager(taskControl.destinationDeviceRoleName!) ??
-
-  //     DeviceController().getDeviceManager(targetDevice.type)
-
-  //        final deviceManager = getDeviceManagerFromRoleName(
-  //           executor.taskControl.destinationDeviceRoleName,
-  //         );
-
-  //     firstWhereOrNull(
-  //       (dm) => dm.deviceRoleName == taskControl.destinationDeviceRoleName,
-  //     );
-
+  /// Creates an executor for [taskControl].
+  ///
+  /// It links [trigger] and [task] on [targetDevice].
   TaskControlExecutor(
     TaskControl taskControl,
     TriggerConfiguration trigger,
@@ -119,7 +127,10 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
     return true;
   }
 
-  /// Callback when the [triggerExecutor] triggers.
+  /// Called when the [triggerExecutor] fires.
+  ///
+  /// Adds a [TriggeredTask] measurement, then resumes the [taskExecutor] for
+  /// [Control.Start] or pauses it for [Control.Stop].
   void onTrigger() {
     // first, add the trigger task measurement to the measurements stream
     _controller.add(
@@ -188,17 +199,17 @@ class TaskControlExecutor extends AbstractExecutor<TaskControl> {
     (measurement) => measurement..taskControl = taskControl,
   );
 
-  /// Returns a list of the running probes in this task control executor.
+  /// The probes of the [taskExecutor]. Empty if there is none.
   List<Probe> get probes => taskExecutor?.probes ?? [];
 }
 
-/// Responsible for handling the execution of a [TaskControl] which contains
-/// an [AppTask].
+/// Runs a [TaskControl] with an [AppTask] and a [Schedulable] trigger.
 ///
-/// In contrast to the [TaskControlExecutor] (which runs in the background),
-/// this [AppTaskControlExecutor] will try to schedule the [AppTask] using
-/// the [AppTaskController]. This means that the [trigger] has to be
-/// [Schedulable].
+/// Unlike [TaskControlExecutor], it does not wait for the trigger to fire.
+/// On resume it computes the trigger's schedule for the next 15 days and
+/// buffers one app task per time in the [AppTaskController], which schedules
+/// them as notifications. It then pauses, and resumes again when the last
+/// scheduled time has passed, if the app is still running.
 class AppTaskControlExecutor extends TaskControlExecutor {
   AppTaskControlExecutor(
     super.taskControl,

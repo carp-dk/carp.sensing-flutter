@@ -6,9 +6,16 @@
  */
 part of '../../runtime.dart';
 
+/// The sampling state of a [SmartphoneDeploymentExecutor] and its task controls.
+///
+/// Stored as [SmartphoneStudy.samplingState] so that each task control can be
+/// resumed or kept paused after an app restart.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SmartphoneDeploymentExecutorSamplingState extends SamplingState {
+  /// The id of the study deployment this state belongs to.
   String studyDeploymentId;
+
+  /// The sampling state of each [TaskControlExecutor] in the deployment.
   List<TaskControlExecutorSamplingState> taskControlSamplingStates = [];
   SmartphoneDeploymentExecutorSamplingState(
     super.state,
@@ -29,13 +36,23 @@ class SmartphoneDeploymentExecutorSamplingState extends SamplingState {
       _$SmartphoneDeploymentExecutorSamplingStateToJson(this);
 }
 
-/// A [SmartphoneDeploymentExecutor] is responsible for executing a [SmartphoneDeployment].
-/// For each task control in this deployment, it starts a [TaskControlExecutor].
+/// Runs a [SmartphoneDeployment]: the root of the executor tree of a study.
 ///
-/// Note that the [SmartphoneDeploymentExecutor] in itself is an [Executor] and hence work
-/// as a 'super executor'. This - amongst other things - imply that you can listen
-/// to all collected measurements from the [measurements] stream and to all state
-/// event changes in the [stateEvents] stream.
+/// Each [SmartphoneStudyController] owns one. On [initialize] it creates a
+/// [TaskControlExecutor] for each task control in the deployment and tells the
+/// target device's [DeviceManager] about it. You rarely use it directly; go
+/// through [SmartphoneStudyController] instead.
+///
+/// Key points:
+///  * Task controls with an [AppTask] and a [Schedulable] trigger get an
+///    [AppTaskControlExecutor]; [MonitoringTask]s get no executor.
+///  * [measurements] merges all measurements of the deployment and adds a
+///    [CompletedAppTask] measurement each time a [UserTask] is done.
+///  * On resume, each task control is resumed or paused according to the
+///    sampling state set with [setSamplingState], if any. Then the buffered
+///    app tasks are enqueued in the [AppTaskController].
+///
+/// See also [Executor] for the lifecycle.
 class SmartphoneDeploymentExecutor
     extends AggregateExecutor<SmartphoneDeployment> {
   final StreamController<Measurement> _manualMeasurementController =
@@ -56,14 +73,18 @@ class SmartphoneDeploymentExecutor
             .toList(),
       );
 
-  /// Set the [samplingState] of this [SmartphoneDeploymentExecutor].
-  /// This state is used to resume the deployment in the same state as it was before,
-  /// e.g. after a restart of the app.
+  /// Sets the sampling state to restore on the next [resume].
+  ///
+  /// E.g. the state saved before the app was restarted.
+  /// Does not change the current [samplingState], which is always computed from
+  /// the running executors.
   void setSamplingState(
     SmartphoneDeploymentExecutorSamplingState? samplingState,
   ) => _samplingState = samplingState;
 
-  /// Clear the [samplingState] of this [SmartphoneDeploymentExecutor].
+  /// Clears the state set with [setSamplingState].
+  ///
+  /// The next [resume] then resumes all task controls.
   void clearSamplingStatus() => _samplingState = null;
 
   @override
@@ -187,13 +208,16 @@ class SmartphoneDeploymentExecutor
     }
   }
 
-  /// Add the stream of [measurements] to the overall stream of measurements
-  /// for this deployment executor.
+  /// Adds [measurements] to the [measurements] of this deployment executor.
+  ///
+  /// Used for executors outside the tree, e.g. app tasks restored by the
+  /// [AppTaskController].
   void addMeasurements(Stream<Measurement> measurements) =>
       _group.add(measurements);
 
-  /// Get the [DeviceManager] based on the [roleName].
-  /// This includes both the primary device and the connected devices.
+  /// Returns the [DeviceManager] of the device with [roleName].
+  ///
+  /// Works for both the primary device and connected devices.
   /// Returns null if no device with [roleName] is found.
   DeviceManager? getDeviceManagerFromRoleName(String? roleName) {
     if (roleName == null) return null;
@@ -204,8 +228,7 @@ class SmartphoneDeploymentExecutor
         : null;
   }
 
-  /// A list of the running probes in this study deployment executor.
-  /// May be empty.
+  /// All probes in this deployment executor. May be empty.
   List<Probe> get probes {
     List<Probe> probes = [];
 
@@ -217,7 +240,7 @@ class SmartphoneDeploymentExecutor
     return probes;
   }
 
-  /// Lookup all probes of type [type]. Returns an empty list if none are found.
+  /// Returns all probes of data [type]. Returns an empty list if none are found.
   List<Probe> lookupProbe(String type) {
     List<Probe> retrainedProbes = probes;
     retrainedProbes.retainWhere((probe) => probe.type == type);
