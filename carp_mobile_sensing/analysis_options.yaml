@@ -2,6 +2,8 @@
 # https://dart.dev/guides/language/analysis-options
 
 include: package:flutter_lints/flutter.yaml
+formatter:
+  page_width: 120
 
 analyzer:
   errors:
