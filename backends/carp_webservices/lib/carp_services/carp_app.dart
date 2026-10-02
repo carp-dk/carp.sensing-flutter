@@ -6,18 +6,19 @@
 
 part of 'carp_services.dart';
 
-/// Represents a CARP web service app endpoint.
+/// The CAWS server instance that the client services talk to.
+///
+/// Pass it to [CarpBaseService.configure] on [CarpService] and the other
+/// CAWS services. Authentication is set up separately with
+/// [CarpAuthProperties].
 class CarpApp {
   /// The name of this app. The name has to be unique.
   final String name;
 
-  /// URI of the CARP web service
+  /// The base URI of the CAWS server, like `https://dev.carp.dk`.
   final Uri uri;
 
-  /// Create a [CarpApp] which know how to access a CARP backend.
-  ///
-  /// [name] and [uri] are required parameters in order to identify and
-  /// know the CAWS endpoint URI.
+  /// Creates a [CarpApp] pointing to the CAWS server at [uri].
   CarpApp({required this.name, required this.uri});
 
   @override

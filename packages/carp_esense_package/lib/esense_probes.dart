@@ -12,8 +12,11 @@ abstract class _ESenseProbe extends StreamProbe {
       super.deviceManager as ESenseDeviceManager;
 }
 
-/// Collects eSense button pressed events. It generates an [ESenseButton]
-/// every time the button is pressed or released.
+/// Collects eSense button events for the [ESenseSamplingPackage.ESENSE_BUTTON]
+/// measure.
+///
+/// Emits an [ESenseButton] every time the button is pressed or released.
+/// Has no stream until the [ESenseDeviceManager] is connected.
 class ESenseButtonProbe extends _ESenseProbe {
   @override
   Stream<Measurement>? get stream => (deviceManager.isConnected)
@@ -31,8 +34,12 @@ class ESenseButtonProbe extends _ESenseProbe {
       : null;
 }
 
-/// Collects eSense sensor events.
-/// It generates an [ESenseSensor] for each sensor event.
+/// Collects eSense sensor events for the [ESenseSamplingPackage.ESENSE_SENSOR]
+/// measure.
+///
+/// Emits an [ESenseSensor] for each sensor event, at the
+/// [ESenseDevice.samplingRate]. Has no stream until the [ESenseDeviceManager]
+/// is connected.
 class ESenseSensorProbe extends _ESenseProbe {
   Stream<Measurement>? _stream;
 

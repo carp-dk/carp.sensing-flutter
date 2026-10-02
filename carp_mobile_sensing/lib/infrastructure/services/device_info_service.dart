@@ -7,10 +7,11 @@
 
 part of '../../domain.dart';
 
-/// Provides (static) information about the local device.
+/// Provides static hardware and operating system information about this phone.
 ///
-/// This service works as a singleton that one time access the information from the
-/// local device to be used in the sensing framework.
+/// A singleton, accessed as `DeviceInfoService()`. Call [init] once (done by
+/// [SmartPhoneClientManager.configure]); after that the fields are set. Used
+/// e.g. to create the [Smartphone] device registration and by [DeviceProbe].
 ///
 /// It takes different hardware information from Android and iOS:
 ///
@@ -23,16 +24,17 @@ class DeviceInfoService {
   factory DeviceInfoService() => _instance;
   DeviceInfoService._();
 
-  /// Android or iOS
+  /// The platform, `Android` or `iOS`. `null` until [init] has run.
   String? platform;
 
   /// The name of the hardware.
-  ///  * Android- the name of the hardware (from the kernel command line or /proc).
+  ///  * Android - the name of the hardware (from the kernel command line or /proc).
   ///  * iOS - hardware type (e.g. 'iPhone7,1' for iPhone 6 Plus).
   String? hardware;
 
-  /// Unique device ID
-  /// * Android - Either a changelist number, or a label like "M4-rc20".
+  /// Device ID.
+  /// * Android - The build ID: either a changelist number, or a label like "M4-rc20".
+  ///   Note that this is not unique per device.
   /// * iOS - [Unique UUID](https://developer.apple.com/documentation/uikit/uidevice/1620059-identifierforvendor) value identifying the current device.
   String? deviceID;
 
@@ -41,29 +43,32 @@ class DeviceInfoService {
   /// * iOS < 16 user-assigned device name.
   /// * iOS >= 16 a generic device name if project has no entitlement to get user-assigned device name.
   ///
-  /// On iOS, se more about [device name](https://developer.apple.com/documentation/uikit/uidevice/1620015-name).
+  /// On iOS, see more about [device name](https://developer.apple.com/documentation/uikit/uidevice/1620015-name).
   String? deviceName;
 
   /// The manufacturer of the device.
   /// * Android - The manufacturer of the product/hardware.
-  /// * iOS - always "Apple"
+  /// * iOS - always "Apple".
   String? deviceManufacturer;
 
-  /// Device Model
+  /// Device model.
   /// * Android - The end-user-visible name for the end product.
-  /// * iOS - Device model according to OS
+  /// * iOS - Device model according to OS.
   String? deviceModel;
 
   /// The name of the current operating system.
+  /// On Android this is the version codename (e.g. `REL`).
   String? operatingSystemName;
 
   /// The current operating system version.
+  /// On Android this is the base OS build.
   String? operatingSystemVersion;
 
-  /// SDK level.
+  /// SDK level. The SDK int on Android, the kernel release on iOS.
   String? sdk;
 
-  /// Release level.
+  /// Release level. The user-visible version on Android (e.g. `14`), the
+  /// kernel version on iOS.
   String? release;
 
   /// The full device info for this device.
@@ -73,7 +78,10 @@ class DeviceInfoService {
   /// Has the device info been initialized?
   bool get initialized => deviceData.isNotEmpty;
 
-  /// Initialize the device info service using the [DeviceInfoPlugin].
+  /// Reads the device info using the [DeviceInfoPlugin].
+  ///
+  /// Does nothing if already [initialized]. On failure, [deviceData] stays
+  /// empty and the other fields stay `null`.
   Future<void> init() async {
     // early out if already initialized
     if (initialized) return;

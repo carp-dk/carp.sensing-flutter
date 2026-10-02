@@ -1,6 +1,11 @@
 part of '../../carp_context_package.dart';
 
-/// Collects mobility features using the [MobilityFeatures] API.
+/// Collects [Mobility] features for the [ContextSamplingPackage.MOBILITY]
+/// measure.
+///
+/// Feeds the location stream from [LocationManager] into the
+/// `mobility_features` plugin while resumed, and emits each computed
+/// mobility context. Needs a [MobilitySamplingConfiguration].
 class MobilityProbe extends StreamProbe {
   @override
   bool onInitialize() {

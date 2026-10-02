@@ -6,7 +6,10 @@
 
 part of '../../carp_context_package.dart';
 
-/// Holds information about a geofence event of entering, exiting, or dwelling.
+/// A geofence event: entering, exiting, or dwelling in a geofence.
+///
+/// Produced by [GeofenceProbe] for the [ContextSamplingPackage.GEOFENCE]
+/// measure. The geofence itself is set in a [GeofenceSamplingConfiguration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Geofence extends Data {
   Geofence({required this.type, required this.name}) : super();
@@ -21,11 +24,13 @@ class Geofence extends Data {
   /// The name of this geofence.
   String name;
 
-  /// Type of geofence event:
-  ///  - ENTER
-  ///  - EXIT
-  ///  - DWELL
+  /// Type of geofence event.
   GeofenceType type;
 }
 
+/// The type of a [Geofence] event.
+///
+///  * `ENTER`: the phone moved into the geofence.
+///  * `EXIT`: the phone moved out of the geofence.
+///  * `DWELL`: the phone has stayed inside for the geofence's dwell time.
 enum GeofenceType { ENTER, EXIT, DWELL }

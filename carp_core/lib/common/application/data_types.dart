@@ -6,7 +6,9 @@
  */
 part of '../../common.dart';
 
-/// Contains meta data about [type].
+/// Metadata about a data [type]: display name and how it relates to time.
+///
+/// Used in [DataTypeSamplingScheme] and registered in [CarpDataTypes].
 class DataTypeMetaData {
   /// Unique fully qualified name for the data type this meta data relates to.
   String type;
@@ -34,7 +36,12 @@ enum DataTimeType {
   TIME_SPAN,
 }
 
-/// Contains CARP data type definitions, as defined in CARP Core.
+/// The data types defined in CARP Core, and a registry of their metadata.
+///
+/// The constants (e.g. [GEOLOCATION]) are the type names to use in a
+/// [Measure]. `CarpDataTypes()` is a singleton whose [types] map holds a
+/// [DataTypeMetaData] for each of them. Sampling packages add their own types
+/// with [add].
 class CarpDataTypes {
   static final CarpDataTypes _instance = CarpDataTypes._();
   factory CarpDataTypes() => _instance;
@@ -102,17 +109,18 @@ class CarpDataTypes {
   /// Any error that may have occurred during data collection.
   static const String ERROR = "$CARP_NAMESPACE.error";
 
-  /// A map of all CARP data types.
+  /// All registered data types, mapped by type name.
   Map<String, DataTypeMetaData> types = {};
 
-  /// Add a list of data types to the list of available data types.
+  /// Add a list of data types to [types]. An existing type with the same
+  /// name is replaced.
   void add(List<DataTypeMetaData> newTypes) {
     for (var type in newTypes) {
       types[type.type] = type;
     }
   }
 
-  /// Get a list of all available data types.
+  /// The names of all registered data types.
   List<String> get all => types.keys.toList();
 
   CarpDataTypes._() {

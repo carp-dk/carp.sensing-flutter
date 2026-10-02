@@ -6,24 +6,35 @@
  */
 part of '../runtime.dart';
 
-/// Controls the runtime execution of a [SmartphoneStudy].
+/// Runs one [SmartphoneStudy] on this phone.
 ///
-/// A [SmartphoneStudyController] is responsible for:
-///  * Orchestrating the lifecycle of a [SmartphoneDeploymentExecutor]
-///  * Configuring the [DataManager] based on the study's [DataEndPoint]
-///  * Requesting OS permissions needed for sampling
-///  * Transforming collected [Measurement]s using the privacy schema and
-///    preferred data format specified in the deployment
+/// There is one controller per study. Use it to start and stop sampling in a
+/// single study, to listen to its [measurements], or to register connected
+/// devices. Get it from [SmartPhoneClientManager.getStudyController]; do not
+/// create it yourself.
 ///
-/// Access via [SmartPhoneClientManager.getStudyController].
+/// Key points:
+///  * Reacts to study events. When a deployment is received, it creates the
+///    [DataManager] for the study's [DataEndPoint], configures and connects
+///    all devices, initializes the [SmartphoneDeploymentExecutor], asks for
+///    permissions and restores the previous sampling state.
+///  * Deployment events are handled one at a time. A failing run is logged,
+///    not rethrown.
+///  * When the deployment is stopped (e.g., on the server), it removes the
+///    study's app tasks and disposes the [executor] for good.
+///  * Transforms collected [Measurement]s with the deployment's privacy schema
+///    and data format before they reach [measurements].
+///
+/// See also [SmartPhoneClientManager], which owns all controllers.
 class SmartphoneStudyController {
   final SmartphoneStudy _study;
   DataManager? _dataManager;
   final SmartphoneDeploymentExecutor _executor = SmartphoneDeploymentExecutor();
   Map<Permission, PermissionStatus>? _permissions;
 
-  /// Create a new [SmartphoneStudyController] to control the runtime behavior
-  /// of a [study].
+  /// Creates a controller for [study] and starts listening to its events.
+  ///
+  /// Normally called by [SmartPhoneClientManager.getStudyController].
   SmartphoneStudyController(SmartphoneStudy study) : _study = study {
     // Listen to study events and handle deployment updates
     study.events.listen((event) {
@@ -48,7 +59,7 @@ class SmartphoneStudyController {
     });
   }
 
-  /// The study that this [SmartphoneStudyController] controls
+  /// The study that this controller runs.
   SmartphoneStudy get study => _study;
 
   /// The deployment status of this [study].
@@ -57,8 +68,9 @@ class SmartphoneStudyController {
   /// The deployment associated with this [study].
   SmartphoneDeployment? get deployment => study.deployment;
 
-  /// The list of all devices - both primary and connected devices - that remain
-  /// to be registered before all devices in this [study] are registered.
+  /// The devices in this [study] that still need to be registered.
+  ///
+  /// Includes both the primary device and connected devices.
   ///
   /// Returns an empty list if the deployment status is not available yet.
   List<DeviceConfiguration> get remainingDevicesToRegister =>
@@ -79,21 +91,30 @@ class SmartphoneStudyController {
   DeploymentService get _deploymentService =>
       SmartPhoneClientManager().deploymentService;
 
-  /// The permissions granted to this client from the OS.
+  /// The status of each permission needed by this study.
+  ///
+  /// Set by [askForAllPermissions]. Empty until then.
   Map<Permission, PermissionStatus> get permissions => _permissions ?? {};
 
   /// The executor executing the [deployment].
   SmartphoneDeploymentExecutor get executor => _executor;
 
-  /// The configuration of the data endpoint, i.e. how data is saved or uploaded.
-  /// Can be null, in which case data is still sampled and can be used in the app,
-  /// but is not saved.
+  /// The data endpoint of the deployment, i.e. how data is saved or uploaded.
+  ///
+  /// If null, data is still sampled and available in [measurements],
+  /// but not saved.
   DataEndPoint? get dataEndPoint => deployment?.dataEndPoint;
 
-  /// The data manager responsible for handling the data collected by this controller.
+  /// The data manager that saves or uploads the [measurements] of this study.
+  ///
+  /// Created from [dataEndPoint] when a deployment is received. Null if there
+  /// is no endpoint or no data manager is registered for its type.
   DataManager? get dataManager => _dataManager;
 
-  /// The privacy schema used to encrypt data before upload.
+  /// The name of the privacy schema applied to all [measurements].
+  ///
+  /// Taken from the deployment. Defaults to [NameSpace.CARP], which leaves
+  /// data unchanged.
   String get privacySchemaName =>
       deployment?.privacySchemaName ?? NameSpace.CARP;
 
@@ -116,7 +137,7 @@ class SmartphoneStudyController {
           ),
   );
 
-  /// A stream of all [measurements] of a specific data [type].
+  /// The [measurements] of data [type], e.g. `dk.cachet.carp.steps`.
   Stream<Measurement> measurementsByType(String type) => measurements.where(
     (measurement) => measurement.data.dataType.toString() == type,
   );
@@ -240,9 +261,13 @@ class SmartphoneStudyController {
   /// Tries to register the connected [device] with the deployment service.
   ///
   /// The [device] must be:
-  ///  - a connected device (i.e., not the primary device),
-  ///  - connected to this phone, and
-  ///  - available in the device controller.
+  ///  * a connected device (i.e., not the primary device),
+  ///  * connected to this phone, and
+  ///  * available in the [DeviceController].
+  ///
+  /// Otherwise, or if registration fails, a warning is logged and nothing
+  /// is registered. On success, the local deployment and deployment status
+  /// are updated too.
   Future<void> tryRegisterConnectedDevice(DeviceConfiguration device) async {
     final deviceType = device.type;
     final deviceRoleName = device.roleName;
@@ -318,17 +343,18 @@ class SmartphoneStudyController {
     }
   }
 
-  /// Tries to register the connected devices which still need to be registered
-  /// in the deployment service.
+  /// Tries to register all [remainingDevicesToRegister].
   ///
-  /// This is a convenient method for synchronizing the devices needed for a
-  /// deployment and the available devices on this phone.
+  /// Syncs the devices needed by the deployment with the devices on this
+  /// phone. Does not wait for the registrations.
   Future<void> tryRegisterRemainingDevicesToRegister() async =>
       remainingDevicesToRegister.forEach((device) async {
         await tryRegisterConnectedDevice(device);
       });
 
-  /// Tries to unregister the disconnected [device] with the deployment service.
+  /// Tries to unregister the [device] with the deployment service.
+  ///
+  /// Failures are logged, not thrown.
   Future<void> tryUnregisterDisconnectedDevice(
     DeviceConfiguration device,
   ) async {
@@ -365,7 +391,8 @@ class SmartphoneStudyController {
   /// Tries to re-register the [device] with the deployment service.
   ///
   /// Since there is no way to update a registration, this method first tries
-  /// to unregister the device and then tries to register it again.
+  /// to unregister the device and then, 5 seconds later, to register it again.
+  /// Returns before the new registration is done.
   Future<void> tryReregisterDevice(DeviceConfiguration device) async {
     await tryUnregisterDisconnectedDevice(device);
     // Wait for a few seconds before trying to register the device again,
@@ -376,15 +403,15 @@ class SmartphoneStudyController {
     );
   }
 
-  /// Asking for permissions for all the measures included in this
-  /// [study].
+  /// Asks for the permissions needed by all measures in this [study].
   ///
-  /// Since we only ask for permission relevant to the deployment, this method
-  /// should be called after deployment has taken place but before this controller
-  /// is resumed.
+  /// Only permissions relevant to the deployment are asked for, so call this
+  /// after the study is deployed but before sampling is resumed. Called
+  /// automatically if [SmartPhoneClientManager.askForPermissions] is true.
   ///
   /// Permissions are asked for one at a time, through
   /// [SmartPhoneClientManager.requestPermissions], on both Android and iOS.
+  /// The result is stored in [permissions].
   Future<void> askForAllPermissions() async {
     if (deployment == null) {
       warning(
@@ -539,31 +566,30 @@ class SmartphoneStudyController {
     }
   }
 
-  // Restart data sampling, ignoring any previously stored sampling state.
+  /// Restarts data sampling, ignoring any previously stored sampling state.
+  ///
+  /// All task controls are resumed, including ones that were paused.
   void restart() => executor
     ..clearSamplingStatus()
     ..resume();
 
-  /// Resume data sampling for the [study] controlled by this controller.
-  /// Will resume data sampling based on the current sampling state of this study.
-  /// If you want to restart sampling and ignore any previously stored sampling state,
-  /// call the [restart] method instead.
+  /// Resumes data sampling in this [study].
+  ///
+  /// Task controls are resumed or kept paused based on the stored sampling
+  /// state of the study. To ignore the stored state, call [restart] instead.
   void resume() => executor.resume();
 
-  /// Pause data sampling.
+  /// Pauses data sampling in this [study].
   void pause() => executor.pause();
 
-  /// Called when this controller is disposed.
+  /// Pauses data sampling and closes the [dataManager].
   ///
-  /// This entails:
-  ///   * pausing data sampling
-  ///   * closing the data manager (e.g., flushing data to a file)
+  /// Closing the data manager e.g. flushes data to a file.
+  /// All cached deployment information and any data sampled in this
+  /// deployment remain on the phone.
   ///
-  /// Note that all cached deployment information and any data sampled
-  /// from this deployment will remain on the phone.
-  ///
-  /// When this method is called, the controller is never used again. It is an error
-  /// to call any of the [start] or [stop] methods at this point.
+  /// The controller must not be used afterwards. Called by
+  /// [SmartPhoneClientManager] when a study is stopped or removed.
   @mustCallSuper
   void dispose() {
     info('$runtimeType - Disposing study from this smartphone...');

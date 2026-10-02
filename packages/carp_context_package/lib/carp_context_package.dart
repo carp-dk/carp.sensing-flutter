@@ -1,10 +1,25 @@
-/// A library for collecting context information on:
-///  * location (both as one-time and continuous location data)
-///  * geofence
-///  * activity
-///  * weather
-///  * air quality
-///  * mobility features
+/// A sampling package for CARP Mobile Sensing that collects context data:
+/// activity, location, geofences, mobility features, weather and air quality.
+///
+/// Register [ContextSamplingPackage] with the `SamplingPackageRegistry` before
+/// you deploy a protocol that uses these measures. Works on Android and iOS.
+///
+/// Measure types provided (see [ContextSamplingPackage] for details):
+///  * `dk.cachet.carp.activity`: activity recognition events. Runs on the
+///    [Smartphone]; no connected device needed.
+///  * `dk.cachet.carp.location`: one-time or continuous [Location] data.
+///    Needs a [LocationService] connected device.
+///  * `dk.cachet.carp.geofence`: [Geofence] enter/exit/dwell events. Needs a
+///    [LocationService].
+///  * `dk.cachet.carp.mobility`: daily [Mobility] features. Needs a
+///    [LocationService].
+///  * `dk.cachet.carp.weather`: current [Weather] from OpenWeather. Needs a
+///    [WeatherService] with an API key.
+///  * `dk.cachet.carp.airquality`: current [AirQuality] from WAQI. Needs an
+///    [AirQualityService] with an API key.
+///
+/// Location permissions are best requested by the app itself, before sensing
+/// starts. See the package README for the platform setup.
 library;
 
 import 'dart:async';

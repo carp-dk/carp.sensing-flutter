@@ -1,9 +1,10 @@
 part of '../../carp_context_package.dart';
 
-/// A sampling configuration for location sampling.
-/// This configuration allows for specifying if the location should be sampled only once.
+/// A sampling configuration for the [ContextSamplingPackage.LOCATION] measure.
 ///
-/// Usage:
+/// Set [once] to collect a single location instead of a continuous stream.
+/// Combine it with a periodic trigger to sample location at fixed intervals.
+/// Read by [ConfigurableLocationProbe].
 ///
 /// ```dart
 /// Measure(type: ContextSamplingPackage.LOCATION)
@@ -12,7 +13,7 @@ part of '../../carp_context_package.dart';
 ///
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class LocationSamplingConfiguration extends SamplingConfiguration {
-  /// Should the location be sampled only once?
+  /// Should the location be sampled only once? Default is false (continuous).
   bool once = false;
 
   LocationSamplingConfiguration({this.once = false}) : super();

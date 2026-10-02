@@ -7,6 +7,11 @@
 part of '../../../common.dart';
 
 /// Configuration of an internet-connected smartphone with built-in sensors.
+///
+/// The usual primary device of a CARP Mobile Sensing protocol; its default
+/// role name is [DEFAULT_ROLE_NAME]. The CARP Core sampling schemes cover
+/// geolocation, step count, acceleration and angular velocity. Sampling
+/// packages in CARP Mobile Sensing add many more data types.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Smartphone extends PrimaryDeviceConfiguration<DefaultDeviceRegistration> {
   /// The type of a smartphone device.

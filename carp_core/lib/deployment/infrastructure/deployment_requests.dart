@@ -12,9 +12,9 @@ part of '../../deployment.dart';
 // -----------------------------------------------------
 
 /// A [DeploymentServiceRequest] and all its sub-classes contain the data for
-/// sending a RPC request to the CARP web service.
+/// sending an RPC request to a [DeploymentService] on the CARP web service.
 ///
-/// All deployment requests to the CARP Service is defined in
+/// All deployment requests to the CARP Service are defined in
 /// [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt)
 abstract class DeploymentServiceRequest extends ServiceRequest {
   final String _infrastructurePackageNamespace =
@@ -78,7 +78,7 @@ class GetStudyDeploymentStatus extends DeploymentServiceRequest {
   Map<String, dynamic> toJson() => _$GetStudyDeploymentStatusToJson(this);
 }
 
-/// A request for getting the status of a list of study deployment.
+/// A request for getting the status of a list of study deployments.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetStudyDeploymentStatusList extends DeploymentServiceRequest {
   List<String> studyDeploymentIds;
@@ -93,7 +93,7 @@ class GetStudyDeploymentStatusList extends DeploymentServiceRequest {
   Map<String, dynamic> toJson() => _$GetStudyDeploymentStatusListToJson(this);
 }
 
-/// A request for registering this device.
+/// A request for registering a device in a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class RegisterDevice extends DeploymentServiceRequest {
   RegisterDevice(
@@ -119,7 +119,7 @@ class RegisterDevice extends DeploymentServiceRequest {
   String toString() => '${super.toString()}, deviceRoleName: $deviceRoleName';
 }
 
-/// A request for unregistering this device.
+/// A request for unregistering a device from a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class UnregisterDevice extends DeploymentServiceRequest {
   UnregisterDevice(super.studyDeploymentId, this.deviceRoleName);
@@ -138,7 +138,7 @@ class UnregisterDevice extends DeploymentServiceRequest {
   String toString() => '${super.toString()}, deviceRoleName: $deviceRoleName';
 }
 
-/// A request for getting the deployment for this primary device.
+/// A request for getting the deployment for a primary device.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetDeviceDeploymentFor extends DeploymentServiceRequest {
   GetDeviceDeploymentFor(super.studyDeploymentId, this.primaryDeviceRoleName);
@@ -158,10 +158,11 @@ class GetDeviceDeploymentFor extends DeploymentServiceRequest {
       '${super.toString()}, primaryDeviceRoleName: $primaryDeviceRoleName';
 }
 
-/// A request for reporting this deployment as successful.
+/// A request for reporting a device deployment as successful.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceDeployed extends GetDeviceDeploymentFor {
-  /// Timestamp when this was last updated in UTC
+  /// [PrimaryDeviceDeployment.lastUpdatedOn] of the deployment that was
+  /// deployed, in UTC.
   DateTime deviceDeploymentLastUpdatedOn;
 
   DeviceDeployed(

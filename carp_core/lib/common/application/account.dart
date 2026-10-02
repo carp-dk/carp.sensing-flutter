@@ -7,10 +7,15 @@
 part of '../../common.dart';
 
 /// Uniquely identifies an account and its associated identity.
+///
+/// The [identity] is what a participant logs in with, e.g., an
+/// [EmailAccountIdentity].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Account {
   /// Identity associated with this account.
   AccountIdentity identity;
+
+  /// Unique id of this account. A random UUID (v4) if not specified.
   late String id;
 
   Account({String? id, required this.identity}) {
@@ -35,6 +40,9 @@ class Account {
 }
 
 /// Identifies an [Account].
+///
+/// Base class of [EmailAccountIdentity] and [UsernameAccountIdentity]. Used in
+/// a `ParticipantInvitation` to invite and authenticate a participant.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AccountIdentity extends Serializable {
   AccountIdentity() : super();
@@ -49,7 +57,7 @@ class AccountIdentity extends Serializable {
   Map<String, dynamic> toJson() => _$AccountIdentityToJson(this);
 }
 
-/// Identifies an  account by a unique [emailAddress].
+/// Identifies an account by a unique [emailAddress].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class EmailAccountIdentity extends AccountIdentity {
   String emailAddress;

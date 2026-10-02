@@ -7,10 +7,13 @@
 
 part of '../../domain.dart';
 
-/// A trigger that does nothing.
+/// A trigger that never triggers.
+///
+/// Used for tasks that need no trigger, like the [MonitoringTask] that
+/// [SmartphoneStudyProtocol] adds for each device.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class NoOpTrigger extends TriggerConfiguration {
-  /// Create a trigger that starts sampling immediately and never stops.
+  /// Creates a trigger that never triggers.
   NoOpTrigger() : super();
 
   @override
@@ -21,10 +24,13 @@ class NoOpTrigger extends TriggerConfiguration {
   Map<String, dynamic> toJson() => _$NoOpTriggerToJson(this);
 }
 
-/// A trigger that starts sampling immediately and never stops.
+/// A trigger that triggers immediately each time the study is resumed.
+///
+/// The task keeps running until the study is paused. Use [OneTimeTrigger] to
+/// trigger only once per deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ImmediateTrigger extends TriggerConfiguration {
-  /// Create a trigger that starts sampling immediately and never stops.
+  /// Creates a trigger that triggers immediately when the study is resumed.
   ImmediateTrigger() : super();
 
   @override
@@ -43,13 +49,15 @@ class ImmediateTrigger extends TriggerConfiguration {
 /// information.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class OneTimeTrigger extends TriggerConfiguration {
-  /// The timestamp of when this trigger was triggered.
+  /// When this trigger was triggered, or `null` if not yet.
+  ///
+  /// Set by the runtime and saved with the deployment.
   DateTime? triggerTimestamp;
 
-  /// Has this trigger been triggered?
+  /// Whether this trigger has been triggered.
   bool get hasBeenTriggered => triggerTimestamp != null;
 
-  /// Create a trigger that triggers once during a deployment.
+  /// Creates a trigger that triggers once during a deployment.
   OneTimeTrigger() : super();
 
   @override
@@ -60,10 +68,13 @@ class OneTimeTrigger extends TriggerConfiguration {
   Map<String, dynamic> toJson() => _$OneTimeTriggerToJson(this);
 }
 
-/// A trigger that trigger when the [trigger] method is called from Dart code.
+/// A trigger that triggers when the app calls [trigger].
+///
+/// Use it to start a task from your own Dart code, e.g. when the user taps a
+/// button.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PassiveTrigger extends TriggerConfiguration {
-  /// Create a trigger that triggers when the [trigger] method is called.
+  /// Creates a trigger that triggers when the [trigger] method is called.
   PassiveTrigger() : super();
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -73,7 +84,9 @@ class PassiveTrigger extends TriggerConfiguration {
   /// Do not set this manually.
   late TriggerExecutor executor;
 
-  /// Called when this trigger is to be triggered.
+  /// Triggers this trigger now.
+  ///
+  /// Only works once the study is deployed and the [executor] is set.
   void trigger() => executor.onTrigger();
 
   @override
@@ -84,16 +97,17 @@ class PassiveTrigger extends TriggerConfiguration {
   Map<String, dynamic> toJson() => _$PassiveTriggerToJson(this);
 }
 
-/// A trigger that triggers after [delay] from the (re)start of the app.
+/// A trigger that triggers after [delay] from the (re)start of sampling.
 ///
-/// The delay is measured from the **start of sensing**, i.e. typically when
-/// the `start()` method is called on a [SmartphoneStudyController].
+/// The delay is measured from when the study is resumed, i.e. typically when
+/// `resume()` is called on the [SmartphoneStudyController] or
+/// [SmartPhoneClientManager]. It triggers again on every resume.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DelayedTrigger extends TriggerConfiguration {
-  /// Delay before this trigger is executed.
+  /// Delay before this trigger triggers.
   Duration delay;
 
-  /// Create a trigger that delays for [delay] and then triggers.
+  /// Creates a trigger that delays for [delay] and then triggers.
   /// Default is no delay.
   DelayedTrigger({this.delay = const Duration()}) : super();
 
@@ -107,14 +121,15 @@ class DelayedTrigger extends TriggerConfiguration {
 
 /// A trigger that triggers every [period].
 ///
-/// Daily, weekly and monthly recurrent triggers can be specified using the
-/// [RecurrentScheduledTrigger].
+/// Triggers once on resume and then every [period]. For triggers at a set
+/// time of day, week, or month, use [RecurrentScheduledTrigger] or
+/// [CronScheduledTrigger].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PeriodicTrigger extends TriggerConfiguration implements Schedulable {
-  /// The period (reciprocal of frequency) of sampling.
+  /// The time between two triggers.
   Duration period;
 
-  /// Create a trigger that triggers every [period].
+  /// Creates a trigger that triggers every [period].
   PeriodicTrigger({required this.period}) : super();
 
   @override
@@ -125,13 +140,13 @@ class PeriodicTrigger extends TriggerConfiguration implements Schedulable {
   Map<String, dynamic> toJson() => _$PeriodicTriggerToJson(this);
 }
 
-/// A trigger that triggers on a specific date and time.
+/// A trigger that triggers once at a specific date and time.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DateTimeTrigger extends TriggerConfiguration implements Schedulable {
-  /// The scheduled date and time for resuming sampling.
+  /// When to trigger. Nothing happens if this time has passed.
   DateTime schedule;
 
-  /// Create a trigger that triggers based on a [schedule].
+  /// Creates a trigger that triggers at [schedule].
   DateTimeTrigger({required this.schedule}) : super();
 
   @override
@@ -149,7 +164,7 @@ class DateTimeTrigger extends TriggerConfiguration implements Schedulable {
 ///
 /// Here are a couple of examples:
 ///
-/// ```
+/// ```dart
 ///  // trigger every day at 13:30
 ///  RecurrentScheduledTrigger(type: RecurrentType.daily, time: TimeOfDay(hour: 13, minute: 30));
 ///
@@ -176,15 +191,17 @@ class DateTimeTrigger extends TriggerConfiguration implements Schedulable {
 class RecurrentScheduledTrigger extends TriggerConfiguration
     implements Schedulable {
   static const int daysPerWeek = 7;
+
+  /// The number of days used as one month when computing [period].
   static const int daysPerMonth = 30;
 
   /// The type of recurrence - daily, weekly or monthly.
   RecurrentType type;
 
-  /// The time of day of this trigger.
+  /// The time of day of this trigger. Default is midnight.
   TimeOfDay time;
 
-  /// End time and date. If [null], this trigger keeps sampling forever.
+  /// End time and date. If `null`, this trigger keeps triggering forever.
   DateTime? end;
 
   /// Separation between recurrences.
@@ -204,9 +221,7 @@ class RecurrentScheduledTrigger extends TriggerConfiguration
 
   /// If weekly recurrence, specify which day of week.
   ///
-  /// Stores which day of the week this sampling will take place according to [
-  /// DateTime] standards, i.e. having Monday as the first day of the week and
-  /// Sunday as the last.
+  /// Uses the [DateTime.weekday] values, i.e. 1 is Monday and 7 is Sunday.
   int? dayOfWeek;
 
   /// If monthly recurrence, specify the week in the month.
@@ -224,7 +239,10 @@ class RecurrentScheduledTrigger extends TriggerConfiguration
   /// say the 25th. Possible numbers are 1..31 counting from the start of a month.
   int? dayOfMonth;
 
-  /// Create a trigger that triggers based on a recurrent scheduled date and time.
+  /// Creates a trigger that triggers based on a recurrent scheduled date and time.
+  ///
+  /// [dayOfWeek] is required for weekly recurrence, and [dayOfMonth] or
+  /// [weekOfMonth] for monthly recurrence. The `duration` parameter is not used.
   RecurrentScheduledTrigger({
     this.type = RecurrentType.daily,
     this.time = const TimeOfDay(),
@@ -263,7 +281,7 @@ class RecurrentScheduledTrigger extends TriggerConfiguration
       .subtract(Duration(days: fromDate.weekday - 1))
       .add(Duration(days: 7 * weekOfMonth! + dayOfWeek! - 1));
 
-  /// The date and time of the first occurrence of this trigger.
+  /// The date and time of the first occurrence of this trigger after now.
   DateTime get firstOccurrence {
     late DateTime firstDay;
     DateTime now = DateTime.now();
@@ -327,7 +345,10 @@ class RecurrentScheduledTrigger extends TriggerConfiguration
     );
   }
 
-  /// The period between the recurring samplings.
+  /// The time between two triggers.
+  ///
+  /// A month is counted as [daysPerMonth] days, so monthly triggers drift
+  /// over time.
   Duration get period {
     switch (type) {
       case RecurrentType.daily:
@@ -354,7 +375,7 @@ class RecurrentScheduledTrigger extends TriggerConfiguration
       '$runtimeType - type: $type, time: $time, separationCount: $separationCount, dayOfWeek: $dayOfWeek, firstOccurrence: $firstOccurrence, period; $period';
 }
 
-/// Type of recurrence for a [RecurrentScheduledTrigger].
+/// Type of recurrence for a [RecurrentScheduledTrigger]. Yearly is not supported.
 enum RecurrentType {
   daily,
   weekly,
@@ -364,14 +385,15 @@ enum RecurrentType {
 
 /// A trigger that triggers based on a cron job specification.
 ///
-/// Bases on the [`cron`](https://pub.dev/packages/cron) package.
+/// Based on the [`cron`](https://pub.dev/packages/cron) package.
 /// See [crontab guru](https://crontab.guru) for a useful tool for specifying cron jobs.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
-  /// The cron job expression.
+  /// The cron expression, in the format
+  /// `<minutes> <hours> <days> <months> <weekdays>`.
   String cronExpression;
 
-  /// Create a cron scheduled trigger based on specifying:
+  /// Creates a cron scheduled trigger based on specifying:
   ///   * [minute] - The minute to trigger. `int` [0-59] or `null` (= match all).
   ///   * [hour] - The hour to trigger. `int` [0-23] or `null` (= match all).
   ///   * [day] - The day of the month to trigger. `int` [1-31] or `null` (= match all).
@@ -409,10 +431,10 @@ class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
     );
   }
 
-  /// Create a [CronScheduledTrigger] based on a cron-formatted string expression.
+  /// Creates a [CronScheduledTrigger] based on a cron-formatted string expression.
   ///
   ///   * [cronExpression] - The cron expression as a `String`.
-  ///   * [duration] - The duration (until stopped) of the the sampling.
+  ///   * `duration` - Not used.
   ///
   /// Cron format used is:
   ///
@@ -459,10 +481,12 @@ class CronScheduledTrigger extends TriggerConfiguration implements Schedulable {
   String toString() => "$runtimeType - cron expression: '$cronExpression'";
 }
 
-/// A trigger that triggers when some sampling event occurs.
+/// A trigger that triggers when a measurement of [measureType] is collected.
 ///
-/// For example, if [measureType] is [CompletedAppTask.dataType] the [triggerCondition]
-/// can be a [CompletedAppTask] with a specific [CompletedAppTask.taskName].
+/// For example, if [measureType] is [CamsDataTypes.COMPLETED_APP_TASK], the
+/// [triggerCondition] can be a [CompletedAppTask] with a specific
+/// [CompletedTask.taskName], to trigger when that task is done.
+/// Unlike [ConditionalSamplingEventTrigger], it can be serialized to JSON.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SamplingEventTrigger extends TriggerConfiguration {
   /// The data type of the event to look for.
@@ -476,14 +500,14 @@ class SamplingEventTrigger extends TriggerConfiguration {
   /// When comparing, the [Data.equivalentTo] method is used. Hence, the
   /// sampled data must be "equivalent" to this [triggerCondition] in order to
   /// trigger based on an event.
-  /// Note that the `equivalentTo` method must be overwritten in
+  /// Note that the `equivalentTo` method must be overridden in
   /// application-specific [Data] classes to support this.
   ///
   /// If [triggerCondition] is null, sampling will be triggered on
   /// every sampling event that matches the specified [measureType].
   Data? triggerCondition;
 
-  /// Create a trigger that triggers when a measure of [measureType] is collected,
+  /// Creates a trigger that triggers when a measure of [measureType] is collected,
   /// and checks the [triggerCondition] to determine if it should trigger.
   SamplingEventTrigger({required this.measureType, this.triggerCondition})
     : super();
@@ -496,20 +520,21 @@ class SamplingEventTrigger extends TriggerConfiguration {
   Map<String, dynamic> toJson() => _$SamplingEventTriggerToJson(this);
 }
 
-/// Takes a [Measurement] from a sampling stream and evaluates if an event has
-/// occurred. Returns [true] if the event has occurred, [false] otherwise.
+/// Evaluates if a [measurement] should fire a [ConditionalSamplingEventTrigger].
+///
+/// Returns `true` to trigger, `false` otherwise.
 typedef ConditionalEventEvaluator = bool Function(Measurement measurement);
 
-/// A trigger that triggers when some (other) sampling event
-/// occurs and a application-specific condition is meet.
+/// A trigger that triggers when a measurement of [measureType] is collected and
+/// an app-specific condition is met.
 ///
-/// Note that the [triggerCondition] is a [ConditionalEvaluator] function,
+/// Note that the [triggerCondition] is a [ConditionalEventEvaluator] function,
 /// which cannot be serialized to/from JSON.
 /// Thus, even though this trigger can be de/serialized from/to JSON, its
 /// [triggerCondition] cannot.
 /// This implies that this function cannot be retrieved as part of a [StudyProtocol]
 /// from a [DeploymentService] since it relies on specifying a Dart-specific function as
-/// the [ConditionalEvaluator] methods. Hence, this trigger is mostly
+/// the [ConditionalEventEvaluator] methods. Hence, this trigger is mostly
 /// useful when creating a [StudyProtocol] directly in the app using Dart code.
 ///
 /// If you need to de/serialize an event trigger, use the [SamplingEventTrigger]
@@ -519,12 +544,13 @@ class ConditionalSamplingEventTrigger extends TriggerConfiguration {
   /// The data type of the event to look for.
   String measureType;
 
-  /// The [ConditionalEventEvaluator] function evaluating if the event
-  /// condition is meet for triggering this trigger
+  /// The function that decides, for each measurement, whether to trigger.
+  ///
+  /// If `null`, this trigger never triggers.
   @JsonKey(includeFromJson: false, includeToJson: false)
   ConditionalEventEvaluator? triggerCondition;
 
-  /// Create a trigger that triggers when a measure of [measureType] is collected,
+  /// Creates a trigger that triggers when a measure of [measureType] is collected,
   /// and checks the [triggerCondition] to determine if the
   /// task should be triggered.
   ConditionalSamplingEventTrigger({
@@ -542,11 +568,12 @@ class ConditionalSamplingEventTrigger extends TriggerConfiguration {
 }
 
 /// Evaluates if a [ConditionalPeriodicTrigger] should trigger.
-/// Returns [true] if triggering should happen, [false] otherwise.
+///
+/// Returns `true` to trigger, `false` otherwise.
 typedef ConditionalEvaluator = bool Function();
 
-/// A trigger that periodically checks if an application-specific  triggering
-/// condition is met.
+/// A trigger that checks an app-specific condition every [period] and
+/// triggers when it is met.
 ///
 /// Note that the [triggerCondition] is a [ConditionalEvaluator] function,
 /// which cannot be serialized to/from JSON.
@@ -558,15 +585,16 @@ typedef ConditionalEvaluator = bool Function();
 /// useful when creating a [StudyProtocol] directly in the app using Dart code.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ConditionalPeriodicTrigger extends TriggerConfiguration {
-  /// The period of when to check the [triggerCondition].
+  /// How often to check the [triggerCondition]. Also checked once on resume.
   Duration period;
 
-  /// The [ConditionalEventEvaluator] function evaluating if the event
-  /// condition is meet for triggering this trigger
+  /// The function that decides whether to trigger.
+  ///
+  /// If `null`, this trigger never triggers.
   @JsonKey(includeFromJson: false, includeToJson: false)
   ConditionalEvaluator? triggerCondition;
 
-  /// Create a [ConditionalSamplingEventTrigger].
+  /// Creates a [ConditionalPeriodicTrigger].
   ConditionalPeriodicTrigger({required this.period, this.triggerCondition})
     : super();
 
@@ -593,21 +621,22 @@ class RandomRecurrentTrigger extends TriggerConfiguration
   /// End time of the day where the trigger can happen.
   TimeOfDay endTime;
 
-  /// Minimum number of trigger per day.
+  /// Minimum number of triggers per day. Default is 0.
   int minNumberOfTriggers;
 
-  /// Maximum number of trigger per day.
+  /// Maximum number of triggers per day. Default is 1.
   int maxNumberOfTriggers;
 
-  /// The timestamp of when this trigger was triggered last.
+  /// When this trigger last triggered, or `null` if never.
   DateTime? lastTriggerTimestamp;
 
-  /// Create a [RandomRecurrentTrigger].
+  /// Creates a [RandomRecurrentTrigger].
   ///
-  /// [minNumberOfTriggers] and [maxNumberOfTriggers] specified the range of
-  /// the random samples (e.g., between 3 and 8 times pr. day).
-  /// [startTime] and [endTime] specified the period within a day the sampling
-  /// should take place (default is between 08:00 and 20:00).
+  /// [minNumberOfTriggers] and [maxNumberOfTriggers] specify the range of
+  /// the random number of triggers (e.g., between 3 and 8 times per day).
+  /// [startTime] and [endTime] specify the period within a day the triggers
+  /// take place (default is between 08:00 and 20:00). [startTime] must be
+  /// before [endTime].
   RandomRecurrentTrigger({
     this.minNumberOfTriggers = 0,
     this.maxNumberOfTriggers = 1,
@@ -640,9 +669,10 @@ class RandomRecurrentTrigger extends TriggerConfiguration
 /// when the app is in the foreground.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AppLifecycleTrigger extends TriggerConfiguration {
+  /// The app life cycle states that fire this trigger.
   Set<AppLifecycleState> states = {};
 
-  /// Create a [AppLifecycleTrigger] that triggers whenever the app state changes.
+  /// Creates an [AppLifecycleTrigger] that triggers whenever the app state changes.
   /// If [states] is not specified, it will trigger on all state change events.
   AppLifecycleTrigger([Set<AppLifecycleState>? states]) : super() {
     this.states = states ?? AppLifecycleState.values.toSet();
@@ -656,17 +686,19 @@ class AppLifecycleTrigger extends TriggerConfiguration {
   Map<String, dynamic> toJson() => _$AppLifecycleTriggerToJson(this);
 }
 
-/// A trigger that triggers based on the state of a [UserTask].
+/// A trigger that triggers when a [UserTask] reaches a given state.
+///
+/// Use it to chain tasks, e.g. start a sensing task when a survey is done.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class UserTaskTrigger extends TriggerConfiguration {
   /// The name of the task to look for, matching [TaskConfiguration.name].
   String taskName;
 
-  /// The state of the user task for resuming this trigger
+  /// The user task state that fires this trigger. Default is
+  /// [UserTaskState.done].
   UserTaskState triggerCondition;
 
-  /// Create a [UserTaskTrigger].
-  /// Default is to trigger when the task is marked as done.
+  /// Creates a [UserTaskTrigger].
   UserTaskTrigger({
     required this.taskName,
     this.triggerCondition = UserTaskState.done,
@@ -685,13 +717,14 @@ class UserTaskTrigger extends TriggerConfiguration {
 ///
 /// Typically used to make sure that a specific task is always on the task list.
 /// The [NoUserTaskTriggerExecutor] checks immediately on resume and then once
-/// pr minute, re-adding the task whenever it is no longer on the list.
+/// per minute, re-adding the task whenever it is done or expired.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class NoUserTaskTrigger extends TriggerConfiguration {
   /// The name of the task to look for, matching [TaskConfiguration.name].
   String taskName;
 
-  /// Create a [NoUserTaskTrigger] that trigger is [taskName] is not on the task list.
+  /// Creates a [NoUserTaskTrigger] that triggers if [taskName] is not on the
+  /// task list.
   NoUserTaskTrigger({required this.taskName}) : super();
 
   @override

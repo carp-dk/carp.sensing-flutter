@@ -1,4 +1,14 @@
-/// Contains common CARP domain classes which are used across the libraries.
+/// Base types shared by all CARP Core subsystems.
+///
+/// Holds the building blocks of a protocol: devices ([DeviceConfiguration],
+/// [DeviceRegistration]), tasks ([TaskConfiguration]), triggers
+/// ([TriggerConfiguration]), task controls ([TaskControl]), measures
+/// ([Measure]) and sampling configurations ([SamplingConfiguration]).
+/// It also defines the collected data types ([Data], [CarpDataTypes]),
+/// participant input data ([InputData]) and accounts ([Account]).
+///
+/// See the [`carp.common`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-common.md)
+/// definition in Kotlin.
 library;
 
 import 'dart:io';
@@ -54,17 +64,19 @@ class NotConfiguredException implements Exception {
   String toString() => "NotConfiguredException: $message";
 }
 
-/// An immutable snapshot of a CARP Core domain object.
-/// Used as the base class for serializable CARP domain objects.
+/// A versioned snapshot of a CARP Core domain object.
+///
+/// Gives an object a unique [id], a [createdOn] timestamp and a [version]
+/// number. [StudyProtocol] extends it.
 abstract class Snapshot {
-  /// Unique id for this object.
+  /// Unique id for this object. A random UUID (v4) if not specified.
   late String id;
 
-  /// The date when the object represented by this snapshot was created.
+  /// When the object represented by this snapshot was created, in UTC.
   late DateTime createdOn;
 
   /// The number of edits made to the object represented by this snapshot,
-  /// indicating its version number.
+  /// indicating its version number. Starts at 0.
   late int version;
 
   Snapshot([String? id]) {
@@ -74,12 +86,12 @@ abstract class Snapshot {
   }
 }
 
-/// Deserialization of [isoString] according to the ISO 8061 standard to [Duration]
+/// Deserialization of [isoString] according to the ISO 8601 standard to [Duration].
 Duration? _$IsoDurationFromJson(String? isoString) => (isoString != null)
     ? Duration(seconds: IsoDuration.tryParse(isoString)!.toSeconds().round())
     : null;
 
-/// Serialization of [Duration] to a ISO 8061 string.
+/// Serialization of [Duration] to an ISO 8601 string.
 String? _$IsoDurationToJson(Duration? duration) => (duration != null)
     ? IsoDuration(seconds: duration.inSeconds.roundToDouble()).toIso()
     : null;

@@ -1,15 +1,20 @@
 part of '../../carp_context_package.dart';
 
-/// Listen on location movements and reports a [Geofence] to the [stream]
-/// when a geofence event happens. This probe can handle only one measure.
-/// If you need multiple geofences, add a [GeofenceMeasure] for each to your [Study]
-/// for example using the [Trigger] model.
+/// Listens to location changes and reports a [Geofence] on the [stream] when
+/// the phone enters, exits or dwells in a geofence.
+///
+/// The probe for [ContextSamplingPackage.GEOFENCE]. It handles one geofence,
+/// set by a [GeofenceSamplingConfiguration]. For multiple geofences, add one
+/// measure per geofence to the protocol. Uses a [CircularGeofence] to detect
+/// the events.
 class GeofenceProbe extends StreamProbe {
+  /// Controller for the [stream] of geofence measurements.
   StreamController<Measurement> geoFenceStreamController =
       StreamController.broadcast();
 
-  /// Set up option for geofence location tracking - accuracy
-  /// is set to `low` and distance filter is 10 meters.
+  /// Distance filter for geofence location tracking, in meters (always 10).
+  ///
+  /// Not used; the [LocationService] settings apply.
   double get distanceFilter => 10;
 
   @override
@@ -41,11 +46,13 @@ class GeofenceProbe extends StreamProbe {
   Stream<Measurement> get stream => geoFenceStreamController.stream;
 }
 
-/// The possible states of a geofence.
+/// The position of the phone relative to a [CircularGeofence].
 enum GeofenceState { inside, outside, unknown }
 
-/// A class representing a circular geofence with a center,
-/// a radius (in meters) and a name.
+/// A circular geofence with a center, a radius (in meters) and a name.
+///
+/// Tracks whether the phone is inside and turns location updates into
+/// [Geofence] events via [moved]. Used by [GeofenceProbe].
 class CircularGeofence {
   /// The last known state of this geofence.
   GeofenceState state = GeofenceState.unknown;
@@ -60,7 +67,8 @@ class CircularGeofence {
   double radius;
 
   /// The dwell time of this geofence. If an object is located inside this
-  /// geofence for more that [dwell], the [moved] function will return this.
+  /// geofence for more than [dwell], [moved] returns a [GeofenceType.DWELL]
+  /// event.
   Duration dwell;
 
   /// The name of this geofence.
@@ -74,6 +82,7 @@ class CircularGeofence {
     required this.name,
   }) : super();
 
+  /// Creates a [CircularGeofence] from a [GeofenceSamplingConfiguration].
   factory CircularGeofence.fromGeofenceSamplingConfiguration(
     GeofenceSamplingConfiguration configuration,
   ) => CircularGeofence(
@@ -83,6 +92,12 @@ class CircularGeofence {
     name: configuration.name,
   );
 
+  /// Updates the [state] with a new [location] and returns the resulting
+  /// [Geofence] event, or null if nothing happened.
+  ///
+  /// Returns ENTER when coming from outside (or unknown), EXIT when leaving,
+  /// and DWELL each time [dwell] has passed since the last event while inside.
+  /// The first update outside the fence also gives an EXIT event.
   Geofence? moved(GeoPosition location) {
     Geofence? data;
     if (center.distanceTo(location) < radius) {

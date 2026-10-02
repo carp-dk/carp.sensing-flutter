@@ -6,14 +6,14 @@
 
 part of '../../infrastructure.dart';
 
-/// A service for managing background execution on Android.
+/// Keeps data collection running while the app is in the background on Android.
 ///
-/// On Android, this service can be used to run data collection in the background
-/// while the app is not in the foreground. On iOS, background execution is not
-/// supported, and this service will do nothing.
+/// Runs an Android foreground service with a persistent notification. On iOS,
+/// background execution is not supported and all calls do nothing.
 ///
-/// Works as a singleton service, and should be initialized and enabled
-/// when the app starts, and disabled when the app is closed.
+/// A singleton, accessed as `BackgroundService()`. Call [initialize] and then
+/// [enable] when the app starts. [SmartPhoneClientManager.configure] does this
+/// when `enableBackgroundMode` is true. Call [disable] to stop it.
 ///
 /// Note that the background service must be enabled in the app's manifest file.
 /// You must specify the appropriate foregroundServiceType for your use case.
@@ -31,15 +31,16 @@ class BackgroundService {
   /// Get the singleton [BackgroundService].
   factory BackgroundService() => _instance;
 
-  /// Has the background service been enabled?
+  /// Whether background execution is currently enabled via [enable].
   bool get isEnabled => _enabled;
 
-  /// Initialize the background service.
+  /// Initializes the background service. Must be called before [enable].
   ///
   /// On Android, this will initialize the background service with the provided
   /// notification title and text. If not provided, default English titles and
   /// text will be used. If you want to use localized titles and text, you can
-  /// provide them here.
+  /// provide them here. The first call may show the Android "battery
+  /// optimization" dialog.
   ///
   /// On iOS, this will do nothing as background services are not supported.
   ///
@@ -87,7 +88,11 @@ class BackgroundService {
     return _initialized;
   }
 
-  /// Enable the background service.
+  /// Enables background execution.
+  ///
+  /// Returns `false` if [initialize] has not succeeded, if the app lacks the
+  /// background permissions, or if enabling fails. Returns `true` if already
+  /// enabled.
   Future<bool> enable() async {
     if (!_initialized) {
       warning('$runtimeType - Background service is not initialized.');
@@ -115,7 +120,10 @@ class BackgroundService {
     return _enabled;
   }
 
-  /// Disable the background service.
+  /// Disables background execution.
+  ///
+  /// Returns `true` if background execution is now disabled, and `false` if
+  /// [initialize] has not succeeded or disabling failed.
   Future<bool> disable() async {
     if (!_initialized) {
       warning('$runtimeType - Background service is not initialized.');

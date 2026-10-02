@@ -7,23 +7,25 @@
 
 part of '../../../sampling_packages.dart';
 
-/// An abstract sensor probe used by all sensor probes to get the [samplingPeriod].
+/// Base class for the raw sensor probes, providing their [samplingPeriod].
 ///
 /// The sampling interval can be specified ("overridden") by specifying a [IntervalSamplingConfiguration]
 /// when configuring a [Measure] in the protocol.
 /// Default sampling interval is 200 ms.
 ///
 /// Note that it seems like setting the sampling interval does NOT work on Android.
-/// Please see the docs on the [sensor_plus](https://pub.dev/packages/sensors_plus)
+/// Please see the docs on the [sensors_plus](https://pub.dev/packages/sensors_plus)
 /// package and on the [Android sensor documentation](https://developer.android.com/reference/android/hardware/SensorManager#registerListener(android.hardware.SensorEventListener,%20android.hardware.Sensor,%20int)).
 abstract class SensorProbe extends StreamProbe {
+  /// The interval from the measure's [IntervalSamplingConfiguration], or
+  /// 200 ms if none is set.
   Duration get samplingPeriod =>
       samplingConfiguration is IntervalSamplingConfiguration
       ? (samplingConfiguration as IntervalSamplingConfiguration).interval
       : const Duration(milliseconds: 200);
 }
 
-/// A probe collecting raw data from the accelerometer.
+/// Collects raw [Acceleration] (including gravity) from the accelerometer.
 class AccelerometerProbe extends SensorProbe {
   @override
   Stream<Measurement> get stream =>
@@ -34,7 +36,7 @@ class AccelerometerProbe extends SensorProbe {
       );
 }
 
-/// A probe collecting raw data from the user accelerometer.
+/// Collects raw [Acceleration] excluding gravity from the user accelerometer.
 class UserAccelerometerProbe extends SensorProbe {
   @override
   Stream<Measurement> get stream =>
@@ -45,14 +47,18 @@ class UserAccelerometerProbe extends SensorProbe {
       );
 }
 
-/// A probe collecting accelerometer data over a sampling period and calculates
-/// a set of features based on the samplings, as represented by a
-/// [AccelerationFeatures] data point.
+/// Collects user accelerometer data over a sampling period and calculates
+/// a set of features from it, as an [AccelerationFeatures] data point.
 ///
 /// Configured with a [PeriodicSamplingConfiguration] configuration.
 class AccelerometerFeaturesProbe extends BufferingPeriodicStreamProbe {
+  /// The events buffered in the current sampling period.
   List<UserAccelerometerEvent> userAccelerometerEventList = [];
+
+  /// Start of the current sampling period, in microseconds since epoch.
   int sensorStartTime = 0;
+
+  /// End of the last sampling period, in microseconds since epoch.
   int? sensorEndTime;
 
   @override
@@ -89,7 +95,7 @@ class AccelerometerFeaturesProbe extends BufferingPeriodicStreamProbe {
   }
 }
 
-/// A probe collecting raw data from the gyroscope.
+/// Collects raw [Rotation] data from the gyroscope.
 class GyroscopeProbe extends SensorProbe {
   @override
   Stream<Measurement> get stream =>
@@ -99,7 +105,7 @@ class GyroscopeProbe extends SensorProbe {
       );
 }
 
-/// A probe collecting raw data from the magnetometer.
+/// Collects raw [MagneticField] data from the magnetometer.
 class MagnetometerProbe extends SensorProbe {
   @override
   Stream<Measurement> get stream =>

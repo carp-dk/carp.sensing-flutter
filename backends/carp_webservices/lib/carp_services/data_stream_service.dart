@@ -1,10 +1,30 @@
 part of 'carp_services.dart';
 
-/// A [DataStreamService] that talks to the CARP Web Services.
+/// A CARP Core [DataStreamService] that talks to CAWS.
+///
+/// Uploads collected [Measurement]s to CAWS as [DataStreamBatch]es, and reads
+/// them back. Data streams are opened, closed and removed on the server, not
+/// by the client.
+///
+/// Key points:
+///  * A singleton; call [configure] (or [configureFrom]) before use.
+///  * [appendToDataStreams] gzips the payload by default and posts it to the
+///    [DATA_STREAM_ZIP_ENDPOINT_NAME] endpoint.
+///  * [openDataStreams], [closeDataStreams] and [removeDataStreams] always
+///    throw a [CarpServiceException].
+///  * [dataStream] returns a [DataStreamReference] for one study deployment.
+///
+/// Apps rarely call it directly: the `carp_backend` package uploads data
+/// through this service when the protocol uses a CAWS data endpoint.
 class CarpDataStreamService extends CarpBaseService
     implements DataStreamService {
+  /// The default (uncompressed) RPC endpoint name.
   static const String DATA_STREAM_ENDPOINT_NAME = "data-stream-service";
+
+  /// The endpoint name for gzip-compressed uploads.
   static const String DATA_STREAM_ZIP_ENDPOINT_NAME = "data-stream-service-zip";
+
+  /// The endpoint name used by [getDataStreamBatchesByTime].
   static const String DATA_STREAM_QUERY_BY_TIME_ENDPOINT_NAME =
       "data-stream-service/query-by-time";
 
@@ -35,6 +55,11 @@ class CarpDataStreamService extends CarpBaseService
         'Opening data streams is not supported from the client side.',
       );
 
+  /// Appends a [batch] of data to the data streams of the study deployment
+  /// with [studyDeploymentId].
+  ///
+  /// If [compress] is true (default), the JSON payload is gzipped before
+  /// upload.
   @override
   Future<void> appendToDataStreams(
     String studyDeploymentId,

@@ -6,12 +6,21 @@
 
 part of '../../infrastructure.dart';
 
-/// The [PersistenceService] class is a singleton which handles persistence of study
-/// runtime information to a SQLite database on the phone. Used to store information
-/// across app re-start on:
+/// Stores running studies and the user task queue in a local SQLite database,
+/// so they survive an app restart.
+///
+/// A singleton, accessed as `PersistenceService()`. Initialized by
+/// [SmartPhoneClientManager.configure], which then restores studies and tasks.
+/// It stores:
 ///
 ///  * Running studies on the phone as managed by the [SmartphoneClientRepository]
 ///  * User tasks on the task queue as managed by the [AppTaskController]
+///
+/// After [init], changes are saved automatically: it listens to
+/// [SmartphoneClientRepository.studyStatusEvents] and
+/// [AppTaskController.userTaskEvents]. Database errors are logged, not thrown.
+///
+/// This is separate from the measurement database used by [SQLiteDataManager].
 ///
 /// Studies are stored in the `studies` table and user tasks are stored
 /// in the `task_queue` table.
@@ -20,7 +29,7 @@ part of '../../infrastructure.dart';
 ///
 ///   `~/carp.db`
 ///
-/// where `~` is the folder where SQLite places it database files.
+/// where `~` is the folder where SQLite places its database files.
 ///
 /// On iOS, this is the `NSDocumentsDirectory` and the files can be accessed via
 /// the MacOS Finder.
@@ -30,6 +39,9 @@ part of '../../infrastructure.dart';
 /// Files can be accessed via AndroidStudio.
 class PersistenceService {
   static const String DATABASE_NAME = 'carp';
+
+  /// Schema version. Version 1 databases (including CAMS 1.x) are migrated
+  /// on [init].
   static const int DATABASE_VERSION = 2;
   static const String STUDY_TABLE_NAME = 'studies';
   static const String TASK_QUEUE_TABLE_NAME = 'task_queue';
@@ -59,13 +71,14 @@ class PersistenceService {
   /// Get the singleton persistence layer.
   factory PersistenceService() => _instance;
 
-  /// Path of the database.
+  /// The folder holding the database. Set by [init].
   String get databasePath => '$_databasePath';
 
   /// Full path and name of the database.
   String get databaseName => '$_databasePath/$DATABASE_NAME.db';
 
-  /// Initialize the persistence layer and the database.
+  /// Opens (and if needed creates or migrates) the database, and starts
+  /// saving study and task changes. Must be called before any other method.
   Future<void> init() async {
     info('Initializing $runtimeType...');
     _databasePath ??= await getDatabasesPath();
@@ -201,13 +214,12 @@ class PersistenceService {
     debug('$runtimeType - $databaseName DB migrated to version 2');
   }
 
-  /// Close the persistence layer. After close is called, no deployment can be
-  /// accessed or saved.
+  /// Closes the database. After this, no study or task can be read or saved.
   Future<void> close() async => await _database?.close();
 
   /// Get the list of all studies previously stored on this phone.
   ///
-  /// Returns an empty list, if not study deployments are stored.
+  /// Returns an empty list if no studies are stored or loading fails.
   Future<List<SmartphoneStudy>> getAllStudies() async {
     List<SmartphoneStudy> list = [];
     try {
@@ -239,8 +251,8 @@ class PersistenceService {
     return list;
   }
 
-  /// Save the [study] persistently to a local cache.
-  /// Returns true if successful.
+  /// Saves [study], replacing any existing row for it.
+  /// Returns `true` if successful.
   Future<bool> saveStudy(SmartphoneStudy study) async {
     bool success = true;
     try {
@@ -257,8 +269,8 @@ class PersistenceService {
     return success;
   }
 
-  /// Update the [study] persistently to a local cache.
-  /// Returns true if successful.
+  /// Updates the stored [study], matched on study deployment ID and device
+  /// role name. Returns `true` if successful.
   Future<bool> updateStudy(SmartphoneStudy study) async {
     bool success = true;
     try {
@@ -333,7 +345,8 @@ class PersistenceService {
     return study;
   }
 
-  /// Remove the [study] from local cache.
+  /// Removes [study] from the database. Its user tasks are not removed;
+  /// use [removeUserTasks] for that.
   Future<void> removeStudy(Study study) async {
     info("$runtimeType - Erasing study, deploymentId: $study");
     try {
@@ -349,7 +362,8 @@ class PersistenceService {
     }
   }
 
-  /// Update or delete a task queue entry.
+  /// Saves [task] to the task queue table, or deletes it if its state is
+  /// [UserTaskState.dequeued].
   Future<void> saveUserTask(UserTask task) async {
     debug("$runtimeType - Saving task to database '$task'.");
     switch (task.state) {

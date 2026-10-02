@@ -1,3 +1,10 @@
+/// Authentication and session support for CARP Web Services (CAWS).
+///
+/// Configure [CarpAuthService] with [CarpAuthProperties] to sign in and obtain a
+/// [CarpUser] with an [OAuthToken]. The CAWS client services use the current
+/// user's access token for authenticated requests.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';

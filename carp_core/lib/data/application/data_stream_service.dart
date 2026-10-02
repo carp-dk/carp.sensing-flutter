@@ -8,6 +8,11 @@
 part of '../../data.dart';
 
 /// Store and retrieve data streams for study deployments.
+///
+/// The server-side data endpoint in CARP Core. Data streams for a deployment
+/// are opened with a [DataStreamsConfiguration], appended to with
+/// [DataStreamBatch]es, and closed when the study ends. Implemented by the
+/// CARP web services client (`carp_webservices`).
 abstract class DataStreamService {
   static const String API_VERSION = "1.1";
 
@@ -46,9 +51,9 @@ abstract class DataStreamService {
   ///
   /// Throws IllegalArgumentException if:
   ///  - [dataStream] has never been opened
-  ///  - the [dataStream] does not exist (i.e, that the combination of [dataStream.deviceRoleName]
-  ///    and [dataStream.dataType] is correct for the protocol used in the
-  ///    [dataStream.studyDeploymentId] deployment.)
+  ///  - the [dataStream] does not exist (i.e., the combination of
+  ///    [DataStreamId.deviceRoleName] and [DataStreamId.dataType] is not valid
+  ///    for the protocol used in the [DataStreamId.studyDeploymentId] deployment)
   ///  - [fromSequenceId] is negative or [toSequenceIdInclusive] is smaller
   ///    than [fromSequenceId]
   Future<List<DataStreamBatch>> getDataStream(

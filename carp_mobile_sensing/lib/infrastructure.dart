@@ -5,22 +5,16 @@
  * found in the LICENSE file.
  */
 
-/// The infrastructure library provide on-phone implementations of CAMS services
-/// like the [SmartphoneDeploymentService] deployment service and the
-/// [SQLiteDataManager] data manager.
+/// The CAMS infrastructure layer: on-phone implementations of the CAMS services.
 ///
-/// This library also holds the two built-in sampling packages:
-///
-///  * [device] - a sampling package for collecting information from the device hardware.
-///  * [sensors] - a sampling package for collecting data from the basic phone sensors:
-///
-/// In terms of Domain-Driven Design (DDD), "the infrastructure layer is responsible
-/// for providing technical services and resources to support the other layers.
-/// It can include databases, message brokers, web servers, cloud platforms,
-/// 3rd-party APIs, or any other external components that are required by the system.
-/// The infrastructure layer should be generic and adaptable, implementing the
-/// interfaces or abstractions that are defined by the domain layer."
-/// From [Domain-Driven Design (DDD): A Guide to Building Scalable, High-Performance Systems](https://romanglushach.medium.com/domain-driven-design-ddd-a-guide-to-building-scalable-high-performance-systems-5314a7fe053c) by Roman Glushach.
+/// Holds the local deployment service ([SmartphoneDeploymentService]), the
+/// data managers that store measurements on the phone ([ConsoleDataManager],
+/// [FileDataManager], [SQLiteDataManager]), the [FileStudyProtocolManager],
+/// the [FlutterLocalNotificationManager], and the [PersistenceService] that
+/// saves runtime state across app restarts.
+/// These classes implement the interfaces defined in the [domain] layer and
+/// are used by the [runtime] layer. The built-in sampling packages are in
+/// the [sampling_packages] library.
 library;
 
 import 'dart:async';

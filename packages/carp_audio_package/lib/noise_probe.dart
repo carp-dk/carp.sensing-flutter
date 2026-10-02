@@ -1,12 +1,13 @@
 part of 'media.dart';
 
-/// A probe collecting noise sampling from the microphone.
+/// Samples the noise level from the microphone and reports it as [Noise] data.
 ///
-/// See [PeriodicSamplingConfiguration] on how to configure this probe,
-/// including setting the frequency and duration of the sampling rate.
+/// Used for the [MediaSamplingPackage.NOISE] measure. Does not record sound.
+/// It listens for the duration of each sampling window and reports the mean,
+/// standard deviation, min and max decibel of that window. Configure the
+/// interval and window duration with a [PeriodicSamplingConfiguration].
 ///
-/// Does not record sound. Instead reports the audio level with a specified
-/// frequency, in a given sampling window as a [Noise] data object.
+/// No measurement is added if no finite readings were collected in a window.
 class NoiseProbe extends BufferingPeriodicStreamProbe {
   final NoiseMeter _noiseMeter = NoiseMeter();
   final List<NoiseReading> _noiseReadings = [];

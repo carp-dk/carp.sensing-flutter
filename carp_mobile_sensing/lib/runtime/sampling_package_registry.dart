@@ -6,24 +6,36 @@
 
 part of '../runtime.dart';
 
-/// A registry of [SamplingPackage] packages.
+/// The singleton registry of all [SamplingPackage]s used in an app.
 ///
-/// This registry works as a singleton and is accessed using the `SamplingPackageRegistry()`
-/// factory method.
+/// An app registers each external sampling package here at startup, before
+/// it configures the [SmartPhoneClientManager]. The registry then knows which
+/// measure types, [Probe]s and devices are available on this phone.
 ///
-/// This registry is mainly used to [register] any sampling packages used in a
-/// CAMS app. See the [CAMS GitHub repro](https://github.com/cph-cachet/carp.sensing-flutter/tree/master)
+/// Key points:
+///  * The built-in [DeviceSamplingPackage], [SensorSamplingPackage] and
+///    [MonitoringSamplingPackage] are always registered.
+///  * [register] also adds the package's data types to [CarpDataTypes] and its
+///    [DeviceManager] to the [DeviceController].
+///  * [create] makes a new [Probe] for a measure type; used by the executors.
+///
+/// See the [CAMS GitHub repo](https://github.com/carp-dk/carp.sensing-flutter)
 /// for an overview of available sampling packages.
+///
+/// ```dart
+/// SamplingPackageRegistry().register(ContextSamplingPackage());
+/// await SmartPhoneClientManager().configure();
+/// ```
 class SamplingPackageRegistry {
   final List<SamplingPackage> _packages = [];
   DataTypeSamplingSchemeMap? _combinedSchemas;
 
   static final SamplingPackageRegistry _instance = SamplingPackageRegistry._();
 
-  /// Get the singleton [SamplingPackageRegistry].
+  /// Returns the singleton [SamplingPackageRegistry].
   factory SamplingPackageRegistry() => _instance;
 
-  /// A list of registered packages.
+  /// The registered packages, in registration order.
   List<SamplingPackage> get packages => _packages;
 
   SamplingPackageRegistry._() {
@@ -33,7 +45,11 @@ class SamplingPackageRegistry {
     register(MonitoringSamplingPackage());
   }
 
-  /// Register a sampling package.
+  /// Registers [package].
+  ///
+  /// Also adds the package's data types to [CarpDataTypes], registers its
+  /// [SamplingPackage.deviceManager] in the [DeviceController], and calls
+  /// [SamplingPackage.onRegister].
   void register(SamplingPackage package) {
     _combinedSchemas = null;
     _packages.add(package);
@@ -49,7 +65,7 @@ class SamplingPackageRegistry {
     package.onRegister();
   }
 
-  /// Lookup the [SamplingPackage]s that support the [type] of data.
+  /// Returns the [SamplingPackage]s that support the data [type].
   ///
   /// Typically, only one package supports a specific type. However, if
   /// more than one package does, all packages are returned.
@@ -76,6 +92,9 @@ class SamplingPackageRegistry {
   }
 
   /// The combined sampling schemes for all measure types in all packages.
+  ///
+  /// Used as the last fallback for a [Probe.samplingConfiguration] and to find
+  /// the permissions a measure needs.
   DataTypeSamplingSchemeMap get samplingSchemes {
     if (_combinedSchemas == null) {
       _combinedSchemas = DataTypeSamplingSchemeMap();
@@ -87,12 +106,14 @@ class SamplingPackageRegistry {
     return _combinedSchemas!;
   }
 
-  /// Create an instance of a probe based on its data type.
+  /// Creates a new [Probe] for the data [type].
   ///
-  /// This methods search this sampling package registry for a [SamplingPackage]
-  /// which has a probe of the specified [type].
+  /// Asks the first registered package that supports [type] to create the
+  /// probe, and sets the probe's [Probe.deviceManager] to the package's device
+  /// manager. If more than one package supports [type], a warning is logged.
   ///
-  /// Returns `null` if no probe is found for the specified [type].
+  /// Returns `null` if no probe is found for [type], e.g., when the probe is
+  /// not available on this OS or its package is not registered.
   Probe? create(String type) {
     Probe? probe;
 

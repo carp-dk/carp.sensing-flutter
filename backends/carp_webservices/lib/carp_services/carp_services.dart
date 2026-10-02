@@ -4,18 +4,24 @@
  * found in the LICENSE file.
  */
 
-/// A library for all CARP Web Services (CAWS):
+/// Client services for the CARP Web Services (CAWS) backend.
 ///
-///  * [CarpAuthService]
-///  * [CarpService]
-///  * [CarpProtocolService]
-///  * [CarpParticipationService]
-///  * [CarpDeploymentService]
-///  * [CarpDataStreamService]
+/// The CARP Core services are implemented as CAWS clients:
 ///
-/// The (current) assumption is that each Flutter app (using this library) will
-/// only connect to one CAWS backend.
-/// All CAWS services are therefore singletons and can be used like:
+///  * [CarpProtocolService] - manages protocols (researchers only).
+///  * [CarpParticipationService] - invitations and participant data.
+///  * [CarpDeploymentService] - device registration and deployments.
+///  * [CarpDataStreamService] - uploads and reads measurements in data streams.
+///
+/// [CarpService] gives access to the CAWS-only ("non-core") endpoints: files,
+/// documents and collections, plus the legacy consent and data point endpoints.
+/// Authentication is handled by [CarpAuthService] in the `carp_auth` library.
+/// References such as [DeploymentReference] and [ParticipationReference] bind
+/// these calls to one study deployment. The `carp_backend` package builds on
+/// this library to upload data from a running study.
+///
+/// Each app is assumed to connect to one CAWS backend only, so the default
+/// constructors return shared instances. Configure them before use, like:
 ///
 /// ```dart
 /// await CarpAuthService().configure(authProperties);
@@ -28,8 +34,8 @@
 /// CarpParticipationService().configure(app);
 /// ```
 ///
-/// where `authProperties`, `username`, and `password` are parameters for setting up
-/// authentication, and `app` is configuring the participation service to use the
+/// where `authProperties`, `username`, and `password` set up authentication,
+/// and `app` is the [CarpApp] that points the participation service to the
 /// right CAWS instance.
 library;
 
@@ -73,7 +79,11 @@ part '../util/utils.dart';
 
 part 'carp_services.g.dart';
 
-/// Base exception for CARP Web Services.
+/// Base exception thrown by the CAWS client services.
+///
+/// Thrown directly for client-side errors, like using a service before it is
+/// configured. Errors returned by the server are thrown as the
+/// [CarpServiceRequestException] subclass.
 class CarpServiceException implements Exception {
   final String message;
   CarpServiceException([this.message = 'CARP Service Exception']);
@@ -81,10 +91,11 @@ class CarpServiceException implements Exception {
 
 /// Exception for CAWS REST/HTTP service communication.
 ///
-/// Handles both HTTP exceptions from TCP/IP, NGINX, and CAWS application
-/// exceptions. The latter typically arise from CARP Core Java exceptions
-/// being thrown on the server side. These exceptions are mapped to HTTP
-/// status codes and messages sent back to the client.
+/// Thrown for non-success HTTP responses with a decodable JSON body, including
+/// CAWS application exceptions. The latter typically arise from CARP Core
+/// exceptions on the server side, which are mapped to HTTP status codes and
+/// messages sent back to the client. Transport failures and undecodable
+/// response bodies can propagate as other exceptions.
 class CarpServiceRequestException extends CarpServiceException {
   /// The HTTP status from CAWS associated with this exception.
   HTTPStatus httpStatus;
@@ -92,10 +103,9 @@ class CarpServiceRequestException extends CarpServiceException {
   /// The Java exception from CARP Core.
   String? exception;
 
-  // The URL path that caused the exception.
+  /// The URL path that caused the exception.
   String? path;
 
-  /// Create new [CarpServiceRequestException].
   CarpServiceRequestException(
     super.message, {
     required this.httpStatus,
@@ -103,8 +113,12 @@ class CarpServiceRequestException extends CarpServiceException {
     this.path,
   });
 
-  /// Create new [CarpServiceException] from a HTTP response [httpStatusCode]
-  /// and [response].
+  /// Creates the matching exception from an HTTP [httpStatusCode] and the
+  /// decoded JSON [response] body.
+  ///
+  /// Returns a [CarpBadRequestException], [CarpUnauthorizedException],
+  /// [CarpNotFoundException] or [CarpInternalServerException] for the
+  /// matching status codes, and a plain [CarpServiceRequestException] otherwise.
   ///
   /// There are two types of error messages - from CAWS and from NGINX.
   /// CAWS errors contain 'path' and 'exception' fields,
@@ -165,31 +179,38 @@ class CarpServiceRequestException extends CarpServiceException {
       " - ${exception ?? "exception"} - ${path ?? "path"}";
 }
 
+/// A [CarpServiceRequestException] for HTTP 400 Bad Request.
 class CarpBadRequestException extends CarpServiceRequestException {
   CarpBadRequestException(super.message, {super.exception, super.path})
     : super(httpStatus: const HTTPStatus(HttpStatus.badRequest));
 }
 
+/// A [CarpServiceRequestException] for HTTP 401 Unauthorized or 403 Forbidden.
+///
+/// Also thrown by [CarpAuthService] when authentication or token refresh fails.
 class CarpUnauthorizedException extends CarpServiceRequestException {
   CarpUnauthorizedException(super.message, {super.exception, super.path})
     : super(httpStatus: const HTTPStatus(HttpStatus.unauthorized));
 }
 
+/// A [CarpServiceRequestException] for HTTP 404 Not Found.
 class CarpNotFoundException extends CarpServiceRequestException {
   CarpNotFoundException(super.message, {super.exception, super.path})
     : super(httpStatus: const HTTPStatus(HttpStatus.notFound));
 }
 
+/// A [CarpServiceRequestException] for HTTP 500 Internal Server Error.
 class CarpInternalServerException extends CarpServiceRequestException {
   CarpInternalServerException(super.message, {super.exception, super.path})
     : super(httpStatus: const HTTPStatus(HttpStatus.internalServerError));
 }
 
-/// Implements HTTP Response Code and associated Reason Phrase.
+/// An HTTP status code and its reason phrase, as held by a
+/// [CarpServiceRequestException].
+///
 /// See https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 class HTTPStatus {
-  /// Mapping of the most common HTTP status code to text.
-  /// See https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+  /// Reason phrases for the most common HTTP status codes.
   static const Map<int, String> httpStatusPhrases = {
     100: "Continue",
     200: "OK",
@@ -216,6 +237,9 @@ class HTTPStatus {
   };
 
   final int httpResponseCode;
+
+  /// The reason phrase for [httpResponseCode], or "Unknown Status Code" if
+  /// it is not in [httpStatusPhrases].
   String get httpReasonPhrase =>
       httpStatusPhrases[httpResponseCode] ?? "Unknown Status Code";
 

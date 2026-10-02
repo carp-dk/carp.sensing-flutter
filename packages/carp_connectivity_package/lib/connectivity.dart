@@ -1,7 +1,14 @@
-/// A library for collecting connectivity data on:
-/// * bluetooth info from nearby devices
-/// * connectivity status
-/// * wifi status
+/// A sampling package that collects network connectivity, wifi, Bluetooth and beacon data.
+///
+/// Register [ConnectivitySamplingPackage] in the `SamplingPackageRegistry` to
+/// use these measure types in a protocol:
+///  * `dk.cachet.carp.connectivity` - connectivity status changes ([Connectivity]).
+///  * `dk.cachet.carp.wifi` - the connected wifi network ([Wifi]).
+///  * `dk.cachet.carp.bluetooth` - nearby Bluetooth devices ([Bluetooth]).
+///  * `dk.cachet.carp.beacon` - nearby iBeacons in given regions ([BeaconData]).
+///
+/// Works on Android and iOS, using the [Smartphone] primary device. Wifi and
+/// Bluetooth names are hashed by the default `PrivacySchema`.
 library;
 
 import 'dart:async';

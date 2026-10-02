@@ -22,7 +22,11 @@ part of 'esense.dart';
 // audio streaming), and use the LEFT earbud for IMU data collection using BLE
 // as part of a mobile sensing study.
 
-/// A [DeviceConfiguration] for an eSense device used in a [StudyProtocol].
+/// A connected device configuration for an eSense earable used in a [StudyProtocol].
+///
+/// Add it to a protocol with [StudyProtocol.addConnectedDevice] and use it as
+/// the target device of tasks with eSense measures. At runtime it is handled
+/// by an [ESenseDeviceManager]. It is optional by default.
 ///
 /// **From the eSense User Documentation:**
 ///
@@ -57,8 +61,10 @@ class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
   static const String DEFAULT_ROLE_NAME = 'eSense';
 
   /// The sampling rate in Hz of getting sensor data from the device.
+  /// Defaults to 10 Hz.
   int samplingRate;
 
+  /// Creates an [ESenseDevice] configuration.
   ESenseDevice({
     super.roleName = ESenseDevice.DEFAULT_ROLE_NAME,
     super.isOptional = true,
@@ -73,10 +79,19 @@ class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
   Map<String, dynamic> toJson() => _$ESenseDeviceToJson(this);
 }
 
-/// A [DeviceManager] for the eSense device.
+/// The [DeviceManager] for an [ESenseDevice].
 ///
-/// Note that eSense use the [bleName] (and not the BLE address) for connecting to it.
-/// Typically of the form `eSense-xxxx`.
+/// Connects to the earable, sets its sampling rate, and gives the eSense probes
+/// access to the device through [manager].
+///
+/// Key points:
+///  * eSense uses the [bleName] (and not the BLE address) for connecting.
+///    It is typically of the form `eSense-xxxx`. [canConnect] is false until
+///    [bleName] is set.
+///  * [connect] returns while connecting; the status follows the device's
+///    connection events.
+///  * While connected, it reads the battery voltage every 2 minutes and emits
+///    an estimated level on [batteryEvents].
 class ESenseDeviceManager
     extends BLEDeviceManager<ESenseDevice, BLEDeviceRegistration> {
   Timer? _batteryTimer;
@@ -87,8 +102,8 @@ class ESenseDeviceManager
 
   ESenseManager? _manager;
 
-  /// The eSense device handler.
-  /// Only available after [bleName] has been set.
+  /// The `esense_flutter` [ESenseManager] that talks to the device.
+  /// Null until [bleName] has been set.
   ESenseManager? get manager =>
       bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
 
@@ -111,7 +126,8 @@ class ESenseDeviceManager
   ///  0.0  | 3.1
   /// ```
   ///
-  /// which gives; `B = 1.19V - 3.91`.
+  /// which gives `B = 1.19V - 3.91`. The level is a percentage, or null if
+  /// no voltage has been read yet.
   ///
   /// See e.g. https://en.wikipedia.org/wiki/State_of_charge#Voltage_method
   @override
@@ -122,6 +138,7 @@ class ESenseDeviceManager
   @override
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
+  /// Creates a manager for an eSense device of the given device [type].
   ESenseDeviceManager(super.type, {super.configuration});
 
   @Deprecated('Use bleName instead')

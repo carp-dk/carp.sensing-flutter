@@ -6,17 +6,19 @@
  */
 part of '../../../common.dart';
 
-/// A [DeviceRegistration] configures a [DeviceConfiguration] as part of the
-/// deployment of a [StudyProtocol].
+/// Identifies the physical device that fills a [DeviceConfiguration] role in
+/// a deployment.
 ///
-/// Note that this is an abstract class and should not be used. If a simple
-/// device registration is needed, use a [DefaultDeviceRegistration].
+/// A registration is sent to the `DeploymentService` with
+/// `registerDevice` when a device joins a study deployment.
+/// Treat this as an abstract base class. If a simple device registration is
+/// needed, use a [DefaultDeviceRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceRegistration extends Serializable {
   /// An ID for the device, used to disambiguate between devices of the same type,
   /// as provided by the device itself.
   /// It is up to specific types of devices to guarantee uniqueness across all
-  /// devices of the same type.
+  /// devices of the same type. A random UUID (v4) if not specified.
   late String deviceId;
 
   /// An optional concise textual representation for display purposes describing
@@ -24,7 +26,7 @@ class DeviceRegistration extends Serializable {
   /// E.g., device manufacturer, name, and operating system version.
   String? deviceDisplayName;
 
-  /// The registration time in zulu time.
+  /// The registration time in UTC. Defaults to the time of creation.
   late DateTime registrationCreatedOn;
 
   DeviceRegistration({
@@ -52,16 +54,17 @@ class DeviceRegistration extends Serializable {
       '$runtimeType - deviceId: $deviceId, deviceDisplayName: $deviceDisplayName, registrationCreatedOn: $registrationCreatedOn';
 }
 
-/// A concrete [DeviceRegistration] which solely implements the base properties
-/// and nothing else.
+/// A concrete [DeviceRegistration] which only holds the base properties.
+///
+/// Used by most devices, including [Smartphone].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DefaultDeviceRegistration extends DeviceRegistration {
-  /// Create a new [DefaultDeviceRegistration]
+  /// Create a new [DefaultDeviceRegistration].
   ///  * [deviceId] - a unique id for this device.
   ///    If not specified, a unique id will be generated.
-  ///  * [deviceDisplayName] - An optional concise textual representation for display
+  ///  * [deviceDisplayName] - an optional concise textual representation for display
   ///    purposes describing the key specifications of the device.
-  ///  * [registrationCreatedOn] - the timestamp in zulu when this registration was created.
+  ///  * [registrationCreatedOn] - the time in UTC when this registration was created.
   ///    If not specified, the time of creation will be used.
   DefaultDeviceRegistration({
     super.deviceId,
@@ -87,10 +90,11 @@ class DefaultDeviceRegistration extends DeviceRegistration {
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MACAddressDeviceRegistration extends DeviceRegistration {
   /// The MAC address, represented according to the recommended IEEE 802 standard notation.
-  /// Six groups of two upper case hexadecimal digits, separate by hyphens (-).
+  /// Six groups of two upper case hexadecimal digits, separated by hyphens (-).
   String macAddress;
 
   /// Create a new [MACAddressDeviceRegistration] with a unique MAC [macAddress].
+  /// If [deviceId] is not specified, [macAddress] is used.
   MACAddressDeviceRegistration({
     String? deviceId,
     super.deviceDisplayName,

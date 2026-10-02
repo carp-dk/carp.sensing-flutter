@@ -1,23 +1,33 @@
 part of '../../domain.dart';
 
-/// Interface for a sampling package.
+/// A plug-in that adds a set of measure types, and the probes that collect
+/// them, to CAMS.
 ///
-/// A sampling package provides information on:
-///  * [dataTypes] - the data types supported
-///  * [samplingSchemes] - the default [DataTypeSamplingSchemeMap] containing
-///     a set of [SamplingConfiguration]s for each data type.
-///  * [deviceType] - what type of device this package supports
+/// Each sampling package covers one type of device (the phone, a wearable, a
+/// service) and is registered in the [SamplingPackageRegistry] at app start.
+/// When a study runs, CAMS asks the package that supports a [Measure] type to
+/// [create] a [Probe] for it.
 ///
-/// It also contains factory methods for:
-///  * creating a [Probe] based on a [Measure] type
-///  * getting a [DeviceManager] for the [deviceType]
+/// A sampling package provides:
+///  * [dataTypes] - the data types (measure types) it supports.
+///  * [samplingSchemes] - the default [SamplingConfiguration] of each data type.
+///  * [deviceType] and [deviceManager] - the device it collects data from.
+///  * [create] - a factory for [Probe]s.
+///
+/// ```dart
+/// // Register a sampling package before using its measures in a protocol.
+/// SamplingPackageRegistry().register(ContextSamplingPackage());
+/// ```
+///
+/// See also [SmartphoneSamplingPackage], the base for packages that collect
+/// data from the phone itself.
 abstract class SamplingPackage {
-  /// The list of data type this package supports.
+  /// The data types this package supports.
   List<DataTypeMetaData> get dataTypes;
 
   /// The default sampling schemes for all [dataTypes] in this package.
   ///
-  /// All sampling packages should defined a [DataTypeSamplingScheme] for each
+  /// All sampling packages should define a [DataTypeSamplingScheme] for each
   /// data type.
   DataTypeSamplingSchemeMap get samplingSchemes;
 
@@ -26,11 +36,10 @@ abstract class SamplingPackage {
   /// Returns null if a probe cannot be created for the [type].
   Probe? create(String type);
 
-  /// What device type is this package using?
+  /// The type of device this package collects data from.
   ///
-  /// This device type is matched with the [DeviceConfiguration.roleName] when a
-  /// [PrimaryDeviceConfiguration] is deployed on the phone and executed by a
-  /// [SmartphoneStudyController].
+  /// On registration, [deviceManager] is registered in the [DeviceController]
+  /// under this type, which is matched with the devices in a deployment.
   ///
   /// Note that it is assumed that a sampling package only supports **one**
   /// type of device.
@@ -39,14 +48,16 @@ abstract class SamplingPackage {
   /// Get the [DeviceManager] for the device used by this package.
   DeviceManager get deviceManager;
 
-  /// Callback method when this package is being registered.
+  /// Called when this package is registered in the [SamplingPackageRegistry].
+  ///
+  /// Use it to register JSON deserialization functions and data transformers.
   void onRegister();
 }
 
-/// An abstract class for all sampling packages that run on the phone itself.
+/// Base class for sampling packages that collect data from the phone itself.
 ///
-/// Note that the default implementation of [permissions] and [onRegister] are
-/// no-op operations and should hence be overridden in subclasses, if needed.
+/// All of them share one [SmartphoneDeviceManager]. [dataTypes] is derived
+/// from [samplingSchemes], and [onRegister] does nothing; override it if needed.
 abstract class SmartphoneSamplingPackage extends SamplingPackage {
   // all smartphone sampling packages uses the same static device manager
   static final _deviceManager = SmartphoneDeviceManager();
@@ -64,14 +75,19 @@ abstract class SmartphoneSamplingPackage extends SamplingPackage {
   void onRegister() {}
 }
 
-/// A [SamplingPackage] containing data types, sampling schemas and probes
-/// for monitoring data sampling:
+/// The built-in [SamplingPackage] that monitors data sampling itself.
 ///
-///  - errors
-///  - task triggering
-///  - task completion, including [AppTask] completion
+/// Its measure types are:
+///  * [ERROR] - errors during data collection.
+///  * [TRIGGERED_TASK] - a task was triggered.
+///  * [COMPLETED_TASK] - a task was completed.
+///  * [COMPLETED_APP_TASK] - an [AppTask] was completed.
+///
+/// These are collected by the CAMS runtime, not by a probe, so [create]
+/// returns a [StubProbe]. [SmartphoneStudyProtocol] adds the first three to
+/// each device automatically.
 class MonitoringSamplingPackage extends SmartphoneSamplingPackage {
-  /// Collect errors occurring during data collection
+  /// Collect errors occurring during data collection.
   static const String ERROR = CarpDataTypes.ERROR;
 
   /// Collect data on a triggered [TaskConfiguration].

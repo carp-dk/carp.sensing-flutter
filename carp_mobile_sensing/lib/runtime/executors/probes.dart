@@ -7,23 +7,40 @@
 
 part of '../../runtime.dart';
 
-/// A [Probe] is a specialized [Executor] responsible for collecting data from
-/// the device sensors as configured in a [Measure].
+/// Collects data for one [Measure].
 ///
-/// A probe may need a set of [permissions] to run. Following best practice on
-/// both [Android](https://developer.android.com/training/permissions/requesting)
-/// and [iOS](https://developer.apple.com/documentation/uikit/protecting_the_user_s_privacy/requesting_access_to_protected_resources/)
-/// a probe will ask for permission when started using the [requestPermissions]
-/// method.
+/// The data comes from a sensor, a connected device or a service.
+/// A probe is the leaf of the executor tree. Each measure in a task gets its
+/// own probe, created by the measure type's [SamplingPackage] through
+/// [SamplingPackageRegistry.create]. Write a probe when you add a new measure
+/// type to a sampling package; most extend one of the specialized probes below.
+///
+/// Key points:
+///  * Lifecycle: see [Executor]. Subclasses implement [onInitialize],
+///    [onResume] and [onPause]; the default ones do nothing.
+///  * Emits [Measurement]s with [addMeasurement]; errors with [addError].
+///  * Its [samplingConfiguration] is looked up in the measure, the
+///    deployment and the sampling packages, in that order.
+///  * [permissions] come from the [CamsDataTypeMetaData] of the measure type.
+///    The [SmartphoneStudyController] asks for them up front; probes only
+///    check them with [hasRequiredPermissions].
+///
+/// Specialized probes: [MeasurementProbe] (one measurement), [IntervalProbe]
+/// (polling), [StreamProbe] (continuous stream), [PeriodicStreamProbe],
+/// [BufferingPeriodicProbe], [BufferingIntervalStreamProbe] and
+/// [BufferingPeriodicStreamProbe].
 abstract class Probe extends AbstractExecutor<Measure> {
-  /// The device that this probes uses to collect data.
+  /// The device manager of the device this probe collects data from.
+  ///
+  /// Set by [SamplingPackageRegistry.create].
   late DeviceManager deviceManager;
 
-  /// Is this probe enabled, i.e. available for collection of data using the
-  /// [resume] method.
+  /// Whether this probe is enabled.
+  ///
+  /// Not used by the CAMS runtime itself.
   bool enabled = true;
 
-  /// The data type this probe is collecting.
+  /// The data type this probe collects, e.g. `dk.cachet.carp.steps`.
   String? get type => measure?.type;
 
   /// The [Measure] that configures this probe.
@@ -55,6 +72,11 @@ abstract class Probe extends AbstractExecutor<Measure> {
           .samplingSchemes[measure?.type]
           ?.defaultSamplingConfiguration;
 
+  /// Adds [measurement] to [measurements].
+  ///
+  /// If the [samplingConfiguration] is a [PersistentSamplingConfiguration],
+  /// also sets its `lastTime` to now and saves the deployment, at most once
+  /// per second.
   @override
   void addMeasurement(Measurement measurement) {
     // timestamp this sampling
@@ -74,7 +96,9 @@ abstract class Probe extends AbstractExecutor<Measure> {
 
   List<Permission>? _permissions;
 
-  /// The list of permissions needed for this probe.
+  /// The permissions this probe needs. Empty if none.
+  ///
+  /// Taken from the [CamsDataTypeMetaData] of its data [type].
   List<Permission> get permissions {
     if (_permissions == null) {
       var schema = SamplingPackageRegistry().samplingSchemes[type];
@@ -85,7 +109,7 @@ abstract class Probe extends AbstractExecutor<Measure> {
     return _permissions!;
   }
 
-  /// Does this probe has the permissions needed to run?
+  /// Whether all [permissions] are granted. Returns false if checking fails.
   Future<bool> arePermissionsGranted() async {
     // fast out if no permissions to check
     if (permissions.isEmpty) return true;
@@ -106,8 +130,9 @@ abstract class Probe extends AbstractExecutor<Measure> {
     return granted;
   }
 
-  /// Request the permissions needed for this probe to run.
-  /// Return true if all permissions are granted.
+  /// Asks the user for any [permissions] not yet granted.
+  ///
+  /// Goes through [SmartPhoneClientManager.requestPermissions]. Returns true if all permissions are granted afterwards.
   Future<bool> requestPermissions() async {
     // fast out if already have permissions
     if (await arePermissionsGranted()) return true;
@@ -121,8 +146,9 @@ abstract class Probe extends AbstractExecutor<Measure> {
   ///
   /// The [SmartphoneStudyController] asks for all deployment permissions up
   /// front ([SmartphoneStudyController.askForAllPermissions]), so probes only
-  /// check. Not on iOS: permission_handler reports Android-only groups (e.g.
-  /// activityRecognition, phone) as denied there, and iOS prompts on first use.
+  /// check. Always true on iOS: `permission_handler` reports Android-only groups
+  /// (e.g. activityRecognition, phone) as denied there, and iOS prompts on
+  /// first use.
   Future<bool> hasRequiredPermissions() async =>
       Platform.isIOS ? true : await arePermissionsGranted();
 
@@ -142,15 +168,13 @@ abstract class Probe extends AbstractExecutor<Measure> {
 //                                SPECIALIZED PROBES
 //---------------------------------------------------------------------------------------
 
-/// A simple no-op probe that does nothing.
+/// A probe that does nothing. Useful as a placeholder, e.g. in tests.
 class StubProbe extends Probe {}
 
-/// This probe collects a single [Measurement] when started, send its to the
-/// [measurements] stream, and then stops.
+/// A probe that collects one [Measurement] when resumed, then pauses itself.
 ///
-/// The [Measurement] to be collected should be implemented in the [getMeasurement] method.
-///
-/// See [DeviceProbe] for an example.
+/// Subclasses implement [getMeasurement]. The probe pauses 5 seconds after
+/// [getMeasurement] completes. See [DeviceProbe] for an example.
 abstract class MeasurementProbe extends Probe {
   @override
   Future<bool> onResume() async {
@@ -170,17 +194,17 @@ abstract class MeasurementProbe extends Probe {
     }
   }
 
-  /// Subclasses should implement this method to collect a [Measurement].
+  /// Collects the [Measurement]. Implemented by subclasses.
   ///
   /// Can return `null` if no data is available.
   /// Can return an [Error] measurement if an error occurs.
   Future<Measurement?> getMeasurement();
 }
 
-/// A probe which is triggered at regular intervals, specified by the interval
-/// property in an [IntervalSamplingConfiguration].
-/// When triggered, the probe collect a measurement using the [getMeasurement] method.
+/// A probe that collects a [Measurement] with [getMeasurement] at an interval.
 ///
+/// The interval is [IntervalSamplingConfiguration.interval].
+/// Resuming fails if the [samplingConfiguration] has no interval.
 /// See [MemoryProbe] for an example.
 abstract class IntervalProbe extends MeasurementProbe {
   Timer? _timer;
@@ -223,22 +247,17 @@ abstract class IntervalProbe extends MeasurementProbe {
   }
 }
 
-/// An abstract class used to create a probe that listen continuously to events
-/// from the [stream] of [Measurement] objects.
+/// A probe that forwards every [Measurement] from a [stream] while resumed.
 ///
-/// Sub-classes must implement the
-///
-///  `Stream<Measurement>? get stream => ...`
-///
-/// method in order to provide the stream of measurements.
-///
-/// See [BatteryProbe] for an example.
+/// Subclasses implement [stream]. Resuming fails if [stream] is null, e.g.
+/// when its device is not connected. See [ScreenProbe] for an example.
 abstract class StreamProbe extends Probe {
   StreamSubscription<Measurement>? _subscription;
   Stream<Measurement>? _stream;
 
-  /// The stream of [Measurement] objects for this [StreamProbe].
-  /// Must be implemented by sub-classes.
+  /// The stream of [Measurement]s to forward. Implemented by subclasses.
+  ///
+  /// Read on the first resume after creation or a pause.
   Stream<Measurement>? get stream;
 
   @override
@@ -279,20 +298,13 @@ abstract class StreamProbe extends Probe {
   void _onDone() => _measurementsController.close();
 }
 
-/// A periodic probe listening on a stream. Listening is done periodically as
-/// specified in a [PeriodicSamplingConfiguration] listening on intervals every
-/// [interval] for a period of [duration].
-/// During this period, all data are forwarded to this probes [measurements] stream.
+/// A [StreamProbe] that listens to its [stream] only in sampling windows.
 ///
-/// Just like in [StreamProbe], sub-classes must implement the
+/// Every [PeriodicSamplingConfiguration.interval] it listens for
+/// [PeriodicSamplingConfiguration.duration] and forwards all measurements in
+/// that window. Subclasses implement [stream].
 ///
-///     Stream<Measurement>? get stream => ...
-///
-/// method in order to provide the stream to collect data from.
-///
-/// Note that this probe will finish its sampling window even if it is paused.
-/// Hence, data can still be generated from this probe, even if paused.
-/// Pausing this probe will stop the creation of new collection periods.
+/// Pausing cancels the current window and stops new windows from starting.
 abstract class PeriodicStreamProbe extends StreamProbe {
   Timer? _timer;
 
@@ -343,17 +355,15 @@ abstract class PeriodicStreamProbe extends StreamProbe {
   }
 }
 
-/// An type of probe which collects data for a period of time and then return
-/// a measurement from this collected data.
+/// A probe that collects data in sampling windows, one measurement per window.
 ///
-/// Probes of this type uses a [PeriodicSamplingConfiguration] that specify
-/// the [interval] of starting sampling, and the [duration] of the sampling window.
-/// Once this sampling window is over, the final measurement is collected from
-/// the [getMeasurement] method and send to the main [measurements] stream.
-///
-/// When sampling starts, the [onSamplingStart] handle is called.
-/// When the sampling window ends, the [onSamplingEnd] handle is called.
+/// Uses a [PeriodicSamplingConfiguration]: every
+/// [PeriodicSamplingConfiguration.interval] it calls [onSamplingStart], and
+/// after [PeriodicSamplingConfiguration.duration] it calls [onSamplingEnd]
+/// and adds the result of [getMeasurement]. On pause, any buffered data is
+/// collected with [getMeasurement] too.
 abstract class BufferingPeriodicProbe extends MeasurementProbe {
+  /// The timer that starts each sampling window.
   Timer? timer;
 
   @override
@@ -414,9 +424,9 @@ abstract class BufferingPeriodicProbe extends MeasurementProbe {
   /// Handler called when sampling period ends.
   void onSamplingEnd();
 
-  /// Subclasses should implement / override this method to collect the [Measurement].
-  /// This method will be called every time data has been buffered for a
-  /// [duration] and should return the final [Measurement] for the buffered data.
+  /// Returns the [Measurement] for the last sampling window.
+  ///
+  /// Implemented by subclasses.
   ///
   /// Can return `null` if no data is available.
   /// Can return an [Error] if an error occurs.
@@ -424,26 +434,14 @@ abstract class BufferingPeriodicProbe extends MeasurementProbe {
   Future<Measurement?> getMeasurement();
 }
 
-/// A type of probe which buffers data from an underlying stream and on a regular
-/// interval return a measurement based on this collected data.
+/// A probe that buffers a [bufferingStream] and emits one measurement per interval.
 ///
-/// Probes of this type uses a [PeriodicSamplingConfiguration] that specify
-/// the [interval] of sampling. The [duration] is not used.
-/// Every [interval] the measurement is collected from the [getMeasurement]
-/// method and send to the main [measurements] stream.
+/// The interval is [IntervalSamplingConfiguration.interval].
+/// Subclasses implement [bufferingStream], [onSamplingData] (called per event)
+/// and [getMeasurement] (called per interval).
 ///
-/// Sub-classes must implement the
-///
-///     Stream<dynamic> get bufferingStream => ...
-///
-/// method in order to provide the stream to be buffered.
-///
-/// The difference between this [BufferingIntervalStreamProbe] and the
-/// [BufferingPeriodicStreamProbe] is that this type of probe keeps the
-/// underlying [bufferingStream] running continuously, while the latter
-/// starts and stop the underlying [bufferingStream] in the sampling
-/// windows specified by the [interval] and [duration] parameters of the
-/// [samplingConfiguration].
+/// Unlike [BufferingPeriodicStreamProbe], it listens to [bufferingStream]
+/// all the time while resumed, not only in sampling windows.
 abstract class BufferingIntervalStreamProbe extends StreamProbe {
   Timer? _timer;
   StreamSubscription<dynamic>? _bufferingStreamSubscription;
@@ -490,49 +488,33 @@ abstract class BufferingIntervalStreamProbe extends StreamProbe {
     return await super.onPause();
   }
 
-  /// The stream of events to be buffered. Must be specified by sub-classes.
+  /// The stream of events to buffer. Implemented by subclasses.
   Stream<dynamic> get bufferingStream;
 
-  /// Handler for handling onData events from the buffering stream.
+  /// Called for each event on [bufferingStream]; buffers it.
   void onSamplingData(dynamic event);
 
-  /// Subclasses should implement / override this method to collect the [Measurement].
-  /// This method will be called every time data has been buffered for a [duration]
-  /// and should return the final measurement for the buffered data.
+  /// Returns the [Measurement] for the data buffered since the last call.
+  /// Called every interval. Implemented by subclasses.
   ///
   /// Can return `null` if no data is available.
   /// Can return an [Error] if an error occurs.
   Future<Measurement?> getMeasurement();
 }
 
-/// A type of probe which buffers data from an underlying stream for a period
-/// of time and then return a measurement from this collected data.
+/// A probe that buffers a [bufferingStream] in sampling windows.
 ///
-/// Probes of this type uses a [PeriodicSamplingConfiguration] that specify
-/// the [interval] of starting sampling, and the [duration] of the sampling window.
-/// Once this sampling window is over, the final measurement is collected from
-/// the [getMeasurement] method and send to the main [measurements] stream.
+/// It emits one measurement per window.
+/// Uses a [PeriodicSamplingConfiguration]: every
+/// [PeriodicSamplingConfiguration.interval] it calls [onSamplingStart] and
+/// listens to [bufferingStream] for [PeriodicSamplingConfiguration.duration].
+/// Each event goes to [onSamplingData]. When the window ends, it calls
+/// [onSamplingEnd] and adds the result of [getMeasurement].
 ///
-/// Sub-classes must implement the
-///
-///     Stream<dynamic> get bufferingStream => ...
-///
-/// method in order to provide the stream to be buffered from.
-///
-/// When sampling starts, the [onSamplingStart] handle is called.
-/// When the sampling window ends, the [onSamplingEnd] handle is called.
-///
-/// The difference between this [BufferingPeriodicStreamProbe] and the
-/// [BufferingIntervalStreamProbe] is that this type of probe starts and stops
-/// the underlying [bufferingStream] in the sampling windows specified by the
-/// [interval] and [duration] parameters of the [samplingConfiguration],
-/// whereas the latter [BufferingIntervalStreamProbe] keeps the
-/// underlying [bufferingStream] running continuously.
-///
-/// See [LightProbe] for an example. This probe listens to the light sensor
-/// every [interval] for [duration] and buffers the reading during this period
-/// into an overall measurement for light, calculated in the [getMeasurement]
-/// method.
+/// Unlike [BufferingIntervalStreamProbe], it listens to [bufferingStream]
+/// only inside sampling windows. See [LightProbe] for an example, which
+/// turns the light readings of each window into one [AmbientLight]
+/// measurement.
 abstract class BufferingPeriodicStreamProbe extends PeriodicStreamProbe {
   StreamSubscription<dynamic>? _bufferingStreamSubscription;
   Timer? _durationTimer;
@@ -588,21 +570,21 @@ abstract class BufferingPeriodicStreamProbe extends PeriodicStreamProbe {
 
   // Sub-classes should implement the following handler methods.
 
-  /// The stream of events to be buffered. Must be specified by sub-classes.
+  /// The stream of events to buffer. Implemented by subclasses.
   Stream<dynamic> get bufferingStream;
 
-  /// Handler called when sampling period starts.
+  /// Called when a sampling window starts, before listening.
   void onSamplingStart();
 
-  /// Handler called when sampling period ends.
+  /// Called when a sampling window ends, before [getMeasurement].
   void onSamplingEnd();
 
-  /// Handler for handling onData events from the buffering stream.
+  /// Called for each event on [bufferingStream]; buffers it.
   void onSamplingData(dynamic event);
 
-  /// Subclasses should implement / override this method to collect the [Measurement].
-  /// This method will be called every time data has been buffered for a [duration]
-  /// and should return the final measurement for the buffered data.
+  /// Returns the [Measurement] for the last sampling window.
+  ///
+  /// Implemented by subclasses.
   ///
   /// Can return `null` if no data is available.
   /// Can return an [Error] if an error occurs.
