@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+/// A placeholder app entry point. Not part of the sampling package.
 void main() {
   runApp(const MainApp());
 }
 
+/// A placeholder "Hello World" app. Not part of the sampling package.
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 

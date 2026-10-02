@@ -1,11 +1,13 @@
 part of 'survey.dart';
 
 /// A full-screen widget that shows a survey (i.e., a [RPTask]).
+///
+/// Used as the [SurveyUserTask.widget]. The [task] must be an [RPOrderedTask].
 class SurveyPage extends StatelessWidget {
-  /// The task to present
+  /// The task to present. Must be an [RPOrderedTask].
   final RPTask task;
 
-  /// The callback function which has to return an [RPTaskResult] object.
+  /// Called with the [RPTaskResult] when the user submits the survey.
   final void Function(RPTaskResult) resultCallback;
 
   /// The callback function if a survey is canceled by user.

@@ -1,7 +1,9 @@
 part of 'survey.dart';
 
 /// A task representing the [WHO-5 well-being index](https://www.psykiatri-regionh.dk/who-5/Pages/default.aspx).
-/// Included as an example.
+///
+/// An English version with five questions scored 0-5. Included as an example;
+/// use it as the [RPAppTask.rpTask].
 RPOrderedTask who5Task = RPOrderedTask(
   identifier: "who5_task",
   steps: [

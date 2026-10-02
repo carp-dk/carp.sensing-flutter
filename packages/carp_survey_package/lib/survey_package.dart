@@ -1,13 +1,27 @@
 part of 'survey.dart';
 
-/// A [SamplingPackage] that knows how to collect data from user surveys based
-/// on the [research_package](https://pub.dev/packages/research_package)
-/// package.
+/// The sampling package for surveys and cognitive tests filled in by the user.
 ///
-/// In contrast to other sampling packages, this package does not support any
-/// [dataTypes]. Collection of [RPTask] data from a user is supported by the
-/// [SurveyUserTask] user task.
+/// Surveys are built with the
+/// [research_package](https://pub.dev/packages/research_package) and added to
+/// a protocol as an [RPAppTask]. Register the package before you deploy such a
+/// protocol:
+///
+/// ```dart
+/// SamplingPackageRegistry().register(SurveySamplingPackage());
+/// ```
+///
+/// Key points:
+///  * The [SurveyUserTask] collects the data, not a probe. [SurveyProbe] is a
+///    no-op placeholder for the [SURVEY] measure.
+///  * On registration, initializes Research Package and Cognition Package and
+///    registers [SurveyUserTaskFactory] with the [AppTaskController].
+///  * Registers [RPAppTask] and [RPTaskResultData] for JSON deserialization.
 class SurveySamplingPackage extends SmartphoneSamplingPackage {
+  /// Measure type for the result of a survey ([RPTaskResultData]).
+  ///  * One-time measure.
+  ///  * Uses the [Smartphone] primary device.
+  ///  * Added automatically to the measures of every [RPAppTask].
   static const String SURVEY = "${NameSpace.CARP}.survey";
 
   @override
@@ -45,6 +59,7 @@ class SurveySamplingPackage extends SmartphoneSamplingPackage {
   };
 }
 
-/// A simple no-op probe that does nothing.
-/// We don't need a probe since the [SurveyUserTask] handles data collection.
+/// A no-op probe for the [SurveySamplingPackage.SURVEY] measure.
+///
+/// No probe is needed since the [SurveyUserTask] handles data collection.
 class SurveyProbe extends Probe {}
