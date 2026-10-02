@@ -1,6 +1,9 @@
 part of 'health_package.dart';
 
-/// Diet, Alcohol, Smoking, Exercise, Sleep (DASES) data types.
+/// Diet, alcohol, smoking, exercise and sleep (DASES) data types.
+///
+/// Custom health data types that are not part of [HealthDataType]. Their units
+/// are listed in [dasesDataTypeToUnit]. The [HealthProbe] does not collect them.
 enum DasesHealthDataType {
   /// Number of calories consumed.
   CALORIES_INTAKE,
@@ -24,10 +27,13 @@ enum DasesHealthDataType {
   SLEEP,
 }
 
-/// Types of health platforms.
+/// The health platform a [HealthData] point comes from.
+///
+/// Mapped by index from the `health` plugin's [HealthPlatformType], so the
+/// order of the values must match.
 enum HealthPlatform { APPLE_HEALTH, GOOGLE_HEALTH_CONNECT }
 
-/// Map a [DasesHealthDataType] to a [HealthDataUnit].
+/// The [HealthDataUnit] of each [DasesHealthDataType].
 const Map<DasesHealthDataType, HealthDataUnit> dasesDataTypeToUnit = {
   DasesHealthDataType.CALORIES_INTAKE: HealthDataUnit.KILOCALORIE,
   DasesHealthDataType.ALCOHOL: HealthDataUnit.COUNT,
@@ -38,13 +44,17 @@ const Map<DasesHealthDataType, HealthDataUnit> dasesDataTypeToUnit = {
   DasesHealthDataType.SLEEP: HealthDataUnit.NO_UNIT,
 };
 
-/// Specify the configuration on how to collect health data.
+/// The sampling configuration of the [HealthSamplingPackage.HEALTH] measure.
 ///
-/// The [healthDataTypes] parameter specifies which [HealthDataType]
-/// to collect.
+/// Sets which [healthDataTypes] to collect. As a [HistoricSamplingConfiguration],
+/// each collection fetches data back to the last time data was collected, or
+/// [past] back in time on the first collection.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HealthSamplingConfiguration extends HistoricSamplingConfiguration {
   /// The list of [HealthDataType] to collect.
+  ///
+  /// Types not supported on the current platform are removed by the
+  /// [HealthProbe] when it is initialized.
   List<HealthDataType> healthDataTypes;
 
   HealthSamplingConfiguration({super.past, required this.healthDataTypes});
@@ -59,15 +69,26 @@ class HealthSamplingConfiguration extends HistoricSamplingConfiguration {
       FromJsonFactory().fromJson<HealthSamplingConfiguration>(json);
 }
 
-/// A [Data] object that holds health data from a [HealthDataPoint].
+/// One health data point from Apple Health or Google Health Connect.
+///
+/// This is the data of every measurement collected by the [HealthProbe]. It is
+/// created from the `health` plugin's [HealthDataPoint] using
+/// [HealthData.fromHealthDataPoint]. All health data has the same JSON type,
+/// `dk.cachet.carp.health` ([HealthSamplingPackage.HEALTH]); the kind of data
+/// is given by [healthDataType].
+///
+/// Key points:
+///  * [dateFrom] and [dateTo] are stored in UTC.
+///  * [recordId] combines [uuid], [healthDataType] and the time span, because
+///    Health Connect gives all samples of one record the same [uuid].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HealthData extends Data {
   /// A unique UUID of this data point.
   String uuid;
 
-  /// The value of the health data.
+  /// The value of the health data, for example a [NumericHealthValue].
   ///
-  /// See [HealthValue](https://pub.dev/documentation/health/latest/health/HealthValue-class.html)
+  /// See [HealthValue].
   // @JsonKey(fromJson: _healthValueFromJson)
   HealthValue value;
 
@@ -76,20 +97,21 @@ class HealthData extends Data {
   /// Note that the uppercase version is used, e.g. `COUNT` in the case of step counts.
   String unit;
 
-  /// The type of health data -- see [HealthDataType](https://pub.dev/documentation/health/latest/health/HealthDataType.html).
+  /// The name of the [HealthDataType] of this data point.
+  ///
   /// Note that the uppercase version is used, e.g. `STEPS`.
   String healthDataType;
 
-  /// Start date-time for this health data.
+  /// Start time of this health data, in UTC.
   late DateTime dateFrom;
 
-  /// End date-time for this health data.
+  /// End time of this health data, in UTC.
   late DateTime dateTo;
 
-  /// The platform from which this health data point came from
+  /// The platform this health data point came from.
   HealthPlatform platform;
 
-  /// The device id of the phone.
+  /// The id of the device the data point was fetched from.
   String? deviceId;
 
   /// The id of the source from which the data point was fetched.
@@ -98,7 +120,7 @@ class HealthData extends Data {
   /// The name of the source from which the data point was fetched.
   String? sourceName;
 
-  /// Create a [HealthData] object.
+  /// Creates a [HealthData] object. [dateFrom] and [dateTo] are converted to UTC.
   HealthData({
     required this.uuid,
     required this.value,
@@ -115,7 +137,7 @@ class HealthData extends Data {
     this.dateTo = dateTo.toUtc();
   }
 
-  /// Create a [HealthData] from a [HealthDataPoint] health data object.
+  /// Creates a [HealthData] from a `health` plugin [HealthDataPoint].
   factory HealthData.fromHealthDataPoint(HealthDataPoint healthDataPoint) =>
       HealthData(
         uuid: healthDataPoint.uuid,
@@ -146,10 +168,8 @@ class HealthData extends Data {
       ? null
       : '$uuid|$healthDataType|${dateFrom.toIso8601String()}|${dateTo.toIso8601String()}';
 
-  /// The json type of this health data is `dk.cachet.carp.health.<healthdatatype>`,
-  /// where `<healthdatatype>` is the lowercase version of the [healthDataType].
-  // String get jsonType =>
-  //     '${HealthSamplingPackage.HEALTH}.${healthDataType.toLowerCase()}';
+  /// The JSON type of all health data, `dk.cachet.carp.health`
+  /// ([HealthSamplingPackage.HEALTH]), whatever the [healthDataType].
   @override
   String get jsonType => HealthSamplingPackage.HEALTH;
 
@@ -164,6 +184,10 @@ class HealthData extends Data {
       ', dateTo: $dateTo';
 }
 
+/// A minimal health [Data] type that holds only a [uuid].
+///
+/// Not produced by the [HealthProbe] and not registered for JSON
+/// deserialization in [HealthSamplingPackage.onRegister].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DummyHealthData extends Data {
   /// A unique UUID of this data point.
@@ -180,9 +204,24 @@ class DummyHealthData extends Data {
   Map<String, dynamic> toJson() => _$DummyHealthDataToJson(this);
 }
 
-/// An [AppTask] that can be used  to collect health data.
+/// An [AppTask] that asks the user to collect their own health data.
+///
+/// Add it to the protocol with a trigger, for example a [PeriodicTrigger], on
+/// the phone. It shows up in the user's task list, and when the user starts it,
+/// it runs as a [HealthUserTask]: it asks for permission to read [types] and
+/// then collects them once.
+///
+/// Key points:
+///  * If [measures] has no [HealthSamplingPackage.HEALTH] measure, one is added
+///    for [types] using [HealthSamplingPackage.getHealthMeasure].
+///  * [type] defaults to [AppTask.HEALTH_ASSESSMENT_TYPE], which the
+///    [HealthUserTaskFactory] turns into a [HealthUserTask].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class HealthAppTask extends AppTask {
+  /// The health data types to collect.
+  ///
+  /// Only used to create the health measure when [measures] does not already
+  /// contain one.
   List<HealthDataType> types;
 
   HealthAppTask({
