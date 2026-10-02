@@ -6,9 +6,11 @@
 
 part of 'esense.dart';
 
-/// Abstract eSense datum class.
+/// The base class of the [Data] collected from an [ESenseDevice].
+///
+/// Extended by [ESenseButton] and [ESenseSensor].
 abstract class ESenseData extends Data {
-  /// Timestamp of this event.
+  /// Timestamp of this event. Defaults to the time this object is created.
   late DateTime timestamp;
 
   /// The name of eSense device that generated this event.
@@ -22,15 +24,22 @@ abstract class ESenseData extends Data {
   String toString() => '${super.toString()}, device name: $deviceName';
 }
 
-/// Holds information about an eSense button pressed event.
+/// An eSense button event: the button was pressed or released.
+///
+/// Collected by the [ESenseButtonProbe] for the
+/// [ESenseSamplingPackage.ESENSE_BUTTON] measure.
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class ESenseButton extends ESenseData {
-  /// true if the button is pressed, false if it is released
+  /// True if the button is pressed, false if it is released.
   bool pressed;
 
   ESenseButton({required String deviceName, required this.pressed})
     : super(deviceName);
 
+  /// Creates an [ESenseButton] from an `esense_flutter` [ButtonEventChanged].
+  ///
+  /// Note that [deviceName] is ignored and the device name is set to an
+  /// empty string.
   factory ESenseButton.fromButtonEventChanged(
     String deviceName,
     ButtonEventChanged event,
@@ -50,21 +59,23 @@ class ESenseButton extends ESenseData {
   String toString() => '${super.toString()}, button pressed: $pressed';
 }
 
-/// Holds information about an eSense button pressed event.
+/// An eSense motion sensor event with accelerometer and gyroscope readings.
 ///
-/// This data is a 1:1 mapping of the
-/// eSense [SensorEvent](https://pub.dev/documentation/esense/latest/esense/SensorEvent-class.html)
-/// event.
+/// Collected by the [ESenseSensorProbe] for the
+/// [ESenseSamplingPackage.ESENSE_SENSOR] measure. This data is a 1:1 mapping
+/// of the `esense_flutter` [SensorEvent].
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class ESenseSensor extends ESenseData {
   /// Sequential number of sensor packets.
-  /// The eSense device don't have a clock, so this index reflect the order of reading.
+  /// The eSense device does not have a clock, so this index reflects the order of reading.
   int? packetIndex;
 
-  /// 3-elements array with X, Y and Z axis for accelerometer
+  /// 3-element array with the X, Y and Z axis of the accelerometer, as raw
+  /// sensor values.
   List<int>? accel;
 
-  /// 3-elements array with X, Y and Z axis for gyroscope
+  /// 3-element array with the X, Y and Z axis of the gyroscope, as raw
+  /// sensor values.
   List<int>? gyro;
 
   ESenseSensor({
@@ -75,6 +86,7 @@ class ESenseSensor extends ESenseData {
     this.gyro,
   }) : super(deviceName, timestamp);
 
+  /// Creates an [ESenseSensor] from an `esense_flutter` [SensorEvent].
   factory ESenseSensor.fromSensorEvent({
     required String deviceName,
     required SensorEvent event,
