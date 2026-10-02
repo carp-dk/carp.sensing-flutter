@@ -7,14 +7,26 @@
 
 part of '../../domain.dart';
 
-/// The [DataManager] interface is used to upload [Measurement] objects to any
-/// data manager that implements this interface.
+/// Stores or uploads the [Measurement]s collected in a study deployment.
 ///
-/// Note that each instance of a data manager supports one deployment
-/// ([PrimaryDeviceDeployment]). A data manager should hence be able to handle
-/// separate data management of concurrently running deployments.
-/// Hence, caution on resource starvation should be considered, such as not
-/// accessing the same file or network socket.
+/// A data manager listens to the measurement stream of one deployment and
+/// saves each measurement, e.g. to a file, a database, or a server. Which one
+/// is used is set by the protocol's [DataEndPoint]: the [SmartphoneStudyController]
+/// asks the [DataManagerRegistry] for a data manager of [DataEndPoint.type] and
+/// calls [configure] with the deployment's measurements.
+///
+/// Key points:
+///  * One instance per deployment. Several deployments can run at the same
+///    time, so implementations must not share resources like the same file
+///    or network socket.
+///  * [onMeasurement] is called for each measurement; [onError] and [onDone]
+///    for errors and the end of the stream.
+///  * Call [close] to flush buffered data. The data manager cannot be used
+///    after that.
+///
+/// See also [AbstractDataManager] to extend, the built-in [SQLiteDataManager],
+/// [FileDataManager], and [ConsoleDataManager], and [DataManagerFactory] to
+/// register your own.
 abstract class DataManager {
   /// The deployment using this data manager.
   PrimaryDeviceDeployment get deployment;
@@ -25,19 +37,22 @@ abstract class DataManager {
   /// The type of this data manager as enumerated in [DataEndPointTypes].
   String get type;
 
-  /// Configure the data manager by specifying the study [deployment], the
-  /// [dataEndPoint], and the stream of [measurements] events to handle.
+  /// Configures the data manager with the study [deployment], the
+  /// [dataEndPoint], and the stream of [measurements] to handle.
+  ///
+  /// Call this before any data is handled.
   Future<void> configure({
     required DataEndPoint dataEndPoint,
     required SmartphoneDeployment deployment,
     required Stream<Measurement> measurements,
   });
 
-  /// Flush any buffered data and close this data manager.
+  /// Flushes any buffered data and closes this data manager.
+  ///
   /// After calling [close] the data manager can no longer be used.
   Future<void> close();
 
-  /// Stream of data manager events.
+  /// Stream of data manager events, see [DataManagerEventTypes].
   Stream<DataManagerEvent> get events;
 
   /// On each measurement collected, the [onMeasurement] handler is called.
@@ -49,16 +64,16 @@ abstract class DataManager {
   /// When the data stream closes, the [onDone] handler is called.
   Future<void> onDone();
 
-  /// When an error event is send on the stream, the [onError] handler is called.
+  /// When an error event is sent on the stream, the [onError] handler is called.
   Future<void> onError(Object error);
 }
 
-/// An event for a data manager.
+/// An event from a [DataManager], emitted on [DataManager.events].
 class DataManagerEvent {
   /// The event type, see [DataManagerEventTypes].
   String type;
 
-  /// What is this event about?
+  /// An optional description of the event.
   String? message;
 
   /// Create a [DataManagerEvent].
@@ -68,16 +83,24 @@ class DataManagerEvent {
   String toString() => 'DataManagerEvent - type: $type, message: $message';
 }
 
-/// An enumeration of data manager event types.
+/// The known [DataManagerEvent.type] values.
+///
+/// Data managers can add their own types.
 class DataManagerEventTypes {
+  /// The data manager has been configured.
   static const String configured = 'configured';
+
+  /// The data manager has been closed.
   static const String closed = 'closed';
 }
 
-/// An abstract [DataManager] implementation useful for extension.
+/// A base [DataManager] to extend when you write your own data manager.
 ///
-/// Takes data from a [Stream<Measurement>] and uploads it.
-/// Also supports JSON encoding via the [toJsonString] method.
+/// [configure] subscribes to the measurement stream and calls [onMeasurement]
+/// for each measurement; you implement [onMeasurement] to store or upload it.
+/// Errors on the stream are saved as [Error] measurements. Emits the
+/// [DataManagerEventTypes.configured] and [DataManagerEventTypes.closed]
+/// events.
 abstract class AbstractDataManager implements DataManager {
   late SmartphoneDeployment _deployment;
   DataEndPoint? _dataEndPoint;
@@ -86,7 +109,8 @@ abstract class AbstractDataManager implements DataManager {
       StreamController.broadcast();
 
   /// The [DataEndPoint] that this data manager is handling.
-  /// Set in the [configure] method.
+  ///
+  /// `null` until [configure] is called.
   DataEndPoint? get dataEndPoint => _dataEndPoint;
 
   @override
@@ -99,7 +123,7 @@ abstract class AbstractDataManager implements DataManager {
   @protected
   Stream<DataManagerEvent> get events => _controller.stream;
 
-  /// Add [event] to the [events] stream.
+  /// Adds [event] to the [events] stream.
   @mustCallSuper
   @protected
   void addEvent(DataManagerEvent event) => _controller.add(event);
@@ -129,6 +153,7 @@ abstract class AbstractDataManager implements DataManager {
   @override
   Future<void> onDone() async {}
 
+  /// Saves [error] as an [Error] measurement via [onMeasurement].
   @override
   Future<void> onError(Object? error) async => await onMeasurement(
     Measurement.fromData(Error(message: error.toString())),
@@ -146,40 +171,43 @@ abstract class AbstractDataManager implements DataManager {
   String toString() => runtimeType.toString();
 }
 
-/// A factory which can create a [DataManager] based on the `type` of an
-/// [DataEndPoint].
+/// Creates the [DataManager] for one [DataEndPoint.type].
+///
+/// Implement one for each data manager and register it in the
+/// [DataManagerRegistry].
 abstract class DataManagerFactory {
-  /// The [DataEndPoint] type.
+  /// The [DataEndPoint.type] that this factory handles, see [DataEndPointTypes].
   String get type;
 
-  /// Create a [DataManager].
+  /// Creates a new [DataManager].
   DataManager create();
 }
 
-/// A registry of [DataManagerFactory]s.
+/// The registry of [DataManagerFactory]s, used to create a [DataManager] for a
+/// [DataEndPoint].
 ///
-/// In order to be able to create a new [DataManager], you must [register] a
-/// [DataManagerFactory] here, which then later is used to call [create]
-/// an appropriate [DataManager] for a specific [DataEndPoint] type.
+/// A singleton. The client manager registers the factories for the built-in
+/// data managers on configuration. To use your own data manager, [register]
+/// its factory before the study is deployed.
 class DataManagerRegistry {
   static final DataManagerRegistry _instance = DataManagerRegistry._();
   factory DataManagerRegistry() => _instance;
   final Map<String, DataManagerFactory> _registry = {};
   DataManagerRegistry._();
 
-  /// Register a [DataManagerFactory] which can create a [DataManager] for
-  /// a specific data endpoint type.
+  /// Registers a [factory] for its [DataManagerFactory.type], replacing any
+  /// existing one.
   void register(DataManagerFactory factory) =>
       _registry[factory.type] = factory;
 
-  /// Register all [factories].
-  /// A convenient way to call [register] for multiple types.
+  /// Registers all [factories], see [register].
   void registerAll(List<DataManagerFactory> factories) {
     for (var factory in factories) {
       register(factory);
     }
   }
 
-  /// Create a new data manager based on [type].
+  /// Creates a new data manager for the data endpoint [type], or `null` if no
+  /// factory is registered for it.
   DataManager? create(String type) => _registry[type]?.create();
 }

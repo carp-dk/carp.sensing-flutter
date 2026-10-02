@@ -7,11 +7,26 @@
 
 part of '../../domain.dart';
 
-/// A study configured to run on a smartphone (i.e., on a [SmartPhoneClientManager]).
+/// A study that this phone takes part in, as seen by the [SmartPhoneClientManager].
+///
+/// Identifies the study deployment and the device role this phone plays in it.
+/// The client manager creates one when you add a study (from a protocol or an
+/// invitation), then gets its [SmartphoneDeployment] and runs it.
+///
+/// Key points:
+///  * [deployment] is `null` until the study is deployed, see [isDeployed].
+///  * [samplingState] is the saved runtime state of the study, so sampling can
+///    resume after an app restart.
+///  * [events] streams [SmartphoneStudyStatusEvent]s on status and sampling
+///    state changes.
+///
+/// See also [SmartphoneStudyController], which controls a running study.
 class SmartphoneStudy extends Study<SmartphoneDeployment> {
   SmartphoneDeploymentExecutorSamplingState? _samplingState;
 
   /// The unique id of the study in the deployment service.
+  ///
+  /// `null` for a local study added from a protocol.
   String? studyId;
 
   /// The ID of the participant in this study.
@@ -20,7 +35,10 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
   /// The role of the participant in this study.
   String? participantRoleName;
 
-  /// The sampling state of this study.
+  /// The sampling state of this study, or `null` if not yet sampled.
+  ///
+  /// Setting it adds a [StudyStatusEventTypes.SamplingStateChanged] event to
+  /// [events].
   SmartphoneDeploymentExecutorSamplingState? get samplingState =>
       _samplingState;
   set samplingState(SmartphoneDeploymentExecutorSamplingState? state) {
@@ -35,10 +53,10 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
     );
   }
 
-  /// Is this study deployed?
+  /// Whether the [deployment] is available.
   bool get isDeployed => deployment != null;
 
-  /// Is this study sampling data?
+  /// Whether the study is sampling data, i.e. its [samplingState] is resumed.
   bool get isSampling =>
       (samplingState?.state ?? ExecutorState.Undefined) ==
       ExecutorState.Resumed;
@@ -48,7 +66,7 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
     (event) => SmartphoneStudyStatusEvent(this, event.event, samplingState),
   );
 
-  /// Create a [SmartphoneStudy].
+  /// Creates a [SmartphoneStudy].
   SmartphoneStudy({
     this.studyId,
     required String studyDeploymentId,
@@ -66,7 +84,9 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
          deployment,
        );
 
-  /// Create a [SmartphoneStudy] from [invitation].
+  /// Creates a [SmartphoneStudy] from an [invitation] to a study.
+  ///
+  /// The device role name defaults to [Smartphone.DEFAULT_ROLE_NAME].
   SmartphoneStudy.fromInvitation(ActiveParticipationInvitation invitation)
     : this(
         studyId: invitation.studyId,
@@ -77,7 +97,8 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
         participantRoleName: invitation.participantRoleName,
       );
 
-  /// Create a [SmartphoneStudy] from a SQL Result Map.
+  /// Creates a [SmartphoneStudy] from a database row saved by the
+  /// [PersistenceService].
   factory SmartphoneStudy.fromMap(Map<String, Object?> map) {
     final statusJson =
         map[PersistenceService.DEPLOYMENT_STATUS_COLUMN] as String?;
@@ -131,8 +152,11 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
       'participant role: $participantRoleName';
 }
 
-/// An event related to a running [study], including its runtime [state].
+/// A status event for a [SmartphoneStudy], including its sampling [state].
+///
+/// Emitted on [SmartphoneStudy.events].
 class SmartphoneStudyStatusEvent extends StudyStatusEvent<SmartphoneStudy> {
+  /// The sampling state of the study when the event happened.
   final SmartphoneDeploymentExecutorSamplingState? state;
   const SmartphoneStudyStatusEvent(super.study, super.event, [this.state]);
   @override

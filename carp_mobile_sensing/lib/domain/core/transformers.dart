@@ -7,19 +7,30 @@
 
 part of '../../domain.dart';
 
-/// Signature of a data transformer.
+/// Signature of a data transformer, which maps one [Data] object to another.
+///
+/// Used to convert data to another format (e.g. OMH or FHIR) or to protect
+/// privacy (e.g. hash an identifier). Grouped in a [DataTransformerSchema].
 typedef DataTransformer = Data Function(Data);
 
-/// A no-operation transformer.
+/// A no-operation transformer that returns [data] unchanged.
 Data noop(Data data) => data;
 
-/// A factory which can create a [DataTransformer].
+/// A marker interface for [Data] classes that can be made by a
+/// [DataTransformer], e.g. an OMH data point.
+///
+/// Static members are not inherited, so implementations declare their own
+/// static `transformer` getter by convention. CAMS does not read it.
 abstract class DataTransformerFactory {
   static DataTransformer? get transformer => null;
 }
 
-/// A registry of [DataTransformerSchema]s which hold a set of
-/// [DataTransformer]s.
+/// The registry of all [DataTransformerSchema]s, looked up by namespace.
+///
+/// A singleton. The CARP, OMH, FHIR, and default privacy schemas are
+/// registered on creation. Sampling packages add their transformers to these
+/// schemas, and the [SmartphoneStudyController] uses them to transform each
+/// measurement before it reaches the [DataManager].
 class DataTransformerSchemaRegistry {
   static final DataTransformerSchemaRegistry _instance =
       DataTransformerSchemaRegistry._();
@@ -43,20 +54,23 @@ class DataTransformerSchemaRegistry {
     register(PrivacySchema());
   }
 
-  /// Register a transformer schema.
+  /// Registers [schema] under its namespace, replacing any existing one, and
+  /// calls [DataTransformerSchema.onRegister].
   void register(DataTransformerSchema schema) {
     _schemas[schema.namespace] = schema;
     schema.onRegister();
   }
 
-  /// Lookup a transformer schema based on its namespace.
+  /// The transformer schema for [namespace], or `null` if none is registered.
   DataTransformerSchema? lookup(String namespace) => _schemas[namespace];
 }
 
-/// An abstract class defining a transformer schema, which hold a set of
-/// [DataTransformer]s that can map from the native CARP namespace
-/// to another namespace.
-/// A [DataTransformerSchema] must be implemented for each supported namespace.
+/// A set of [DataTransformer]s that map data from the CARP namespace to
+/// another [namespace], indexed by data type.
+///
+/// Implement one for each supported namespace and register it in the
+/// [DataTransformerSchemaRegistry]. The schema used for a study is selected
+/// by [DataEndPoint.dataFormat] or [SmartphoneStudyProtocol.privacySchemaName].
 abstract class DataTransformerSchema {
   /// The type of namespace that this package can transform to (see e.g.
   /// [NameSpace] for pre-defined namespaces).
@@ -71,19 +85,21 @@ abstract class DataTransformerSchema {
   /// Callback method when this schema is being registered.
   void onRegister();
 
-  /// Add a transformer to this schema that can map data of a specific [format].
+  /// Adds a [transformer] for data of type [format], replacing any existing one.
   void add(String format, DataTransformer transformer) =>
       transformers[format] = transformer;
 
-  /// Transform the [data] using a transformer for its data format.
-  /// If no transformer is found, returns [data] unchanged.
+  /// Transforms [data] using the transformer for its data type.
+  ///
+  /// Returns [data] unchanged if no transformer is found.
   Data transform(Data data) {
     DataTransformer? transformer = transformers[data.dataType.toString()];
     return (transformer != null) ? transformer(data) : data;
   }
 }
 
-/// A default [DataTransformerSchema] for CARP no-operation transformers
+/// The default [DataTransformerSchema] for the CARP namespace, with no
+/// transformers (data is kept as collected).
 class CARPTransformerSchema extends DataTransformerSchema {
   @override
   String get namespace => NameSpace.CARP;
@@ -91,7 +107,9 @@ class CARPTransformerSchema extends DataTransformerSchema {
   void onRegister() {}
 }
 
-/// A default [DataTransformerSchema] for Open mHealth (OMH) transformers
+/// The default [DataTransformerSchema] for Open mHealth (OMH) transformers.
+///
+/// Empty by default; sampling packages add their OMH transformers to it.
 class OMHTransformerSchema extends DataTransformerSchema {
   @override
   String get namespace => NameSpace.OMH;
@@ -99,7 +117,9 @@ class OMHTransformerSchema extends DataTransformerSchema {
   void onRegister() {}
 }
 
-/// A default [DataTransformerSchema] for HL7 FHIR transformers
+/// The default [DataTransformerSchema] for HL7 FHIR transformers.
+///
+/// Empty by default; sampling packages add their FHIR transformers to it.
 class FHIRTransformerSchema extends DataTransformerSchema {
   @override
   String get namespace => NameSpace.FHIR;
@@ -107,8 +127,12 @@ class FHIRTransformerSchema extends DataTransformerSchema {
   void onRegister() {}
 }
 
-/// A default [DataTransformerSchema] for privacy transformers
+/// The default [DataTransformerSchema] for privacy transformers.
+///
+/// Selected with [SmartphoneStudyProtocol.privacySchemaName] set to [DEFAULT].
+/// Sampling packages add transformers that hide or hash sensitive data.
 class PrivacySchema extends DataTransformerSchema {
+  /// The namespace of the default privacy schema.
   static const String DEFAULT = 'default-privacy-schema';
 
   @override
