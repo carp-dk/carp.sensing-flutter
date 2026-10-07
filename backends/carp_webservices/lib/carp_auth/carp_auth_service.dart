@@ -159,14 +159,15 @@ class CarpAuthService {
 
     String? code;
     String? clientId = _authProperties?.clientId;
-    String? redirectUri = _authProperties?.anonymousRedirectURI?.toString();
+    Uri? redirect = _authProperties?.anonymousRedirectURI;
+    String? redirectUri = redirect?.toString();
     uri = _constructAuthUri(uri);
 
     TokenResponse tokenResponse =
         await FlutterWebAuth2.authenticate(
           url: uri,
           callbackUrlScheme: redirectUri!.split(':/').first,
-          options: FlutterWebAuth2Options(preferEphemeral: true),
+          options: FlutterWebAuth2Options(preferEphemeral: true, httpsHost: redirect?.host, httpsPath: redirect?.path),
         ).then((result) async {
           code = Uri.parse(result).queryParameters['code'];
           if ((_currentUser == null || _currentUser!.isAuthenticated) && code != null) {

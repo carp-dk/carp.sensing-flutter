@@ -1,3 +1,7 @@
+## 4.4.2
+
+* Add `httpsHost` and `httpsPath` to anonymous login to fix issues on iOS 17.4
+
 ## 4.4.1
 
 * fix: token refresh for anonymous (magic link) users. These sessions have no `openid` scope and hence no `id_token`, which the oidc manager requires - they are now refreshed via AppAuth with a `refresh_token` grant
