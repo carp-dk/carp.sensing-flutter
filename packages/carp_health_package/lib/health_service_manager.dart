@@ -41,8 +41,9 @@ class HealthService extends ServiceConfiguration<ServiceRegistration> {
 ///  * Types come from each [HealthProbe] (on initialize) and from the default
 ///    sampling configuration of the [HealthService] (on configure).
 ///  * Connecting always succeeds once permissions are granted.
-///  * On iOS, [hasPermissions] is true as soon as types are registered, because
+///  * On iOS, [hasPermissions] is true once access has been requested, because
 ///    Apple Health does not disclose whether read access is granted.
+///  * Missing permissions are logged per type, see [missingHealthPermissions].
 ///  * On Android below SDK level 34, it logs a warning that Health Connect must
 ///    be installed as a separate app.
 class HealthServiceManager extends ServiceManager<HealthService, ServiceRegistration> {
@@ -130,15 +131,16 @@ class HealthServiceManager extends ServiceManager<HealthService, ServiceRegistra
   /// data and is a more specific method than [hasPermissions].
   /// Returns true if [types] is empty, and false if the check fails.
   ///
-  /// Note that this method always returns false on iOS, as there is no way to
-  /// know if permissions are granted.
+  /// Note that Apple Health does not disclose whether read access is granted.
+  /// On iOS this therefore returns false only if access was never requested.
   Future<bool> hasHealthPermissions(List<HealthDataType> types) async {
     if (types.isEmpty) return true;
 
     info('$runtimeType - Checking permissions for health types: $types on ${Platform.operatingSystem}');
 
     try {
-      return await service?.hasPermissions(types) ?? false;
+      // On iOS, null means access was requested, but read access is never disclosed.
+      return await service?.hasPermissions(types) ?? Platform.isIOS;
     } catch (error) {
       warning('$runtimeType - Error getting permission status - $error');
     }
@@ -169,11 +171,26 @@ class HealthServiceManager extends ServiceManager<HealthService, ServiceRegistra
     // No registered types yet must not count as "granted".
     if (types.isEmpty) return false;
 
-    // Apple Health does not disclose whether read access is granted - see the
-    // note above - so on iOS the only way to know is to try to collect data.
-    if (Platform.isIOS) return true;
+    final granted = await hasHealthPermissions(types);
+    if (!granted) {
+      final missing = await missingHealthPermissions(types);
+      warning(
+        '$runtimeType - Missing health permissions for: $missing. '
+        'Either the user has not granted them, or they are not declared in the app\'s AndroidManifest.xml.',
+      );
+    }
+    return granted;
+  }
 
-    return hasHealthPermissions(types);
+  /// The health [types] this service cannot read, checked one type at a time.
+  ///
+  /// On iOS, only types never requested, since Apple Health does not disclose read access.
+  Future<List<HealthDataType>> missingHealthPermissions(List<HealthDataType> types) async {
+    final missing = <HealthDataType>[];
+    for (final type in types) {
+      if (!await hasHealthPermissions([type])) missing.add(type);
+    }
+    return missing;
   }
 
   @override
