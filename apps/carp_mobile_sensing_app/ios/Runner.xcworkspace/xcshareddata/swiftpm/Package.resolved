@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "com.awareframework.ios.sensor.applewatch",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/awareframework/com.awareframework.ios.sensor.applewatch.git",
+      "state" : {
+        "revision" : "3be3f86d5bdc8c9b88274b52c21fb73c807f4713",
+        "version" : "1.6.0"
+      }
+    },
+    {
       "identity" : "datacompression",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mw99/DataCompression.git",
