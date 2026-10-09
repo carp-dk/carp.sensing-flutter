@@ -5,7 +5,8 @@ part of 'health_package.dart';
 /// Created by the [HealthSamplingPackage] for the [HealthSamplingPackage.HEALTH]
 /// measure and configured by a [HealthSamplingConfiguration]. Each time it is
 /// resumed, it fetches the configured health data types back to the last time
-/// data was collected and emits one [HealthData] measurement per data point.
+/// data was collected. Large catch-ups are written to SQLite in a background
+/// isolate and only the last 7 days are emitted (see [_importInBackground]).
 /// Use it with a trigger that runs regularly, such as a [PeriodicTrigger], or
 /// from a [HealthAppTask] that the user starts.
 ///
@@ -122,25 +123,9 @@ class HealthProbe extends Probe {
       );
 
       try {
-        List<HealthDataPoint>? healthDataPoints =
-            await deviceManager.service?.getHealthDataFromTypes(
-              startTime: start,
-              endTime: end,
-              types: healthDataTypes,
-            ) ??
-            [];
-        debug('$runtimeType - Retrieved ${healthDataPoints.length} health data points of types: $healthDataTypes');
-
-        // Convert HealthDataPoint to measurements and add them the measurements stream.
-        for (var data in healthDataPoints) {
-          addMeasurement(
-            Measurement(
-              sensorStartTime: data.dateFrom.microsecondsSinceEpoch,
-              sensorEndTime: data.dateTo.microsecondsSinceEpoch,
-              data: HealthData.fromHealthDataPoint(data),
-            ),
-          );
-        }
+        final count =
+            await _importInBackground(start, end, healthDataTypes) ?? await _addToStream(start, end, healthDataTypes);
+        debug('$runtimeType - Collected $count health data points of types: $healthDataTypes');
 
         // Automatically pause this probe after it is done adding the measurements.
         Future.delayed(const Duration(seconds: 20), () => pause());
@@ -153,4 +138,92 @@ class HealthProbe extends Probe {
     }
     return true;
   }
+
+  /// Fetches the health data and writes it to SQLite in one batch, in a background
+  /// isolate; only the last [_streamWindow] goes on the stream, for the UI cards.
+  /// Returns the number of points, or null if the stream path must be used.
+  Future<int?> _importInBackground(DateTime start, DateTime end, List<HealthDataType> types) async {
+    final token = RootIsolateToken.instance;
+    final deploymentId = deployment?.studyDeploymentId;
+    final control = _taskControl;
+    final usesSQLite = [DataEndPointTypes.SQLITE, DataEndPointTypes.CAWS].contains(deployment?.dataEndPoint?.type);
+    // The stream applies privacy and data-format transforms; this path stores data as-is.
+    final untransformed =
+        (deployment?.privacySchemaName ?? NameSpace.CARP) == NameSpace.CARP &&
+        (deployment?.dataEndPoint?.dataFormat ?? NameSpace.CARP) == NameSpace.CARP;
+    if (!usesSQLite || !untransformed || token == null || deploymentId == null || control == null) return null;
+    // The probe resumes periodically; don't start a second import of the same range.
+    if (_importing) return 0;
+    _importing = true;
+    try {
+      final (count, recent) = await _import(
+        token,
+        start,
+        end,
+        types,
+        deploymentId,
+        control.destinationDeviceRoleName ?? deployment!.deviceConfiguration.roleName,
+        control.triggerId,
+      );
+      recent.forEach(addMeasurement);
+      // addMeasurement stamps lastTime with "now" - reset it to [end], the time
+      // the import actually covered, so points sampled meanwhile are not skipped.
+      samplingConfiguration.lastTime = end.toUtc();
+      deployment?.hasBeenUpdated();
+      return count;
+    } finally {
+      _importing = false;
+    }
+  }
+
+  /// The task control running this probe, which sets the trigger and role of the rows.
+  /// Null if there are several, as then the stream would tag each row differently.
+  TaskControl? get _taskControl => deployment?.taskControls
+      .where((c) => deployment!.getTaskByName(c.taskName)?.measures?.any((m) => identical(m, measure)) ?? false)
+      .singleOrNull;
+
+  // Static, so the isolate closure only captures these arguments, not the probe.
+  static Future<(int, List<Measurement>)> _import(
+    RootIsolateToken token,
+    DateTime start,
+    DateTime end,
+    List<HealthDataType> types,
+    String deploymentId,
+    String roleName,
+    int triggerId,
+  ) => Isolate.run(() async {
+    BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+    DartPluginRegistrant.ensureInitialized(); // registers sqflite in this isolate
+    CarpMobileSensing.ensureInitialized();
+
+    final points = await Health().getHealthDataFromTypes(startTime: start, endTime: end, types: types);
+    final measurements = points.map(_toMeasurement).toList();
+    await SQLiteDataManager.writeAll(
+      measurements,
+      studyDeploymentId: deploymentId,
+      deviceRoleName: roleName,
+      triggerId: triggerId,
+    );
+    final since = DateTime.now().subtract(_streamWindow).microsecondsSinceEpoch;
+    return (measurements.length, measurements.where((m) => m.sensorStartTime >= since).toList());
+  });
+
+  bool _importing = false;
+
+  /// The period shown by the UI cards.
+  static const _streamWindow = Duration(days: 7);
+
+  /// Adds the health data to the [measurements] stream, on the main isolate.
+  Future<int> _addToStream(DateTime start, DateTime end, List<HealthDataType> types) async {
+    final points =
+        await deviceManager.service?.getHealthDataFromTypes(startTime: start, endTime: end, types: types) ?? [];
+    points.map(_toMeasurement).forEach(addMeasurement);
+    return points.length;
+  }
+
+  static Measurement _toMeasurement(HealthDataPoint data) => Measurement(
+    sensorStartTime: data.dateFrom.microsecondsSinceEpoch,
+    sensorEndTime: data.dateTo.microsecondsSinceEpoch,
+    data: HealthData.fromHealthDataPoint(data),
+  );
 }
