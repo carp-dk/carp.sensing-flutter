@@ -65,7 +65,7 @@ class CarpDataStreamService extends CarpBaseService implements DataStreamService
     if (compress) {
       // compress the payload and POST the byte stream to the zip endpoint
       _endpointName = DATA_STREAM_ZIP_ENDPOINT_NAME;
-      var response = await _post(Uri.encodeFull(rpcEndpointUri), body: zipJson(payload.toJson()));
+      var response = await _post(Uri.encodeFull(rpcEndpointUri), body: await _zipInBackground(payload));
       // we do not expect any response content but handle exceptions
       _handleResponse(response);
     } else {
@@ -109,6 +109,10 @@ class CarpDataStreamService extends CarpBaseService implements DataStreamService
   /// Both data stream queries return a JSON list of [DataStreamBatch].
   List<DataStreamBatch> _toDataStreamBatches(dynamic responseJson) =>
       (responseJson as List<dynamic>).map((batch) => DataStreamBatch.fromJson(batch as Map<String, dynamic>)).toList();
+
+  // Static, so the isolate closure captures only [payload], not `this`.
+  static Future<List<int>> _zipInBackground(AppendToDataStreams payload) =>
+      Isolate.run(() => zipJson(payload.toJson()));
 
   @override
   Future<void> closeDataStreams(List<String> studyDeploymentIds) async =>

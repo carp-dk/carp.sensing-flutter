@@ -172,6 +172,35 @@ class SQLiteDataManager extends AbstractDataManager {
     _flushTimer ??= Timer(const Duration(milliseconds: 500), _flush);
   }
 
+  /// Bulk-inserts [measurements] in one batch, skipping duplicates like [onMeasurement].
+  /// Callable from a background isolate; the database must already exist.
+  static Future<void> writeAll(
+    List<Measurement> measurements, {
+    required String studyDeploymentId,
+    required String deviceRoleName,
+    int triggerId = 0,
+  }) async {
+    final db = await databaseFactory.openDatabase(
+      '${await getDatabasesPath()}/$DATABASE_NAME.db',
+      // The main isolate shares this database; never roll back its transaction.
+      options: OpenDatabaseOptions(rollbackActiveTransactionOnOpen: false),
+    );
+    final batch = db.batch();
+    for (final measurement in measurements) {
+      batch.insert(MEASUREMENT_TABLE_NAME, {
+        UPLOADED_COLUMN: 0,
+        DEPLOYMENT_ID_COLUMN: studyDeploymentId,
+        TRIGGER_ID_COLUMN: triggerId,
+        DEVICE_ROLE_NAME_COLUMN: deviceRoleName,
+        DATATYPE_COLUMN: measurement.dataType.toString(),
+        RECORD_ID_COLUMN: measurement.data.recordId,
+        MEASUREMENT_COLUMN: jsonEncode(measurement),
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+    await batch.commit(noResult: true);
+    // Not closed: the native database is shared with the main isolate.
+  }
+
   final List<Map<String, dynamic>> _rows = [];
   Timer? _flushTimer;
 

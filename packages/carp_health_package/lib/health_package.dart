@@ -21,6 +21,10 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui' show DartPluginRegistrant;
+
+import 'package:flutter/services.dart';
 
 import 'package:json_annotation/json_annotation.dart';
 
