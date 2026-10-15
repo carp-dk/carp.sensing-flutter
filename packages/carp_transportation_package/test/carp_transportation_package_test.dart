@@ -338,6 +338,7 @@ void main() {
         startTime: DateTime.parse('2026-08-20T08:30:00Z'),
         endTime: DateTime.parse('2026-08-20T16:30:00Z'),
         placeCategory: 'office',
+        userActivityText: 'walking the dog',
         confidence: 0.91,
       );
 
@@ -346,6 +347,7 @@ void main() {
 
       expect(json['dwellTime'], 8 * 60);
       expect(restored.activityType, MobilityActivityType.work);
+      expect(restored.userActivityText, 'walking the dog');
       expect(restored.stopId, 1);
       expect(restored.dwellTime, 8 * 60);
     });

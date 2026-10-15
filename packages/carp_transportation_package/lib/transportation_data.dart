@@ -43,6 +43,11 @@ enum MobilityActivityType {
   leisure,
   exercise,
   transfer,
+  business,
+  errands,
+  medical,
+  escort,
+  social,
   other,
   unknown,
 }
@@ -585,6 +590,9 @@ class MobilityActivity extends Data {
   /// POI category associated with this activity.
   String? placeCategory;
 
+  /// What the user typed when they chose [MobilityActivityType.other].
+  String? userActivityText;
+
   /// Confidence of the activity recognition, in the range [0-1].
   double? confidence;
 
@@ -605,6 +613,7 @@ class MobilityActivity extends Data {
     required this.endTime,
     this.placeId,
     this.placeCategory,
+    this.userActivityText,
     this.confidence,
     this.reason,
     this.isConfirmed = false,
