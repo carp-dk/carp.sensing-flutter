@@ -88,6 +88,11 @@ class TransportationSamplingPackage extends SmartphoneSamplingPackage {
   static const String STAGE_MODE_CORRECTION =
       "$TRANSPORTATION_NAMESPACE.stagemodecorrection";
 
+  /// Measure type for the user's answers about a stage ([StageFeedback]).
+  ///  * Event-based measure - written by the app when the user answers.
+  ///  * Uses the [Smartphone] primary device.
+  static const String STAGE_FEEDBACK = "$TRANSPORTATION_NAMESPACE.stagefeedback";
+
   @override
   DataTypeSamplingSchemeMap get samplingSchemes =>
       DataTypeSamplingSchemeMap.from([
@@ -142,6 +147,13 @@ class TransportationSamplingPackage extends SmartphoneSamplingPackage {
             timeType: DataTimeType.POINT,
           ),
         ),
+        DataTypeSamplingScheme(
+          CamsDataTypeMetaData(
+            type: STAGE_FEEDBACK,
+            displayName: "Stage Feedback",
+            timeType: DataTimeType.POINT,
+          ),
+        ),
       ]);
 
   @override
@@ -193,6 +205,7 @@ class TransportationSamplingPackage extends SmartphoneSamplingPackage {
         correctedMode: TransportationMode.unknown,
         feedbackTime: DateTime.now(),
       ),
+      StageFeedback(kind: '', payload: {}),
     ]);
   }
 }

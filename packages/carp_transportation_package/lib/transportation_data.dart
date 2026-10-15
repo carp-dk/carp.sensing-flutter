@@ -20,6 +20,9 @@ enum TransportationMode {
   bus,
   train,
 
+  /// Metro / subway.
+  metro,
+
   /// The user is not moving - the mode of a [StopStage].
   stationary,
 
@@ -49,6 +52,18 @@ enum MobilityActivityType {
 ///
 /// These attributes normally remain unchanged during a sensing session, and
 /// are therefore not repeated on every [TransportationSample].
+/// How settled a [Stage] is.
+enum StageStatus {
+  /// Still near the live end of the track, may yet change.
+  loading,
+
+  /// Settled, waiting for the user to review it.
+  pending,
+
+  /// The user confirmed it.
+  confirmed,
+}
+
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TransportationModelConfiguration extends Data {
   /// Name of the model used to generate [TransportationSample.embedding].
@@ -158,6 +173,9 @@ class TransportationSample extends Data {
   /// given explicitly (0 when neither is available).
   double confidence;
 
+  /// True if the user confirmed this sample's [mode].
+  bool isConfirmed;
+
   /// Confidence derived from the entropy of a predicted probability
   /// distribution - lower entropy means higher confidence:
   ///
@@ -187,6 +205,7 @@ class TransportationSample extends Data {
     this.logits,
     Map<String, double>? probabilities,
     double? confidence,
+    this.isConfirmed = false,
   }) : probabilities = probabilities,
        confidence =
            confidence ??
@@ -267,6 +286,13 @@ abstract class Stage extends Data {
   /// Quality score associated with the data collection accuracy.
   double? quality;
 
+  /// When the server computed this stage. All stages of one run share it;
+  /// readers keep only the newest run of a day, since streams are append-only.
+  DateTime? computedAt;
+
+  @JsonKey(unknownEnumValue: StageStatus.pending)
+  StageStatus status;
+
   /// Number of samples included in this stage.
   @JsonKey(includeFromJson: false, includeToJson: true)
   int get numSamples => endSampleId - startSampleId + 1;
@@ -285,6 +311,8 @@ abstract class Stage extends Data {
     required this.mode,
     this.confidence,
     this.quality,
+    this.computedAt,
+    this.status = StageStatus.pending,
   }) : super();
 
   @override
@@ -353,6 +381,8 @@ class MoveStage extends Stage {
     super.mode = TransportationMode.unknown,
     super.confidence,
     super.quality,
+    super.computedAt,
+    super.status,
     this.distance = 0,
     required this.startLatitude,
     required this.startLongitude,
@@ -457,6 +487,8 @@ class StopStage extends Stage {
     super.mode = TransportationMode.stationary,
     super.confidence,
     super.quality,
+    super.computedAt,
+    super.status,
     required this.centroidLatitude,
     required this.centroidLongitude,
     this.maxDisplacement,
@@ -556,6 +588,15 @@ class MobilityActivity extends Data {
   /// Confidence of the activity recognition, in the range [0-1].
   double? confidence;
 
+  /// Why the activity was inferred.
+  String? reason;
+
+  /// True if the user confirmed the activity.
+  bool isConfirmed;
+
+  /// When the server computed this activity (see [Stage.computedAt]).
+  DateTime? computedAt;
+
   MobilityActivity({
     required this.activityId,
     this.stopId,
@@ -565,6 +606,9 @@ class MobilityActivity extends Data {
     this.placeId,
     this.placeCategory,
     this.confidence,
+    this.reason,
+    this.isConfirmed = false,
+    this.computedAt,
   }) : super();
 
   @override
@@ -655,6 +699,35 @@ class StageModeCorrection extends Data {
 }
 
 /// Distance in meters between two WGS 84 coordinates.
+/// An answer from the user about a stage, sent from the app to the server
+/// through the data stream: [kind] is `move`, `stop_activity`, `boundary` or
+/// `context`, and [payload] holds the answer in the server's feedback format.
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class StageFeedback extends Data {
+  String kind;
+
+  Map<String, dynamic> payload;
+
+  DateTime createdAt;
+
+  StageFeedback({required this.kind, required this.payload, DateTime? createdAt})
+    : createdAt = createdAt ?? DateTime.now().toUtc(),
+      super();
+
+  @override
+  Function get fromJsonFunction => _$StageFeedbackFromJson;
+  factory StageFeedback.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<StageFeedback>(json);
+  @override
+  Map<String, dynamic> toJson() => _$StageFeedbackToJson(this);
+
+  @override
+  String get jsonType => TransportationSamplingPackage.STAGE_FEEDBACK;
+
+  @override
+  String toString() => '${super.toString()}, kind: $kind';
+}
+
 // ponytail: haversine on a spherical earth - ~0.5% error, fine for stage-level
 // statistics. Use a geodesic (Vincenty) formula if higher accuracy is needed.
 double _distanceBetween(double lat1, double lon1, double lat2, double lon2) {

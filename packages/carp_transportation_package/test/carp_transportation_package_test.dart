@@ -106,6 +106,69 @@ void main() {
     });
   });
 
+  group('Server-computed fields', () {
+    test('metro, status and computedAt survive a round-trip', () {
+      final at = DateTime.parse('2026-10-14T10:00:00Z');
+      final stop = StopStage(
+        stageId: 1,
+        startSampleId: 0,
+        endSampleId: 9,
+        startTime: DateTime.parse('2026-10-14T08:00:00Z'),
+        endTime: DateTime.parse('2026-10-14T08:50:00Z'),
+        centroidLatitude: 55.7,
+        centroidLongitude: 12.5,
+        computedAt: at,
+        status: StageStatus.confirmed,
+      );
+      final move = MoveStage(
+        stageId: 2,
+        startSampleId: 10,
+        endSampleId: 19,
+        startTime: DateTime.parse('2026-10-14T08:50:00Z'),
+        endTime: DateTime.parse('2026-10-14T09:10:00Z'),
+        mode: TransportationMode.metro,
+        startLatitude: 55.7,
+        startLongitude: 12.5,
+        endLatitude: 55.8,
+        endLongitude: 12.6,
+      );
+      final activity = MobilityActivity(
+        activityId: 1,
+        stopId: 1,
+        startTime: stop.startTime,
+        endTime: stop.endTime,
+        reason: 'POI nearby',
+        isConfirmed: true,
+        computedAt: at,
+      );
+
+      final restoredStop = StopStage.fromJson(stop.toJson());
+      expect(restoredStop.status, StageStatus.confirmed);
+      expect(restoredStop.computedAt, at);
+      expect(MoveStage.fromJson(move.toJson()).mode, TransportationMode.metro);
+      expect(move.toJson()['status'], 'pending');
+      final restoredActivity = MobilityActivity.fromJson(activity.toJson());
+      expect(restoredActivity.isConfirmed, isTrue);
+      expect(restoredActivity.reason, 'POI nearby');
+      expect(restoredActivity.computedAt, at);
+    });
+  });
+
+  group('StageFeedback', () {
+    test('serialization round-trip', () {
+      final original = StageFeedback(
+        kind: 'move',
+        payload: {'segment_id': 3, 'agree': false, 'corrected_mode': 'bus'},
+      );
+      final json = original.toJson();
+      final restored = StageFeedback.fromJson(json);
+      expect(restored.kind, 'move');
+      expect(restored.payload['corrected_mode'], 'bus');
+      expect(restored.createdAt, original.createdAt);
+      expect(json['__type'], TransportationSamplingPackage.STAGE_FEEDBACK);
+    });
+  });
+
   group('TransportationSample', () {
     test('serialization round-trip', () {
       final original = TransportationSample(

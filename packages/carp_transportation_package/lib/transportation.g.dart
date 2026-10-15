@@ -62,6 +62,7 @@ TransportationSample _$TransportationSampleFromJson(
     (k, e) => MapEntry(k, (e as num).toDouble()),
   ),
   confidence: (json['confidence'] as num?)?.toDouble(),
+  isConfirmed: json['isConfirmed'] as bool? ?? false,
 )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$TransportationSampleToJson(
@@ -82,6 +83,7 @@ Map<String, dynamic> _$TransportationSampleToJson(
   'logits': ?instance.logits,
   'probabilities': ?instance.probabilities,
   'confidence': instance.confidence,
+  'isConfirmed': instance.isConfirmed,
 };
 
 const _$TransportationModeEnumMap = {
@@ -90,6 +92,7 @@ const _$TransportationModeEnumMap = {
   TransportationMode.car: 'car',
   TransportationMode.bus: 'bus',
   TransportationMode.train: 'train',
+  TransportationMode.metro: 'metro',
   TransportationMode.stationary: 'stationary',
   TransportationMode.unknown: 'unknown',
   TransportationMode.other: 'other',
@@ -123,6 +126,16 @@ MoveStage _$MoveStageFromJson(Map<String, dynamic> json) => MoveStage(
       TransportationMode.unknown,
   confidence: (json['confidence'] as num?)?.toDouble(),
   quality: (json['quality'] as num?)?.toDouble(),
+  computedAt: json['computedAt'] == null
+      ? null
+      : DateTime.parse(json['computedAt'] as String),
+  status:
+      $enumDecodeNullable(
+        _$StageStatusEnumMap,
+        json['status'],
+        unknownValue: StageStatus.pending,
+      ) ??
+      StageStatus.pending,
   distance: (json['distance'] as num?)?.toDouble() ?? 0,
   startLatitude: (json['startLatitude'] as num).toDouble(),
   startLongitude: (json['startLongitude'] as num).toDouble(),
@@ -152,6 +165,8 @@ Map<String, dynamic> _$MoveStageToJson(MoveStage instance) => <String, dynamic>{
   'mode': _$TransportationModeEnumMap[instance.mode]!,
   'confidence': ?instance.confidence,
   'quality': ?instance.quality,
+  'computedAt': ?instance.computedAt?.toIso8601String(),
+  'status': _$StageStatusEnumMap[instance.status]!,
   'numSamples': instance.numSamples,
   'durationInMinutes': instance.durationInMinutes,
   'distance': instance.distance,
@@ -170,6 +185,12 @@ Map<String, dynamic> _$MoveStageToJson(MoveStage instance) => <String, dynamic>{
   'transitLineCandidates': ?instance.transitLineCandidates,
 };
 
+const _$StageStatusEnumMap = {
+  StageStatus.loading: 'loading',
+  StageStatus.pending: 'pending',
+  StageStatus.confirmed: 'confirmed',
+};
+
 StopStage _$StopStageFromJson(Map<String, dynamic> json) => StopStage(
   stageId: (json['stageId'] as num).toInt(),
   startSampleId: (json['startSampleId'] as num).toInt(),
@@ -185,6 +206,16 @@ StopStage _$StopStageFromJson(Map<String, dynamic> json) => StopStage(
       TransportationMode.stationary,
   confidence: (json['confidence'] as num?)?.toDouble(),
   quality: (json['quality'] as num?)?.toDouble(),
+  computedAt: json['computedAt'] == null
+      ? null
+      : DateTime.parse(json['computedAt'] as String),
+  status:
+      $enumDecodeNullable(
+        _$StageStatusEnumMap,
+        json['status'],
+        unknownValue: StageStatus.pending,
+      ) ??
+      StageStatus.pending,
   centroidLatitude: (json['centroidLatitude'] as num).toDouble(),
   centroidLongitude: (json['centroidLongitude'] as num).toDouble(),
   maxDisplacement: (json['maxDisplacement'] as num?)?.toDouble(),
@@ -203,6 +234,8 @@ Map<String, dynamic> _$StopStageToJson(StopStage instance) => <String, dynamic>{
   'mode': _$TransportationModeEnumMap[instance.mode]!,
   'confidence': ?instance.confidence,
   'quality': ?instance.quality,
+  'computedAt': ?instance.computedAt?.toIso8601String(),
+  'status': _$StageStatusEnumMap[instance.status]!,
   'numSamples': instance.numSamples,
   'durationInMinutes': instance.durationInMinutes,
   'centroidLatitude': instance.centroidLatitude,
@@ -228,6 +261,11 @@ MobilityActivity _$MobilityActivityFromJson(Map<String, dynamic> json) =>
       placeId: json['placeId'] as String?,
       placeCategory: json['placeCategory'] as String?,
       confidence: (json['confidence'] as num?)?.toDouble(),
+      reason: json['reason'] as String?,
+      isConfirmed: json['isConfirmed'] as bool? ?? false,
+      computedAt: json['computedAt'] == null
+          ? null
+          : DateTime.parse(json['computedAt'] as String),
     )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$MobilityActivityToJson(MobilityActivity instance) =>
@@ -242,6 +280,9 @@ Map<String, dynamic> _$MobilityActivityToJson(MobilityActivity instance) =>
       'placeId': ?instance.placeId,
       'placeCategory': ?instance.placeCategory,
       'confidence': ?instance.confidence,
+      'reason': ?instance.reason,
+      'isConfirmed': instance.isConfirmed,
+      'computedAt': ?instance.computedAt?.toIso8601String(),
     };
 
 const _$MobilityActivityTypeEnumMap = {
@@ -294,3 +335,20 @@ Map<String, dynamic> _$StageModeCorrectionToJson(
   'isLatest': instance.isLatest,
   'comment': ?instance.comment,
 };
+
+StageFeedback _$StageFeedbackFromJson(Map<String, dynamic> json) =>
+    StageFeedback(
+      kind: json['kind'] as String,
+      payload: json['payload'] as Map<String, dynamic>,
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+    )..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$StageFeedbackToJson(StageFeedback instance) =>
+    <String, dynamic>{
+      '__type': ?instance.$type,
+      'kind': instance.kind,
+      'payload': instance.payload,
+      'createdAt': instance.createdAt.toIso8601String(),
+    };
