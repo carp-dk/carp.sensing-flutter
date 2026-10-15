@@ -149,6 +149,7 @@ MoveStage _$MoveStageFromJson(Map<String, dynamic> json) => MoveStage(
   originStop: json['originStop'] as String?,
   destinationStop: json['destinationStop'] as String?,
   transitLine: json['transitLine'] as String?,
+  fuelCostKr: (json['fuelCostKr'] as num?)?.toDouble(),
   transitLineCandidates:
       (json['transitLineCandidates'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, (e as num).toDouble()),
@@ -182,6 +183,7 @@ Map<String, dynamic> _$MoveStageToJson(MoveStage instance) => <String, dynamic>{
   'originStop': ?instance.originStop,
   'destinationStop': ?instance.destinationStop,
   'transitLine': ?instance.transitLine,
+  'fuelCostKr': ?instance.fuelCostKr,
   'transitLineCandidates': ?instance.transitLineCandidates,
 };
 

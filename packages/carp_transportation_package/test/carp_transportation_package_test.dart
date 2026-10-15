@@ -131,6 +131,8 @@ void main() {
         startLongitude: 12.5,
         endLatitude: 55.8,
         endLongitude: 12.6,
+        distance: 1234.5,
+        fuelCostKr: 400,
       );
       final activity = MobilityActivity(
         activityId: 1,
@@ -146,6 +148,8 @@ void main() {
       expect(restoredStop.status, StageStatus.confirmed);
       expect(restoredStop.computedAt, at);
       expect(MoveStage.fromJson(move.toJson()).mode, TransportationMode.metro);
+      expect(MoveStage.fromJson(move.toJson()).distance, 1234.5);
+      expect(MoveStage.fromJson(move.toJson()).fuelCostKr, 400);
       expect(move.toJson()['status'], 'pending');
       final restoredActivity = MobilityActivity.fromJson(activity.toJson());
       expect(restoredActivity.isConfirmed, isTrue);

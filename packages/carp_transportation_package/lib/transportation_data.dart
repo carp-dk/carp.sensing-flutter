@@ -373,6 +373,9 @@ class MoveStage extends Stage {
   /// e.g. `6A`, `150S`, or `M1`.
   String? transitLine;
 
+  /// What the user paid at a fill-up on this trip, in kr (0 = no fill-up). Only set on car trips the user answered.
+  double? fuelCostKr;
+
   /// Top candidate public-transport lines and their probabilities,
   /// e.g. `{'150S': 0.72, '6A': 0.18}`.
   Map<String, double>? transitLineCandidates;
@@ -401,6 +404,7 @@ class MoveStage extends Stage {
     this.originStop,
     this.destinationStop,
     this.transitLine,
+    this.fuelCostKr,
     this.transitLineCandidates,
   });
 
