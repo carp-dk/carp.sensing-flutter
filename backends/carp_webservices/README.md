@@ -182,6 +182,12 @@ To authenticate using a magic link (e.g., as read from a QR code) use the `authe
 CarpUser user = await CarpAuthService().authenticateWithMagicLink(qrcode);
 ```
 
+To authenticate using a short self-signup code (e.g., `XXGHW`), use the `authenticateWithCode` method. It resolves the code to its magic link and then signs in as `authenticateWithMagicLink` does.
+
+```dart
+CarpUser user = await CarpAuthService().authenticateWithCode('XXGHW');
+```
+
 ### How the two login flows differ
 
 There are two ways a user ends up with a token, and they are handled by different code paths:

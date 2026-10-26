@@ -1,5 +1,7 @@
 ## 4.4.3
 
+* Add `CarpAuthService().authenticateWithCode()` - sign in with a short self-signup code (resolves it via `magicLinkForCode()` and then calls `authenticateWithMagicLink()`)
+
 * Prefer Chrome for anonymous (magic link) login on Android. Samsung Internet does not hand the `https` redirect back to the app, leaving the login stuck on the redirect page
 
 ## 4.4.2

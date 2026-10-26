@@ -210,7 +210,8 @@ class CarpAuthService {
   /// to the magic link it belongs to, using the CAWS `/api/self-signup/{code}`
   /// endpoint. No authentication is needed.
   ///
-  /// The returned link can be passed to [authenticateWithMagicLink].
+  /// The returned link can be passed to [authenticateWithMagicLink], or use
+  /// [authenticateWithCode] to do both steps at once.
   /// Throws a [CarpNotFoundException] if CAWS does not know the code.
   Future<String> magicLinkForCode(String code) async {
     final url = authProperties.authURL.replace(path: '/api/self-signup/$code').toString();
@@ -225,6 +226,14 @@ class CarpAuthService {
     }
     return body['magicLink'] as String;
   }
+
+  /// Authenticate to this CARP service using a short self-signup [code]
+  /// (as shown to participants, e.g. `XXGHW`).
+  ///
+  /// Resolves the code with [magicLinkForCode] and signs in with
+  /// [authenticateWithMagicLink].
+  /// Throws a [CarpNotFoundException] if CAWS does not know the code.
+  Future<CarpUser> authenticateWithCode(String code) async => authenticateWithMagicLink(await magicLinkForCode(code));
 
   String get _discoveryUrl => _authProperties!.discoveryURL
       .replace(pathSegments: [..._authProperties!.discoveryURL.pathSegments, '.well-known', 'openid-configuration'])
