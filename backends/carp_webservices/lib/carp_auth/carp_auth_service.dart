@@ -167,7 +167,16 @@ class CarpAuthService {
         await FlutterWebAuth2.authenticate(
           url: uri,
           callbackUrlScheme: redirectUri!.split(':/').first,
-          options: FlutterWebAuth2Options(preferEphemeral: true, httpsHost: redirect?.host, httpsPath: redirect?.path),
+          options: FlutterWebAuth2Options(
+            preferEphemeral: true,
+            httpsHost: redirect?.host,
+            httpsPath: redirect?.path,
+            // Samsung Internet opens a plain Custom Tab instead of an Auth Tab and
+            // never hands the https redirect back, so the login stalls on the
+            // redirect page. Prefer Chrome; the default browser is still used if
+            // Chrome is not installed.
+            customTabsPackageOrder: const ['com.android.chrome'],
+          ),
         ).then((result) async {
           code = Uri.parse(result).queryParameters['code'];
           if ((_currentUser == null || _currentUser!.isAuthenticated) && code != null) {
