@@ -22,7 +22,8 @@ class LocationProbe extends StreamProbe {
 
 /// Collects [Location] data for the [ContextSamplingPackage.LOCATION] measure.
 ///
-/// Collects location continuously (default) or only once, set by a
+/// Collects location continuously (default), only once, or every `period`
+/// (repeating the last fix if the OS reported none), set by a
 /// [LocationSamplingConfiguration]. In one-time mode it pauses itself 5
 /// seconds after collecting one location; the next resume (e.g. from a
 /// periodic trigger) collects a new one. Uses the [LocationManager] of its
@@ -30,7 +31,8 @@ class LocationProbe extends StreamProbe {
 /// collects nothing if it is not granted.
 class ConfigurableLocationProbe extends Probe {
   LocationSamplingConfiguration? _configuration;
-  StreamSubscription<Measurement>? _subscription;
+  StreamSubscription<Object>? _subscription;
+  Timer? _timer;
 
   /// True if the [LocationSamplingConfiguration] asks for one location only.
   bool get oneTimeSampling => _configuration?.once ?? false;
@@ -60,6 +62,17 @@ class ConfigurableLocationProbe extends Probe {
         }
         // automatically pause this probe after it is done collecting the measurement
         Future.delayed(const Duration(seconds: 5), () => pause());
+      } else if (_configuration?.period != null) {
+        // Time based: keep the OS stream running so the last fix stays fresh, but emit
+        // that fix every period, also when the OS reported nothing new (a duplicate).
+        _subscription = deviceManager.manager.onLocationChanged.listen(
+          null,
+          onError: (Object error) => addError(error),
+        );
+        _timer = Timer.periodic(_configuration!.period!, (_) {
+          final location = deviceManager.manager.lastKnownLocation;
+          if (location != null) addMeasurement(Measurement.fromData(location));
+        });
       } else {
         var stream = deviceManager.manager.onLocationChanged.map((location) => Measurement.fromData(location));
 
@@ -74,6 +87,7 @@ class ConfigurableLocationProbe extends Probe {
 
   @override
   Future<bool> onPause() async {
+    _timer?.cancel();
     await _subscription?.cancel();
     return true;
   }

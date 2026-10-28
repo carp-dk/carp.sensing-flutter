@@ -70,11 +70,15 @@ Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
 };
 
 LocationSamplingConfiguration _$LocationSamplingConfigurationFromJson(Map<String, dynamic> json) =>
-    LocationSamplingConfiguration(once: json['once'] as bool? ?? false)..$type = json['__type'] as String?;
+    LocationSamplingConfiguration(
+      once: json['once'] as bool? ?? false,
+      period: json['period'] == null ? null : Duration(microseconds: (json['period'] as num).toInt()),
+    )..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$LocationSamplingConfigurationToJson(LocationSamplingConfiguration instance) => <String, dynamic>{
   '__type': ?instance.$type,
   'once': instance.once,
+  'period': ?instance.period?.inMicroseconds,
 };
 
 Weather _$WeatherFromJson(Map<String, dynamic> json) => Weather()
