@@ -50,7 +50,9 @@ class ConfigurableLocationProbe extends Probe {
 
   @override
   Future<bool> onResume() async {
-    if (await requestPermissions()) {
+    if (!await requestPermissions()) {
+      warning('$runtimeType - No location permission, not sampling.');
+    } else {
       // if this is a one-time sampling, just get the location once and return
       if (oneTimeSampling) {
         try {
@@ -65,13 +67,20 @@ class ConfigurableLocationProbe extends Probe {
       } else if (_configuration?.period != null) {
         // Time based: keep the OS stream running so the last fix stays fresh, but emit
         // that fix every period, also when the OS reported nothing new (a duplicate).
+        final period = _configuration!.period!;
+        info('$runtimeType - Time based sampling, one location every ${period.inSeconds} s.');
         _subscription = deviceManager.manager.onLocationChanged.listen(
-          null,
+          (location) => debug('$runtimeType - OS fix: ${location.time} (${location.latitude}, ${location.longitude}).'),
           onError: (Object error) => addError(error),
         );
-        _timer = Timer.periodic(_configuration!.period!, (_) {
+        _timer = Timer.periodic(period, (_) {
           final location = deviceManager.manager.lastKnownLocation;
-          if (location != null) addMeasurement(Measurement.fromData(location));
+          if (location == null) {
+            warning('$runtimeType - No OS fix yet, nothing to emit.');
+            return;
+          }
+          debug('$runtimeType - Emitting fix from ${location.time}.');
+          addMeasurement(Measurement.fromData(location));
         });
       } else {
         var stream = deviceManager.manager.onLocationChanged.map((location) => Measurement.fromData(location));
