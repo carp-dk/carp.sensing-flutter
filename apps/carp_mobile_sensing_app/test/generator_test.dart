@@ -36,9 +36,7 @@ void main() {
   /// Generates and save the study protocol as json file
   test(
     'protocol.json',
-    () async => await writeToFile(
-      toJsonString(await LocalStudyProtocolManager().getStudyProtocol('1234')),
-      'protocol.json',
-    ),
+    () async =>
+        await writeToFile(toJsonString(await LocalStudyProtocolManager().getStudyProtocol('1234')), 'protocol.json'),
   );
 }

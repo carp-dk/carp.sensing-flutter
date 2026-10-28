@@ -34,18 +34,20 @@ part of '../../protocol.dart';
 
 /// Specifies a specific version for a [StudyProtocol], identified by a [tag].
 ///
-/// [date] is the date when this version of the protocol was created.
+/// Returned by [ProtocolService.getVersionHistoryFor].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ProtocolVersion {
+  /// Label of this version, e.g. a version number or date.
   String tag;
+
+  /// When this version of the protocol was created (local time).
   late DateTime date;
 
   ProtocolVersion(this.tag) {
     date = DateTime.now();
   }
 
-  factory ProtocolVersion.fromJson(Map<String, dynamic> json) =>
-      _$ProtocolVersionFromJson(json);
+  factory ProtocolVersion.fromJson(Map<String, dynamic> json) => _$ProtocolVersionFromJson(json);
   Map<String, dynamic> toJson() => _$ProtocolVersionToJson(this);
 
   @override

@@ -25,10 +25,12 @@ void main() async {
 
   // Add a background task that collects incoming SMS messages
   protocol.addTaskControl(
-      ImmediateTrigger(),
-      BackgroundTask(
-          measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)]),
-      phone);
+    ImmediateTrigger(),
+    BackgroundTask(
+      measures: [Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE)],
+    ),
+    phone,
+  );
 
   // Add a background task that collects the logs for:
   //  * in/out SMS
@@ -36,22 +38,29 @@ void main() async {
   //  * calendar entries
   // every 3 hours
   protocol.addTaskControl(
-      PeriodicTrigger(period: const Duration(hours: 3)),
-      BackgroundTask(measures: [
+    PeriodicTrigger(period: const Duration(hours: 3)),
+    BackgroundTask(
+      measures: [
         Measure(type: CommunicationSamplingPackage.PHONE_LOG),
         Measure(type: CommunicationSamplingPackage.TEXT_MESSAGE_LOG),
         Measure(type: CommunicationSamplingPackage.CALENDAR),
-      ]),
-      phone);
+      ],
+    ),
+    phone,
+  );
 
   // Add a background task that collects the calendar entries for the past 7
   // days (max), every time the app is resumed (i.e., when coming to foreground).
   protocol.addTaskControl(
-      AppLifecycleTrigger({AppLifecycleState.resumed}),
-      BackgroundTask(measures: [
+    AppLifecycleTrigger({AppLifecycleState.resumed}),
+    BackgroundTask(
+      measures: [
         Measure(type: CommunicationSamplingPackage.CALENDAR)
-          ..overrideSamplingConfiguration =
-              HistoricSamplingConfiguration(past: const Duration(days: 7)),
-      ]),
-      phone);
+          ..overrideSamplingConfiguration = HistoricSamplingConfiguration(
+            past: const Duration(days: 7),
+          ),
+      ],
+    ),
+    phone,
+  );
 }

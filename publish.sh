@@ -12,6 +12,7 @@ PACKAGES=(
   carp_mobile_sensing
   packages/carp_apps_package
   packages/carp_audio_package
+  packages/carp_aware_package
   packages/carp_communication_package
   packages/carp_connectivity_package
   packages/carp_context_package

@@ -11,8 +11,7 @@ void main() {
   late Smartphone primaryPhone;
   DeviceConfiguration eSense;
 
-  Future<void> writeToFile(String json, String fileName) async =>
-      await File('test/json/$fileName').writeAsString(json);
+  Future<void> writeToFile(String json, String fileName) async => await File('test/json/$fileName').writeAsString(json);
 
   setUp(() {
     // Initialization of serialization
@@ -58,20 +57,12 @@ void main() {
     ];
 
     var task = BackgroundTask(name: 'Start measures')..addMeasures(measures);
-    primaryProtocol.addTaskControl(
-      TriggerConfiguration(),
-      task,
-      primaryPhone,
-      Control.Start,
-    );
+    primaryProtocol.addTaskControl(TriggerConfiguration(), task, primaryPhone, Control.Start);
 
     // adding all measure from the sampling packages to one one trigger and one task
     primaryProtocol.addTaskControl(
       ImmediateTrigger(), // a simple trigger that starts immediately
-      BackgroundTask()
-        ..measures = SamplingPackageRegistry().dataTypes
-            .map((type) => Measure(type: type.type))
-            .toList(),
+      BackgroundTask()..measures = SamplingPackageRegistry().dataTypes.map((type) => Measure(type: type.type)).toList(),
       primaryPhone,
       Control.Start,
     );
@@ -79,8 +70,7 @@ void main() {
     // collect device info only once
     primaryProtocol.addTaskControl(
       OneTimeTrigger(),
-      BackgroundTask()
-        ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+      BackgroundTask()..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
       primaryPhone,
       Control.Start,
     );
@@ -95,18 +85,10 @@ void main() {
           Measure(type: SensorSamplingPackage.STEP_EVENT),
         ]);
 
-    primaryProtocol.addTaskControl(
-      ImmediateTrigger(),
-      sensingAppTask,
-      primaryPhone,
-      Control.Start,
-    );
+    primaryProtocol.addTaskControl(ImmediateTrigger(), sensingAppTask, primaryPhone, Control.Start);
 
     primaryProtocol.addTaskControl(
-      UserTaskTrigger(
-        taskName: sensingAppTask.name,
-        triggerCondition: UserTaskState.done,
-      ),
+      UserTaskTrigger(taskName: sensingAppTask.name, triggerCondition: UserTaskState.done),
       sensingAppTask,
       primaryPhone,
       Control.Start,
@@ -138,20 +120,13 @@ void main() {
       final allData = [
         Heartbeat(deviceType: 'Smartphone', deviceRoleName: 'phone'),
         Error(message: 'An error occurred'),
-        TriggeredTask(
-          triggerId: 0,
-          taskName: '',
-          destinationDeviceRoleName: '',
-          control: Control.Start,
-        ),
+        TriggeredTask(triggerId: 0, taskName: '', destinationDeviceRoleName: '', control: Control.Start),
         CompletedTask(taskName: 'task1'),
       ];
 
       for (var data in allData) {
         final dataJson = toJsonString(data);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [
-          json.decode(dataJson) as Map<String, dynamic>,
-        ]);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }
@@ -172,9 +147,7 @@ void main() {
 
       for (var data in allData) {
         final dataJson = toJsonString(data);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [
-          json.decode(dataJson) as Map<String, dynamic>,
-        ]);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }
@@ -183,15 +156,9 @@ void main() {
     test('- completed app task data types', () async {
       final allData = [
         CompletedAppTask(taskName: 'audio', taskType: AppTask.AUDIO_TYPE),
-        CompletedAppTask(
-          taskName: '',
-          taskType: AppTask.COGNITIVE_ASSESSMENT_TYPE,
-        ),
+        CompletedAppTask(taskName: '', taskType: AppTask.COGNITIVE_ASSESSMENT_TYPE),
         CompletedAppTask(taskName: 'image', taskType: AppTask.IMAGE_TYPE),
-        CompletedAppTask(
-          taskName: 'informed consent',
-          taskType: AppTask.INFORMED_CONSENT_TYPE,
-        ),
+        CompletedAppTask(taskName: 'informed consent', taskType: AppTask.INFORMED_CONSENT_TYPE),
         CompletedAppTask(taskName: 'sensing', taskType: AppTask.SENSING_TYPE),
         CompletedAppTask(taskName: 'survey', taskType: AppTask.SURVEY_TYPE),
         CompletedAppTask(taskName: 'video', taskType: AppTask.VIDEO_TYPE),
@@ -199,9 +166,7 @@ void main() {
 
       for (var data in allData) {
         final dataJson = toJsonString(data);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [
-          json.decode(dataJson) as Map<String, dynamic>,
-        ]);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }
@@ -210,9 +175,7 @@ void main() {
 
   group('Measurement', () {
     test('Measurement -> JSON', () async {
-      final measurement = Measurement.fromData(
-        DeviceInformation(platform: 'iOS', deviceId: '1234abcd'),
-      );
+      final measurement = Measurement.fromData(DeviceInformation(platform: 'iOS', deviceId: '1234abcd'));
       expect(measurement.data, isA<DeviceInformation>());
       expect(measurement.dataType, DeviceInformation().dataType);
       print(toJsonString(measurement));
@@ -221,9 +184,7 @@ void main() {
     test('JSON File -> Measurement', () async {
       final plainJson = File('test/json/measurement.json').readAsStringSync();
 
-      final measurement = Measurement.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      final measurement = Measurement.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       expect(measurement.data, isA<Timezone>());
       print(toJsonString(measurement));
@@ -233,10 +194,7 @@ void main() {
   group('StudyProtocol', () {
     test('SmartphoneStudyProtocol -> JSON', () async {
       print(toJsonString(primaryProtocol));
-      expect(
-        primaryProtocol.protocolApiLevel,
-        SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL,
-      );
+      expect(primaryProtocol.protocolApiLevel, SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL);
       expect(primaryProtocol.ownerId, 'user@dtu.dk');
       expect(primaryProtocol.primaryDevices.length, 1);
       expect(primaryProtocol.connectedDevices?.length, 1);
@@ -250,39 +208,25 @@ void main() {
       await writeToFile(toJsonString(primaryProtocol), 'study_protocol.json');
     });
 
-    test(
-      'SmartphoneStudyProtocol -> JSON -> SmartphoneStudyProtocol :: deep assert',
-      () async {
-        print(toJsonString(primaryProtocol));
-        final studyJson = toJsonString(primaryProtocol);
+    test('SmartphoneStudyProtocol -> JSON -> SmartphoneStudyProtocol :: deep assert', () async {
+      print(toJsonString(primaryProtocol));
+      final studyJson = toJsonString(primaryProtocol);
 
-        SmartphoneStudyProtocol protocolFromJson =
-            SmartphoneStudyProtocol.fromJson(
-              json.decode(studyJson) as Map<String, dynamic>,
-            );
-        print(toJsonString(protocolFromJson));
-        expect(toJsonString(protocolFromJson), equals(studyJson));
-      },
-    );
+      SmartphoneStudyProtocol protocolFromJson = SmartphoneStudyProtocol.fromJson(
+        json.decode(studyJson) as Map<String, dynamic>,
+      );
+      print(toJsonString(protocolFromJson));
+      expect(toJsonString(protocolFromJson), equals(studyJson));
+    });
 
     test('JSON File -> SmartphoneStudyProtocol', () async {
-      String plainJson = File(
-        'test/json/study_protocol.json',
-      ).readAsStringSync();
+      String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-      final protocol = SmartphoneStudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      final protocol = SmartphoneStudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
-      expect(
-        primaryProtocol.protocolApiLevel,
-        SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL,
-      );
+      expect(primaryProtocol.protocolApiLevel, SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL);
       expect(protocol.ownerId, primaryProtocol.ownerId);
-      expect(
-        protocol.primaryDevices.first.roleName,
-        Smartphone.DEFAULT_ROLE_NAME,
-      );
+      expect(protocol.primaryDevices.first.roleName, Smartphone.DEFAULT_ROLE_NAME);
       expect(protocol.dataEndPoint?.type, DataEndPointTypes.SQLITE);
       expect(protocol.expectedParticipantData?.length, 1);
       expect(protocol.getApplicationData('uiTheme'), 'black');
@@ -311,43 +255,31 @@ void main() {
       await writeToFile(toJsonString(deployment), 'study_deployment.json');
     });
 
-    test(
-      'SmartphoneDeployment -> JSON -> SmartphoneDeployment :: deep assert',
-      () async {
-        final deployment = SmartphoneDeployment.fromSmartphoneStudyProtocol(
-          studyDeploymentId: '1234',
-          primaryDeviceRoleName: 'phone',
-          protocol: primaryProtocol,
-        );
-        print(toJsonString(deployment));
-        expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
-        expect(deployment.expectedParticipantData.length, 1);
-        expect(deployment.getApplicationData('uiTheme'), 'black');
+    test('SmartphoneDeployment -> JSON -> SmartphoneDeployment :: deep assert', () async {
+      final deployment = SmartphoneDeployment.fromSmartphoneStudyProtocol(
+        studyDeploymentId: '1234',
+        primaryDeviceRoleName: 'phone',
+        protocol: primaryProtocol,
+      );
+      print(toJsonString(deployment));
+      expect(deployment.dataEndPoint?.type, DataEndPointTypes.SQLITE);
+      expect(deployment.expectedParticipantData.length, 1);
+      expect(deployment.getApplicationData('uiTheme'), 'black');
 
-        final studyJson = toJsonString(deployment);
-        final deploymentFromJson = SmartphoneDeployment.fromJson(
-          json.decode(studyJson) as Map<String, dynamic>,
-        );
-        print(toJsonString(deploymentFromJson));
-        expect(toJsonString(deploymentFromJson), equals(studyJson));
-      },
-    );
+      final studyJson = toJsonString(deployment);
+      final deploymentFromJson = SmartphoneDeployment.fromJson(json.decode(studyJson) as Map<String, dynamic>);
+      print(toJsonString(deploymentFromJson));
+      expect(toJsonString(deploymentFromJson), equals(studyJson));
+    });
 
     test('JSON File -> SmartphoneDeployment', () async {
-      final plainJson = File(
-        'test/json/study_deployment.json',
-      ).readAsStringSync();
+      final plainJson = File('test/json/study_deployment.json').readAsStringSync();
 
-      final deployment = SmartphoneDeployment.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      final deployment = SmartphoneDeployment.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       print(toJsonString(deployment));
 
-      expect(
-        primaryProtocol.protocolApiLevel,
-        SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL,
-      );
+      expect(primaryProtocol.protocolApiLevel, SmartphoneStudyProtocol.CAMS_PROTOCOL_API_LEVEL);
       expect(deployment.deviceConfiguration.roleName, 'phone');
       expect(deployment.connectedDevices.length, 1);
       expect(deployment.triggers.length, 8);
@@ -390,8 +322,7 @@ void main() {
     print('$t1');
     primaryProtocol.addTaskControl(
       t1,
-      BackgroundTask()
-        ..addMeasure(Measure(type: DeviceSamplingPackage.FREE_MEMORY)),
+      BackgroundTask()..addMeasure(Measure(type: DeviceSamplingPackage.FREE_MEMORY)),
       primaryPhone,
       Control.Start,
     );
@@ -450,12 +381,8 @@ void main() {
 
     // when battery level is 10% then sample light
     primaryProtocol.addTaskControl(
-      SamplingEventTrigger(
-        measureType: DeviceSamplingPackage.BATTERY_STATE,
-        triggerCondition: BatteryState(10),
-      ),
-      BackgroundTask()
-        ..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)),
+      SamplingEventTrigger(measureType: DeviceSamplingPackage.BATTERY_STATE, triggerCondition: BatteryState(10)),
+      BackgroundTask()..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)),
       primaryPhone,
       Control.Start,
     );
@@ -466,8 +393,7 @@ void main() {
         measureType: DeviceSamplingPackage.SCREEN_EVENT,
         triggerCondition: ScreenEvent('SCREEN_OFF'),
       ),
-      BackgroundTask()
-        ..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
+      BackgroundTask()..addMeasure(Measure(type: DeviceSamplingPackage.DEVICE_INFORMATION)),
       primaryPhone,
       Control.Start,
     );
@@ -475,11 +401,9 @@ void main() {
     primaryProtocol.addTaskControl(
       ConditionalSamplingEventTrigger(
         measureType: DeviceSamplingPackage.BATTERY_STATE,
-        triggerCondition: (measurement) =>
-            (measurement.data as BatteryState).batteryLevel == 10,
+        triggerCondition: (measurement) => (measurement.data as BatteryState).batteryLevel == 10,
       ),
-      BackgroundTask()
-        ..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)),
+      BackgroundTask()..addMeasure(Measure(type: SensorSamplingPackage.AMBIENT_LIGHT)),
       primaryPhone,
       Control.Start,
     );
@@ -503,10 +427,7 @@ void main() {
   });
 
   test('Sampling configurations', () async {
-    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(
-      ownerId: 'user@dtu.dk',
-      name: 'sampling_configurations',
-    );
+    SmartphoneStudyProtocol protocol = SmartphoneStudyProtocol(ownerId: 'user@dtu.dk', name: 'sampling_configurations');
 
     Smartphone phone = Smartphone();
 
@@ -534,99 +455,73 @@ void main() {
   test('Register Device', () async {
     await DeviceInfoService().init();
 
-    StudyDeploymentStatus status_1 = await (SmartphoneDeploymentService()
-        .createStudyDeployment(primaryProtocol));
+    StudyDeploymentStatus status_1 = await (SmartphoneDeploymentService().createStudyDeployment(primaryProtocol));
     print(status_1);
     assert(status_1.status == StudyDeploymentStatusTypes.Invited);
 
-    StudyDeploymentStatus? status_2 = await (SmartphoneDeploymentService()
-        .registerDevice(
-          status_1.studyDeploymentId,
-          'esense',
-          DefaultDeviceRegistration(),
-        ));
+    StudyDeploymentStatus? status_2 = await (SmartphoneDeploymentService().registerDevice(
+      status_1.studyDeploymentId,
+      'esense',
+      DefaultDeviceRegistration(),
+    ));
     print(status_2);
     assert(status_2?.studyDeploymentId == status_1.studyDeploymentId);
     assert(status_2?.status == StudyDeploymentStatusTypes.DeployingDevices);
     assert(status_2 == status_1);
 
-    StudyDeploymentStatus? status_3 = await SmartphoneDeploymentService()
-        .registerDevice(
-          status_1.studyDeploymentId,
-          'nonsense',
-          DefaultDeviceRegistration(),
-        );
+    StudyDeploymentStatus? status_3 = await SmartphoneDeploymentService().registerDevice(
+      status_1.studyDeploymentId,
+      'nonsense',
+      DefaultDeviceRegistration(),
+    );
     assert(status_3?.status == StudyDeploymentStatusTypes.DeployingDevices);
     assert(status_3?.studyDeploymentId == status_1.studyDeploymentId);
     print(status_3);
   });
 
   test('Study Deployment', () async {
-    StudyDeploymentStatus status_1 = await SmartphoneDeploymentService()
-        .createStudyDeployment(primaryProtocol);
+    StudyDeploymentStatus status_1 = await SmartphoneDeploymentService().createStudyDeployment(primaryProtocol);
 
     print(toJsonString(status_1));
     // we expect the phone and eSense devices
     expect(status_1.deviceStatusList.length, 2);
     expect(status_1.status, StudyDeploymentStatusTypes.Invited);
-    expect(
-      status_1.deviceStatusList[0].device.roleName,
-      Smartphone.DEFAULT_ROLE_NAME,
-    );
+    expect(status_1.deviceStatusList[0].device.roleName, Smartphone.DEFAULT_ROLE_NAME);
     // the phone as a primary device is always registered by the SmartphoneDeploymentService
-    expect(
-      status_1.deviceStatusList[0].status,
-      DeviceDeploymentStatusTypes.Registered,
-    );
+    expect(status_1.deviceStatusList[0].status, DeviceDeploymentStatusTypes.Registered);
     // but we do not expect the eSense device to be registered (yet)
     expect(status_1.deviceStatusList[1].device.roleName, 'eSense');
-    expect(
-      status_1.deviceStatusList[1].status,
-      DeviceDeploymentStatusTypes.Unregistered,
-    );
+    expect(status_1.deviceStatusList[1].status, DeviceDeploymentStatusTypes.Unregistered);
 
     // now register the eSense device
-    StudyDeploymentStatus? status_2 = await SmartphoneDeploymentService()
-        .registerDevice(
-          status_1.studyDeploymentId,
-          'eSense',
-          DefaultDeviceRegistration(),
-        );
+    StudyDeploymentStatus? status_2 = await SmartphoneDeploymentService().registerDevice(
+      status_1.studyDeploymentId,
+      'eSense',
+      DefaultDeviceRegistration(),
+    );
 
     print(toJsonString(status_2));
     expect(status_2?.studyDeploymentId, status_1.studyDeploymentId);
     expect(status_1.deviceStatusList[1].device.roleName, 'eSense');
 
     // now we expect the eSense device to be registered
-    expect(
-      status_1.deviceStatusList[1].status,
-      DeviceDeploymentStatusTypes.Registered,
-    );
+    expect(status_1.deviceStatusList[1].status, DeviceDeploymentStatusTypes.Registered);
 
-    SmartphoneDeployment? deployment = await SmartphoneDeploymentService()
-        .getDeviceDeployment(status_1.studyDeploymentId);
+    SmartphoneDeployment? deployment = await SmartphoneDeploymentService().getDeviceDeployment(
+      status_1.studyDeploymentId,
+    );
     print(deployment);
     print(toJsonString(deployment));
     expect(deployment?.studyDeploymentId, status_1.studyDeploymentId);
     expect(deployment?.tasks.length, primaryProtocol.tasks.length);
     expect(deployment?.triggers.length, primaryProtocol.triggers.length);
-    expect(
-      deployment?.taskControls.length,
-      primaryProtocol.taskControls.length,
-    );
+    expect(deployment?.taskControls.length, primaryProtocol.taskControls.length);
 
-    StudyDeploymentStatus? status_3 = await SmartphoneDeploymentService()
-        .deployed(status_1.studyDeploymentId);
+    StudyDeploymentStatus? status_3 = await SmartphoneDeploymentService().deployed(status_1.studyDeploymentId);
     expect(status_3?.status, StudyDeploymentStatusTypes.Running);
     expect(status_3?.studyDeploymentId, status_1.studyDeploymentId);
     print(toJsonString(status_3));
-    expect(
-      status_3?.deviceStatusList[0].status,
-      DeviceDeploymentStatusTypes.Deployed,
-    );
-    expect(
-      status_3?.deviceStatusList[1].status,
-      DeviceDeploymentStatusTypes.Deployed,
-    );
+    expect(status_3?.deviceStatusList[0].status, DeviceDeploymentStatusTypes.Deployed);
+    expect(status_3?.deviceStatusList[1].status, DeviceDeploymentStatusTypes.Deployed);
   });
 }

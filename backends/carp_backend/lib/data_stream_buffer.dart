@@ -7,41 +7,46 @@
 
 part of 'carp_backend.dart';
 
-/// A local buffer of data streams using the [SQLiteDataManager].
-/// Works as a singleton accessed by `DataStreamBuffer()`, since it is backed
-/// by a single, app-wide `carp-data.db` file.
+/// A local SQLite buffer of measurements waiting to be uploaded to CAWS.
+///
+/// Used by [CarpDataManager]. Stores measurements with a [SQLiteDataManager]
+/// and reads them back as [DataStreamBatch]es, one per expected data stream.
+/// A singleton (`DataStreamBuffer()`), since it is backed by a single,
+/// app-wide `carp-data.db` file.
+///
+/// Call [initialize], then [getDataStreamBatches] to read pending data, and
+/// [cleanup] once it is uploaded.
 class DataStreamBuffer {
   SmartphoneDeployment? _deployment;
   final _manager = SQLiteDataManager();
 
+  /// Database row IDs of the measurements returned by the last
+  /// [getDataStreamBatch] calls. Cleared by [cleanup].
   Set<int> rows = {};
 
+  /// The deployment whose data is buffered. `null` before [initialize]
+  /// and after [detach].
   SmartphoneDeployment? get deployment => _deployment;
+
+  /// The underlying SQLite database, or `null` if not open.
   Database? get database => _manager.database;
 
   static final DataStreamBuffer _instance = DataStreamBuffer._();
   DataStreamBuffer._();
 
-  /// Get the singleton [DataStreamBuffer].
+  /// The singleton [DataStreamBuffer].
   factory DataStreamBuffer() => _instance;
 
-  /// Initialize this buffer by specifying which [deployment] it handles
-  /// and the stream of [measurements] to buffer.
-  Future<void> initialize(
-    SmartphoneDeployment deployment,
-    Stream<Measurement> measurements,
-  ) async {
+  /// Starts buffering [measurements] from [deployment].
+  Future<void> initialize(SmartphoneDeployment deployment, Stream<Measurement> measurements) async {
     info('Initializing $runtimeType...');
     _deployment = deployment;
-    await _manager.configure(
-      dataEndPoint: SQLiteDataEndPoint(),
-      deployment: deployment,
-      measurements: measurements,
-    );
+    await _manager.configure(dataEndPoint: SQLiteDataEndPoint(), deployment: deployment, measurements: measurements);
   }
 
-  /// Get the list of [DataStreamBatch] which has not yet been uploaded.
-  /// Returns an empty list if no data needs to be uploaded.
+  /// All buffered data not yet uploaded, one [DataStreamBatch] per data stream.
+  ///
+  /// Returns an empty list if there is no data or no [deployment].
   Future<List<DataStreamBatch>> getDataStreamBatches() async {
     List<DataStreamBatch> batches = [];
 
@@ -54,10 +59,10 @@ class DataStreamBuffer {
     return batches;
   }
 
-  /// Get a [DataStreamBatch] of all data which has not been uploaded yet
-  /// for the [stream].
+  /// All data not yet uploaded for [stream], as one [DataStreamBatch].
   ///
-  /// Returns null if no data is found.
+  /// Adds the returned rows to [rows] so [cleanup] can mark them as uploaded.
+  /// Requires [initialize] first. Returns `null` if there is no data.
   Future<DataStreamBatch?> getDataStreamBatch(ExpectedDataStream stream) async {
     DataStreamId dataStream = DataStreamId(
       studyDeploymentId: deployment!.studyDeploymentId,
@@ -84,12 +89,7 @@ class DataStreamBuffer {
         await database?.query(
           SQLiteDataManager.MEASUREMENT_TABLE_NAME,
           where: where,
-          whereArgs: [
-            0,
-            dataStream.studyDeploymentId,
-            dataStream.deviceRoleName,
-            dataStream.dataType,
-          ],
+          whereArgs: [0, dataStream.studyDeploymentId, dataStream.deviceRoleName, dataStream.dataType],
         ) ??
         [];
 
@@ -97,20 +97,14 @@ class DataStreamBuffer {
     if (maps.isEmpty) return null;
 
     for (var element in maps) {
-      int row =
-          int.tryParse(element[SQLiteDataManager.ID_COLUMN].toString()) ?? 0;
+      int row = int.tryParse(element[SQLiteDataManager.ID_COLUMN].toString()) ?? 0;
       // save the row id of what is uploaded
       rows.add(row);
-      int? triggerId = int.tryParse(
-        element[SQLiteDataManager.TRIGGER_ID_COLUMN].toString(),
-      );
+      int? triggerId = int.tryParse(element[SQLiteDataManager.TRIGGER_ID_COLUMN].toString());
       if (triggerId != null) triggerIds.add(triggerId);
 
-      final jsonString =
-          element[SQLiteDataManager.MEASUREMENT_COLUMN] as String;
-      final measurement = Measurement.fromJson(
-        json.decode(jsonString) as Map<String, dynamic>,
-      );
+      final jsonString = element[SQLiteDataManager.MEASUREMENT_COLUMN] as String;
+      final measurement = Measurement.fromJson(json.decode(jsonString) as Map<String, dynamic>);
       measurements.add(measurement);
     }
     firstSequenceId = rows.reduce(min);
@@ -123,10 +117,10 @@ class DataStreamBuffer {
     );
   }
 
-  /// Clean up the database.
+  /// Removes the measurements in [rows] from the buffer, then clears [rows].
   ///
-  /// If [delete] is true, all measurements which has been successfully uploaded
-  /// is deleted. Otherwise they are kept, but marked as uploaded.
+  /// If [delete] is `true`, they are deleted. Otherwise they are kept but
+  /// marked as uploaded. Call it after a successful upload.
   Future<void> cleanup([bool delete = true]) async {
     final args = rows.join(',');
     int? count = 0;
@@ -157,6 +151,6 @@ class DataStreamBuffer {
     _deployment = null;
   }
 
-  /// Close this buffer. No more data can be added.
+  /// Closes the database. No more data can be added.
   Future<void> close() async => await database?.close();
 }

@@ -8,6 +8,9 @@ part of '../../protocol.dart';
 
 /// Application service which allows managing (multiple versions of)
 /// [StudyProtocol]s.
+///
+/// The protocol store in CARP Core. Clients usually call it through the CARP
+/// web services; a protocol is then deployed with a [DeploymentService].
 abstract class ProtocolService {
   static const String API_VERSION = "1.1";
 
@@ -61,10 +64,5 @@ abstract class ProtocolFactoryService {
   /// The [customProtocol] is stored in a single [CustomProtocolTask] which in
   /// the CARP study protocol model is described as being triggered at the start
   /// of the study for a [CustomProtocolDevice] with role name "Custom device".
-  Future<StudyProtocol> createCustomProtocol(
-    String ownerId,
-    String name,
-    String description,
-    String customProtocol,
-  );
+  Future<StudyProtocol> createCustomProtocol(String ownerId, String name, String description, String customProtocol);
 }

@@ -1,11 +1,13 @@
-/// Maps the information specified in a study protocol to runtime configurations
-/// used by the 'clients' subsystem to run the protocol on concrete devices
-/// (e.g., a smartphone) and allow researchers to monitor their state.
-/// To start collecting data, participants need to be invited, devices need to
-/// be registered, and consent needs to be given to collect the requested data.
+/// Deployments: turning a study protocol into what runs on each device.
 ///
-/// Contains the core deployment classes like [PrimaryDeviceDeployment], [StudyDeployment],
-/// [ParticipantData], and [DeploymentService].
+/// A [StudyDeployment] maps a [StudyProtocol] to runtime configurations
+/// ([PrimaryDeviceDeployment]) used by the client subsystem, and lets
+/// researchers monitor its state ([StudyDeploymentStatus]).
+/// To start collecting data, participants are invited, devices are
+/// registered, and participant data (e.g., consent) is collected.
+///
+/// Main types: [DeploymentService], [ParticipationService], [StudyDeployment],
+/// [StudyDeploymentStatus], [PrimaryDeviceDeployment] and [ParticipantData].
 ///
 /// See the [`carp.deployments`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-deployments.md)
 /// definition in Kotlin.

@@ -15,8 +15,7 @@ class A extends Serializable {
   @override
   Function get fromJsonFunction => _$AFromJson;
 
-  factory A.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<A>(json);
+  factory A.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<A>(json);
 
   @override
   Map<String, dynamic> toJson() => _$AToJson(this);
@@ -42,8 +41,7 @@ class B extends A {
 
   @override
   Function get fromJsonFunction => _$BFromJson;
-  factory B.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<B>(json, notAvailable: B(-1));
+  factory B.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<B>(json, notAvailable: B(-1));
   @override
   Map<String, dynamic> toJson() => _$BToJson(this);
 }
@@ -60,8 +58,7 @@ class C extends A {
 
   @override
   Function get fromJsonFunction => _$CFromJson;
-  factory C.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<C>(json);
+  factory C.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<C>(json);
   @override
   Map<String, dynamic> toJson() => _$CToJson(this);
 }

@@ -7,27 +7,34 @@
 
 part of 'communication.dart';
 
-/// Holds a list of text (SMS) messages from the device.
+/// The text (SMS) messages on the device.
+///
+/// Collected by [TextMessageLogProbe] for the
+/// [CommunicationSamplingPackage.TEXT_MESSAGE_LOG] measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TextMessageLog extends Data {
+  /// The inbox and sent messages.
   List<TextMessage> textMessageLog = [];
 
   TextMessageLog([this.textMessageLog = const []]) : super();
 
   @override
   Function get fromJsonFunction => _$TextMessageLogFromJson;
-  factory TextMessageLog.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<TextMessageLog>(json);
+  factory TextMessageLog.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<TextMessageLog>(json);
   @override
   Map<String, dynamic> toJson() => _$TextMessageLogToJson(this);
 }
 
-/// Holds a text messages (SMS).
+/// A text message (SMS).
+///
+/// Collected by [TextMessageProbe] for the [CommunicationSamplingPackage.TEXT_MESSAGE]
+/// measure, and listed in a [TextMessageLog].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TextMessage extends Data {
+  /// The id of this message on the device.
   int? id;
 
-  /// The receiver address of this message
+  /// The address (phone number) of the other party of this message.
   String? address;
 
   /// The text body of this message.
@@ -36,7 +43,7 @@ class TextMessage extends Data {
   /// The size in bytes of the body of the message.
   int? size;
 
-  /// Has the message been read?
+  /// Whether the message has been read.
   bool? read;
 
   /// The date this message was created.
@@ -45,10 +52,10 @@ class TextMessage extends Data {
   /// The date this message was sent.
   DateTime? dateSent;
 
-  /// The type of message:
+  /// The type of message, e.g. inbox or sent.
   SmsType? type;
 
-  /// The state of the message:
+  /// The delivery status of the message.
   SmsStatus? status;
 
   TextMessage({
@@ -63,6 +70,7 @@ class TextMessage extends Data {
     this.status,
   }) : super();
 
+  /// Creates a [TextMessage] from an [SmsMessage] from the telephony plugin.
   factory TextMessage.fromSmsMessage(SmsMessage sms) => TextMessage(
     id: sms.id,
     address: sms.address,
@@ -77,67 +85,66 @@ class TextMessage extends Data {
 
   @override
   Function get fromJsonFunction => _$TextMessageFromJson;
-  factory TextMessage.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<TextMessage>(json);
+  factory TextMessage.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<TextMessage>(json);
 
   @override
   Map<String, dynamic> toJson() => _$TextMessageToJson(this);
 }
 
-/// Holds a phone log, i.e. a list of phone calls made on the device.
+/// The phone log, i.e. the list of phone calls made on the device in a period.
+///
+/// Collected by [PhoneLogProbe] for the [CommunicationSamplingPackage.PHONE_LOG]
+/// measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PhoneLog extends Data {
+  /// The start and end (UTC) of the period this log covers.
   DateTime start, end;
+
+  /// The phone calls in the period.
   List<PhoneCall> phoneLog = [];
 
   PhoneLog(this.start, this.end, [this.phoneLog = const []]) : super();
 
   @override
   Function get fromJsonFunction => _$PhoneLogFromJson;
-  factory PhoneLog.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<PhoneLog>(json);
+  factory PhoneLog.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<PhoneLog>(json);
 
   @override
   Map<String, dynamic> toJson() => _$PhoneLogToJson(this);
 }
 
-/// Phone call data.
+/// A phone call, as listed in a [PhoneLog].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PhoneCall {
-  /// Date & Time of the call.
+  /// Date and time of the call.
   DateTime? timestamp;
 
-  /// Type of call:
-  ///  - answered
-  ///  - incoming
-  ///  - blocked
-  ///  - missed
-  ///  - outgoing
-  ///  - rejected
-  ///  - voice_mail
+  /// Type of call. One of:
+  ///  * answered_externally
+  ///  * incoming
+  ///  * blocked
+  ///  * missed
+  ///  * outgoing
+  ///  * rejected
+  ///  * voice_mail
+  ///  * unknown
   String? callType;
 
-  /// Duration of call in ms.
+  /// Duration of the call in seconds, as reported by the Android call log.
   int? duration;
 
   /// The formatted version of the phone number (if available).
   String? formattedNumber;
 
-  /// The phone number
+  /// The phone number.
   String? number;
 
   /// The name of the caller (if available).
   String? name;
 
-  PhoneCall([
-    this.timestamp,
-    this.callType,
-    this.duration,
-    this.formattedNumber,
-    this.number,
-    this.name,
-  ]);
+  PhoneCall([this.timestamp, this.callType, this.duration, this.formattedNumber, this.number, this.name]);
 
+  /// Creates a [PhoneCall] from a [CallLogEntry] from the call log plugin.
   factory PhoneCall.fromCallLogEntry(CallLogEntry call) {
     DateTime timestamp = DateTime.fromMicrosecondsSinceEpoch(call.timestamp!);
     String type = "unknown";
@@ -169,67 +176,62 @@ class PhoneCall {
         break;
     }
 
-    return PhoneCall(
-      timestamp,
-      type,
-      call.duration,
-      call.formattedNumber,
-      call.number,
-      call.name,
-    );
+    return PhoneCall(timestamp, type, call.duration, call.formattedNumber, call.number, call.name);
   }
 
-  factory PhoneCall.fromJson(Map<String, dynamic> json) =>
-      _$PhoneCallFromJson(json);
+  factory PhoneCall.fromJson(Map<String, dynamic> json) => _$PhoneCallFromJson(json);
   Map<String, dynamic> toJson() => _$PhoneCallToJson(this);
 }
 
-/// Holds a list of calendar events from the device.
+/// The calendar events on the device in a period.
+///
+/// Collected by [CalendarProbe] for the [CommunicationSamplingPackage.CALENDAR]
+/// measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Calendar extends Data {
   /// The list of calendar entries collected.
   List<CalendarEvent> calendarEvents = [];
 
+  /// The start and end of the period this calendar data covers.
   DateTime start, end;
 
   Calendar(this.start, this.end, [this.calendarEvents = const []]) : super();
 
   @override
   Function get fromJsonFunction => _$CalendarFromJson;
-  factory Calendar.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Calendar>(json);
+  factory Calendar.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Calendar>(json);
   @override
   Map<String, dynamic> toJson() => _$CalendarToJson(this);
 }
 
-/// A calendar event.
+/// A calendar event, as listed in a [Calendar].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CalendarEvent {
-  /// The unique identifier for this event
+  /// The unique identifier for this event.
   String? eventId;
 
-  /// The identifier of the calendar that this event is associated with
+  /// The identifier of the calendar that this event is associated with.
   String? calendarId;
 
-  /// The title of this event
+  /// The title of this event.
   String? title;
 
-  /// The description for this event
+  /// The description for this event.
   String? description;
 
-  /// Indicates when the event starts
+  /// When the event starts (UTC).
   DateTime? start;
 
-  /// Indicates when the event ends
+  /// When the event ends (UTC).
   DateTime? end;
 
-  /// Indicates if this is an all-day event
+  /// Whether this is an all-day event.
   bool? allDay;
 
-  /// The location of this event
+  /// The location of this event.
   String? location;
 
-  /// Status of the event.
+  /// Status of the event, e.g. `confirmed`, `tentative` or `canceled`.
   final String? status;
 
   /// Timezone identifier for the event (e.g., "America/New_York").
@@ -254,6 +256,7 @@ class CalendarEvent {
     this.isRecurring = false,
   ]);
 
+  /// Creates a [CalendarEvent] from an event from the device calendar plugin.
   factory CalendarEvent.fromEvent(cal.Event event) {
     return CalendarEvent(
       event.eventId,
@@ -270,7 +273,6 @@ class CalendarEvent {
     );
   }
 
-  factory CalendarEvent.fromJson(Map<String, dynamic> json) =>
-      _$CalendarEventFromJson(json);
+  factory CalendarEvent.fromJson(Map<String, dynamic> json) => _$CalendarEventFromJson(json);
   Map<String, dynamic> toJson() => _$CalendarEventToJson(this);
 }

@@ -22,10 +22,7 @@ enum DeploymentMode {
 class SensingBLoC {
   /// Create the BLoC, optionally specifying the [deploymentMode], [debugLevel],
   /// and [primaryDeviceType].
-  SensingBLoC({
-    this.deploymentMode = DeploymentMode.local,
-    DebugLevel debugLevel = DebugLevel.warning,
-  }) {
+  SensingBLoC({this.deploymentMode = DeploymentMode.local, DebugLevel debugLevel = DebugLevel.warning}) {
     Settings().debugLevel = debugLevel;
   }
 
@@ -39,8 +36,7 @@ class SensingBLoC {
   SmartphoneStudy? get study => sensing.study;
 
   /// Is sampling running, i.e. has the study executor been started?
-  bool get isSampling =>
-      sensing.controller?.executor.state == ExecutorState.Resumed;
+  bool get isSampling => sensing.controller?.executor.state == ExecutorState.Resumed;
 
   /// Add a study to the app based on the current [deploymentMode].
   /// If in local mode, the study protocol is loaded from the local study protocol
@@ -50,8 +46,7 @@ class SensingBLoC {
       case DeploymentMode.local:
         // Get the protocol from the local study protocol manager.
         // Note that the study id is not used.
-        StudyProtocol protocol = await LocalStudyProtocolManager()
-            .getStudyProtocol('');
+        StudyProtocol protocol = await LocalStudyProtocolManager().getStudyProtocol('');
 
         // Add the study from the protocol to the sensing client.
         await sensing.client.addStudyFromProtocol(protocol);

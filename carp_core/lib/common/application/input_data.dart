@@ -6,31 +6,41 @@
  */
 part of '../../common.dart';
 
-/// All supported input data types.
+/// The type names of all supported participant input data.
+///
+/// Used as [ParticipantAttribute.inputDataType] and as the `__type` of the
+/// matching [InputData] subclass, e.g. [SEX] for [SexInput].
+/// [CUSTOM] and [SEX] are defined in CARP Core; the others by the CARP web
+/// services (CAWS).
 abstract class InputType {
+  /// Namespace of the input types defined in CARP Core.
   static const INPUT_TYPE_NAMESPACE = '${NameSpace.CARP}.input';
+
+  /// Namespace of the input types defined by the CARP web services.
   static const CAWS_INPUT_TYPE_NAMESPACE = 'dk.carp.webservices.input';
   static const CUSTOM = '${InputType.INPUT_TYPE_NAMESPACE}.custom';
   static const SEX = '${InputType.INPUT_TYPE_NAMESPACE}.sex';
-  static const PHONE_NUMBER =
-      '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.phone_number';
+  static const PHONE_NUMBER = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.phone_number';
   static const SSN = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.ssn';
   static const FULL_NAME = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.full_name';
-  static const INFORMED_CONSENT =
-      '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.informed_consent';
+  static const INFORMED_CONSENT = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.informed_consent';
   static const ADDRESS = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.address';
   static const DIAGNOSIS = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.diagnosis';
 
   static const NOTE = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.note';
-  static const EDUCATIONAL_DEGREE =
-      '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.educational_degree';
-  static const ONBOARDING_RESEARCHER =
-      '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.onboarding_researcher';
+  static const EDUCATIONAL_DEGREE = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.educational_degree';
+  static const ONBOARDING_RESEARCHER = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.onboarding_researcher';
   static const LANGUAGE = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.language';
   static const OCCUPATION = '${InputType.CAWS_INPUT_TYPE_NAMESPACE}.occupation';
 }
 
-/// Base class for all input data types.
+/// Base class for data about a participant that is entered by a user.
+///
+/// Examples are name, sex or informed consent. This is participant data,
+/// not sensor data; it is stored per study deployment with a
+/// `ParticipationService` and declared in a protocol with
+/// [ExpectedParticipantData]. Its JSON `__type` is [type], one of the
+/// [InputType] names.
 abstract class InputData extends Data {
   /// The type of this input data.
   String get type;
@@ -39,7 +49,7 @@ abstract class InputData extends Data {
   String get jsonType => type;
 }
 
-/// Custom input data as requested by a researcher.
+/// Custom input data as requested by a researcher, of type [InputType.CUSTOM].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CustomInput extends InputData {
   @override
@@ -52,8 +62,7 @@ class CustomInput extends InputData {
 
   @override
   Function get fromJsonFunction => _$CustomInputFromJson;
-  factory CustomInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<CustomInput>(json);
+  factory CustomInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<CustomInput>(json);
   @override
   Map<String, dynamic> toJson() => _$CustomInputToJson(this);
 }
@@ -74,8 +83,7 @@ class SexInput extends InputData {
 
   @override
   Function get fromJsonFunction => _$SexInputFromJson;
-  factory SexInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<SexInput>(json);
+  factory SexInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<SexInput>(json);
   @override
   Map<String, dynamic> toJson() => _$SexInputToJson(this);
 }
@@ -109,8 +117,7 @@ class PhoneNumberInput extends InputData {
 
   @override
   Function get fromJsonFunction => _$PhoneNumberInputFromJson;
-  factory PhoneNumberInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<PhoneNumberInput>(json);
+  factory PhoneNumberInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<PhoneNumberInput>(json);
   @override
   Map<String, dynamic> toJson() => _$PhoneNumberInputToJson(this);
 }
@@ -127,10 +134,7 @@ class SocialSecurityNumberInput extends InputData {
   /// The country in which this [socialSecurityNumber] originates from.
   String country;
 
-  SocialSecurityNumberInput({
-    required this.socialSecurityNumber,
-    required this.country,
-  }) : super();
+  SocialSecurityNumberInput({required this.socialSecurityNumber, required this.country}) : super();
 
   @override
   Function get fromJsonFunction => _$SocialSecurityNumberInputFromJson;
@@ -152,8 +156,7 @@ class FullNameInput extends InputData {
 
   @override
   Function get fromJsonFunction => _$FullNameInputFromJson;
-  factory FullNameInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<FullNameInput>(json);
+  factory FullNameInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<FullNameInput>(json);
   @override
   Map<String, dynamic> toJson() => _$FullNameInputToJson(this);
 }
@@ -164,7 +167,8 @@ class InformedConsentInput extends InputData {
   @override
   String get type => InputType.INFORMED_CONSENT;
 
-  /// The time this informed consent was signed.
+  /// The time this informed consent was signed, in UTC.
+  /// Defaults to the time of creation.
   late DateTime signedTimestamp;
 
   /// The location where this informed consent was signed.
@@ -210,19 +214,11 @@ class AddressInput extends InputData {
   String get type => InputType.ADDRESS;
 
   String? address1, address2, street, city, postalCode, country;
-  AddressInput({
-    this.address1,
-    this.address2,
-    this.street,
-    this.city,
-    this.postalCode,
-    this.country,
-  }) : super();
+  AddressInput({this.address1, this.address2, this.street, this.city, this.postalCode, this.country}) : super();
 
   @override
   Function get fromJsonFunction => _$AddressInputFromJson;
-  factory AddressInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AddressInput>(json);
+  factory AddressInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AddressInput>(json);
   @override
   Map<String, dynamic> toJson() => _$AddressInputToJson(this);
 }
@@ -249,17 +245,11 @@ class DiagnosisInput extends InputData {
   /// Any conclusion or notes from the physician.
   String? conclusion;
 
-  DiagnosisInput({
-    this.effectiveDate,
-    this.diagnosis,
-    required this.icd11Code,
-    this.conclusion,
-  }) : super();
+  DiagnosisInput({this.effectiveDate, this.diagnosis, required this.icd11Code, this.conclusion}) : super();
 
   @override
   Function get fromJsonFunction => _$DiagnosisInputFromJson;
-  factory DiagnosisInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<DiagnosisInput>(json);
+  factory DiagnosisInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<DiagnosisInput>(json);
   @override
   Map<String, dynamic> toJson() => _$DiagnosisInputToJson(this);
 }
@@ -277,8 +267,7 @@ class NoteInput extends InputData {
 
   @override
   Function get fromJsonFunction => _$NoteInputFromJson;
-  factory NoteInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<NoteInput>(json);
+  factory NoteInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<NoteInput>(json);
   @override
   Map<String, dynamic> toJson() => _$NoteInputToJson(this);
 }
@@ -352,11 +341,7 @@ class OnboardingResearcherInput extends InputData {
   /// The name of the institution of the onboarding researcher (optional).
   String? institutionName;
 
-  OnboardingResearcherInput({
-    required this.researcherId,
-    required this.researcherName,
-    this.institutionName,
-  }) : super();
+  OnboardingResearcherInput({required this.researcherId, required this.researcherName, this.institutionName}) : super();
 
   @override
   Function get fromJsonFunction => _$OnboardingResearcherInputFromJson;
@@ -381,11 +366,7 @@ class PreferredLanguageInput extends InputData {
   /// Human-readable language name, if needed.
   String? displayName;
 
-  PreferredLanguageInput({
-    required this.languageCode,
-    this.region,
-    this.displayName,
-  }) : super();
+  PreferredLanguageInput({required this.languageCode, this.region, this.displayName}) : super();
 
   @override
   Function get fromJsonFunction => _$PreferredLanguageInputFromJson;
@@ -401,7 +382,7 @@ class OccupationInput extends InputData {
   @override
   String get type => InputType.OCCUPATION;
 
-  /// ISO 639-1 or 639-3 code (e.g., "en", "da").
+  /// One or more selected occupations of the participant.
   List<String> roles = [];
 
   /// Free-text occupation if none of the predefined roles fit.
@@ -413,8 +394,7 @@ class OccupationInput extends InputData {
 
   @override
   Function get fromJsonFunction => _$OccupationInputFromJson;
-  factory OccupationInput.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<OccupationInput>(json);
+  factory OccupationInput.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<OccupationInput>(json);
   @override
   Map<String, dynamic> toJson() => _$OccupationInputToJson(this);
 }

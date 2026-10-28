@@ -6,13 +6,15 @@
  */
 part of '../../../common.dart';
 
-/// Configuration of an internet-connected personal computer with no built-in [sensors].
+/// Configuration of an internet-connected personal computer with no built-in
+/// sensors.
+///
+/// A [PrimaryDeviceConfiguration] registered with a
+/// [PersonalComputerRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class PersonalComputer
-    extends PrimaryDeviceConfiguration<PersonalComputerRegistration> {
+class PersonalComputer extends PrimaryDeviceConfiguration<PersonalComputerRegistration> {
   /// The type of a personal computer device.
-  static const String DEVICE_TYPE =
-      '${DeviceConfiguration.DEVICE_NAMESPACE}.PersonalComputer';
+  static const String DEVICE_TYPE = '${DeviceConfiguration.DEVICE_NAMESPACE}.PersonalComputer';
 
   /// The default role name for a personal computer.
   static const String DEFAULT_ROLE_NAME = 'Primary PC';
@@ -44,8 +46,7 @@ class PersonalComputer
 
   @override
   Function get fromJsonFunction => _$PersonalComputerFromJson;
-  factory PersonalComputer.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<PersonalComputer>(json);
+  factory PersonalComputer.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<PersonalComputer>(json);
   @override
   Map<String, dynamic> toJson() => _$PersonalComputerToJson(this);
 }

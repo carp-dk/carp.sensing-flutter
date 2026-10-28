@@ -7,9 +7,11 @@
 
 part of '../../../sampling_packages.dart';
 
-/// The [LightProbe] listens to the phone's light sensor typically located
+/// Collects ambient light from the phone's light sensor, typically located
 /// near the front camera.
-/// Every value is in the SI unit Lux and is stored in a [AmbientLight] object.
+///
+/// Buffers lux readings over each sampling period and reports their
+/// statistics as an [AmbientLight] object.
 ///
 /// This probe is only available on Android.
 class LightProbe extends BufferingPeriodicStreamProbe {

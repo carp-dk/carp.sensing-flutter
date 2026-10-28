@@ -6,11 +6,11 @@
  */
 part of 'carp_services.dart';
 
-/// Provides a reference to the data stream endpoint in a CARP web service.
+/// A reference to the data streams of one study deployment in CAWS.
 ///
-/// Used to:
-/// - append data to the stream.
-/// - get data from the stream.
+/// Obtained from [CarpDataStreamService.dataStream]. [append] uses this
+/// reference's study deployment ID. The read methods use the deployment ID in
+/// the [DataStreamId] you pass in, without checking that it matches.
 class DataStreamReference extends RPCCarpReference {
   /// The CARP study deployment ID.
   String studyDeploymentId;
@@ -18,36 +18,29 @@ class DataStreamReference extends RPCCarpReference {
   @override
   CarpDataStreamService get service => super.service as CarpDataStreamService;
 
-  DataStreamReference._(CarpDataStreamService service, this.studyDeploymentId)
-    : super._(service);
+  DataStreamReference._(CarpDataStreamService service, this.studyDeploymentId) : super._(service);
 
   /// The URL for the data stream service endpoint.
   ///
   /// {{PROTOCOL}}://{{SERVER_HOST}}:{{SERVER_PORT}}/api/data-stream-service
   @override
-  String get rpcEndpointUri =>
-      "${service.app.uri.toString()}/api/data-stream-service";
+  String get rpcEndpointUri => "${service.app.uri.toString()}/api/data-stream-service";
 
-  /// Append a [batch] of data measures to this data stream.
+  /// Appends a [batch] of measurements to the data streams of this deployment.
   /// If [compress] is true, the data is compressed before upload.
-  Future<void> append(
-    List<DataStreamBatch> batch, {
-    bool compress = true,
-  }) async => await service.appendToDataStreams(
-    studyDeploymentId,
-    batch,
-    compress: compress,
-  );
+  Future<void> append(List<DataStreamBatch> batch, {bool compress = true}) async =>
+      await service.appendToDataStreams(studyDeploymentId, batch, compress: compress);
 
-  /// Get all data points in [dataStream] with sequence numbers between
+  /// Gets all data in [dataStream] with sequence numbers between
   /// [fromSequenceId] and [toSequenceIdInclusive].
-  Future<List<DataStreamBatch>> get(
-    DataStreamId dataStream,
-    int fromSequenceId, [
-    int? toSequenceIdInclusive,
-  ]) async => await service.getDataStream(
-    dataStream,
-    fromSequenceId,
-    toSequenceIdInclusive,
-  );
+  /// If [toSequenceIdInclusive] is null, all data from [fromSequenceId] is
+  /// returned.
+  Future<List<DataStreamBatch>> get(DataStreamId dataStream, int fromSequenceId, [int? toSequenceIdInclusive]) async =>
+      await service.getDataStream(dataStream, fromSequenceId, toSequenceIdInclusive);
+
+  /// Gets all data in [dataStream] whose local update time falls
+  /// within the inclusive [from]-[to] window, as one [DataStreamBatch] per
+  /// contiguous run of measurements.
+  Future<List<DataStreamBatch>> getDataStreamBatchesByTime(DataStreamId dataStream, DateTime from, DateTime to) async =>
+      await service.getDataStreamBatchesByTime(dataStream, from, to);
 }

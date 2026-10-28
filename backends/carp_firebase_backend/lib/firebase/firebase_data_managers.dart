@@ -6,8 +6,13 @@
  */
 part of carp_firebase_backend;
 
-/// An abstract class handling initialization and authentication to Firebase.
+/// Base class for data managers that upload to Firebase.
+///
+/// Sets up the Firebase app and signs in the user, based on the
+/// [FirebaseEndPoint] of a [FirebaseDataEndPoint].
+/// Extended by [FirebaseStorageDataManager] and [FirebaseDatabaseDataManager].
 abstract class FirebaseDataManager extends AbstractDataManager {
+  /// The Firebase project and credentials. Set by [initialize].
   FirebaseEndPoint? firebaseEndPoint;
 
   FirebaseApp? _firebaseApp;
@@ -26,10 +31,14 @@ abstract class FirebaseDataManager extends AbstractDataManager {
     firebaseEndPoint = (dataEndPoint as FirebaseDataEndPoint).firebaseEndPoint;
   }
 
+  /// The Firebase app for [firebaseEndPoint], initialized on first access.
+  ///
+  /// Throws a [CarpFirebaseBackendException] if [initialize] has not been called.
   Future<FirebaseApp> get firebaseApp async {
     if (firebaseEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_firebaseApp == null) {
       _firebaseApp = await Firebase.initializeApp(
@@ -47,19 +56,22 @@ abstract class FirebaseDataManager extends AbstractDataManager {
     return _firebaseApp!;
   }
 
-  /// Returns the current authenticated user.
+  /// The authenticated Firebase user.
   ///
-  /// If the user is not authenticated, authentication to Firebase is done
-  /// according to the specified [FireBaseAuthenticationMethods]:
+  /// If no user is signed in yet, signs in according to
+  /// [FirebaseEndPoint.firebaseAuthenticationMethod]:
   ///
-  ///   * `GOOGLE` -- authenticate using Google credentials
-  ///   * `PASSWORD` - authenticate using username and password
+  ///  * [FireBaseAuthenticationMethods.GOOGLE]: Google Sign-In.
+  ///  * [FireBaseAuthenticationMethods.PASSWORD]: email and password.
   ///
-  /// Returns `null` if the user cannot be authenticated.
+  /// Emits a [FirebaseDataManagerEventTypes.authenticated] event on sign-in.
+  /// Returns `null` if the user cannot be authenticated. Throws a
+  /// [CarpFirebaseBackendException] if [initialize] has not been called.
   Future<User?> get user async {
     if (firebaseEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_user == null) {
       switch (firebaseEndPoint!.firebaseAuthenticationMethod) {
@@ -73,8 +85,9 @@ abstract class FirebaseDataManager extends AbstractDataManager {
               accessToken: googleAuth.accessToken,
               idToken: googleAuth.idToken,
             );
-            UserCredential result =
-                await _auth.signInWithCredential(credential);
+            UserCredential result = await _auth.signInWithCredential(
+              credential,
+            );
             _user = result.user;
             break;
           }
@@ -83,8 +96,9 @@ abstract class FirebaseDataManager extends AbstractDataManager {
             assert(firebaseEndPoint?.email != null);
             assert(firebaseEndPoint?.password != null);
             UserCredential result = await _auth.signInWithEmailAndPassword(
-                email: firebaseEndPoint!.email!,
-                password: firebaseEndPoint!.password!);
+              email: firebaseEndPoint!.email!,
+              password: firebaseEndPoint!.password!,
+            );
             _user = result.user;
             break;
           }
@@ -94,8 +108,9 @@ abstract class FirebaseDataManager extends AbstractDataManager {
           }
       }
       if (_user != null) {
-        addEvent(FirebaseDataManagerEvent(
-            FirebaseDataManagerEventTypes.authenticated));
+        addEvent(
+          FirebaseDataManagerEvent(FirebaseDataManagerEventTypes.authenticated),
+        );
         print("signed in as " + _user!.email! + " - uid: " + _user!.uid);
       }
     }
@@ -115,17 +130,19 @@ abstract class FirebaseDataManager extends AbstractDataManager {
   void onError(error) => warning('Error in $runtimeType - $error');
 }
 
-/// Stores files with [Datum] json objects in the Firebase Storage file store.
-/// Works closely with the [FileDataManager] which is responsible for writing
-/// and zipping files to the local device.
+/// A data manager that uploads files of JSON data to Firebase Storage.
 ///
-/// Files are transferred when the device is online and buffered when offline.
-/// Once the file has been transferred to Firebase, it is deleted on the local
-/// device.
+/// Handles a [FirebaseStorageDataEndPoint]. Wraps a [FileDataManager], which
+/// writes (and zips) files on the phone. Each closed file is uploaded to
+/// [firebasePath] and then deleted locally. Its events are forwarded to this
+/// manager's event stream.
 class FirebaseStorageDataManager extends FirebaseDataManager {
   FirebaseStorage? _firebaseStorage;
 
+  /// The wrapped manager that writes files on the phone.
   late FileDataManager fileDataManager;
+
+  /// The data endpoint this manager uploads to. Set by [initialize].
   FirebaseStorageDataEndPoint? firebaseStorageDataEndPoint;
 
   String get type => DataEndPointTypes.FIREBASE_STORAGE;
@@ -142,8 +159,10 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
     fileDataManager.events
         .where((event) => event.runtimeType == FileDataManagerEvent)
         .where((event) => event.type == FileDataManagerEventTypes.FILE_CLOSED)
-        .listen((event) =>
-            _uploadFileToFirestore((event as FileDataManagerEvent).path));
+        .listen(
+          (event) =>
+              _uploadFileToFirestore((event as FileDataManagerEvent).path),
+        );
   }
 
   Future initialize(
@@ -163,35 +182,47 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
 
     info('Initializig FirebaseStorageDataManager...');
     info(
-        ' Firebase URI  : ${firebaseStorageDataEndPoint!.firebaseEndPoint.uri}');
+      ' Firebase URI  : ${firebaseStorageDataEndPoint!.firebaseEndPoint.uri}',
+    );
     info(' Folder path   : ${firebaseStorageDataEndPoint!.path}');
     info(' Storage       : ${storage.app.name}');
     info(
-        ' Auth. user    : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n');
+      ' Auth. user    : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n',
+    );
   }
 
+  /// The Firebase Storage instance for the endpoint's bucket.
+  ///
+  /// Throws a [CarpFirebaseBackendException] if [initialize] has not been called.
   Future<FirebaseStorage> get firebaseStorage async {
     if (firebaseStorageDataEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_firebaseStorage == null) {
       final FirebaseApp? app = await firebaseApp;
       _firebaseStorage = FirebaseStorage.instanceFor(
-          app: app, bucket: firebaseStorageDataEndPoint!.firebaseEndPoint.uri);
+        app: app,
+        bucket: firebaseStorageDataEndPoint!.firebaseEndPoint.uri,
+      );
     }
     return _firebaseStorage!;
   }
 
+  /// The folder in Firebase Storage that files are uploaded to:
+  /// `<path>/<study_deployment_id>/<device_id>`.
   String get firebasePath =>
       "${firebaseStorageDataEndPoint!.path}/$studyDeploymentId/${DeviceInfo().deviceID.toString()}";
 
   Future<String> _uploadFileToFirestore(String localFilePath) async {
-    final String filename =
-        localFilePath.substring(localFilePath.lastIndexOf('/') + 1);
+    final String filename = localFilePath.substring(
+      localFilePath.lastIndexOf('/') + 1,
+    );
 
     info(
-        "Upload to Firestore started - path : '$firebasePath', filename : '$filename'");
+      "Upload to Firestore started - path : '$firebasePath', filename : '$filename'",
+    );
 
     final Reference ref =
         FirebaseStorage.instance.ref().child(firebasePath).child(filename);
@@ -207,7 +238,7 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
         customMetadata: <String, String>{
           'device_id': '$deviceID',
           'study_deployment_id': '$studyDeploymentId',
-          'user_id': '$userID'
+          'user_id': '$userID',
         },
         // TODO - add location as metadata
       ),
@@ -219,16 +250,19 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
     String downloadUrl = await ref.getDownloadURL();
 
     await uploadTask.whenComplete(() {
-      addEvent(FirebaseDataManagerEvent(
-        FirebaseDataManagerEventTypes.file_uploaded,
-        file.path,
-        downloadUrl,
-      ));
+      addEvent(
+        FirebaseDataManagerEvent(
+          FirebaseDataManagerEventTypes.file_uploaded,
+          file.path,
+          downloadUrl,
+        ),
+      );
       info('Upload to Firestore finished - remote file url  : $downloadUrl');
       // then delete the local file.
       file.delete();
-      addEvent(FileDataManagerEvent(
-          FileDataManagerEventTypes.FILE_DELETED, file.path));
+      addEvent(
+        FileDataManagerEvent(FileDataManagerEventTypes.FILE_DELETED, file.path),
+      );
     });
 
     return downloadUrl;
@@ -238,14 +272,16 @@ class FirebaseStorageDataManager extends FirebaseDataManager {
   void onDataPoint(DataPoint dataPoint) => fileDataManager.write(dataPoint);
 }
 
-/// Stores CARP json objects in the Firebase Database.
+/// A data manager that uploads each JSON data object to Cloud Firestore.
 ///
-/// Every time a CARP json data object is created, it is uploaded to Firebase.
-/// Hence, this interface only works when the device is online.
-/// If offline data storage and forward is needed, use the [FirebaseStorageDataManager]
-/// instead.
+/// Handles a [FirebaseDatabaseDataEndPoint]. Every data object is uploaded
+/// as soon as it is collected, so this only works when the phone is online;
+/// nothing is buffered. Use [FirebaseStorageDataManager] if offline buffering
+/// is needed.
 class FirebaseDatabaseDataManager extends FirebaseDataManager {
   FirebaseFirestore? _firebaseDatabase;
+
+  /// The data endpoint this manager uploads to. Set by [initialize].
   FirebaseDatabaseDataEndPoint? firebaseDatabaseDataEndPoint;
 
   FirebaseDatabaseDataManager();
@@ -267,17 +303,23 @@ class FirebaseDatabaseDataManager extends FirebaseDataManager {
 
     print('Initializig $runtimeType...');
     print(
-        ' Firebase URI    : ${firebaseDatabaseDataEndPoint!.firebaseEndPoint.uri}');
+      ' Firebase URI    : ${firebaseDatabaseDataEndPoint!.firebaseEndPoint.uri}',
+    );
     print(' Collection path : ${firebaseDatabaseDataEndPoint!.collection}');
     print(' Database        : ${database.app.name}');
     print(
-        ' Auth. user      : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n');
+      ' Auth. user      : ${authenticatedUser?.displayName} <${authenticatedUser?.email}>\n',
+    );
   }
 
+  /// The Firestore instance for the Firebase app.
+  ///
+  /// Throws a [CarpFirebaseBackendException] if [initialize] has not been called.
   Future<FirebaseFirestore> get firebaseDatabase async {
     if (firebaseDatabaseDataEndPoint == null)
       throw CarpFirebaseBackendException(
-          "The Firebase Endpoint is not configured - call the 'initialize()' method first.");
+        "The Firebase Endpoint is not configured - call the 'initialize()' method first.",
+      );
 
     if (_firebaseDatabase == null) {
       final FirebaseApp app = await firebaseApp;
@@ -286,7 +328,11 @@ class FirebaseDatabaseDataManager extends FirebaseDataManager {
     return _firebaseDatabase!;
   }
 
-  /// Called every time a JSON CARP [data] object is to be uploaded.
+  /// Uploads [dataPoint] as a JSON document to
+  /// [FirebaseDatabaseDataEndPoint.collection].
+  ///
+  /// Returns `false`, without uploading, if no user is authenticated.
+  /// The write is not awaited.
   Future<bool> uploadData(DataPoint dataPoint) async {
     assert(dataPoint.data is Datum);
     final datum = dataPoint.data as Datum?;
@@ -314,7 +360,8 @@ class FirebaseDatabaseDataManager extends FirebaseDataManager {
       return true;
     } else {
       warning(
-          'Could not upload data in $runtimeType - no user is authenticated.');
+        'Could not upload data in $runtimeType - no user is authenticated.',
+      );
     }
 
     return false;
@@ -323,8 +370,9 @@ class FirebaseDatabaseDataManager extends FirebaseDataManager {
   void onDataPoint(DataPoint dataPoint) => uploadData(dataPoint);
 }
 
-/// A status event for this Firebase data manager.
-/// See [FirebaseDataManagerEventTypes] for a list of possible event types.
+/// A status event from a [FirebaseDataManager].
+///
+/// See [FirebaseDataManagerEventTypes] for the event types.
 class FirebaseDataManagerEvent extends DataManagerEvent {
   /// The full path and filename for the file on the device.
   String? path;
@@ -332,6 +380,7 @@ class FirebaseDataManagerEvent extends DataManagerEvent {
   /// The URI of the file on the Firebase server.
   String? firebaseUri;
 
+  /// Creates an event of [type], with an optional local [path] and [firebaseUri].
   FirebaseDataManagerEvent(String type, [this.path, this.firebaseUri])
       : super(type);
 
@@ -339,8 +388,11 @@ class FirebaseDataManagerEvent extends DataManagerEvent {
       'FirebaseDataManagerEvent - type: $type, path: $path, firebaseUri: $firebaseUri';
 }
 
-/// An enumeration of file data manager event types
+/// The types of [FirebaseDataManagerEvent]s.
 class FirebaseDataManagerEventTypes extends FileDataManagerEventTypes {
+  /// A user signed in to Firebase.
   static const String authenticated = 'authenticated';
+
+  /// A file was uploaded to Firebase Storage.
   static const String file_uploaded = 'file_uploaded';
 }

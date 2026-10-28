@@ -21,29 +21,17 @@ class ProbeDescription {
     MonitoringSamplingPackage.TRIGGERED_TASK: ProbeDescriptor(
       'Triggered Task',
       'Triggered Task',
-      Icon(
-        Icons.dashboard_customize_outlined,
-        size: 50,
-        color: CachetColors.GREY_4,
-      ),
+      Icon(Icons.dashboard_customize_outlined, size: 50, color: CachetColors.GREY_4),
     ),
     MonitoringSamplingPackage.COMPLETED_TASK: ProbeDescriptor(
       'Completed Task',
       'Completed Task.',
-      Icon(
-        Icons.document_scanner_outlined,
-        size: 50,
-        color: CachetColors.GREY_4,
-      ),
+      Icon(Icons.document_scanner_outlined, size: 50, color: CachetColors.GREY_4),
     ),
     MonitoringSamplingPackage.COMPLETED_APP_TASK: ProbeDescriptor(
       'Completed App Task',
       'Completed App Task.',
-      Icon(
-        Icons.document_scanner_outlined,
-        size: 50,
-        color: CachetColors.GREY_4,
-      ),
+      Icon(Icons.document_scanner_outlined, size: 50, color: CachetColors.GREY_4),
     ),
     DeviceSamplingPackage.FREE_MEMORY: ProbeDescriptor(
       'Memory',
@@ -148,11 +136,7 @@ class ProbeDescription {
     DeviceSamplingPackage.SCREEN_EVENT: ProbeDescriptor(
       'Screen',
       'Screen events (on/off/unlock).',
-      Icon(
-        Icons.screen_lock_portrait,
-        size: 50,
-        color: CachetColors.LIGHT_PURPLE,
-      ),
+      Icon(Icons.screen_lock_portrait, size: 50, color: CachetColors.LIGHT_PURPLE),
     ),
     ContextSamplingPackage.LOCATION: ProbeDescriptor(
       'Location Tracking',
@@ -187,11 +171,7 @@ class ProbeDescription {
     ESenseSamplingPackage.ESENSE_BUTTON: ProbeDescriptor(
       'eSense Button',
       'eSense button events.',
-      Icon(
-        Icons.radio_button_checked,
-        size: 50,
-        color: CachetColors.LIGHT_PURPLE,
-      ),
+      Icon(Icons.radio_button_checked, size: 50, color: CachetColors.LIGHT_PURPLE),
     ),
     ESenseSamplingPackage.ESENSE_SENSOR: ProbeDescriptor(
       'eSense Movement',
@@ -268,6 +248,51 @@ class ProbeDescription {
       'Health data collected from the phone.',
       Icon(Icons.heart_broken, size: 50, color: CachetColors.RED),
     ),
+    AppleWatchSamplingPackage.MOTION: ProbeDescriptor(
+      'Watch Motion',
+      'Motion sensor data from the Apple Watch.',
+      Icon(Icons.moving, size: 50, color: CachetColors.DARK_BLUE),
+    ),
+    AppleWatchSamplingPackage.HEART_RATE: ProbeDescriptor(
+      'Watch HR',
+      'Heart rate from the Apple Watch.',
+      Icon(Icons.monitor_heart_rounded, size: 50, color: CachetColors.RED),
+    ),
+    AppleWatchSamplingPackage.BATTERY: ProbeDescriptor(
+      'Watch Battery',
+      'Battery level and charging state of the Apple Watch.',
+      Icon(Icons.battery_charging_full, size: 50, color: CachetColors.GREEN),
+    ),
+    AppleWatchSamplingPackage.LOCATION: ProbeDescriptor(
+      'Watch Location',
+      'Location collected by the Apple Watch.',
+      Icon(Icons.location_on, size: 50, color: CachetColors.LIGHT_GREEN),
+    ),
+    AppleWatchSamplingPackage.HEADING: ProbeDescriptor(
+      'Watch Heading',
+      'Compass heading from the Apple Watch.',
+      Icon(Icons.explore, size: 50, color: CachetColors.LIGHT_GREEN),
+    ),
+    AppleWatchSamplingPackage.BLUETOOTH: ProbeDescriptor(
+      'Watch Bluetooth',
+      'Nearby Bluetooth devices scanned by the Apple Watch.',
+      Icon(Icons.bluetooth_searching, size: 50, color: CachetColors.BLUE),
+    ),
+    AppleWatchSamplingPackage.AMBIENT_NOISE: ProbeDescriptor(
+      'Watch Noise',
+      'Ambient noise level measured by the Apple Watch.',
+      Icon(Icons.hearing, size: 50, color: CachetColors.LIGHT_PURPLE),
+    ),
+    AppleWatchSamplingPackage.AUDIO_LABEL: ProbeDescriptor(
+      'Watch Sound',
+      'Sound classification made by the Apple Watch.',
+      Icon(Icons.graphic_eq, size: 50, color: CachetColors.LIGHT_PURPLE),
+    ),
+    AppleWatchSamplingPackage.DEVICE: ProbeDescriptor(
+      'Watch Device',
+      'Information on the Apple Watch and the phone it is paired with.',
+      Icon(Icons.watch, size: 50, color: CachetColors.GREY_2),
+    ),
     // MovesenseSamplingPackage.HR: ProbeDescriptor(
     //   'Movesense HR',
     //   'Movesense Heart Rate.',
@@ -311,18 +336,9 @@ class ProbeDescription {
 
   static Map<ExecutorState, Icon> get probeStateIcon => {
     ExecutorState.Created: Icon(Icons.child_care, color: CachetColors.GREY_4),
-    ExecutorState.Initialized: Icon(
-      Icons.check,
-      color: CachetColors.LIGHT_PURPLE,
-    ),
-    ExecutorState.Resumed: Icon(
-      Icons.radio_button_checked,
-      color: CachetColors.GREEN,
-    ),
-    ExecutorState.Paused: Icon(
-      Icons.radio_button_unchecked,
-      color: CachetColors.GREEN,
-    ),
+    ExecutorState.Initialized: Icon(Icons.check, color: CachetColors.LIGHT_PURPLE),
+    ExecutorState.Resumed: Icon(Icons.radio_button_checked, color: CachetColors.GREEN),
+    ExecutorState.Paused: Icon(Icons.radio_button_unchecked, color: CachetColors.GREEN),
     ExecutorState.Undefined: Icon(Icons.error_outline, color: CachetColors.RED),
   };
 }

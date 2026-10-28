@@ -17,10 +17,7 @@ void main() async {
   SamplingPackageRegistry().register(ContextSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Context Sensing Example',
-  );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Context Sensing Example');
 
   // Define the smartphone as the primary device.
   Smartphone phone = Smartphone();
@@ -63,9 +60,7 @@ void main() async {
     BackgroundTask(
       measures: [
         Measure(type: ContextSamplingPackage.LOCATION)
-          ..overrideSamplingConfiguration = LocationSamplingConfiguration(
-            once: true,
-          ),
+          ..overrideSamplingConfiguration = LocationSamplingConfiguration(once: true),
       ],
     ),
     locationService,
@@ -105,9 +100,7 @@ void main() async {
   // Add a background task that air quality every 30 minutes.
   protocol.addTaskControl(
     PeriodicTrigger(period: Duration(minutes: 30)),
-    BackgroundTask(
-      measures: [Measure(type: ContextSamplingPackage.AIR_QUALITY)],
-    ),
+    BackgroundTask(measures: [Measure(type: ContextSamplingPackage.AIR_QUALITY)]),
     airQualityService,
   );
 }

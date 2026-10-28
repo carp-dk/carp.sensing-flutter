@@ -18,8 +18,7 @@ class DeviceViewModel {
   // String get id => deviceManager.id;
 
   /// A printer-friendly type name for this device.
-  String get typeName =>
-      DeviceDescription.descriptors[type!]?.description ?? type!;
+  String get typeName => DeviceDescription.descriptors[type!]?.description ?? type!;
 
   /// A longer description of this device.
   String get description =>
@@ -30,9 +29,8 @@ class DeviceViewModel {
   String get statusString => status.name;
 
   /// The battery level of this device, if known.
-  int? get batteryLevel => deviceManager is HardwareDeviceManager
-      ? (deviceManager as HardwareDeviceManager).batteryLevel
-      : null;
+  int? get batteryLevel =>
+      deviceManager is HardwareDeviceManager ? (deviceManager as HardwareDeviceManager).batteryLevel : null;
 
   /// The icon for this type of device.
   Icon? get icon => DeviceDescription.descriptors[type!]?.icon;
@@ -41,8 +39,7 @@ class DeviceViewModel {
   Icon? get stateIcon => DeviceDescription.deviceStateIcon[status];
 
   /// Is this device currently paired?
-  bool get isPaired =>
-      status == DeviceStatus.paired || status == DeviceStatus.connected;
+  bool get isPaired => status == DeviceStatus.paired || status == DeviceStatus.connected;
 
   /// Is this device currently connected?
   bool get isConnected => status == DeviceStatus.connected;
@@ -58,19 +55,12 @@ class DeviceViewModel {
       (deviceManager as BLEDeviceManager).pair(
         bleAddress: device.id,
         bleName: device.name,
-        serviceUuids: device.serviceUuids
-            .map((uuid) => uuid.toString())
-            .toList(),
+        serviceUuids: device.serviceUuids.map((uuid) => uuid.toString()).toList(),
         manufacturerData: device.manufacturerData.toList(),
       );
     }
   }
 
   /// Connect to this device.
-  void connectToDevice() => bloc
-      .sensing
-      .client
-      .deviceController
-      .devices[deviceManager.deviceType]!
-      .connect();
+  void connectToDevice() => bloc.sensing.client.deviceController.devices[deviceManager.deviceType]!.connect();
 }

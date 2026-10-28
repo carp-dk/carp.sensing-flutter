@@ -7,7 +7,11 @@
 
 part of 'communication.dart';
 
-/// A probe that collects the phone log from this device.
+/// Collects the phone call log from this device as [PhoneLog] data.
+///
+/// Used for the [CommunicationSamplingPackage.PHONE_LOG] measure. The period
+/// starts at the last time this probe collected data or, the first time, at
+/// [HistoricSamplingConfiguration.past] before now. The period ends now.
 ///
 /// Only works on Android.
 class PhoneLogProbe extends MeasurementProbe {
@@ -18,10 +22,7 @@ class PhoneLogProbe extends MeasurementProbe {
         ? m.lastTime!.millisecondsSinceEpoch
         : DateTime.now().subtract(m.past).millisecondsSinceEpoch;
     int now = DateTime.now().millisecondsSinceEpoch;
-    Iterable<CallLogEntry> entries = await CallLog.query(
-      dateFrom: from,
-      dateTo: now,
-    );
+    Iterable<CallLogEntry> entries = await CallLog.query(dateFrom: from, dateTo: now);
     return Measurement.fromData(
       PhoneLog(
         DateTime.fromMillisecondsSinceEpoch(from).toUtc(),
@@ -32,12 +33,18 @@ class PhoneLogProbe extends MeasurementProbe {
   }
 }
 
-/// A probe that collects a complete list of all text (SMS) messages from
-/// this device. Combines both send and received messages.
+/// Collects all text (SMS) messages on this device as [TextMessageLog] data.
+///
+/// Used for the [CommunicationSamplingPackage.TEXT_MESSAGE_LOG] measure.
+/// Combines the inbox and sent messages. It does not filter on the
+/// [HistoricSamplingConfiguration] period, so each run returns the full log.
 ///
 /// Only works on Android.
 class TextMessageLogProbe extends MeasurementProbe {
+  /// Not used.
   SmsColumn? col;
+
+  /// The SMS columns read from the inbox and sent messages.
   static const List<SmsColumn> ALL_SMS_COLUMNS = [
     SmsColumn.ADDRESS,
     SmsColumn.BODY,
@@ -58,11 +65,7 @@ class TextMessageLogProbe extends MeasurementProbe {
     allSms
       ..addAll(await _telephony.getInboxSms(columns: ALL_SMS_COLUMNS))
       ..addAll(await _telephony.getSentSms(columns: ALL_SMS_COLUMNS));
-    return Measurement.fromData(
-      TextMessageLog(
-        allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList(),
-      ),
-    );
+    return Measurement.fromData(TextMessageLog(allSms.map((sms) => TextMessage.fromSmsMessage(sms)).toList()));
   }
 }
 
@@ -71,50 +74,32 @@ class TextMessageLogProbe extends MeasurementProbe {
 Telephony get _telephony => Telephony.backgroundInstance;
 
 // A private stream controller to be used in the call-back from the SMS probe.
-StreamController<Measurement> _textMessageProbeController =
-    StreamController.broadcast();
+StreamController<Measurement> _textMessageProbeController = StreamController.broadcast();
 
-/// The top-level call-back method for handling in-coming SMS messages when
-/// the app is in the background.
+/// Handles incoming SMS messages while the app is in the background.
+///
+/// Must be a top-level function so the telephony plugin can call it from a
+/// background isolate. Passed to `listenIncomingSms` by [TextMessageProbe].
 void backgroundMessageHandler(SmsMessage message) async {
-  _textMessageProbeController.add(
-    Measurement.fromData(TextMessage.fromSmsMessage(message)),
-  );
+  _textMessageProbeController.add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
 }
 
-/// The [TextMessageProbe] listens to SMS messages and collects a
-/// [TextMessage] every time a new SMS message is received.
+/// Collects a [TextMessage] every time this device receives an SMS message.
+///
+/// Used for the [CommunicationSamplingPackage.TEXT_MESSAGE] measure. Starts
+/// listening on [onResume], both in the foreground and in the background
+/// (via [backgroundMessageHandler]).
 ///
 /// Only works on Android.
 class TextMessageProbe extends StreamProbe {
   @override
   Stream<Measurement> get stream => _textMessageProbeController.stream;
 
-  // @override
-  // bool onInitialize() {
-  //   if (!Platform.isAndroid) {
-  //     warning('$runtimeType only available on Android.');
-  //     return false;
-  //   }
-
-  //   _telephony.listenIncomingSms(
-  //     onNewMessage: (SmsMessage message) {
-  //       _textMessageProbeController.add(
-  //         Measurement.fromData(TextMessage.fromSmsMessage(message)),
-  //       );
-  //     },
-  //     onBackgroundMessage: backgroundMessageHandler,
-  //   );
-  //   return true;
-  // }
-
   @override
   Future<bool> onResume() async {
     _telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
-        _textMessageProbeController.add(
-          Measurement.fromData(TextMessage.fromSmsMessage(message)),
-        );
+        _textMessageProbeController.add(Measurement.fromData(TextMessage.fromSmsMessage(message)));
       },
       onBackgroundMessage: backgroundMessageHandler,
     );
@@ -123,7 +108,11 @@ class TextMessageProbe extends StreamProbe {
   }
 }
 
-/// A probe collecting calendar entries from the calendar on the phone.
+/// Collects the events in all calendars on the phone as [Calendar] data.
+///
+/// Used for the [CommunicationSamplingPackage.CALENDAR] measure. Asks for
+/// calendar permission the first time, if the user has not been asked yet.
+/// If the calendars cannot be read, the measurement holds an [Error].
 class CalendarProbe extends MeasurementProbe {
   final cal.DeviceCalendar _deviceCalendar = cal.DeviceCalendar();
   List<cal.Calendar>? _calendars;
@@ -152,22 +141,21 @@ class CalendarProbe extends MeasurementProbe {
   HistoricSamplingConfiguration get samplingConfiguration =>
       super.samplingConfiguration as HistoricSamplingConfiguration;
 
-  /// Get a [Calendar] measurement for all events in all calendars based on
-  /// the historic [samplingConfiguration].
+  /// Gets a [Calendar] measurement for all events in all calendars.
+  ///
+  /// The period starts at the last time this probe collected data or, the
+  /// first time, at [HistoricSamplingConfiguration.past] before now. The
+  /// period ends now.
   @override
   Future<Measurement> getMeasurement() async {
     if (_calendars == null) await _retrieveCalendars();
 
     // Fast out if calendars could not be retrieved, e.g. due to missing permissions.
     if (_calendars == null) {
-      return Measurement.fromData(
-        Error(message: 'The list of calendars could not be retrieved.'),
-      );
+      return Measurement.fromData(Error(message: 'The list of calendars could not be retrieved.'));
     }
 
-    DateTime startDate =
-        samplingConfiguration.lastTime ??
-        DateTime.now().subtract(samplingConfiguration.past);
+    DateTime startDate = samplingConfiguration.lastTime ?? DateTime.now().subtract(samplingConfiguration.past);
     DateTime endDate = DateTime.now();
 
     // Get all events from all calendars.
@@ -177,9 +165,7 @@ class CalendarProbe extends MeasurementProbe {
       sensorStartTime: startDate.microsecondsSinceEpoch,
       sensorEndTime: endDate.microsecondsSinceEpoch,
       data: Calendar(startDate, endDate)
-        ..calendarEvents = events
-            .map((event) => CalendarEvent.fromEvent(event))
-            .toList(),
+        ..calendarEvents = events.map((event) => CalendarEvent.fromEvent(event)).toList(),
     );
   }
 }

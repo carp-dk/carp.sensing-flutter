@@ -26,7 +26,7 @@ part of '../../../common.dart';
 ///    concrete [DeviceConfiguration], if none of the previous configurations
 ///    are present.
 ///
-/// See also the section on[Sampling schemes and configurations](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
+/// See also the section on [Sampling schemes and configurations](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-common.md#sampling-schemes-and-configurations)
 /// in the CARP Core Framework.
 class DataTypeSamplingScheme {
   /// The data type this sampling scheme relates to.
@@ -43,20 +43,20 @@ class DataTypeSamplingScheme {
   /// Create a [Measure] for the [dataType] defined by this sampling scheme,
   /// and override the measure's default [SamplingConfiguration] with
   /// this scheme's [defaultSamplingConfiguration].
-  Measure get measure =>
-      Measure(type: type)
-        ..overrideSamplingConfiguration = defaultSamplingConfiguration;
+  Measure get measure => Measure(type: type)..overrideSamplingConfiguration = defaultSamplingConfiguration;
 
-  DataTypeSamplingScheme(
-    this.dataType, [
-    SamplingConfiguration? defaultSamplingConfiguration,
-  ]) : super() {
-    this.defaultSamplingConfiguration =
-        defaultSamplingConfiguration ?? NoOptionsSamplingConfiguration();
+  /// Create a scheme for [dataType]. The default configuration is a
+  /// [NoOptionsSamplingConfiguration] if [defaultSamplingConfiguration] is
+  /// not specified.
+  DataTypeSamplingScheme(this.dataType, [SamplingConfiguration? defaultSamplingConfiguration]) : super() {
+    this.defaultSamplingConfiguration = defaultSamplingConfiguration ?? NoOptionsSamplingConfiguration();
   }
 }
 
-/// A set of [DataTypeSamplingScheme] mapped to their data type as `String`.
+/// A set of [DataTypeSamplingScheme]s mapped to their data type as `String`.
+///
+/// Returned by [DeviceConfiguration.dataTypeSamplingSchemes] to list what a
+/// device can collect.
 class DataTypeSamplingSchemeMap {
   final Map<String, DataTypeSamplingScheme> _map = {};
 
@@ -65,40 +65,34 @@ class DataTypeSamplingSchemeMap {
 
   /// Creates a [DataTypeSamplingSchemeMap] from the list of [schemes].
   DataTypeSamplingSchemeMap.from(List<DataTypeSamplingScheme> schemes) {
-    _map.addAll(
-      Map.fromEntries(schemes.map((scheme) => MapEntry(scheme.type, scheme))),
-    );
+    _map.addAll(Map.fromEntries(schemes.map((scheme) => MapEntry(scheme.type, scheme))));
   }
 
-  /// This sampling schema as a native [Map].
+  /// This sampling schema as a native [Map]. Changes to it change this map.
   Map<String, DataTypeSamplingScheme> toMap() => _map;
 
   /// The set of data types as `String` supported by this sampling schema.
   Set<String> get types => _map.keys.toSet();
 
   /// The list of data types as [DataTypeMetaData] supported by this sampling schema.
-  List<DataTypeMetaData> get dataTypes =>
-      _map.values.map((schema) => schema.dataType).toList();
+  List<DataTypeMetaData> get dataTypes => _map.values.map((schema) => schema.dataType).toList();
 
   /// The map of all [SamplingConfiguration] entries in this scheme.
-  Map<String, SamplingConfiguration> get configurations => _map.map(
-    (key, value) => MapEntry(key, value.defaultSamplingConfiguration),
-  );
+  Map<String, SamplingConfiguration> get configurations =>
+      _map.map((key, value) => MapEntry(key, value.defaultSamplingConfiguration));
 
   /// The configuration for the data type [type], or `null` if [type] is not in the map.
   DataTypeSamplingScheme? operator [](String? type) => _map[type];
 
   /// Associates the [type] with the given [schema].
-  void operator []=(String type, DataTypeSamplingScheme schema) =>
-      _map[type] = schema;
+  void operator []=(String type, DataTypeSamplingScheme schema) => _map[type] = schema;
 
   /// Add [scheme] to this map of schemes.
   void add(DataTypeSamplingScheme scheme) => _map[scheme.type] = scheme;
 
   /// Adds all sampling configurations from another [schema] to this schema.
   /// If a configuration in [schema] is already in this schema, its value is overwritten.
-  void addSamplingSchema(DataTypeSamplingSchemeMap schema) =>
-      _map.addAll(schema._map);
+  void addSamplingSchema(DataTypeSamplingSchemeMap schema) => _map.addAll(schema._map);
 
   /// Removes [type] and its associated value, if present, from the map.
   ///

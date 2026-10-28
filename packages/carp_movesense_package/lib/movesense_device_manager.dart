@@ -6,29 +6,46 @@
 
 part of 'carp_movesense_package.dart';
 
-/// Enumeration of supported Movesense devices.
+/// The Movesense hardware models this package can tell apart.
+///
+/// [MovesenseDeviceManager.movesenseDeviceType] derives it from the device
+/// info after connecting.
 enum MovesenseDeviceType {
-  /// Unknown Movesense type
+  /// Unknown Movesense type.
   UNKNOWN,
 
-  /// Movesense Medical sensor
+  /// Movesense Medical sensor (hardware type "A1").
   MD,
 
-  /// Movesense ACTIVE HR+
+  /// Movesense Active HR+ sensor (hardware type "H3").
   HR_PLUS,
 
-  /// Movesense ACTIVE HR2 sensor
+  /// Movesense Active HR2 sensor (hardware type "H4").
   HR2,
 
-  /// Movesense FLASH sensor
+  /// Movesense FLASH sensor. Not detected automatically.
   FLASH,
 }
 
+/// A Movesense sensor used as a connected device in a protocol.
+///
+/// Add it with [SmartphoneStudyProtocol.addConnectedDevice] and use it as the
+/// target device of tasks with Movesense measures (see
+/// [MovesenseSamplingPackage]). At runtime it is handled by a
+/// [MovesenseDeviceManager] and registered with a
+/// [MovesenseDeviceRegistration].
+///
+/// Key points:
+///  * Optional by default ([isOptional] is true), so a study can start
+///    without it.
+///  * [namePrefix] defaults to "Movesense", so a BLE scan only shows
+///    Movesense devices.
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class MovesenseDevice extends BLEDevice<MovesenseDeviceRegistration> {
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovesenseDevice';
+  /// The device type of a Movesense device.
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.MovesenseDevice';
 
+  /// The default role name of a Movesense device in a protocol.
   static const String DEFAULT_ROLE_NAME = 'Movesense ECG Device';
 
   MovesenseDevice({
@@ -39,25 +56,36 @@ class MovesenseDevice extends BLEDevice<MovesenseDeviceRegistration> {
 
   @override
   Function get fromJsonFunction => _$MovesenseDeviceFromJson;
-  factory MovesenseDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as MovesenseDevice;
+  factory MovesenseDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as MovesenseDevice;
   @override
   Map<String, dynamic> toJson() => _$MovesenseDeviceToJson(this);
 }
 
 /// A [DeviceRegistration] for a Movesense device.
+///
+/// Created by [MovesenseDeviceManager.createRegistration] when a device is
+/// paired and connected. Holds the BLE address and name plus Movesense
+/// specific info.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MovesenseDeviceRegistration extends BLEDeviceRegistration {
   /// The Movesense device serial number.
+  ///
+  /// Not set by [MovesenseDeviceManager.createRegistration] at the moment.
   String? serial;
 
-  /// The type of Movesense device, if known.
+  /// The type of Movesense device. [MovesenseDeviceType.UNKNOWN] if not known.
   MovesenseDeviceType movesenseDeviceType;
 
-  /// The detailed device info for the connected Movesense device.
+  /// The detailed device info for the connected Movesense device, as returned
+  /// by the device's `/Info` resource.
+  ///
   /// See https://www.movesense.com/docs/esw/api_reference/#info
   Map<String, dynamic>? deviceInfo;
 
+  /// Creates a registration.
+  ///
+  /// [deviceDisplayName] defaults to [bleName] and [hardwareName] defaults to
+  /// the name of [movesenseDeviceType].
   MovesenseDeviceRegistration({
     String? deviceDisplayName,
     super.registrationCreatedOn,
@@ -68,10 +96,7 @@ class MovesenseDeviceRegistration extends BLEDeviceRegistration {
     super.bleName,
     this.movesenseDeviceType = MovesenseDeviceType.UNKNOWN,
     this.deviceInfo,
-  }) : super(
-         deviceDisplayName: deviceDisplayName ?? bleName,
-         hardwareName: hardwareName ?? movesenseDeviceType.name,
-       );
+  }) : super(deviceDisplayName: deviceDisplayName ?? bleName, hardwareName: hardwareName ?? movesenseDeviceType.name);
 
   @override
   Function get fromJsonFunction => _$MovesenseDeviceRegistrationFromJson;
@@ -81,26 +106,42 @@ class MovesenseDeviceRegistration extends BLEDeviceRegistration {
   Map<String, dynamic> toJson() => _$MovesenseDeviceRegistrationToJson(this);
 }
 
-/// A [BLEDeviceManager] for managing Movesense devices.
+/// A [BLEDeviceManager] that connects to and monitors a Movesense device.
 ///
-/// Typical BLE name is "Movesense 220330000122".
-class MovesenseDeviceManager
-    extends BLEDeviceManager<MovesenseDevice, MovesenseDeviceRegistration> {
+/// Created by [MovesenseSamplingPackage] and used by the Movesense probes to
+/// reach the device through its [serial]. The typical BLE name is
+/// "Movesense 220330000122".
+///
+/// Key points:
+///  * Connects using the [bleAddress] set when pairing.
+///  * On connect, it reads [deviceInfo] and starts polling the battery state
+///    every 10 minutes.
+///  * Movesense only reports "OK" or "LOW" battery, which is mapped to a
+///    [batteryLevel] of 80% or 10%.
+///  * If a connection attempt fails, it disconnects so the native SDK stops
+///    retrying in the background.
+class MovesenseDeviceManager extends BLEDeviceManager<MovesenseDevice, MovesenseDeviceRegistration> {
   int? _batteryLevel;
-  final StreamController<int> _batteryEventController =
-      StreamController.broadcast();
+  final StreamController<int> _batteryEventController = StreamController.broadcast();
 
+  /// Creates a device manager for the device [type], typically
+  /// [MovesenseDevice.DEVICE_TYPE].
   MovesenseDeviceManager(super.type);
 
   @override
   int? get batteryLevel => _batteryLevel;
 
   /// The device info for the connected Movesense device.
-  /// Only available after device is connected.
+  ///
+  /// Null until the device is connected and has answered the info request.
+  ///
   /// See https://www.movesense.com/docs/esw/api_reference/#info
   Map<String, dynamic>? deviceInfo;
 
-  /// The type of Movesense device based on the "hw" property in the device info.
+  /// The type of Movesense device, based on the "hw" property in [deviceInfo].
+  ///
+  /// [MovesenseDeviceType.UNKNOWN] if [deviceInfo] is not yet available or the
+  /// hardware type is not recognized.
   MovesenseDeviceType get movesenseDeviceType {
     final hw = (deviceInfo?["hw"] as String?)?.toUpperCase();
 
@@ -115,18 +156,17 @@ class MovesenseDeviceManager
   }
 
   @override
-  MovesenseDeviceRegistration createRegistration() =>
-      MovesenseDeviceRegistration(
-        deviceDisplayName: bleName,
-        isConnected: isConnected,
-        bleAddress: bleAddress ?? 'Unknown Movesense Device',
-        bleName: bleName,
-        batteryChargingState: batteryLevel != null
-            ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
-            : BatteryChargingState.unknown,
-        movesenseDeviceType: movesenseDeviceType,
-        deviceInfo: deviceInfo,
-      );
+  MovesenseDeviceRegistration createRegistration() => MovesenseDeviceRegistration(
+    deviceDisplayName: bleName,
+    isConnected: isConnected,
+    bleAddress: bleAddress ?? 'Unknown Movesense Device',
+    bleName: bleName,
+    batteryChargingState: batteryLevel != null
+        ? HardwareDeviceRegistration.parseBatteryLevel(batteryLevel!)
+        : BatteryChargingState.unknown,
+    movesenseDeviceType: movesenseDeviceType,
+    deviceInfo: deviceInfo,
+  );
 
   @override
   bool get canConnect => bleAddress != null;
@@ -138,16 +178,16 @@ class MovesenseDeviceManager
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
   /// The serial number of the connected Movesense device.
-  /// Returns null if not connected.
+  ///
+  /// Null until the device has connected. Used to address the device in MDS
+  /// requests and subscriptions. Not cleared on disconnect.
   String? serial;
 
   @override
   Future<DeviceStatus> onConnect() async {
     if (isConnected) return DeviceStatus.connected;
     if (bleAddress?.isEmpty ?? true) {
-      warning(
-        '$runtimeType - cannot connect to device, BLE address is missing.',
-      );
+      warning('$runtimeType - cannot connect to device, BLE address is missing.');
       return DeviceStatus.disconnected;
     }
 
@@ -196,9 +236,7 @@ class MovesenseDeviceManager
   void _connected(String serial) {
     this.serial = serial;
 
-    debug(
-      "$runtimeType - Successfully connected to Movesense device, serial: $serial",
-    );
+    debug("$runtimeType - Successfully connected to Movesense device, serial: $serial");
 
     _getDeviceInfo();
     _getBatteryStatus();
@@ -222,9 +260,9 @@ class MovesenseDeviceManager
     }), (error, statusCode) => {});
   }
 
-  /// Setting up a request (GET) for battery status at a regular interval.
-  /// We can subscribe to battery state changes, but they come so rarely that its
-  /// better to request the status.
+  /// Sets up a request (GET) for battery status at a regular interval.
+  /// We can subscribe to battery state changes, but they come so rarely that it
+  /// is better to request the status.
   void _getBatteryStatus() {
     // fast out if not connected
     if (serial == null) return;
@@ -233,19 +271,14 @@ class MovesenseDeviceManager
     debug('$runtimeType - Setting up battery monitoring.');
 
     Timer.periodic(const Duration(minutes: 10), (_) {
-      Mds.get(
-        Mds.createRequestUri(serial!, "/System/States/1"),
-        "{}",
-        ((data, statusCode) {
-          final dataContent = json.decode(data);
-          num batteryState = dataContent["Content"] as num;
-          // Movesense only reports "OK" (0) or "LOW" (1) battery state
-          // This is translated to 80% & 10% battery level
-          _batteryLevel = batteryState == 0 ? 80 : 10;
-          _batteryEventController.add(_batteryLevel ?? 0);
-        }),
-        (error, statusCode) => {},
-      );
+      Mds.get(Mds.createRequestUri(serial!, "/System/States/1"), "{}", ((data, statusCode) {
+        final dataContent = json.decode(data);
+        num batteryState = dataContent["Content"] as num;
+        // Movesense only reports "OK" (0) or "LOW" (1) battery state
+        // This is translated to 80% & 10% battery level
+        _batteryLevel = batteryState == 0 ? 80 : 10;
+        _batteryEventController.add(_batteryLevel ?? 0);
+      }), (error, statusCode) => {});
     });
   }
 

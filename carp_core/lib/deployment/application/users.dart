@@ -9,9 +9,12 @@ part of '../../deployment.dart';
 
 /// The information which needs to be provided when inviting a participant to
 /// a deployment.
+///
+/// Passed to [DeploymentService.createStudyDeployment].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ParticipantInvitation {
-  // An ID for the participant, uniquely assigned by the calling service.
+  /// An ID for the participant, uniquely assigned by the calling service.
+  /// A random UUID (v4) if not specified.
   late String participantId;
 
   /// The participant roles in the study protocol which the participant is assigned to.
@@ -32,12 +35,13 @@ class ParticipantInvitation {
     this.participantId = participantId ?? const Uuid().v4();
   }
 
-  factory ParticipantInvitation.fromJson(Map<String, dynamic> json) =>
-      _$ParticipantInvitationFromJson(json);
+  factory ParticipantInvitation.fromJson(Map<String, dynamic> json) => _$ParticipantInvitationFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantInvitationToJson(this);
 }
 
 /// Uniquely identifies the participation of an account in a study deployment.
+///
+/// Part of an [ActiveParticipationInvitation].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Participation {
   /// The CARP study deployment ID.
@@ -50,19 +54,18 @@ class Participation {
   /// is assigned to.
   AssignedTo assignedRoles;
 
-  Participation(this.studyDeploymentId, this.participantId, this.assignedRoles)
-    : super();
+  Participation(this.studyDeploymentId, this.participantId, this.assignedRoles) : super();
 
-  factory Participation.fromJson(Map<String, dynamic> json) =>
-      _$ParticipationFromJson(json);
+  factory Participation.fromJson(Map<String, dynamic> json) => _$ParticipationFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipationToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, participantId: $participantId, studyDeploymentId: $studyDeploymentId';
+  String toString() => '${super.toString()}, participantId: $participantId, studyDeploymentId: $studyDeploymentId';
 }
 
 /// A description of a study, shared with participants once they are invited to a study.
+///
+/// Part of a [ParticipantInvitation] and an [ActiveParticipationInvitation].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyInvitation {
   /// A descriptive name for the study to be shown to participants.
@@ -77,38 +80,48 @@ class StudyInvitation {
   /// This can be used by infrastructures or concrete applications which require
   /// exchanging additional data between the study and client subsystems,
   /// outside of scope or not yet supported by CARP core.
+  /// The CARP web services put the study id here, either as a plain string or
+  /// as a JSON map with a `studyId` key; see
+  /// [ActiveParticipationInvitation.studyId].
   dynamic applicationData;
 
-  StudyInvitation(this.name, [this.description, this.applicationData])
-    : super();
+  StudyInvitation(this.name, [this.description, this.applicationData]) : super();
 
-  factory StudyInvitation.fromJson(Map<String, dynamic> json) =>
-      _$StudyInvitationFromJson(json);
+  factory StudyInvitation.fromJson(Map<String, dynamic> json) => _$StudyInvitationFromJson(json);
   Map<String, dynamic> toJson() => _$StudyInvitationToJson(this);
 
   @override
-  String toString() =>
-      '$runtimeType - name: $name, description: $description, applicationData: $applicationData';
+  String toString() => '$runtimeType - name: $name, description: $description, applicationData: $applicationData';
 }
 
 /// An [invitation] to participate in an active study deployment using the
 /// [assignedDevices].
+///
+/// Returned by [ParticipationService.getActiveParticipationInvitations]. A
+/// participant app shows these to let the user pick a study, and then
+/// creates a [Study] from [studyDeploymentId] and [deviceRoleName].
 /// Some of the devices which the participant is invited to might already be
 /// registered. If the participant wants to use a different device, they will
 /// need to unregister the existing device first.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ActiveParticipationInvitation {
+  /// Who participates in which study deployment.
   Participation participation;
+
+  /// The study description shown to the participant.
   StudyInvitation invitation;
+
+  /// The primary devices the participant is invited to use.
   List<AssignedPrimaryDevice>? assignedDevices;
 
   // The following are user-friendly getters for the most used info in an invitation.
 
   String? _studyId;
 
-  /// The ID of the study.
+  /// The ID of the study; null if not available.
   ///
-  /// The study ID is extracted from the application data of the [invitation].
+  /// The study ID is extracted from [StudyInvitation.applicationData] of the
+  /// [invitation], either as a plain string or as the `studyId` field of a map.
   String? get studyId {
     if (_studyId != null) return _studyId;
     if (invitation.applicationData == null) return null;
@@ -135,15 +148,15 @@ class ActiveParticipationInvitation {
   /// The study description.
   String? get studyDescription => invitation.description;
 
-  /// The role name of the assigned device.
+  /// The role name of the first assigned device; null if [assignedDevices] is
+  /// null. Throws a [StateError] if the list is empty.
   String? get deviceRoleName => assignedDevices?.first.device.roleName;
 
   /// The ID of the participant.
   String get participantId => participation.participantId;
 
-  /// The role name of the participant.
-  String? get participantRoleName =>
-      participation.assignedRoles.roleNames?.first;
+  /// The first role name of the participant; null if assigned to all roles.
+  String? get participantRoleName => participation.assignedRoles.roleNames?.first;
 
   ActiveParticipationInvitation(this.participation, this.invitation) : super();
 
@@ -157,18 +170,20 @@ class ActiveParticipationInvitation {
 }
 
 /// The status of a participant in a study deployment.
+///
+/// Part of [StudyDeploymentStatus.participantStatusList].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ParticipantStatus {
+  /// Unique id of the participant in the study deployment.
   String participantId;
+
+  /// The participant roles the participant is assigned to.
   AssignedTo assignedParticipantRoles;
+
+  /// Role names of the primary devices the participant uses.
   Set<String> assignedPrimaryDeviceRoleNames;
 
-  ParticipantStatus(
-    this.participantId,
-    this.assignedParticipantRoles,
-    this.assignedPrimaryDeviceRoleNames,
-  ) : super();
-  factory ParticipantStatus.fromJson(Map<String, dynamic> json) =>
-      _$ParticipantStatusFromJson(json);
+  ParticipantStatus(this.participantId, this.assignedParticipantRoles, this.assignedPrimaryDeviceRoleNames) : super();
+  factory ParticipantStatus.fromJson(Map<String, dynamic> json) => _$ParticipantStatusFromJson(json);
   Map<String, dynamic> toJson() => _$ParticipantStatusToJson(this);
 }

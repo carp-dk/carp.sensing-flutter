@@ -7,7 +7,7 @@
 
 part of '../../../sampling_packages.dart';
 
-/// A probe that collects the device info about this device.
+/// Collects [DeviceInformation] about this phone once, using [DeviceInfoService].
 class DeviceProbe extends MeasurementProbe {
   @override
   Future<Measurement?> getMeasurement() async {
@@ -28,35 +28,34 @@ class DeviceProbe extends MeasurementProbe {
   }
 }
 
-/// A probe that collects heartbeat info about the master device on a regular basis
-/// as specified in [PeriodicMeasure.frequency].
+/// Collects a [Heartbeat] from the phone at the interval given by
+/// [IntervalSamplingConfiguration.interval].
 class HeartbeatProbe extends IntervalProbe {
   @override
   Future<Measurement?> getMeasurement() async => Measurement.fromData(
     Heartbeat(
-      deviceType: SmartPhoneClientManager()
-          .deviceController
-          .smartphoneDeviceManager
-          .deviceType,
+      deviceType: SmartPhoneClientManager().deviceController.smartphoneDeviceManager.deviceType,
       deviceRoleName: deployment?.deviceRoleName ?? 'unknown',
     ),
   );
 }
 
-/// A probe that collects the device info about this device.
+/// Collects [ApplicationInformation] about this app once.
+///
+/// Returns no measurement if [Settings] has not been initialized.
 class ApplicationProbe extends MeasurementProbe {
   @override
   Future<Measurement?> getMeasurement() async {
     if (!Settings().initialized) return null;
 
-    return Measurement.fromData(
-      ApplicationInformation.fromPackageInfo(Settings().packageInfo!),
-    );
+    return Measurement.fromData(ApplicationInformation.fromPackageInfo(Settings().packageInfo!));
   }
 }
 
 /// Collects battery information (charging state and battery level) on a regular
 /// basis as specified by the [IntervalSamplingConfiguration.interval].
+///
+/// Only reports a [BatteryState] when it differs from the previous one.
 class BatteryProbe extends IntervalProbe {
   BatteryState _priorState = BatteryState(0, 'unknown');
 
@@ -73,7 +72,7 @@ class BatteryProbe extends IntervalProbe {
   }
 }
 
-/// A probe collecting screen events:
+/// Collects screen events:
 ///  - SCREEN ON
 ///  - SCREEN OFF
 ///  - SCREEN UNLOCK
@@ -81,15 +80,15 @@ class BatteryProbe extends IntervalProbe {
 ///
 /// This probe is only available on Android.
 class ScreenProbe extends StreamProbe {
+  /// The `screen_state` plugin instance providing the events.
   Screen screen = Screen();
 
   @override
-  Stream<Measurement> get stream => screen.screenStateStream.map(
-    (event) => Measurement.fromData(ScreenEvent.fromScreenStateEvent(event)),
-  );
+  Stream<Measurement> get stream =>
+      screen.screenStateStream.map((event) => Measurement.fromData(ScreenEvent.fromScreenStateEvent(event)));
 }
 
-/// A probe that collects free virtual memory on a regular basis
+/// Collects free physical and virtual memory as [FreeMemory] on a regular basis
 /// as specified by the [IntervalSamplingConfiguration.interval].
 ///
 /// Only available on Android (it seems).
@@ -102,23 +101,22 @@ class MemoryProbe extends IntervalProbe {
   }
 
   @override
-  Future<Measurement?> getMeasurement() async => Measurement.fromData(
-    FreeMemory(SysInfo.getFreePhysicalMemory(), SysInfo.getFreeVirtualMemory()),
-  );
+  Future<Measurement?> getMeasurement() async =>
+      Measurement.fromData(FreeMemory(SysInfo.getFreePhysicalMemory(), SysInfo.getFreeVirtualMemory()));
 }
 
-/// A probe that collects the device's current timezone.
+/// Collects the phone's current [Timezone] once.
 class TimezoneProbe extends MeasurementProbe {
   @override
-  Future<Measurement?> getMeasurement() async => Measurement.fromData(
-    Timezone((await FlutterTimezone.getLocalTimezone()).identifier),
-  );
+  Future<Measurement?> getMeasurement() async =>
+      Measurement.fromData(Timezone((await FlutterTimezone.getLocalTimezone()).identifier));
 }
 
-/// A probe that collects app lifecycle events.
+/// Collects an [AppLifecycleEvent] each time the app lifecycle state changes.
+///
+/// Observes [WidgetsBinding] while resumed.
 class AppLifecycleProbe extends StreamProbe with WidgetsBindingObserver {
-  final StreamController<Measurement> _controller =
-      StreamController.broadcast();
+  final StreamController<Measurement> _controller = StreamController.broadcast();
 
   @override
   Stream<Measurement> get stream => _controller.stream;

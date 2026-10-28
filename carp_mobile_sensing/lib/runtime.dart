@@ -4,11 +4,14 @@
  * found in the LICENSE file.
  */
 
-/// The runtime layer is the main entry point to CAMS and holds the [SmartPhoneClientManager],
-/// [SmartphoneStudyController]s with a [SmartphoneDeploymentExecutor] for each
-/// running study, [DeviceController] with [DeviceManager]s for each connected
-/// device, and a [SamplingPackageRegistry] for registering sampling packages
-/// and their supported devices and probes.
+/// The CAMS runtime layer: executes studies on the phone.
+///
+/// [SmartPhoneClientManager] is the main entry point. It holds a
+/// [SmartphoneStudyController] for each study, which runs the study's
+/// deployment with a [SmartphoneDeploymentExecutor]. The [DeviceController]
+/// holds a [DeviceManager] for each connected device, the
+/// [SamplingPackageRegistry] holds the registered sampling packages and their
+/// probes, and the [AppTaskController] holds the queue of [UserTask]s.
 library;
 
 import 'dart:async';
@@ -42,6 +45,7 @@ part 'runtime/util/cron_parser.dart';
 part 'runtime/app_task_controller.dart';
 part 'runtime/client_manager.dart';
 part 'runtime/client_repository.dart';
+part 'runtime/permissions.dart';
 part 'runtime/study_controller.dart';
 part 'runtime/device_manager/device_controller.dart';
 part 'runtime/device_manager/device_manager.dart';

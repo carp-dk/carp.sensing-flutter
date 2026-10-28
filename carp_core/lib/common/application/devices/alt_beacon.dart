@@ -7,17 +7,17 @@
 part of '../../../common.dart';
 
 /// A beacon meeting the open AltBeacon standard.
+///
+/// A connected device that provides [CarpDataTypes.SIGNAL_STRENGTH] data.
+/// Optional by default, with role name 'Beacon'. Registered with an
+/// [AltBeaconDeviceRegistration].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AltBeacon extends DeviceConfiguration<AltBeaconDeviceRegistration> {
   AltBeacon({super.roleName = 'Beacon'}) : super(isOptional: true);
 
   @override
   DataTypeSamplingSchemeMap? get dataTypeSamplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.SIGNAL_STRENGTH]!,
-        ),
-      ]);
+      DataTypeSamplingSchemeMap.from([DataTypeSamplingScheme(CarpDataTypes().types[CarpDataTypes.SIGNAL_STRENGTH]!)]);
 
   @override
   AltBeaconDeviceRegistration createRegistration({
@@ -40,8 +40,7 @@ class AltBeacon extends DeviceConfiguration<AltBeaconDeviceRegistration> {
 
   @override
   Function get fromJsonFunction => _$AltBeaconFromJson;
-  factory AltBeacon.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AltBeacon>(json);
+  factory AltBeacon.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AltBeacon>(json);
   @override
   Map<String, dynamic> toJson() => _$AltBeaconToJson(this);
 }

@@ -7,17 +7,24 @@
 
 part of '../../infrastructure.dart';
 
-/// A very simple data manager that just "uploads" the data to the
-/// console (i.e., prints it). Used mainly for testing and debugging purposes.
+/// A data manager that prints each [Measurement] as JSON to the console.
+///
+/// Used for testing and debugging. Selected when the protocol's data endpoint
+/// has type [DataEndPointTypes.PRINT]. Nothing is stored, so all data is lost
+/// when the app stops.
 class ConsoleDataManager extends AbstractDataManager {
   @override
   String get type => DataEndPointTypes.PRINT;
 
   @override
-  Future<void> onMeasurement(Measurement measurement) async =>
-      debugPrint(jsonEncode(measurement));
+  Future<void> onMeasurement(Measurement measurement) async => debugPrint(jsonEncode(measurement));
 }
 
+/// Creates a [ConsoleDataManager] for data endpoints of type
+/// [DataEndPointTypes.PRINT].
+///
+/// Registered in the [DataManagerRegistry] by
+/// [SmartPhoneClientManager.configure].
 class ConsoleDataManagerFactory implements DataManagerFactory {
   @override
   String get type => DataEndPointTypes.PRINT;

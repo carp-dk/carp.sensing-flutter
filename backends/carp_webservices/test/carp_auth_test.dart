@@ -32,10 +32,7 @@ void main() {
 
   group('authentication', () {
     test('- authentication w. username and password', () async {
-      CarpUser user = await CarpAuthService().authenticateWithUsernamePassword(
-        username: username,
-        password: password,
-      );
+      CarpUser user = await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
 
       expect(user.token, isNotNull);
       expect(user.isAuthenticated, true);
@@ -46,19 +43,14 @@ void main() {
 
     test('- failed authentication w. username and password', () async {
       expect(
-        () async => await CarpAuthService().authenticateWithUsernamePassword(
-          username: username,
-          password: 'wrong_password',
-        ),
+        () async =>
+            await CarpAuthService().authenticateWithUsernamePassword(username: username, password: 'wrong_password'),
         throwsA(isA<CarpUnauthorizedException>()),
       );
     });
 
     test('- get user profile', () async {
-      await CarpAuthService().authenticateWithUsernamePassword(
-        username: username,
-        password: password,
-      );
+      await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
       expect(CarpAuthService().authenticated, true);
 
       CarpUser user = CarpAuthService().currentUser;
@@ -72,10 +64,7 @@ void main() {
     });
 
     test('- oauth token refreshes', () async {
-      await CarpAuthService().authenticateWithUsernamePassword(
-        username: username,
-        password: password,
-      );
+      await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
       expect(CarpAuthService().authenticated, true);
 
       debugPrint('expiring token...');
@@ -85,10 +74,7 @@ void main() {
     });
 
     test('- refreshing token', () async {
-      CarpUser user = await CarpAuthService().authenticateWithUsernamePassword(
-        username: username,
-        password: password,
-      );
+      CarpUser user = await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
       expect(CarpAuthService().authenticated, true);
 
       CarpUser newUser = await CarpAuthService().refresh();

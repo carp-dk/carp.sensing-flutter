@@ -15,10 +15,7 @@ void main() async {
   SamplingPackageRegistry().register(AppsSamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Apps Sensing Example',
-  );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Apps Sensing Example');
 
   // Define which devices are used for data collection
   // In this case, its only this smartphone

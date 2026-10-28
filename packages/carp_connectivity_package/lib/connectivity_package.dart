@@ -1,74 +1,82 @@
 part of '../connectivity.dart';
 
+/// The sampling package for collecting connectivity, wifi, Bluetooth and beacon data.
+///
+/// Register it before you deploy a protocol that uses its measure types:
+///
+/// ```dart
+/// SamplingPackageRegistry().register(ConnectivitySamplingPackage());
+/// ```
+///
+/// Key points:
+///  * [BLUETOOTH] can be configured with a [BluetoothScanPeriodicSamplingConfiguration]
+///    to filter the scan on services or device ids.
+///  * [BEACON] needs a [BeaconRangingPeriodicSamplingConfiguration] with at
+///    least one [BeaconRegion]; otherwise the [BeaconProbe] does not start.
+///  * On registration, adds [bluetoothNameAnonymizer] and [wifiNameAnonymizer]
+///    to the default [PrivacySchema].
 class ConnectivitySamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for continuous collection of connectivity status of the phone
   /// (none/mobile/wifi).
   ///  * Event-based measure.
-  ///  * Uses the [Smartphone] master device for data collection.
+  ///  * Uses the [Smartphone] primary device for data collection.
   ///  * No sampling configuration needed.
+  ///  * Collected as [Connectivity] data.
   static const String CONNECTIVITY = "${NameSpace.CARP}.connectivity";
 
   /// Measure type for collection of nearby Bluetooth devices on a regular basis.
   ///  * Event-based (Periodic) measure - default every 10 minutes for 10 seconds.
-  ///  * Uses the [Smartphone] master device for data collection.
-  ///  * Use a [BluetoothScanPeriodicSamplingConfiguration] for configuration.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use a [PeriodicSamplingConfiguration] or a
+  ///    [BluetoothScanPeriodicSamplingConfiguration] for configuration.
+  ///  * Collected as [Bluetooth] data.
   static const String BLUETOOTH = "${NameSpace.CARP}.bluetooth";
 
   /// Measure type for collection of wifi information (SSID, BSSID, IP).
   ///  * Event-based (Interval) measure - default every 10 minutes.
-  ///  * Uses the [Smartphone] master device for data collection.
-  ///  * Use a [IntervalSamplingConfiguration] for configuration.
+  ///  * Uses the [Smartphone] primary device for data collection.
+  ///  * Use an [IntervalSamplingConfiguration] for configuration.
+  ///  * Collected as [Wifi] data.
   static const String WIFI = "${NameSpace.CARP}.wifi";
 
   /// Measure type for Beacon ranging to detect and estimate proximity to
   /// Bluetooth beacons (e.g., iBeacon, Eddystone).
-  /// Typically collects beacon identifiers (UUID, major, minor) and
-  /// estimated distance or RSSI.
-  ///  * Event-based (Interval) measure - default every 10 minutes.
-  ///  * Uses the [Smartphone] master device for data collection.
+  /// Collects beacon identifiers (UUID, major, minor), estimated distance
+  /// and RSSI while the phone is inside a monitored region.
+  ///  * Event-based measure.
+  ///  * Uses the [Smartphone] primary device for data collection.
   ///  * Use a [BeaconRangingPeriodicSamplingConfiguration] for configuration.
+  ///  * Collected as [BeaconData] data.
   static const String BEACON = "${NameSpace.CARP}.beacon";
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: CONNECTIVITY,
-            displayName: "Connectivity Status",
-            timeType: DataTimeType.POINT,
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: BLUETOOTH,
-            displayName: "Bluetooth Scan of Nearby Devices",
-            timeType: DataTimeType.TIME_SPAN,
-            permissions: [Permission.bluetoothScan],
-          ),
-          PeriodicSamplingConfiguration(
-            interval: const Duration(minutes: 10),
-            duration: const Duration(seconds: 10),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: WIFI,
-            displayName: "Wifi Connectivity Status",
-            timeType: DataTimeType.POINT,
-          ),
-          IntervalSamplingConfiguration(interval: const Duration(minutes: 10)),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: BEACON,
-            displayName: "Ranging iBeacons",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.bluetoothScan, Permission.locationAlways],
-          ),
-          BeaconRangingPeriodicSamplingConfiguration(),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(type: CONNECTIVITY, displayName: "Connectivity Status", timeType: DataTimeType.POINT),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: BLUETOOTH,
+        displayName: "Bluetooth Scan of Nearby Devices",
+        timeType: DataTimeType.TIME_SPAN,
+        permissions: [Permission.bluetoothScan],
+      ),
+      PeriodicSamplingConfiguration(interval: const Duration(minutes: 10), duration: const Duration(seconds: 10)),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(type: WIFI, displayName: "Wifi Connectivity Status", timeType: DataTimeType.POINT),
+      IntervalSamplingConfiguration(interval: const Duration(minutes: 10)),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: BEACON,
+        displayName: "Ranging iBeacons",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.bluetoothScan, Permission.locationAlways],
+      ),
+      BeaconRangingPeriodicSamplingConfiguration(),
+    ),
+  ]);
 
   @override
   Probe? create(String type) {
@@ -98,35 +106,27 @@ class ConnectivitySamplingPackage extends SmartphoneSamplingPackage {
         interval: const Duration(minutes: 10),
         duration: const Duration(seconds: 10),
       ),
-      BeaconRangingPeriodicSamplingConfiguration(
-        beaconDistance: 2,
-        beaconRegions: [],
-      ),
+      BeaconRangingPeriodicSamplingConfiguration(beaconDistance: 2, beaconRegions: []),
     ]);
 
     // registering default privacy functions
-    DataTransformerSchemaRegistry()
-        .lookup(PrivacySchema.DEFAULT)!
-        .add(BLUETOOTH, bluetoothNameAnonymizer);
-    DataTransformerSchemaRegistry()
-        .lookup(PrivacySchema.DEFAULT)!
-        .add(WIFI, wifiNameAnonymizer);
+    DataTransformerSchemaRegistry().lookup(PrivacySchema.DEFAULT)!.add(BLUETOOTH, bluetoothNameAnonymizer);
+    DataTransformerSchemaRegistry().lookup(PrivacySchema.DEFAULT)!.add(WIFI, wifiNameAnonymizer);
   }
 }
 
 /// A sampling configuration specifying how to scan for Bluetooth devices on a
 /// regular basis for a specific period.
 ///
-/// Data collection will be started as specified by the [interval] for a time
-/// period specified as the [duration]. Bluetooth scanning is filtering
-/// on the [withServices] and [withRemoteIds] to only collect data from
-/// specific services and remote ids.
+/// Used with the [ConnectivitySamplingPackage.BLUETOOTH] measure. A scan
+/// starts every [interval] and runs for [duration]. The scan is filtered on
+/// [withServices] and [withRemoteIds] to only collect data from specific
+/// services and remote ids. Empty lists mean no filtering.
 ///
 /// Filtering on remoteIds allows Android to scan for devices in the background
 /// without needing to be in the foreground. This is not possible on iOS.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class BluetoothScanPeriodicSamplingConfiguration
-    extends PeriodicSamplingConfiguration {
+class BluetoothScanPeriodicSamplingConfiguration extends PeriodicSamplingConfiguration {
   /// List of Bluetooth service UUIDs to filter the scan results.
   List<String> withServices;
 
@@ -141,50 +141,38 @@ class BluetoothScanPeriodicSamplingConfiguration
   });
 
   @override
-  Map<String, dynamic> toJson() =>
-      _$BluetoothScanPeriodicSamplingConfigurationToJson(this);
+  Map<String, dynamic> toJson() => _$BluetoothScanPeriodicSamplingConfigurationToJson(this);
   @override
-  Function get fromJsonFunction =>
-      _$BluetoothScanPeriodicSamplingConfigurationFromJson;
-  factory BluetoothScanPeriodicSamplingConfiguration.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<BluetoothScanPeriodicSamplingConfiguration>(
-    json,
-  );
+  Function get fromJsonFunction => _$BluetoothScanPeriodicSamplingConfigurationFromJson;
+  factory BluetoothScanPeriodicSamplingConfiguration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<BluetoothScanPeriodicSamplingConfiguration>(json);
 }
 
 /// A sampling configuration specifying how to scan for iBeacon devices.
 ///
-/// The regions of the beacons to monitor are specified in the [beaconRegions]
-/// list. The [beaconDistance] is used to determine the proximity to the beacon,
-/// with a default value of 2 meters.
+/// Used with the [ConnectivitySamplingPackage.BEACON] measure. The regions of
+/// the beacons to monitor are specified in the [beaconRegions] list. Only
+/// beacons within [beaconDistance] meters (default 2) are reported.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BeaconRangingPeriodicSamplingConfiguration extends SamplingConfiguration {
   /// List of beacon regions to monitor and range.
   List<BeaconRegion> beaconRegions;
 
-  /// The distance in meters to consider a beacon as "in range".
+  /// The distance in meters to consider a beacon as "in range". Default is 2.
   int beaconDistance;
 
-  BeaconRangingPeriodicSamplingConfiguration({
-    this.beaconRegions = const [],
-    this.beaconDistance = 2,
-  }) : super();
+  BeaconRangingPeriodicSamplingConfiguration({this.beaconRegions = const [], this.beaconDistance = 2}) : super();
 
   @override
-  Map<String, dynamic> toJson() =>
-      _$BeaconRangingPeriodicSamplingConfigurationToJson(this);
+  Map<String, dynamic> toJson() => _$BeaconRangingPeriodicSamplingConfigurationToJson(this);
   @override
-  Function get fromJsonFunction =>
-      _$BeaconRangingPeriodicSamplingConfigurationFromJson;
-  factory BeaconRangingPeriodicSamplingConfiguration.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<BeaconRangingPeriodicSamplingConfiguration>(
-    json,
-  );
+  Function get fromJsonFunction => _$BeaconRangingPeriodicSamplingConfigurationFromJson;
+  factory BeaconRangingPeriodicSamplingConfiguration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<BeaconRangingPeriodicSamplingConfiguration>(json);
 }
 
-/// Beacon region to use when scanning for beacons.
+/// A beacon region to monitor, as listed in
+/// [BeaconRangingPeriodicSamplingConfiguration.beaconRegions].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BeaconRegion {
   /// A unique identifier for the beacon region.
@@ -204,28 +192,17 @@ class BeaconRegion {
   /// the same UUID and major value.
   int? minor;
 
-  BeaconRegion({
-    required this.identifier,
-    required this.uuid,
-    this.major,
-    this.minor,
-  });
+  BeaconRegion({required this.identifier, required this.uuid, this.major, this.minor});
 
+  /// Converts this region to a [Region] used by the beacon plugin.
   Region toRegion() {
-    return Region(
-      identifier: identifier,
-      proximityUUID: uuid,
-      major: major,
-      minor: minor,
-    );
+    return Region(identifier: identifier, proximityUUID: uuid, major: major, minor: minor);
   }
 
-  factory BeaconRegion.fromJson(Map<String, dynamic> json) =>
-      _$BeaconRegionFromJson(json);
+  factory BeaconRegion.fromJson(Map<String, dynamic> json) => _$BeaconRegionFromJson(json);
 
   Map<String, dynamic> toJson() => _$BeaconRegionToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, Identifier: $identifier, UUID: $uuid, Major: $major, Minor: $minor';
+  String toString() => '${super.toString()}, Identifier: $identifier, UUID: $uuid, Major: $major, Minor: $minor';
 }

@@ -68,8 +68,8 @@ void main() {
     });
 
     test('- get invitations for this user', () async {
-      List<ActiveParticipationInvitation> invitations =
-          await CarpParticipationService().getActiveParticipationInvitations();
+      List<ActiveParticipationInvitation> invitations = await CarpParticipationService()
+          .getActiveParticipationInvitations();
 
       expect(invitations, isNotNull);
       debugPrint(toJsonString(invitations));
@@ -109,9 +109,7 @@ void main() {
 
       // add expected participant data which can be set by ALL participants
       protocol.addExpectedParticipantData(
-        ExpectedParticipantData(
-          attribute: ParticipantAttribute(inputDataType: InputType.ADDRESS),
-        ),
+        ExpectedParticipantData(attribute: ParticipantAttribute(inputDataType: InputType.ADDRESS)),
       );
 
       // add expected participant data for specific participants
@@ -130,9 +128,7 @@ void main() {
         )
         ..addExpectedParticipantData(
           ExpectedParticipantData(
-            attribute: ParticipantAttribute(
-              inputDataType: InputType.INFORMED_CONSENT,
-            ),
+            attribute: ParticipantAttribute(inputDataType: InputType.INFORMED_CONSENT),
             assignedTo: AssignedTo(roleNames: {father, mother}),
           ),
         );
@@ -201,10 +197,7 @@ void main() {
 
       // getting the deployment for the father we expect to throw an exception
       // since the rest of the family hasn't registered their devices yet...
-      expect(
-        () async => await reference.get(),
-        throwsA(TypeMatcher<CarpServiceException>()),
-      );
+      expect(() async => await reference.get(), throwsA(TypeMatcher<CarpServiceException>()));
     });
 
     test('- unregister device', () async {
@@ -222,8 +215,7 @@ void main() {
 
   group("Participant Data", () {
     test('- get all', () async {
-      ParticipationReference participation = CarpParticipationService()
-          .participation();
+      ParticipationReference participation = CarpParticipationService().participation();
 
       ParticipantData data = await participation.getParticipantData();
       debugPrint(toJsonString(data));
@@ -235,9 +227,7 @@ void main() {
     test('- set common data (Sex)', () async {
       final participation = CarpParticipationService().participation();
 
-      ParticipantData data = await participation.setParticipantData({
-        InputType.SEX: SexInput(value: Sex.Male),
-      });
+      ParticipantData data = await participation.setParticipantData({InputType.SEX: SexInput(value: Sex.Male)});
       debugPrint(toJsonString(data));
 
       expect(data.common[InputType.SEX], isA<SexInput>());
@@ -248,17 +238,11 @@ void main() {
       final participation = CarpParticipationService().participation();
 
       final data = await participation.setParticipantData({
-        InputType.FULL_NAME: FullNameInput(
-          firstName: 'Anna',
-          middleName: 'K.',
-          lastName: 'Doe',
-        ),
+        InputType.FULL_NAME: FullNameInput(firstName: 'Anna', middleName: 'K.', lastName: 'Doe'),
       }, mother);
       debugPrint(toJsonString(data));
 
-      final sex = data.roles
-          .firstWhere((role) => role.roleName == mother)
-          .data[InputType.SEX];
+      final sex = data.roles.firstWhere((role) => role.roleName == mother).data[InputType.SEX];
 
       expect(sex, isA<SexInput>());
       expect((sex as SexInput).value, Sex.Male);
@@ -267,14 +251,10 @@ void main() {
     test('- set role-specific data (Sex of Mother)', () async {
       final participation = CarpParticipationService().participation();
 
-      final data = await participation.setParticipantData({
-        InputType.SEX: SexInput(value: Sex.Female),
-      }, mother);
+      final data = await participation.setParticipantData({InputType.SEX: SexInput(value: Sex.Female)}, mother);
       debugPrint(toJsonString(data));
 
-      final sex = data.roles
-          .firstWhere((role) => role.roleName == mother)
-          .data[InputType.SEX];
+      final sex = data.roles.firstWhere((role) => role.roleName == mother).data[InputType.SEX];
 
       expect(sex, isA<SexInput>());
       expect((sex as SexInput).value, Sex.Female);
@@ -293,9 +273,7 @@ void main() {
       }, father);
       debugPrint(toJsonString(data));
 
-      final consent = data.roles
-          .firstWhere((role) => role.roleName == father)
-          .data[InputType.INFORMED_CONSENT];
+      final consent = data.roles.firstWhere((role) => role.roleName == father).data[InputType.INFORMED_CONSENT];
 
       expect(consent, isA<InformedConsentInput>());
       expect((consent as InformedConsentInput).name, father);
@@ -305,17 +283,11 @@ void main() {
       final participation = CarpParticipationService().participation();
 
       final data = await participation.setParticipantData({
-        InputType.FULL_NAME: FullNameInput(
-          firstName: 'Jakob',
-          middleName: 'E.',
-          lastName: 'Bardram',
-        ),
+        InputType.FULL_NAME: FullNameInput(firstName: 'Jakob', middleName: 'E.', lastName: 'Bardram'),
       }, father);
       debugPrint(toJsonString(data));
 
-      final name = data.roles
-          .firstWhere((role) => role.roleName == father)
-          .data[InputType.FULL_NAME];
+      final name = data.roles.firstWhere((role) => role.roleName == father).data[InputType.FULL_NAME];
 
       expect(name, isA<FullNameInput>());
       expect((name as FullNameInput).firstName, 'Jakob');
@@ -324,8 +296,7 @@ void main() {
     test('- get Informed Consent', () async {
       final participation = CarpParticipationService().participation();
 
-      Map<String, InformedConsentInput?> consent = await participation
-          .getInformedConsent();
+      Map<String, InformedConsentInput?> consent = await participation.getInformedConsent();
       debugPrint(toJsonString(consent));
 
       expect(consent[father], isA<InformedConsentInput>());
@@ -337,8 +308,7 @@ void main() {
     test('- get Informed Consent by Role', () async {
       final participation = CarpParticipationService().participation();
 
-      InformedConsentInput? consent = await participation
-          .getInformedConsentByRole();
+      InformedConsentInput? consent = await participation.getInformedConsentByRole();
       debugPrint(toJsonString(consent));
 
       expect(consent, isA<InformedConsentInput>());

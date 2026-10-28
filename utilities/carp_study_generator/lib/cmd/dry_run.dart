@@ -47,14 +47,10 @@ class DryRunCommand extends AbstractCommand {
 
     if (protocolJson != null) {
       try {
-        StudyProtocol protocol = StudyProtocol.fromJson(
-          json.decode(protocolJson) as Map<String, dynamic>,
-        );
+        StudyProtocol protocol = StudyProtocol.fromJson(json.decode(protocolJson) as Map<String, dynamic>);
         print('\x1B[32m[✓]\x1B[0m Protocol parse \t name: ${protocol.name}');
       } catch (error) {
-        print(
-          '\x1B[31m[!]\x1B[0m Protocol parse \t Error parsing protocol json - ${errorToString(error)}',
-        );
+        print('\x1B[31m[!]\x1B[0m Protocol parse \t Error parsing protocol json - ${errorToString(error)}');
         issues++;
       }
     } else {
@@ -75,17 +71,11 @@ class DryRunCommand extends AbstractCommand {
 
     if (consentJson != null) {
       try {
-        RPOrderedTask consent = RPOrderedTask.fromJson(
-          json.decode(consentJson) as Map<String, dynamic>,
-        );
+        RPOrderedTask consent = RPOrderedTask.fromJson(json.decode(consentJson) as Map<String, dynamic>);
 
-        print(
-          '\x1B[32m[✓]\x1B[0m Consent \t\t identifier: ${consent.identifier}',
-        );
+        print('\x1B[32m[✓]\x1B[0m Consent \t\t identifier: ${consent.identifier}');
       } catch (error) {
-        print(
-          '\x1B[31m[!]\x1B[0m Consent parse \t Error parsing consent json - ${errorToString(error)}',
-        );
+        print('\x1B[31m[!]\x1B[0m Consent parse \t Error parsing consent json - ${errorToString(error)}');
         issues++;
       }
     } else {
@@ -121,16 +111,12 @@ class DryRunCommand extends AbstractCommand {
       issues++;
     }
 
-    print(
-      '${(issues == 0) ? '\x1B[32m • \x1B[0m No' : '\x1B[31m • \x1B[0m $issues'} issues found!',
-    );
+    print('${(issues == 0) ? '\x1B[32m • \x1B[0m No' : '\x1B[31m • \x1B[0m $issues'} issues found!');
   }
 
   /// Transform a multiline error message to one line only.
   String errorToString(dynamic error) {
     int index = error.toString().indexOf('\n');
-    return (index > 0)
-        ? error.toString().substring(0, index)
-        : error.toString();
+    return (index > 0) ? error.toString().substring(0, index) : error.toString();
   }
 }

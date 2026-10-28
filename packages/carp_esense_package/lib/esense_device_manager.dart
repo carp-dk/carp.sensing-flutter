@@ -22,7 +22,11 @@ part of 'esense.dart';
 // audio streaming), and use the LEFT earbud for IMU data collection using BLE
 // as part of a mobile sensing study.
 
-/// A [DeviceConfiguration] for an eSense device used in a [StudyProtocol].
+/// A connected device configuration for an eSense earable used in a [StudyProtocol].
+///
+/// Add it to a protocol with [StudyProtocol.addConnectedDevice] and use it as
+/// the target device of tasks with eSense measures. At runtime it is handled
+/// by an [ESenseDeviceManager]. It is optional by default.
 ///
 /// **From the eSense User Documentation:**
 ///
@@ -50,47 +54,49 @@ part of 'esense.dart';
 @JsonSerializable(fieldRename: FieldRename.none, includeIfNull: false)
 class ESenseDevice extends BLEDevice<BLEDeviceRegistration> {
   /// The type of an eSense device.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.ESenseDevice';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.ESenseDevice';
 
   /// The default role name for an eSense device.
   static const String DEFAULT_ROLE_NAME = 'eSense';
 
   /// The sampling rate in Hz of getting sensor data from the device.
+  /// Defaults to 10 Hz.
   int samplingRate;
 
-  ESenseDevice({
-    super.roleName = ESenseDevice.DEFAULT_ROLE_NAME,
-    super.isOptional = true,
-    this.samplingRate = 10,
-  });
+  /// Creates an [ESenseDevice] configuration.
+  ESenseDevice({super.roleName = ESenseDevice.DEFAULT_ROLE_NAME, super.isOptional = true, this.samplingRate = 10});
 
   @override
   Function get fromJsonFunction => _$ESenseDeviceFromJson;
-  factory ESenseDevice.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson(json) as ESenseDevice;
+  factory ESenseDevice.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson(json) as ESenseDevice;
   @override
   Map<String, dynamic> toJson() => _$ESenseDeviceToJson(this);
 }
 
-/// A [DeviceManager] for the eSense device.
+/// The [DeviceManager] for an [ESenseDevice].
 ///
-/// Note that eSense use the [bleName] (and not the BLE address) for connecting to it.
-/// Typically of the form `eSense-xxxx`.
-class ESenseDeviceManager
-    extends BLEDeviceManager<ESenseDevice, BLEDeviceRegistration> {
+/// Connects to the earable, sets its sampling rate, and gives the eSense probes
+/// access to the device through [manager].
+///
+/// Key points:
+///  * eSense uses the [bleName] (and not the BLE address) for connecting.
+///    It is typically of the form `eSense-xxxx`. [canConnect] is false until
+///    [bleName] is set.
+///  * [connect] returns while connecting; the status follows the device's
+///    connection events.
+///  * While connected, it reads the battery voltage every 2 minutes and emits
+///    an estimated level on [batteryEvents].
+class ESenseDeviceManager extends BLEDeviceManager<ESenseDevice, BLEDeviceRegistration> {
   Timer? _batteryTimer;
   StreamSubscription<ESenseEvent>? _batterySubscription;
   double? _voltageLevel;
-  final StreamController<int> _batteryEventController =
-      StreamController.broadcast();
+  final StreamController<int> _batteryEventController = StreamController.broadcast();
 
   ESenseManager? _manager;
 
-  /// The eSense device handler.
-  /// Only available after [bleName] has been set.
-  ESenseManager? get manager =>
-      bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
+  /// The `esense_flutter` [ESenseManager] that talks to the device.
+  /// Null until [bleName] has been set.
+  ESenseManager? get manager => bleName != null ? _manager ??= ESenseManager(bleName!) : _manager = null;
 
   @override
   String? get displayName => bleName;
@@ -111,17 +117,17 @@ class ESenseDeviceManager
   ///  0.0  | 3.1
   /// ```
   ///
-  /// which gives; `B = 1.19V - 3.91`.
+  /// which gives `B = 1.19V - 3.91`. The level is a percentage, or null if
+  /// no voltage has been read yet.
   ///
   /// See e.g. https://en.wikipedia.org/wiki/State_of_charge#Voltage_method
   @override
-  int? get batteryLevel => (_voltageLevel != null)
-      ? ((1.19 * _voltageLevel! - 3.91) * 100).toInt()
-      : null;
+  int? get batteryLevel => (_voltageLevel != null) ? ((1.19 * _voltageLevel! - 3.91) * 100).toInt() : null;
 
   @override
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
+  /// Creates a manager for an eSense device of the given device [type].
   ESenseDeviceManager(super.type, {super.configuration});
 
   @Deprecated('Use bleName instead')
@@ -193,9 +199,7 @@ class ESenseDeviceManager
       // try to connect to the manager with the [bleName]
       manager?.connect();
     } catch (error) {
-      warning(
-        '$runtimeType - Error connecting to eSense device: $bleName - $error',
-      );
+      warning('$runtimeType - Error connecting to eSense device: $bleName - $error');
       return DeviceStatus.disconnected;
     }
 

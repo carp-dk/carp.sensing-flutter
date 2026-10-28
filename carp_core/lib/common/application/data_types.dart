@@ -6,7 +6,9 @@
  */
 part of '../../common.dart';
 
-/// Contains meta data about [type].
+/// Metadata about a data [type]: display name and how it relates to time.
+///
+/// Used in [DataTypeSamplingScheme] and registered in [CarpDataTypes].
 class DataTypeMetaData {
   /// Unique fully qualified name for the data type this meta data relates to.
   String type;
@@ -18,11 +20,7 @@ class DataTypeMetaData {
   /// as a time span).
   DataTimeType timeType;
 
-  DataTypeMetaData({
-    required this.type,
-    this.displayName = '',
-    this.timeType = DataTimeType.POINT,
-  });
+  DataTypeMetaData({required this.type, this.displayName = '', this.timeType = DataTimeType.POINT});
 }
 
 /// Describes how [Data] for a [DataType] is stored temporally.
@@ -34,7 +32,12 @@ enum DataTimeType {
   TIME_SPAN,
 }
 
-/// Contains CARP data type definitions, as defined in CARP Core.
+/// The data types defined in CARP Core, and a registry of their metadata.
+///
+/// The constants (e.g. [GEOLOCATION]) are the type names to use in a
+/// [Measure]. `CarpDataTypes()` is a singleton whose [types] map holds a
+/// [DataTypeMetaData] for each of them. Sampling packages add their own types
+/// with [add].
 class CarpDataTypes {
   static final CarpDataTypes _instance = CarpDataTypes._();
   factory CarpDataTypes() => _instance;
@@ -77,8 +80,7 @@ class CarpDataTypes {
 
   /// Rate of change in velocity, excluding gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
-  static const String NON_GRAVITATIONAL_ACCELERATION =
-      "$CARP_NAMESPACE.nongravitationalacceleration";
+  static const String NON_GRAVITATIONAL_ACCELERATION = "$CARP_NAMESPACE.nongravitationalacceleration";
 
   /// Rotation of the device in x,y,z (typically measured by a gyroscope).
   static const String ROTATION = "$CARP_NAMESPACE.rotation";
@@ -102,58 +104,38 @@ class CarpDataTypes {
   /// Any error that may have occurred during data collection.
   static const String ERROR = "$CARP_NAMESPACE.error";
 
-  /// A map of all CARP data types.
+  /// All registered data types, mapped by type name.
   Map<String, DataTypeMetaData> types = {};
 
-  /// Add a list of data types to the list of available data types.
+  /// Add a list of data types to [types]. An existing type with the same
+  /// name is replaced.
   void add(List<DataTypeMetaData> newTypes) {
     for (var type in newTypes) {
       types[type.type] = type;
     }
   }
 
-  /// Get a list of all available data types.
+  /// The names of all registered data types.
   List<String> get all => types.keys.toList();
 
   CarpDataTypes._() {
     add([
       DataTypeMetaData(type: GEOLOCATION, displayName: "Location"),
-      DataTypeMetaData(
-        type: STEP_COUNT,
-        displayName: "Step Count",
-        timeType: DataTimeType.TIME_SPAN,
-      ),
+      DataTypeMetaData(type: STEP_COUNT, displayName: "Step Count", timeType: DataTimeType.TIME_SPAN),
       DataTypeMetaData(type: ECG, displayName: "Electrocardiography (ECG)"),
       DataTypeMetaData(type: PPG, displayName: "Photoplethysmography (PPG)"),
       DataTypeMetaData(type: HEART_RATE, displayName: "Heart Rate"),
-      DataTypeMetaData(
-        type: INTERBEAT_INTERVAL,
-        displayName: "Interbeat Interval",
-        timeType: DataTimeType.TIME_SPAN,
-      ),
-      DataTypeMetaData(
-        type: SENSOR_SKIN_CONTACT,
-        displayName: "Sensor Skin Contact",
-      ),
-      DataTypeMetaData(
-        type: NON_GRAVITATIONAL_ACCELERATION,
-        displayName: "Acceleration excl. Gravity",
-      ),
+      DataTypeMetaData(type: INTERBEAT_INTERVAL, displayName: "Interbeat Interval", timeType: DataTimeType.TIME_SPAN),
+      DataTypeMetaData(type: SENSOR_SKIN_CONTACT, displayName: "Sensor Skin Contact"),
+      DataTypeMetaData(type: NON_GRAVITATIONAL_ACCELERATION, displayName: "Acceleration excl. Gravity"),
       DataTypeMetaData(type: EDA, displayName: "Electrodermal Activity"),
-      DataTypeMetaData(
-        type: ACCELERATION,
-        displayName: "Acceleration incl. Gravity",
-      ),
+      DataTypeMetaData(type: ACCELERATION, displayName: "Acceleration incl. Gravity"),
       DataTypeMetaData(type: ROTATION, displayName: "Rotation"),
       DataTypeMetaData(type: MAGNETIC_FIELD, displayName: "Magnetic Field"),
       DataTypeMetaData(type: ANGULAR_VELOCITY, displayName: "Angular Velocity"),
       DataTypeMetaData(type: SIGNAL_STRENGTH, displayName: "Signal Strength"),
       DataTypeMetaData(type: TRIGGERED_TASK, displayName: "Triggered Task"),
-      DataTypeMetaData(
-        type: COMPLETED_TASK,
-        displayName: "Completed Task",
-        timeType: DataTimeType.TIME_SPAN,
-      ),
+      DataTypeMetaData(type: COMPLETED_TASK, displayName: "Completed Task", timeType: DataTimeType.TIME_SPAN),
       DataTypeMetaData(type: ERROR, displayName: "Error"),
     ]);
   }

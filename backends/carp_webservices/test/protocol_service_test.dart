@@ -24,10 +24,7 @@ void main() {
     await CarpAuthService().configure(CarpProperties().authProperties);
     CarpService().configure(CarpProperties().app, CarpProperties().study);
 
-    user = await CarpAuthService().authenticateWithUsernamePassword(
-      username: username,
-      password: password,
-    );
+    user = await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
     CarpProtocolService().configureFrom(CarpService());
     ownerId = CarpAuthService().currentUser.id;
 
@@ -46,8 +43,7 @@ void main() {
         StudyProtocol(
             ownerId: ownerId!,
             name: 'Non-motorized transport study',
-            description:
-                'Track how much non-motorized movement participants perform.',
+            description: 'Track how much non-motorized movement participants perform.',
           )
           ..addPrimaryDevice(phone)
           ..addConnectedDevice(bike, phone);
@@ -63,13 +59,10 @@ void main() {
           duration: const Duration(hours: 1),
           measures: [
             Measure(type: CarpDataTypes.GEOLOCATION)
-              ..overrideSamplingConfiguration =
-                  BatteryAwareSamplingConfiguration(
-                    normal: GranularitySamplingConfiguration(
-                      Granularity.Detailed,
-                    ),
-                    low: GranularitySamplingConfiguration(Granularity.Balanced),
-                  ),
+              ..overrideSamplingConfiguration = BatteryAwareSamplingConfiguration(
+                normal: GranularitySamplingConfiguration(Granularity.Detailed),
+                low: GranularitySamplingConfiguration(Granularity.Balanced),
+              ),
             Measure(type: CarpDataTypes.STEP_COUNT),
             // the following measures are not part of carp-core, but should still be accepted.
             Measure(type: DeviceSamplingPackage.APP_LIFECYCLE_EVENT),
@@ -93,9 +86,7 @@ void main() {
 
     protocol.addExpectedParticipantData(
       ExpectedParticipantData(
-        attribute: ParticipantAttribute(
-          inputDataType: 'dk.cachet.carp.input.sex',
-        ),
+        attribute: ParticipantAttribute(inputDataType: 'dk.cachet.carp.input.sex'),
         assignedTo: AssignedTo(roleNames: {'Participant'}),
       ),
     );
@@ -135,30 +126,22 @@ void main() {
 
     test('- getAllFor', () async {
       debugPrint('Getting protocols for owner id: $ownerId');
-      List<StudyProtocol> protocols = await CarpProtocolService()
-          .getAllForOwner(ownerId!);
+      List<StudyProtocol> protocols = await CarpProtocolService().getAllForOwner(ownerId!);
       debugPrint(toJsonString(protocols));
     });
 
     test('- getVersionHistoryFor', () async {
-      List<ProtocolVersion> versions = await CarpProtocolService()
-          .getVersionHistoryFor(testProtocolId);
+      List<ProtocolVersion> versions = await CarpProtocolService().getVersionHistoryFor(testProtocolId);
       debugPrint(toJsonString(versions));
     });
 
     test('- updateParticipantDataConfiguration', () async {
-      var p = await CarpProtocolService().updateParticipantDataConfiguration(
-        testProtocolId,
-        testProtocolVersion,
-        [
-          ExpectedParticipantData(
-            attribute: ParticipantAttribute(
-              inputDataType: 'dk.cachet.carp.input.sex',
-            ),
-            // assignedTo: AssignedTo(roleNames: {'Participant'}),
-          ),
-        ],
-      );
+      var p = await CarpProtocolService().updateParticipantDataConfiguration(testProtocolId, testProtocolVersion, [
+        ExpectedParticipantData(
+          attribute: ParticipantAttribute(inputDataType: 'dk.cachet.carp.input.sex'),
+          // assignedTo: AssignedTo(roleNames: {'Participant'}),
+        ),
+      ]);
       debugPrint(toJsonString(p));
     });
 

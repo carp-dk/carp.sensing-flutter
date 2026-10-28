@@ -30,8 +30,7 @@ abstract class AbstractCommand implements Command {
   String get password => _yaml['server']['password'].toString();
 
   String get studyId => _yaml['study']['study_id'].toString();
-  String get studyDeploymentId =>
-      _yaml['study']['study_deployment_id'].toString();
+  String get studyDeploymentId => _yaml['study']['study_deployment_id'].toString();
 
   String get protocolPath => _yaml['protocol']['path'].toString();
   String get consentPath => _yaml['consent']['path'].toString();
@@ -40,8 +39,7 @@ abstract class AbstractCommand implements Command {
   List<dynamic> get messageIds => _yaml['message']['messages'] as List<dynamic>;
 
   String get localizationPath => _yaml['localization']['path'].toString();
-  List<dynamic> get locales =>
-      _yaml['localization']['locales'] as List<dynamic>;
+  List<dynamic> get locales => _yaml['localization']['locales'] as List<dynamic>;
 
   String get ownerId => CarpAuthService().currentUser.id;
 
@@ -80,31 +78,23 @@ abstract class AbstractCommand implements Command {
 
     CarpService().configure(
       app,
-      SmartphoneStudy(
-        studyId: studyId,
-        studyDeploymentId: studyDeploymentId,
-        deviceRoleName: 'ignored',
-      ),
+      SmartphoneStudy(studyId: studyId, studyDeploymentId: studyDeploymentId, deviceRoleName: 'ignored'),
     );
   }
 
   /// The authentication configuration
-  CarpAuthProperties get authProperties =>
-      _authProperties ??= CarpAuthProperties(
-        authURL: uri,
-        clientId: 'studies-app',
-        redirectURI: Uri.parse('carp-studies-auth://auth'),
-        // For authentication at CAWS the path is '/auth/realms/Carp'
-        discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
-      );
+  CarpAuthProperties get authProperties => _authProperties ??= CarpAuthProperties(
+    authURL: uri,
+    clientId: 'studies-app',
+    redirectURI: Uri.parse('carp-studies-auth://auth'),
+    // For authentication at CAWS the path is '/auth/realms/Carp'
+    discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
+  );
 
   /// Authenticate at the CARP server.
   Future<void> authenticate() async {
     await configure();
-    await CarpAuthService().authenticateWithUsernamePassword(
-      username: username,
-      password: password,
-    );
+    await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
     CarpProtocolService().configureFrom(CarpService());
   }
 }

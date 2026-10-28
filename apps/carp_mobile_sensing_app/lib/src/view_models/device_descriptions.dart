@@ -54,6 +54,11 @@ class DeviceDescription {
       'Movesense ECG Sensor',
       Icon(Icons.watch, size: 50, color: CachetColors.CYAN),
     ),
+    AppleWatchDevice.DEVICE_TYPE: DeviceTypeDescriptor(
+      'Apple Watch',
+      'Apple Watch (AWARE)',
+      Icon(Icons.watch, size: 50, color: CachetColors.DARK_BLUE),
+    ),
     // CortriumDevice.DEVICE_TYPE: DeviceTypeDescriptor(
     //     'Cortrium',
     //     'Cortrium ECG Holter Monitor',
@@ -66,13 +71,7 @@ class DeviceDescription {
     DeviceStatus.connected: Icon(Icons.link, color: CachetColors.GREEN),
     DeviceStatus.reconnected: Icon(Icons.link, color: CachetColors.GREEN),
     DeviceStatus.disconnected: Icon(Icons.link_off, color: CachetColors.YELLOW),
-    DeviceStatus.disconnecting: Icon(
-      Icons.link_off,
-      color: CachetColors.YELLOW,
-    ),
-    DeviceStatus.paired: Icon(
-      Icons.bluetooth_connected,
-      color: CachetColors.DARK_BLUE,
-    ),
+    DeviceStatus.disconnecting: Icon(Icons.link_off, color: CachetColors.YELLOW),
+    DeviceStatus.paired: Icon(Icons.bluetooth_connected, color: CachetColors.DARK_BLUE),
   };
 }

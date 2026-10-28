@@ -7,19 +7,19 @@
 
 part of '../../domain.dart';
 
-/// An interface defining a manger of [SmartphoneStudyProtocol]s.
+/// Gets and saves [SmartphoneStudyProtocol]s, e.g. from local files or a server.
 ///
-/// Is mainly used to get and save [SmartphoneStudyProtocol]s.
-/// See [FileStudyProtocolManager] for an example.
+/// Apps implement it to load the protocol they run. See
+/// [FileStudyProtocolManager] for an example.
 abstract class StudyProtocolManager {
-  /// Initialize the study manager.
+  /// Initializes this manager. Call it before any other method.
   void initialize();
 
-  /// Get a [SmartphoneStudyProtocol] based on its [id].
+  /// Gets a [SmartphoneStudyProtocol] based on its [id].
   /// Returns `null` if no protocol exists.
   Future<SmartphoneStudyProtocol?> getStudyProtocol(String id);
 
-  /// Save a [SmartphoneStudyProtocol] with the ID [id].
+  /// Saves [protocol] with the ID [id].
   /// Returns `true` if successful, `false` otherwise.
   Future<bool> saveStudyProtocol(String id, SmartphoneStudyProtocol protocol);
 }

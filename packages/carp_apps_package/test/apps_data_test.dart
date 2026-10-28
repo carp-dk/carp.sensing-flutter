@@ -4,8 +4,7 @@ import 'package:carp_apps_package/apps.dart';
 import 'package:test/test.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 
-String _encode(Object object) =>
-    const JsonEncoder.withIndent(' ').convert(object);
+String _encode(Object object) => const JsonEncoder.withIndent(' ').convert(object);
 
 void main() {
   setUp(() {
@@ -16,11 +15,7 @@ void main() {
 
   group('Apps Tests', () {
     test(' - installed apps', () {
-      Apps d = Apps([
-        App(name: 'MUBS'),
-        App(name: 'mCardia'),
-        App(name: 'Safari'),
-      ]);
+      Apps d = Apps([App(name: 'MUBS'), App(name: 'mCardia'), App(name: 'Safari')]);
       print(d);
       print(_encode(d));
     });

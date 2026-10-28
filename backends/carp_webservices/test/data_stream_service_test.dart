@@ -23,10 +23,7 @@ void main() {
     await CarpAuthService().configure(CarpProperties().authProperties);
     CarpService().configure(CarpProperties().app, CarpProperties().study);
 
-    user = await CarpAuthService().authenticateWithUsernamePassword(
-      username: username,
-      password: password,
-    );
+    user = await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
 
     CarpDataStreamService().configureFrom(CarpService());
   });
@@ -45,26 +42,15 @@ void main() {
     test('- append - KNOWN measurements to carp-core.kotlin', () async {
       var m1 = Measurement(
         sensorStartTime: 1642505045000000,
-        data: Geolocation(
-          latitude: 55.68061908805645,
-          longitude: 12.582050313435703,
-        )..sensorSpecificData = SignalStrength(rssi: 0),
+        data: Geolocation(latitude: 55.68061908805645, longitude: 12.582050313435703)
+          ..sensorSpecificData = SignalStrength(rssi: 0),
       );
       var m2 = Measurement(
         sensorStartTime: 1642505144000000,
-        data: Geolocation(
-          latitude: 55.680802203873114,
-          longitude: 12.581802212861367,
-        ),
+        data: Geolocation(latitude: 55.680802203873114, longitude: 12.581802212861367),
       );
-      var m3 = Measurement(
-        sensorStartTime: 1642505045000000,
-        data: StepCount(steps: 0),
-      );
-      var m4 = Measurement(
-        sensorStartTime: 1642505144000000,
-        data: StepCount(steps: 30),
-      );
+      var m3 = Measurement(sensorStartTime: 1642505045000000, data: StepCount(steps: 0));
+      var m4 = Measurement(sensorStartTime: 1642505144000000, data: StepCount(steps: 30));
 
       var batch = [
         DataStreamBatch(
@@ -103,14 +89,8 @@ void main() {
     });
 
     test('- append - UNKNOWN measurements to carp-core.kotlin', () async {
-      var m1 = Measurement(
-        sensorStartTime: 1642505045000000,
-        data: BatteryState(100),
-      );
-      var m2 = Measurement(
-        sensorStartTime: 1642505045000000,
-        data: BatteryState(100),
-      );
+      var m1 = Measurement(sensorStartTime: 1642505045000000, data: BatteryState(100));
+      var m2 = Measurement(sensorStartTime: 1642505045000000, data: BatteryState(100));
 
       var batch = [
         DataStreamBatch(
@@ -131,23 +111,13 @@ void main() {
       }
 
       // debugPrint(toJsonString(batch));
-      await CarpDataStreamService().appendToDataStreams(
-        testDeploymentId,
-        batch,
-        compress: false,
-      );
+      await CarpDataStreamService().appendToDataStreams(testDeploymentId, batch, compress: false);
       debugPrint('Uploaded N=$length measurements.');
     });
 
     test('- append - STOPPED deployment', () async {
-      var m1 = Measurement(
-        sensorStartTime: 1642505045000000,
-        data: BatteryState(100),
-      );
-      var m2 = Measurement(
-        sensorStartTime: 1642505045000000,
-        data: BatteryState(100),
-      );
+      var m1 = Measurement(sensorStartTime: 1642505045000000, data: BatteryState(100));
+      var m2 = Measurement(sensorStartTime: 1642505045000000, data: BatteryState(100));
 
       var batch = [
         DataStreamBatch(
@@ -163,11 +133,7 @@ void main() {
       ];
 
       expect(
-        () async => await CarpDataStreamService().appendToDataStreams(
-          stoppedDeploymentId,
-          batch,
-          compress: false,
-        ),
+        () async => await CarpDataStreamService().appendToDataStreams(stoppedDeploymentId, batch, compress: false),
         throwsA(isA<CarpInternalServerException>()),
       );
     });
@@ -181,10 +147,7 @@ void main() {
         upload.add(
           Measurement(
             sensorStartTime: 1642505045000000 + 1000 * i,
-            data: BatteryState(
-              100 - i,
-              BatteryState.STATE_CONNECTED_NOT_CHARGING,
-            ),
+            data: BatteryState(100 - i, BatteryState.STATE_CONNECTED_NOT_CHARGING),
           ),
         );
       }
@@ -222,10 +185,7 @@ void main() {
         upload.add(
           Measurement(
             sensorStartTime: 1642505045000000 + 1000 * i,
-            data: BatteryState(
-              100 - i,
-              BatteryState.STATE_CONNECTED_NOT_CHARGING,
-            ),
+            data: BatteryState(100 - i, BatteryState.STATE_CONNECTED_NOT_CHARGING),
           ),
         );
       }
@@ -244,10 +204,7 @@ void main() {
       ];
 
       expect(
-        () async => await CarpDataStreamService().appendToDataStreams(
-          stoppedDeploymentId,
-          batch,
-        ),
+        () async => await CarpDataStreamService().appendToDataStreams(stoppedDeploymentId, batch),
         throwsA(isA<CarpInternalServerException>()),
       );
     });
@@ -292,16 +249,10 @@ void main() {
       // debugPrint(toJsonString(measurements));
 
       var selected = measurements
-          .where(
-            (item) =>
-                (item.data as BatteryState).batteryStatus ==
-                BatteryState.STATE_CONNECTED_NOT_CHARGING,
-          )
+          .where((item) => (item.data as BatteryState).batteryStatus == BatteryState.STATE_CONNECTED_NOT_CHARGING)
           .toList();
 
-      debugPrint(
-        'No. BatteryState.STATE_CONNECTED_NOT_CHARGING = ${selected.length}',
-      );
+      debugPrint('No. BatteryState.STATE_CONNECTED_NOT_CHARGING = ${selected.length}');
     });
 
     test('- get - Device Information - should throw', () async {
@@ -333,33 +284,27 @@ void main() {
         measurements: [
           Measurement(
             sensorStartTime: 1642505045000000,
-            data: Geolocation(
-              latitude: 55.68061908805645,
-              longitude: 12.582050313435703,
-            )..sensorSpecificData = SignalStrength(rssi: 0),
+            data: Geolocation(latitude: 55.68061908805645, longitude: 12.582050313435703)
+              ..sensorSpecificData = SignalStrength(rssi: 0),
           ),
           Measurement(
             sensorStartTime: 1642505144000000,
-            data: Geolocation(
-              latitude: 55.680802203873114,
-              longitude: 12.581802212861367,
-            ),
+            data: Geolocation(latitude: 55.680802203873114, longitude: 12.581802212861367),
           ),
         ],
         triggerIds: {0},
       ),
     ];
 
-    Future<List<DataStreamBatch>> getGeoLocationBatches() async =>
-        await CarpDataStreamService().getDataStream(
-          DataStreamId(
-            studyDeploymentId: testDeploymentId,
-            deviceRoleName: testPhoneRoleName,
-            dataType: CarpDataTypes.GEOLOCATION,
-          ),
-          0,
-          100,
-        );
+    Future<List<DataStreamBatch>> getGeoLocationBatches() async => await CarpDataStreamService().getDataStream(
+      DataStreamId(
+        studyDeploymentId: testDeploymentId,
+        deviceRoleName: testPhoneRoleName,
+        dataType: CarpDataTypes.GEOLOCATION,
+      ),
+      0,
+      100,
+    );
 
     // This test tests for data upload/download consistency as reported in Issue #16
     // - https://github.com/cph-cachet/carp-webservices-spring/issues/16
@@ -369,10 +314,7 @@ void main() {
       debugPrint('N = ${list.length}');
 
       debugPrint('Uploading another batch of Geolocation measurements...');
-      await CarpDataStreamService().appendToDataStreams(
-        testDeploymentId,
-        geoLocationBatch,
-      );
+      await CarpDataStreamService().appendToDataStreams(testDeploymentId, geoLocationBatch);
 
       var list2 = await getGeoLocationBatches();
       debugPrint('N = ${list2.length}');

@@ -7,10 +7,15 @@
 part of '../../common.dart';
 
 /// Uniquely identifies an account and its associated identity.
+///
+/// The [identity] is what a participant logs in with, e.g., an
+/// [EmailAccountIdentity].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Account {
   /// Identity associated with this account.
   AccountIdentity identity;
+
+  /// Unique id of this account. A random UUID (v4) if not specified.
   late String id;
 
   Account({String? id, required this.identity}) {
@@ -18,23 +23,22 @@ class Account {
   }
 
   /// Create a new [Account] uniquely identified by the specified [emailAddress].
-  Account.withEmailIdentity(String emailAddress)
-    : this(identity: EmailAccountIdentity(emailAddress));
+  Account.withEmailIdentity(String emailAddress) : this(identity: EmailAccountIdentity(emailAddress));
 
   /// Create a new [Account] uniquely identified by the specified [username].
-  Account.withUsernameIdentity(String username)
-    : this(identity: UsernameAccountIdentity(username));
+  Account.withUsernameIdentity(String username) : this(identity: UsernameAccountIdentity(username));
 
   /// Determines whether this account has the same [identity] as [otherAccount].
-  bool hasSameIdentity(Account otherAccount) =>
-      identity == otherAccount.identity;
+  bool hasSameIdentity(Account otherAccount) => identity == otherAccount.identity;
 
-  factory Account.fromJson(Map<String, dynamic> json) =>
-      _$AccountFromJson(json);
+  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
   Map<String, dynamic> toJson() => _$AccountToJson(this);
 }
 
 /// Identifies an [Account].
+///
+/// Base class of [EmailAccountIdentity] and [UsernameAccountIdentity]. Used in
+/// a `ParticipantInvitation` to invite and authenticate a participant.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AccountIdentity extends Serializable {
   AccountIdentity() : super();
@@ -43,13 +47,12 @@ class AccountIdentity extends Serializable {
   String get jsonType => 'dk.cachet.carp.common.application.users.$runtimeType';
   @override
   Function get fromJsonFunction => _$AccountIdentityFromJson;
-  factory AccountIdentity.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AccountIdentity>(json);
+  factory AccountIdentity.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AccountIdentity>(json);
   @override
   Map<String, dynamic> toJson() => _$AccountIdentityToJson(this);
 }
 
-/// Identifies an  account by a unique [emailAddress].
+/// Identifies an account by a unique [emailAddress].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class EmailAccountIdentity extends AccountIdentity {
   String emailAddress;

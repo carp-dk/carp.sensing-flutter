@@ -1,39 +1,44 @@
 part of 'health_package.dart';
 
-/// A probe collecting health data from Apple Health or Google Health Connect.
+/// Collects health data from Apple Health or Google Health Connect.
 ///
-/// Configuration of this probe is based on a [HealthSamplingConfiguration] which
-/// again is a [HistoricSamplingConfiguration].
-/// This means that when started, it will try to collect data back to the last
-/// time data was collected.
+/// Created by the [HealthSamplingPackage] for the [HealthSamplingPackage.HEALTH]
+/// measure and configured by a [HealthSamplingConfiguration]. Each time it is
+/// resumed, it fetches the configured health data types back to the last time
+/// data was collected and emits one [HealthData] measurement per data point.
+/// Use it with a trigger that runs regularly, such as a [PeriodicTrigger], or
+/// from a [HealthAppTask] that the user starts.
 ///
-/// Hence, this probe is suited for configuration using a trigger that
-/// collects data on a regular basis. This could be a [PeriodicTrigger] or it
-/// could be configured as an [AppTask] asking the user to collect the data
-/// on a regular basis.
+/// Key points:
+///  * On initialize, it removes types not supported on this platform and adds
+///    the rest to the [HealthServiceManager].
+///  * It collects nothing if permissions are missing, the type list is empty,
+///    or the start time is after the end time.
+///  * It pauses itself 20 seconds after a collection.
+///  * Errors from the `health` plugin are logged and the resume fails.
 class HealthProbe extends Probe {
   final StreamController<Measurement> _ctrl = StreamController.broadcast();
+
+  /// A stream that only carries collection errors.
+  ///
+  /// Measurements are emitted on [measurements], not on this stream.
   Stream<Measurement> get stream => _ctrl.stream;
 
   @override
-  HealthSamplingConfiguration get samplingConfiguration =>
-      super.samplingConfiguration as HealthSamplingConfiguration;
+  HealthSamplingConfiguration get samplingConfiguration => super.samplingConfiguration as HealthSamplingConfiguration;
 
   @override
-  HealthServiceManager get deviceManager =>
-      super.deviceManager as HealthServiceManager;
+  HealthServiceManager get deviceManager => super.deviceManager as HealthServiceManager;
 
-  /// Check if the sampling configuration contains a valid list of [HealthDataType]
-  /// for the current platform (iOS or Android).
+  /// Removes the health data types in [samplingConfiguration] that are not
+  /// supported on the current platform (iOS or Android).
   ///
-  /// Removes any health data type(s) which are not supported on this platform.
+  /// Logs a warning for each removed type. Called when the probe is initialized.
   void validateHealthDataTypes() {
     List<HealthDataType> toRemove = [];
     for (var type in samplingConfiguration.healthDataTypes) {
       // is this type supported on the current platform?
-      bool supported = (Platform.isIOS)
-          ? dataTypeKeysIOS.contains(type)
-          : dataTypeKeysAndroid.contains(type);
+      bool supported = (Platform.isIOS) ? dataTypeKeysIOS.contains(type) : dataTypeKeysAndroid.contains(type);
 
       if (!supported) {
         warning(
@@ -45,9 +50,7 @@ class HealthProbe extends Probe {
       }
     }
     // remove all types we don't support on this platform
-    samplingConfiguration.healthDataTypes.removeWhere(
-      (element) => toRemove.contains(element),
-    );
+    samplingConfiguration.healthDataTypes.removeWhere((element) => toRemove.contains(element));
   }
 
   @override
@@ -57,17 +60,19 @@ class HealthProbe extends Probe {
     return true;
   }
 
-  /// Does this probe have permissions to access health data specified in
-  /// the [samplingConfiguration]?
-  Future<bool> hasPermissions() async => await deviceManager
-      .hasHealthPermissions(samplingConfiguration.healthDataTypes);
-
-  /// Request permission to access health data specified in the [samplingConfiguration]
-  /// for this probe.
+  /// Whether permission is granted to read the health data types in the
+  /// [samplingConfiguration].
   ///
-  /// Note that this will show the Permission dialog to the user, asking for
+  /// See [HealthServiceManager.hasHealthPermissions] for the iOS caveat.
+  Future<bool> hasPermissions() async =>
+      await deviceManager.hasHealthPermissions(samplingConfiguration.healthDataTypes);
+
+  /// Requests permission to read the health data types in the
+  /// [samplingConfiguration], if not already granted.
+  ///
+  /// Note that this shows the permission dialog to the user, asking for
   /// access to the health data.
-  /// If the user denies access, this method will return false.
+  /// If the user denies access, this method returns false.
   ///
   /// Note that on Android, if the user denies access to the health data types
   /// TWICE, then the permissions are permanently denied and the app cannot ask
@@ -78,9 +83,7 @@ class HealthProbe extends Probe {
   Future<bool> requestPermissions() async {
     bool permission = await hasPermissions();
     if (!permission) {
-      permission = await deviceManager.requestHealthPermissions(
-        samplingConfiguration.healthDataTypes,
-      );
+      permission = await deviceManager.requestHealthPermissions(samplingConfiguration.healthDataTypes);
     }
     return permission;
   }
@@ -90,19 +93,14 @@ class HealthProbe extends Probe {
     // Check if we have permissions to access health data and fast out if not.
     bool permission = await deviceManager.hasPermissions();
     if (!permission) {
-      warning(
-        "$runtimeType - Cannot resume probe since we don't have permissions to access health data.",
-      );
+      warning("$runtimeType - Cannot resume probe since we don't have permissions to access health data.");
       return false;
     }
 
     if (await super.onResume()) {
-      DateTime start =
-          samplingConfiguration.lastTime ??
-          DateTime.now().subtract(samplingConfiguration.past);
+      DateTime start = samplingConfiguration.lastTime ?? DateTime.now().subtract(samplingConfiguration.past);
       DateTime end = DateTime.now();
-      List<HealthDataType> healthDataTypes =
-          samplingConfiguration.healthDataTypes;
+      List<HealthDataType> healthDataTypes = samplingConfiguration.healthDataTypes;
 
       if (healthDataTypes.isEmpty) {
         warning(
@@ -131,9 +129,7 @@ class HealthProbe extends Probe {
               types: healthDataTypes,
             ) ??
             [];
-        debug(
-          '$runtimeType - Retrieved ${healthDataPoints.length} health data points of types: $healthDataTypes',
-        );
+        debug('$runtimeType - Retrieved ${healthDataPoints.length} health data points of types: $healthDataTypes');
 
         // Convert HealthDataPoint to measurements and add them the measurements stream.
         for (var data in healthDataPoints) {

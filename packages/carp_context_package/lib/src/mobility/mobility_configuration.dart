@@ -1,18 +1,23 @@
 part of '../../carp_context_package.dart';
 
-/// Specify the configuration on how to measure mobility features.
+/// The sampling configuration for the [ContextSamplingPackage.MOBILITY] measure.
+///
+/// Read by [MobilityProbe], which passes the values to the `mobility_features`
+/// plugin.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MobilitySamplingConfiguration extends PersistentSamplingConfiguration {
-  /// Should prior computed context be used?
+  /// Should prior computed context be used? Default is true.
+  ///
+  /// Not currently passed on by [MobilityProbe].
   bool usePriorContexts;
 
-  /// The radius of a stop.
+  /// The radius of a stop, in meters. Default is 25.
   double stopRadius;
 
-  /// The radius for registering a place.
+  /// The radius for registering a place, in meters. Default is 50.
   double placeRadius;
 
-  /// The duration of a stop (minimum).
+  /// The minimum duration of a stop. Default is 30 seconds.
   late Duration stopDuration;
 
   MobilitySamplingConfiguration({

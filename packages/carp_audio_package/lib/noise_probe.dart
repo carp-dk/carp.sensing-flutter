@@ -1,12 +1,13 @@
 part of 'media.dart';
 
-/// A probe collecting noise sampling from the microphone.
+/// Samples the noise level from the microphone and reports it as [Noise] data.
 ///
-/// See [PeriodicSamplingConfiguration] on how to configure this probe,
-/// including setting the frequency and duration of the sampling rate.
+/// Used for the [MediaSamplingPackage.NOISE] measure. Does not record sound.
+/// It listens for the duration of each sampling window and reports the mean,
+/// standard deviation, min and max decibel of that window. Configure the
+/// interval and window duration with a [PeriodicSamplingConfiguration].
 ///
-/// Does not record sound. Instead reports the audio level with a specified
-/// frequency, in a given sampling window as a [Noise] data object.
+/// No measurement is added if no finite readings were collected in a window.
 class NoiseProbe extends BufferingPeriodicStreamProbe {
   final NoiseMeter _noiseMeter = NoiseMeter();
   final List<NoiseReading> _noiseReadings = [];
@@ -25,22 +26,13 @@ class NoiseProbe extends BufferingPeriodicStreamProbe {
   void onSamplingEnd() => _endRecordingTime = DateTime.now();
 
   @override
-  void onSamplingData(dynamic event) =>
-      event is NoiseReading ? _noiseReadings.add(event) : null;
+  void onSamplingData(dynamic event) => event is NoiseReading ? _noiseReadings.add(event) : null;
 
   @override
   Future<Measurement?> getMeasurement() async {
     if (_noiseReadings.isNotEmpty) {
-      Stats meanStats = Stats.fromData(
-        _noiseReadings
-            .map((reading) => reading.meanDecibel)
-            .where((e) => e.isFinite),
-      );
-      Stats maxStats = Stats.fromData(
-        _noiseReadings
-            .map((reading) => reading.maxDecibel)
-            .where((e) => e.isFinite),
-      );
+      Stats meanStats = Stats.fromData(_noiseReadings.map((reading) => reading.meanDecibel).where((e) => e.isFinite));
+      Stats maxStats = Stats.fromData(_noiseReadings.map((reading) => reading.maxDecibel).where((e) => e.isFinite));
 
       num mean = meanStats.mean;
       num std = meanStats.sampleValues.standardDeviation;
@@ -49,9 +41,7 @@ class NoiseProbe extends BufferingPeriodicStreamProbe {
 
       if (mean.isFinite && std.isFinite && min.isFinite && max.isFinite) {
         return Measurement(
-          sensorStartTime:
-              _startRecordingTime?.microsecondsSinceEpoch ??
-              DateTime.now().microsecondsSinceEpoch,
+          sensorStartTime: _startRecordingTime?.microsecondsSinceEpoch ?? DateTime.now().microsecondsSinceEpoch,
           sensorEndTime: _endRecordingTime?.microsecondsSinceEpoch,
           data: Noise(
             meanDecibel: mean.toDouble(),

@@ -7,30 +7,22 @@ part of 'sampling_packages.dart';
 // **************************************************************************
 
 AmbientLight _$AmbientLightFromJson(Map<String, dynamic> json) =>
-    AmbientLight(
-        json['meanLux'] as num,
-        json['stdLux'] as num,
-        json['minLux'] as num,
-        json['maxLux'] as num,
-      )
+    AmbientLight(json['meanLux'] as num, json['stdLux'] as num, json['minLux'] as num, json['maxLux'] as num)
       ..$type = json['__type'] as String?
       ..sensorSpecificData = json['sensorSpecificData'] == null
           ? null
           : Data.fromJson(json['sensorSpecificData'] as Map<String, dynamic>);
 
-Map<String, dynamic> _$AmbientLightToJson(AmbientLight instance) =>
-    <String, dynamic>{
-      '__type': ?instance.$type,
-      'sensorSpecificData': ?instance.sensorSpecificData?.toJson(),
-      'meanLux': instance.meanLux,
-      'stdLux': instance.stdLux,
-      'minLux': instance.minLux,
-      'maxLux': instance.maxLux,
-    };
+Map<String, dynamic> _$AmbientLightToJson(AmbientLight instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'sensorSpecificData': ?instance.sensorSpecificData?.toJson(),
+  'meanLux': instance.meanLux,
+  'stdLux': instance.stdLux,
+  'minLux': instance.minLux,
+  'maxLux': instance.maxLux,
+};
 
-AccelerationFeatures _$AccelerationFeaturesFromJson(
-  Map<String, dynamic> json,
-) => AccelerationFeatures()
+AccelerationFeatures _$AccelerationFeaturesFromJson(Map<String, dynamic> json) => AccelerationFeatures()
   ..$type = json['__type'] as String?
   ..sensorSpecificData = json['sensorSpecificData'] == null
       ? null
@@ -78,9 +70,7 @@ AccelerationFeatures _$AccelerationFeaturesFromJson(
   ..avgResultAcceleration = json['avgResultAcceleration'] as num?
   ..signalMagnitudeArea = json['signalMagnitudeArea'] as num?;
 
-Map<String, dynamic> _$AccelerationFeaturesToJson(
-  AccelerationFeatures instance,
-) => <String, dynamic>{
+Map<String, dynamic> _$AccelerationFeaturesToJson(AccelerationFeatures instance) => <String, dynamic>{
   '__type': ?instance.$type,
   'sensorSpecificData': ?instance.sensorSpecificData?.toJson(),
   'count': instance.count,
@@ -127,12 +117,11 @@ Map<String, dynamic> _$AccelerationFeaturesToJson(
   'signalMagnitudeArea': ?instance.signalMagnitudeArea,
 };
 
-StepEvent _$StepEventFromJson(Map<String, dynamic> json) =>
-    StepEvent(steps: (json['steps'] as num?)?.toInt() ?? 0)
-      ..$type = json['__type'] as String?
-      ..sensorSpecificData = json['sensorSpecificData'] == null
-          ? null
-          : Data.fromJson(json['sensorSpecificData'] as Map<String, dynamic>);
+StepEvent _$StepEventFromJson(Map<String, dynamic> json) => StepEvent(steps: (json['steps'] as num?)?.toInt() ?? 0)
+  ..$type = json['__type'] as String?
+  ..sensorSpecificData = json['sensorSpecificData'] == null
+      ? null
+      : Data.fromJson(json['sensorSpecificData'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$StepEventToJson(StepEvent instance) => <String, dynamic>{
   '__type': ?instance.$type,
@@ -155,41 +144,32 @@ DeviceInformation _$DeviceInformationFromJson(Map<String, dynamic> json) =>
       ..sdk = json['sdk'] as String?
       ..release = json['release'] as String?;
 
-Map<String, dynamic> _$DeviceInformationToJson(DeviceInformation instance) =>
-    <String, dynamic>{
-      '__type': ?instance.$type,
-      'platform': ?instance.platform,
-      'deviceId': ?instance.deviceId,
-      'hardware': ?instance.hardware,
-      'deviceName': ?instance.deviceName,
-      'deviceManufacturer': ?instance.deviceManufacturer,
-      'deviceModel': ?instance.deviceModel,
-      'operatingSystem': ?instance.operatingSystem,
-      'sdk': ?instance.sdk,
-      'release': ?instance.release,
-      'deviceData': instance.deviceData,
-    };
+Map<String, dynamic> _$DeviceInformationToJson(DeviceInformation instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'platform': ?instance.platform,
+  'deviceId': ?instance.deviceId,
+  'hardware': ?instance.hardware,
+  'deviceName': ?instance.deviceName,
+  'deviceManufacturer': ?instance.deviceManufacturer,
+  'deviceModel': ?instance.deviceModel,
+  'operatingSystem': ?instance.operatingSystem,
+  'sdk': ?instance.sdk,
+  'release': ?instance.release,
+  'deviceData': instance.deviceData,
+};
 
-ApplicationInformation _$ApplicationInformationFromJson(
-  Map<String, dynamic> json,
-) => ApplicationInformation(
+ApplicationInformation _$ApplicationInformationFromJson(Map<String, dynamic> json) => ApplicationInformation(
   appName: json['appName'] as String,
   packageName: json['packageName'] as String,
   version: json['version'] as String,
   buildNumber: json['buildNumber'] as String,
   buildSignature: json['buildSignature'] as String? ?? '',
   installerStore: json['installerStore'] as String?,
-  installTime: json['installTime'] == null
-      ? null
-      : DateTime.parse(json['installTime'] as String),
-  updateTime: json['updateTime'] == null
-      ? null
-      : DateTime.parse(json['updateTime'] as String),
+  installTime: json['installTime'] == null ? null : DateTime.parse(json['installTime'] as String),
+  updateTime: json['updateTime'] == null ? null : DateTime.parse(json['updateTime'] as String),
 )..$type = json['__type'] as String?;
 
-Map<String, dynamic> _$ApplicationInformationToJson(
-  ApplicationInformation instance,
-) => <String, dynamic>{
+Map<String, dynamic> _$ApplicationInformationToJson(ApplicationInformation instance) => <String, dynamic>{
   '__type': ?instance.$type,
   'appName': instance.appName,
   'packageName': instance.packageName,
@@ -201,39 +181,33 @@ Map<String, dynamic> _$ApplicationInformationToJson(
   'updateTime': ?instance.updateTime?.toIso8601String(),
 };
 
-BatteryState _$BatteryStateFromJson(Map<String, dynamic> json) => BatteryState(
-  (json['batteryLevel'] as num?)?.toInt(),
-  json['batteryStatus'] as String?,
-)..$type = json['__type'] as String?;
-
-Map<String, dynamic> _$BatteryStateToJson(BatteryState instance) =>
-    <String, dynamic>{
-      '__type': ?instance.$type,
-      'batteryLevel': ?instance.batteryLevel,
-      'batteryStatus': ?instance.batteryStatus,
-    };
-
-FreeMemory _$FreeMemoryFromJson(Map<String, dynamic> json) => FreeMemory(
-  (json['freePhysicalMemory'] as num?)?.toInt(),
-  (json['freeVirtualMemory'] as num?)?.toInt(),
-)..$type = json['__type'] as String?;
-
-Map<String, dynamic> _$FreeMemoryToJson(FreeMemory instance) =>
-    <String, dynamic>{
-      '__type': ?instance.$type,
-      'freePhysicalMemory': ?instance.freePhysicalMemory,
-      'freeVirtualMemory': ?instance.freeVirtualMemory,
-    };
-
-ScreenEvent _$ScreenEventFromJson(Map<String, dynamic> json) =>
-    ScreenEvent(json['screenEvent'] as String?)
+BatteryState _$BatteryStateFromJson(Map<String, dynamic> json) =>
+    BatteryState((json['batteryLevel'] as num?)?.toInt(), json['batteryStatus'] as String?)
       ..$type = json['__type'] as String?;
 
-Map<String, dynamic> _$ScreenEventToJson(ScreenEvent instance) =>
-    <String, dynamic>{
-      '__type': ?instance.$type,
-      'screenEvent': ?instance.screenEvent,
-    };
+Map<String, dynamic> _$BatteryStateToJson(BatteryState instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'batteryLevel': ?instance.batteryLevel,
+  'batteryStatus': ?instance.batteryStatus,
+};
+
+FreeMemory _$FreeMemoryFromJson(Map<String, dynamic> json) =>
+    FreeMemory((json['freePhysicalMemory'] as num?)?.toInt(), (json['freeVirtualMemory'] as num?)?.toInt())
+      ..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$FreeMemoryToJson(FreeMemory instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'freePhysicalMemory': ?instance.freePhysicalMemory,
+  'freeVirtualMemory': ?instance.freeVirtualMemory,
+};
+
+ScreenEvent _$ScreenEventFromJson(Map<String, dynamic> json) =>
+    ScreenEvent(json['screenEvent'] as String?)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$ScreenEventToJson(ScreenEvent instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'screenEvent': ?instance.screenEvent,
+};
 
 Timezone _$TimezoneFromJson(Map<String, dynamic> json) =>
     Timezone(json['timezone'] as String)..$type = json['__type'] as String?;
@@ -244,16 +218,16 @@ Map<String, dynamic> _$TimezoneToJson(Timezone instance) => <String, dynamic>{
 };
 
 AppLifecycleEvent _$AppLifecycleEventFromJson(Map<String, dynamic> json) =>
-    AppLifecycleEvent(json['state'] as String)
+    AppLifecycleEvent(json['state'] as String)..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$AppLifecycleEventToJson(AppLifecycleEvent instance) => <String, dynamic>{
+  '__type': ?instance.$type,
+  'state': instance.state,
+};
+
+Heartbeat _$HeartbeatFromJson(Map<String, dynamic> json) =>
+    Heartbeat(deviceType: json['deviceType'] as String, deviceRoleName: json['deviceRoleName'] as String)
       ..$type = json['__type'] as String?;
-
-Map<String, dynamic> _$AppLifecycleEventToJson(AppLifecycleEvent instance) =>
-    <String, dynamic>{'__type': ?instance.$type, 'state': instance.state};
-
-Heartbeat _$HeartbeatFromJson(Map<String, dynamic> json) => Heartbeat(
-  deviceType: json['deviceType'] as String,
-  deviceRoleName: json['deviceRoleName'] as String,
-)..$type = json['__type'] as String?;
 
 Map<String, dynamic> _$HeartbeatToJson(Heartbeat instance) => <String, dynamic>{
   '__type': ?instance.$type,

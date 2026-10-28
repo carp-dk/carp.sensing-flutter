@@ -30,6 +30,7 @@ These are the available CARP Mobile Sensing Flutter components in this repositor
 | [carp_esense_package](./packages/carp_esense_package) | Sampling package for the eSense earplug device (button pressed & movement) | [![pub package](https://img.shields.io/pub/v/carp_esense_package.svg)](https://pub.dartlang.org/packages/carp_esense_package) |
 | [carp_polar_package](./packages/carp_polar_package) | Sampling package for the [Polar heart rate monitors](https://www.polar.com/) | [![pub package](https://img.shields.io/pub/v/carp_polar_package.svg)](https://pub.dartlang.org/packages/carp_polar_package) |
 | [carp_movesense_package](./packages/carp_movesense_package) | Sampling package for the [Movesense heart rate monitors](https://www.movesense.com/) | [![pub package](https://img.shields.io/pub/v/carp_movesense_package.svg)](https://pub.dartlang.org/packages/carp_movesense_package) |
+| [carp_aware_package](https://github.com/carp-dk/carp_aware_package) | Sampling package for the [Apple Watch](https://www.apple.com/watch/), using the [AWARE watchOS](https://github.com/awareframework/com.awareframework.ios.sensor.applewatch) framework | [![pub package](https://img.shields.io/pub/v/carp_aware_package.svg)](https://pub.dartlang.org/packages/carp_aware_package) |
 | **Backends** | **Backend data upload components** |  |
 | [carp_webservices](./backends/carp_webservices) | Flutter API for CARP Web Services (CAWS) | [![pub package](https://img.shields.io/pub/v/carp_webservices.svg)](https://pub.dartlang.org/packages/carp_webservices) |
 | [carp_backend](./backends/carp_backend) | Data manager for uploading data to a CAWS data backend. | [![pub package](https://img.shields.io/pub/v/carp_backend.svg)](https://pub.dartlang.org/packages/carp_backend) |
@@ -49,5 +50,7 @@ The overall documentation of the software architecture of CARP Mobile Sensing, a
 Please check existing issues and file any new issues, bugs, or feature requests in the [carp.sensing-flutter repo](https://github.com/cph-cachet/carp.sensing-flutter/issues).
 
 ## Contributing
+
+Code is formatted with `dart format` at a line width of 120 (set in each `analysis_options.yaml`), which CI enforces on every pull request. Run `flutter pub get` in a package before formatting it, otherwise its settings are ignored.
 
 Contributing is not yet in place. However, if you wish to contribute a change to any of the existing components in this repo, please review our [contribution guide](https://github.com/cph-cachet/carp.sensing/CONTRIBUTING.md), and send a [pull request](https://github.com/cph-cachet/carp.sensing-flutter/pulls).

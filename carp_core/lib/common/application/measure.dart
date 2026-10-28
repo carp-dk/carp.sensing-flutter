@@ -6,14 +6,31 @@
  */
 part of '../../common.dart';
 
-/// Defines data that needs to be measured/collected passively as part of a
-/// task defined by [TaskConfiguration].
+/// Defines one type of data to collect passively as part of a task.
+///
+/// A measure names a data [type] (e.g., `dk.cachet.carp.geolocation`) and
+/// is added to a [TaskConfiguration]. When the task is triggered, the client
+/// collects this data type, typically through a probe.
+///
+/// Key points:
+///  * Two measures are equal if they have the same [type]. [TaskConfiguration]
+///    removes duplicates when it is created; later additions are not
+///    de-duplicated.
+///  * [overrideSamplingConfiguration] overrides how the data is sampled; see
+///    [DataTypeSamplingScheme] for the order of priority.
+///
+/// ```dart
+/// var task = BackgroundTask(measures: [
+///   Measure(type: CarpDataTypes.STEP_COUNT),
+///   Measure(type: CarpDataTypes.GEOLOCATION),
+/// ]);
+/// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Measure extends Serializable {
   /// The type of measure to do.
   ///
-  /// Specifies the full name space of the data to be collected, e.g.,
-  /// "dk.cachet.carp.measure.location".
+  /// The fully qualified data type to collect, e.g.,
+  /// "dk.cachet.carp.geolocation". See [CarpDataTypes] for the core types.
   String type;
 
   /// The type of measure as a [DataType].
@@ -28,20 +45,17 @@ class Measure extends Serializable {
 
   /// Create a measure by specifying its [type] and optionally a
   /// [samplingConfiguration] to override the default sampling configuration.
-  Measure({required this.type, SamplingConfiguration? samplingConfiguration})
-    : super() {
+  Measure({required this.type, SamplingConfiguration? samplingConfiguration}) : super() {
     overrideSamplingConfiguration = samplingConfiguration;
   }
 
   @override
   Function get fromJsonFunction => _$MeasureFromJson;
-  factory Measure.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Measure>(json);
+  factory Measure.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Measure>(json);
   @override
   Map<String, dynamic> toJson() => _$MeasureToJson(this);
   @override
-  String get jsonType =>
-      'dk.cachet.carp.common.application.tasks.Measure.DataStream';
+  String get jsonType => 'dk.cachet.carp.common.application.tasks.Measure.DataStream';
 
   @override
   int get hashCode => type.hashCode;

@@ -17,10 +17,7 @@ void main() async {
   SamplingPackageRegistry().register(ESenseSamplingPackage());
 
   // Create a study protocol
-  var protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'eSense Sensing Example',
-  );
+  var protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'eSense Sensing Example');
 
   // Define which devices are used for data collection - both phone and eSense
   // and add them to the protocol.

@@ -7,15 +7,18 @@
 
 part of '../../common.dart';
 
-/// Describes requested measures to be collected by a device.
+/// A named group of [Measure]s that a device runs when a trigger fires.
 ///
-/// A [TaskConfiguration] holds information about each task to be triggered by
-/// a [TriggerConfiguration] as part of a [TaskControl].
-/// Each task holds a list of [Measure]s to be done as part of this task.
-/// A [TaskConfiguration] is hence an aggregation of [Measure]s.
+/// A task is added to a protocol together with a [TriggerConfiguration] via
+/// [StudyProtocol.addTaskControl], which creates a [TaskControl]. When the
+/// trigger fires, the client starts (or stops) all of the task's measures.
 ///
-/// Note that the [name] of the task identifies the task and has to be unique
-/// within a study deployment.
+/// Key points:
+///  * The [name] identifies the task and must be unique within a protocol.
+///    If not given, a name like 'Task #3' is generated.
+///  * Duplicate measures (same type) are removed when the task is created.
+///  * Subclasses define how the task runs, e.g. [BackgroundTask]. CARP Mobile
+///    Sensing adds `AppTask` for tasks the user does in the app.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TaskConfiguration extends Serializable {
   static int _counter = 0;
@@ -31,9 +34,10 @@ class TaskConfiguration extends Serializable {
 
   /// Get data types of all data which may be collected, either passively as part
   /// of task measures, or as the result of user interactions, for this task.
+  ///
+  /// Always includes [CarpDataTypes.COMPLETED_TASK].
   Set<String> getAllExpectedDataTypes() =>
-      (measures?.map((measure) => measure.type).toSet() ?? {})
-        ..add(CarpDataTypes.COMPLETED_TASK);
+      (measures?.map((measure) => measure.type).toSet() ?? {})..add(CarpDataTypes.COMPLETED_TASK);
 
   /// Add [measure] to this task.
   void addMeasure(Measure measure) => measures!.add(measure);
@@ -46,8 +50,7 @@ class TaskConfiguration extends Serializable {
 
   /// Create a task. The [name] uniquely identifies the task.
   /// If [name] is not specified, a name is generated.
-  TaskConfiguration({String? name, this.description, List<Measure>? measures})
-    : super() {
+  TaskConfiguration({String? name, this.description, List<Measure>? measures}) : super() {
     this.name = name ?? 'Task #${_counter++}';
     // Remove duplicates by converting to a set and back to a list.
     this.measures = measures?.toSet().toList() ?? [];
@@ -55,22 +58,21 @@ class TaskConfiguration extends Serializable {
 
   @override
   Function get fromJsonFunction => _$TaskConfigurationFromJson;
-  factory TaskConfiguration.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<TaskConfiguration>(json);
+  factory TaskConfiguration.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<TaskConfiguration>(json);
   @override
   Map<String, dynamic> toJson() => _$TaskConfigurationToJson(this);
   @override
   String get jsonType => 'dk.cachet.carp.common.application.tasks.$runtimeType';
 
   @override
-  String toString() =>
-      '$runtimeType - name: $name, measures size: ${measures?.length}';
+  String toString() => '$runtimeType - name: $name, measures size: ${measures?.length}';
 }
 
 /// A task which is used for monitoring the execution of the data sampling
 /// collecting data on [CompletedTask], [TriggeredTask], and [Error].
-/// This task is not supposed to be executed as such, but allows the addition
-/// of such monitoring measure to be added to a protocol.
+///
+/// This task is not supposed to be executed as such, but allows such
+/// monitoring measures to be added to a protocol.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class MonitoringTask extends TaskConfiguration {
   /// Create a new monitoring task.
@@ -78,16 +80,17 @@ class MonitoringTask extends TaskConfiguration {
 
   @override
   Function get fromJsonFunction => _$MonitoringTaskFromJson;
-  factory MonitoringTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<MonitoringTask>(json);
+  factory MonitoringTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<MonitoringTask>(json);
   @override
   Map<String, dynamic> toJson() => _$MonitoringTaskToJson(this);
 }
 
 /// A task which specifies that all containing measures and/or
 /// outputs should immediately start running in the background once triggered.
+///
 /// The task runs for the specified [duration], or until stopped, or until
-/// all measures and/or outputs have completed.
+/// all measures and/or outputs have completed. This is the usual task type
+/// for passive sensing.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class BackgroundTask extends TaskConfiguration {
   /// The optional duration over the course of which the [measures] need to
@@ -97,23 +100,20 @@ class BackgroundTask extends TaskConfiguration {
   Duration? duration;
 
   /// Create a new task which can run in the background.
-  BackgroundTask({
-    super.name,
-    super.description,
-    super.measures,
-    this.duration,
-  });
+  BackgroundTask({super.name, super.description, super.measures, this.duration});
 
   @override
   Function get fromJsonFunction => _$BackgroundTaskFromJson;
-  factory BackgroundTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<BackgroundTask>(json);
+  factory BackgroundTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<BackgroundTask>(json);
   @override
   Map<String, dynamic> toJson() => _$BackgroundTaskToJson(this);
 }
 
 /// A task which contains a definition of a custom protocol which differs from
 /// the CARP domain model.
+///
+/// Created by [ProtocolFactoryService.createCustomProtocol] and run on a
+/// [CustomProtocolDevice]. Has no [measures].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CustomProtocolTask extends TaskConfiguration {
   /// A definition on how to run a study on a primary device, serialized as a string.
@@ -161,21 +161,18 @@ class WebTask extends TaskConfiguration {
   /// Create a task which redirects to a web page [url].
   WebTask({super.name, super.description, super.measures, required this.url});
 
-  /// Replace the variables in [url] with the specified runtime values,
-  /// if the variables are present.
-  String getUrl(
-    String participantId,
-    String studyDeploymentId,
-    int triggerId,
-  ) => url
+  /// Returns [url] with `$PARTICIPANT_ID`, `$DEPLOYMENT_ID` and `$TRIGGER_ID`
+  /// replaced by [participantId], [studyDeploymentId] and [triggerId].
+  ///
+  /// Only the first occurrence of each variable is replaced.
+  String getUrl(String participantId, String studyDeploymentId, int triggerId) => url
       .replaceFirst('\$PARTICIPANT_ID', participantId)
       .replaceFirst('\$DEPLOYMENT_ID', studyDeploymentId)
       .replaceFirst('\$TRIGGER_ID', triggerId.toString());
 
   @override
   Function get fromJsonFunction => _$WebTaskFromJson;
-  factory WebTask.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<WebTask>(json);
+  factory WebTask.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<WebTask>(json);
   @override
   Map<String, dynamic> toJson() => _$WebTaskToJson(this);
 

@@ -7,13 +7,22 @@
 
 part of '../../../sampling_packages.dart';
 
-/// Ambient light intensity in Lux.
-/// Typically collected from the light sensor on the front of the phone.
+/// Statistics of ambient light intensity, in lux, over a sampling period.
+///
+/// Collected by [LightProbe] for the [SensorSamplingPackage.AMBIENT_LIGHT]
+/// measure, typically from the light sensor on the front of the phone.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AmbientLight extends SensorData {
+  /// Mean light intensity in lux.
   num meanLux;
+
+  /// Standard deviation of the light intensity in lux.
   num stdLux;
+
+  /// Minimum light intensity in lux.
   num minLux;
+
+  /// Maximum light intensity in lux.
   num maxLux;
 
   AmbientLight(this.meanLux, this.stdLux, this.minLux, this.maxLux) : super();
@@ -21,24 +30,22 @@ class AmbientLight extends SensorData {
   /// Create an [AmbientLight] from a list of lux value readings.
   factory AmbientLight.fromLuxReadings(List<num> luxValues) {
     var statistics = luxValues.statistics;
-    return AmbientLight(
-      statistics.mean,
-      statistics.standardDeviation,
-      statistics.min,
-      statistics.max,
-    );
+    return AmbientLight(statistics.mean, statistics.standardDeviation, statistics.min, statistics.max);
   }
 
   @override
   Function get fromJsonFunction => _$AmbientLightFromJson;
-  factory AmbientLight.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AmbientLight>(json);
+  factory AmbientLight.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AmbientLight>(json);
   @override
   Map<String, dynamic> toJson() => _$AmbientLightToJson(this);
 }
 
 /// A set of acceleration (non-gravitational) features collected over a specific
 /// sampling period.
+///
+/// Collected by [AccelerometerFeaturesProbe] for the
+/// [SensorSamplingPackage.ACCELERATION_FEATURES] measure. Each feature is
+/// calculated per axis (`x`, `y`, `z` prefix), in m/s^2 or as a count.
 ///
 /// The set of features is inspired from the Medium article on
 /// [Feature Engineering on Time-Series Data for Human Activity Recognition](https://medium.com/towards-data-science/feature-engineering-on-time-series-data-transforming-signal-data-of-a-smartphone-accelerometer-for-72cbe34b8a60)
@@ -71,6 +78,7 @@ class AmbientLight extends SensorData {
 ///
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AccelerationFeatures extends SensorData {
+  /// The number of accelerometer readings the features are calculated from.
   int count = 0;
   num? xMean,
       yMean,
@@ -125,9 +133,8 @@ class AccelerationFeatures extends SensorData {
 
   AccelerationFeatures() : super();
 
-  factory AccelerationFeatures.fromAccelerometerReadings(
-    List<UserAccelerometerEvent> readings,
-  ) {
+  /// Calculates the features from a non-empty list of accelerometer [readings].
+  factory AccelerationFeatures.fromAccelerometerReadings(List<UserAccelerometerEvent> readings) {
     final n = readings.length;
 
     final List<num> xList = readings.map((event) => event.x).toList();
@@ -238,7 +245,10 @@ class AccelerationFeatures extends SensorData {
   Map<String, dynamic> toJson() => _$AccelerationFeaturesToJson(this);
 }
 
-/// Step event data as sensed by the phone's built-in pedometer.
+/// A step event as sensed by the phone's built-in pedometer.
+///
+/// Collected by [PedometerProbe] for the [SensorSamplingPackage.STEP_EVENT]
+/// measure.
 ///
 /// Normally, a step event is sent for each step taken by the user.
 /// But note that this depends on the underlying OS and hardware capabilities.
@@ -253,8 +263,7 @@ class StepEvent extends SensorData {
 
   @override
   Function get fromJsonFunction => _$StepEventFromJson;
-  factory StepEvent.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<StepEvent>(json);
+  factory StepEvent.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StepEvent>(json);
   @override
   Map<String, dynamic> toJson() => _$StepEventToJson(this);
 }

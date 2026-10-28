@@ -1,11 +1,12 @@
-/// Implements open standards which can describe a study protocol, i.e.,
-/// defining how a study should be run. Essentially, this subsystem has no
-/// technical dependencies on any particular sensor technology or application as
-/// it merely describes why, when, and what data should be collected.
+/// Study protocols: the definition of how a study is run.
 ///
+/// A [StudyProtocol] describes why, when and what data should be collected,
+/// without depending on any sensor technology or app. It combines devices,
+/// tasks, triggers and measures from the common subsystem. Protocols are
+/// managed through a [ProtocolService] and deployed with a `DeploymentService`.
 ///
-/// Contain the the core CARP domain classes like [StudyProtocol], [TaskConfiguration],
-/// and [Measure].
+/// Main types: [StudyProtocol], [ProtocolVersion], [ProtocolService] and
+/// [ProtocolFactoryService].
 ///
 /// See the [`carp.protocols`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-protocols.md)
 /// definition in Kotlin.

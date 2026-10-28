@@ -9,10 +9,7 @@ void main() {
   group('Sampling Configurations', () {
     test('Sampling Packages.', () {
       var schemes = DeviceSamplingPackage().samplingSchemes;
-      expect(
-        schemes.configurations.length,
-        DeviceSamplingPackage().samplingSchemes.dataTypes.length,
-      );
+      expect(schemes.configurations.length, DeviceSamplingPackage().samplingSchemes.dataTypes.length);
 
       schemes.addSamplingSchema(MonitoringSamplingPackage().samplingSchemes);
       expect(

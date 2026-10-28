@@ -7,7 +7,7 @@
 
 part of '../../../sampling_packages.dart';
 
-/// The pedometer probe listens to the hardware step counter sensor.
+/// Collects [StepEvent]s from the hardware step counter sensor.
 ///
 /// It samples step counts directly from the native OS and reports step events
 /// as they are sensed, typically for each step taken.
@@ -17,10 +17,8 @@ part of '../../../sampling_packages.dart';
 class PedometerProbe extends StreamProbe {
   @override
   Stream<Measurement> get stream => pedometer.Pedometer.stepCountStream.map(
-    (pedometer.StepCount count) => Measurement.fromData(
-      StepEvent(steps: count.steps),
-      count.timeStamp.microsecondsSinceEpoch,
-    ),
+    (pedometer.StepCount count) =>
+        Measurement.fromData(StepEvent(steps: count.steps), count.timeStamp.microsecondsSinceEpoch),
   );
 }
 
@@ -32,9 +30,7 @@ class PedometerProbe extends StreamProbe {
 class StepCountProbe extends StreamProbe {
   @override
   Stream<Measurement> get stream => pedometer.Pedometer.stepCountStream.map(
-    (pedometer.StepCount count) => Measurement.fromData(
-      StepCount(steps: count.steps),
-      count.timeStamp.microsecondsSinceEpoch,
-    ),
+    (pedometer.StepCount count) =>
+        Measurement.fromData(StepCount(steps: count.steps), count.timeStamp.microsecondsSinceEpoch),
   );
 }

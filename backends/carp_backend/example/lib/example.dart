@@ -33,10 +33,7 @@ void main() async {
   CarpService().configure(app);
 
   // Authenticate at CAWS
-  await CarpAuthService().authenticateWithUsernamePassword(
-    username: 'the_username',
-    password: 'the_password',
-  );
+  await CarpAuthService().authenticateWithUsernamePassword(username: 'the_username', password: 'the_password');
 
   // Configure the other services needed.
   // Note that these CAWS services work as singletons and can be
@@ -49,8 +46,8 @@ void main() async {
   // -----------------------------------------------
 
   // Get the invitations to studies from CARP for this user.
-  List<ActiveParticipationInvitation> invitations =
-      await CarpParticipationService().getActiveParticipationInvitations();
+  List<ActiveParticipationInvitation> invitations = await CarpParticipationService()
+      .getActiveParticipationInvitations();
 
   // Use the first (i.e. latest) invitation.
   final invitation = invitations[0];
@@ -70,10 +67,7 @@ void main() async {
   await client.addStudy(study);
 
   // Deploy the study.
-  await SmartPhoneClientManager().tryDeployment(
-    study.studyDeploymentId,
-    study.deviceRoleName,
-  );
+  await SmartPhoneClientManager().tryDeployment(study.studyDeploymentId, study.deviceRoleName);
 
   // Resume sampling.
   SmartPhoneClientManager().resume();
@@ -101,16 +95,10 @@ void main() async {
   /// Specify parameters on upload interval (in minutes), if upload only
   /// should happen when the phone is connected to WiFi, and whether data
   /// buffered locally on the phone should be deleted when uploaded.
-  streamingEndPoint = CarpDataEndPoint(
-    uploadInterval: 20,
-    onlyUploadOnWiFi: true,
-    deleteWhenUploaded: false,
-  );
+  streamingEndPoint = CarpDataEndPoint(uploadInterval: 20, onlyUploadOnWiFi: true, deleteWhenUploaded: false);
 
   // Using the "old" DataPoint endpoint for uploading batches of data points.
-  var dataPointEndPoint = CarpDataEndPoint(
-    uploadMethod: CarpUploadMethod.datapoint,
-  );
+  var dataPointEndPoint = CarpDataEndPoint(uploadMethod: CarpUploadMethod.datapoint);
 
   // var dataPointEndPoint = CarpDataEndPoint(
   //   uploadMethod: CarpUploadMethod.datapoint,
@@ -171,13 +159,8 @@ void main() async {
   final consent = RPOrderedTask(
     identifier: '12',
     steps: [
-      RPInstructionStep(identifier: "1", title: "Welcome!")
-        ..text = "Welcome to this study! ",
-      RPCompletionStep(
-        identifier: "2",
-        title: "Thank You!",
-        text: "We saved your consent document.",
-      ),
+      RPInstructionStep(identifier: "1", title: "Welcome!")..text = "Welcome to this study! ",
+      RPCompletionStep(identifier: "2", title: "Thank You!", text: "We saved your consent document."),
     ],
   );
   // .. and upload it to CAWS.
@@ -196,12 +179,7 @@ void main() async {
 
   // Create a message and upload it to CAWS.
   messageManager.setMessage(
-    Message(
-      id: '123',
-      title: 'Great News!',
-      message: 'There are great news from CARP',
-      type: MessageType.news,
-    ),
+    Message(id: '123', title: 'Great News!', message: 'There are great news from CARP', type: MessageType.news),
   );
 
   // Get all messages from CAWS.
@@ -231,11 +209,7 @@ void main() async {
   var locale = Locale('da');
 
   // Create a translation file for Danish and upload it to CAWS.
-  localizationManager.setLocalizations(locale, {
-    'morning': 'morgen',
-    'midday': 'middag',
-    'evening': 'aften',
-  });
+  localizationManager.setLocalizations(locale, {'morning': 'morgen', 'midday': 'middag', 'evening': 'aften'});
 
   // Get translation file for Danish
   if (localizationManager.isSupported(locale)) {

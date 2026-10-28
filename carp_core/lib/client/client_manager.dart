@@ -7,7 +7,23 @@
 
 part of '../client.dart';
 
-/// Allows managing studies on a client device.
+/// Manages the studies that run on a client device.
+///
+/// A client manager is the entry point of the client subsystem. It registers
+/// the device in study deployments, keeps track of the [Study]s on this device,
+/// and fetches their [PrimaryDeviceDeployment] from a [DeploymentService].
+///
+/// Key points:
+///  * Call [configure] once with a [DeviceRegistration] before any other call;
+///    most methods throw [NotConfiguredException] until then.
+///  * Study lifecycle: [addStudy] -> [tryDeployment] (repeat until
+///    [StudyStatus.Running]) -> [stopStudy] or [removeStudy].
+///  * Deployment calls are delegated to a [StudyDeploymentProxy]; state is
+///    persisted in a [ClientRepository].
+///  * Subclasses overriding a lifecycle method must call `super`.
+///
+/// See also [SmartphoneClient]. In CARP Mobile Sensing,
+/// `SmartPhoneClientManager` extends this class and also runs the studies.
 abstract class ClientManager<
   TPrimaryDevice extends PrimaryDeviceConfiguration<TRegistration>,
   TRegistration extends DeviceRegistration,
@@ -17,6 +33,8 @@ abstract class ClientManager<
   DeploymentService? _deploymentService;
   DeviceDataCollectorFactory? _dataCollectorFactory;
   TRegistration? _registration;
+
+  /// Performs deployment calls for studies; created by [configure].
   StudyDeploymentProxy? proxy;
 
   /// Create a new [ClientManager].
@@ -35,34 +53,36 @@ abstract class ClientManager<
        _dataCollectorFactory = dataCollectorFactory;
 
   /// Repository within which the state of this client is stored.
+  ///
+  /// Throws [NotConfiguredException] if no repository was given to the
+  /// constructor.
   ClientRepository<TStudy> get repository =>
       _repository ??
-      (throw NotConfiguredException(
-        'ClientManager has not been configured yet. Call configure() first.',
-      ));
+      (throw NotConfiguredException('ClientManager has not been configured yet. Call configure() first.'));
 
   /// Get the studies running on this client device.
   List<TStudy> get studies => repository.getStudyList();
 
   /// The application service through which study deployments, to be run on
   /// this client, can be managed and retrieved.
+  ///
+  /// Throws [NotConfiguredException] if not set via the constructor or
+  /// [configure].
   DeploymentService get deploymentService =>
       _deploymentService ??
-      (throw NotConfiguredException(
-        'ClientManager has not been configured yet. Call configure() first.',
-      ));
+      (throw NotConfiguredException('ClientManager has not been configured yet. Call configure() first.'));
 
   /// Determines which [DeviceDataCollector] to use to collect data locally on
   /// this primary device and this factory is used to create
   /// [ConnectedDeviceDataCollector] instances for connected devices.
   DeviceDataCollectorFactory? get dataCollectorFactory => _dataCollectorFactory;
 
-  /// The registration of this client.
+  /// The registration of this client, set by [configure].
+  ///
+  /// Throws [NotConfiguredException] before [configure] is called.
   TRegistration get registration =>
       _registration ??
-      (throw NotConfiguredException(
-        'ClientManager has not been configured yet. Call configure() first.',
-      ));
+      (throw NotConfiguredException('ClientManager has not been configured yet. Call configure() first.'));
 
   /// Determines whether a [DeviceRegistration] has been configured for this client,
   /// which is necessary to start adding studies.
@@ -71,9 +91,7 @@ abstract class ClientManager<
   /// Makes a check if this client manager is ready for requests.
   void _checkConfiguration() {
     if (!isConfigured) {
-      throw NotConfiguredException(
-        'ClientManager has not been configured yet. Call configure() first.',
-      );
+      throw NotConfiguredException('ClientManager has not been configured yet. Call configure() first.');
     }
   }
 
@@ -117,11 +135,10 @@ abstract class ClientManager<
   }
 
   /// Get the status for the studies which run on this client device.
-  /// Note that is the current status, and reflects the latest known status.
+  /// Note that this is the latest known status, held locally.
   /// If you want an updated status from the deployment service, use
   /// [getStudyDeploymentStatus] for each study.
-  List<StudyStatus> getStudyStatusList() =>
-      studies.map((study) => study.status).toList();
+  List<StudyStatus> getStudyStatusList() => studies.map((study) => study.status).toList();
 
   /// Get the study with [studyDeploymentId] and [deviceRoleName] from this client
   /// manager.
@@ -133,10 +150,12 @@ abstract class ClientManager<
   /// No deployment is attempted yet.
   ///
   /// If a study with the same deployment id and device role name has already
-  /// been added to this client, nothing happens and this study is returned.
+  /// been added to this client, it is not added again and no status is fetched.
+  /// The [study] passed in is returned, which can be a different instance from
+  /// the one already stored.
   ///
-  /// Throws NotConfiguredException if the client has not yet been configured.
-  /// Return the study successfully added to this client manager or the existing
+  /// Throws [NotConfiguredException] if the client has not yet been configured.
+  /// Returns the study added to this client manager or the existing
   /// study if it was already added.
   @mustCallSuper
   Future<TStudy> addStudy(TStudy study) async {
@@ -167,18 +186,18 @@ abstract class ClientManager<
   /// Verifies whether the device is ready for deployment of the study runtime
   /// identified by [studyDeploymentId] and [deviceRoleName], and in case it is,
   /// deploys.
-  /// In case already deployed, nothing happens and the status of the deployment
-  /// is returned.
+  /// Also runs for a study that is already deployed, to refresh its deployment
+  /// information. Returns the study's status afterwards.
   ///
-  /// Throws NotConfiguredException if the client has not yet been configured.
-  /// Throws IllegalArgumentException if a study with the given [studyDeploymentId]
-  /// and [deviceRoleName] does not exist or if deployment failed because of unexpected
-  /// study deployment ID, device role name, or device registration.
+  /// Throws [NotConfiguredException] if the client has not yet been configured.
+  /// Throws [IllegalArgumentException] if a study with the given
+  /// [studyDeploymentId] and [deviceRoleName] has not been added.
+  /// Most other deployment failures do not throw; they are reported on the
+  /// study as [StudyStatusEventTypes.DeploymentError] events.
+  ///
+  /// Returns the new [StudyStatus] of the study.
   @mustCallSuper
-  Future<StudyStatus> tryDeployment(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
+  Future<StudyStatus> tryDeployment(String studyDeploymentId, String deviceRoleName) async {
     _checkConfiguration();
 
     var study = getStudy(studyDeploymentId, deviceRoleName);
@@ -216,10 +235,7 @@ abstract class ClientManager<
   ///
   /// If a study deployment is to be permanently stopped, use the [stopStudy] method.
   @mustCallSuper
-  Future<void> removeStudy(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
+  Future<void> removeStudy(String studyDeploymentId, String deviceRoleName) async {
     _checkConfiguration();
 
     var study = getStudy(studyDeploymentId, deviceRoleName);
@@ -237,11 +253,11 @@ abstract class ClientManager<
   /// If you want to remove the study from this client and be able to
   /// redeploy it later, use the [removeStudy] method instead.
   /// Note that stopping a study does not remove it from this client manager.
+  ///
+  /// Throws [IllegalArgumentException] if no such study has been added.
+  /// Returns the new [StudyStatus] of the study.
   @mustCallSuper
-  Future<StudyStatus> stopStudy(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
+  Future<StudyStatus> stopStudy(String studyDeploymentId, String deviceRoleName) async {
     _checkConfiguration();
 
     var study = getStudy(studyDeploymentId, deviceRoleName);
@@ -262,12 +278,9 @@ abstract class ClientManager<
   }
 }
 
-/// Allows managing studies on a smartphone.
-class SmartphoneClient
-    extends ClientManager<Smartphone, DeviceRegistration, Study> {
-  SmartphoneClient({
-    super.repository,
-    super.deploymentService,
-    super.dataCollectorFactory,
-  });
+/// A [ClientManager] for a [Smartphone] primary device using the base [Study].
+///
+/// CARP Mobile Sensing uses its own `SmartPhoneClientManager` instead.
+class SmartphoneClient extends ClientManager<Smartphone, DeviceRegistration, Study> {
+  SmartphoneClient({super.repository, super.deploymentService, super.dataCollectorFactory});
 }

@@ -66,7 +66,5 @@ class HomePageState extends State<HomePage> {
   /// If there is no study, add a study first.
   /// If the study is not yet deployed, deploy it.
   /// Once deployed, resume/pause sensing.
-  void _onButtonPressed() => bloc.sensing.client.studies.isEmpty
-      ? bloc.addStudy(context)
-      : bloc.runStudy();
+  void _onButtonPressed() => bloc.sensing.client.studies.isEmpty ? bloc.addStudy(context) : bloc.runStudy();
 }

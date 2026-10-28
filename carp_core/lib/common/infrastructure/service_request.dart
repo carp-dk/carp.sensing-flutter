@@ -7,7 +7,10 @@
 
 part of '../../common.dart';
 
-/// An abstract base class for all RPC requests to CARP.
+/// Base class for all RPC requests to the CARP services.
+///
+/// Each service has its own request family, e.g., `DeploymentServiceRequest`.
+/// A request serializes to the JSON that the CARP web services expect.
 abstract class ServiceRequest extends Serializable {
   /// The API version of this request as defined by CARP Core Kotlin.
   String apiVersion = "1.0";

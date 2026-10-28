@@ -9,13 +9,16 @@ part of '../../deployment.dart';
 /// Application service which allows inviting participants, retrieving participation
 /// invitations for study deployments, and managing data related to participants
 /// which is input by users.
+///
+/// A participant app uses [getActiveParticipationInvitations] to find the
+/// studies it is invited to, and [setParticipantData] to store [InputData]
+/// such as informed consent. Works alongside [DeploymentService].
 abstract class ParticipationService {
   static const String API_VERSION = "1.0";
 
   /// Get all invitations of active study deployments the account
   /// with the given [accountId] has been invited to.
-  Future<List<ActiveParticipationInvitation>>
-  getActiveParticipationInvitations({String? accountId});
+  Future<List<ActiveParticipationInvitation>> getActiveParticipationInvitations({String? accountId});
 
   /// Get currently set data for all expected participant data in the study
   /// deployment with [studyDeploymentId].
@@ -25,9 +28,7 @@ abstract class ParticipationService {
   /// Get currently set data for all expected participant data for a set of study
   /// deployments with [studyDeploymentIds].
   /// Data which is not set equals null.
-  Future<List<ParticipantData>> getParticipantDataList(
-    List<String> studyDeploymentIds,
-  );
+  Future<List<ParticipantData>> getParticipantDataList(List<String> studyDeploymentIds);
 
   /// Set [data] that was [inputByParticipantRole] in the study deployment with
   /// [studyDeploymentId].

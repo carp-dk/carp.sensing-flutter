@@ -14,10 +14,7 @@ void main() async {
   SamplingPackageRegistry().register(ConnectivitySamplingPackage());
 
   // Create a study protocol
-  StudyProtocol protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Connectivity Sensing Example',
-  );
+  StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Connectivity Sensing Example');
 
   // Define which devices are used for data collection
   // In this case, its only this smartphone
@@ -76,14 +73,8 @@ void main() async {
           samplingConfiguration: BeaconRangingPeriodicSamplingConfiguration(
             beaconDistance: 2,
             beaconRegions: [
-              BeaconRegion(
-                identifier: 'region1',
-                uuid: '12345678-1234-1234-1234-123456789012',
-              ),
-              BeaconRegion(
-                identifier: 'region2',
-                uuid: '12345678-1234-1234-1234-123456789012',
-              ),
+              BeaconRegion(identifier: 'region1', uuid: '12345678-1234-1234-1234-123456789012'),
+              BeaconRegion(identifier: 'region2', uuid: '12345678-1234-1234-1234-123456789012'),
             ],
           ),
         ),

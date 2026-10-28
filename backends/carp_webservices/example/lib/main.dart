@@ -1,6 +1,7 @@
 library;
 
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
@@ -23,10 +24,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'CARP Backend Demo',
-      home: HomePage(),
-    );
+    return const MaterialApp(title: 'CARP Backend Demo', home: HomePage());
   }
 }
 
@@ -54,10 +52,10 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-          child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          StreamBuilder(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            StreamBuilder(
               stream: CarpAuthService().manager?.userChanges(),
               builder: (BuildContext context, AsyncSnapshot<OidcUser?> event) {
                 if (!event.hasData) {
@@ -65,62 +63,47 @@ class HomePageState extends State<HomePage> {
                     children: [
                       TextButton.icon(
                         onPressed: () {
-                          showDialog<void>(
-                            context: context,
-                            builder: (context) => QRViewExample(),
-                          );
+                          showDialog<void>(context: context, builder: (context) => QRViewExample());
                         },
                         icon: const Icon(Icons.login),
-                        label: const Text(
-                          'SCAN',
-                          style: TextStyle(fontSize: 35),
-                        ),
+                        label: const Text('SCAN', style: TextStyle(fontSize: 35)),
                       ),
                       TextButton.icon(
-                        onPressed: () async => bloc.currentUser =
-                            await CarpAuthService().authenticate(),
+                        onPressed: () async => bloc.currentUser = await CarpAuthService().authenticate(),
                         icon: const Icon(Icons.login),
-                        label: const Text(
-                          'LOGIN',
-                          style: TextStyle(fontSize: 35),
-                        ),
-                      )
+                        label: const Text('LOGIN', style: TextStyle(fontSize: 35)),
+                      ),
                     ],
                   );
                 } else {
                   return TextButton.icon(
                     onPressed: () => CarpAuthService().logout(),
                     icon: const Icon(Icons.logout),
-                    label: const Text(
-                      'LOGOUT',
-                      style: TextStyle(fontSize: 35),
-                    ),
+                    label: const Text('LOGOUT', style: TextStyle(fontSize: 35)),
                   );
                 }
-              }),
-          TextButton.icon(
-            onPressed: () => bloc.getStudyInvitation(context),
-            icon: const Icon(Icons.mail),
-            label: const Text(
-              'GET STUDY',
-              style: TextStyle(fontSize: 35),
+              },
             ),
-          ),
-          StreamBuilder(
-            stream: CarpAuthService().authStateChanges,
-            builder: (BuildContext context, AsyncSnapshot<AuthEvent> event) =>
-                Padding(
-              padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
-              child: Text(
-                (CarpAuthService().authenticated)
-                    ? 'Authenticated as ${CarpAuthService().currentUser.username} ${CarpAuthService().currentUser.firstName} ${CarpAuthService().currentUser.lastName}'
-                    : 'Not authenticated',
-                textAlign: TextAlign.center,
+            TextButton.icon(
+              onPressed: () => bloc.getStudyInvitation(context),
+              icon: const Icon(Icons.mail),
+              label: const Text('GET STUDY', style: TextStyle(fontSize: 35)),
+            ),
+            StreamBuilder(
+              stream: CarpAuthService().authStateChanges,
+              builder: (BuildContext context, AsyncSnapshot<AuthEvent> event) => Padding(
+                padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
+                child: Text(
+                  (CarpAuthService().authenticated)
+                      ? 'Authenticated as ${CarpAuthService().currentUser.username} ${CarpAuthService().currentUser.firstName} ${CarpAuthService().currentUser.lastName}'
+                      : 'Not authenticated',
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-          )
-        ],
-      )),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -129,15 +112,9 @@ class AppBLoC {
   ActiveParticipationInvitation? _invitation;
 
   // The URI of the CAWS server to connect to.
-  final Uri uri = Uri(
-    scheme: 'https',
-    host: 'dev.carp.dk',
-  );
+  final Uri uri = Uri(scheme: 'https', host: 'dev.carp.dk');
 
-  late CarpApp app = CarpApp(
-    name: "CAWS @ DTU [DEV]",
-    uri: uri,
-  );
+  late CarpApp app = CarpApp(name: "CAWS @ DTU [DEV]", uri: uri);
 
   // The authentication configuration
   late CarpAuthProperties authProperties = CarpAuthProperties(
@@ -146,11 +123,7 @@ class AppBLoC {
     redirectURI: Uri.parse('caws-example-app-auth://auth'),
     anonymousRedirectURI: Uri.parse('caws-example-app:/anonymous'),
     // For authentication at CAWS the path is '/auth/realms/Carp'
-    discoveryURL: uri.replace(pathSegments: [
-      'auth',
-      'realms',
-      'Carp',
-    ]),
+    discoveryURL: uri.replace(pathSegments: ['auth', 'realms', 'Carp']),
   );
 
   CarpUser? currentUser;
@@ -165,9 +138,7 @@ class AppBLoC {
 
   void dispose() async {}
 
-  Future<ActiveParticipationInvitation?> getStudyInvitation(
-    BuildContext context,
-  ) async {
+  Future<ActiveParticipationInvitation?> getStudyInvitation(BuildContext context) async {
     // configure a participant service based on the carp service already configured
     CarpParticipationService().configureFrom(CarpService());
     _invitation = await CarpParticipationService().getStudyInvitation(context);

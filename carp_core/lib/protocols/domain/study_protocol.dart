@@ -7,13 +7,37 @@
 
 part of '../../protocol.dart';
 
-/// A description of how a study is to be executed, defining the type(s) of
-/// primary device(s) ([PrimaryDeviceConfiguration]) responsible for
-/// aggregating data, the optional devices ([DeviceConfiguration]) connected
-/// to them, and the [TaskControl]'s which lead to data collection on
-/// said devices.
+/// A description of how a study is to be executed.
+///
+/// A protocol defines the primary device(s) ([PrimaryDeviceConfiguration])
+/// responsible for aggregating data, the optional devices
+/// ([DeviceConfiguration]) connected to them, and the [TaskControl]s which
+/// lead to data collection on said devices. It does not depend on any
+/// sensor technology or app.
+///
+/// Key points:
+///  * Add a primary device first; [addTaskControl] and [addTrigger] use
+///    [primaryDevice] as the default device.
+///  * [addTaskControl] adds a trigger, a task and the [TaskControl] that
+///    links them in one call.
+///  * Task names and device role names must be unique within a protocol.
+///  * A protocol is deployed with [DeploymentService.createStudyDeployment],
+///    which creates a [StudyDeployment]. CARP Mobile Sensing extends it as
+///    `SmartphoneStudyProtocol`.
+///
+/// ```dart
+/// var protocol = StudyProtocol(ownerId: 'alice@example.com', name: 'Steps');
+/// var phone = Smartphone();
+/// protocol.addPrimaryDevice(phone);
+/// protocol.addTaskControl(
+///   phone.atStartOfStudy,
+///   BackgroundTask(measures: [Measure(type: CarpDataTypes.STEP_COUNT)]),
+///   phone,
+/// );
+/// ```
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyProtocol extends Snapshot {
+  /// The JSON namespace of the protocol domain types.
   static const String PROTOCOL_NAMESPACE = 'dk.cachet.carp.protocols.domain';
 
   // maps a task's name and the task
@@ -31,7 +55,7 @@ class StudyProtocol extends Snapshot {
     return _taskMapProperty!;
   }
 
-  /// The entity (e.g., person or group) that created this study pProtocol.
+  /// The entity (e.g., person or group) that created this study protocol.
   String ownerId;
 
   /// A unique descriptive name for the protocol assigned by the protocol owner.
@@ -47,10 +71,7 @@ class StudyProtocol extends Snapshot {
   Set<ParticipantRole>? participantRoles = {};
 
   /// The full list of devices part of this configuration.
-  Set<DeviceConfiguration> get devices => {
-    ...primaryDevices,
-    ...connectedDevices!,
-  };
+  Set<DeviceConfiguration> get devices => {...primaryDevices, ...connectedDevices!};
 
   /// The set of devices which are responsible for aggregating and synchronizing
   /// incoming data.
@@ -88,8 +109,7 @@ class StudyProtocol extends Snapshot {
   Map<String, dynamic>? applicationData;
 
   /// Create a new protocol. [ownerId] and [name] must be specified.
-  StudyProtocol({required this.ownerId, required this.name, this.description})
-    : super();
+  StudyProtocol({required this.ownerId, required this.name, this.description}) : super();
 
   /// Add a primary device (e.g., a phone) which is responsible for aggregating
   /// and synchronizing incoming data.
@@ -97,8 +117,7 @@ class StudyProtocol extends Snapshot {
   ///
   /// Returns true if the [primaryDevice] has been added; false if it is already
   /// set as a primary device.
-  bool addPrimaryDevice(PrimaryDeviceConfiguration primaryDevice) =>
-      primaryDevices.add(primaryDevice);
+  bool addPrimaryDevice(PrimaryDeviceConfiguration primaryDevice) => primaryDevices.add(primaryDevice);
 
   /// Does this protocol have a primary device with role name [roleName]?
   bool hasPrimaryDevice(String roleName) =>
@@ -122,19 +141,14 @@ class StudyProtocol extends Snapshot {
   ///
   /// Returns true if the [device] has been added; false if it is already connected
   /// to the specified [primaryDevice].
-  bool addConnectedDevice(
-    DeviceConfiguration device,
-    PrimaryDeviceConfiguration primaryDevice,
-  ) {
+  bool addConnectedDevice(DeviceConfiguration device, PrimaryDeviceConfiguration primaryDevice) {
     connections ??= [];
     connections?.add(DeviceConnection(device.roleName, primaryDevice.roleName));
     return connectedDevices!.add(device);
   }
 
   /// Gets all devices configured to be connected to [primaryDevice].
-  List<DeviceConfiguration> getConnectedDevices(
-    PrimaryDeviceConfiguration primaryDevice,
-  ) {
+  List<DeviceConfiguration> getConnectedDevices(PrimaryDeviceConfiguration primaryDevice) {
     final List<DeviceConfiguration> devices = [];
     connections?.forEach((connection) {
       if (connection.roleName == primaryDevice.roleName) {
@@ -147,7 +161,10 @@ class StudyProtocol extends Snapshot {
     return devices;
   }
 
-  /// Add the [trigger] to this protocol.
+  /// Add the [trigger] to this protocol, if not already added.
+  ///
+  /// Its id is the number of triggers before it ('0', '1', ...). If the
+  /// trigger has no source device, [primaryDevice] is used.
   void addTrigger(TriggerConfiguration trigger) {
     // early out if already added
     if (triggers.values.contains(trigger)) return;
@@ -156,8 +173,7 @@ class StudyProtocol extends Snapshot {
     trigger.sourceDeviceRoleName ??= primaryDevice.roleName;
 
     // so much for null-safety "#%"&?
-    if (trigger.requiresPrimaryDevice != null &&
-        trigger.requiresPrimaryDevice!) {
+    if (trigger.requiresPrimaryDevice != null && trigger.requiresPrimaryDevice!) {
       assert(
         hasPrimaryDevice(trigger.sourceDeviceRoleName!),
         'The passed trigger cannot be initiated by its specified source device '
@@ -202,8 +218,7 @@ class StudyProtocol extends Snapshot {
     destinationDevice ??= primaryDevice;
 
     assert(
-      primaryDevices.contains(destinationDevice) ||
-          connectedDevices!.contains(destinationDevice),
+      primaryDevices.contains(destinationDevice) || connectedDevices!.contains(destinationDevice),
       'The passed device to which the task needs to be sent is not included in this study protocol.',
     );
 
@@ -217,12 +232,7 @@ class StudyProtocol extends Snapshot {
     int triggerId = indexOfTrigger(trigger);
     if (triggerId >= 0) {
       taskControls.add(
-        TaskControl(
-          triggerId: triggerId,
-          task: task,
-          targetDevice: destinationDevice,
-          control: control,
-        ),
+        TaskControl(triggerId: triggerId, task: task, targetDevice: destinationDevice, control: control),
       );
       return true;
     }
@@ -251,10 +261,7 @@ class StudyProtocol extends Snapshot {
   ///
   /// Throws an error if [trigger] is not part of this study protocol.
   Set<TaskControl> getTaskControls(TriggerConfiguration trigger) {
-    assert(
-      triggers.values.contains(trigger),
-      'The passed trigger is not part of this study protocol.',
-    );
+    assert(triggers.values.contains(trigger), 'The passed trigger is not part of this study protocol.');
     int triggerId = indexOfTrigger(trigger);
 
     Set<TaskControl> tt = {};
@@ -272,10 +279,11 @@ class StudyProtocol extends Snapshot {
   /// in this protocol by the trigger with [triggerId].
   ///
   /// Throws an error if a trigger with [triggerId] is not defined in this study protocol.
-  Set<TaskControl> getTaskControlsByTriggerId(int triggerId) =>
-      getTaskControls(triggers['$triggerId']!);
+  Set<TaskControl> getTaskControlsByTriggerId(int triggerId) => getTaskControls(triggers['$triggerId']!);
 
   /// Add the [task] to this protocol.
+  ///
+  /// A task with the same name replaces the earlier one in the task lookup.
   void addTask(TaskConfiguration task) {
     tasks.add(task);
     _taskMap[task.name] = task;
@@ -332,8 +340,7 @@ class StudyProtocol extends Snapshot {
   ///
   /// Returns true if the [role] has been added; false in case the same [role]
   /// has already been added before.
-  bool addParticipantRole(ParticipantRole role) =>
-      (participantRoles ??= {}).add(role);
+  bool addParticipantRole(ParticipantRole role) => (participantRoles ??= {}).add(role);
 
   /// Determines whether all participant roles in [assignment] are part of the
   /// [participantRoles] in this protocol.
@@ -355,19 +362,10 @@ class StudyProtocol extends Snapshot {
   ///
   /// Requires that [device] is part of this protocol and [assignedTo] contains
   /// participant roles which are part of this protocol.
-  void changeDeviceAssignment(
-    PrimaryDeviceConfiguration device,
-    AssignedTo assignedTo,
-  ) {
+  void changeDeviceAssignment(PrimaryDeviceConfiguration device, AssignedTo assignedTo) {
     assignedDevices ??= {};
-    assert(
-      primaryDevices.contains(device),
-      "The device configuration is not part of this protocol.",
-    );
-    assert(
-      isValidAssignment(assignedTo),
-      "One of the assigned participant roles is not part of this protocol.",
-    );
+    assert(primaryDevices.contains(device), "The device configuration is not part of this protocol.");
+    assert(isValidAssignment(assignedTo), "One of the assigned participant roles is not part of this protocol.");
     assert(
       !assignedTo.isAssignedToAll,
       "Do not use this method to assign a device to all participants. "
@@ -383,10 +381,7 @@ class StudyProtocol extends Snapshot {
   /// Requires that [device] is part of this protocol.
   void removeDeviceAssignment(PrimaryDeviceConfiguration device) {
     assignedDevices ??= {};
-    assert(
-      primaryDevices.contains(device),
-      "The device configuration is not part of this protocol.",
-    );
+    assert(primaryDevices.contains(device), "The device configuration is not part of this protocol.");
 
     assignedDevices!.remove(device.roleName);
   }
@@ -395,8 +390,7 @@ class StudyProtocol extends Snapshot {
   ///
   /// Returns true if the [expectedData] has been added; false in case the same
   /// [expectedData] has already been added before.
-  bool addExpectedParticipantData(ExpectedParticipantData expectedData) =>
-      expectedParticipantData!.add(expectedData);
+  bool addExpectedParticipantData(ExpectedParticipantData expectedData) => expectedParticipantData!.add(expectedData);
 
   /// Remove expected participant data to be input by users.
   ///
@@ -418,21 +412,25 @@ class StudyProtocol extends Snapshot {
   dynamic removeApplicationData(String key) => applicationData!.remove(key);
 
   Map<String, dynamic> toJson() => _$StudyProtocolToJson(this);
-  factory StudyProtocol.fromJson(Map<String, dynamic> json) =>
-      _$StudyProtocolFromJson(json);
+  factory StudyProtocol.fromJson(Map<String, dynamic> json) => _$StudyProtocolFromJson(json);
 
   @override
   String toString() => '$runtimeType - name: $name, ownerId: $ownerId';
 }
 
+/// A connection from a connected device to a primary device in a [StudyProtocol].
+///
+/// Created by [StudyProtocol.addConnectedDevice].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class DeviceConnection {
+  /// Role name of the connected device.
   String? roleName;
+
+  /// Role name of the primary device that [roleName] connects to.
   String? connectedToRoleName;
 
   DeviceConnection([this.roleName, this.connectedToRoleName]) : super();
 
-  factory DeviceConnection.fromJson(Map<String, dynamic> json) =>
-      _$DeviceConnectionFromJson(json);
+  factory DeviceConnection.fromJson(Map<String, dynamic> json) => _$DeviceConnectionFromJson(json);
   Map<String, dynamic> toJson() => _$DeviceConnectionToJson(this);
 }

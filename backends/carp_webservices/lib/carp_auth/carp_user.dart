@@ -1,11 +1,7 @@
 part of 'carp_auth.dart';
 
 /// Represents a CARP Web Service (CAWS) account and user.
-@JsonSerializable(
-  fieldRename: FieldRename.snake,
-  includeIfNull: false,
-  explicitToJson: true,
-)
+@JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false, explicitToJson: true)
 class CarpUser {
   /// Unique CARP username
   String username;
@@ -42,10 +38,12 @@ class CarpUser {
   /// Set or update the authenticated [OAuthToken] token for this user.
   void authenticated(OAuthToken token) => this.token = token;
 
-  /// Returns true if the user is logged in; that is, has a valid token.
+  /// Whether this user has a [token]. Does not check expiry or server-side
+  /// validity.
   bool get isAuthenticated => (token != null);
 
-  /// Returns true if the user's email is verified.
+  /// Currently returns whether this user has a [token]; the email verification
+  /// status is not inspected.
   bool get isEmailVerified => (token != null);
 
   /// Sign out the current user.
@@ -77,14 +75,12 @@ class CarpUser {
     );
   }
 
-  factory CarpUser.fromJson(Map<String, dynamic> json) =>
-      _$CarpUserFromJson(json);
+  factory CarpUser.fromJson(Map<String, dynamic> json) => _$CarpUserFromJson(json);
   Map<String, dynamic> toJson() => _$CarpUserToJson(this);
 
   @Deprecated('Use id instead')
   String get accountId => id;
 
   @override
-  String toString() =>
-      'CARP User: $username [$id] - $firstName $lastName [account id: $id]';
+  String toString() => 'CARP User: $username [$id] - $firstName $lastName [account id: $id]';
 }

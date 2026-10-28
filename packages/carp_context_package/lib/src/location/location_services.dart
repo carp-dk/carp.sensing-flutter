@@ -1,11 +1,16 @@
 part of '../../carp_context_package.dart';
 
-/// An [OnlineService] for the location manager.
+/// A connected device that gives access to the phone's location.
+///
+/// Add it to a protocol with `addConnectedDevice` to enable the
+/// [ContextSamplingPackage.LOCATION], [ContextSamplingPackage.GEOFENCE] and
+/// [ContextSamplingPackage.MOBILITY] measures. Its settings (accuracy,
+/// distance, interval, Android notification) configure the shared
+/// [LocationManager] via [LocationServiceManager].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class LocationService extends ServiceConfiguration<ServiceRegistration> {
   /// The type of a location service.
-  static const String DEVICE_TYPE =
-      '${CamsDevice.CAMS_DEVICE_NAMESPACE}.LocationService';
+  static const String DEVICE_TYPE = '${CamsDevice.CAMS_DEVICE_NAMESPACE}.LocationService';
 
   /// The default role name for a location service.
   static const String DEFAULT_ROLE_NAME = 'Location Service';
@@ -37,7 +42,7 @@ class LocationService extends ServiceConfiguration<ServiceRegistration> {
   /// Only used on Android.
   String? notificationDescription;
 
-  /// The icon in `Android/app/main/res/drawable` folder.
+  /// Name of the notification icon in the `android/app/src/main/res/drawable` folder.
   /// Only used on Android.
   String? notificationIconName;
 
@@ -67,13 +72,16 @@ class LocationService extends ServiceConfiguration<ServiceRegistration> {
 
   @override
   Function get fromJsonFunction => _$LocationServiceFromJson;
-  factory LocationService.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<LocationService>(json);
+  factory LocationService.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<LocationService>(json);
   @override
   Map<String, dynamic> toJson() => _$LocationServiceToJson(this);
 }
 
-/// A [DeviceManager] for the location service.
+/// A [DeviceManager] for the [LocationService].
+///
+/// On connect it configures the [LocationManager] with the [LocationService]
+/// settings. It is connected only if the phone's location service is enabled
+/// and location permission is granted.
 class LocationServiceManager extends ContextServiceManager<LocationService> {
   /// A handle to the [LocationManager] used by this service.
   LocationManager manager = LocationManager();
@@ -89,15 +97,12 @@ class LocationServiceManager extends ContextServiceManager<LocationService> {
     await manager.configure(configuration!);
     // The service is only ready to provide locations if the phone's location
     // service is enabled *and* permission is granted
-    return manager.enabled && await manager.hasPermission()
-        ? DeviceStatus.connected
-        : DeviceStatus.disconnected;
+    return manager.enabled && await manager.hasPermission() ? DeviceStatus.connected : DeviceStatus.disconnected;
   }
 
   @override
   Future<bool> onHasPermissions() async => await manager.hasPermission();
 
   @override
-  Future<void> onRequestPermissions() async =>
-      await manager.requestPermission();
+  Future<void> onRequestPermissions() async => await manager.requestPermission();
 }

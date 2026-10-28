@@ -7,44 +7,41 @@
 
 part of '../connectivity.dart';
 
-/// The [ConnectivityProbe] listens to the connectivity status of the phone and
-/// collect a [Connectivity] data point every time the connectivity state changes.
+/// Collects a [Connectivity] measurement every time the phone's connectivity
+/// status changes.
+///
+/// Used for the [ConnectivitySamplingPackage.CONNECTIVITY] measure. Also
+/// collects the current status when sampling is resumed.
 class ConnectivityProbe extends StreamProbe {
   @override
   Future<bool> onResume() async {
     // collect the current connectivity status on sampling start
-    var connectivityStatus = await connectivity.Connectivity()
-        .checkConnectivity();
-    addMeasurement(
-      Measurement.fromData(
-        Connectivity.fromConnectivityResult(connectivityStatus),
-      ),
-    );
+    var connectivityStatus = await connectivity.Connectivity().checkConnectivity();
+    addMeasurement(Measurement.fromData(Connectivity.fromConnectivityResult(connectivityStatus)));
 
     return super.onResume();
   }
 
   @override
-  Stream<Measurement> get stream =>
-      connectivity.Connectivity().onConnectivityChanged.map(
-        (event) =>
-            Measurement.fromData(Connectivity.fromConnectivityResult(event)),
-      );
+  Stream<Measurement> get stream => connectivity.Connectivity().onConnectivityChanged.map(
+    (event) => Measurement.fromData(Connectivity.fromConnectivityResult(event)),
+  );
 }
 
 // This probe requests access to location permissions (both on Android and iOS).
 // See https://pub.dev/packages/network_info_plus
-/// The [WifiProbe] get the wifi connectivity status of the phone and
-/// collect a [Wifi].
+/// Collects the phone's wifi connection (SSID, BSSID and IP) as [Wifi] data.
 ///
-/// Note, that in order to make this probe work on iOS (especially after iOS
-/// 12 and 13), there is a set of requirements to meet for the app using this
-/// probe. See
+/// Used for the [ConnectivitySamplingPackage.WIFI] measure, at the interval
+/// set in an [IntervalSamplingConfiguration].
+///
+/// To make this probe work on iOS (especially after iOS 12 and 13), the app
+/// must meet a set of requirements. See
 ///
 ///  * [network_info_plus](https://pub.dev/packages/network_info_plus)
 ///  * [CNCopyCurrentNetworkInfo](https://developer.apple.com/documentation/systemconfiguration/1614126-cncopycurrentnetworkinfo)
 ///
-/// Please note that it this probes does not work on emulators (returns null).
+/// Does not work on emulators (values are null).
 ///
 /// From Android 10.0 onwards the `ACCESS_FINE_LOCATION` permission must be
 /// granted.
@@ -59,14 +56,16 @@ class WifiProbe extends IntervalProbe {
   }
 }
 
-/// The [BluetoothProbe] scans for nearby and visible Bluetooth devices and
-/// collects a [Bluetooth] measurement that lists each device found during the scan.
+/// Scans for nearby, visible Bluetooth devices and collects a [Bluetooth]
+/// measurement that lists each device found during the scan.
 ///
-/// Uses a [PeriodicSamplingConfiguration] for configuration the interval
-/// and duration of the scan. Can also be configured to filter by
-/// [services] and [remoteIds] by using a [BluetoothScanPeriodicSamplingConfiguration].
+/// Used for the [ConnectivitySamplingPackage.BLUETOOTH] measure. Uses a
+/// [PeriodicSamplingConfiguration] for the interval and duration of the scan.
+/// Use a [BluetoothScanPeriodicSamplingConfiguration] to filter by [services]
+/// and [remoteIds]. If the scan fails, the measurement holds an [Error].
 class BluetoothProbe extends BufferingPeriodicStreamProbe {
-  /// Default timeout for bluetooth scan - 4 secs
+  /// Default scan timeout in milliseconds (4 seconds), used if no duration
+  /// is configured.
   static const DEFAULT_TIMEOUT = 4 * 1000;
   Data? _data;
 
@@ -74,84 +73,80 @@ class BluetoothProbe extends BufferingPeriodicStreamProbe {
   Stream<dynamic> get bufferingStream => FlutterBluePlus.scanResults;
 
   @override
-  Future<Measurement?> getMeasurement() async =>
-      _data != null ? Measurement.fromData(_data!) : null;
+  Future<Measurement?> getMeasurement() async => _data != null ? Measurement.fromData(_data!) : null;
 
   // if a BT-specific sampling configuration is used, we need to
   // extract the services and remoteIds from it so FlutterBluePlus can
   // perform filtered scanning
-  List<Guid> get services =>
-      (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
-      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration)
-            .withServices
-            .map((e) => Guid(e))
-            .toList()
+
+  /// The service UUIDs to filter the scan on. Empty if no
+  /// [BluetoothScanPeriodicSamplingConfiguration] is used.
+  List<Guid> get services => (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
+      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration).withServices.map((e) => Guid(e)).toList()
       : [];
 
-  List<String> get remoteIds =>
-      (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
-      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration)
-            .withRemoteIds
+  /// The remote device ids to filter the scan on. Empty if no
+  /// [BluetoothScanPeriodicSamplingConfiguration] is used.
+  List<String> get remoteIds => (samplingConfiguration is BluetoothScanPeriodicSamplingConfiguration)
+      ? (samplingConfiguration as BluetoothScanPeriodicSamplingConfiguration).withRemoteIds
       : [];
 
   @override
   void onSamplingStart() {
     _data = Bluetooth();
 
-    try {
-      FlutterBluePlus.startScan(
-        withServices: services,
-        withRemoteIds: remoteIds,
-        timeout:
-            samplingConfiguration?.duration ??
-            const Duration(milliseconds: DEFAULT_TIMEOUT),
-      );
-    } catch (error) {
-      FlutterBluePlus.stopScan();
+    // startScan is async - a plain try/catch would not catch its errors
+    // (e.g. adapter not ready yet on iOS: CBManagerStateUnknown).
+    FlutterBluePlus.startScan(
+      withServices: services,
+      withRemoteIds: remoteIds,
+      timeout: samplingConfiguration?.duration ?? const Duration(milliseconds: DEFAULT_TIMEOUT),
+    ).catchError((Object error) {
       _data = Error(message: 'Error scanning for bluetooth - $error');
-    }
+    });
   }
 
   @override
   void onSamplingEnd() {
-    FlutterBluePlus.stopScan();
+    FlutterBluePlus.stopScan().catchError((Object error) {
+      _data = Error(message: 'Error stopping bluetooth scan - $error');
+    });
 
     if (_data is Bluetooth) (_data as Bluetooth).endScan = DateTime.now();
   }
 
   @override
   void onSamplingData(event) {
-    if (event is List<ScanResult>) {
+    if (_data is Bluetooth && event is List<ScanResult>) {
       (_data as Bluetooth).addBluetoothDevicesFromScanResults(event);
     }
   }
 }
 
-/// A Probe that constantly scans for nearby and visible iBeacon devices and collects a
-/// [Beacon] measurement that lists each [BeaconDevice] found during the scan.
+/// Monitors iBeacon regions and collects a [BeaconData] measurement listing
+/// each nearby [BeaconDevice] while the phone is inside a region.
 ///
-/// Uses a [BeaconRangingPeriodicSamplingConfiguration] for configuration the
-/// [beaconRegions] to include and the [beaconDistance].
+/// Used for the [ConnectivitySamplingPackage.BEACON] measure. Uses a
+/// [BeaconRangingPeriodicSamplingConfiguration] for the [beaconRegions] to
+/// monitor and the [beaconDistance]. Only beacons closer than [beaconDistance]
+/// are included. Does not start if no regions are configured.
 class BeaconProbe extends StreamProbe {
   @override
   BeaconRangingPeriodicSamplingConfiguration? get samplingConfiguration =>
       super.samplingConfiguration as BeaconRangingPeriodicSamplingConfiguration;
 
+  /// The configured regions, converted to the beacon plugin's [Region] type.
   List<Region> get beaconRegions =>
-      samplingConfiguration?.beaconRegions
-          .map((region) => region.toRegion())
-          .toList() ??
-      [];
+      samplingConfiguration?.beaconRegions.map((region) => region.toRegion()).toList() ?? [];
 
+  /// The maximum beacon distance in meters. Default is 2.
   int get beaconDistance => samplingConfiguration?.beaconDistance ?? 2;
 
   @override
   bool onInitialize() {
     super.onInitialize();
     if (beaconRegions.isEmpty) {
-      warning(
-        '$runtimeType - No beacon regions specified for monitoring. Will not start monitoring.',
-      );
+      warning('$runtimeType - No beacon regions specified for monitoring. Will not start monitoring.');
       return false;
     }
 
@@ -176,30 +171,19 @@ class BeaconProbe extends StreamProbe {
 
   @override
   Stream<Measurement> get stream async* {
-    await for (final monitoringResult in flutterBeacon.monitoring(
-      beaconRegions,
-    )) {
+    await for (final monitoringResult in flutterBeacon.monitoring(beaconRegions)) {
       if (monitoringResult.monitoringState == MonitoringState.inside) {
-        debug(
-          '$runtimeType - Entered region: ${monitoringResult.region.identifier}',
-        );
+        debug('$runtimeType - Entered region: ${monitoringResult.region.identifier}');
 
         yield* flutterBeacon.ranging(beaconRegions).map((rangingResult) {
-          final closeBeacons = rangingResult.beacons
-              .where((beacon) => beacon.accuracy <= beaconDistance)
-              .toList();
+          final closeBeacons = rangingResult.beacons.where((beacon) => beacon.accuracy <= beaconDistance).toList();
 
           return Measurement.fromData(
-            BeaconData.fromRegionAndBeacons(
-              region: rangingResult.region.identifier,
-              beacons: closeBeacons,
-            ),
+            BeaconData.fromRegionAndBeacons(region: rangingResult.region.identifier, beacons: closeBeacons),
           );
         });
       } else if (monitoringResult.monitoringState == MonitoringState.outside) {
-        debug(
-          '$runtimeType - Exited region: ${monitoringResult.region.identifier}',
-        );
+        debug('$runtimeType - Exited region: ${monitoringResult.region.identifier}');
       }
     }
   }

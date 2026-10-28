@@ -7,6 +7,10 @@
 
 part of '../../domain.dart';
 
+/// A human-readable description of a study: title, purpose, and who runs it.
+///
+/// Stored as [SmartphoneStudyProtocol.studyDescription] and copied to each
+/// [SmartphoneDeployment], so the app can show it to the participant.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyDescription extends Serializable {
   /// A longer printer-friendly title for this study.
@@ -25,7 +29,7 @@ class StudyDescription extends Serializable {
   /// The URL pointing to a web page with the privacy policy of this study.
   String? privacyPolicyUrl;
 
-  /// The primary investigator (PI) responsible of this study.
+  /// The principal investigator (PI) responsible for this study.
   StudyResponsible? responsible;
 
   StudyDescription({
@@ -39,40 +43,35 @@ class StudyDescription extends Serializable {
 
   @override
   Function get fromJsonFunction => _$StudyDescriptionFromJson;
-  factory StudyDescription.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<StudyDescription>(json);
+  factory StudyDescription.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StudyDescription>(json);
   @override
   Map<String, dynamic> toJson() => _$StudyDescriptionToJson(this);
 
   @override
-  String toString() =>
-      '$runtimeType -  title: $title, description: $description. purpose: $purpose';
+  String toString() => '$runtimeType -  title: $title, description: $description. purpose: $purpose';
 }
 
 /// A person who is responsible for a [StudyProtocol].
 /// Typically the Principal Investigator (PI) who is responsible for the study.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class StudyResponsible extends Serializable {
+  /// A unique id of this person.
   String id;
   String name;
+
+  /// The job title, e.g. "Professor".
   String? title;
   String? email;
   String? address;
+
+  /// The institution this person belongs to.
   String? affiliation;
 
-  StudyResponsible({
-    required this.id,
-    required this.name,
-    this.title,
-    this.email,
-    this.affiliation,
-    this.address,
-  });
+  StudyResponsible({required this.id, required this.name, this.title, this.email, this.affiliation, this.address});
 
   @override
   Function get fromJsonFunction => _$StudyResponsibleFromJson;
-  factory StudyResponsible.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<StudyResponsible>(json);
+  factory StudyResponsible.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StudyResponsible>(json);
   @override
   Map<String, dynamic> toJson() => _$StudyResponsibleToJson(this);
 

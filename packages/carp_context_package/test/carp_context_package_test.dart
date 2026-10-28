@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:test/test.dart';
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -7,15 +8,14 @@ import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_context_package/carp_context_package.dart';
 import 'package:openmhealth_schemas/openmhealth_schemas.dart' as omh;
+import 'package:activity_recognition_flutter/activity_recognition_flutter.dart' as ar;
 
-String _encode(Object object) =>
-    const JsonEncoder.withIndent(' ').convert(object);
+String _encode(Object object) => const JsonEncoder.withIndent(' ').convert(object);
 
 void main() {
   late StudyProtocol protocol;
 
-  Future<void> writeToFile(String json, String fileName) async =>
-      await File('test/json/$fileName').writeAsString(json);
+  Future<void> writeToFile(String json, String fileName) async => await File('test/json/$fileName').writeAsString(json);
 
   setUp(() {
     // Initialization of serialization
@@ -26,10 +26,7 @@ void main() {
     SamplingPackageRegistry().register(ContextSamplingPackage());
 
     // Create a study protocol
-    protocol = StudyProtocol(
-      ownerId: 'owner@dtu.dk',
-      name: 'Context Sensing Example',
-    );
+    protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Context Sensing Example');
 
     // Define the smartphone as the primary device.
     Smartphone phone = Smartphone();
@@ -38,8 +35,7 @@ void main() {
     // Add a background task that collects activity data from the phone
     protocol.addTaskControl(
       ImmediateTrigger(),
-      BackgroundTask()
-        ..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
+      BackgroundTask()..addMeasure(Measure(type: ContextSamplingPackage.ACTIVITY)),
       phone,
     );
 
@@ -54,8 +50,7 @@ void main() {
     // Add a background task that collects location on a regular basis
     protocol.addTaskControl(
       PeriodicTrigger(period: const Duration(minutes: 5)),
-      BackgroundTask()
-        ..addMeasure(Measure(type: ContextSamplingPackage.LOCATION)),
+      BackgroundTask()..addMeasure(Measure(type: ContextSamplingPackage.LOCATION)),
       locationService,
     );
 
@@ -86,30 +81,24 @@ void main() {
     );
 
     // Define the online weather service and add it as a 'device'
-    WeatherService weatherService = WeatherService(
-      apiKey: 'OW_API_key_goes_here',
-    );
+    WeatherService weatherService = WeatherService(apiKey: 'OW_API_key_goes_here');
     protocol.addConnectedDevice(weatherService, phone);
 
     // Add a background task that collects weather every 30 minutes.
     protocol.addTaskControl(
       PeriodicTrigger(period: const Duration(minutes: 30)),
-      BackgroundTask()
-        ..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
+      BackgroundTask()..addMeasure(Measure(type: ContextSamplingPackage.WEATHER)),
       weatherService,
     );
 
     // Define the online air quality service and add it as a 'device'
-    AirQualityService airQualityService = AirQualityService(
-      apiKey: 'WAQI_API_key_goes_here',
-    );
+    AirQualityService airQualityService = AirQualityService(apiKey: 'WAQI_API_key_goes_here');
     protocol.addConnectedDevice(airQualityService, phone);
 
     // Add a background task that air quality every 30 minutes.
     protocol.addTaskControl(
       PeriodicTrigger(period: const Duration(minutes: 30)),
-      BackgroundTask()
-        ..addMeasure(Measure(type: ContextSamplingPackage.AIR_QUALITY)),
+      BackgroundTask()..addMeasure(Measure(type: ContextSamplingPackage.AIR_QUALITY)),
       airQualityService,
     );
   });
@@ -127,9 +116,7 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
-      json.decode(studyJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -137,15 +124,10 @@ void main() {
   test('JSON File -> StudyProtocol', () async {
     String plainJson = File('test/json/protocol.json').readAsStringSync();
 
-    StudyProtocol protocolFromFile = StudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocolFromFile = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
     expect(protocolFromFile.ownerId, protocol.ownerId);
-    expect(
-      protocolFromFile.primaryDevices.first.roleName,
-      Smartphone.DEFAULT_ROLE_NAME,
-    );
+    expect(protocolFromFile.primaryDevices.first.roleName, Smartphone.DEFAULT_ROLE_NAME);
     expect(protocolFromFile.taskControls.length, protocol.taskControls.length);
     print(toJsonString(protocolFromFile));
   });
@@ -175,9 +157,7 @@ void main() {
 
       for (var data in allData) {
         final dataJson = toJsonString(data);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [
-          json.decode(dataJson) as Map<String, dynamic>,
-        ]);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }
@@ -187,9 +167,7 @@ void main() {
       final allData = [
         OMHContextDataPoint(
           omh.DataPoint(
-            body: omh.Measure(
-              effectiveTimeFrame: omh.TimeFrame(dateTime: DateTime.now()),
-            ),
+            body: omh.Measure(effectiveTimeFrame: omh.TimeFrame(dateTime: DateTime.now())),
           ),
         ),
 
@@ -207,9 +185,7 @@ void main() {
       for (var data in allData) {
         final dataJson = toJsonString(data);
         print(dataJson);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [
-          json.decode(dataJson) as Map<String, dynamic>,
-        ]);
+        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }
@@ -221,6 +197,31 @@ void main() {
     Measurement m_1 = Measurement.fromData(act);
     expect(m_1.dataType.namespace, NameSpace.CARP);
     print(_encode(m_1));
+  });
+
+  test('CARP Activity - from AR ActivityEvent', () {
+    // Every activity type of the AR plugin must map to the CARP type of the
+    // same name - the types the CARP model does not have (TILTING) map to
+    // UNKNOWN. These are discarded by the [ActivityProbe].
+    const expected = {
+      ar.ActivityType.IN_VEHICLE: ActivityType.IN_VEHICLE,
+      ar.ActivityType.ON_BICYCLE: ActivityType.ON_BICYCLE,
+      ar.ActivityType.ON_FOOT: ActivityType.ON_FOOT,
+      ar.ActivityType.RUNNING: ActivityType.RUNNING,
+      ar.ActivityType.STILL: ActivityType.STILL,
+      ar.ActivityType.WALKING: ActivityType.WALKING,
+      ar.ActivityType.TILTING: ActivityType.UNKNOWN,
+      ar.ActivityType.UNKNOWN: ActivityType.UNKNOWN,
+    };
+
+    // all types the plugin can report are covered
+    expect(expected.keys, containsAll(ar.ActivityType.values));
+
+    for (final entry in expected.entries) {
+      final activity = Activity.fromActivityEvent(ar.ActivityEvent(entry.key, 80));
+      expect(activity.type, entry.value);
+      expect(activity.confidence, 80);
+    }
   });
 
   test('CARP AirQuality', () {
@@ -255,11 +256,7 @@ void main() {
   });
 
   test('CARP Mobility', () {
-    Mobility mob = Mobility(
-      numberOfPlaces: 2,
-      homeStay: 86,
-      distanceTraveled: 3400,
-    );
+    Mobility mob = Mobility(numberOfPlaces: 2, homeStay: 86, distanceTraveled: 3400);
     Measurement m_1 = Measurement.fromData(mob);
     expect(m_1.dataType.namespace, NameSpace.CARP);
     print(_encode(m_1));
@@ -280,8 +277,7 @@ void main() {
     print(_encode(loc));
 
     OMHGeopositionDataPoint geo =
-        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(loc)
-            as OMHGeopositionDataPoint;
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(loc) as OMHGeopositionDataPoint;
     print(_encode(geo));
 
     Measurement m_2 = Measurement.fromData(geo);
@@ -300,8 +296,7 @@ void main() {
     print(_encode(act));
 
     OMHPhysicalActivityDataPoint phy =
-        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(act)
-            as OMHPhysicalActivityDataPoint;
+        DataTransformerSchemaRegistry().lookup(NameSpace.OMH)!.transform(act) as OMHPhysicalActivityDataPoint;
     print(_encode(phy));
 
     Measurement m_2 = Measurement.fromData(phy);
@@ -327,9 +322,8 @@ void main() {
       radius: 5,
     );
 
-    CircularGeofence f = CircularGeofence.fromGeofenceSamplingConfiguration(
-      config,
-    )..dwell = const Duration(seconds: 2); // dwell timeout 2 secs.
+    CircularGeofence f = CircularGeofence.fromGeofenceSamplingConfiguration(config)
+      ..dwell = const Duration(seconds: 2); // dwell timeout 2 secs.
     print(f);
 
     d = f.moved(home);

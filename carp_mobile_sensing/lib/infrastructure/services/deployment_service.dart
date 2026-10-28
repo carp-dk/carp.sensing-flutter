@@ -7,20 +7,32 @@
 
 part of '../../infrastructure.dart';
 
-/// A local (in-memory) implementation of a [DeploymentService] useful in
-/// CAMS studies to be deployed locally on this phone.
+/// A [DeploymentService] that runs locally on the phone and keeps deployments
+/// in memory.
+///
+/// Used when a study is deployed from a local [SmartphoneStudyProtocol]
+/// instead of from a server. It is the default deployment service in
+/// [SmartPhoneClientManager.configure]. Use a server-backed service, such as
+/// the one in `carp_webservices`, to get deployments from CARP.
+///
+/// Key points:
+///  * A singleton, accessed as `SmartphoneDeploymentService()`.
+///  * Only accepts [SmartphoneStudyProtocol]s.
+///  * Registers [thisPhone] as the primary device of every new deployment.
+///  * Deployments are not persisted, so they are lost when the app restarts.
+///    Running studies are restored by [PersistenceService] instead.
 class SmartphoneDeploymentService implements DeploymentService {
   // key = studyDeploymentId
   final Map<String, StudyDeployment> _repository = {};
 
-  static final SmartphoneDeploymentService _instance =
-      SmartphoneDeploymentService._();
+  static final SmartphoneDeploymentService _instance = SmartphoneDeploymentService._();
   SmartphoneDeploymentService._();
 
   /// Get the singleton [SmartphoneDeploymentService].
   factory SmartphoneDeploymentService() => _instance;
 
-  /// The device description for this phone.
+  /// The device configuration for this phone. Registered as the primary
+  /// device of every deployment created by this service.
   Smartphone thisPhone = Smartphone();
 
   @override
@@ -48,9 +60,7 @@ class SmartphoneDeploymentService implements DeploymentService {
   }
 
   @override
-  Future<Set<String>> removeStudyDeployments(
-    Set<String> studyDeploymentIds,
-  ) async {
+  Future<Set<String>> removeStudyDeployments(Set<String> studyDeploymentIds) async {
     Set<String> removedKeys = {};
     for (var key in studyDeploymentIds) {
       if (_repository.containsKey(key)) {
@@ -62,14 +72,12 @@ class SmartphoneDeploymentService implements DeploymentService {
   }
 
   @override
-  Future<StudyDeploymentStatus?> getStudyDeploymentStatus(
-    String studyDeploymentId,
-  ) async => _repository[studyDeploymentId]?.status;
+  Future<StudyDeploymentStatus?> getStudyDeploymentStatus(String studyDeploymentId) async =>
+      _repository[studyDeploymentId]?.status;
 
   @override
-  Future<List<StudyDeploymentStatus?>> getStudyDeploymentStatusList(
-    List<String> studyDeploymentIds,
-  ) async => studyDeploymentIds.map((id) => _repository[id]?.status).toList();
+  Future<List<StudyDeploymentStatus?>> getStudyDeploymentStatusList(List<String> studyDeploymentIds) async =>
+      studyDeploymentIds.map((id) => _repository[id]?.status).toList();
 
   @override
   Future<StudyDeploymentStatus?> registerDevice(
@@ -93,10 +101,7 @@ class SmartphoneDeploymentService implements DeploymentService {
   }
 
   @override
-  Future<StudyDeploymentStatus?> unregisterDevice(
-    String studyDeploymentId,
-    String deviceRoleName,
-  ) async {
+  Future<StudyDeploymentStatus?> unregisterDevice(String studyDeploymentId, String deviceRoleName) async {
     if (_repository[studyDeploymentId] == null) return null;
     StudyDeployment deployment = _repository[studyDeploymentId]!;
     DeviceConfiguration device = deployment.registeredDevices.keys.firstWhere(
@@ -109,10 +114,7 @@ class SmartphoneDeploymentService implements DeploymentService {
   }
 
   @override
-  Future<SmartphoneDeployment?> getDeviceDeploymentFor(
-    String studyDeploymentId,
-    String primaryDeviceRoleName,
-  ) async {
+  Future<SmartphoneDeployment?> getDeviceDeploymentFor(String studyDeploymentId, String primaryDeviceRoleName) async {
     if (_repository[studyDeploymentId] == null) return null;
 
     StudyDeployment deployment = _repository[studyDeploymentId]!;
@@ -125,8 +127,7 @@ class SmartphoneDeploymentService implements DeploymentService {
       "The specified '$primaryDeviceRoleName' device is not registered as a primary device",
     );
 
-    PrimaryDeviceDeployment deviceDeployment = deployment
-        .getDeviceDeploymentFor(device as PrimaryDeviceConfiguration);
+    PrimaryDeviceDeployment deviceDeployment = deployment.getDeviceDeploymentFor(device as PrimaryDeviceConfiguration);
 
     return SmartphoneDeployment.fromPrimaryDeviceDeploymentAndSmartphoneStudyProtocol(
       studyDeploymentId: studyDeploymentId,
@@ -135,11 +136,9 @@ class SmartphoneDeploymentService implements DeploymentService {
     );
   }
 
-  /// Get a smartphone deployment configuration for [studyDeploymentId] for
-  /// this phone.
-  Future<SmartphoneDeployment?> getDeviceDeployment(
-    String studyDeploymentId,
-  ) async =>
+  /// Returns the [SmartphoneDeployment] for [studyDeploymentId] for this phone
+  /// ([thisPhone]), or `null` if the deployment is unknown.
+  Future<SmartphoneDeployment?> getDeviceDeployment(String studyDeploymentId) async =>
       await getDeviceDeploymentFor(studyDeploymentId, thisPhone.roleName);
 
   @override
@@ -157,9 +156,7 @@ class SmartphoneDeploymentService implements DeploymentService {
     );
 
     if (device is! PrimaryDeviceConfiguration) {
-      warning(
-        "The specified device with role name '$primaryDeviceRoleName' is not a primary device.",
-      );
+      warning("The specified device with role name '$primaryDeviceRoleName' is not a primary device.");
       return null;
     }
     deployment.deviceDeployed(device, deviceDeploymentLastUpdatedOn);
@@ -167,19 +164,15 @@ class SmartphoneDeploymentService implements DeploymentService {
     return deployment.status;
   }
 
-  /// Mark the study deployment with [studyDeploymentId] as deployed successfully
+  /// Marks the study deployment with [studyDeploymentId] as deployed successfully
   /// to this primary device (phone), i.e., that the study deployment was loaded
   /// on the device and that the necessary runtime is available to run it.
-  Future<StudyDeploymentStatus?> deployed(
-    String studyDeploymentId, {
-    DateTime? deviceDeploymentLastUpdateDate,
-  }) async => deviceDeployed(
-    studyDeploymentId,
-    thisPhone.roleName,
-    deviceDeploymentLastUpdateDate,
-  );
+  Future<StudyDeploymentStatus?> deployed(String studyDeploymentId, {DateTime? deviceDeploymentLastUpdateDate}) async =>
+      deviceDeployed(studyDeploymentId, thisPhone.roleName, deviceDeploymentLastUpdateDate);
 
-  /// Stop the study deployment with [studyDeploymentId].
+  /// Stops the study deployment with [studyDeploymentId].
+  ///
+  /// Returns `null` if the deployment is unknown.
   @override
   Future<StudyDeploymentStatus?> stop(String studyDeploymentId) async {
     if (_repository[studyDeploymentId] == null) return null;

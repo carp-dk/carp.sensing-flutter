@@ -1,3 +1,22 @@
+## 4.4.2
+
+* Add `httpsHost` and `httpsPath` to anonymous login to fix issues on iOS 17.4
+
+## 4.4.1
+
+* fix: token refresh for anonymous (magic link) users. These sessions have no `openid` scope and hence no `id_token`, which the oidc manager requires - they are now refreshed via AppAuth with a `refresh_token` grant
+* concurrent `refresh()` calls share one in-flight refresh (refresh tokens are single-use)
+* `AuthEvent.failed` is emitted when a refresh fails
+
+## 4.4.0
+
+* Add `CarpAuthService().magicLinkForCode()` - resolve a short self-signup code to its magic link via the CAWS `/api/self-signup/{code}` endpoint
+
+## 4.3.0
+
+* Add `getDataStreamBatchesByTime()` (on `CarpDataStreamService` and `DataStreamReference`) - query a data stream by local update time window via the CAWS `query-by-time` endpoint
+* Rename `CarpDataStreamService().stream()` to `dataStream()` (old name deprecated)
+
 ## 4.2.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package

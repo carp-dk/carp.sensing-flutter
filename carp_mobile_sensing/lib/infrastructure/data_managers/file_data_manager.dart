@@ -7,6 +7,11 @@
 
 part of '../../infrastructure.dart';
 
+/// Creates a [FileDataManager] for data endpoints of type
+/// [DataEndPointTypes.FILE].
+///
+/// Registered in the [DataManagerRegistry] by
+/// [SmartPhoneClientManager.configure].
 class FileDataManagerFactory implements DataManagerFactory {
   @override
   String get type => DataEndPointTypes.FILE;
@@ -15,15 +20,26 @@ class FileDataManagerFactory implements DataManagerFactory {
   DataManager create() => FileDataManager();
 }
 
-/// Stores [Measurement] objects on the device's local storage media.
-/// Supports compression (zip) and encryption.
+/// A data manager that writes [Measurement]s as JSON to files on the phone.
+///
+/// Used when the protocol's data endpoint is a [FileDataEndPoint]. Each file
+/// holds a JSON array of measurements. When a file grows beyond
+/// [FileDataEndPoint.bufferSize] bytes, it is closed, optionally zipped, and a
+/// new file is started.
+///
+/// Key points:
+///  * Emits [FileDataManagerEvent]s on [events] when files are created and
+///    closed, so e.g. an upload manager can pick up closed files.
+///  * Encryption ([FileDataEndPoint.encrypt]) is not implemented yet. Only the
+///    [FileDataManagerEventTypes.fileEncrypted] event is emitted.
+///  * If a write fails, the file is reset and the write is retried.
 ///
 /// The path and filename format is
 ///
 ///   `~/carp/deployments/<study_deployment_id>/data/carp-data-yyyy-mm-dd-hh-mm-ss-ms.json.zip`
 ///
 /// where `~` is the folder where an application can place files that are private
-/// to the application.
+/// to the application (see [Settings.getDataBasePath]).
 ///
 /// On iOS, this is the `NSDocumentsDirectory` and the files can be accessed via
 /// the MacOS Finder.
@@ -42,8 +58,9 @@ class FileDataManager extends AbstractDataManager {
   @override
   String get type => DataEndPointTypes.FILE;
 
-  FileDataEndPoint get fileDataEndPoint =>
-      super.dataEndPoint! as FileDataEndPoint;
+  /// The [dataEndPoint] cast to a [FileDataEndPoint].
+  /// Only valid after [configure] has been called.
+  FileDataEndPoint get fileDataEndPoint => super.dataEndPoint! as FileDataEndPoint;
 
   @override
   Future<void> configure({
@@ -52,27 +69,19 @@ class FileDataManager extends AbstractDataManager {
     required Stream<Measurement> measurements,
   }) async {
     assert(dataEndPoint is FileDataEndPoint);
-    await super.configure(
-      dataEndPoint: dataEndPoint,
-      deployment: deployment,
-      measurements: measurements,
-    );
+    await super.configure(dataEndPoint: dataEndPoint, deployment: deployment, measurements: measurements);
 
-    // _fileDataEndPoint = dataEndPoint as FileDataEndPoint;
     await Settings().getDeploymentBasePath(studyDeploymentId);
 
     if (fileDataEndPoint.encrypt) {
-      assert(
-        fileDataEndPoint.publicKey != null,
-        'A public key is required if files are to be encrypted.',
-      );
+      assert(fileDataEndPoint.publicKey != null, 'A public key is required if files are to be encrypted.');
       assert(
         fileDataEndPoint.publicKey!.isNotEmpty,
         'A non-empty public key is required if files are to be encrypted.',
       );
     }
 
-    // Initializing the the local directory and file
+    // Initializing the local directory and file
     await path;
     await file;
     await sink;
@@ -83,21 +92,20 @@ class FileDataManager extends AbstractDataManager {
   }
 
   @override
-  Future<void> onMeasurement(Measurement measurement) async =>
-      await write(measurement);
+  Future<void> onMeasurement(Measurement measurement) async => await write(measurement);
 
   @override
   Future<void> onDone() async => await close();
 
   /// The full path where data files are stored on the device.
-  Future<String> get path async =>
-      Settings().getDataBasePath(studyDeploymentId);
+  Future<String> get path async => Settings().getDataBasePath(studyDeploymentId);
 
-  /// Full path and filename according to this format:
+  /// Full path and filename of the current file, on the format
   ///
   ///   `~/carp/deployments/<study_deployment_id>/data/carp-data-yyyy-mm-dd-hh-mm-ss-ms.json`
   ///
-  /// where the date is in UTC format / zulu time.
+  /// where the date is the creation time in UTC (zulu time).
+  /// A new name is generated each time a file is flushed.
   Future<String> get filename async {
     if (_filename == null) {
       final created = DateTime.now()
@@ -114,22 +122,22 @@ class FileDataManager extends AbstractDataManager {
   }
 
   /// The current file being written to.
+  ///
+  /// Created on first access, which also emits a
+  /// [FileDataManagerEventTypes.fileCreated] event.
   Future<File> get file async {
     if (_file == null) {
       final newFilename = await filename;
       _file = File(newFilename);
       info("Creating file '$newFilename'");
-      addEvent(
-        FileDataManagerEvent(
-          FileDataManagerEventTypes.fileCreated,
-          newFilename,
-        ),
-      );
+      addEvent(FileDataManagerEvent(FileDataManagerEventTypes.fileCreated, newFilename));
     }
     return _file!;
   }
 
-  /// The currently used [IOSink].
+  /// The [IOSink] used to append to the current [file].
+  ///
+  /// Opened on first access, which also writes the opening `[` of the JSON array.
   Future<IOSink> get sink async {
     if (_sink == null) {
       // open the file's sink for writing in append mode
@@ -141,15 +149,15 @@ class FileDataManager extends AbstractDataManager {
     return _sink!;
   }
 
-  /// Writes a JSON encoded [measurement] to the file.
+  /// Writes a JSON encoded [measurement] to the current file.
+  ///
+  /// If the sink is not ready, the write is retried after 2 seconds.
+  /// Calls [flush] when the file size exceeds [FileDataEndPoint.bufferSize].
   Future<void> write(Measurement measurement) async {
     // Check if the sink is ready for writing...
     if (!_initialized) {
       info('File sink not ready -- delaying for 2 sec...');
-      return Future.delayed(
-        const Duration(seconds: 2),
-        () => write(measurement),
-      );
+      return Future.delayed(const Duration(seconds: 2), () => write(measurement));
     }
 
     final json = jsonEncode(measurement);
@@ -158,9 +166,7 @@ class FileDataManager extends AbstractDataManager {
       try {
         // always add a comma directly after json
         activeSink.write('$json\n,\n');
-        debug(
-          'Writing measurement to file - type: ${measurement.dataType.toString()}',
-        );
+        debug('Writing measurement to file - type: ${measurement.dataType.toString()}');
 
         await file.then((activeFile) async {
           await activeFile.length().then((len) {
@@ -177,7 +183,13 @@ class FileDataManager extends AbstractDataManager {
     });
   }
 
-  /// Flushes data to the file, compress, encrypt, and close it.
+  /// Closes [flushFile] and its [flushSink], and zips the file if
+  /// [FileDataEndPoint.zip] is true.
+  ///
+  /// Resets the current file, so the next [write] starts a new file.
+  /// Emits a [FileDataManagerEventTypes.fileClosed] event with the final path
+  /// (ending in `.zip` if zipped). Calls for a sink that is already being
+  /// flushed are ignored.
   Future<void> flush(File flushFile, IOSink flushSink) async {
     // fast exit if we're already flushing this file/sink
     if (flushSink.hashCode == _flushingSink) return;
@@ -217,20 +229,10 @@ class FileDataManager extends AbstractDataManager {
         //TODO : implement encryption
         // if the encrypted file gets another name, remember to
         // update _jsonFilePath
-        addEvent(
-          FileDataManagerEvent(
-            FileDataManagerEventTypes.fileEncrypted,
-            finalFilePath,
-          ),
-        );
+        addEvent(FileDataManagerEvent(FileDataManagerEventTypes.fileEncrypted, finalFilePath));
       }
 
-      addEvent(
-        FileDataManagerEvent(
-          FileDataManagerEventTypes.fileClosed,
-          finalFilePath,
-        ),
-      );
+      addEvent(FileDataManagerEvent(FileDataManagerEventTypes.fileClosed, finalFilePath));
     });
   }
 
@@ -247,8 +249,10 @@ class FileDataManager extends AbstractDataManager {
   }
 }
 
-/// A status event for this file data manager.
-/// See [FileDataManagerEventTypes] for a list of possible event types.
+/// A status event from a [FileDataManager], carrying the path of the file
+/// it concerns.
+///
+/// See [FileDataManagerEventTypes] for the possible event types.
 class FileDataManagerEvent extends DataManagerEvent {
   /// The full path and filename for the file.
   String path;
@@ -260,10 +264,20 @@ class FileDataManagerEvent extends DataManagerEvent {
   String toString() => 'FileDataManagerEvent - type: $type, path: $path';
 }
 
-/// An enumeration of file data manager event types
+/// The event types used in [FileDataManagerEvent], in addition to those in
+/// [DataManagerEventTypes].
 class FileDataManagerEventTypes extends DataManagerEventTypes {
+  /// A new data file was created and is being written to.
   static const String fileCreated = 'file_created';
+
+  /// A data file was closed (and zipped, if enabled) and is ready for upload.
   static const String fileClosed = 'file_closed';
+
+  /// A data file was deleted. Not emitted by [FileDataManager] itself, but
+  /// used by managers that delete files after upload.
   static const String fileDeleted = 'file_deleted';
+
+  /// A data file was encrypted. Encryption is not implemented yet, so this
+  /// event only signals that [FileDataEndPoint.encrypt] was set.
   static const String fileEncrypted = 'file_encrypted';
 }

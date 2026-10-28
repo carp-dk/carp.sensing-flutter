@@ -2,12 +2,12 @@ name: carp_mobile_sensing_app
 description: The CARP Mobile Sensing App
 version: 2.0.0
 homepage: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/apps/carp_mobile_sensing_app
-publish_to: 'none' 
+publish_to: 'none'
 
 environment:
   sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
-  
+
 platforms:
   android:
   ios:
@@ -36,10 +36,14 @@ dependencies:
   # carp_polar_package: ^0.30.0
   # carp_movesense_package: ^0.30.0
 
+  # iOS only - collects data from an Apple Watch via the AWARE watchOS framework.
+  # Needs the companion watchOS app, see packages/carp_aware_package/doc/watchos_app_setup.md
+  carp_aware_package: ^1.0.0
+
   research_package: ^3.0.0
 
   # Packages used by CAMS. For some reason, we need to explicitly depend on them here.
-  # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though 
+  # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though
   # it does compile. See issue #530
   system_info2: ^4.0.0
   path_provider: ^2.0.0
@@ -64,8 +68,8 @@ dependencies:
   flutter_reactive_ble: ^5.0.0
 
   # Context package plugins
-  location: ^8.0.1
-  flutter_activity_recognition: ^4.0.0
+  location: ^10.0.2
+  activity_recognition_flutter: ^6.0.0
 
   # Communication package plugins
   device_calendar: ^4.3.1 # need to use a forked version of device_calendar - see dependency_overrides below
@@ -76,7 +80,7 @@ dependencies:
   connectivity_plus: ^7.0.0    # connectivity events
   network_info_plus: ^8.2.1    # wifi ssid name
   flutter_blue_plus: '>=1.29.0 <3.0.0'  # bluetooth scan
-  dchs_flutter_beacon: ^0.6.4  # collecting nearby iBeacon devices
+  dchs_flutter_beacon: ^0.6.10  # collecting nearby iBeacon devices
 
   # Apps package plugins
   app_usage: ^4.0.0
@@ -84,7 +88,7 @@ dependencies:
 
   # Audio package plugins
   flutter_sound: ^9.17.0  # audio probe
-  noise_meter: ^5.0.0     # measuring noise level
+  noise_meter: ^6.0.0     # measuring noise level
 
   # wearable device plugins
   # The Movesense native plugin. As of carp_movesense_package 3.0.0 the Movesense
@@ -133,24 +137,26 @@ dependency_overrides:
     path: ../../packages/carp_movesense_package/
   # carp_cortrium_package:
   #   path: ../../../carp_cortrium_package/
+  carp_aware_package:
+    path: ../../packages/carp_aware_package/
 
   # research_package:
   #   path: ../../../../research.package/
 
   # esense_flutter:
   #   path: ../../../../flutter-plugins/packages/esense_flutter/
-  
+
   # location:
   #   git:
   #     url: https://github.com/fairuzmn/flutterlocation.git
   #     ref: location-v5.5.0.0-dev.9-fix
   #     path: packages/location
-  
-  # due to this issue https://github.com/builttoroam/device_calendar/issues/586 
+
+  # due to this issue https://github.com/builttoroam/device_calendar/issues/586
   device_calendar:
     git: https://github.com/bardram/device_calendar
 
-  # due to this issue https://github.com/petri-lipponen-movesense/mdsflutter/issues/36 
+  # due to this issue https://github.com/petri-lipponen-movesense/mdsflutter/issues/36
   # mdsflutter:
   #   git:
   #     url: https://github.com/Panosfunk/mdsflutter.git
@@ -165,10 +171,10 @@ dependency_overrides:
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter  
-  test: any 
+    sdk: flutter
+  test: any
   flutter_lints: any
-  
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -197,4 +203,3 @@ flutter:
     - assets/study.png
     - assets/cachet_logo.png
     - assets/logo.png
-

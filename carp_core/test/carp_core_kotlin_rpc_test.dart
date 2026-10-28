@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_serializable/carp_serializable.dart';
@@ -15,20 +16,12 @@ void main() {
 
   group('Protocol Service', () {
     test('Add - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/add.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/add.json').readAsStringSync();
 
-      var expected = Add.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = Add.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      String plainJson = File(
-        '$path/protocols/study_protocol.json',
-      ).readAsStringSync();
-      StudyProtocol protocol = StudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      String plainJson = File('$path/protocols/study_protocol.json').readAsStringSync();
+      StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       var request = Add(protocol, 'Version 1');
 
       print(toJsonString(request));
@@ -36,28 +29,18 @@ void main() {
     });
 
     test('Add - Response', () async {
-      String plainJson = File(
-        '$path/protocols/ProtocolService/add-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/protocols/ProtocolService/add-response.json').readAsStringSync();
       // the response is empty
       print(toJsonString(plainJson));
     });
 
     test('AddVersion - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/addVersion.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/addVersion.json').readAsStringSync();
 
-      var expected = AddVersion.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = AddVersion.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      String plainJson = File(
-        '$path/protocols/study_protocol.json',
-      ).readAsStringSync();
-      StudyProtocol protocol = StudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      String plainJson = File('$path/protocols/study_protocol.json').readAsStringSync();
+      StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       // the name and the version number is updated
       protocol.name = 'Walking/biking study';
@@ -68,9 +51,7 @@ void main() {
     });
 
     test('AddVersion - Response', () async {
-      String plainJson = File(
-        '$path/protocols/ProtocolService/addVersion-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/protocols/ProtocolService/addVersion-response.json').readAsStringSync();
       // the response is empty
       print(toJsonString(plainJson));
     });
@@ -80,18 +61,14 @@ void main() {
         '$path/protocols/ProtocolService/updateParticipantDataConfiguration.json',
       ).readAsStringSync();
 
-      var expected = UpdateParticipantDataConfiguration.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = UpdateParticipantDataConfiguration.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = UpdateParticipantDataConfiguration(
         '25fe92a5-0d52-4e37-8d05-31f347d72d3d',
         'Version 3: ask participant data',
         [
           ExpectedParticipantData(
-            attribute: ParticipantAttribute(
-              inputDataType: 'dk.cachet.carp.input.sex',
-            ),
+            attribute: ParticipantAttribute(inputDataType: 'dk.cachet.carp.input.sex'),
             assignedTo: AssignedTo(roleNames: {'Participant'}),
           ),
         ],
@@ -106,9 +83,7 @@ void main() {
         '$path/protocols/ProtocolService/updateParticipantDataConfiguration-response.json',
       ).readAsStringSync();
 
-      StudyProtocol protocol = StudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       print(toJsonString(protocol));
       expect(protocol.id, '25fe92a5-0d52-4e37-8d05-31f347d72d3d');
@@ -116,13 +91,9 @@ void main() {
     });
 
     test('GetBy - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/getBy.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/getBy.json').readAsStringSync();
 
-      var expected = GetBy.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = GetBy.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = GetBy('25fe92a5-0d52-4e37-8d05-31f347d72d3d', 'Version 1');
 
@@ -131,13 +102,9 @@ void main() {
     });
 
     test('GetBy - Response', () async {
-      String plainJson = File(
-        '$path/protocols/ProtocolService/getBy-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/protocols/ProtocolService/getBy-response.json').readAsStringSync();
 
-      StudyProtocol protocol = StudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       print(toJsonString(protocol));
       expect(protocol.id, '25fe92a5-0d52-4e37-8d05-31f347d72d3d');
@@ -145,13 +112,9 @@ void main() {
     });
 
     test('GetAllForOwner - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/getAllForOwner.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/getAllForOwner.json').readAsStringSync();
 
-      var expected = GetAllForOwner.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = GetAllForOwner.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = GetAllForOwner('491f03fc-964b-4783-86a6-a528bbfe4e94');
 
@@ -160,9 +123,7 @@ void main() {
     });
 
     test('GetAllForOwner - Response', () async {
-      String plainJson = File(
-        '$path/protocols/ProtocolService/getAllForOwner-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/protocols/ProtocolService/getAllForOwner-response.json').readAsStringSync();
 
       var list = json.decode(plainJson) as List<dynamic>;
       var protocol = StudyProtocol.fromJson(list[0] as Map<String, dynamic>);
@@ -173,26 +134,18 @@ void main() {
     });
 
     test('GetVersionHistoryFor - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolService/getVersionHistoryFor.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolService/getVersionHistoryFor.json').readAsStringSync();
 
-      var expected = GetVersionHistoryFor.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = GetVersionHistoryFor.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      var request = GetVersionHistoryFor(
-        '25fe92a5-0d52-4e37-8d05-31f347d72d3d',
-      );
+      var request = GetVersionHistoryFor('25fe92a5-0d52-4e37-8d05-31f347d72d3d');
 
       print(toJsonString(request));
       expect(toJsonString(expected), toJsonString(request));
     });
 
     test('GetVersionHistoryFor - Response', () async {
-      String plainJson = File(
-        '$path/protocols/ProtocolService/getVersionHistoryFor-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/protocols/ProtocolService/getVersionHistoryFor-response.json').readAsStringSync();
 
       var list = json.decode(plainJson) as List<dynamic>;
       print(toJsonString(list));
@@ -205,13 +158,9 @@ void main() {
 
   group('ProtocolFactory Service', () {
     test('CreateCustomProtocol - Request', () async {
-      String rpcString = File(
-        '$path/protocols/ProtocolFactoryService/createCustomProtocol.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/protocols/ProtocolFactoryService/createCustomProtocol.json').readAsStringSync();
 
-      var expected = CreateCustomProtocol.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = CreateCustomProtocol.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = CreateCustomProtocol(
         '491f03fc-964b-4783-86a6-a528bbfe4e94',
@@ -229,9 +178,7 @@ void main() {
         '$path/protocols/ProtocolFactoryService/createCustomProtocol-response.json',
       ).readAsStringSync();
 
-      StudyProtocol protocol = StudyProtocol.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
       print(toJsonString(protocol));
       expect(protocol.id, '4d8c75c7-9604-48fa-8f9b-5ed3e4bd5df8');
@@ -240,26 +187,16 @@ void main() {
   });
   group('DataStream Service', () {
     test('OpenDataStreams - Request', () async {
-      String rpcString = File(
-        '$path/data/DataStreamService/openDataStreams.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/data/DataStreamService/openDataStreams.json').readAsStringSync();
 
-      var expected = OpenDataStreams.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = OpenDataStreams.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = OpenDataStreams(
         DataStreamsConfiguration(
           studyDeploymentId: 'c9cc5317-48da-45f2-958e-58bc07f34681',
           expectedDataStreams: {
-            ExpectedDataStream(
-              dataType: 'dk.cachet.carp.geolocation',
-              deviceRoleName: "Participant's phone",
-            ),
-            ExpectedDataStream(
-              dataType: 'dk.cachet.carp.stepcount',
-              deviceRoleName: "Participant's phone",
-            ),
+            ExpectedDataStream(dataType: 'dk.cachet.carp.geolocation', deviceRoleName: "Participant's phone"),
+            ExpectedDataStream(dataType: 'dk.cachet.carp.stepcount', deviceRoleName: "Participant's phone"),
           },
         ),
       );
@@ -269,94 +206,68 @@ void main() {
     });
 
     test('OpenDataStreams - Response', () async {
-      String plainJson = File(
-        '$path/data/DataStreamService/openDataStreams-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/data/DataStreamService/openDataStreams-response.json').readAsStringSync();
 
       // the response is empty
       print(toJsonString(plainJson));
     });
 
     test('AppendToDataStreams - Request', () async {
-      String rpcString = File(
-        '$path/data/DataStreamService/appendToDataStreams.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/data/DataStreamService/appendToDataStreams.json').readAsStringSync();
 
-      var expected = AppendToDataStreams.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = AppendToDataStreams.fromJson(json.decode(rpcString) as Map<String, dynamic>);
       print(toJsonString(expected));
 
       var m1 = Measurement(
         sensorStartTime: 1642505045000000,
-        data: Geolocation(
-          latitude: 55.68061908805645,
-          longitude: 12.582050313435703,
-        )..sensorSpecificData = SignalStrength(rssi: 0),
+        data: Geolocation(latitude: 55.68061908805645, longitude: 12.582050313435703)
+          ..sensorSpecificData = SignalStrength(rssi: 0),
       );
       var m2 = Measurement(
         sensorStartTime: 1642505144000000,
-        data: Geolocation(
-          latitude: 55.680802203873114,
-          longitude: 12.581802212861367,
-        ),
+        data: Geolocation(latitude: 55.680802203873114, longitude: 12.581802212861367),
       );
-      var m3 = Measurement(
-        sensorStartTime: 1642505045000000,
-        data: StepCount(steps: 0),
-      );
-      var m4 = Measurement(
-        sensorStartTime: 1642505144000000,
-        data: StepCount(steps: 30),
-      );
+      var m3 = Measurement(sensorStartTime: 1642505045000000, data: StepCount(steps: 0));
+      var m4 = Measurement(sensorStartTime: 1642505144000000, data: StepCount(steps: 30));
 
-      var request = AppendToDataStreams(
-        'c9cc5317-48da-45f2-958e-58bc07f34681',
-        [
-          DataStreamBatch(
-            dataStream: DataStreamId(
-              studyDeploymentId: 'c9cc5317-48da-45f2-958e-58bc07f34681',
-              deviceRoleName: "Participant's phone",
-              dataType: "dk.cachet.carp.geolocation",
-            ),
-            firstSequenceId: 0,
-            measurements: [m1, m2],
-            triggerIds: {0},
+      var request = AppendToDataStreams('c9cc5317-48da-45f2-958e-58bc07f34681', [
+        DataStreamBatch(
+          dataStream: DataStreamId(
+            studyDeploymentId: 'c9cc5317-48da-45f2-958e-58bc07f34681',
+            deviceRoleName: "Participant's phone",
+            dataType: "dk.cachet.carp.geolocation",
           ),
-          DataStreamBatch(
-            dataStream: DataStreamId(
-              studyDeploymentId: 'c9cc5317-48da-45f2-958e-58bc07f34681',
-              deviceRoleName: "Participant's phone",
-              dataType: "dk.cachet.carp.stepcount",
-            ),
-            firstSequenceId: 0,
-            measurements: [m3, m4],
-            triggerIds: {0},
+          firstSequenceId: 0,
+          measurements: [m1, m2],
+          triggerIds: {0},
+        ),
+        DataStreamBatch(
+          dataStream: DataStreamId(
+            studyDeploymentId: 'c9cc5317-48da-45f2-958e-58bc07f34681',
+            deviceRoleName: "Participant's phone",
+            dataType: "dk.cachet.carp.stepcount",
           ),
-        ],
-      );
+          firstSequenceId: 0,
+          measurements: [m3, m4],
+          triggerIds: {0},
+        ),
+      ]);
 
       print(toJsonString(request));
       expect(toJsonString(expected), toJsonString(request));
     });
 
     test('AppendToDataStreams - Response', () async {
-      String plainJson = File(
-        '$path/data/DataStreamService/appendToDataStreams-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/data/DataStreamService/appendToDataStreams-response.json').readAsStringSync();
 
       // the response is empty
       print(toJsonString(plainJson));
     });
 
     test('GetDataStream - Request', () async {
-      String rpcString = File(
-        '$path/data/DataStreamService/getDataStream.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/data/DataStreamService/getDataStream.json').readAsStringSync();
 
-      var expected = GetDataStream.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = GetDataStream.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = GetDataStream(
         DataStreamId(
@@ -373,68 +284,45 @@ void main() {
     });
 
     test('GetDataStream - Response', () async {
-      String plainJson = File(
-        '$path/data/DataStreamService/getDataStream-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/data/DataStreamService/getDataStream-response.json').readAsStringSync();
 
       var list = json.decode(plainJson) as List<dynamic>;
       var data = DataStreamBatch.fromJson(list[0] as Map<String, dynamic>);
 
       print(toJsonString(data));
-      expect(
-        data.dataStream.studyDeploymentId,
-        'c9cc5317-48da-45f2-958e-58bc07f34681',
-      );
+      expect(data.dataStream.studyDeploymentId, 'c9cc5317-48da-45f2-958e-58bc07f34681');
       expect(data.measurements.length, 2);
     });
 
     test('CloseDataStreams - Request', () async {
-      String rpcString = File(
-        '$path/data/DataStreamService/closeDataStreams.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/data/DataStreamService/closeDataStreams.json').readAsStringSync();
 
-      var expected = CloseDataStreams.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = CloseDataStreams.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      var request = CloseDataStreams([
-        "c9cc5317-48da-45f2-958e-58bc07f34681",
-        "d4a9bba4-860e-4c58-a356-8a91605dc1ee",
-      ]);
+      var request = CloseDataStreams(["c9cc5317-48da-45f2-958e-58bc07f34681", "d4a9bba4-860e-4c58-a356-8a91605dc1ee"]);
       print(toJsonString(request));
       expect(toJsonString(expected), toJsonString(request));
     });
 
     test('CloseDataStreams - Response', () async {
-      String plainJson = File(
-        '$path/data/DataStreamService/closeDataStreams-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/data/DataStreamService/closeDataStreams-response.json').readAsStringSync();
 
       // the response is empty
       print(toJsonString(plainJson));
     });
 
     test('RemoveDataStreams - Request', () async {
-      String rpcString = File(
-        '$path/data/DataStreamService/removeDataStreams.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/data/DataStreamService/removeDataStreams.json').readAsStringSync();
 
-      var expected = RemoveDataStreams.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = RemoveDataStreams.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      var request = RemoveDataStreams([
-        "c9cc5317-48da-45f2-958e-58bc07f34681",
-        "d4a9bba4-860e-4c58-a356-8a91605dc1ee",
-      ]);
+      var request = RemoveDataStreams(["c9cc5317-48da-45f2-958e-58bc07f34681", "d4a9bba4-860e-4c58-a356-8a91605dc1ee"]);
       print(toJsonString(request));
       expect(toJsonString(expected), toJsonString(request));
     });
 
     test('RemoveDataStreams - Response', () async {
-      String plainJson = File(
-        '$path/data/DataStreamService/removeDataStreams-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/data/DataStreamService/removeDataStreams-response.json').readAsStringSync();
 
       var list = json.decode(plainJson) as List<dynamic>;
 
@@ -450,12 +338,8 @@ void main() {
         '$path/deployments/ParticipationService/getActiveParticipationInvitations.json',
       ).readAsStringSync();
 
-      var expected = GetActiveParticipationInvitations.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
-      var request = GetActiveParticipationInvitations(
-        'ca60cb7f-de18-44b6-baf9-3c8e6a73005a',
-      );
+      var expected = GetActiveParticipationInvitations.fromJson(json.decode(rpcString) as Map<String, dynamic>);
+      var request = GetActiveParticipationInvitations('ca60cb7f-de18-44b6-baf9-3c8e6a73005a');
 
       expect(expected.toJson(), request.toJson());
       print(toJsonString(request));
@@ -470,25 +354,17 @@ void main() {
       final invitations = json.decode(plainJson) as List<dynamic>;
 
       // checking the first one
-      ActiveParticipationInvitation invitation =
-          ActiveParticipationInvitation.fromJson(
-            invitations.first as Map<String, dynamic>,
-          );
-      expect(
-        invitation.participation.participantId,
-        '32880e82-01c9-40cf-a6ed-17ff3348f251',
+      ActiveParticipationInvitation invitation = ActiveParticipationInvitation.fromJson(
+        invitations.first as Map<String, dynamic>,
       );
+      expect(invitation.participation.participantId, '32880e82-01c9-40cf-a6ed-17ff3348f251');
       print(toJsonString(invitation));
     });
 
     test('GetParticipantData - Request', () async {
-      String rpc = File(
-        '$path/deployments/ParticipationService/getParticipantData.json',
-      ).readAsStringSync();
+      String rpc = File('$path/deployments/ParticipationService/getParticipantData.json').readAsStringSync();
 
-      var expected = GetParticipantData.fromJson(
-        json.decode(rpc) as Map<String, dynamic>,
-      );
+      var expected = GetParticipantData.fromJson(json.decode(rpc) as Map<String, dynamic>);
       var request = GetParticipantData('c9cc5317-48da-45f2-958e-58bc07f34681');
 
       expect(expected.toJson(), request.toJson());
@@ -500,24 +376,16 @@ void main() {
         '$path/deployments/ParticipationService/getParticipantData-response.json',
       ).readAsStringSync();
 
-      ParticipantData data = ParticipantData.fromJson(
-        json.decode(response) as Map<String, dynamic>,
-      );
+      ParticipantData data = ParticipantData.fromJson(json.decode(response) as Map<String, dynamic>);
       expect(data.roles.first.roleName, "Participant");
       print(toJsonString(data));
     });
 
     test('GetParticipantDataList - Request', () async {
-      String rpc = File(
-        '$path/deployments/ParticipationService/getParticipantDataList.json',
-      ).readAsStringSync();
+      String rpc = File('$path/deployments/ParticipationService/getParticipantDataList.json').readAsStringSync();
 
-      var expected = GetParticipantDataList.fromJson(
-        json.decode(rpc) as Map<String, dynamic>,
-      );
-      var request = GetParticipantDataList([
-        'c9cc5317-48da-45f2-958e-58bc07f34681',
-      ]);
+      var expected = GetParticipantDataList.fromJson(json.decode(rpc) as Map<String, dynamic>);
+      var request = GetParticipantDataList(['c9cc5317-48da-45f2-958e-58bc07f34681']);
 
       expect(expected.toJson(), request.toJson());
       print(toJsonString(request));
@@ -534,19 +402,13 @@ void main() {
     });
 
     test('SetParticipantData - Request', () async {
-      String rpcString = File(
-        '$path/deployments/ParticipationService/setParticipantData.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/deployments/ParticipationService/setParticipantData.json').readAsStringSync();
 
       var data = SexInput(value: Sex.Male);
 
-      var request = SetParticipantData('c9cc5317-48da-45f2-958e-58bc07f34681', {
-        data.type: data,
-      }, 'Participant');
+      var request = SetParticipantData('c9cc5317-48da-45f2-958e-58bc07f34681', {data.type: data}, 'Participant');
 
-      var expected = SetParticipantData.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = SetParticipantData.fromJson(json.decode(rpcString) as Map<String, dynamic>);
       print(toJsonString(expected));
 
       // for some strange reason, this doesn't work here?????
@@ -559,9 +421,7 @@ void main() {
         '$path/deployments/ParticipationService/setParticipantData-response.json',
       ).readAsStringSync();
 
-      ParticipantData data = ParticipantData.fromJson(
-        json.decode(response) as Map<String, dynamic>,
-      );
+      ParticipantData data = ParticipantData.fromJson(json.decode(response) as Map<String, dynamic>);
       expect(data.roles.first.roleName, "Participant");
       print(toJsonString(data));
     });
@@ -569,20 +429,12 @@ void main() {
 
   group('Deployment Service', () {
     test('CreateStudyDeployment - Request', () async {
-      String rpcString = File(
-        '$path/deployments/DeploymentService/createStudyDeployment.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/deployments/DeploymentService/createStudyDeployment.json').readAsStringSync();
 
-      final expected = CreateStudyDeployment.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      final expected = CreateStudyDeployment.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      String protocolJson = File(
-        '$path/protocols/study_protocol.json',
-      ).readAsStringSync();
-      StudyProtocol protocol = StudyProtocol.fromJson(
-        json.decode(protocolJson) as Map<String, dynamic>,
-      );
+      String protocolJson = File('$path/protocols/study_protocol.json').readAsStringSync();
+      StudyProtocol protocol = StudyProtocol.fromJson(json.decode(protocolJson) as Map<String, dynamic>);
       final request = CreateStudyDeployment(
         protocol,
         [
@@ -621,22 +473,16 @@ void main() {
         '$path/deployments/DeploymentService/createStudyDeployment-response.json',
       ).readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       expect(status.studyDeploymentId, testDeploymentId);
       expect(status.status, StudyDeploymentStatusTypes.Invited);
       print(toJsonString(status));
     });
 
     test('GetStudyDeploymentStatus - Request', () async {
-      String rpcString = File(
-        '$path/deployments/DeploymentService/getStudyDeploymentStatus.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/deployments/DeploymentService/getStudyDeploymentStatus.json').readAsStringSync();
 
-      final expected = GetStudyDeploymentStatus.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      final expected = GetStudyDeploymentStatus.fromJson(json.decode(rpcString) as Map<String, dynamic>);
       final request = GetStudyDeploymentStatus(testDeploymentId);
 
       // expect(expected.toJson(), request.toJson());
@@ -649,22 +495,16 @@ void main() {
         '$path/deployments/DeploymentService/getStudyDeploymentStatus-response.json',
       ).readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       expect(status.studyDeploymentId, testDeploymentId);
       expect(status.status, StudyDeploymentStatusTypes.Invited);
       print(toJsonString(status));
     });
 
     test('RegisterDevice - Request', () async {
-      String rpcString = File(
-        '$path/deployments/DeploymentService/registerDevice.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/deployments/DeploymentService/registerDevice.json').readAsStringSync();
 
-      var expected = RegisterDevice.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = RegisterDevice.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = RegisterDevice(
         testDeploymentId,
@@ -681,26 +521,18 @@ void main() {
     });
 
     test('RegisterDevice - Response', () async {
-      String plainJson = File(
-        '$path/deployments/DeploymentService/registerDevice-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/deployments/DeploymentService/registerDevice-response.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       expect(status.studyDeploymentId, testDeploymentId);
       expect(status.status, StudyDeploymentStatusTypes.DeployingDevices);
       print(toJsonString(status));
     });
 
     test('UnregisterDevice - Request', () async {
-      String rpcString = File(
-        '$path/deployments/DeploymentService/unregisterDevice.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/deployments/DeploymentService/unregisterDevice.json').readAsStringSync();
 
-      var expected = UnregisterDevice.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = UnregisterDevice.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
       var request = UnregisterDevice(testDeploymentId, "Participant's phone");
       print(toJsonString(request));
@@ -710,31 +542,20 @@ void main() {
     });
 
     test('UnregisterDevice - Response', () async {
-      String plainJson = File(
-        '$path/deployments/DeploymentService/unregisterDevice-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/deployments/DeploymentService/unregisterDevice-response.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       expect(status.studyDeploymentId, testDeploymentId);
       expect(status.status, StudyDeploymentStatusTypes.Invited);
       print(toJsonString(status));
     });
 
     test('GetDeviceDeploymentFor - Request', () async {
-      String rpcString = File(
-        '$path/deployments/DeploymentService/getDeviceDeploymentFor.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/deployments/DeploymentService/getDeviceDeploymentFor.json').readAsStringSync();
 
-      var expected = GetDeviceDeploymentFor.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = GetDeviceDeploymentFor.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      var request = GetDeviceDeploymentFor(
-        testDeploymentId,
-        "Participant's phone",
-      );
+      var request = GetDeviceDeploymentFor(testDeploymentId, "Participant's phone");
       print(toJsonString(request));
 
       // expect(expected.toJson(), request.toJson());
@@ -756,32 +577,20 @@ void main() {
     });
 
     test('DeviceDeployed - Request', () async {
-      String rpcString = File(
-        '$path/deployments/DeploymentService/deviceDeployed.json',
-      ).readAsStringSync();
+      String rpcString = File('$path/deployments/DeploymentService/deviceDeployed.json').readAsStringSync();
 
-      var expected = DeviceDeployed.fromJson(
-        json.decode(rpcString) as Map<String, dynamic>,
-      );
+      var expected = DeviceDeployed.fromJson(json.decode(rpcString) as Map<String, dynamic>);
 
-      var request = DeviceDeployed(
-        testDeploymentId,
-        "Participant's phone",
-        DateTime.tryParse('2022-01-18T13:55:10Z')!,
-      );
+      var request = DeviceDeployed(testDeploymentId, "Participant's phone", DateTime.tryParse('2022-01-18T13:55:10Z')!);
       print(toJsonString(request));
 
       expect(toJsonString(expected), toJsonString(request));
     });
 
     test('DeviceDeployed - Response', () async {
-      String plainJson = File(
-        '$path/deployments/DeploymentService/deviceDeployed-response.json',
-      ).readAsStringSync();
+      String plainJson = File('$path/deployments/DeploymentService/deviceDeployed-response.json').readAsStringSync();
 
-      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(
-        json.decode(plainJson) as Map<String, dynamic>,
-      );
+      StudyDeploymentStatus status = StudyDeploymentStatus.fromJson(json.decode(plainJson) as Map<String, dynamic>);
       expect(status.studyDeploymentId, testDeploymentId);
       expect(status.status, StudyDeploymentStatusTypes.Running);
       print(toJsonString(status));

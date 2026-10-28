@@ -7,11 +7,15 @@
 
 part of '../client.dart';
 
-/// A repository which handles persisting the state of studies.
+/// Persists the device registration and the [Study]s of a client.
+///
 /// Used by a [ClientManager] to store and retrieve information about
-/// the client device and the studies it is handling.
+/// the client device and the studies it is handling. Implementations decide
+/// where the state lives (memory, local storage, ...).
 abstract interface class ClientRepository<TStudy extends Study> {
-  /// The [DeviceRegistration] used to register the client in deployments.
+  /// The [DeviceRegistration] used to register the client in deployments;
+  /// null when none is stored. [ClientManager.configure] writes the
+  /// registration given to it here.
   DeviceRegistration? deviceRegistration;
 
   /// Adds [study] to the repository.

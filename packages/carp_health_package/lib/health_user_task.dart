@@ -1,12 +1,13 @@
 part of 'health_package.dart';
 
-/// A non-UI user task that collects health data in the background.
+/// A [UserTask] without UI that collects health data when the user starts it.
 ///
-/// When started, it will ask for permission to access the health data listed
-/// in the [HealthAppTask].
+/// Created by the [HealthUserTaskFactory] for a [HealthAppTask]. On start, it
+/// asks its [HealthProbe] to request permission for the health data types,
+/// resumes data collection, and marks itself done 30 seconds later. If
+/// permission is denied or the task has no health probe, it logs a warning
+/// and collects nothing. When done, it pauses data collection again.
 class HealthUserTask extends UserTask {
-  // Health health = Health();
-
   /// The [HealthAppTask] which specifies which health data to collect.
   HealthAppTask get healthAppTask => super.task as HealthAppTask;
 
@@ -19,24 +20,16 @@ class HealthUserTask extends UserTask {
 
     // then check for permission to access health data
     try {
-      var healthProbe =
-          backgroundTaskExecutor.probes.firstWhere(
-                (probe) => probe is HealthProbe,
-              )
-              as HealthProbe;
+      var healthProbe = backgroundTaskExecutor.probes.firstWhere((probe) => probe is HealthProbe) as HealthProbe;
 
       // Always request permissions when starting the health user task.
       healthProbe.requestPermissions().then((granted) {
         if (granted) {
-          debug(
-            '$runtimeType - Got permissions to access health data. Now starting data collection.',
-          );
+          debug('$runtimeType - Got permissions to access health data. Now starting data collection.');
           backgroundTaskExecutor.resume();
           Timer(const Duration(seconds: 30), () => onDone());
         } else {
-          warning(
-            '$runtimeType - Could not get permissions to access health data.',
-          );
+          warning('$runtimeType - Could not get permissions to access health data.');
           return;
         }
       });
@@ -57,6 +50,10 @@ class HealthUserTask extends UserTask {
   }
 }
 
+/// A [UserTaskFactory] that creates a [HealthUserTask] for each [AppTask] of
+/// type [AppTask.HEALTH_ASSESSMENT_TYPE].
+///
+/// Registered in the [AppTaskController] by [HealthSamplingPackage.onRegister].
 class HealthUserTaskFactory implements UserTaskFactory {
   @override
   List<String> types = [AppTask.HEALTH_ASSESSMENT_TYPE];

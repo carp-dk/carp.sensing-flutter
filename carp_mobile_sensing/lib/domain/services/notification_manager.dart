@@ -21,11 +21,15 @@ part of '../../domain.dart';
 /// notifications. This is done using the [createNotification], [scheduleNotification],
 /// and [scheduleRecurrentNotifications] methods, which
 /// creates an immediate, scheduled, or recurrent notification, respectively.
+///
+/// The [SmartPhoneClientManager] uses [FlutterLocalNotificationManager],
+/// available as [SmartPhoneClientManager.notificationManager].
 abstract class NotificationManager {
-  /// The upper limit of scheduled notification, platform dependent.
+  /// The maximum number of pending scheduled notifications: 64 on iOS and
+  /// 500 on Android.
   static final pendingNotificationLimit = Platform.isIOS ? 64 : 500;
 
-  /// The id of the notification channel.
+  /// The id of the notification channel for immediate notifications.
   static const CHANNEL_ID = 'carp_mobile_sensing_notifications';
 
   /// The name of the notification channel as shown in the Settings
@@ -34,12 +38,10 @@ abstract class NotificationManager {
 
   /// The description of the notification channel as shown in the Settings
   /// on Android phones.
-  static const CHANNEL_DESCRIPTION =
-      'Notifications about tasks that the user has to do.';
+  static const CHANNEL_DESCRIPTION = 'Notifications about tasks that the user has to do.';
 
-  /// The id of the notification channel.
-  static const SCHEDULED_CHANNEL_ID =
-      'carp_mobile_sensing_scheduled_notifications';
+  /// The id of the notification channel for scheduled notifications.
+  static const SCHEDULED_CHANNEL_ID = 'carp_mobile_sensing_scheduled_notifications';
 
   /// The name of the notification channel as shown in the Settings
   /// on Android phones.
@@ -47,42 +49,38 @@ abstract class NotificationManager {
 
   /// The description of the notification channel as shown in the Settings
   /// on Android phones.
-  static const SCHEDULED_CHANNEL_DESCRIPTION =
-      'Notifications about scheduled tasks that the user has to do.';
+  static const SCHEDULED_CHANNEL_DESCRIPTION = 'Notifications about scheduled tasks that the user has to do.';
 
-  /// Configure and set up the notification manager.
-  /// Also tries to get permissions to send notifications.
+  /// Configures and sets up the notification manager.
+  ///
+  /// Also tries to get permission to send notifications.
   Future<void> configure();
 
-  /// Create an immediate notification with [id], [title], and [body].
+  /// Creates an immediate notification with [id], [title], and [body].
+  /// If the [id] is not specified, a random id will be generated.
+  /// When tapped, [payload] is emitted on [notificationTaps].
+  ///
+  /// Returns the id of the notification created.
+  Future<int> createNotification({int? id, required String title, String? body, String? payload});
+
+  /// The payloads of tapped notifications created with [createNotification].
+  /// Taps on task notifications are handled by the [AppTaskController].
+  Stream<String> get notificationTaps;
+
+  /// Schedules a notification with [id], [title], and [body] at the [schedule] time.
   /// If the [id] is not specified, a random id will be generated.
   ///
   /// Returns the id of the notification created.
-  Future<int> createNotification({
-    int? id,
-    required String title,
-    String? body,
-  });
+  Future<int> scheduleNotification({int? id, required String title, String? body, required DateTime schedule});
 
-  /// Schedule a notification with [id], [title], and [body] at the [schedule] time.
-  /// If the [id] is not specified, a random id will be generated.
-  ///
-  /// Returns the id of the notification created.
-  Future<int> scheduleNotification({
-    int? id,
-    required String title,
-    String? body,
-    required DateTime schedule,
-  });
-
-  /// Schedule recurrent notifications with [id], [title], and [body] at the
+  /// Schedules recurrent notifications with [id], [title], and [body] at the
   /// [schedule] time.
   ///
   /// Allows for daily, weekly, and monthly recurrence according to the [schedule].
   ///
   /// Note that [RecurrentScheduledTrigger.separationCount] and
   /// [RecurrentScheduledTrigger.end] are **not used**, i.e. days /
-  /// weeks / months cannot be skipped in the scheduled and the notifications
+  /// weeks / months cannot be skipped in the schedule and the notifications
   /// keeps recurring indefinitely. If you want to stop a recurrent notification
   /// schedule, use the [cancelNotification] method.
   ///
@@ -96,16 +94,16 @@ abstract class NotificationManager {
     required RecurrentScheduledTrigger schedule,
   });
 
-  /// Cancel (i.e., remove) the notification with [id].
+  /// Cancels (i.e., removes) the notification with [id].
   Future<void> cancelNotification(int id);
 
-  /// Create an immediate notification for a [task].
+  /// Creates an immediate notification for a [task].
   Future<void> createTaskNotification(UserTask task);
 
-  /// Schedule a notification for a [task] at the [task.triggerTime].
+  /// Schedules a notification for a [task] at its [UserTask.triggerTime].
   Future<void> scheduleTaskNotification(UserTask task);
 
-  /// Cancel (i.e., remove) the notification for the [task].
+  /// Cancels (i.e., removes) the notification for the [task].
   Future<void> cancelTaskNotification(UserTask task);
 
   /// The number of pending notifications.
@@ -115,25 +113,23 @@ abstract class NotificationManager {
   Future<int> get pendingNotificationRequestsCount;
 }
 
-/// A no-operation notification manager that does nothing.
+/// A [NotificationManager] that does nothing.
+///
+/// Use it, e.g. in tests, where no notifications should be shown. All methods
+/// return at once; the create and schedule methods return id 0.
 class NoOpNotificationManager implements NotificationManager {
   @override
   Future<void> configure() async {}
 
   @override
-  Future<int> createNotification({
-    int? id,
-    required String title,
-    String? body,
-  }) async => 0;
+  Future<int> createNotification({int? id, required String title, String? body, String? payload}) async => 0;
 
   @override
-  Future<int> scheduleNotification({
-    int? id,
-    required String title,
-    String? body,
-    required DateTime schedule,
-  }) async => 0;
+  Stream<String> get notificationTaps => const Stream.empty();
+
+  @override
+  Future<int> scheduleNotification({int? id, required String title, String? body, required DateTime schedule}) async =>
+      0;
 
   @override
   Future<int> scheduleRecurrentNotifications({

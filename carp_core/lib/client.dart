@@ -5,20 +5,20 @@
  * can be found in the LICENSE file.
  */
 
-/// The runtime which performs the actual data collection on a device (e.g.,
-/// desktop computer or smartphone). The client subsystem contains reusable components
-/// which understand the runtime configuration derived from a study protocol by
-/// the ‘deployment’ subsystem. Integrations with sensors are loaded through a
-/// 'device data collector' plug-in system to decouple sensing — not part of core —
-/// from sensing logic.
+/// The client runtime that runs a study on a device, such as a smartphone.
+///
+/// The client subsystem holds reusable components which understand the
+/// runtime configuration ([PrimaryDeviceDeployment]) derived from a protocol
+/// by the deployment subsystem. Sensor integrations are plugged in through
+/// [DeviceDataCollector]s, so sensing itself is not part of core.
 ///
 /// [ClientManager] is the main entry point into this subsystem.
-/// Concrete devices extend on it, e.g., the SmartphoneClient manages data
-/// collection on a smartphone and is implemented in
-/// [CARP Mobile Sensing](https://pub.dev/packages/carp_mobile_sensing).
+/// Concrete clients extend it; e.g., `SmartPhoneClientManager` in
+/// [CARP Mobile Sensing](https://pub.dev/packages/carp_mobile_sensing)
+/// manages data collection on a smartphone.
 ///
-/// Contains the core client classes like [ClientManager], [DeviceDataCollectorFactory],
-/// [DeviceDataCollector], and [ClientRepository].
+/// Main types: [ClientManager], [Study], [StudyDeploymentProxy],
+/// [ClientRepository], [DeviceDataCollectorFactory] and [DeviceDataCollector].
 ///
 /// See the [`carp.clients`](https://github.com/carp-dk/carp.core-kotlin/blob/develop/docs/carp-clients.md)
 /// definition in Kotlin.

@@ -6,7 +6,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/Docs-docs.carp.dk-0A66C2?logo=readthedocs&logoColor=white)](https://docs.carp.dk/carp-mobile-sensing/)
 [![arXiv](https://img.shields.io/badge/arXiv-2006.11904-green.svg)](https://arxiv.org/abs/2006.11904)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/NKuUwCsV)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/sswpqGvnf5)
 
 A Flutter library to access the [CARP Web Service (CAWS)](https://carp.cachet.dk/caws/) web API.
 This library is intended to be used with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework, but also works on its own, if a app is to connect directly to CAWS.
@@ -181,6 +181,33 @@ To authenticate using a magic link (e.g., as read from a QR code) use the `authe
 ```dart
 CarpUser user = await CarpAuthService().authenticateWithMagicLink(qrcode);
 ```
+
+### How the two login flows differ
+
+There are two ways a user ends up with a token, and they are handled by different code paths:
+
+| | Browser login (`authenticate()`) | Magic link (`authenticateWithMagicLink()`) |
+|---|---|---|
+| Grant | OAuth2 authorization code, scope `openid offline_access` | Keycloak *action token* (`/login-actions/action-token`) |
+| Token exchange | `OidcUserManager` (package `oidc`) | `FlutterAppAuth().token()` directly |
+| Response | `access_token`, `refresh_token`, `id_token` | `access_token`, `refresh_token` — **no `id_token`** |
+| Who holds the user | `OidcUserManager.currentUser` | `CarpAuthService._currentUser` only |
+
+The action-token flow is not a negotiated OpenID grant, so Keycloak never attaches the `openid` scope
+and never issues an `id_token` — neither at login nor on refresh. `oidc_core` requires an `id_token`
+to build an `OidcUser`, which is why the magic-link path cannot go through the manager at all
+(`manager.refreshToken(overrideRefreshToken: ...)` gets a token back but fails on the missing `id_token`).
+
+`refresh()` therefore picks the path based on who owns the user:
+
+- `manager.currentUser != null` → `manager.refreshToken()` (browser login; `id_token` present).
+- otherwise, with a stored `refreshToken` → `FlutterAppAuth().token(grantType: 'refresh_token')`,
+  and the `CarpUser` is rebuilt from the access-token JWT claims (same as at magic-link login).
+
+Both paths emit `AuthEvent.refreshed` on success and `AuthEvent.failed` otherwise. Refresh tokens are
+single-use, so concurrent `refresh()` calls (e.g. several uploads hitting 403 at once) share one in-flight future.
+
+Listen on `authStateChanges` to persist the new token — the service does not store anything itself.
 
 To log out, just call the `logout` or `logoutNoContext` methods:
 
@@ -390,7 +417,7 @@ var batch = [
 ];
 
 // Get a data stream and append the batch
-CarpDataStreamService().stream().append(batch);
+CarpDataStreamService().dataStream(studyDeploymentId).append(batch);
 ```
 
 However, you would rarely need to use these endpoints in your app, since the [carp_backend](https://pub.dev/packages/carp_backend) would handle this when you use a [`CarpDataEndPoint`](https://pub.dev/documentation/carp_backend/latest/carp_backend/CarpDataEndPoint-class.html) as the data endpoint in the study protocol.

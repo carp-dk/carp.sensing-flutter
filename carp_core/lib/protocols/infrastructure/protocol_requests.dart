@@ -8,16 +8,14 @@ part of '../../protocol.dart';
 
 /// An abstract RPC request to a [ProtocolService].
 abstract class ProtocolServiceRequest extends ServiceRequest {
-  final String _infrastructurePackageNamespace =
-      'dk.cachet.carp.protocols.infrastructure';
+  final String _infrastructurePackageNamespace = 'dk.cachet.carp.protocols.infrastructure';
   ProtocolServiceRequest() : super();
 
   @override
   String get apiVersion => ProtocolService.API_VERSION;
 
   @override
-  String get jsonType =>
-      '$_infrastructurePackageNamespace.ProtocolServiceRequest.$runtimeType';
+  String get jsonType => '$_infrastructurePackageNamespace.ProtocolServiceRequest.$runtimeType';
 }
 
 /// An RPC request for [ProtocolService.add].
@@ -34,8 +32,7 @@ class Add extends ProtocolServiceRequest {
 
   @override
   Function get fromJsonFunction => _$AddFromJson;
-  factory Add.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Add>(json);
+  factory Add.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Add>(json);
   @override
   Map<String, dynamic> toJson() => _$AddToJson(this);
 }
@@ -47,8 +44,7 @@ class AddVersion extends Add {
 
   @override
   Function get fromJsonFunction => _$AddVersionFromJson;
-  factory AddVersion.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AddVersion>(json);
+  factory AddVersion.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AddVersion>(json);
   @override
   Map<String, dynamic> toJson() => _$AddVersionToJson(this);
 }
@@ -60,20 +56,14 @@ class UpdateParticipantDataConfiguration extends ProtocolServiceRequest {
   final String? versionTag;
   final List<ExpectedParticipantData>? expectedParticipantData;
 
-  UpdateParticipantDataConfiguration(
-    this.protocolId,
-    this.versionTag,
-    this.expectedParticipantData,
-  ) : super();
+  UpdateParticipantDataConfiguration(this.protocolId, this.versionTag, this.expectedParticipantData) : super();
 
   @override
   Function get fromJsonFunction => _$UpdateParticipantDataConfigurationFromJson;
-  factory UpdateParticipantDataConfiguration.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<UpdateParticipantDataConfiguration>(json);
+  factory UpdateParticipantDataConfiguration.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<UpdateParticipantDataConfiguration>(json);
   @override
-  Map<String, dynamic> toJson() =>
-      _$UpdateParticipantDataConfigurationToJson(this);
+  Map<String, dynamic> toJson() => _$UpdateParticipantDataConfigurationToJson(this);
 }
 
 /// An RPC request for [ProtocolService.getBy].
@@ -88,8 +78,7 @@ class GetBy extends ProtocolServiceRequest {
 
   @override
   Function get fromJsonFunction => _$GetByFromJson;
-  factory GetBy.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<GetBy>(json);
+  factory GetBy.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<GetBy>(json);
   @override
   Map<String, dynamic> toJson() => _$GetByToJson(this);
 }
@@ -103,8 +92,7 @@ class GetAllForOwner extends ProtocolServiceRequest {
 
   @override
   Function get fromJsonFunction => _$GetAllForOwnerFromJson;
-  factory GetAllForOwner.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<GetAllForOwner>(json);
+  factory GetAllForOwner.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<GetAllForOwner>(json);
   @override
   Map<String, dynamic> toJson() => _$GetAllForOwnerToJson(this);
 }
@@ -132,16 +120,10 @@ class CreateCustomProtocol extends ProtocolServiceRequest {
   final String description;
   final String customProtocol;
 
-  CreateCustomProtocol(
-    this.ownerId,
-    this.name,
-    this.description,
-    this.customProtocol,
-  ) : super();
+  CreateCustomProtocol(this.ownerId, this.name, this.description, this.customProtocol) : super();
 
   @override
-  String get jsonType =>
-      '$_infrastructurePackageNamespace.ProtocolFactoryServiceRequest.$runtimeType';
+  String get jsonType => '$_infrastructurePackageNamespace.ProtocolFactoryServiceRequest.$runtimeType';
 
   @override
   Function get fromJsonFunction => _$CreateCustomProtocolFromJson;

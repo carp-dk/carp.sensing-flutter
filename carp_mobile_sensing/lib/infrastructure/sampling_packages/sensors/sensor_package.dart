@@ -6,8 +6,11 @@
 
 part of '../../../sampling_packages.dart';
 
-/// A [SamplingPackage] containing data types, sampling schemas and probes
-/// for collecting information from the phone sensors:
+/// The built-in sampling package for collecting data from the phone's sensors.
+///
+/// Registered automatically in the [SamplingPackageRegistry]. Add a [Measure]
+/// with one of the measure types below to a task in your protocol to use it.
+/// All measures use the [Smartphone] primary device. It collects:
 ///
 ///  - accelerometer (rate of change in velocity, including and excluding gravity)
 ///  - gyroscope (rotation)
@@ -15,6 +18,12 @@ part of '../../../sampling_packages.dart';
 ///  - acceleration features (e.g. mean, variance, etc. calculated over a sampling period)
 ///  - ambient light (from the phone's light sensor)
 ///  - pedometer (step events)
+///
+/// Ambient light is only available on Android. Step events need the
+/// activity recognition permission.
+///
+/// Raw sensor measures emit many events per second. Use
+/// [ACCELERATION_FEATURES] or a short trigger window to limit data volume.
 class SensorSamplingPackage extends SmartphoneSamplingPackage {
   /// Rate of change in velocity, including gravity, along perpendicular x, y,
   /// and z axes in the device's coordinate system.
@@ -28,16 +37,15 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [IntervalSamplingConfiguration] sampling configuration.
-  static const String NON_GRAVITATIONAL_ACCELERATION =
-      CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION;
+  static const String NON_GRAVITATIONAL_ACCELERATION = CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION;
 
   /// A set of acceleration (non-gravitational) features calculated over a
   /// specific sampling period.
   ///  * Event-based measure.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
-  static const String ACCELERATION_FEATURES =
-      '${CarpDataTypes.CARP_NAMESPACE}.accelerationfeatures';
+  ///    Default is 3 seconds sampling every minute.
+  static const String ACCELERATION_FEATURES = '${CarpDataTypes.CARP_NAMESPACE}.accelerationfeatures';
 
   /// Rotation of the phone in x,y,z (typically measured by a gyroscope).
   ///  * Event-based measure.
@@ -53,11 +61,11 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
 
   /// Ambient light from the phone's light sensor.
   ///  * Event-based measure.
+  ///  * Android only.
   ///  * Uses the [Smartphone] device for data collection.
   ///  * Uses a [PeriodicSamplingConfiguration] for configuration.
   ///    Default is 10 seconds sampling every 5 minutes.
-  static const String AMBIENT_LIGHT =
-      '${CarpDataTypes.CARP_NAMESPACE}.ambientlight';
+  static const String AMBIENT_LIGHT = '${CarpDataTypes.CARP_NAMESPACE}.ambientlight';
 
   /// Step event from the phone's pedometer.
   /// Note that this measure type is different from the "stepcount" measure type,
@@ -76,71 +84,52 @@ class SensorSamplingPackage extends SmartphoneSamplingPackage {
   static const String STEP_COUNT = CarpDataTypes.STEP_COUNT;
 
   @override
-  DataTypeSamplingSchemeMap get samplingSchemes =>
-      DataTypeSamplingSchemeMap.from([
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ACCELERATION]!,
-          IntervalSamplingConfiguration(
-            interval: const Duration(milliseconds: 200),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION]!,
-          IntervalSamplingConfiguration(
-            interval: const Duration(milliseconds: 200),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.ROTATION]!,
-          IntervalSamplingConfiguration(
-            interval: const Duration(milliseconds: 200),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CarpDataTypes().types[CarpDataTypes.MAGNETIC_FIELD]!,
-          IntervalSamplingConfiguration(
-            interval: const Duration(milliseconds: 200),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: ACCELERATION_FEATURES,
-            displayName: "Accelerometer Features",
-            timeType: DataTimeType.TIME_SPAN,
-          ),
-          PeriodicSamplingConfiguration(
-            interval: const Duration(minutes: 1),
-            duration: const Duration(seconds: 3),
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: STEP_EVENT,
-            displayName: "Step Events",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.activityRecognition],
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: STEP_COUNT,
-            displayName: "Step Count",
-            timeType: DataTimeType.POINT,
-            permissions: [Permission.activityRecognition],
-          ),
-        ),
-        DataTypeSamplingScheme(
-          CamsDataTypeMetaData(
-            type: AMBIENT_LIGHT,
-            displayName: "Ambient Light",
-            timeType: DataTimeType.TIME_SPAN,
-          ),
-          PeriodicSamplingConfiguration(
-            interval: const Duration(minutes: 5),
-            duration: const Duration(seconds: 10),
-          ),
-        ),
-      ]);
+  DataTypeSamplingSchemeMap get samplingSchemes => DataTypeSamplingSchemeMap.from([
+    DataTypeSamplingScheme(
+      CarpDataTypes().types[CarpDataTypes.ACCELERATION]!,
+      IntervalSamplingConfiguration(interval: const Duration(milliseconds: 200)),
+    ),
+    DataTypeSamplingScheme(
+      CarpDataTypes().types[CarpDataTypes.NON_GRAVITATIONAL_ACCELERATION]!,
+      IntervalSamplingConfiguration(interval: const Duration(milliseconds: 200)),
+    ),
+    DataTypeSamplingScheme(
+      CarpDataTypes().types[CarpDataTypes.ROTATION]!,
+      IntervalSamplingConfiguration(interval: const Duration(milliseconds: 200)),
+    ),
+    DataTypeSamplingScheme(
+      CarpDataTypes().types[CarpDataTypes.MAGNETIC_FIELD]!,
+      IntervalSamplingConfiguration(interval: const Duration(milliseconds: 200)),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: ACCELERATION_FEATURES,
+        displayName: "Accelerometer Features",
+        timeType: DataTimeType.TIME_SPAN,
+      ),
+      PeriodicSamplingConfiguration(interval: const Duration(minutes: 1), duration: const Duration(seconds: 3)),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: STEP_EVENT,
+        displayName: "Step Events",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.activityRecognition],
+      ),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(
+        type: STEP_COUNT,
+        displayName: "Step Count",
+        timeType: DataTimeType.POINT,
+        permissions: [Permission.activityRecognition],
+      ),
+    ),
+    DataTypeSamplingScheme(
+      CamsDataTypeMetaData(type: AMBIENT_LIGHT, displayName: "Ambient Light", timeType: DataTimeType.TIME_SPAN),
+      PeriodicSamplingConfiguration(interval: const Duration(minutes: 5), duration: const Duration(seconds: 10)),
+    ),
+  ]);
 
   @override
   Probe? create(String type) {

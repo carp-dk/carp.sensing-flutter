@@ -33,9 +33,13 @@ GeneratedPluginRegistrant.java
 build/
 .flutter-plugins
 *.xcconfig
-carp_mobile_sensing/example/ios/Flutter/Release.xcconfig
-carp_mobile_sensing_app/ios/Flutter/Debug.xcconfig
-carp_mobile_sensing_app/ios/Flutter/Release.xcconfig
+# ...but the Flutter base configs must stay checked in - they are the base
+# configuration of the Runner target and pull in both Generated.xcconfig and
+# the CocoaPods config. Without them Xcode fails with "Unable to open base
+# configuration reference file .../Flutter/Debug.xcconfig".
+!**/ios/Flutter/Debug.xcconfig
+!**/ios/Flutter/Profile.xcconfig
+!**/ios/Flutter/Release.xcconfig
 
 .flutter-plugins-dependencies
 flutter_export_environment.sh

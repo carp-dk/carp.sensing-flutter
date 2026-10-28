@@ -13,22 +13,13 @@ void main() async {
   SamplingPackageRegistry().register(MovisensSamplingPackage());
 
   // Create a study protocol
-  var protocol = StudyProtocol(
-    ownerId: 'owner@dtu.dk',
-    name: 'Movisens Example',
-  );
+  var protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Movisens Example');
 
   // Define which devices are used for data collection - both phone and Movisens
   // and add them to the protocol.
   // Note that the Movisens device is added as a connected device to the phone.
   var phone = Smartphone();
-  var movisens = MovisensDevice(
-    sensorLocation: SensorLocation.Chest,
-    sex: Sex.Male,
-    height: 175,
-    weight: 75,
-    age: 25,
-  );
+  var movisens = MovisensDevice(sensorLocation: SensorLocation.Chest, sex: Sex.Male, height: 175, weight: 75, age: 25);
 
   protocol
     ..addPrimaryDevice(phone)

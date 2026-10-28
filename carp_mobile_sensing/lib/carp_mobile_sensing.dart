@@ -1,24 +1,22 @@
-/// This library contains the software architecture for the CARP Mobile Sensing
-/// (CAMS) framework implemented in Flutter.
-/// Supports cross-platform (iOS and Android) mobile sensing.
+/// The CARP Mobile Sensing (CAMS) framework for Flutter: cross-platform
+/// (Android and iOS) mobile sensing.
 ///
-/// The CAMS software architecture is a domain-drive design (DDD) model using an
-/// onion-based layout with the following onion layers:
+/// Import this library to get all of CAMS. It extends the domain model of
+/// [carp_core](https://pub.dev/packages/carp_core) and is split into
+/// onion layers, following domain-driven design (DDD):
 ///
-///  * [domain] - contains the core domain model for CAMS which extends the domain
-///             model of the [carp_core](https://pub.dev/packages/carp_core) domain model.
-///             This also include definition of service interfaces.
-///  * [runtime] - contains the business logic for executing a sensing study (normally
-///              called 'application' in DDD).
-///  * [infrastructure] - contains specific implementation of the services used.
-///  * [sampling_packages] - contains the build-in sampling packages.
+///  * [domain] - the CAMS domain model: protocol, devices, triggers, tasks,
+///    data endpoints, and the service interfaces (e.g. [DataManager]).
+///  * [runtime] - executes a study on the phone, starting from
+///    [SmartPhoneClientManager] (called the "application" layer in DDD).
+///  * [infrastructure] - on-phone implementations of the services, like
+///    [SQLiteDataManager] and [SmartphoneDeploymentService].
+///  * [sampling_packages] - the built-in sampling packages
+///    ([DeviceSamplingPackage], [SensorSamplingPackage]).
 ///
-/// Domain-driven design (DDD) is a software design approach that focuses on modeling
-/// the software to match the domain, or the subject area, that the software is
-/// intended for. DDD helps developers create software that is aligned with the
-/// business needs and terminology of the domain experts, users, and stakeholders.
-/// From [Domain-Driven Design (DDD): A Guide to Building Scalable, High-Performance Systems](https://romanglushach.medium.com/domain-driven-design-ddd-a-guide-to-building-scalable-high-performance-systems-5314a7fe053c) by Roman Glushach.
-///
+/// Call [CarpMobileSensing.ensureInitialized] (done by the client manager)
+/// before you deserialize any CAMS object from JSON.
+/// See the [CAMS documentation](https://docs.carp.dk/carp-mobile-sensing/).
 library;
 
 import 'package:carp_serializable/carp_serializable.dart';
@@ -35,12 +33,14 @@ export 'sampling_packages.dart';
 
 part 'carp_mobile_sensing.json.dart';
 
-/// Base class for the carp_mobile_sensing library.
+/// Singleton that initializes the carp_mobile_sensing library.
 ///
-/// In order to ensure initialization of json serialization, call:
-///
-///    CarpMobileSensing.ensureInitialized();
-///
+/// Creating it registers the JSON deserialization functions of all CAMS
+/// domain classes in the [FromJsonFactory], and the CAMS data types in
+/// [CarpDataTypes] (via [CamsDataTypes]). Call
+/// [CarpMobileSensing.ensureInitialized] before you deserialize a
+/// [SmartphoneStudyProtocol] or other CAMS object from JSON.
+/// [SmartPhoneClientManager] does this for you.
 class CarpMobileSensing {
   static final _instance = CarpMobileSensing._();
 
@@ -53,14 +53,15 @@ class CarpMobileSensing {
   /// The singleton [CarpMobileSensing] instance.
   factory CarpMobileSensing() => _instance;
 
-  /// Returns a the singleton instance of [CarpMobileSensing].
-  /// If it has not yet been initialized, this call makes sure to create and
-  /// initialize it.
+  /// Returns the singleton instance of [CarpMobileSensing].
+  ///
+  /// Creates and initializes it on the first call. Safe to call many times.
   static CarpMobileSensing ensureInitialized() => _instance;
 }
 
-/// Generic sensing exception.
+/// A generic exception thrown by CAMS when sensing fails.
 class SensingException implements Exception {
+  /// A description of the error, if any.
   dynamic message;
   SensingException([this.message]);
 

@@ -1,3 +1,35 @@
+## 2.5.1
+
+- fix: a study deployment stopped on the server did not stop the study on the phone. Once the study's status is `Stopped`, the study controller removes the study's tasks and disposes its executor, so nothing resumes sampling again - not even a device reconnecting. Needs `carp_core` 2.2.2.
+
+## 2.5.0
+
+- feat: `NotificationManager.createNotification` takes an optional `payload`. When the user taps such a notification, its payload comes out on the new `NotificationManager.notificationTaps` stream, so the app can open the matching page. Task notifications still go to the `AppTaskController` as before.
+
+## 2.4.3
+
+- fix: `NoUserTaskTrigger` only counted an `enqueued` task as being on the task list. Once the task was started, notified or canceled, the trigger added a new copy every minute. Now only a done or expired task counts as gone.
+
+## 2.4.2
+
+* `SQLiteDataManager` writes measurements in one batched transaction per 500 ms instead of one transaction per measurement - a burst of ~30k health points took minutes and flooded the log with "database has been locked" warnings; it now takes seconds
+* `Probe.addMeasurement()` saves the `PersistentSamplingConfiguration.lastTime` checkpoint at most once per second instead of rewriting the whole deployment on every measurement
+
+## 2.4.1
+
+* `UserTask.onExpired({dequeue})` - pass `dequeue: false` to keep an expired task on the queue (state `expired`, still counted in `taskExpired`) instead of dequeuing it, which also deletes it from persistent storage. Default is unchanged
+
+## 2.4.0
+
+* fix permission dialogs failing silently: all permission requests now go through one serialized queue, `SmartPhoneClientManager.requestPermissions()`, which asks one dialog at a time. Android denies - without showing anything - any request made while another dialog is up, and the deployment handler, probes and device managers used to ask concurrently
+* `requestPermissionsInOrder()` (the default requester) also skips already granted permissions and asks `locationWhenInUse` before `locationAlways`, as Android requires
+* `configure(permissionRequester:)` lets an app take over how the user is asked - e.g. to show a rationale before each dialog
+* `askForAllPermissions()` and `Probe.requestPermissions()` now also ask on iOS. They skipped it because batching `List<Permission>.request()` is flaky on iOS; one at a time is not. `locationAlways` and `notification` are never auto-prompted by iOS, so studies needing them used to depend on the app asking by hand
+* `_deviceDeploymentReceived` is serialized - the deployment event fires twice on a normal launch, and the two runs used to configure and ask for permissions at the same time
+* initialize the notification plugin before asking for the notification permission - a dismissed dialog left the plugin uninitialized, and every `show()` crashed with a null icon
+* ask for the notification permission through `flutter_local_notifications` instead of `permission_handler`, which never completes its future when the dialog is dismissed - hanging `SmartPhoneClientManager.configure()` forever
+* stop requesting `SCHEDULE_EXACT_ALARM`, which Android only grants through a settings screen: notifications now schedule exactly when the permission happens to be granted, and inexactly (still while idle) otherwise
+
 ## 2.3.1
 
 * fix `duplicate column name: record_id` crash in the `record_id` SQLite migration (`SQLiteDataManager.onUpgrade`) by only adding the column/index when it isn't already there

@@ -5,8 +5,9 @@
  */
 part of '../carp_context_package.dart';
 
-/// The precision of the Location. A lower precision will provide a greater
-/// battery life.
+/// The precision of the location. A lower precision gives longer battery life.
+///
+/// Set on [LocationService.accuracy].
 ///
 /// This is modelled following [LocationAccuracy](https://pub.dev/documentation/location_platform_interface/latest/location_platform_interface/LocationAccuracy.html)
 /// in the location plugin. This is good compromise between the iOS and Android models:
@@ -37,12 +38,18 @@ enum GeolocationAccuracy {
   reduced,
 }
 
-/// A manger that knows how to get location information.
-/// Provide access to location data while the app is in the background.
+/// Singleton that gives access to the phone's location, also while the app
+/// is in the background.
 ///
-/// Use as a singleton:
+/// All location-based probes in this package share it: [ConfigurableLocationProbe],
+/// [GeofenceProbe], [MobilityProbe], [WeatherProbe] and [AirQualityProbe].
+/// [LocationServiceManager] configures it from a [LocationService].
 ///
-///  `LocationManager()...`
+/// Key points:
+///  * Call [enable] (done by [configure]) before reading location.
+///  * [configure] runs only once; later calls are ignored.
+///  * [getLocation] throws a [StateError] if no location can be found.
+///  * Errors on the native location stream are logged and dropped.
 ///
 /// Note that this [LocationManager] **tries** to handle location permissions
 /// during its configuration (via the [configure] method) and the [hasPermission]
@@ -52,22 +59,22 @@ enum GeolocationAccuracy {
 /// Google - to handle permissions on an application level and show the location
 /// permission dialogue to the user **before** using probes that depend on location.
 ///
-/// This [LocationManager] based on the [location](https://pub.dev/packages/location)
+/// This [LocationManager] is based on the [location](https://pub.dev/packages/location)
 /// plugin.
 class LocationManager {
   static final LocationManager _instance = LocationManager._();
   LocationManager._();
 
-  /// Get the singleton [LocationManager] instance
+  /// Gets the singleton [LocationManager] instance.
   factory LocationManager() => _instance;
 
   bool _enabled = false, _configured = false;
   final _provider = location.Location();
   Location? _lastKnownLocation;
 
-  /// Is the location service enabled, which entails that
-  ///  * location service is enabled
-  ///  * permissions granted
+  /// True after [enable] has found the phone's location service turned on.
+  ///
+  /// Does not say whether permission is granted; use [hasPermission].
   bool get enabled => _enabled;
 
   /// Is the location service configured via the [configure] method.
@@ -76,7 +83,7 @@ class LocationManager {
   /// Is the location service enabled in background mode?
   Future<bool> isBackgroundModeEnabled() async => await _provider.isBackgroundModeEnabled();
 
-  /// Does this location manger have permission to access location?
+  /// Does this location manager have permission to access location?
   Future<bool> hasPermission() async => (await _provider.hasPermission()) == location.PermissionStatus.granted;
 
   /// Request permissions to access location.
@@ -98,71 +105,78 @@ class LocationManager {
   /// opens the Settings page on Android / iOS.
   /// This method is, however, **NOT** used by this context sampling package, since
   /// handling of permissions should be taken care of on an app level.
+  ///
+  /// Goes through [SmartPhoneClientManager.requestPermissions] so it never
+  /// collides with another dialog. Asks 'when in use' first, then 'always'.
   Future<PermissionStatus> requestPermission() async {
     debug('$runtimeType - Requesting permission to access location...');
 
-    var permissionGranted = await _provider.hasPermission();
-    if (permissionGranted == location.PermissionStatus.denied) {
-      permissionGranted = await _provider.requestPermission();
-      if (permissionGranted != location.PermissionStatus.granted) {
-        warning(
-          "$runtimeType - The user opted not to allow collection of location data. "
-          "The only way to change the permission's status now is to let the "
-          "user manually enables it in the system settings.",
-        );
-      }
+    await SmartPhoneClientManager().requestPermissions([Permission.locationWhenInUse, Permission.locationAlways]);
+
+    final granted = await hasPermission();
+    if (!granted) {
+      warning(
+        "$runtimeType - The user opted not to allow collection of location data. "
+        "The only way to change the permission's status now is to let the "
+        "user manually enables it in the system settings.",
+      );
     }
-
-    debug('$runtimeType - Permission: $permissionGranted');
-
-    return permissionGranted == location.PermissionStatus.granted ? PermissionStatus.granted : PermissionStatus.denied;
+    return granted ? PermissionStatus.granted : PermissionStatus.denied;
   }
 
-  /// Enable the [LocationManager] for accessing location also when the app is
-  /// in the background.
-  ///
-  /// This method will try to enable 'background mode' to allow location
-  /// when the app is in the background (i.e., not in use but still running).
-  /// Therefore it will request the "location always" permission which will
-  /// open the OS-specific settings on the phone (both iOS and Android)
-  ///
-  /// After the location manager is enabled, configuration can be done via the
-  /// [configure] method.
-  Future<void> enable() async {
-    // fast out if already enabled
-    if (enabled) return;
+  // The running enable() call, shared by concurrent callers.
+  Future<void>? _enabling;
 
-    info('Enabling $runtimeType...');
-    _enabled = false;
+  /// Enables location access, also while the app runs in the background.
+  ///
+  /// Asks the user to turn on the phone's location service if it is off.
+  /// Then enables 'background mode' (location while the app is not in use but
+  /// still running), but only if the 'location always' permission is already
+  /// granted; otherwise this step is retried on the next call.
+  /// Concurrent calls share the same running future.
+  /// Call [configure] afterwards to apply a [LocationService].
+  Future<void> enable() => _enabling ??= _enable().whenComplete(() => _enabling = null);
 
-    bool serviceEnabled = await _provider.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await _provider.requestService();
+  Future<void> _enable() async {
+    if (!enabled) {
+      info('Enabling $runtimeType...');
+
+      bool serviceEnabled = await _provider.serviceEnabled();
       if (!serviceEnabled) {
-        warning('$runtimeType - Location service could not be enabled.');
-        return;
+        serviceEnabled = await _provider.requestService();
+        if (!serviceEnabled) {
+          warning('$runtimeType - Location service could not be enabled.');
+          return;
+        }
+      }
+      _enabled = true;
+    }
+
+    // Retried on every call: the plugin natively pops the 'location always'
+    // dialog here if not granted, outside CAMS' permission queue - so only
+    // enable background mode once the permission is there.
+    if (!await _provider.isBackgroundModeEnabled() && await Permission.locationAlways.isGranted) {
+      try {
+        final backgroundMode = await _provider.enableBackgroundMode();
+        info('$runtimeType - Location service enabled, background mode: $backgroundMode');
+      } catch (error) {
+        warning('$runtimeType - Could not enable background mode - $error');
       }
     }
-    _enabled = true;
-    bool backgroundMode = false;
-
-    try {
-      backgroundMode = await _provider.enableBackgroundMode();
-    } catch (error) {
-      warning('$runtimeType - Could not enable background mode - $error');
-    }
-
-    info('$runtimeType - Location service enabled, background mode: $backgroundMode');
   }
 
   LocationService? _configuration;
+
+  /// The [LocationService] given to [configure], or null if not configured.
   LocationService? get configuration => _configuration;
 
-  /// Configures the [LocationManager], incl. sending a notification to the
-  /// Android notification system.
+  /// Configures the [LocationManager] from a [LocationService].
   ///
-  /// Configuration is done based on the [configuration]. If not provided,
-  /// as set of default configurations are used.
+  /// Calls [enable] first. On Android it also sets up the notification shown
+  /// while location runs in the background, using defaults for missing
+  /// notification texts, and asks for 'when in use' permission if not granted.
+  /// Then applies accuracy, distance and interval on both platforms.
+  /// Does nothing if already [configured]. Failures are logged, not thrown.
   Future<void> configure(LocationService configuration) async {
     // fast out if already configured
     if (configured) return;
@@ -193,7 +207,7 @@ class LocationManager {
         );
 
         // If not granted, try to request 'when in use' permission.
-        await Permission.locationWhenInUse.request();
+        await SmartPhoneClientManager().requestPermissions([Permission.locationWhenInUse]);
       }
 
       // Change notification options - only on Android.
@@ -231,13 +245,14 @@ class LocationManager {
     }
   }
 
-  /// The last know location, if any.
+  /// The last known location, if any.
   Location? get lastKnownLocation => _lastKnownLocation;
 
   /// Gets the current location of the phone. In case the location cannot be
-  /// obtained within a few seconds, the last known location is returned.
+  /// obtained within 6 seconds, the [lastKnownLocation] is returned.
   ///
-  /// Throws an error if the app does not have permission to access location.
+  /// Throws a [StateError] if there is neither a new nor a last known location
+  /// (e.g. no permission to access location).
   Future<Location> getLocation() async {
     try {
       _lastKnownLocation = await onLocationChanged.first.timeout(const Duration(seconds: 6));
@@ -261,7 +276,8 @@ class LocationManager {
   //           // onTimeout: () => lastKnownLocation,
   //         ));
 
-  /// Returns a stream of [Location] objects.
+  /// Returns a stream of [Location] objects. Each event also updates
+  /// [lastKnownLocation].
   ///
   /// The underlying native `location` plugin reports permission errors
   /// (e.g. PERMISSION_DENIED_NEVER_ASK) on its event channel. `handleError`

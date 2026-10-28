@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:carp_connectivity_package/connectivity.dart';
 import 'package:dchs_flutter_beacon/dchs_flutter_beacon.dart';
 import 'package:test/test.dart';
@@ -12,8 +13,7 @@ void main() {
   late StudyProtocol protocol;
   Smartphone phone;
 
-  Future<void> writeToFile(String json, String fileName) async =>
-      await File('test/json/$fileName').writeAsString(json);
+  Future<void> writeToFile(String json, String fileName) async => await File('test/json/$fileName').writeAsString(json);
 
   setUpAll(() {
     // Initialization of serialization
@@ -23,10 +23,7 @@ void main() {
     SamplingPackageRegistry().register(ConnectivitySamplingPackage());
 
     // Create a new study protocol.
-    protocol = StudyProtocol(
-      ownerId: 'alex@uni.dk',
-      name: 'Connectivity package test',
-    );
+    protocol = StudyProtocol(ownerId: 'alex@uni.dk', name: 'Connectivity package test');
 
     // Define which devices are used for data collection.
     phone = Smartphone();
@@ -36,10 +33,7 @@ void main() {
     // adding all available measures to one one trigger and one task
     protocol.addTaskControl(
       ImmediateTrigger(),
-      BackgroundTask()
-        ..measures = SamplingPackageRegistry().dataTypes
-            .map((type) => Measure(type: type.type))
-            .toList(),
+      BackgroundTask()..measures = SamplingPackageRegistry().dataTypes.map((type) => Measure(type: type.type)).toList(),
       phone,
     );
 
@@ -85,12 +79,7 @@ void main() {
             type: ConnectivitySamplingPackage.BEACON,
             samplingConfiguration: BeaconRangingPeriodicSamplingConfiguration(
               beaconDistance: 2,
-              beaconRegions: [
-                BeaconRegion(
-                  identifier: 'TestB1',
-                  uuid: 'fda50693-a4e2-4fb1-afcf-c6eb07647825',
-                ),
-              ],
+              beaconRegions: [BeaconRegion(identifier: 'TestB1', uuid: 'fda50693-a4e2-4fb1-afcf-c6eb07647825')],
             ),
           ),
         ],
@@ -112,9 +101,7 @@ void main() {
     print('#1 : $protocol');
     final studyJson = toJsonString(protocol);
 
-    StudyProtocol protocolFromJson = StudyProtocol.fromJson(
-      json.decode(studyJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocolFromJson = StudyProtocol.fromJson(json.decode(studyJson) as Map<String, dynamic>);
     expect(toJsonString(protocolFromJson), equals(studyJson));
     print('#2 : $protocolFromJson');
   });
@@ -123,9 +110,7 @@ void main() {
     // Read the study protocol from json file
     String plainJson = File('test/json/study_protocol.json').readAsStringSync();
 
-    StudyProtocol protocol = StudyProtocol.fromJson(
-      json.decode(plainJson) as Map<String, dynamic>,
-    );
+    StudyProtocol protocol = StudyProtocol.fromJson(json.decode(plainJson) as Map<String, dynamic>);
 
     expect(protocol.ownerId, 'alex@uni.dk');
     expect(protocol.primaryDevice.roleName, Smartphone.DEFAULT_ROLE_NAME);
@@ -153,11 +138,7 @@ void main() {
   test('Beacon  -> JSON', () async {
     BeaconData data = BeaconData(region: "TestB1")
       ..addBeaconDevice(
-        BeaconDevice(
-          uuid: 'fda50693-a4e2-4fb1-afcf-c6eb07647825',
-          rssi: -60,
-          proximity: Proximity.near,
-        ),
+        BeaconDevice(uuid: 'fda50693-a4e2-4fb1-afcf-c6eb07647825', rssi: -60, proximity: Proximity.near),
       );
 
     final measurement = Measurement.fromData(data);
@@ -166,8 +147,7 @@ void main() {
   });
 
   test('Connectivity  -> JSON', () async {
-    Connectivity data = Connectivity()
-      ..connectivityStatus = [ConnectivityStatus.bluetooth];
+    Connectivity data = Connectivity()..connectivityStatus = [ConnectivityStatus.bluetooth];
 
     final measurement = Measurement.fromData(data);
 

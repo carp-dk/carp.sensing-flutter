@@ -7,38 +7,28 @@
 
 part of '../carp_services/carp_services.dart';
 
-/// The HTTP Retry method.
+/// The shared [HTTPRetry] client used by all CAWS services.
 final HTTPRetry httpr = HTTPRetry();
 
-/// A MultipartFile class which support cloning of the file for re-submission
-/// of POST request.
+/// A [http.MultipartFile] that can be cloned, so [HTTPRetry.send] can
+/// re-submit a multipart POST request with the same file.
 class ClonableMultipartFile extends http.MultipartFile {
+  /// The path of the local file to send.
   final String filePath;
 
-  ClonableMultipartFile(
-    this.filePath,
-    super.field,
-    super.stream,
-    super.length, {
-    super.filename,
-    super.contentType,
-  });
+  /// Creates a [ClonableMultipartFile]. Use
+  /// [ClonableMultipartFile.fromFileSync] to create one from a file path.
+  ClonableMultipartFile(this.filePath, super.field, super.stream, super.length, {super.filename, super.contentType});
 
   /// Creates a new [ClonableMultipartFile] from a file specified by
-  /// the [filePath].
+  /// the [filePath], sent as form field `file`.
   factory ClonableMultipartFile.fromFileSync(String filePath) {
     final file = File(filePath);
     final length = file.lengthSync();
     final stream = file.openRead();
     var name = file.path.split('/').last;
 
-    return ClonableMultipartFile(
-      filePath,
-      'file',
-      stream,
-      length,
-      filename: name,
-    );
+    return ClonableMultipartFile(filePath, 'file', stream, length, filename: name);
   }
 
   // /// Creates a new [MultipartFile] from a string.
@@ -59,21 +49,28 @@ class ClonableMultipartFile extends http.MultipartFile {
   /// Make a clone of this [ClonableMultipartFile].
   ClonableMultipartFile clone() => ClonableMultipartFile.fromFileSync(filePath);
 
-  /// Cleanup this [ClonableMultipartFile], i.e., deleting the buffer.
+  /// Deletes the local file at [filePath].
   void cleanup() => File(filePath).deleteSync();
 }
 
-/// A class wrapping all HTTP operations (GET, POST, PUT, DELETE) in a retry manner.
+/// Wraps the HTTP operations (GET, POST, PUT, DELETE, multipart SEND) with
+/// retry on network errors.
 ///
-/// In case of network problems ([SocketException] or [TimeoutException]),
-/// this method will retry the HTTP operation N=15 times, with an increasing
-/// delay time as 2^(N+1) * 5 secs (20, 40, , ..., 10.240).
-/// I.e., maximum retry time is ca. three hours.
+/// Used through the shared [httpr] instance by all CAWS services.
+///
+/// Key points:
+///  * Retries only on [SocketException] or [TimeoutException]; HTTP error
+///    responses are returned as-is.
+///  * Makes up to 15 attempts with exponential backoff (from the `retry`
+///    package), each delay capped at 30 seconds.
+///  * Each attempt times out after 20 seconds (15 for DELETE, 5 for SEND).
 class HTTPRetry {
   final client = http.Client();
 
-  /// Sends an generic HTTP [MultipartRequest] with the given headers to the given URL,
-  /// which can be a [Uri] or a [String].
+  /// Sends a multipart [request].
+  ///
+  /// On retry the request is rebuilt, cloning any [ClonableMultipartFile]s.
+  /// Other file types are dropped from the retried request.
   Future<http.StreamedResponse> send(http.MultipartRequest request) async {
     http.MultipartRequest sending = request;
 
@@ -101,67 +98,41 @@ class HTTPRetry {
   }
 
   /// Sends an HTTP GET request with the given [headers] to the given [url].
-  Future<http.Response> get(String url, {Map<String, String>? headers}) async =>
+  Future<http.Response> get(String url, {Map<String, String>? headers}) async => await retry(
+    () => client.get(Uri.parse(Uri.encodeFull(url)), headers: headers).timeout(const Duration(seconds: 20)),
+    delayFactor: const Duration(seconds: 5),
+    maxAttempts: 15,
+    retryIf: (e) => e is SocketException || e is TimeoutException,
+    onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to GET $url'),
+  );
+
+  /// Sends an HTTP POST request with the given [headers] and [body] to the given [url].
+  Future<http.Response> post(String url, {Map<String, String>? headers, Object? body, Encoding? encoding}) async =>
       await retry(
         () => client
-            .get(Uri.parse(Uri.encodeFull(url)), headers: headers)
+            .post(Uri.parse(Uri.encodeFull(url)), headers: headers, body: body, encoding: encoding)
             .timeout(const Duration(seconds: 20)),
         delayFactor: const Duration(seconds: 5),
         maxAttempts: 15,
         retryIf: (e) => e is SocketException || e is TimeoutException,
-        onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to GET $url'),
+        onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to POST $url'),
       );
 
-  /// Sends an HTTP POST request with the given [headers] and [body] to the given [url].
-  Future<http.Response> post(
-    String url, {
-    Map<String, String>? headers,
-    Object? body,
-    Encoding? encoding,
-  }) async => await retry(
-    () => client
-        .post(
-          Uri.parse(Uri.encodeFull(url)),
-          headers: headers,
-          body: body,
-          encoding: encoding,
-        )
-        .timeout(const Duration(seconds: 20)),
-    delayFactor: const Duration(seconds: 5),
-    maxAttempts: 15,
-    retryIf: (e) => e is SocketException || e is TimeoutException,
-    onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to POST $url'),
-  );
-
   /// Sends an HTTP PUT request with the given [headers] and [body] to the given [url].
-  Future<http.Response> put(
-    String url, {
-    Map<String, String>? headers,
-    Object? body,
-    Encoding? encoding,
-  }) async => await retry(
-    () => client
-        .put(
-          Uri.parse(Uri.encodeFull(url)),
-          headers: headers,
-          body: body,
-          encoding: encoding,
-        )
-        .timeout(const Duration(seconds: 20)),
-    delayFactor: const Duration(seconds: 5),
-    maxAttempts: 15,
-    retryIf: (e) => e is SocketException || e is TimeoutException,
-    onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to PUT $url'),
-  );
+  Future<http.Response> put(String url, {Map<String, String>? headers, Object? body, Encoding? encoding}) async =>
+      await retry(
+        () => client
+            .put(Uri.parse(Uri.encodeFull(url)), headers: headers, body: body, encoding: encoding)
+            .timeout(const Duration(seconds: 20)),
+        delayFactor: const Duration(seconds: 5),
+        maxAttempts: 15,
+        retryIf: (e) => e is SocketException || e is TimeoutException,
+        onRetry: (e) => debugPrint('${e.runtimeType} - Retrying to PUT $url'),
+      );
 
   /// Sends an HTTP DELETE request with the given [headers] to the given [url].
-  Future<http.Response> delete(
-    String url, {
-    Map<String, String>? headers,
-  }) async => await retry(
-    () => client
-        .delete(Uri.parse(Uri.encodeFull(url)), headers: headers)
-        .timeout(const Duration(seconds: 15)),
+  Future<http.Response> delete(String url, {Map<String, String>? headers}) async => await retry(
+    () => client.delete(Uri.parse(Uri.encodeFull(url)), headers: headers).timeout(const Duration(seconds: 15)),
     delayFactor: const Duration(seconds: 5),
     maxAttempts: 15,
     retryIf: (e) => e is SocketException || e is TimeoutException,

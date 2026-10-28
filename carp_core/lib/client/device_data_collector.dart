@@ -7,9 +7,11 @@
 
 part of '../client.dart';
 
-/// Provides a [localDataCollector] to collect data locally on the primary device
-/// and supports creating [ConnectedDeviceDataCollector] instances for connected
-/// devices.
+/// Provides the [DeviceDataCollector]s a client uses to collect data.
+///
+/// Holds a [localDataCollector] for the primary device and creates
+/// [ConnectedDeviceDataCollector]s for connected devices. Given to a
+/// [ClientManager]. In CARP Mobile Sensing, `DeviceController` implements it.
 abstract class DeviceDataCollectorFactory {
   /// The data collector for the primary device.
   DeviceDataCollector? localDataCollector;
@@ -20,13 +22,13 @@ abstract class DeviceDataCollectorFactory {
   /// using connection options specified in [deviceRegistration].
   ///
   /// Returns null in case the [ConnectedDeviceDataCollector] cannot be created.
-  ConnectedDeviceDataCollector? createConnectedDataCollector(
-    String deviceType,
-    DeviceRegistration deviceRegistration,
-  );
+  ConnectedDeviceDataCollector? createConnectedDataCollector(String deviceType, DeviceRegistration deviceRegistration);
 }
 
 /// Collects [Data] for a single device.
+///
+/// The plug-in point that keeps sensor code out of the domain model.
+/// See [DeviceDataCollectorFactory].
 abstract interface class DeviceDataCollector {
   /// The set of data types defining which data can be collected on this device.
   Set<DataType> get supportedDataTypes;

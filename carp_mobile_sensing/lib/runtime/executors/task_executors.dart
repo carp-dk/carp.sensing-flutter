@@ -7,38 +7,38 @@
 
 part of '../../runtime.dart';
 
-/// The [TaskExecutor] is responsible for executing a [TaskConfiguration].
-/// For each measure in the task, it looks up an appropriate [Probe] to
-/// collect data.
+/// Runs a [TaskConfiguration] when its trigger fires.
 ///
-/// Note that a [TaskExecutor] in itself is a [Executor].
-/// This - amongst other things - imply that you can listen
-/// to [Executor.measurements] from a task executor.
-abstract class TaskExecutor<TConfig extends TaskConfiguration>
-    extends AggregateExecutor<TConfig> {
+/// Created by the [ExecutorFactory] and started or stopped by a
+/// [TaskControlExecutor]. Each task type has its own executor:
+/// [BackgroundTaskExecutor], [AppTaskExecutor] and [FunctionTaskExecutor].
+abstract class TaskExecutor<TConfig extends TaskConfiguration> extends AggregateExecutor<TConfig> {
   final StreamGroup<ExecutorState> _statesGroup = StreamGroup.broadcast();
 
   /// The [TaskConfiguration] for this task executor.
   TConfig get task => configuration!;
 
-  /// Returns a list of the probes in this task executor.
+  /// The probes in this task executor. Empty for tasks without measures.
   List<Probe> get probes;
 
-  /// The combines state event from all [probes] in this task executor.
+  /// The merged state events of all [probes] in this task executor.
   Stream<ExecutorState> get states => _statesGroup.stream;
 }
 
-/// Executes a [BackgroundTask].
+/// Runs a [BackgroundTask] by creating and running one [Probe] per measure.
+///
+/// Probes are created with [SamplingPackageRegistry.create]; measures with no
+/// probe on this phone are skipped with a warning. On resume, the devices of
+/// the probes are connected. If the task has a duration, the executor pauses
+/// itself after that duration. It also pauses when all its probes have paused.
 class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   StreamSubscription<ExecutorState>? _subscription;
 
   @override
-  List<Probe> get probes =>
-      executors.map((executor) => executor as Probe).toList();
+  List<Probe> get probes => executors.map((executor) => executor as Probe).toList();
 
   /// Are all [probes] in a paused state?
-  bool get haveAllProbesPaused =>
-      !probes.any((probe) => probe.state != ExecutorState.Paused);
+  bool get haveAllProbesPaused => !probes.any((probe) => probe.state != ExecutorState.Paused);
 
   @override
   bool onInitialize() {
@@ -73,46 +73,36 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
 
     // Early out if already running (this is a background task)
     if (state == ExecutorState.Resumed) {
-      warning(
-        '$runtimeType - Trying to resume $this but it is already resumed. Ignoring this.',
-      );
+      warning('$runtimeType - Trying to resume $this but it is already resumed. Ignoring this.');
       return false;
     }
 
     // Listen to pause this background executor when all of its underlying
     // probes have paused - Issue #384
-    _subscription = states
-        .where((event) => event == ExecutorState.Paused)
-        .listen((_) {
-          if (haveAllProbesPaused && state == ExecutorState.Resumed) {
-            debug(
-              '$runtimeType - All probes are paused - pausing this $this too.',
-            );
-            pause();
-          }
-        });
+    _subscription = states.where((event) => event == ExecutorState.Paused).listen((_) {
+      if (haveAllProbesPaused && state == ExecutorState.Resumed) {
+        debug('$runtimeType - All probes are paused - pausing this $this too.');
+        pause();
+      }
+    });
 
     // Check if the devices for this task is connected.
     await connectAllConnectableDevices();
 
     if (configuration?.duration != null) {
       // If the task has a duration (optional), stop it again after this duration has passed.
-      Timer(
-        Duration(seconds: configuration!.duration!.inSeconds.truncate()),
-        () => pause(),
-      );
+      Timer(Duration(seconds: configuration!.duration!.inSeconds.truncate()), () => pause());
     }
 
     // Now - finally - we can start the probes.
     return await super.onResume();
   }
 
-  /// Connect all connectable devices used by the [probes] in this
-  /// background task executor.
+  /// Starts connecting the devices of all [probes].
+  ///
+  /// Skips devices already connecting. Does not wait for the connections.
   Future<void> connectAllConnectableDevices() async {
-    debug(
-      '$runtimeType - Trying to connect to all connectable devices for this background executor.',
-    );
+    debug('$runtimeType - Trying to connect to all connectable devices for this background executor.');
 
     probes
         .where((probe) => !probe.deviceManager.isConnecting)
@@ -126,7 +116,7 @@ class BackgroundTaskExecutor extends TaskExecutor<BackgroundTask> {
   }
 }
 
-/// Executes a [FunctionTask].
+/// Runs a [FunctionTask] by calling its function each time it is resumed.
 class FunctionTaskExecutor extends TaskExecutor<FunctionTask> {
   @override
   List<Probe> get probes => [];
@@ -143,20 +133,16 @@ class FunctionTaskExecutor extends TaskExecutor<FunctionTask> {
   }
 }
 
-/// Executes an [AppTask].
+/// Runs an [AppTask] by putting it on the [AppTaskController] queue.
 ///
-/// This executor works closely with the singleton [AppTaskController].
-/// Whenever an [AppTaskExecutor] is started (e.g. in a [PeriodicTrigger]),
-/// this executor is wrapped in a [UserTask] and put on the queue in
-/// the [AppTaskController].
+/// Each time it is resumed (e.g. by a [PeriodicTrigger]), the executor is
+/// wrapped in a new [UserTask] and enqueued. The app then starts, cancels or
+/// finishes the task with [UserTask.onStart], [UserTask.onCancel] and
+/// [UserTask.onDone]. The executor pauses itself again after 5 seconds, so it
+/// can be resumed by the next trigger.
 ///
-/// Later, the app (user) can start, cancel, or finalize a [UserTask]
-/// by calling the `onStart()`, `onCancel()`, and `onDone()` methods,
-/// respectively.
-///
-/// Special-purpose [UserTask]s can be created by an [UserTaskFactory]
-/// and such factories can be registered in the [AppTaskController]
-/// using the `registerUserTaskFactory` method.
+/// Special-purpose [UserTask]s are created by a [UserTaskFactory] registered
+/// with [AppTaskController.registerUserTaskFactory].
 class AppTaskExecutor<TConfig extends AppTask> extends TaskExecutor<TConfig> {
   @override
   List<Probe> get probes => []; // an AppTask itself does not have probes.

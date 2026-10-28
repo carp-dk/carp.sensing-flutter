@@ -2,9 +2,14 @@
 # https://dart.dev/guides/language/analysis-options
 
 include: package:lints/recommended.yaml
+formatter:
+  page_width: 120
 
 analyzer:
-  exclude: [build/**]
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
   language:
     strict-casts: true
     strict-inference: true

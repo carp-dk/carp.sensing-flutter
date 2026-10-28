@@ -27,8 +27,7 @@ void main() {
 
     test(' - 1.x smartphone device registration', () {
       final registration = DeviceRegistration.fromJson({
-        '__type':
-            '${DeviceConfiguration.DEVICE_NAMESPACE}.SmartphoneDeviceRegistration',
+        '__type': '${DeviceConfiguration.DEVICE_NAMESPACE}.SmartphoneDeviceRegistration',
         'deviceId': '123',
         'registrationCreatedOn': '2025-10-23T07:46:11.643113Z',
         'platform': 'Android',
@@ -54,8 +53,7 @@ void main() {
       expect(device.allowDuplicates, true);
     });
 
-    test(' - 1.x study protocol w. old device namespace and measure types',
-        () {
+    test(' - 1.x study protocol w. old device namespace and measure types', () {
       final protocol = SmartphoneStudyProtocol.fromJson({
         'applicationData': {
           'studyDescription': {
@@ -92,13 +90,11 @@ void main() {
             'name': 'Task #11',
             'measures': [
               {
-                '__type':
-                    'dk.cachet.carp.common.application.tasks.Measure.DataStream',
+                '__type': 'dk.cachet.carp.common.application.tasks.Measure.DataStream',
                 'type': 'dk.cachet.carp.stepcount',
               },
               {
-                '__type':
-                    'dk.cachet.carp.common.application.tasks.Measure.DataStream',
+                '__type': 'dk.cachet.carp.common.application.tasks.Measure.DataStream',
                 'type': 'dk.cachet.carp.heartbeat',
               },
             ],
@@ -106,18 +102,12 @@ void main() {
         ],
         'triggers': {
           '0': {
-            '__type':
-                'dk.cachet.carp.common.application.triggers.ImmediateTrigger',
+            '__type': 'dk.cachet.carp.common.application.triggers.ImmediateTrigger',
             'sourceDeviceRoleName': 'Primary Phone',
           },
         },
         'taskControls': [
-          {
-            'triggerId': 0,
-            'taskName': 'Task #11',
-            'destinationDeviceRoleName': 'Primary Phone',
-            'control': 'Start',
-          },
+          {'triggerId': 0, 'taskName': 'Task #11', 'destinationDeviceRoleName': 'Primary Phone', 'control': 'Start'},
         ],
         'expectedParticipantData': <Map<String, dynamic>>[],
       });
@@ -130,14 +120,8 @@ void main() {
     });
 
     test(' - 1.x step count measure type', () {
-      expect(
-        SensorSamplingPackage().samplingSchemes.types,
-        contains(SensorSamplingPackage.STEP_COUNT),
-      );
-      expect(
-        SensorSamplingPackage().create(SensorSamplingPackage.STEP_COUNT),
-        isA<StepCountProbe>(),
-      );
+      expect(SensorSamplingPackage().samplingSchemes.types, contains(SensorSamplingPackage.STEP_COUNT));
+      expect(SensorSamplingPackage().create(SensorSamplingPackage.STEP_COUNT), isA<StepCountProbe>());
     });
   });
 }

@@ -1,12 +1,15 @@
 part of 'media.dart';
 
-/// Type of media.
+/// The type of media held by a [MediaData].
 enum MediaType { audio, video, image }
 
-/// An abstract media data that holds the path to media file on the local device,
-/// as well as the timestamps of when the recording was started and stopped
+/// Base class for media data that refers to a media file on the local device.
+///
+/// Holds the file name and path (from [FileData]) and the timestamps of when
+/// the recording started and stopped. See [AudioMedia], [VideoMedia] and
+/// [ImageMedia].
 abstract class MediaData extends FileData {
-  /// A unique id of this media file.
+  /// A unique id of this media file, generated as a UUID on creation.
   late String id;
 
   /// The type of media.
@@ -18,84 +21,73 @@ abstract class MediaData extends FileData {
   /// The timestamp for end of recording, if available.
   DateTime? endRecordingTime;
 
-  MediaData({
-    required super.filename,
-    required this.mediaType,
-    this.startRecordingTime,
-    this.endRecordingTime,
-  }) {
+  MediaData({required super.filename, required this.mediaType, this.startRecordingTime, this.endRecordingTime}) {
     id = const Uuid().v4();
   }
 }
 
-/// An audio data.
+/// An audio recording.
+///
+/// Collected by [AudioProbe] for the [MediaSamplingPackage.AUDIO] measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AudioMedia extends MediaData {
-  AudioMedia({
-    required super.filename,
-    super.startRecordingTime,
-    super.endRecordingTime,
-  }) : super(mediaType: MediaType.audio);
+  AudioMedia({required super.filename, super.startRecordingTime, super.endRecordingTime})
+    : super(mediaType: MediaType.audio);
 
   @override
   String get jsonType => MediaSamplingPackage.AUDIO;
 
   @override
   Function get fromJsonFunction => _$AudioMediaFromJson;
-  factory AudioMedia.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<AudioMedia>(json);
+  factory AudioMedia.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<AudioMedia>(json);
 
   @override
   Map<String, dynamic> toJson() => _$AudioMediaToJson(this);
 }
 
-/// An image data.
+/// An image captured by the app.
+///
+/// Used for the [MediaSamplingPackage.IMAGE] measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class ImageMedia extends MediaData {
-  ImageMedia({
-    required super.filename,
-    super.startRecordingTime,
-    super.endRecordingTime,
-  }) : super(mediaType: MediaType.image);
+  ImageMedia({required super.filename, super.startRecordingTime, super.endRecordingTime})
+    : super(mediaType: MediaType.image);
 
   @override
   String get jsonType => MediaSamplingPackage.IMAGE;
 
   @override
   Function get fromJsonFunction => _$ImageMediaFromJson;
-  factory ImageMedia.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<ImageMedia>(json);
+  factory ImageMedia.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<ImageMedia>(json);
 
   @override
   Map<String, dynamic> toJson() => _$ImageMediaToJson(this);
 }
 
-/// An video data.
+/// A video recorded by the app.
+///
+/// Used for the [MediaSamplingPackage.VIDEO] measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class VideoMedia extends MediaData {
-  VideoMedia({
-    required super.filename,
-    super.startRecordingTime,
-    super.endRecordingTime,
-  }) : super(mediaType: MediaType.video);
+  VideoMedia({required super.filename, super.startRecordingTime, super.endRecordingTime})
+    : super(mediaType: MediaType.video);
 
   @override
   String get jsonType => MediaSamplingPackage.VIDEO;
 
   @override
   Function get fromJsonFunction => _$VideoMediaFromJson;
-  factory VideoMedia.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<VideoMedia>(json);
+  factory VideoMedia.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<VideoMedia>(json);
 
   @override
   Map<String, dynamic> toJson() => _$VideoMediaToJson(this);
 }
 
-/// Holds the noise level in decibel of a noise sampling.
+/// Sound level statistics, in decibel (dB), for one noise sampling window.
+///
+/// Collected by [NoiseProbe] for the [MediaSamplingPackage.NOISE] measure.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Noise extends Data {
-  // The sound intensity [dB] measurement statistics for a given sampling window.
-
   /// Mean decibel of sampling window.
   double meanDecibel;
 
@@ -108,21 +100,15 @@ class Noise extends Data {
   /// Maximum decibel of sampling window.
   double maxDecibel;
 
-  Noise({
-    required this.meanDecibel,
-    required this.stdDecibel,
-    required this.minDecibel,
-    required this.maxDecibel,
-  }) : super();
+  Noise({required this.meanDecibel, required this.stdDecibel, required this.minDecibel, required this.maxDecibel})
+    : super();
 
   @override
   Function get fromJsonFunction => _$NoiseFromJson;
-  factory Noise.fromJson(Map<String, dynamic> json) =>
-      FromJsonFactory().fromJson<Noise>(json);
+  factory Noise.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<Noise>(json);
   @override
   Map<String, dynamic> toJson() => _$NoiseToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, mean: $meanDecibel, std: $stdDecibel, min: $minDecibel, max: $maxDecibel';
+  String toString() => '${super.toString()}, mean: $meanDecibel, std: $stdDecibel, min: $minDecibel, max: $maxDecibel';
 }

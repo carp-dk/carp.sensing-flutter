@@ -12,9 +12,9 @@ part of '../../deployment.dart';
 // -----------------------------------------------------
 
 /// A [ParticipationServiceRequest] and its sub-classes contain the data for
-/// sending a participant request to the CARP web service.
+/// sending a request to a [ParticipationService] on the CARP web service.
 ///
-/// All participant requests to the CARP Service is defined in
+/// All participant requests to the CARP Service are defined in
 /// [carp.core-kotlin](https://github.com/carp-dk/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/ParticipationServiceRequest.kt)
 abstract class ParticipationServiceRequest extends DeploymentServiceRequest {
   final String _serviceRequestPackageNamespace =
@@ -44,18 +44,16 @@ class GetActiveParticipationInvitations extends ParticipationServiceRequest {
 
   @override
   Function get fromJsonFunction => _$GetActiveParticipationInvitationsFromJson;
-  factory GetActiveParticipationInvitations.fromJson(
-    Map<String, dynamic> json,
-  ) => FromJsonFactory().fromJson<GetActiveParticipationInvitations>(json);
+  factory GetActiveParticipationInvitations.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<GetActiveParticipationInvitations>(json);
   @override
-  Map<String, dynamic> toJson() =>
-      _$GetActiveParticipationInvitationsToJson(this);
+  Map<String, dynamic> toJson() => _$GetActiveParticipationInvitationsToJson(this);
 
   @override
   String toString() => '$runtimeType - accountId: $accountId';
 }
 
-/// A request for getting the status of a study deployment.
+/// A request for getting the participant data of a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetParticipantData extends ParticipationServiceRequest {
   GetParticipantData(super.studyDeploymentId);
@@ -68,8 +66,8 @@ class GetParticipantData extends ParticipationServiceRequest {
   Map<String, dynamic> toJson() => _$GetParticipantDataToJson(this);
 }
 
-/// A request for getting the list of participant data for this a list
-/// of [studyDeploymentIds].
+/// A request for getting the participant data for a list of
+/// [studyDeploymentIds].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class GetParticipantDataList extends ParticipationServiceRequest {
   List<String> studyDeploymentIds;
@@ -83,14 +81,10 @@ class GetParticipantDataList extends ParticipationServiceRequest {
   Map<String, dynamic> toJson() => _$GetParticipantDataListToJson(this);
 }
 
-/// A request for adding data for a participant.
+/// A request for setting participant data in a study deployment.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class SetParticipantData extends ParticipationServiceRequest {
-  SetParticipantData(
-    super.studyDeploymentId, [
-    this.data,
-    this.inputByParticipantRole,
-  ]);
+  SetParticipantData(super.studyDeploymentId, [this.data, this.inputByParticipantRole]);
 
   /// The participant role who filled out [data]; null if all roles can set it.
   String? inputByParticipantRole;
@@ -106,6 +100,5 @@ class SetParticipantData extends ParticipationServiceRequest {
   Map<String, dynamic> toJson() => _$SetParticipantDataToJson(this);
 
   @override
-  String toString() =>
-      '${super.toString()}, inputByParticipantRole: $inputByParticipantRole';
+  String toString() => '${super.toString()}, inputByParticipantRole: $inputByParticipantRole';
 }

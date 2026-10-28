@@ -1,3 +1,7 @@
+## 2.2.1
+
+* handle asynchronous Bluetooth scan start/stop failures with `catchError` and ignore late scan results after an error
+
 ## 2.2.0
 
 * upgrade to `network_info_plus` ^8.2.1, which pulls in `win32` 6.x
