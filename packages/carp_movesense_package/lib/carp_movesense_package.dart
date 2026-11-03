@@ -32,13 +32,9 @@
 /// device (EU MDR 2017/745).
 ///
 /// This package uses the Flutter
-/// [carp_movesense_flutter](https://pub.dev/packages/carp_movesense_flutter)
-/// plugin, which is based on the official
+/// [movesense_plus](https://pub.dev/packages/movesense_plus) plugin, which is
+/// based on the official
 /// [Movesense Mobile API](https://www.movesense.com/docs/mobile/mobile_sw_overview/).
-/// As of version 3.0.0 this plugin replaces the `mdsflutter` plugin. The public
-/// API of this sampling package is unchanged. Internally, the Movesense MDS
-/// calls go through the mdsflutter-compatible [Mds] facade of
-/// `carp_movesense_flutter`.
 library;
 
 import 'dart:async';
@@ -48,7 +44,7 @@ import 'dart:core';
 import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
-import 'package:carp_movesense_flutter/carp_movesense_flutter.dart' show Mds;
+import 'package:movesense_plus/movesense_plus.dart' as ms;
 import 'package:json_annotation/json_annotation.dart';
 
 part 'carp_movesense_package.g.dart';

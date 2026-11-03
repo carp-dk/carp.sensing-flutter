@@ -6,103 +6,47 @@
 
 part of 'carp_movesense_package.dart';
 
-/// Base class for probes that subscribe to a Movesense resource and turn each
-/// notification into a [Measurement].
+/// Base class for probes that subscribe to a Movesense [resource] and turn each
+/// notification into a [Measurement] using [parse].
 ///
-/// The first 10 notifications are skipped to let the sensor stabilize.
+/// Listening subscribes to the resource on the device, and pausing the probe
+/// unsubscribes. The first [warmUp] notifications are skipped to let the
+/// sensor stabilize.
 abstract class _MovesenseStreamProbe extends StreamProbe {
-  int? _subscriptionId;
+  _MovesenseStreamProbe(this.resource, this.parse);
 
-  final StreamController<String> _streamController = StreamController.broadcast();
+  /// The MDS resource to subscribe to, e.g. `/Meas/HR`.
+  final String resource;
+
+  /// Converts a decoded notification into [Data].
+  final Data Function(dynamic json) parse;
+
+  /// Number of notifications to skip after subscribing.
+  int get warmUp => 10;
 
   @override
   MovesenseDeviceManager get deviceManager => super.deviceManager as MovesenseDeviceManager;
 
-  String? get _serial => deviceManager.serial;
-
-  final String _uri;
-  final Function _converter;
-
-  _MovesenseStreamProbe(this._uri, this._converter);
-
   @override
-  Stream<Measurement>? get stream => deviceManager.isConnected
-      ? _streamController.stream
-            .map((event) => Measurement.fromData(_converter.call(jsonDecode(event)) as Data))
-            .skip(10) // skip first 10 measurements to allow sensor to stabilize
-      : null;
-
-  @override
-  Future<bool> onResume() async {
-    var completer = Completer<bool>();
-
-    // fast out if not connected to device
-    if (_serial == null) return false;
-
-    // fast out of already subscribed to this type of measurement
-    if (_subscriptionId != null) return false;
-
-    // React to a subscription failure at most once.
-    var errorHandled = false;
-    void handleError(String label, Object error, int status) {
-      if (errorHandled) return;
-      errorHandled = true;
-
-      var errorMsg = '$runtimeType - $label, error: $error, status: $status';
-      warning(errorMsg);
-      _streamController.addError(errorMsg);
-      _subscriptionId = null;
-      if (!completer.isCompleted) completer.complete(false);
-    }
-
-    try {
-      _subscriptionId = Mds.subscribe(
-        "$_serial/$_uri",
-        "{}",
-        // onSuccess
-        (data, status) {
-          debug('$runtimeType - OnSuccess, data: $data, status: $status');
-          if (!completer.isCompleted) completer.complete(super.onResume());
-        },
-        // onError
-        (error, status) => handleError('Error', error, status),
-        // onNotification
-        (data) {
-          _streamController.add(data);
-        },
-        // onSubscriptionError
-        (error, status) => handleError('Subscription Error', error, status),
-      );
-    } catch (error) {
-      handleError('Error when trying to subscribe to device - serial: $_serial, uri: $_uri', error, 0);
-    }
-
-    return completer.future;
-  }
-
-  @override
-  Future<bool> onPause() async {
-    super.onPause();
-
-    if (_subscriptionId != null) Mds.unsubscribe(_subscriptionId!);
-    _subscriptionId = null;
-
-    return true;
+  Stream<Measurement>? get stream {
+    final device = deviceManager.device;
+    if (device == null || !deviceManager.isConnected) return null;
+    return device.subscribe(resource).map((body) => Measurement.fromData(parse(jsonDecode(body)))).skip(warmUp);
   }
 }
 
-/// A probe collecting [MovesenseHR] data from the `Meas/HR` resource.
+/// A probe collecting [MovesenseHR] data from the `/Meas/HR` resource.
 ///
 /// Used for the [MovesenseSamplingPackage.HR] measure.
 class MovesenseHRProbe extends _MovesenseStreamProbe {
-  MovesenseHRProbe() : super("Meas/HR", MovesenseHR.fromMovesenseData);
+  MovesenseHRProbe() : super('/Meas/HR', MovesenseHR.fromMovesenseData);
 }
 
 /// A probe collecting [MovesenseECG] data at 125 Hz.
 ///
 /// Used for the [MovesenseSamplingPackage.ECG] measure.
 class MovesenseECGProbe extends _MovesenseStreamProbe {
-  MovesenseECGProbe() : super("Meas/ECG/125", MovesenseECG.fromMovesenseData);
+  MovesenseECGProbe() : super('/Meas/ECG/125', MovesenseECG.fromMovesenseData);
 }
 
 /// A probe collecting [MovesenseTemperature] data.
@@ -111,31 +55,28 @@ class MovesenseECGProbe extends _MovesenseStreamProbe {
 /// Movesense MD supports temperature, so [MovesenseSamplingPackage.create]
 /// only creates this probe for that device.
 class MovesenseTemperatureProbe extends _MovesenseStreamProbe {
-  MovesenseTemperatureProbe() : super("Meas/Temp", MovesenseTemperature.fromMovesenseData);
+  MovesenseTemperatureProbe() : super('/Meas/Temp', MovesenseTemperature.fromMovesenseData);
 }
 
 /// A probe collecting [MovesenseIMU] data at 13 Hz (the lowest rate).
 ///
 /// Used for the [MovesenseSamplingPackage.IMU] measure.
 class MovesenseIMUProbe extends _MovesenseStreamProbe {
-  MovesenseIMUProbe() : super("Meas/IMU9/13", MovesenseIMU.fromMovesenseData);
+  MovesenseIMUProbe() : super('/Meas/IMU9/13', MovesenseIMU.fromMovesenseData);
 }
 
-/// A probe collecting [MovesenseStateChange] events.
+/// A probe collecting single tap [MovesenseStateChange] events.
 ///
 /// Used for the [MovesenseSamplingPackage.STATE] measure.
-/// See [MovesenseDeviceState] for the possible states.
 ///
-/// However, due to a hardware limitation in Movesense we can only subscribe to
-/// one (!) type of state change at a time.
+/// Movesense firmware only allows one state subscription at a time, and only
+/// the connectors and tap states have been confirmed on the MD and HR2.
 /// See https://github.com/petri-lipponen-movesense/mdsflutter/issues/15
-///
-/// Seems like the only states we can listen to is the connectors and single tap
-/// events. This has been tested on the MD and HR2 devices.
-///
-/// Therefore, this probe **only** listens to single tap events.
 class MovesenseStateChangeProbe extends _MovesenseStreamProbe {
-  MovesenseStateChangeProbe() : super("System/States/4", MovesenseStateChange.fromMovesenseData);
+  MovesenseStateChangeProbe() : super('/System/States/4', MovesenseStateChange.fromMovesenseData);
+
+  @override
+  int get warmUp => 0; // every tap is an event, none are noise
 }
 
 /// A probe collecting [MovesenseDeviceInformation] from the connected
@@ -145,132 +86,14 @@ class MovesenseStateChangeProbe extends _MovesenseStreamProbe {
 /// the device is not connected.
 class MovesenseDeviceProbe extends MeasurementProbe {
   @override
-  Future<Measurement?> getMeasurement() async {
-    var completer = Completer<Measurement>();
-    var serial = (deviceManager as MovesenseDeviceManager).serial;
-
-    // fast out if not connected
-    if (!deviceManager.isConnected) return null;
-
-    // fast out if no serial number (typically not connected)
-    if (serial == null) return null;
-
-    Mds.get(
-      Mds.createRequestUri(serial, "/Info"),
-      "{}",
-      ((info, statusCode) {
-        var data = MovesenseDeviceInformation.fromMovesenseData(json.decode(info));
-        completer.complete(Measurement.fromData(data));
-      }),
-      (error, statusCode) {
-        completer.completeError('$runtimeType - error: $error');
-      },
-    );
-
-    return completer.future;
-  }
-}
-
-// MULTI STATE CHANGE PROBE BELOW - with notes
-
-/// The types of state changes available on the Movesense device.
-///
-/// [MovesenseMultiStateChangeProbe] uses the index of each value as the
-/// Movesense state id.
-///
-/// See https://www.movesense.com/docs/esw/api_reference/#systemstates
-enum MovesenseState { movement, battery, connectors, doubleTap, tap, freeFall }
-
-// State Change overview. The following table shows the state change types
-// available on the different devices. This is based on testing of physical
-// device. Can't find any documentation on this in the Movesense documentation
-//
-//   type      | MD | HR+ | HR2
-//  -----------+----+-----+-----
-//  movement   | -  |  ?  |  -
-//  connectors | +  |  ?  |  +
-//  doubleTap  | -  |  ?  |  -
-//  tap        | +  |  ?  |  +
-//  freeFall   | -  |  ?  |  -
-
-/// A probe collecting all possible [MovesenseStateChange] events.
-/// See [MovesenseDeviceState] for an enumeration of possible states.
-///
-/// In contrast to the [MovesenseStateChangeProbe], this probe tries to
-/// collect all the different types of state changes. However, due to a
-/// hardware limitation on the device, this often does not succeed.
-///
-/// Therefore, this probe is not used at the moment.
-class MovesenseMultiStateChangeProbe extends StreamProbe {
-  /// A map from state id to subscription id.
-  final Map<int, int> _subscriptionIDs = {};
-  final StreamController<String> _subscriptionController = StreamController.broadcast();
-
-  @override
   MovesenseDeviceManager get deviceManager => super.deviceManager as MovesenseDeviceManager;
 
   @override
-  Future<bool> onResume() async {
-    _addStateSubscription(MovesenseState.movement);
-    _addStateSubscription(MovesenseState.connectors);
-    _addStateSubscription(MovesenseState.doubleTap);
-    _addStateSubscription(MovesenseState.tap);
-    _addStateSubscription(MovesenseState.freeFall);
+  Future<Measurement?> getMeasurement() async {
+    final device = deviceManager.device;
+    if (device == null || device.serial == null) return null;
 
-    return super.onResume();
-  }
-
-  @override
-  Stream<Measurement>? get stream => deviceManager.isConnected
-      ? _subscriptionController.stream.map(
-          (event) => Measurement.fromData(MovesenseStateChange.fromMovesenseData(jsonDecode(event))),
-        )
-      : null;
-
-  void _addStateSubscription(MovesenseState state) {
-    int stateId = state.index;
-
-    // fast out of already subscribed to this type of state change.
-    if (_subscriptionIDs.containsKey(stateId)) return;
-
-    try {
-      final int id = Mds.subscribe(
-        "${deviceManager.serial}/System/States/$stateId",
-        "{}",
-        (data, status) {
-          debug('$runtimeType - OnSuccess, stateId: $stateId, data: $data, status: $status');
-        },
-        (error, status) {
-          warning('$runtimeType - OnError, stateId: $stateId, error: $error, status: $status');
-          _subscriptionController.addError(error);
-        },
-        (data) {
-          debug('$runtimeType - OnNotification, stateId: $stateId, data: $data');
-          _subscriptionController.add(data);
-        },
-        (error, status) {
-          warning('$runtimeType - OnSubscriptionError, stateId: $stateId, error: $error, status: $status');
-          _subscriptionController.addError(error);
-        },
-      );
-
-      _subscriptionIDs[stateId] = id;
-    } catch (error) {
-      warning('$runtimeType - Error, stateId: $stateId, error: $error');
-      _subscriptionController.addError(error);
-    }
-  }
-
-  @override
-  Future<bool> onPause() async {
-    super.onPause();
-
-    // unsubscribed to all state subscriptions
-    for (var id in _subscriptionIDs.values) {
-      Mds.unsubscribe(id);
-    }
-    _subscriptionIDs.clear();
-
-    return true;
+    final response = await device.request(ms.MdsRequestMethod.get, '/Info');
+    return Measurement.fromData(MovesenseDeviceInformation.fromMovesenseData(jsonDecode(response.body)));
   }
 }

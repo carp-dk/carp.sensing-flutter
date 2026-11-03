@@ -233,10 +233,10 @@ class MovesenseHR extends SensorData {
   /// notification.
   factory MovesenseHR.fromMovesenseData(dynamic data) {
     num average = data["Body"]["average"] as num;
-    // returns a list of R-R measures with only one entry (the latest)
-    int rr = (data["Body"]["rrData"] as List<dynamic>).map((e) => e as int).toList()[0];
+    // the latest R-R interval, if any (the list is empty when no beat was detected)
+    final rr = (data["Body"]["rrData"] as List<dynamic>?)?.lastOrNull as num?;
 
-    return MovesenseHR(average.toDouble(), rr);
+    return MovesenseHR(average.toDouble(), rr?.toInt());
   }
 
   @override
@@ -352,11 +352,11 @@ class MovesenseIMU extends SensorData {
         .map((sample) => MovesenseAccelerometerSample(sample['x'] as num, sample['y'] as num, sample['z'] as num))
         .toList();
 
-    List<MovesenseGyroscopeSample> gyro = (data["Body"]["ArrayAcc"] as List<dynamic>)
+    List<MovesenseGyroscopeSample> gyro = (data["Body"]["ArrayGyro"] as List<dynamic>)
         .map((sample) => MovesenseGyroscopeSample(sample['x'] as num, sample['y'] as num, sample['z'] as num))
         .toList();
 
-    List<MovesenseMagnetometerSample> mag = (data["Body"]["ArrayAcc"] as List<dynamic>)
+    List<MovesenseMagnetometerSample> mag = (data["Body"]["ArrayMagn"] as List<dynamic>)
         .map((sample) => MovesenseMagnetometerSample(sample['x'] as num, sample['y'] as num, sample['z'] as num))
         .toList();
 
