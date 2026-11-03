@@ -201,7 +201,12 @@ class MovesenseDeviceManager extends BLEDeviceManager<MovesenseDevice, Movesense
     }
 
     await device!.connect();
-    return device!.isConnected ? DeviceStatus.connected : DeviceStatus.connecting;
+    // The connect command is accepted, but the device may already have connected or failed.
+    return switch (device!.status) {
+      ms.MovesenseDeviceStatus.connected => DeviceStatus.connected,
+      ms.MovesenseDeviceStatus.connecting => DeviceStatus.connecting,
+      _ => DeviceStatus.disconnected,
+    };
   }
 
   void _onDeviceStatus(ms.MovesenseDeviceStatus deviceStatus) {
@@ -218,10 +223,9 @@ class MovesenseDeviceManager extends BLEDeviceManager<MovesenseDevice, Movesense
       case ms.MovesenseDeviceStatus.error:
         warning('$runtimeType - Error in connecting to device: $bleAddress');
         _batteryTimer?.cancel();
-        // Tear down the half-open connection, or the native SDK keeps
-        // retrying it in the background.
+        // Tear down the half-open connection, or the native SDK keeps retrying it.
+        // Its 'disconnected' event then sets the status, so a reconnect waits for the teardown.
         device?.disconnect().ignore();
-        status = DeviceStatus.disconnected;
     }
   }
 

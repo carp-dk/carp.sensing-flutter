@@ -13,19 +13,29 @@ import 'package:movesense_plus/movesense_plus_platform_interface.dart';
 class _FakePlatform extends MovesensePlatform {
   final events = StreamController<ms.MovesenseConnectionEvent>.broadcast();
   final notifications = <String, ms.MdsNotificationCallback>{};
+  bool failConnect = false;
 
   @override
   Stream<ms.MovesenseConnectionEvent> get connectionEvents => events.stream;
 
   @override
-  Future<void> connect(String address) async => scheduleMicrotask(
-    () => events.add(
-      ms.MovesenseConnectionEvent(type: ms.MovesenseConnectionEventType.connected, address: address, serial: '123'),
-    ),
-  );
+  Future<void> connect(String address) async {
+    if (failConnect) {
+      // The native error arrives before the connect command completes.
+      events.add(ms.MovesenseConnectionEvent(type: ms.MovesenseConnectionEventType.error, address: address));
+      await pumpEventQueue();
+      return;
+    }
+    scheduleMicrotask(
+      () => events.add(
+        ms.MovesenseConnectionEvent(type: ms.MovesenseConnectionEventType.connected, address: address, serial: '123'),
+      ),
+    );
+  }
 
   @override
-  Future<void> disconnect(String address) async {}
+  Future<void> disconnect(String address) async =>
+      events.add(ms.MovesenseConnectionEvent(type: ms.MovesenseConnectionEventType.disconnected, address: address));
 
   @override
   Future<ms.MdsResponse> request(ms.MdsRequestMethod method, String uri, String contract) async => ms.MdsResponse(
@@ -71,17 +81,48 @@ void main() {
     expect(manager.batteryLevel, 80);
     expect(manager.createRegistration().deviceInfo?['hw'], 'H4');
 
-    final hrProbe = MovesenseHRProbe()..deviceManager = manager;
-    final hr = hrProbe.stream!.first;
-    await pumpEventQueue();
+    // CAMS keeps the probe stream and re-listens to it after a reconnect.
+    final hrStream = (MovesenseHRProbe()..deviceManager = manager).stream!;
     final hrJson = File('test/json/hr.json').readAsStringSync();
-    for (var i = 0; i <= 10; i++) {
-      platform.notifications['123/Meas/HR']!(hrJson);
+    Future<MovesenseHR> nextHR() async {
+      final hr = hrStream.first;
+      await pumpEventQueue();
+      for (var i = 0; i <= 10; i++) {
+        platform.notifications['123/Meas/HR']!(hrJson);
+      }
+      return (await hr).data as MovesenseHR;
     }
-    expect(((await hr).data as MovesenseHR).rr, 976);
+
+    expect((await nextHR()).rr, 976);
+
+    platform.events.add(
+      const ms.MovesenseConnectionEvent(
+        type: ms.MovesenseConnectionEventType.disconnected,
+        address: '0C:8C:DC:1B:23:BF',
+      ),
+    );
+    await pumpEventQueue();
+    expect(manager.status, DeviceStatus.disconnected);
+    expect(manager.serial, isNull);
+
+    final reconnected = manager.statusEvents.firstWhere((s) => s == DeviceStatus.connected);
+    await manager.connect();
+    await reconnected;
+    expect((await nextHR()).rr, 976);
 
     final info = await (MovesenseDeviceProbe()..deviceManager = manager).getMeasurement();
     expect((info!.data as MovesenseDeviceInformation).hardwareType, 'H4');
+  });
+
+  test('a connection error before connect returns leaves the device disconnected', () async {
+    final platform = _FakePlatform()..failConnect = true;
+    MovesensePlatform.instance = platform;
+    final manager = MovesenseDeviceManager(MovesenseDevice.DEVICE_TYPE)
+      ..configure(MovesenseDevice())
+      ..pair(bleAddress: 'AA:BB');
+    expect(await manager.connect(), DeviceStatus.disconnected);
+    await pumpEventQueue();
+    expect(manager.status, DeviceStatus.disconnected);
   });
 
   test('HR without R-R intervals parses', () {

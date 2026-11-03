@@ -29,9 +29,11 @@ abstract class _MovesenseStreamProbe extends StreamProbe {
 
   @override
   Stream<Measurement>? get stream {
-    final device = deviceManager.device;
-    if (device == null || !deviceManager.isConnected) return null;
-    return device.subscribe(resource).map((body) => Measurement.fromData(parse(jsonDecode(body)))).skip(warmUp);
+    if (deviceManager.device == null || !deviceManager.isConnected) return null;
+    // Subscribes anew on every listen, since CAMS re-listens to this stream after a reconnect.
+    return Stream<String>.multi(
+      (controller) => controller.addStream(deviceManager.device!.subscribe(resource)).whenComplete(controller.close),
+    ).map((body) => Measurement.fromData(parse(jsonDecode(body)))).skip(warmUp);
   }
 }
 
