@@ -37,6 +37,33 @@ void main() {
     await manager.database?.close();
   });
 
+  test('writeAll stores rows like the stream does and skips duplicates', () async {
+    final manager = await _manager();
+    await manager.onMeasurement(Measurement.fromData(_IdentifiedData('record-1', 'streamed')));
+    await manager.close();
+
+    await SQLiteDataManager.writeAll(
+      [
+        Measurement.fromData(_IdentifiedData('record-1', 'imported')),
+        Measurement.fromData(_IdentifiedData('record-2', 'imported')),
+      ],
+      studyDeploymentId: 'study-a',
+      deviceRoleName: 'phone',
+      triggerId: 3,
+    );
+
+    final rows = await manager.database!.query(SQLiteDataManager.MEASUREMENT_TABLE_NAME, orderBy: 'id');
+    expect(rows, hasLength(2));
+    expect(rows.first[SQLiteDataManager.MEASUREMENT_COLUMN], contains('streamed'));
+    expect(rows.last, containsPair(SQLiteDataManager.DEPLOYMENT_ID_COLUMN, 'study-a'));
+    expect(rows.last, containsPair(SQLiteDataManager.TRIGGER_ID_COLUMN, 3));
+    expect(rows.last, containsPair(SQLiteDataManager.DEVICE_ROLE_NAME_COLUMN, 'phone'));
+    expect(rows.last, containsPair(SQLiteDataManager.UPLOADED_COLUMN, 0));
+    expect(rows.last[SQLiteDataManager.RECORD_ID_COLUMN], 'record-2');
+
+    await manager.database?.close();
+  });
+
   test('upgrades existing databases', () async {
     final path = await _databasePath();
     await deleteDatabase(path);
