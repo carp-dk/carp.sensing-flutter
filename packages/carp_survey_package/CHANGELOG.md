@@ -1,6 +1,7 @@
 ## 2.1.2
 
 - upgrade to `cognition_package` ^1.10.0
+- upgrade to `research_package` ^4.0.0
 
 ## 2.1.1
 
