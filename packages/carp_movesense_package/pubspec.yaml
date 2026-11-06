@@ -29,7 +29,7 @@ dependencies:
   carp_core: ^2.2.0         # the core CARP domain model
   carp_mobile_sensing: ^2.2.0
 
-  movesense_plus: ^2.0.1
+  movesense_plus: ^2.0.2
   json_annotation: ^4.8.0
 
 
