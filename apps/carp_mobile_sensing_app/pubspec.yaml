@@ -91,12 +91,10 @@ dependencies:
   noise_meter: ^6.0.0     # measuring noise level
 
   # wearable device plugins
-  # The Movesense native plugin. As of carp_movesense_package 3.0.0 the Movesense
-  # MDS library is provided by `carp_movesense_flutter` (which replaces the no
-  # longer maintained `mdsflutter`). It bundles the Android `.aar` / iOS
-  # `.xcframework`, so a manually vendored `android/libs/mdslib-*.aar` is no
-  # longer required.
-  carp_movesense_flutter: ^0.1.0
+  # The Movesense native plugin. As of carp_movesense_package 4.0.0 the Movesense
+  # MDS library is provided by `movesense_plus`, which bundles the Android `.aar`
+  # and iOS `.xcframework`.
+  movesense_plus: ^2.0.1
   polar: ^7.0.0
 
   # app-specific plugins

@@ -18,10 +18,10 @@ This packages supports sampling of the following [`Measure`](https://docs.carp.d
 * `dk.cachet.carp.movesense.temperature` : Device temperature
 * `dk.cachet.carp.movesense.imu` : 9-axis Inertial Movement Unit (IMU)
 
-This package uses the Flutter [carp_movesense_flutter](https://pub.dev/packages/carp_movesense_flutter) plugin, which is based on the official [Movesense Mobile API](https://www.movesense.com/docs/mobile/mobile_sw_overview/).
+This package uses the Flutter [movesense_plus](https://pub.dev/packages/movesense_plus) plugin, which is based on the official [Movesense Mobile API](https://www.movesense.com/docs/mobile/mobile_sw_overview/).
 
 > [!NOTE]
-> As of version 3.0.0 this package is based on the [`carp_movesense_flutter`](https://pub.dev/packages/carp_movesense_flutter) plugin instead of the `mdsflutter` plugin. The public API of this sampling package is unchanged. The main practical difference is that `carp_movesense_flutter` bundles the native Movesense MDS libraries (the Android `.aar` and the iOS `.xcframework`), so apps no longer need to vendor them manually (see [Installing](#installing) below).
+> As of version 4.0.0 this package is based on the [`movesense_plus`](https://pub.dev/packages/movesense_plus) plugin, which replaces the discontinued `carp_movesense_flutter` (3.x) and `mdsflutter` (2.x) plugins. See the CHANGELOG for the few API changes.
 
 The following heart rate devices are supported:
 
@@ -49,18 +49,18 @@ dependencies:
   ...
 `````
 
-Unlike previous (`mdsflutter`-based) versions, the underlying `carp_movesense_flutter` plugin **bundles the native Movesense MDS libraries** for both Android and iOS. This means you no longer have to download and vendor the Movesense SDK yourself. The remaining setup below only concerns Bluetooth permissions.
+The underlying `movesense_plus` plugin **bundles the native Movesense MDS libraries** for both Android and iOS. This means you no longer have to download and vendor the Movesense SDK yourself. The remaining setup below only concerns Bluetooth permissions.
 
 ### Android
 
-The Movesense `mdslib` `.aar` is bundled inside the `carp_movesense_flutter` plugin, so **no manual `.aar` download or `flatDir` repository is required** anymore. The plugin also declares the Bluetooth permissions it needs (`BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, and — on Android 11 and lower — `ACCESS_FINE_LOCATION`) in its own manifest, and these are merged into your app automatically. The plugin requires a minimum Android SDK of `24`.
+The Movesense `mdslib` `.aar` is bundled inside the `movesense_plus` plugin, so **no manual `.aar` download or `flatDir` repository is required** anymore. The plugin also declares the Bluetooth permissions it needs (`BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, and — on Android 11 and lower — `ACCESS_FINE_LOCATION`) in its own manifest, and these are merged into your app automatically. The plugin requires a minimum Android SDK of `24`.
 
 > [!IMPORTANT]
 > The package does not *request* runtime permissions. On the first run, make sure your app requests the Bluetooth (and, on Android 11 and lower, location) permissions. Location access is necessary to use BLE on older Android versions.
 
 ### iOS
 
-The Movesense `MovesenseMDS.xcframework` is bundled inside the `carp_movesense_flutter` plugin, so **no manual `pod 'Movesense', :git => ...` entry is required** in your `Podfile` anymore. The plugin targets a minimum deployment of iOS 15.0.
+The Movesense `MovesenseMDS.xcframework` is bundled inside the `movesense_plus` plugin, so **no manual `pod 'Movesense', :git => ...` entry is required** in your `Podfile` anymore. The plugin targets a minimum deployment of iOS 15.0.
 
 > [!NOTE]
 > Because the bundled framework is statically linked, some app setups still need `use_frameworks! :linkage => :static` (and `use_modular_headers!`) in the `Podfile`. If you hit linker/module errors, add these flags to your `Runner` target.

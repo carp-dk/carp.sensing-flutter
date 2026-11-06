@@ -113,47 +113,56 @@ class MovesenseDeviceRegistration extends BLEDeviceRegistration {
 /// "Movesense 220330000122".
 ///
 /// Key points:
-///  * Connects using the [bleAddress] set when pairing.
-///  * On connect, it reads [deviceInfo] and starts polling the battery state
-///    every 10 minutes.
+///  * Connects using the [bleAddress] set when pairing, through a
+///    `movesense_plus` [device].
+///  * On connect, `movesense_plus` reads the device info and battery state.
+///    The battery state is then polled every 10 minutes.
 ///  * Movesense only reports "OK" or "LOW" battery, which is mapped to a
 ///    [batteryLevel] of 80% or 10%.
 ///  * If a connection attempt fails, it disconnects so the native SDK stops
 ///    retrying in the background.
 class MovesenseDeviceManager extends BLEDeviceManager<MovesenseDevice, MovesenseDeviceRegistration> {
-  int? _batteryLevel;
   final StreamController<int> _batteryEventController = StreamController.broadcast();
+  StreamSubscription<ms.MovesenseDeviceStatus>? _statusSubscription;
+  Timer? _batteryTimer;
 
   /// Creates a device manager for the device [type], typically
   /// [MovesenseDevice.DEVICE_TYPE].
   MovesenseDeviceManager(super.type);
 
+  /// The `movesense_plus` device for [bleAddress]. Null until [connect] is called.
+  ms.MovesenseDevice? device;
+
   @override
-  int? get batteryLevel => _batteryLevel;
+  int? get batteryLevel => switch (device?.batteryLevel) {
+    ms.MovesenseBatteryLevel.ok => 80,
+    ms.MovesenseBatteryLevel.low => 10,
+    _ => null,
+  };
 
   /// The device info for the connected Movesense device.
   ///
   /// Null until the device is connected and has answered the info request.
   ///
   /// See https://www.movesense.com/docs/esw/api_reference/#info
-  Map<String, dynamic>? deviceInfo;
+  Map<String, dynamic>? get deviceInfo => device?.deviceInfo?.toJson();
+
+  /// The serial number of the connected Movesense device.
+  ///
+  /// Null when not connected. Used to address the device in MDS requests.
+  String? get serial => device?.serial;
 
   /// The type of Movesense device, based on the "hw" property in [deviceInfo].
   ///
   /// [MovesenseDeviceType.UNKNOWN] if [deviceInfo] is not yet available or the
   /// hardware type is not recognized.
-  MovesenseDeviceType get movesenseDeviceType {
-    final hw = (deviceInfo?["hw"] as String?)?.toUpperCase();
-
-    // Try to figure out the type of device based on the "hw" property
-    // H3 is "HR+", H4 is "HR2", A1 is "MD"
-    return switch (hw) {
-      'A1' => MovesenseDeviceType.MD,
-      'H3' => MovesenseDeviceType.HR_PLUS,
-      'H4' => MovesenseDeviceType.HR2,
-      _ => MovesenseDeviceType.UNKNOWN,
-    };
-  }
+  MovesenseDeviceType get movesenseDeviceType => switch (device?.deviceType) {
+    ms.MovesenseDeviceType.md => MovesenseDeviceType.MD,
+    ms.MovesenseDeviceType.hrPlus => MovesenseDeviceType.HR_PLUS,
+    ms.MovesenseDeviceType.hr2 => MovesenseDeviceType.HR2,
+    ms.MovesenseDeviceType.flash => MovesenseDeviceType.FLASH,
+    _ => MovesenseDeviceType.UNKNOWN,
+  };
 
   @override
   MovesenseDeviceRegistration createRegistration() => MovesenseDeviceRegistration(
@@ -177,120 +186,69 @@ class MovesenseDeviceManager extends BLEDeviceManager<MovesenseDevice, Movesense
   @override
   Stream<int> get batteryEvents => _batteryEventController.stream;
 
-  /// The serial number of the connected Movesense device.
-  ///
-  /// Null until the device has connected. Used to address the device in MDS
-  /// requests and subscriptions. Not cleared on disconnect.
-  String? serial;
-
   @override
   Future<DeviceStatus> onConnect() async {
-    if (isConnected) return DeviceStatus.connected;
-    if (bleAddress?.isEmpty ?? true) {
+    final address = bleAddress;
+    if (address == null || address.isEmpty) {
       warning('$runtimeType - cannot connect to device, BLE address is missing.');
       return DeviceStatus.disconnected;
     }
 
-    status = DeviceStatus.connecting;
+    if (device?.address != address) {
+      await _statusSubscription?.cancel();
+      device = ms.MovesenseDevice(address: address, name: bleName);
+      _statusSubscription = device!.statusEvents.listen(_onDeviceStatus);
+    }
 
-    Mds.connect(
-      bleAddress!,
-      // onConnected
-      (String serial) {
-        _connected(serial);
+    await device!.connect();
+    // The connect command is accepted, but the device may already have connected or failed.
+    return switch (device!.status) {
+      ms.MovesenseDeviceStatus.connected => DeviceStatus.connected,
+      ms.MovesenseDeviceStatus.connecting => DeviceStatus.connecting,
+      _ => DeviceStatus.disconnected,
+    };
+  }
+
+  void _onDeviceStatus(ms.MovesenseDeviceStatus deviceStatus) {
+    switch (deviceStatus) {
+      case ms.MovesenseDeviceStatus.connecting:
+        break;
+      case ms.MovesenseDeviceStatus.connected:
+        debug('$runtimeType - Connected to Movesense device, serial: $serial');
+        _startBatteryPolling();
         status = DeviceStatus.connected;
-      },
-      // onDisconnected
-      () {
-        _batteryLevel = null;
+      case ms.MovesenseDeviceStatus.disconnected:
+        _batteryTimer?.cancel();
         status = DeviceStatus.disconnected;
-      },
-      // onConnectionError
-      (String error) {
-        // Note that an "error" might be that the device is already connected,
-        // and the error message would read like;
-        //    "Already connected to 0C:8C:DC:1B:23:BF"
-        //
-        // In this case, we treat it as a "connected" event.
-        if (error.startsWith('Already connected to')) {
-          var serial = error.split(' ').last.trim();
-          _connected(serial);
-          status = DeviceStatus.connected;
-        } else {
-          warning("$runtimeType - Error in connecting to device: $error");
-          // Tear down the half-open connection, or the native SDK keeps
-          // retrying it in the background.
-          Mds.disconnect(bleAddress!);
-          status = DeviceStatus.disconnected;
-        }
-      },
-      // onBleConnected
-      // - for now we ignore this callback
-      (_) {},
-    );
-
-    return status;
+      case ms.MovesenseDeviceStatus.error:
+        warning('$runtimeType - Error in connecting to device: $bleAddress');
+        _batteryTimer?.cancel();
+        // Tear down the half-open connection, or the native SDK keeps retrying it.
+        // Its 'disconnected' event then sets the status, so a reconnect waits for the teardown.
+        device?.disconnect().ignore();
+    }
   }
 
-  /// Mark the Movesense device with [serial] as connected.
-  void _connected(String serial) {
-    this.serial = serial;
-
-    debug("$runtimeType - Successfully connected to Movesense device, serial: $serial");
-
-    _getDeviceInfo();
-    _getBatteryStatus();
-  }
-
-  /// Get the detailed info about this Movesense device.
-  ///
-  /// See https://www.movesense.com/docs/esw/api_reference/#info
-  ///
-  /// Example response from the device see ../test/json/info.json
-  void _getDeviceInfo() {
-    // fast out if not connected
-    if (serial == null) return;
-
-    debug('$runtimeType - Getting device info.');
-
-    Mds.get(Mds.createRequestUri(serial!, "/Info"), "{}", ((info, statusCode) {
-      debug('$runtimeType - Movesense Device Info:\n$info');
-      final dataContent = json.decode(info);
-      deviceInfo = dataContent["Content"] as Map<String, dynamic>;
-    }), (error, statusCode) => {});
-  }
-
-  /// Sets up a request (GET) for battery status at a regular interval.
-  /// We can subscribe to battery state changes, but they come so rarely that it
-  /// is better to request the status.
-  void _getBatteryStatus() {
-    // fast out if not connected
-    if (serial == null) return;
-
-    _batteryLevel = 80;
-    debug('$runtimeType - Setting up battery monitoring.');
-
-    Timer.periodic(const Duration(minutes: 10), (_) {
-      Mds.get(Mds.createRequestUri(serial!, "/System/States/1"), "{}", ((data, statusCode) {
-        final dataContent = json.decode(data);
-        num batteryState = dataContent["Content"] as num;
-        // Movesense only reports "OK" (0) or "LOW" (1) battery state
-        // This is translated to 80% & 10% battery level
-        _batteryLevel = batteryState == 0 ? 80 : 10;
-        _batteryEventController.add(_batteryLevel ?? 0);
-      }), (error, statusCode) => {});
+  /// Polls the battery state, since Movesense battery state changes are too
+  /// rare to subscribe to.
+  void _startBatteryPolling() {
+    _batteryTimer?.cancel();
+    _batteryTimer = Timer.periodic(const Duration(minutes: 10), (_) async {
+      await device?.getBatteryStatus();
+      final level = batteryLevel;
+      if (level != null) _batteryEventController.add(level);
     });
   }
 
   @override
   Future<bool> onDisconnect() async {
-    if (bleAddress == null) {
-      warning('$runtimeType - cannot disconnect from device, address is null.');
+    _batteryTimer?.cancel();
+    if (device == null) {
+      warning('$runtimeType - cannot disconnect from device, not connected.');
       return false;
     }
     debug("$runtimeType - Disconnecting from '$bleAddress'...");
-
-    Mds.disconnect(bleAddress!);
+    await device!.disconnect();
     return true;
   }
 }

@@ -1,3 +1,14 @@
+## 4.0.0
+
+* requires `movesense_plus` ^2.0.2, which reports a sensor iOS already reconnected after an app relaunch as connected
+* **BREAKING (dependency only)**: migrated from the discontinued [`carp_movesense_flutter`](https://pub.dev/packages/carp_movesense_flutter) plugin to [`movesense_plus`](https://pub.dev/packages/movesense_plus) 2.x, using its typed `MovesenseDevice` API (connection status, device info, battery, subscriptions) instead of the `Mds` compatibility facade
+* `MovesenseDeviceManager.serial` and `deviceInfo` are now read-only and come from the connected `movesense_plus` device (exposed as `device`); `serial` is cleared on disconnect
+* the battery level is no longer faked as 80% before the first read, and the battery polling timer is cancelled on disconnect
+* fix IMU gyroscope and magnetometer samples being read from the accelerometer array
+* fix HR parsing crashing when a notification has no R-R intervals
+* the state probe no longer skips the first 10 tap events
+* removed the unused `MovesenseMultiStateChangeProbe` and `MovesenseState` enum (use `movesense_plus` `MovesenseDevice.getStateEvents` directly)
+
 ## 3.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
