@@ -14,7 +14,7 @@
 ///  * [CarpDataStreamService] - uploads and reads measurements in data streams.
 ///
 /// [CarpService] gives access to the CAWS-only ("non-core") endpoints: files,
-/// documents and collections, plus the legacy consent and data point endpoints.
+/// documents and collections, plus the legacy consent endpoint.
 /// Authentication is handled by [CarpAuthService] in the `carp_auth` library.
 /// References such as [DeploymentReference] and [ParticipationReference] bind
 /// these calls to one study deployment. The `carp_backend` package builds on
@@ -48,11 +48,9 @@ import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:retry/retry.dart';
-import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter/foundation.dart';
 
-import 'package:carp_core/carp_core.dart' hide Smartphone;
-import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
+import 'package:carp_core/carp_core.dart';
 
 part 'carp_base_service.dart';
 part 'carp_service.dart';
@@ -65,8 +63,6 @@ part 'carp_app.dart';
 part 'carp_tasks.dart';
 part 'consent_document.dart';
 part 'carp_references.dart';
-part 'data_point_reference.dart';
-part 'data_point.dart';
 part 'deployment_reference.dart';
 part 'participation_reference.dart';
 part 'collection_reference.dart';
@@ -74,10 +70,8 @@ part 'document_reference.dart';
 part 'file_reference.dart';
 part '../util/http_retry.dart';
 part '../util/push_id_generator.dart';
-part '../ui/invitations_dialog.dart';
+part '../util/log.dart';
 part '../util/utils.dart';
-
-part 'carp_services.g.dart';
 
 /// Base exception thrown by the CAWS client services.
 ///

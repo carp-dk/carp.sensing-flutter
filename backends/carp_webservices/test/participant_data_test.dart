@@ -183,7 +183,7 @@ void main() {
 
       expect(status.deviceStatusList.first.device, isNotNull);
       debugPrint('${status.deviceStatusList.first.device}');
-      var newStatus = await reference.registerDevice();
+      var newStatus = await reference.registerDevice(DefaultDeviceRegistration());
       debugPrint('$newStatus');
       expect(newStatus.studyDeploymentId, familyDeploymentId);
     });

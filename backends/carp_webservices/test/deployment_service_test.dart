@@ -37,11 +37,6 @@ void main() {
 
       // debugPrint('${CarpAuthService().manager?.discoveryDocument}');
     }, skip: false);
-
-    test('- device ID', () async {
-      String id = CarpDeploymentService().deployment().registeredDeviceId;
-      debugPrint('Registered Device ID : $id');
-    }, skip: false);
   });
 
   group("Deployment - using DeploymentReference", () {
@@ -59,7 +54,7 @@ void main() {
       expect(status.deviceStatusList.length, isNot(0));
 
       try {
-        var newStatus = await reference.registerDevice();
+        var newStatus = await reference.registerDevice(DefaultDeviceRegistration());
         debugPrint('$newStatus');
         expect(newStatus.studyDeploymentId, testDeploymentId);
       } catch (error) {

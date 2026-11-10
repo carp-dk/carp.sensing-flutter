@@ -49,7 +49,7 @@ abstract class CarpBaseService {
   ///
   /// Used as the default for study, study deployment and device role IDs that
   /// are not passed explicitly. Can be set directly or via [configure].
-  SmartphoneStudy? study;
+  Study? study;
 
   /// The CAWS instance this service talks to.
   ///
@@ -75,7 +75,7 @@ abstract class CarpBaseService {
   /// If [study] is specified, this service is 'tied' to this study deployment.
   /// This is convenient if the app only handles one study deployment (which is
   /// often the case).
-  void configure(CarpApp app, [SmartphoneStudy? study]) {
+  void configure(CarpApp app, [Study? study]) {
     _app = app;
     this.study = study;
   }
@@ -165,22 +165,22 @@ abstract class CarpBaseService {
     _endpointName = endpointName ?? rpcEndpointName;
     final requestBody = toJsonString(request.toJson());
 
-    debug('REQUEST: POST $rpcEndpointUri\n$requestBody');
+    CarpLog.debug('REQUEST: POST $rpcEndpointUri\n$requestBody');
     http.Response response = await httpr.post(Uri.encodeFull(rpcEndpointUri), headers: headers, body: requestBody);
     // int httpStatusCode = response.statusCode;
     // String responseBody = response.body;
-    debug('RESPONSE: ${response.statusCode}\n${response.body}');
+    CarpLog.debug('RESPONSE: ${response.statusCode}\n${response.body}');
 
     return _handleResponse(response);
   }
 
   /// Sends an HTTP GET request to the given [url] for this CAWS service.
   Future<http.Response> _get(String url) async {
-    debug('REQUEST: GET $url');
+    CarpLog.debug('REQUEST: GET $url');
 
     var response = await httpr.get(url, headers: headers);
 
-    debug('RESPONSE: ${response.statusCode}\n${response.body}');
+    CarpLog.debug('RESPONSE: ${response.statusCode}\n${response.body}');
 
     // If we get a 403 forbidden response try to refresh token and retry once.
     // See issue : https://github.com/cph-cachet/carp.sensing-flutter/issues/392
@@ -194,11 +194,11 @@ abstract class CarpBaseService {
 
   /// Sends an HTTP POST request with [body] to the given [url] for this CAWS service.
   Future<http.Response> _post(String url, {Object? body}) async {
-    debug('REQUEST: POST $url\nBODY SIZE: ${body.toString().length}\n$body');
+    CarpLog.debug('REQUEST: POST $url\nBODY SIZE: ${body.toString().length}\n$body');
 
     var response = await httpr.post(url, headers: headers, body: body);
 
-    debug('RESPONSE: ${response.statusCode}\n${response.body}');
+    CarpLog.debug('RESPONSE: ${response.statusCode}\n${response.body}');
 
     if (response.statusCode == HttpStatus.forbidden) {
       await CarpAuthService().refresh();
@@ -210,11 +210,11 @@ abstract class CarpBaseService {
 
   /// Sends an HTTP PUT request with [body] to the given [url] for this CAWS service.
   Future<http.Response> _put(String url, {Object? body}) async {
-    debug('REQUEST: PUT $url\n$body');
+    CarpLog.debug('REQUEST: PUT $url\n$body');
 
     var response = await httpr.put(url, headers: headers, body: body);
 
-    debug('RESPONSE: ${response.statusCode}\n${response.body}');
+    CarpLog.debug('RESPONSE: ${response.statusCode}\n${response.body}');
 
     if (response.statusCode == HttpStatus.forbidden) {
       await CarpAuthService().refresh();
@@ -226,7 +226,7 @@ abstract class CarpBaseService {
 
   /// Sends a generic HTTP multipart [request].
   Future<http.Response> _send(http.MultipartRequest request) async {
-    debug('REQUEST: SEND $request');
+    CarpLog.debug('REQUEST: SEND $request');
 
     var status = await httpr.send(request);
 
@@ -236,18 +236,18 @@ abstract class CarpBaseService {
     }
 
     var response = await http.Response.fromStream(status);
-    debug('RESPONSE: ${response.statusCode}\n${response.body}');
+    CarpLog.debug('RESPONSE: ${response.statusCode}\n${response.body}');
 
     return _clean(response);
   }
 
   /// Sends an HTTP DELETE request to the given [url] for this CAWS service.
   Future<http.Response> _delete(String url) async {
-    debug('REQUEST: DELETE $url');
+    CarpLog.debug('REQUEST: DELETE $url');
 
     var response = await httpr.delete(url, headers: headers);
 
-    debug('RESPONSE: ${response.statusCode}\n${response.body}');
+    CarpLog.debug('RESPONSE: ${response.statusCode}\n${response.body}');
 
     if (response.statusCode == HttpStatus.forbidden) {
       await CarpAuthService().refresh();

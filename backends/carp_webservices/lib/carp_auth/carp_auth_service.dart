@@ -98,7 +98,7 @@ class CarpAuthService {
     );
 
     await initManager();
-    info('$runtimeType configured with $authProperties');
+    CarpLog.info('$runtimeType configured with $authProperties');
   }
 
   /// Initialize the OidcUserManager. This service must be configured before calling this
@@ -215,10 +215,10 @@ class CarpAuthService {
   /// Throws a [CarpNotFoundException] if CAWS does not know the code.
   Future<String> magicLinkForCode(String code) async {
     final url = authProperties.authURL.replace(path: '/api/self-signup/$code').toString();
-    debug('REQUEST: POST $url');
+    CarpLog.debug('REQUEST: POST $url');
     final response = await httpr.post(url);
     // The body holds a one-time auth token, so only the status is logged.
-    debug('RESPONSE: ${response.statusCode}');
+    CarpLog.debug('RESPONSE: ${response.statusCode}');
 
     final body = json.decode(response.body.isEmpty ? '{}' : response.body);
     if (response.statusCode != HttpStatus.ok) {
@@ -318,7 +318,7 @@ class CarpAuthService {
     // cached user to refresh - pass the refresh token we hold ourselves.
     final ownRefreshToken = _currentUser?.token?.refreshToken;
     final hasOwnToken = ownRefreshToken?.isNotEmpty ?? false;
-    debug(
+    CarpLog.debug(
       '$runtimeType - refreshing token - manager user: '
       '${manager?.currentUser != null}, own refresh token: $hasOwnToken, '
       'user: ${_currentUser?.username}',
@@ -345,7 +345,7 @@ class CarpAuthService {
           return currentUser;
         }
       } catch (error) {
-        warning('$runtimeType - anonymous refresh rejected - $error');
+        CarpLog.warning('$runtimeType - anonymous refresh rejected - $error');
       }
     } else {
       OidcUser? response;
@@ -353,7 +353,7 @@ class CarpAuthService {
         response = await manager?.refreshToken();
       } on OidcException catch (error) {
         // Surface Keycloak's reason (invalid_grant, session expired, ...).
-        warning(
+        CarpLog.warning(
           '$runtimeType - refresh rejected - ${error.message} '
           '${error.errorResponse?.error ?? ''} '
           '${error.errorResponse?.errorDescription ?? ''}',
@@ -361,7 +361,7 @@ class CarpAuthService {
       }
 
       if (response == null) {
-        warning(
+        CarpLog.warning(
           '$runtimeType - refresh returned no user - '
           '${hasOwnToken ? 'refresh token rejected' : 'no refresh token to use'}',
         );

@@ -1,3 +1,18 @@
+## 5.0.0
+
+The package now only depends on `carp_core`. It no longer depends on `carp_mobile_sensing` and has no UI. (#661, #662)
+
+* **BREAKING** removed the deprecated DataPoint endpoint: `DataPoint`, `DataPointHeader`, `DataPointReference` and `CarpService().dataPointReference()` (#586). Upload data with the `CarpDataStreamService`.
+* **BREAKING** removed `CarpParticipationService().getStudyInvitation(context)` and the invitation dialog. Use `getActiveParticipationInvitations()` and show your own dialog. The example app has one.
+* **BREAKING** `CarpDeploymentService().getDeviceDeploymentFor()` and `DeploymentReference.get()` return a CARP Core `PrimaryDeviceDeployment`, not a `SmartphoneDeployment`. `SmartphoneStudy` in `carp_mobile_sensing` 2.6.0 does the conversion.
+* **BREAKING** `CarpBaseService.study` and `configure()` take a CARP Core `Study`. A `SmartphoneStudy` still works, since it is a `Study`.
+* **BREAKING** `DeploymentReference.registerDevice()` needs a `DeviceRegistration`. It no longer creates one from the phone's hardware info.
+* **BREAKING** removed `DeploymentReference.registeredDeviceId`
+* a device registration which is not a CARP Core type is sent as a `DefaultDeviceRegistration`. This now also holds for `DeploymentReference.registerDevice()`.
+* logging no longer follows the CAMS `Settings().debugLevel`. Set `CarpLog.level` (default `CarpLogLevel.warning`). `carp_backend` 3.0.0 sets it from the CAMS debug level when its data manager is configured.
+* removed the unused `url_launcher` and `meta` dependencies (#666)
+* require `carp_core` ^2.3.0
+
 ## 4.4.3
 
 * Add `CarpAuthService().authenticateWithCode()` - sign in with a short self-signup code (resolves it via `magicLinkForCode()` and then calls `authenticateWithMagicLink()`)

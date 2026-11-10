@@ -10,7 +10,7 @@ part of 'carp_services.dart';
 /// A CARP Core [DeploymentService] that talks to CAWS.
 ///
 /// A participant app uses it to register the phone as the primary device of a
-/// study deployment, download the [SmartphoneDeployment] that says what to
+/// study deployment, download the [PrimaryDeviceDeployment] that says what to
 /// measure, and report it as deployed. Researcher tools can also create
 /// study deployments from a protocol.
 ///
@@ -117,8 +117,8 @@ class CarpDeploymentService extends CarpBaseService implements DeploymentService
   /// deployment with [studyDeploymentId]. The [registration] contains a
   /// matching configuration for the device with [deviceRoleName].
   ///
-  /// A [CamsDeviceRegistration] is sent as a [DefaultDeviceRegistration]
-  /// (workaround for CAWS issue #561).
+  /// A [registration] of a type that is not part of CARP Core is sent as a
+  /// [DefaultDeviceRegistration] (workaround for CAWS issue #561).
   ///
   /// CAWS throws IllegalArgumentException when:
   /// - a deployment with [studyDeploymentId] does not exist
@@ -134,13 +134,13 @@ class CarpDeploymentService extends CarpBaseService implements DeploymentService
     String deviceRoleName,
     DeviceRegistration registration,
   ) async {
-    // => StudyDeploymentStatus.fromJson( await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration))
-    //     as Map<String, dynamic>,);
-
-    // TODO - due to issue #561 in CAWS, we need to only use a [DefaultDeviceRegistration] for now.
-
-    if (registration is CamsDeviceRegistration) {
-      registration = registration.toDefaultDeviceRegistration();
+    // TODO - due to issue #561 in CAWS, it only takes the CARP Core registration types for now.
+    if (!registration.jsonType.startsWith(DeviceConfiguration.DEVICE_NAMESPACE)) {
+      registration = DefaultDeviceRegistration(
+        deviceId: registration.deviceId,
+        deviceDisplayName: registration.deviceDisplayName,
+        registrationCreatedOn: registration.registrationCreatedOn,
+      );
     }
 
     return StudyDeploymentStatus.fromJson(
@@ -165,9 +165,6 @@ class CarpDeploymentService extends CarpBaseService implements DeploymentService
   /// Gets the deployment for the primary device with
   /// [primaryDeviceRoleName] in the study deployment with [studyDeploymentId].
   ///
-  /// The [PrimaryDeviceDeployment] from CAWS is returned as a
-  /// [SmartphoneDeployment].
-  ///
   /// CAWS throws IllegalArgumentException when:
   /// - a deployment with [studyDeploymentId] does not exist
   /// - [primaryDeviceRoleName] is not present in the deployment
@@ -176,18 +173,12 @@ class CarpDeploymentService extends CarpBaseService implements DeploymentService
   /// CAWS throws IllegalStateException when the deployment for the requested
   /// primary device is not yet available.
   @override
-  Future<SmartphoneDeployment> getDeviceDeploymentFor(String studyDeploymentId, String primaryDeviceRoleName) async {
-    // downloading a PrimaryDeviceDeployment
-    var deployment = PrimaryDeviceDeployment.fromJson(
-      await _rpc(GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName)) as Map<String, dynamic>,
-    );
-
-    // converting it to a SmartphoneDeployment
-    return SmartphoneDeployment.fromPrimaryDeviceDeployment(
-      studyDeploymentId: studyDeploymentId,
-      deployment: deployment,
-    );
-  }
+  Future<PrimaryDeviceDeployment> getDeviceDeploymentFor(
+    String studyDeploymentId,
+    String primaryDeviceRoleName,
+  ) async => PrimaryDeviceDeployment.fromJson(
+    await _rpc(GetDeviceDeploymentFor(studyDeploymentId, primaryDeviceRoleName)) as Map<String, dynamic>,
+  );
 
   /// Tells stakeholders in the study deployment with [studyDeploymentId]
   /// that the device with [primaryDeviceRoleName] was deployed successfully,
