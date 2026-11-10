@@ -19,19 +19,28 @@ part of '../client.dart';
 ///  * [status] is derived from [deploymentStatus]; it is not stored.
 ///  * Two studies are equal if they have the same type, [studyDeploymentId] and
 ///    [deviceRoleName].
-///  * Is a [ChangeNotifier]: listeners are notified when the deployment
+///  * Has [ChangeListeners]: listeners are notified when the deployment
 ///    status or deployment changes.
 ///  * The [events] stream emits a [StudyStatusEvent] on each change,
 ///    including errors ([StudyStatusEventTypes.DeploymentError]).
 ///
 /// See also [StudyDeploymentProxy], which updates a study during deployment.
 /// CARP Mobile Sensing extends this class as `SmartphoneStudy`.
-class Study<TDeviceDeployment extends PrimaryDeviceDeployment> with ChangeNotifier {
+class Study<TDeviceDeployment extends PrimaryDeviceDeployment> with ChangeListeners {
   final DateTime _createdOn;
   final String _studyDeploymentId;
   final String _deviceRoleName;
   StudyDeploymentStatus? _deploymentStatus;
   TDeviceDeployment? _deployment;
+
+  /// The unique id of the study in the deployment service, if known.
+  String? studyId;
+
+  /// The ID of the participant in this study, if known.
+  String? participantId;
+
+  /// The role of the participant in this study, if known.
+  String? participantRoleName;
   final StreamController<StudyStatusEvent> _eventController = StreamController<StudyStatusEvent>.broadcast();
   late final void Function() _onDeploymentUpdated = () => deploymentUpdated();
 
