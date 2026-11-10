@@ -1,3 +1,7 @@
+## 3.0.0
+
+- **BREAKING** the package no longer depends on `cognition_package` (#669). An app that uses cognitive tests must add `cognition_package` itself and call `CognitionPackage.ensureInitialized()` before loading a protocol.
+
 ## 2.1.2
 
 - upgrade to `cognition_package` ^1.10.0

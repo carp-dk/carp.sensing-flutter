@@ -1,5 +1,3 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'package:carp_core/carp_core.dart' hide Smartphone;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_survey_package/survey.dart';
@@ -13,6 +11,9 @@ import 'package:cognition_package/cognition_package.dart';
 void main() async {
   // register this sampling package before using its measures
   SamplingPackageRegistry().register(SurveySamplingPackage());
+
+  // cognitive tests come from the cognition package, which the app adds itself
+  CognitionPackage.ensureInitialized();
 
   // Create a study protocol
   StudyProtocol protocol = StudyProtocol(ownerId: 'owner@dtu.dk', name: 'Survey Example');

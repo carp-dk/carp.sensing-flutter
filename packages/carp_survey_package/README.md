@@ -9,7 +9,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/sswpqGvnf5)
 
 This library contains a sampling package for collection of user-generated data to work with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework. Data is collected via [surveys](https://carp.cachet.dk/creating-a-survey/) and [cognitive tests](https://carp.cachet.dk/creating-cognitive-tests/).
-For this, this library uses the [CARP Research Package](https://carp.cachet.dk/research-package/) and the [CARP Cognition Package](https://carp.cachet.dk/cognition-package/).
+For this, this library uses the [CARP Research Package](https://carp.cachet.dk/research-package/). Cognitive tests come from the [CARP Cognition Package](https://carp.cachet.dk/cognition-package/), which is not a dependency of this package: add `cognition_package` to your app and call `CognitionPackage.ensureInitialized()` before loading a protocol with cognitive tests.
 This package supports the creation of a `RPAppTask` which can be added to a CAMS study protocol.
 
 Read more on the [Research Package API](https://carp.cachet.dk/research-package-api/) and how to [create a survey](https://carp.cachet.dk/creating-a-survey/) and how to [create a cognitive test](https://carp.cachet.dk/creating-cognitive-tests/) on the CARP website. For a demo of how to use this package and the `RPAppTask` in an app, see the [PulmonaryMonitor](https://github.com/cph-cachet/pulmonary_monitor_app) app.

@@ -14,8 +14,10 @@ part of 'survey.dart';
 /// Key points:
 ///  * The [SurveyUserTask] collects the data, not a probe. [SurveyProbe] is a
 ///    no-op placeholder for the [SURVEY] measure.
-///  * On registration, initializes Research Package and Cognition Package and
-///    registers [SurveyUserTaskFactory] with the [AppTaskController].
+///  * On registration, initializes Research Package and registers
+///    [SurveyUserTaskFactory] with the [AppTaskController].
+///  * To use cognitive tests, add the `cognition_package` to your app and call
+///    `CognitionPackage.ensureInitialized()` before loading a protocol.
 ///  * Registers [RPAppTask] and [RPTaskResultData] for JSON deserialization.
 class SurveySamplingPackage extends SmartphoneSamplingPackage {
   /// Measure type for the result of a survey ([RPTaskResultData]).
@@ -27,7 +29,6 @@ class SurveySamplingPackage extends SmartphoneSamplingPackage {
   @override
   void onRegister() {
     ResearchPackage.ensureInitialized();
-    CognitionPackage.ensureInitialized();
 
     FromJsonFactory().registerAll([
       RPAppTask(
