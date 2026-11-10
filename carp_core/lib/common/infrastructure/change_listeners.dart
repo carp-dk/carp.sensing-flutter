@@ -11,6 +11,12 @@ mixin ChangeListeners {
   /// Stop calling [listener].
   void removeListener(void Function() listener) => _listeners.remove(listener);
 
+  /// Is anyone listening?
+  bool get hasListeners => _listeners.isNotEmpty;
+
+  /// Remove all listeners.
+  void dispose() => _listeners.clear();
+
   /// Call all listeners. A listener that throws does not stop the others,
   /// and a listener removed by another one is not called.
   void notifyListeners() {

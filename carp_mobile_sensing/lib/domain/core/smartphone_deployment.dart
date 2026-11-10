@@ -23,7 +23,7 @@ part of '../../domain.dart';
 ///
 /// See also [SmartphoneDeploymentExecutor], which runs it.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class SmartphoneDeployment extends PrimaryDeviceDeployment with SmartphoneProtocolExtension {
+class SmartphoneDeployment extends PrimaryDeviceDeployment with SmartphoneProtocolExtension implements Listenable {
   late String _studyDeploymentId;
 
   /// The unique id of the study that this deployment is part of.

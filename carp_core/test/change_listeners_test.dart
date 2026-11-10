@@ -16,4 +16,14 @@ void main() {
 
     expect(called, ['last']);
   });
+
+  test('dispose removes all listeners', () {
+    final study = Study('1234', 'phone')..addListener(() => fail('called after dispose'));
+    expect(study.hasListeners, isTrue);
+
+    study.dispose();
+
+    expect(study.hasListeners, isFalse);
+    study.notifyListeners();
+  });
 }

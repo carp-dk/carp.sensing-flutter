@@ -21,7 +21,7 @@ part of '../../domain.dart';
 ///    state changes.
 ///
 /// See also [SmartphoneStudyController], which controls a running study.
-class SmartphoneStudy extends Study<SmartphoneDeployment> {
+class SmartphoneStudy extends Study<SmartphoneDeployment> implements Listenable {
   SmartphoneDeploymentExecutorSamplingState? _samplingState;
 
   /// The sampling state of this study, or `null` if not yet sampled.
