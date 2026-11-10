@@ -1,3 +1,7 @@
+## 2.3.0
+
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
+
 ## 2.2.0
 
 * **breaking** - replace the `flutter_activity_recognition` plugin with [`activity_recognition_flutter`](https://pub.dev/packages/activity_recognition_flutter) v. 6.1 for activity recognition (AR)

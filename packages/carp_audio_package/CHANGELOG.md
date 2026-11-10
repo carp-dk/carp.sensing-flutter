@@ -1,3 +1,7 @@
+## 2.2.0
+
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
+
 ## 2.1.1
 
   * upgrade to `noise_meter: ^6.0.0`

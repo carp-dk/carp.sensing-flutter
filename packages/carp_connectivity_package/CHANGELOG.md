@@ -1,3 +1,7 @@
+## 2.3.0
+
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
+
 ## 2.2.1
 
 * handle asynchronous Bluetooth scan start/stop failures with `catchError` and ignore late scan results after an error

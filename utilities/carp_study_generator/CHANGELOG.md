@@ -2,6 +2,7 @@
 
 * upgrade to `research_package` ^4.0.0, `cognition_package` ^1.10.1, `carp_survey_package` ^3.0.0, `carp_backend` ^3.0.0 and `carp_webservices` ^5.0.0 (#668)
 * removed the unused `carp_serializable`, `carp_connectivity_package` and `meta` dependencies (#666)
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
 
 ## 2.0.0
 

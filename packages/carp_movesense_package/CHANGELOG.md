@@ -1,5 +1,6 @@
-## 4.0.1
+## 4.1.0
 
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
 * register `MovesenseDeviceRegistration` for JSON, so a deployment holding a Movesense registration can be read again (#561)
 
 ## 4.0.0

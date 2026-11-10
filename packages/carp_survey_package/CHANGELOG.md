@@ -1,6 +1,7 @@
 ## 3.0.0
 
 - **BREAKING** the package no longer depends on `cognition_package` (#669). An app that uses cognitive tests must add `cognition_package` itself and call `CognitionPackage.ensureInitialized()` before loading a protocol.
+- upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
 
 ## 2.1.2
 

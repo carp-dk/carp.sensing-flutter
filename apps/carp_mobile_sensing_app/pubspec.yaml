@@ -18,8 +18,8 @@ dependencies:
 
   # CARP libraries. The local copies are used, see dependency_overrides below.
   carp_serializable: ^3.0.1
-  carp_core: ^2.3.0
-  carp_mobile_sensing: ^2.6.0
+  carp_core: ^3.0.0
+  carp_mobile_sensing: ^3.0.0
   carp_webservices: ^5.0.0
   carp_backend: ^3.0.0
 
@@ -32,11 +32,11 @@ dependencies:
   carp_esense_package: ^2.1.0
   carp_health_package: ^4.1.1
   carp_movesense_package: ^4.0.0
-  carp_movisens_package: ^2.1.1
+  carp_movisens_package: ^2.2.0
   carp_polar_package: ^2.1.0
   # iOS only - collects data from an Apple Watch via the AWARE watchOS framework.
   # Needs the companion watchOS app, see packages/carp_aware_package/doc/watchos_app_setup.md
-  carp_aware_package: ^1.0.0
+  carp_aware_package: ^1.2.0
 
   # Plugins the app itself uses. The plugins used by the CARP packages come with them.
   permission_handler: '>=11.0.0 <13.0.0'
