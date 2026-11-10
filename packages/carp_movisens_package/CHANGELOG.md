@@ -1,3 +1,7 @@
+## 2.1.1
+
+* removed the unused `convert` dependency (#666)
+
 ## 2.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package
