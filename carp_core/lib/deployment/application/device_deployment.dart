@@ -18,12 +18,17 @@ part of '../../deployment.dart';
 ///  * Built by [StudyDeployment.getDeviceDeploymentFor]: holds the tasks of the
 ///    primary device and of all devices connected to it in the protocol.
 ///  * [expectedDataStreams] is computed from the task controls on first access.
-///  * Is a [ChangeNotifier]; call [hasBeenUpdated] after changing it to notify
-///    listeners (e.g., the [Study]).
+///  * Call [hasBeenUpdated] after changing it. This calls [onUpdated], which
+///    the [Study] holding this deployment sets.
 ///
 /// CARP Mobile Sensing extends it as `SmartphoneDeployment`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class PrimaryDeviceDeployment with ChangeNotifier {
+class PrimaryDeviceDeployment {
+  /// Called by [hasBeenUpdated]. Set by the [Study] holding this deployment.
+  // ponytail: one callback, since a deployment has one study. Make it a stream if more need it.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  void Function()? onUpdated;
+
   /// The configuration for the primary device this deployment is intended for.
   PrimaryDeviceConfiguration deviceConfiguration;
 
@@ -119,8 +124,8 @@ class PrimaryDeviceDeployment with ChangeNotifier {
     return latestUpdate;
   }
 
-  /// Notify listeners that this deployment has been updated.
-  void hasBeenUpdated() => notifyListeners();
+  /// Tell the [Study] holding this deployment that it has been updated.
+  void hasBeenUpdated() => onUpdated?.call();
 
   factory PrimaryDeviceDeployment.fromJson(Map<String, dynamic> json) => _$PrimaryDeviceDeploymentFromJson(json);
   Map<String, dynamic> toJson() => _$PrimaryDeviceDeploymentToJson(this);
