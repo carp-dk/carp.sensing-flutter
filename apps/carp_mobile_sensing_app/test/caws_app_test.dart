@@ -182,14 +182,13 @@ void main() {
 
       print(
         'Marking deployment as deployed - '
-        'deploymentId: ${deployment.studyDeploymentId}, '
-        'deviceRoleName: ${deployment.deviceRoleName}, '
+        'deploymentId: $testDeploymentId, '
         'lastUpdatedOn: ${deployment.lastUpdatedOn}',
       );
 
       final status = await CarpDeploymentService().deviceDeployed(
-        deployment.studyDeploymentId,
-        deployment.deviceRoleName,
+        testDeploymentId,
+        "Smartphone",
         deployment.lastUpdatedOn,
       );
 
