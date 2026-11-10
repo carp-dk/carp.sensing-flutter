@@ -35,7 +35,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:light/light.dart';
 import 'package:pedometer/pedometer.dart' as pedometer;
 import 'package:statistics/statistics.dart';
-import 'package:sample_statistics/sample_statistics.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:battery_plus/battery_plus.dart' as battery;
 import 'package:screen_state/screen_state.dart';

@@ -1,3 +1,9 @@
+## 2.6.0
+
+- require `carp_core` ^2.3.0. `studyId`, `participantId` and `participantRoleName` of `SmartphoneStudy` are now inherited from `Study`.
+- `SmartphoneStudy.deviceDeploymentReceived()` converts a plain `PrimaryDeviceDeployment` to a `SmartphoneDeployment`, so a deployment service like `carp_webservices` does not need to know CAMS
+- removed the `sample_statistics` dependency. The inter-quartile range of the sensor features is computed in the package, with the same results. (#666)
+
 ## 2.5.1
 
 - fix: a study deployment stopped on the server did not stop the study on the phone. Once the study's status is `Stopped`, the study controller removes the study's tasks and disposes its executor, so nothing resumes sampling again - not even a device reconnecting. Needs `carp_core` 2.2.2.

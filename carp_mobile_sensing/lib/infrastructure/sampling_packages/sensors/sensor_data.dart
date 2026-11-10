@@ -145,10 +145,6 @@ class AccelerationFeatures extends SensorData {
     final yStatistics = yList.statistics;
     final zStatistics = zList.statistics;
 
-    final xStats = Stats(xList);
-    final yStats = Stats(yList);
-    final zStats = Stats(zList);
-
     var features = AccelerationFeatures()
       ..count = n
       // mean
@@ -193,9 +189,9 @@ class AccelerationFeatures extends SensorData {
     features.zNegCount = zList.where((z) => z < 0).length;
 
     // inter-quartile range
-    features.xIqr = xStats.quartile3 - xStats.quartile1;
-    features.yIqr = yStats.quartile3 - yStats.quartile1;
-    features.zIqr = zStats.quartile3 - zStats.quartile1;
+    features.xIqr = interQuartileRange(xList);
+    features.yIqr = interQuartileRange(yList);
+    features.zIqr = interQuartileRange(zList);
 
     // values above mean
     features.xAboveMean = xList.where((x) => x > xStatistics.mean).length;
@@ -266,4 +262,14 @@ class StepEvent extends SensorData {
   factory StepEvent.fromJson(Map<String, dynamic> json) => FromJsonFactory().fromJson<StepEvent>(json);
   @override
   Map<String, dynamic> toJson() => _$StepEventToJson(this);
+}
+
+/// The inter-quartile range of a non-empty [sample]. The quartiles are the
+/// medians of the lower and upper half, where an odd sample has its median in both.
+@visibleForTesting
+num interQuartileRange(List<num> sample) {
+  final sorted = [...sample]..sort();
+  final half = (sorted.length + 1) ~/ 2;
+  num quartile(int i) => half.isEven ? (sorted[i - 1] + sorted[i]) / 2 : sorted[i];
+  return quartile(sorted.length ~/ 2 + half ~/ 2) - quartile(half ~/ 2);
 }
