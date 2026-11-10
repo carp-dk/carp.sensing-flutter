@@ -6,7 +6,6 @@ import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_backend/carp_backend.dart';
 import 'package:flutter/material.dart';
-import 'package:research_package/model.dart';
 
 void main() async {
   // -----------------------------------------------
@@ -97,24 +96,6 @@ void main() async {
   /// buffered locally on the phone should be deleted when uploaded.
   streamingEndPoint = CarpDataEndPoint(uploadInterval: 20, onlyUploadOnWiFi: true, deleteWhenUploaded: false);
 
-  // Using the "old" DataPoint endpoint for uploading batches of data points.
-  var dataPointEndPoint = CarpDataEndPoint(uploadMethod: CarpUploadMethod.datapoint);
-
-  // var dataPointEndPoint = CarpDataEndPoint(
-  //   uploadMethod: CarpUploadMethod.datapoint,
-  //   name: 'CAWS Staging Server',
-  //   // uri: 'http://staging.carp.cachet.dk:8080',
-  //   // clientId: 'carp',
-  //   // clientSecret: 'a_secret',
-  //   // email: 'username@cachet.dk',
-  //   // password: 'password',
-  // );
-
-  // Note that if a user is already authenticated to a CAWS server - for example
-  // based on the download of invitations and deployments - specification of server
-  // and authentication info is not needed in the CarpDataEndPoint.
-  var endpoint = CarpDataEndPoint(uploadMethod: CarpUploadMethod.datapoint);
-
   // Using the file method would upload SQLite db files.
   var fileEndPoint = CarpDataEndPoint(uploadMethod: CarpUploadMethod.file);
 
@@ -155,19 +136,27 @@ void main() async {
   InformedConsentManager icManager = CarpResourceManager();
   icManager.initialize();
 
-  // Create a simple informed consent...
-  final consent = RPOrderedTask(
-    identifier: '12',
-    steps: [
-      RPInstructionStep(identifier: "1", title: "Welcome!")..text = "Welcome to this study! ",
-      RPCompletionStep(identifier: "2", title: "Thank You!", text: "We saved your consent document."),
+  // The consent document is plain JSON. Build it with the research_package
+  // (`RPOrderedTask(...).toJson()`) or write it by hand.
+  final consent = <String, dynamic>{
+    '__type': 'RPOrderedTask',
+    'identifier': '12',
+    'steps': [
+      {'__type': 'RPInstructionStep', 'identifier': '1', 'title': 'Welcome!', 'text': 'Welcome to this study!'},
+      {
+        '__type': 'RPCompletionStep',
+        'identifier': '2',
+        'title': 'Thank You!',
+        'text': 'We saved your consent document.',
+      },
     ],
-  );
+  };
   // .. and upload it to CAWS.
   await icManager.setConsentDocument(consent);
 
-  // Get the informed consent back as a RPOrderedTask, if available.
-  RPOrderedTask? myConsent = await icManager.getConsentDocument();
+  // Get the consent document back, if available.
+  // Show it with `RPOrderedTask.fromJson(myConsent)` from the research_package.
+  final myConsent = await icManager.getConsentDocument();
 
   // --------------------------------------------------
   // HANDLING MESSAGES CARP

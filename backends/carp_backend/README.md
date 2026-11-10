@@ -148,24 +148,22 @@ Here is an example of uploading and downloading an informed consent document to 
 InformedConsentManager icManager = CarpResourceManager();
 icManager.initialize();
 
-// Create a simple informed consent...
-final consent = RPOrderedTask(
-  identifier: '12',
-  steps: [
-    RPInstructionStep(identifier: "1", title: "Welcome!")
-      ..text = "Welcome to this study! ",
-    RPCompletionStep(
-      identifier: "2",
-      title: "Thank You!",
-      text: "We saved your consent document.",
-    ),
+// The consent document is plain JSON. Build it with the research_package
+// (`RPOrderedTask(...).toJson()`) or write it by hand.
+final consent = <String, dynamic>{
+  '__type': 'RPOrderedTask',
+  'identifier': '12',
+  'steps': [
+    {'__type': 'RPInstructionStep', 'identifier': '1', 'title': 'Welcome!', 'text': 'Welcome to this study!'},
+    {'__type': 'RPCompletionStep', 'identifier': '2', 'title': 'Thank You!', 'text': 'We saved your consent document.'},
   ],
-);
+};
 // .. and upload it to CAWS.
 await icManager.setConsentDocument(consent);
 
-// Get the informed consent back as a RPOrderedTask, if available.
-RPOrderedTask? myConsent = await icManager.getConsentDocument();
+// Get the consent document back, if available.
+// Show it with `RPOrderedTask.fromJson(myConsent)` from the research_package.
+final myConsent = await icManager.getConsentDocument();
 ```
 
 Note that we distinguish between a **"consent document"** and the **"informed consent"**.
@@ -237,10 +235,9 @@ if (localizationManager.isSupported(locale)) {
 
 Configuration of data upload is done as a [`DataEndPoint`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/DataEndPoint-class.html), which is part of a [`SmartphoneStudyProtocol`](https://pub.dev/documentation/carp_mobile_sensing/latest/domain/SmartphoneStudyProtocol-class.html).
 
-CAWS and hence this plugin supports three methods of data upload:
+CAWS and hence this plugin supports two methods of data upload:
 
 * The (default) data stream upload using the [CARP Core Data subsystem](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-data.md)
-* The (legacy) [`DataPoint`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/DataPoint-class.html) upload
 * File upload of raw SQLite `.db` files
 
 ### Specifying a CARP Data Endpoint
@@ -252,28 +249,20 @@ Create a `CarpDataEndPoint` that specify which method to use for uploading data,
 var streamingEndPoint = CarpDataEndPoint();
 ```
 
-Upload methods are defined in the `uploadMethod` property. A data point upload method is created like this:
-
-```dart
-// Using the "legacy" DataPoint endpoint for uploading batches of data points.
-var dataPointEndPoint =
-    CarpDataEndPoint(uploadMethod: CarpUploadMethod.datapoint);
-```
-
-Similarly, an endpoint uploading the raw SQLite db files can be specified:
+The upload method is set in the `uploadMethod` property. An endpoint uploading the raw SQLite db files is specified like this:
 
 ```dart
 // Using the file method would upload SQLite db files.
 var fileEndPoint = CarpDataEndPoint(uploadMethod: CarpUploadMethod.file);
 ```
 
-There are some details in how the three different types of endpoints work:
+There are some details in how the two types of endpoints work:
 
 * **Streaming** - Using the streaming data method requires that the study deployment has been obtained from CAWS via an invitation, as shown above. This ensures that there is a linkage between the study deployment ID from the deployment and the ID in the data being streamed back to CAWS.
 
-* **Data Point** & **File** - The data point and file endpoints need the study ID and study deployment ID. This can be obtained via the invitation (as above), but it can also be specified when creating the `CarpApp` configuration. Hence, the data point and file endpoints can be used if these IDs are known, e.g., are static to the app.
+* **File** - The file endpoint needs the study ID and study deployment ID. This can be obtained via the invitation (as above), but it can also be specified when creating the `CarpApp` configuration. Hence, the file endpoint can be used if these IDs are known, e.g., are static to the app.
 
-For all three upload types (stream, data point, and file), additional parameters can be specified for a an endpoint.
+For both upload types (stream and file), additional parameters can be specified for a an endpoint.
 
 ```dart
 /// Specify parameters on upload interval (in minutes), if upload only

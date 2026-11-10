@@ -33,8 +33,7 @@ class CarpDataManagerFactory implements DataManagerFactory {
 ///  * Measurements are buffered in a local [DataStreamBuffer] and uploaded every
 ///    [CarpDataEndPoint.uploadInterval] minutes (every minute in debug mode).
 ///  * [CarpDataEndPoint.uploadMethod] selects the upload method:
-///    [CarpUploadMethod.stream] (default) or [CarpUploadMethod.datapoint].
-///    [CarpUploadMethod.file] is not implemented.
+///    [CarpUploadMethod.stream] (default). [CarpUploadMethod.file] is not implemented.
 ///  * Uploads are skipped when offline, when [CarpDataEndPoint.onlyUploadOnWiFi]
 ///    is set and there is no WiFi, or when no user is authenticated in
 ///    [CarpAuthService]. Data stays in the buffer until the next try.
@@ -97,6 +96,9 @@ class CarpDataManager extends AbstractDataManager {
     carpEndPoint = dataEndPoint as CarpDataEndPoint;
 
     assert(CarpService().isConfigured, 'CarpService is not configured -- cannot upload data to this end point.');
+
+    // CAWS services log at the same level as CAMS.
+    CarpLog.level = CarpLogLevel.values.byName(Settings().debugLevel.name);
 
     await buffer.initialize(deployment, measurements);
 
@@ -169,10 +171,6 @@ class CarpDataManager extends AbstractDataManager {
           await CarpDataStreamService().appendToDataStreams(studyDeploymentId, batches, compress: compress);
           addEvent(DataManagerEvent(CarpDataManagerEventTypes.dataStreamAppended));
           break;
-        case CarpUploadMethod.datapoint:
-          await uploadDataStreamBatchesAsDataPoint(batches);
-          addEvent(DataManagerEvent(CarpDataManagerEventTypes.dataPointsBatchUploaded));
-          break;
         case CarpUploadMethod.file:
           // TODO - implement file method.
           warning('$runtimeType - CarpUploadMethod.file not supported (yet).');
@@ -202,41 +200,6 @@ class CarpDataManager extends AbstractDataManager {
     } catch (error) {
       warning('$runtimeType - Data upload failed - $error');
     }
-  }
-
-  DataPointReference? _dataPointReference;
-
-  /// The CAWS DataPoint endpoint used by [CarpUploadMethod.datapoint].
-  DataPointReference get dataPointReference => _dataPointReference ??= CarpService().dataPointReference();
-
-  /// Converts all measurements in [batches] to [DataPoint]s and uploads them
-  /// using the CAWS DataPoint batch endpoint.
-  ///
-  /// Used by [CarpUploadMethod.datapoint].
-  Future<void> uploadDataStreamBatchesAsDataPoint(List<DataStreamBatch> batches) async {
-    final List<DataPoint> dataPoints = [];
-    for (var batch in batches) {
-      for (var measurement in batch.measurements) {
-        var dataPoint = DataPoint(
-          DataPointHeader(
-            studyId: deployment.studyDeploymentId,
-            userId: CarpService().study?.participantId,
-            dataFormat: measurement.dataType,
-            deviceRoleName: measurement.taskControl?.targetDevice?.roleName ?? deployment.deviceConfiguration.roleName,
-            triggerId: measurement.taskControl?.triggerId.toString() ?? '0',
-            startTime: DateTime.fromMicrosecondsSinceEpoch(measurement.sensorStartTime).toUtc(),
-            endTime: measurement.sensorEndTime == null
-                ? null
-                : DateTime.fromMicrosecondsSinceEpoch(measurement.sensorEndTime!).toUtc(),
-          ),
-          measurement.data,
-        );
-        dataPoints.add(dataPoint);
-      }
-    }
-
-    info('$runtimeType - Batch uploading data points to CAWS, N=${dataPoints.length}');
-    dataPointReference.batch(dataPoints);
   }
 
   /// Uploads the file referenced by [data] to CAWS file storage.
@@ -305,9 +268,6 @@ class CarpDataManager extends AbstractDataManager {
 
 /// The types of [DataManagerEvent]s emitted by a [CarpDataManager].
 class CarpDataManagerEventTypes extends DataManagerEventTypes {
-  /// A batch of data points was uploaded using [CarpUploadMethod.datapoint].
-  static const String dataPointsBatchUploaded = 'data_points_batch_uploaded';
-
   /// Buffered data was appended to the CAWS data streams.
   static const String dataStreamAppended = 'data_stream_appended';
 

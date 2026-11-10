@@ -34,7 +34,6 @@ import 'package:carp_serializable/carp_serializable.dart';
 import 'package:carp_core/carp_core.dart';
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
-import 'package:research_package/research_package.dart';
 
 part 'carp_data_manager.dart';
 part 'data_stream_buffer.dart';
@@ -65,6 +64,8 @@ part 'carp_backend.g.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class CarpDataEndPoint extends DataEndPoint {
   /// The method used to upload to CARP. See [CarpUploadMethod] for options.
+  /// An unknown method in JSON, like the removed `datapoint`, is read as `stream`.
+  @JsonKey(unknownEnumValue: CarpUploadMethod.stream)
   CarpUploadMethod uploadMethod;
 
   /// A human-readable name of the CAWS endpoint.
@@ -118,9 +119,6 @@ class CarpDataEndPoint extends DataEndPoint {
 enum CarpUploadMethod {
   /// Upload data as data streams (the default method).
   stream,
-
-  /// Upload measurements as data points using the deprecated DataPoint endpoint.
-  datapoint,
 
   /// Collect measurements in a SQLite DB file and upload as a `db` file.
   ///

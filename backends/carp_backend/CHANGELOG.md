@@ -1,3 +1,11 @@
+## 3.0.0
+
+* **BREAKING** the package no longer depends on `research_package` (#663). `InformedConsentManager` handles the consent document as JSON: `getConsentDocument()` returns a `Map<String, dynamic>?` and `setConsentDocument()` takes one. Use `RPOrderedTask.fromJson()` and `toJson()` in the app.
+* **BREAKING** removed the deprecated DataPoint upload: `CarpUploadMethod.datapoint` and `CarpDataManagerEventTypes.dataPointsBatchUploaded` (#586). A protocol that still says `"uploadMethod": "datapoint"` is read as `stream`.
+* upgrade to `carp_webservices` ^5.0.0, `carp_mobile_sensing` ^2.6.0 and `carp_core` ^2.3.0
+* `CarpDataManager` sets the log level of `carp_webservices` (`CarpLog.level`) from the CAMS `Settings().debugLevel` when it is configured. Set `CarpLog.level` yourself to change it earlier.
+* removed the unused `meta` dependency (#666)
+
 ## 2.1.2
 
 - upgrade to `research_package` ^4.0.0

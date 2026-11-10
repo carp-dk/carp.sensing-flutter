@@ -40,14 +40,13 @@ class CarpResourceManager implements InformedConsentManager, LocalizationManager
   CarpResourceManager._() {
     // Initialization of serialization
     CarpMobileSensing.ensureInitialized();
-    ResearchPackage.ensureInitialized();
   }
 
   // --------------------------------------------------------------------------
 
   String? _cacheResourcePath;
 
-  final Map<Type, String> _resourceNames = {RPOrderedTask: 'informed_consent'};
+  static const _consent = 'informed_consent';
 
   void _assertCarpService() {
     assert(
@@ -64,23 +63,23 @@ class CarpResourceManager implements InformedConsentManager, LocalizationManager
   String get _studyDeploymentId => CarpService().study!.studyDeploymentId;
 
   /// The path for the [resource] at the CARP server
-  String _getResourcePath(Type resource) => '$RESOURCE_PATH/${_resourceNames[resource]}';
+  String _getResourcePath(String resource) => '$RESOURCE_PATH/$resource';
 
   /// The full path and filename of the local cache of the [resource].
   /// Create the directory if it does not exist.
   /// The filename is the name of the resource, e.g. "informed_consent.json"
   /// and the file is stored in the "resources" directory under the current study deployment.
-  Future<String> _cacheFilename(Type resource) async {
+  Future<String> _cacheFilename(String resource) async {
     if (_cacheResourcePath == null) {
       final directory = await Directory(
         '${await Settings().getDeploymentBasePath(_studyDeploymentId)}/$RESOURCE_PATH',
       ).create(recursive: true);
       _cacheResourcePath = directory.path;
     }
-    return '$_cacheResourcePath/${_resourceNames[resource]}.json';
+    return '$_cacheResourcePath/$resource.json';
   }
 
-  Future<Map<String, dynamic>?> _getResource(Type resource, {bool refresh = false}) async {
+  Future<Map<String, dynamic>?> _getResource(String resource, {bool refresh = false}) async {
     info("Getting resource of type '$resource', refresh: $refresh.");
 
     Map<String, dynamic>? result;
@@ -125,18 +124,18 @@ class CarpResourceManager implements InformedConsentManager, LocalizationManager
     return result;
   }
 
-  Future<bool> _setResource(Serializable resource) async {
+  Future<bool> _setResource(String resource, Map<String, dynamic> data) async {
     _assertCarpService();
-    info("Uploading resource: $resource");
+    info("Uploading resource '$resource'.");
 
-    DocumentReference reference = CarpService().document(_getResourcePath(resource.runtimeType));
+    DocumentReference reference = CarpService().document(_getResourcePath(resource));
     await reference.get();
-    await reference.setData(resource.toJson());
+    await reference.setData(data);
 
     return true;
   }
 
-  Future<bool> _deleteResource(Type resource) async {
+  Future<bool> _deleteResource(String resource) async {
     _assertCarpService();
     info("Deleting resource of type '$resource'.");
 
@@ -149,7 +148,7 @@ class CarpResourceManager implements InformedConsentManager, LocalizationManager
     return (document == null);
   }
 
-  Future<void> _removeCachedResource(Type resource) async {
+  Future<void> _removeCachedResource(String resource) async {
     _assertCarpService();
     info("Removing cached resource of type '$resource'.");
 
@@ -175,35 +174,19 @@ class CarpResourceManager implements InformedConsentManager, LocalizationManager
   // --------------------------------------------------------------------------
 
   @override
-  RPOrderedTask? informedConsent;
+  Map<String, dynamic>? informedConsent;
 
   @override
-  Future<RPOrderedTask?> getConsentDocument({bool refresh = false}) async {
-    // make sure json serialization for RP classes is initialized
-    ResearchPackage.ensureInitialized();
-    Map<String, dynamic>? json = await _getResource(RPOrderedTask, refresh: refresh);
-
-    if (json == null) return null;
-
-    RPOrderedTask? informedConsent;
-
-    try {
-      informedConsent = RPOrderedTask.fromJson(json);
-    } catch (error) {
-      warning('$runtimeType - Error parsing informed consent - $error');
-    }
-
-    return informedConsent;
-  }
+  Future<Map<String, dynamic>?> getConsentDocument({bool refresh = false}) => _getResource(_consent, refresh: refresh);
 
   @override
-  Future<bool> setConsentDocument(RPOrderedTask informedConsent) async {
+  Future<bool> setConsentDocument(Map<String, dynamic> informedConsent) async {
     this.informedConsent = informedConsent;
-    return await _setResource(informedConsent);
+    return await _setResource(_consent, informedConsent);
   }
 
   @override
-  Future<bool> deleteConsentDocument() async => await _deleteResource(RPOrderedTask);
+  Future<bool> deleteConsentDocument() async => await _deleteResource(_consent);
 
   // --------------------------------------------------------------------------
   // LOCALIZATION
