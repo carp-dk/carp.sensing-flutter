@@ -18,12 +18,12 @@ part of '../../deployment.dart';
 ///  * Built by [StudyDeployment.getDeviceDeploymentFor]: holds the tasks of the
 ///    primary device and of all devices connected to it in the protocol.
 ///  * [expectedDataStreams] is computed from the task controls on first access.
-///  * Has [ChangeListeners]; call [hasBeenUpdated] after changing it to notify
+///  * Is a [ChangeNotifier]; call [hasBeenUpdated] after changing it to notify
 ///    listeners (e.g., the [Study]).
 ///
 /// CARP Mobile Sensing extends it as `SmartphoneDeployment`.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class PrimaryDeviceDeployment with ChangeListeners {
+class PrimaryDeviceDeployment with ChangeNotifier {
   /// The configuration for the primary device this deployment is intended for.
   PrimaryDeviceConfiguration deviceConfiguration;
 

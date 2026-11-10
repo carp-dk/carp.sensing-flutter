@@ -1,10 +1,6 @@
 ## 2.3.0
 
-* pure Dart: the package no longer depends on the Flutter SDK (#665)
-  * `Study` and `PrimaryDeviceDeployment` no longer mix in Flutter's `ChangeNotifier`. They use the new `ChangeListeners` mixin, which has the same `addListener()`, `removeListener()`, `notifyListeners()`, `hasListeners` and `dispose()`.
-  * They are no longer a Flutter `Listenable`. `SmartphoneStudy` and `SmartphoneDeployment` in `carp_mobile_sensing` 2.6.0 still are.
 * `Study` now holds `studyId`, `participantId` and `participantRoleName` (moved up from `SmartphoneStudy` in `carp_mobile_sensing`)
-* require `carp_serializable` ^3.0.1
 
 ## 2.2.2
 

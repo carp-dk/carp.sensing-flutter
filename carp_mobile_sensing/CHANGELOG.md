@@ -2,7 +2,6 @@
 
 - require `carp_core` ^2.3.0. `studyId`, `participantId` and `participantRoleName` of `SmartphoneStudy` are now inherited from `Study`.
 - `SmartphoneStudy.deviceDeploymentReceived()` converts a plain `PrimaryDeviceDeployment` to a `SmartphoneDeployment`, so a deployment service like `carp_webservices` does not need to know CAMS
-- `SmartphoneStudy` and `SmartphoneDeployment` implement Flutter's `Listenable`, since `Study` and `PrimaryDeviceDeployment` in `carp_core` 2.3.0 are pure Dart
 - removed the `sample_statistics` dependency. The inter-quartile range of the sensor features is computed in the package, with the same results. (#666)
 
 ## 2.5.1

@@ -1,7 +1,7 @@
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
 
-include: package:lints/recommended.yaml
+include: package:flutter_lints/flutter.yaml
 formatter:
   page_width: 120
 

@@ -26,6 +26,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/material.dart' show ChangeNotifier;
 import 'package:meta/meta.dart';
 import 'package:carp_core/common.dart';
 import 'package:carp_core/deployment.dart';
