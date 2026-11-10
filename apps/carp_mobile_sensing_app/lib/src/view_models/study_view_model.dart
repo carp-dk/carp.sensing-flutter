@@ -14,6 +14,12 @@ class StudyViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+  @override
+  void dispose() {
+    _studyEvents?.cancel();
+    super.dispose();
+  }
+
   SmartphoneDeployment? get deployment => _study?.deployment;
   Image get image => Image.asset('assets/study.png');
   String get title => _study == null
