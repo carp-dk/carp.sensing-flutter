@@ -58,6 +58,16 @@ void main() {
     expect((requests.last['registration'] as Map)[Serializable.CLASS_IDENTIFIER], core.jsonType);
   });
 
+  test('the deployment reference registers a default registration if none is given', () async {
+    reply = (StudyDeploymentStatus(studyDeploymentId: '1234')..createdOn = DateTime.now()).toJson();
+
+    await withCaws(() => CarpDeploymentService().deployment('1234', 'phone').registerDevice());
+
+    final sent = requests.last['registration'] as Map<String, dynamic>;
+    expect(sent[Serializable.CLASS_IDENTIFIER], DefaultDeviceRegistration().jsonType);
+    expect(sent['deviceId'], isNotEmpty);
+  });
+
   test('the deployment from CAWS becomes a SmartphoneDeployment in a SmartphoneStudy', () async {
     final phone = Smartphone();
     reply = PrimaryDeviceDeployment(deviceConfiguration: phone, registration: DefaultDeviceRegistration()).toJson();

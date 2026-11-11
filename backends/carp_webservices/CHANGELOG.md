@@ -6,7 +6,7 @@ The package now only depends on `carp_core`. It no longer depends on `carp_mobil
 * **BREAKING** removed `CarpParticipationService().getStudyInvitation(context)` and the invitation dialog. Use `getActiveParticipationInvitations()` and show your own dialog. The example app has one.
 * **BREAKING** `CarpDeploymentService().getDeviceDeploymentFor()` and `DeploymentReference.get()` return a CARP Core `PrimaryDeviceDeployment`, not a `SmartphoneDeployment`. `SmartphoneStudy` in `carp_mobile_sensing` 2.6.0 does the conversion.
 * **BREAKING** `CarpBaseService.study` and `configure()` take a CARP Core `Study`. A `SmartphoneStudy` still works, since it is a `Study`.
-* **BREAKING** `DeploymentReference.registerDevice()` needs a `DeviceRegistration`. It no longer creates one from the phone's hardware info.
+* `DeploymentReference.registerDevice()` without a registration now registers a `DefaultDeviceRegistration` with a random device ID, not the phone's hardware ID (which needs CAMS). Pass a registration to set the ID, e.g. `DefaultDeviceRegistration(deviceId: DeviceInfoService().deviceID)`.
 * **BREAKING** removed `DeploymentReference.registeredDeviceId`
 * a device registration which is not a CARP Core type is sent as a `DefaultDeviceRegistration`. This now also holds for `DeploymentReference.registerDevice()`.
 * logging no longer follows the CAMS `Settings().debugLevel`. Set `CarpLog.level` (default `CarpLogLevel.warning`). `carp_backend` 3.0.0 sets it from the CAMS debug level when its data manager is configured.

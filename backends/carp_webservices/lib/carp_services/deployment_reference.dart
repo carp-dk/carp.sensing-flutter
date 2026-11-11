@@ -22,7 +22,7 @@ part of 'carp_services.dart';
 ///
 /// ```dart
 /// final reference = CarpDeploymentService().deployment(studyDeploymentId);
-/// await reference.registerDevice(DefaultDeviceRegistration());
+/// await reference.registerDevice();
 /// final deployment = await reference.get();
 /// await reference.deployed();
 /// ```
@@ -63,12 +63,19 @@ class DeploymentReference extends RPCCarpReference {
   /// Registers this device as [deviceRoleName] with [registration] for this
   /// deployment in CAWS.
   ///
+  /// If [registration] is `null`, a [DefaultDeviceRegistration] with a random
+  /// device ID is used.
+  ///
   /// Returns the updated study deployment status if the registration is successful.
   /// Throws a [CarpServiceException] if not.
-  Future<StudyDeploymentStatus> registerDevice(DeviceRegistration registration) async {
+  Future<StudyDeploymentStatus> registerDevice([DeviceRegistration? registration]) async {
     assert(deviceRoleName.isNotEmpty, 'deviceRoleName has to be specified when registering a device in CARP.');
 
-    return _status = await CarpDeploymentService().registerDevice(studyDeploymentId, deviceRoleName, registration);
+    return _status = await CarpDeploymentService().registerDevice(
+      studyDeploymentId,
+      deviceRoleName,
+      registration ?? DefaultDeviceRegistration(),
+    );
   }
 
   /// Unregisters [deviceRoleName] for this deployment in CAWS.
