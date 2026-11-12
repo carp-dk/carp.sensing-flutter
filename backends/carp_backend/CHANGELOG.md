@@ -1,3 +1,7 @@
+## 2.1.2
+
+- upgrade to `research_package` ^4.0.0
+
 ## 2.1.1
 
 - upgrade to `research_package` ^3.0.0
