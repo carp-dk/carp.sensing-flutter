@@ -1,5 +1,6 @@
 ## 2.3.0
 
+* `DeviceConfiguration.acceptedRegistration()` returns a registration in the form the deployment service accepts for the device. CARP Core only accepts a `DefaultDeviceRegistration` for its `Smartphone` and `CustomProtocolDevice`, which protocols from CAMS 1.x also use. `StudyDeploymentProxy.tryDeployment()` uses it. (#561)
 * `Study` now holds `studyId`, `participantId` and `participantRoleName` (moved up from `SmartphoneStudy` in `carp_mobile_sensing`)
 
 ## 2.2.2

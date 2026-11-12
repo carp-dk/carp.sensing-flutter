@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:carp_core/carp_core.dart' show DeviceRegistration, DefaultDeviceRegistration;
 import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_movesense_package/carp_movesense_package.dart';
 import 'package:movesense_plus/movesense_plus.dart' as ms;
@@ -112,6 +113,20 @@ void main() {
 
     final info = await (MovesenseDeviceProbe()..deviceManager = manager).getMeasurement();
     expect((info!.data as MovesenseDeviceInformation).hardwareType, 'H4');
+  });
+
+  test('a stored registration decodes and configures the device manager', () {
+    final stored = MovesenseDeviceRegistration(bleAddress: '0C:8C:DC:1B:23:BF', bleName: 'Movesense 233830000816');
+    final decoded = DeviceRegistration.fromJson(stored.toJson());
+    expect(decoded, isA<MovesenseDeviceRegistration>());
+
+    final manager = MovesenseDeviceManager(MovesenseDevice.DEVICE_TYPE)..configure(MovesenseDevice(), decoded);
+    expect(manager.bleAddress, '0C:8C:DC:1B:23:BF');
+
+    // a registration of another type, e.g. stored by an older CAMS, is ignored
+    final old = MovesenseDeviceManager(MovesenseDevice.DEVICE_TYPE)
+      ..configure(MovesenseDevice(), DefaultDeviceRegistration(deviceId: '0C:8C:DC:1B:23:BF'));
+    expect(old.registration, isNull);
   });
 
   test('a connection error before connect returns leaves the device disconnected', () async {

@@ -30,9 +30,7 @@ abstract class CamsDeviceRegistration extends DeviceRegistration {
 
   /// Convert this [CamsDeviceRegistration] to a [DefaultDeviceRegistration]
   /// with the same base properties.
-  ///
-  /// This is needed for registering the device in the [DeploymentService]
-  /// due to issue #561 - right now CAWS only can process a [DefaultDeviceRegistration].
+  @Deprecated('Not needed since CAWS runs CARP Core 1.3. Use DeviceConfiguration.acceptedRegistration().')
   DefaultDeviceRegistration toDefaultDeviceRegistration() => DefaultDeviceRegistration(
     deviceId: deviceId,
     deviceDisplayName: deviceDisplayName,

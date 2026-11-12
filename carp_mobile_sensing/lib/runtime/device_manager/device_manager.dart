@@ -164,15 +164,17 @@ abstract class DeviceManager<
   /// information about the real device, e.g., the BLE address of a Bluetooth
   /// device. Calls [onConfigure] and sets [status] to
   /// [DeviceStatus.configured]. Does nothing if already configured.
+  /// A [registration] of another type than [TRegistration] is ignored, e.g. a
+  /// [DefaultDeviceRegistration] stored by an older version of CAMS.
   @nonVirtual
-  void configure(TDeviceConfiguration configuration, [TRegistration? registration]) {
+  void configure(TDeviceConfiguration configuration, [DeviceRegistration? registration]) {
     // fast out if already configured
     if (isConfigured) return;
 
     info('$runtimeType - Configuring, type: $typeName, configuration: $configuration, registration: $registration');
 
     _configuration = configuration;
-    _registration = registration;
+    _registration = registration is TRegistration ? registration : null;
     onConfigure();
 
     // A device connecting after the study has started has its executors paused,

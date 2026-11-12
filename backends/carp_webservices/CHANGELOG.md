@@ -8,7 +8,7 @@ The package now only depends on `carp_core`. It no longer depends on `carp_mobil
 * **BREAKING** `CarpBaseService.study` and `configure()` take a CARP Core `Study`. A `SmartphoneStudy` still works, since it is a `Study`.
 * `DeploymentReference.registerDevice()` without a registration now registers a `DefaultDeviceRegistration` with a random device ID, not the phone's hardware ID (which needs CAMS). Pass a registration to set the ID, e.g. `DefaultDeviceRegistration(deviceId: DeviceInfoService().deviceID)`.
 * **BREAKING** removed `DeploymentReference.registeredDeviceId`
-* a device registration which is not a CARP Core type is sent as a `DefaultDeviceRegistration`. This now also holds for `DeploymentReference.registerDevice()`.
+* `registerDevice()` sends a device registration as it is. The workaround for issue #561, which sent any non CARP Core registration as a `DefaultDeviceRegistration`, is removed. It needs CAWS 2.5.0 or later (CARP Core 1.3). CAWS takes only a `DefaultDeviceRegistration` for a CARP Core `Smartphone` or `CustomProtocolDevice` (e.g. in a 1.x protocol); `DeviceConfiguration.acceptedRegistration()` in `carp_core` does this conversion.
 * logging no longer follows the CAMS `Settings().debugLevel`. Set `CarpLog.level` (default `CarpLogLevel.warning`). `carp_backend` 3.0.0 sets it from the CAMS debug level when its data manager is configured.
 * removed the unused `url_launcher` and `meta` dependencies (#666)
 * require `carp_core` ^2.3.0

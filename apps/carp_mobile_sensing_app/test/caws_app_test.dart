@@ -130,10 +130,8 @@ void main() {
       print(toJsonString(status));
     });
 
-    // The following tests check if we can use the custom SmartphoneRegistration.
-    // This fails - see issue #561.
-    // So - right now, there is a workaround, where we use the DefaultDeviceRegistration
-    // see [CamsDeviceRegistration.toDefaultDeviceRegistration] for more details.
+    // The following tests check that CAWS takes the custom CAMS registrations,
+    // which needs CAWS 2.5.0 or later (CARP Core 1.3) - see issue #561.
 
     // You can only register the same primary device once - an IllegalArgumentException is thrown.
     test("- register smartphone device", () async {

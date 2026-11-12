@@ -32,21 +32,22 @@ void main() {
     }),
   );
 
-  // CAWS issue #561: it only takes the registration types of CARP Core.
-  test('a CAMS registration is sent as a DefaultDeviceRegistration', () async {
+  // CAWS takes custom registrations since CARP Core 1.3 (issue #561).
+  test('a CAMS registration is sent as is', () async {
     reply = (StudyDeploymentStatus(studyDeploymentId: '1234')..createdOn = DateTime.now()).toJson();
-    final cams = SmartphoneRegistration(deviceId: 'abc', deviceDisplayName: 'my phone');
+    final cams = SmartphoneRegistration(deviceId: 'abc', deviceDisplayName: 'my phone', platform: 'Android');
 
     await withCaws(() => CarpDeploymentService().registerDevice('1234', 'phone', cams));
 
     final sent = requests.last['registration'] as Map<String, dynamic>;
-    expect(sent[Serializable.CLASS_IDENTIFIER], DefaultDeviceRegistration().jsonType);
+    expect(sent[Serializable.CLASS_IDENTIFIER], cams.jsonType);
+    expect(sent['deviceId'], 'abc');
+    expect(sent['platform'], 'Android');
+    expect(sent['registrationCreatedOn'], isNotNull);
 
     // the deployment reference takes the same path
     await withCaws(() => CarpDeploymentService().deployment('1234', 'phone').registerDevice(cams));
-    expect((requests.last['registration'] as Map)[Serializable.CLASS_IDENTIFIER], DefaultDeviceRegistration().jsonType);
-    expect(sent['deviceId'], 'abc');
-    expect(sent['deviceDisplayName'], 'my phone');
+    expect((requests.last['registration'] as Map)[Serializable.CLASS_IDENTIFIER], cams.jsonType);
   });
 
   test('a CARP Core registration is sent as is', () async {

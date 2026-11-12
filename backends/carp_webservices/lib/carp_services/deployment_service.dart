@@ -117,9 +117,6 @@ class CarpDeploymentService extends CarpBaseService implements DeploymentService
   /// deployment with [studyDeploymentId]. The [registration] contains a
   /// matching configuration for the device with [deviceRoleName].
   ///
-  /// A [registration] of a type that is not part of CARP Core is sent as a
-  /// [DefaultDeviceRegistration] (workaround for CAWS issue #561).
-  ///
   /// CAWS throws IllegalArgumentException when:
   /// - a deployment with [studyDeploymentId] does not exist
   /// - [deviceRoleName] is not present in the deployment or is already registered
@@ -133,20 +130,9 @@ class CarpDeploymentService extends CarpBaseService implements DeploymentService
     String studyDeploymentId,
     String deviceRoleName,
     DeviceRegistration registration,
-  ) async {
-    // TODO - due to issue #561 in CAWS, it only takes the CARP Core registration types for now.
-    if (!registration.jsonType.startsWith(DeviceConfiguration.DEVICE_NAMESPACE)) {
-      registration = DefaultDeviceRegistration(
-        deviceId: registration.deviceId,
-        deviceDisplayName: registration.deviceDisplayName,
-        registrationCreatedOn: registration.registrationCreatedOn,
-      );
-    }
-
-    return StudyDeploymentStatus.fromJson(
-      await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration)) as Map<String, dynamic>,
-    );
-  }
+  ) async => StudyDeploymentStatus.fromJson(
+    await _rpc(RegisterDevice(studyDeploymentId, deviceRoleName, registration)) as Map<String, dynamic>,
+  );
 
   /// Unregisters the device with the specified [deviceRoleName] for the study
   /// deployment with [studyDeploymentId].

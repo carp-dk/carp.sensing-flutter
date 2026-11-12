@@ -1,5 +1,8 @@
 ## 2.6.0
 
+- removed the workaround for CAWS issue #561 (fixed in CAWS 2.5.0, which runs CARP Core 1.3). Device registrations go to every deployment service as they are, e.g. a `SmartphoneRegistration` or a `PolarDeviceRegistration`. Only a CARP Core `Smartphone` or `CustomProtocolDevice` (as in 1.x protocols) gets a `DefaultDeviceRegistration`, see `DeviceConfiguration.acceptedRegistration()` in `carp_core`. A CARP Core `BLEHeartRateDevice` in a 1.x protocol still fails on CAWS, which takes only a `MACAddressDeviceRegistration` for it (as before).
+- device managers are now configured with their stored registration (e.g. the BLE address) on CAWS too, not only on the local deployment service. A stored registration of another type (e.g. a `DefaultDeviceRegistration` from an older version) is ignored.
+- deprecated `CamsDeviceRegistration.toDefaultDeviceRegistration()`
 - require `carp_core` ^2.3.0. `studyId`, `participantId` and `participantRoleName` of `SmartphoneStudy` are now inherited from `Study`.
 - `SmartphoneStudy.deviceDeploymentReceived()` converts a plain `PrimaryDeviceDeployment` to a `SmartphoneDeployment`, so a deployment service like `carp_webservices` does not need to know CAMS
 - removed the `sample_statistics` dependency. The inter-quartile range of the sensor features is computed in the package, with the same results. (#666)
