@@ -28,8 +28,8 @@ dependencies:
   sqflite: ^2.2.0
 
   carp_serializable: ^3.0.0
-  carp_core: ^2.3.0
-  carp_mobile_sensing: ^2.6.0
+  carp_core: ^3.0.0
+  carp_mobile_sensing: ^3.0.0
   carp_webservices: ^5.0.0
 
 

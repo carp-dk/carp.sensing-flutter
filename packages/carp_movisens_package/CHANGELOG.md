@@ -1,5 +1,6 @@
-## 2.1.1
+## 2.2.0
 
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
 * removed the unused `convert` dependency (#666)
 
 ## 2.1.0

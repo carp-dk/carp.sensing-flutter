@@ -25,8 +25,8 @@ dependencies:
     sdk: flutter
 
   carp_serializable: ^3.0.0
-  carp_core: ^2.2.0
-  carp_mobile_sensing: ^2.3.0
+  carp_core: ^3.0.0
+  carp_mobile_sensing: ^3.0.0
 
   research_package: ^4.0.0
   json_annotation: ^4.8.0

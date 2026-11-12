@@ -1,3 +1,7 @@
+## 4.2.0
+
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
+
 ## 4.1.2
 
 * log which health data types are missing permissions when the permission check fails on Android, and add `HealthServiceManager.missingHealthPermissions()` to get them

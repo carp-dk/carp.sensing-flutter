@@ -11,7 +11,7 @@ The package now only depends on `carp_core`. It no longer depends on `carp_mobil
 * `registerDevice()` sends a device registration as it is. The workaround for issue #561, which sent any non CARP Core registration as a `DefaultDeviceRegistration`, is removed. It needs CAWS 2.5.0 or later (CARP Core 1.3). CAWS takes only a `DefaultDeviceRegistration` for a CARP Core `Smartphone` or `CustomProtocolDevice` (e.g. in a 1.x protocol); `DeviceConfiguration.acceptedRegistration()` in `carp_core` does this conversion.
 * logging no longer follows the CAMS `Settings().debugLevel`. Set `CarpLog.level` (default `CarpLogLevel.warning`). `carp_backend` 3.0.0 sets it from the CAMS debug level when its data manager is configured.
 * removed the unused `url_launcher` and `meta` dependencies (#666)
-* require `carp_core` ^2.3.0
+* require `carp_core` ^3.0.0
 
 ## 4.4.3
 

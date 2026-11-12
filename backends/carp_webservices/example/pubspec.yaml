@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  carp_core: ^2.3.0
+  carp_core: ^3.0.0
   qr_code_scanner_plus: ^2.0.12
   oidc: ^0.14.0
 

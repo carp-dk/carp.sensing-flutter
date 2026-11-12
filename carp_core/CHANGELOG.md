@@ -1,3 +1,9 @@
+## 3.0.0
+
+* **BREAKING** the package is pure Dart and no longer depends on Flutter (#665)
+* **BREAKING** `Study` is no longer a `ChangeNotifier`. Every change is on the `Study.events` stream, so replace `study.addListener(...)` with `study.events.listen(...)`
+* **BREAKING** `PrimaryDeviceDeployment` is no longer a `ChangeNotifier`. `hasBeenUpdated()` calls the new `onUpdated` callback, which the `Study` holding the deployment sets
+
 ## 2.3.0
 
 * `DeviceConfiguration.acceptedRegistration()` returns a registration in the form the deployment service accepts for the device. CARP Core only accepts a `DefaultDeviceRegistration` for its `Smartphone` and `CustomProtocolDevice`, which protocols from CAMS 1.x also use. `StudyDeploymentProxy.tryDeployment()` uses it. (#561)

@@ -5,11 +5,10 @@ version: 2.0.0
 
 environment:
   sdk: ">=3.8.0 <4.0.0"
-  flutter: ">=3.19.0"
   
 dependencies:
   carp_core:
     path: ../
 
 dev_dependencies:
-  flutter_lints: any
+  lints: any

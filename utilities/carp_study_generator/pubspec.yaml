@@ -19,8 +19,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  carp_core: ^2.3.0
-  carp_mobile_sensing: ^2.6.0
+  carp_core: ^3.0.0
+  carp_mobile_sensing: ^3.0.0
   carp_webservices: ^5.0.0
   carp_backend: ^3.0.0
   carp_apps_package: ^2.1.0

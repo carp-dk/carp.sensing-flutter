@@ -19,21 +19,18 @@ part of '../client.dart';
 ///  * [status] is derived from [deploymentStatus]; it is not stored.
 ///  * Two studies are equal if they have the same type, [studyDeploymentId] and
 ///    [deviceRoleName].
-///  * Is a [ChangeNotifier]: listeners are notified when the deployment
-///    status or deployment changes.
 ///  * The [events] stream emits a [StudyStatusEvent] on each change,
 ///    including errors ([StudyStatusEventTypes.DeploymentError]).
 ///
 /// See also [StudyDeploymentProxy], which updates a study during deployment.
 /// CARP Mobile Sensing extends this class as `SmartphoneStudy`.
-class Study<TDeviceDeployment extends PrimaryDeviceDeployment> with ChangeNotifier {
+class Study<TDeviceDeployment extends PrimaryDeviceDeployment> {
   final DateTime _createdOn;
   final String _studyDeploymentId;
   final String _deviceRoleName;
   StudyDeploymentStatus? _deploymentStatus;
   TDeviceDeployment? _deployment;
   final StreamController<StudyStatusEvent> _eventController = StreamController<StudyStatusEvent>.broadcast();
-  late final void Function() _onDeploymentUpdated = () => deploymentUpdated();
 
   /// The unique id of the study in the deployment service, if known.
   String? studyId;
@@ -97,12 +94,10 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment> with ChangeNotifi
   ///
   /// Keeps the latest status. If [deploymentStatus] is not specified, the
   /// previously received status is marked as updated.
-  /// Emits [StudyStatusEventTypes.DeploymentStatusReceived] and notifies
-  /// listeners.
+  /// Emits [StudyStatusEventTypes.DeploymentStatusReceived].
   void deploymentStatusReceived([StudyDeploymentStatus? deploymentStatus]) {
     _deploymentStatus = deploymentStatus ?? _deploymentStatus;
     createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentStatusReceived));
-    notifyListeners();
   }
 
   /// A new primary device [deployment] determining what data to collect for
@@ -137,33 +132,27 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment> with ChangeNotifi
     }
 
     // Listen to updates to the deployment - which is also the restored one when
-    // called without a deployment. Remove first, as this may be called again
-    // for a deployment already listened to.
-    this.deployment
-      ?..removeListener(_onDeploymentUpdated)
-      ..addListener(_onDeploymentUpdated);
+    // called without a deployment.
+    this.deployment?.onUpdated = deploymentUpdated;
 
     createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeviceDeploymentReceived));
-    notifyListeners();
   }
 
   /// Mark the [deployment] as updated.
-  /// Print the optional [message] and notify listeners of a deployment update event.
+  /// Print the optional [message] and emit a deployment update event.
   /// If [deployment] is null, nothing happens.
   void deploymentUpdated([String? message]) {
     if (deployment != null) {
       if (message != null) print(message);
       createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentUpdated));
-      notifyListeners();
     }
   }
 
   /// The deployment is in an error state.
-  /// Print the optional [message] and notify listeners of a deployment error event.
+  /// Print the optional [message] and emit a deployment error event.
   void deploymentError([String? message]) {
     if (message != null) print(message);
     createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentError));
-    notifyListeners();
   }
 
   @override

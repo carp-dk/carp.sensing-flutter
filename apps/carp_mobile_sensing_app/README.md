@@ -204,13 +204,21 @@ The `StudyViewModel` class looks like this:
 /// A view model for the [StudyPage] view.
 class StudyViewModel with ChangeNotifier {
   SmartphoneStudy? _study;
+  StreamSubscription<void>? _studyEvents;
 
   StudyViewModel(this._study) : super();
 
   set study(SmartphoneStudy study) {
     _study = study;
-    study.addListener(() => notifyListeners()); // Notify when study changes
+    _studyEvents?.cancel();
+    _studyEvents = study.events.listen((_) => notifyListeners()); // Notify when study changes
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _studyEvents?.cancel();
+    super.dispose();
   }
 
   SmartphoneDeployment? get deployment => _study?.deployment;

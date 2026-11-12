@@ -1,3 +1,7 @@
+## 2.2.0
+
+* upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
+
 ## 2.1.0
 
 * require `carp_serializable` ^3.0.0, which replaces the built-in `Uuid` with the [uuid](https://pub.dev/packages/uuid) package

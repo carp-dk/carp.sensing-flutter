@@ -1,3 +1,8 @@
+## 3.0.0
+
+- **BREAKING** require `carp_core` ^3.0.0. `SmartphoneStudy` and `SmartphoneDeployment` are no longer `ChangeNotifier`s. Replace `study.addListener(...)` with `study.events.listen(...)`. The `SmartphoneClientManager` is still a `ChangeNotifier`.
+- **BREAKING** removed the deprecated `CamsDeviceRegistration.toDefaultDeviceRegistration()`. Use `DeviceConfiguration.acceptedRegistration()` from `carp_core`.
+
 ## 2.6.0
 
 - removed the workaround for CAWS issue #561 (fixed in CAWS 2.5.0, which runs CARP Core 1.3). Device registrations go to every deployment service as they are, e.g. a `SmartphoneRegistration` or a `PolarDeviceRegistration`. Only a CARP Core `Smartphone` or `CustomProtocolDevice` (as in 1.x protocols) gets a `DefaultDeviceRegistration`, see `DeviceConfiguration.acceptedRegistration()` in `carp_core`. A CARP Core `BLEHeartRateDevice` in a 1.x protocol still fails on CAWS, which takes only a `MACAddressDeviceRegistration` for it (as before).
