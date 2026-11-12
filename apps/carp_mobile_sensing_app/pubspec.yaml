@@ -40,7 +40,7 @@ dependencies:
   # Needs the companion watchOS app, see packages/carp_aware_package/doc/watchos_app_setup.md
   carp_aware_package: ^1.0.0
 
-  research_package: ^3.0.0
+  research_package: ^4.0.0
 
   # Packages used by CAMS. For some reason, we need to explicitly depend on them here.
   # Otherwise, the app will not launch or throws MissingPlugin Exceptions, even though
