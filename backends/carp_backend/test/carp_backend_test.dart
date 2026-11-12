@@ -12,7 +12,6 @@ import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_backend/carp_backend.dart';
-import 'package:research_package/research_package.dart';
 
 // import the context, eSense & audio sampling package
 // this is used to be able to deserialize the downloaded protocol
@@ -32,7 +31,6 @@ void main() {
 
   // Initialization of serialization
   CarpMobileSensing.ensureInitialized();
-  ResearchPackage.ensureInitialized();
 
   // register the context, eSense & audio sampling package
   // this is used to be able to deserialize the downloaded protocol
@@ -103,23 +101,29 @@ void main() {
 
   group("Informed Consent", () {
     test('- get', () async {
-      RPOrderedTask? informedConsent = await CarpResourceManager().getConsentDocument(refresh: true);
+      final informedConsent = await CarpResourceManager().getConsentDocument(refresh: true);
 
       print(_encode(informedConsent));
     });
 
     test('- set', () async {
-      RPOrderedTask anotherInformedConsent = RPOrderedTask(
-        identifier: '12',
-        steps: [
-          RPInstructionStep(identifier: "1", title: "Welcome!", text: "Welcome to this study!"),
-          RPCompletionStep(identifier: "2", title: "Thank You!", text: "We saved your consent document - VIII"),
+      final anotherInformedConsent = {
+        '__type': 'RPOrderedTask',
+        'identifier': '12',
+        'steps': [
+          {'__type': 'RPInstructionStep', 'identifier': '1', 'title': 'Welcome!', 'text': 'Welcome to this study!'},
+          {
+            '__type': 'RPCompletionStep',
+            'identifier': '2',
+            'title': 'Thank You!',
+            'text': 'We saved your consent document.',
+          },
         ],
-      );
+      };
 
       bool success = await CarpResourceManager().setConsentDocument(anotherInformedConsent);
       print('updated: $success');
-      RPOrderedTask? informedConsent = await CarpResourceManager().getConsentDocument(refresh: true);
+      final informedConsent = await CarpResourceManager().getConsentDocument(refresh: true);
 
       print(_encode(informedConsent));
     });

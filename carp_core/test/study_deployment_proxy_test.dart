@@ -11,6 +11,7 @@ class _DeploymentService implements DeploymentService {
     registration: DefaultDeviceRegistration(),
   );
   int registerDeviceCalls = 0;
+  DeviceRegistration? registered;
   int deviceDeployedCalls = 0;
   bool failRegistration = false;
 
@@ -20,6 +21,7 @@ class _DeploymentService implements DeploymentService {
   @override
   Future<StudyDeploymentStatus?> registerDevice(String id, String roleName, DeviceRegistration registration) async {
     registerDeviceCalls++;
+    registered = registration;
     if (failRegistration) throw Exception('registration failed');
     deviceStatus.status = DeviceDeploymentStatusTypes.Registered;
     return status;
@@ -99,5 +101,31 @@ void main() {
 
     expect(service.registerDeviceCalls, 1);
     expect(service.deviceDeployedCalls, 1);
+  });
+
+  test('sends the registration the device in the deployment accepts', () async {
+    final service = _DeploymentService();
+    service.status.status = StudyDeploymentStatusTypes.DeployingDevices;
+    service.deviceStatus.status = DeviceDeploymentStatusTypes.Unregistered;
+    final custom = MACAddressDeviceRegistration(macAddress: '00:11:22:33:44:55');
+
+    await StudyDeploymentProxy(service).tryDeployment(Study<PrimaryDeviceDeployment>('deployment', 'phone'), custom);
+
+    // a CARP Core Smartphone only takes a DefaultDeviceRegistration
+    expect(service.registered, isA<DefaultDeviceRegistration>());
+    expect(service.registered!.deviceId, custom.deviceId);
+    expect(service.registered!.registrationCreatedOn, custom.registrationCreatedOn);
+  });
+
+  test('acceptedRegistration only converts for CARP Core devices taking a default registration', () {
+    final custom = MACAddressDeviceRegistration(macAddress: '00:11:22:33:44:55');
+    final plain = DefaultDeviceRegistration();
+
+    expect(Smartphone().acceptedRegistration(custom), isA<DefaultDeviceRegistration>());
+    expect(CustomProtocolDevice().acceptedRegistration(custom), isA<DefaultDeviceRegistration>());
+    expect(Smartphone().acceptedRegistration(plain), same(plain));
+    expect(BLEHeartRateDevice(roleName: 'hr').acceptedRegistration(custom), same(custom));
+    // a device type which is not CARP Core, e.g. a CAMS device
+    expect((Smartphone()..$type = 'dk.carp.cams.devices.Smartphone').acceptedRegistration(custom), same(custom));
   });
 }

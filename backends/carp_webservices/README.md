@@ -9,7 +9,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/sswpqGvnf5)
 
 A Flutter library to access the [CARP Web Service (CAWS)](https://carp.cachet.dk/caws/) web API.
-This library is intended to be used with the [`carp_mobile_sensing`](https://pub.dartlang.org/packages/carp_mobile_sensing) framework, but also works on its own, if a app is to connect directly to CAWS.
+It only depends on [`carp_core`](https://pub.dev/packages/carp_core), so any app can use it to connect to CAWS. To use it with the [`carp_mobile_sensing`](https://pub.dev/packages/carp_mobile_sensing) framework, add the [`carp_backend`](https://pub.dev/packages/carp_backend) package.
 
 For an overview of CARP and other Flutter CARP libraries, see [CARP Mobile Sensing in Flutter](https://github.com/cph-cachet/carp.sensing-flutter/blob/master/README.md).
 
@@ -244,12 +244,7 @@ List<ActiveParticipationInvitation> invitations =
     await CarpParticipationService().getActiveParticipationInvitations();
 ```
 
-There is also support for showing a modal UI dialog for the user to select amongst several invitations. This is done using the `getStudyInvitation` method, like this:
-
-```dart
-var invitation =
-    await CarpParticipationService().getStudyInvitation(context);
-```
+This package has no UI. If there are several invitations, show your own dialog and let the user pick one (see the [example app](https://github.com/carp-dk/carp.sensing-flutter/blob/main/backends/carp_webservices/example/lib/main.dart)).
 
 The invitation holds information on the study deployment. So, once you (or the user) has selected an invitation, you can let the CAWS services know about the deployment by using the `setInvitation` method:
 
@@ -436,7 +431,6 @@ These "non-core" endpoints are:
 - JSON Documents organized in Collections
 - File Management
 - Informed Consent Documents
-- Data Points
 
 All of these endpoints can be considered as additional "resources" which are available for up- or download from clients.
 
@@ -548,46 +542,6 @@ try {
 } catch (error) {
   ...;
 }
-```
-
-### Data Points
-
-> [!CAUTION]
-> This is an old endpoint which is deprecated. Data should be uploaded using "data streams" as outlined above. However, at the moment, CAWS supports both types of data upload (for backward compatibility reasons).
-
-A [`DataPointReference`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/DataPointReference-class.html) is used to manage [`DataPoint`](https://pub.dev/documentation/carp_webservices/latest/carp_services_carp_services/DataPoint-class.html) objects on a CARP Web Service, and have CRUD methods for:
-
-- post a data point
-- batch upload multiple data points
-- get a data point
-- delete data points
-
-```dart
-// Create a piece of data
-final lightData = AmbientLight(
-  maxLux: 12,
-  meanLux: 23,
-  minLux: 0.3,
-  stdLux: 0.4,
-);
-
-// create a CARP data point
-final data = DataPoint.fromData(lightData);
-
-// post it to the CARP server, which returns the ID of the data point
-int dataPointId =
-    await CarpService().getDataPointReference().postDataPoint(data);
-
-// get the data point back from the server
-CARPDataPoint dataPoint =
-    await CarpService().getDataPointReference().getDataPoint(dataPointId);
-
-// batch upload a list of raw json data points in a file
-final File file = File('test/batch.json');
-await CarpService().getDataPointReference().batchPostDataPoint(file);
-
-// delete the data point
-await CarpService().getDataPointReference().deleteDataPoint(dataPointId);
 ```
 
 ## Features and bugs

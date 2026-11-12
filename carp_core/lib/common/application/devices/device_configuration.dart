@@ -68,6 +68,24 @@ class DeviceConfiguration<TRegistration extends DeviceRegistration> extends Seri
   TRegistration createRegistration({String? deviceId, String? deviceDisplayName}) =>
       DefaultDeviceRegistration(deviceId: deviceId, deviceDisplayName: deviceDisplayName) as TRegistration;
 
+  /// CARP Core device types which only accept a [DefaultDeviceRegistration].
+  static const _defaultRegistrationTypes = {Smartphone.DEVICE_TYPE, '$DEVICE_NAMESPACE.CustomProtocolDevice'};
+
+  /// The [registration] in the form the deployment service accepts for this device.
+  ///
+  /// CARP Core only accepts a [DefaultDeviceRegistration] for its [Smartphone]
+  /// and [CustomProtocolDevice] types, which protocols from CAMS 1.x also use.
+  /// For these, [registration] is converted. Any other registration is returned as is.
+  /// ponytail: a core BLEHeartRateDevice needs a MAC address, which iOS does not expose - not converted.
+  DeviceRegistration acceptedRegistration(DeviceRegistration registration) =>
+      _defaultRegistrationTypes.contains($type) && registration is! DefaultDeviceRegistration
+      ? DefaultDeviceRegistration(
+          deviceId: registration.deviceId,
+          deviceDisplayName: registration.deviceDisplayName,
+          registrationCreatedOn: registration.registrationCreatedOn,
+        )
+      : registration;
+
   @override
   String toString() => '$runtimeType - roleName: $roleName, isOptional: $isOptional';
 

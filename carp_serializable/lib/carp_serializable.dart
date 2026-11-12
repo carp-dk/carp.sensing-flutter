@@ -11,7 +11,6 @@ library carp_serializable;
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 export 'package:uuid/uuid.dart' show Uuid;
@@ -229,7 +228,7 @@ class FromJsonFactory {
           "'CarpMobileSensing.ensureInitialized()' as part of your main method.";
 
       if (notAvailable != null) {
-        debugPrint('$runtimeType - $message');
+        print('$runtimeType - $message');
         return notAvailable;
       } else {
         throw SerializationException(message);
@@ -244,7 +243,7 @@ class FromJsonFactory {
         "Make sure that the fromJson function returns a class of type '$T'.";
 
     if (notAvailable != null) {
-      debugPrint('$runtimeType - $message');
+      print('$runtimeType - $message');
       return notAvailable;
     } else {
       throw SerializationException(message);

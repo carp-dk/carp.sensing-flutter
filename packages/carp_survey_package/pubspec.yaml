@@ -1,6 +1,6 @@
 name: carp_survey_package
-version: 2.1.2
-description: CARP survey sampling package. Samples survey data from the CARP Research Package and Cognition Package.
+version: 3.0.0
+description: CARP survey sampling package. Samples survey data from the CARP Research Package.
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/master/packages/carp_survey_package
 issue_tracker: https://github.com/cph-cachet/carp.sensing-flutter/issues
@@ -29,7 +29,6 @@ dependencies:
   carp_mobile_sensing: ^2.3.0
 
   research_package: ^4.0.0
-  cognition_package: ^1.10.0
   json_annotation: ^4.8.0
 
 # Overriding carp libraries to use the local copy
@@ -43,8 +42,6 @@ dependencies:
 #   path: ../../carp_mobile_sensing/
 # research_package:
 #   path: ../../../../research.package/
-# cognition_package:
-#   path: ../../../../cognition_package/
 
 dev_dependencies:
   flutter_lints: any

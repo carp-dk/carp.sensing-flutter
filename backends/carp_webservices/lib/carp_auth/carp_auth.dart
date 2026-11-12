@@ -9,7 +9,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:carp_mobile_sensing/infrastructure.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:json_annotation/json_annotation.dart';

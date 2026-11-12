@@ -289,7 +289,7 @@ class SmartphoneStudyController {
     }
 
     // Now try to register this device with the deployment service.
-    DeviceRegistration registration = deviceManager.createRegistration();
+    final registration = device.acceptedRegistration(deviceManager.createRegistration());
     try {
       final deploymentStatus = await _deploymentService.registerDevice(
         study.studyDeploymentId,
@@ -439,22 +439,7 @@ class SmartphoneStudyController {
         : null;
 
     // Now configure the device incl. any pre-registration information from the deployment
-    var registration = deployment?.connectedDeviceRegistrations[configuration.roleName];
-
-    // TODO - due to issue # 561 in CAWS we cannot use the device registration
-    // information to configure the device manager, since CAWS does not properly
-    // return the correct custom registrations.
-    //
-    // So for now we just configure the device manager without the registration
-    // information, which means that we cannot use any pre-registration information
-    // from the deployment.
-    // Once this issue is fixed in CAWS, we can update this code to use the
-    // registration information when configuring the device manager.
-    if (_deploymentService is SmartphoneDeploymentService) {
-      manager?.configure(configuration, registration);
-    } else {
-      manager?.configure(configuration);
-    }
+    manager?.configure(configuration, deployment?.connectedDeviceRegistrations[configuration.roleName]);
   }
 
   /// Start connecting all connectable devices to be used in the [deployment]

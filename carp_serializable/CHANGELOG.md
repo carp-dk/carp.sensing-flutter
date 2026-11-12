@@ -1,3 +1,8 @@
+## 3.0.1
+
+* pure Dart: the package no longer depends on the Flutter SDK (#664)
+* removed the unused `meta` dependency
+
 ## 3.0.0
 
 * **BREAKING** replaced the built-in `Uuid` class with the [uuid](https://pub.dev/packages/uuid) package, which is now re-exported

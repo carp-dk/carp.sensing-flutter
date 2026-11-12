@@ -60,7 +60,29 @@ class CarpBackend {
   Future<CarpUser> authenticateWithUsernamePassword(String username, String password) async =>
       await CarpAuthService().authenticateWithUsernamePassword(username: username, password: password);
 
-  /// Get the study invitation by opening the CAWS study invitation page.
-  Future<ActiveParticipationInvitation?> getStudyInvitation(BuildContext context) async =>
-      await CarpParticipationService().getStudyInvitation(context);
+  /// Get the study invitation from CAWS. The user picks one if there are several.
+  Future<ActiveParticipationInvitation?> getStudyInvitation(BuildContext context) async {
+    final invitations = await CarpParticipationService().getActiveParticipationInvitations();
+    return context.mounted ? selectInvitation(context, invitations) : null;
+  }
 }
+
+/// Lets the user pick one of [invitations]. Returns `null` if there are none or the user cancels.
+Future<ActiveParticipationInvitation?> selectInvitation(
+  BuildContext context,
+  List<ActiveParticipationInvitation> invitations,
+) async => invitations.length < 2 || !context.mounted
+    ? invitations.firstOrNull
+    : showDialog<ActiveParticipationInvitation>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          title: const Text('Select invitation'),
+          children: [
+            for (final invitation in invitations)
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, invitation),
+                child: Text(invitation.invitation.name),
+              ),
+          ],
+        ),
+      );

@@ -88,8 +88,14 @@ class StudyDeploymentProxy {
     }
 
     try {
+      final device = deploymentStatus.getDeviceStatusByRoleName(deviceRoleName).device;
       deploymentStatus =
-          await deploymentService.registerDevice(studyDeploymentId, deviceRoleName, registration) ?? deploymentStatus;
+          await deploymentService.registerDevice(
+            studyDeploymentId,
+            deviceRoleName,
+            device.acceptedRegistration(registration),
+          ) ??
+          deploymentStatus;
     } catch (error) {
       // The device may already be registered, e.g. after an app restart or
       // reinstallation. Report it, but keep obtaining the deployment.
@@ -170,7 +176,7 @@ class StudyDeploymentProxy {
         );
       }
     } catch (error) {
-      // we only print a warning - there is a bug in CAWS - see issue #561
+      // Only printed, since the deployment is already received and running on this client.
       print("$runtimeType - Error marking deployment '$studyDeploymentId' as deployed.\n$error");
     }
   }

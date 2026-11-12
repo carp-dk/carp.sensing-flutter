@@ -35,6 +35,15 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment> with ChangeNotifi
   final StreamController<StudyStatusEvent> _eventController = StreamController<StudyStatusEvent>.broadcast();
   late final void Function() _onDeploymentUpdated = () => deploymentUpdated();
 
+  /// The unique id of the study in the deployment service, if known.
+  String? studyId;
+
+  /// The ID of the participant in this study, if known.
+  String? participantId;
+
+  /// The role of the participant in this study, if known.
+  String? participantRoleName;
+
   /// Create a study uniquely identified by its [studyDeploymentId] and
   /// [deviceRoleName].
   Study(

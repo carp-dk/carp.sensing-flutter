@@ -1,3 +1,7 @@
+## 4.0.1
+
+* register `MovesenseDeviceRegistration` for JSON, so a deployment holding a Movesense registration can be read again (#561)
+
 ## 4.0.0
 
 * requires `movesense_plus` ^2.0.2, which reports a sensor iOS already reconnected after an app relaunch as connected

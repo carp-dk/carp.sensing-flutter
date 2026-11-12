@@ -24,17 +24,6 @@ part of '../../domain.dart';
 class SmartphoneStudy extends Study<SmartphoneDeployment> {
   SmartphoneDeploymentExecutorSamplingState? _samplingState;
 
-  /// The unique id of the study in the deployment service.
-  ///
-  /// `null` for a local study added from a protocol.
-  String? studyId;
-
-  /// The ID of the participant in this study.
-  String? participantId;
-
-  /// The role of the participant in this study.
-  String? participantRoleName;
-
   /// The sampling state of this study, or `null` if not yet sampled.
   ///
   /// Setting it adds a [StudyStatusEventTypes.SamplingStateChanged] event to
@@ -58,15 +47,31 @@ class SmartphoneStudy extends Study<SmartphoneDeployment> {
 
   /// Creates a [SmartphoneStudy].
   SmartphoneStudy({
-    this.studyId,
+    String? studyId,
     required String studyDeploymentId,
     required String deviceRoleName,
-    this.participantId,
-    this.participantRoleName,
+    String? participantId,
+    String? participantRoleName,
     DateTime? createdOn,
     StudyDeploymentStatus? deploymentStatus,
     SmartphoneDeployment? deployment,
-  }) : super(studyDeploymentId, deviceRoleName, createdOn, deploymentStatus, deployment);
+  }) : super(studyDeploymentId, deviceRoleName, createdOn, deploymentStatus, deployment) {
+    this.studyId = studyId;
+    this.participantId = participantId;
+    this.participantRoleName = participantRoleName;
+  }
+
+  /// Also takes the plain [PrimaryDeviceDeployment] that a deployment service
+  /// like CAWS returns, and converts it to a [SmartphoneDeployment].
+  @override
+  void deviceDeploymentReceived([PrimaryDeviceDeployment? deployment]) => super.deviceDeploymentReceived(
+    deployment == null || deployment is SmartphoneDeployment
+        ? deployment as SmartphoneDeployment?
+        : SmartphoneDeployment.fromPrimaryDeviceDeployment(
+            studyDeploymentId: studyDeploymentId,
+            deployment: deployment,
+          ),
+  );
 
   /// Creates a [SmartphoneStudy] from an [invitation] to a study.
   ///

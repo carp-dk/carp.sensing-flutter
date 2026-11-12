@@ -10,7 +10,13 @@ CarpDataEndPoint _$CarpDataEndPointFromJson(Map<String, dynamic> json) =>
     CarpDataEndPoint(
         dataFormat: json['dataFormat'] as String? ?? NameSpace.CARP,
         name: json['name'] as String? ?? 'CARP Web Services',
-        uploadMethod: $enumDecodeNullable(_$CarpUploadMethodEnumMap, json['uploadMethod']) ?? CarpUploadMethod.stream,
+        uploadMethod:
+            $enumDecodeNullable(
+              _$CarpUploadMethodEnumMap,
+              json['uploadMethod'],
+              unknownValue: CarpUploadMethod.stream,
+            ) ??
+            CarpUploadMethod.stream,
         onlyUploadOnWiFi: json['onlyUploadOnWiFi'] as bool? ?? false,
         uploadInterval: (json['uploadInterval'] as num?)?.toInt() ?? 10,
         deleteWhenUploaded: json['deleteWhenUploaded'] as bool? ?? true,
@@ -31,11 +37,7 @@ Map<String, dynamic> _$CarpDataEndPointToJson(CarpDataEndPoint instance) => <Str
   'compress': instance.compress,
 };
 
-const _$CarpUploadMethodEnumMap = {
-  CarpUploadMethod.stream: 'stream',
-  CarpUploadMethod.datapoint: 'datapoint',
-  CarpUploadMethod.file: 'file',
-};
+const _$CarpUploadMethodEnumMap = {CarpUploadMethod.stream: 'stream', CarpUploadMethod.file: 'file'};
 
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   id: json['id'] as String?,

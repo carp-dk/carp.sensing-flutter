@@ -16,8 +16,8 @@ part of 'carp_services.dart';
 /// Key points:
 ///  * A singleton; call [configure] (or [configureFrom]) and authenticate
 ///    with [CarpAuthService] before use.
-///  * [getStudyInvitation] can show an [ActiveParticipationInvitationDialog]
-///    to let the user pick an invitation.
+///  * [getActiveParticipationInvitations] returns the invitations. Showing
+///    them to the user is up to the app.
 ///  * [participation] returns a [ParticipationReference] bound to one study
 ///    deployment, which is the easier way to handle participant data.
 ///
@@ -26,8 +26,8 @@ part of 'carp_services.dart';
 ///
 /// ```dart
 /// CarpParticipationService().configureFrom(CarpService());
-/// final invitation =
-///     await CarpParticipationService().getStudyInvitation(context);
+/// final invitations =
+///     await CarpParticipationService().getActiveParticipationInvitations();
 /// ```
 class CarpParticipationService extends CarpBaseService implements ParticipationService {
   static final CarpParticipationService _instance = CarpParticipationService._();
@@ -67,7 +67,7 @@ class CarpParticipationService extends CarpBaseService implements ParticipationS
   }) async {
     accountId ??= CarpAuthService().currentUser.id;
 
-    debug("$runtimeType - Getting invitations for '$accountId' for application: '$applicationName'.");
+    CarpLog.debug("$runtimeType - Getting invitations for '$accountId' for application: '$applicationName'.");
 
     dynamic responseJson = await _rpc(GetActiveParticipationInvitations(accountId));
 
@@ -89,60 +89,6 @@ class CarpParticipationService extends CarpBaseService implements ParticipationS
     }
 
     return invitations;
-  }
-
-  /// Gets a study invitation for the current user, letting the user select
-  /// one if more than one is available.
-  ///
-  /// Returns the selected invitation. Returns `null` if the user has no invitation(s)
-  /// or if the user cancels the dialog.
-  ///
-  /// If the user is invited to more than one study and [showInvitations] is `true`,
-  /// an [ActiveParticipationInvitationDialog] is shown in [context].
-  /// If not, the first invitation is returned.
-  /// If [device] is specified, it is used as the `applicationName` filter of
-  /// [getActiveParticipationInvitations].
-  ///
-  /// [allowClose] controls whether the dialog can be dismissed by tapping
-  /// outside it. The Cancel button is always shown.
-  ///
-  /// Throws a [CarpServiceException] if this service is not configured or
-  /// no user is authenticated.
-  Future<ActiveParticipationInvitation?> getStudyInvitation(
-    BuildContext context, {
-    bool showInvitations = true,
-    String? device,
-    bool allowClose = false,
-  }) async {
-    if (!isConfigured) {
-      throw CarpServiceException("CARP Service not initialized. Call 'CarpService().configure()' first.");
-    }
-
-    if (!CarpAuthService().authenticated) {
-      throw CarpServiceException(
-        "The current user is not authenticated to CAWS. Call 'CarpAuthService().authenticate...()' first.",
-      );
-    }
-
-    List<ActiveParticipationInvitation> invitations = await getActiveParticipationInvitations(applicationName: device);
-
-    ActiveParticipationInvitation? invitation;
-
-    if (invitations.isEmpty) return null;
-
-    if (invitations.length == 1 || !showInvitations) {
-      invitation = invitations[0];
-    } else {
-      if (context.mounted) {
-        invitation = await showDialog<ActiveParticipationInvitation>(
-          context: context,
-          barrierDismissible: allowClose,
-          builder: (BuildContext context) => ActiveParticipationInvitationDialog().build(context, invitations),
-        );
-      }
-    }
-
-    return invitation;
   }
 
   @override

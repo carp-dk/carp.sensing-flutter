@@ -4,8 +4,8 @@ part of 'carp_services.dart';
 /// and collections.
 ///
 /// Use it to store app resources (like JSON documents) or upload files for a
-/// study. It also exposes the legacy informed consent and data point
-/// endpoints, which are deprecated in CAWS.
+/// study. It also exposes the legacy informed consent endpoint, which is
+/// deprecated in CAWS.
 ///
 /// Key points:
 ///  * The default constructor returns a shared instance; [CarpService.instance]
@@ -203,17 +203,4 @@ class CarpService extends CarpBaseService {
     http.Response response = await _get(Uri.encodeFull(url));
     return ConsentDocument._(_handleResponse(response) as Map<String, dynamic>);
   }
-
-  // --------------------------------------------------------------------------
-  // DATA POINT
-  // --------------------------------------------------------------------------
-
-  /// Creates a [DataPointReference] for the study deployment with
-  /// [studyDeploymentId], or the deployment of [study] if omitted.
-  @Deprecated(
-    'The DataPoint endpoints is deprecated in CAWS. '
-    'Data should be uploaded using the CARP-Core Data Stream endpoint.',
-  )
-  DataPointReference dataPointReference([String? studyDeploymentId]) =>
-      DataPointReference._(this, getStudyDeploymentId(studyDeploymentId));
 }

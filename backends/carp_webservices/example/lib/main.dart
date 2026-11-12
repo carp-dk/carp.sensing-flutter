@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:carp_mobile_sensing/carp_mobile_sensing.dart';
 import 'package:carp_webservices/carp_services/carp_services.dart';
 import 'package:carp_webservices/carp_auth/carp_auth.dart';
 import 'package:carp_core/carp_core.dart';
@@ -15,7 +14,7 @@ import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart' as qr;
 part 'qr-scanner.dart';
 
 void main() {
-  CarpMobileSensing.ensureInitialized();
+  Core.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -141,11 +140,14 @@ class AppBLoC {
   Future<ActiveParticipationInvitation?> getStudyInvitation(BuildContext context) async {
     // configure a participant service based on the carp service already configured
     CarpParticipationService().configureFrom(CarpService());
-    _invitation = await CarpParticipationService().getStudyInvitation(context);
+    final invitations = await CarpParticipationService().getActiveParticipationInvitations();
+    _invitation = context.mounted ? await selectInvitation(context, invitations) : null;
     debugPrint('CARP Study Invitation: $_invitation');
 
-    if (_invitation != null) {
-      var study = SmartphoneStudy.fromInvitation(_invitation!);
+    if (_invitation case final invitation?) {
+      final study = Study(invitation.studyDeploymentId, invitation.deviceRoleName ?? Smartphone.DEFAULT_ROLE_NAME)
+        ..studyId = invitation.studyId
+        ..participantRoleName = invitation.participantRoleName;
       CarpParticipationService().study = study;
       debugPrint('Study : $study');
     }
@@ -155,3 +157,23 @@ class AppBLoC {
 }
 
 final bloc = AppBLoC();
+
+/// Lets the user pick one of [invitations]. Returns `null` if there are none or the user cancels.
+Future<ActiveParticipationInvitation?> selectInvitation(
+  BuildContext context,
+  List<ActiveParticipationInvitation> invitations,
+) async => invitations.length < 2 || !context.mounted
+    ? invitations.firstOrNull
+    : showDialog<ActiveParticipationInvitation>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          title: const Text('Select invitation'),
+          children: [
+            for (final invitation in invitations)
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, invitation),
+                child: Text(invitation.invitation.name),
+              ),
+          ],
+        ),
+      );

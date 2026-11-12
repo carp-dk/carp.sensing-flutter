@@ -40,6 +40,21 @@ void main() {
       expect(registration.deviceId, '123');
     });
 
+    test(' - a 1.x smartphone gets the registration CARP Core accepts', () {
+      final old = DeviceConfiguration.fromJson({
+        '__type': '${DeviceConfiguration.DEVICE_NAMESPACE}.Smartphone',
+        'roleName': 'phone',
+        'isPrimaryDevice': true,
+      });
+      final registration = SmartphoneRegistration(deviceId: '123', platform: 'Android');
+
+      expect(old, isA<Smartphone>());
+      expect(old.acceptedRegistration(registration), isA<DefaultDeviceRegistration>());
+      expect(old.acceptedRegistration(registration).deviceId, '123');
+      // a CAMS 2.x smartphone keeps the CAMS registration
+      expect(Smartphone().acceptedRegistration(registration), same(registration));
+    });
+
     test(' - 1.x BLE heart rate device w/o scan configuration', () {
       final device = DeviceConfiguration.fromJson({
         '__type': '${DeviceConfiguration.DEVICE_NAMESPACE}.BLEHeartRateDevice',
