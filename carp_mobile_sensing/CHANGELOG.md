@@ -1,6 +1,7 @@
 ## 3.0.0
 
 - **BREAKING** require `carp_core` ^3.0.0. `SmartphoneStudy` and `SmartphoneDeployment` are no longer `ChangeNotifier`s. Replace `study.addListener(...)` with `study.events.listen(...)`. The `SmartphoneClientManager` is still a `ChangeNotifier`.
+- **BREAKING** removed the deprecated `CamsDeviceRegistration.toDefaultDeviceRegistration()`. Use `DeviceConfiguration.acceptedRegistration()` from `carp_core`.
 
 ## 2.6.0
 

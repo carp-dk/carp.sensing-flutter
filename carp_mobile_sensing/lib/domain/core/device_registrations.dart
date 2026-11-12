@@ -28,15 +28,6 @@ abstract class CamsDeviceRegistration extends DeviceRegistration {
     this.isConnected = false,
   });
 
-  /// Convert this [CamsDeviceRegistration] to a [DefaultDeviceRegistration]
-  /// with the same base properties.
-  @Deprecated('Not needed since CAWS runs CARP Core 1.3. Use DeviceConfiguration.acceptedRegistration().')
-  DefaultDeviceRegistration toDefaultDeviceRegistration() => DefaultDeviceRegistration(
-    deviceId: deviceId,
-    deviceDisplayName: deviceDisplayName,
-    registrationCreatedOn: registrationCreatedOn,
-  );
-
   @override
   String get jsonType => '${CamsDevice.CAMS_DEVICE_NAMESPACE}.$runtimeType';
 }
