@@ -79,7 +79,9 @@ class PersistenceService {
 
   /// Opens (and if needed creates or migrates) the database, and starts
   /// saving study and task changes. Must be called before any other method.
+  /// Does nothing if the database is already open.
   Future<void> init() async {
+    if (_database?.isOpen ?? false) return;
     info('Initializing $runtimeType...');
     _databasePath ??= await getDatabasesPath();
 
