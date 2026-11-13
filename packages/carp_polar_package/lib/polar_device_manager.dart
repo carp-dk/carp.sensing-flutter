@@ -22,6 +22,21 @@ enum PolarDeviceType {
   Verity,
 }
 
+// Stored by enum name. Also reads the polar plugin's platform-specific toJson
+// (Android "SKIN_TEMPERATURE", iOS index) written by 2.x, skipping unknown values.
+List<PolarDataType>? _dataTypesFromJson(List<dynamic>? json) {
+  final byName = {for (final t in PolarDataType.values) t.name.toLowerCase(): t};
+  return json
+      ?.map(
+        (e) =>
+            e is int ? PolarDataType.values.elementAtOrNull(e) : byName[e.toString().replaceAll('_', '').toLowerCase()],
+      )
+      .nonNulls
+      .toList();
+}
+
+List<String>? _dataTypesToJson(List<PolarDataType>? types) => types?.map((t) => t.name).toList();
+
 /// A Polar sensor used as a connected device in a protocol.
 ///
 /// Add it with [SmartphoneStudyProtocol.addConnectedDevice] and use it as the
@@ -68,6 +83,7 @@ class PolarDeviceRegistration extends BLEDeviceRegistration {
 
   /// List of [PolarDataType]s that are available in the connected Polar device.
   /// Null if not known.
+  @JsonKey(fromJson: _dataTypesFromJson, toJson: _dataTypesToJson)
   List<PolarDataType>? supportedDataTypes;
 
   /// RSSI (Received Signal Strength Indicator) value from advertisement.
