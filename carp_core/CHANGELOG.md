@@ -1,3 +1,7 @@
+## 3.0.1
+
+* log messages (deployment errors, failed stop/mark-as-deployed) are printed in debug builds only, not in release
+
 ## 3.0.0
 
 * **BREAKING** the package is pure Dart and no longer depends on Flutter (#665)

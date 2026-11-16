@@ -228,7 +228,7 @@ class FromJsonFactory {
           "'CarpMobileSensing.ensureInitialized()' as part of your main method.";
 
       if (notAvailable != null) {
-        print('$runtimeType - $message');
+        _debugPrint('$runtimeType - $message');
         return notAvailable;
       } else {
         throw SerializationException(message);
@@ -243,7 +243,7 @@ class FromJsonFactory {
         "Make sure that the fromJson function returns a class of type '$T'.";
 
     if (notAvailable != null) {
-      print('$runtimeType - $message');
+      _debugPrint('$runtimeType - $message');
       return notAvailable;
     } else {
       throw SerializationException(message);
@@ -267,3 +267,11 @@ class SerializationException implements Exception {
 ///
 /// Useful for logging and debugging [Serializable] objects.
 String toJsonString(Object? object) => const JsonEncoder.withIndent(' ').convert(object);
+
+/// Prints [message] in debug builds only - asserts are compiled out of release.
+void _debugPrint(String message) {
+  assert(() {
+    print(message);
+    return true;
+  }());
+}

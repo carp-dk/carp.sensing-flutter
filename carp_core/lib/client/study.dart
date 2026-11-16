@@ -143,7 +143,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment> {
   /// If [deployment] is null, nothing happens.
   void deploymentUpdated([String? message]) {
     if (deployment != null) {
-      if (message != null) print(message);
+      if (message != null) _debugPrint(message);
       createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentUpdated));
     }
   }
@@ -151,7 +151,7 @@ class Study<TDeviceDeployment extends PrimaryDeviceDeployment> {
   /// The deployment is in an error state.
   /// Print the optional [message] and emit a deployment error event.
   void deploymentError([String? message]) {
-    if (message != null) print(message);
+    if (message != null) _debugPrint(message);
     createEvent(StudyStatusEvent(this, StudyStatusEventTypes.DeploymentError));
   }
 

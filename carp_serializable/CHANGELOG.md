@@ -1,3 +1,7 @@
+## 3.0.2
+
+* `FromJsonFactory` prints its "not registered" message in debug builds only, not in release
+
 ## 3.0.1
 
 * pure Dart: the package no longer depends on the Flutter SDK (#664)
