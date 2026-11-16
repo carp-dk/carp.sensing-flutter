@@ -1,6 +1,7 @@
 ## 2.2.0
 
 * upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
+* fix `PolarDeviceRegistration.supportedDataTypes` JSON: stored by enum name (was the `polar` plugin's platform-specific `toJson`, e.g. `HR` on Android, which could not be read back and broke loading the whole persisted study, so devices never reconnected after an app restart). Values stored by earlier versions are still read.
 
 ## 2.1.0
 

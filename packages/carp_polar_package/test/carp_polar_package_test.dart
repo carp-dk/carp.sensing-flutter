@@ -123,6 +123,27 @@ void main() {
     }
   });
 
+  test('- registration supportedDataTypes round-trip (incl. polar plugin Android/iOS json)', () async {
+    final reg = PolarDeviceRegistration(
+      bleAddress: '00:11:22:33:44:55',
+      identifier: '1C709B20',
+      polarDeviceType: PolarDeviceType.Verity,
+      supportedDataTypes: [PolarDataType.hr, PolarDataType.skinTemperature],
+    );
+    final jsonMap = json.decode(toJsonString(reg)) as Map<String, dynamic>;
+    expect(jsonMap['supportedDataTypes'], ['hr', 'skinTemperature']);
+    expect(PolarDeviceRegistration.fromJson(jsonMap).supportedDataTypes, reg.supportedDataTypes);
+
+    // Stored by 2.x via the plugin's platform toJson: Android names, iOS indices.
+    for (final legacy in [
+      ['HR', 'SKIN_TEMPERATURE'],
+      [6, 9],
+    ]) {
+      jsonMap['supportedDataTypes'] = legacy;
+      expect(PolarDeviceRegistration.fromJson(jsonMap).supportedDataTypes, reg.supportedDataTypes);
+    }
+  });
+
   test('- all data types', () async {
     List<PolarAccSample> samples = [];
 
