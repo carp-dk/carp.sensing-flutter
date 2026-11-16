@@ -150,14 +150,15 @@ class StudyProtocol extends Snapshot {
   /// Gets all devices configured to be connected to [primaryDevice].
   List<DeviceConfiguration> getConnectedDevices(PrimaryDeviceConfiguration primaryDevice) {
     final List<DeviceConfiguration> devices = [];
-    connections?.forEach((connection) {
-      if (connection.roleName == primaryDevice.roleName) {
-        var connectedDevice = connectedDevices?.firstWhere(
-          (device) => device.roleName == connection.connectedToRoleName,
-        );
-        if (connectedDevice != null) devices.add(connectedDevice);
+    for (var connection in connections ?? const <DeviceConnection>[]) {
+      // A connection stores the role name of the connected device in
+      // [DeviceConnection.roleName] and the role name of the primary device it
+      // connects to in [DeviceConnection.connectedToRoleName].
+      if (connection.connectedToRoleName != primaryDevice.roleName) continue;
+      for (var device in connectedDevices ?? const <DeviceConfiguration>{}) {
+        if (device.roleName == connection.roleName) devices.add(device);
       }
-    });
+    }
     return devices;
   }
 
