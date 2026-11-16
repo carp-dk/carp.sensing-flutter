@@ -35,3 +35,11 @@ part 'client/study.dart';
 part 'client/device_data_collector.dart';
 part 'client/client_repository.dart';
 part 'client/study_deployment_proxy.dart';
+
+/// Prints [message] in debug builds only - asserts are compiled out of release.
+void _debugPrint(String message) {
+  assert(() {
+    print(message);
+    return true;
+  }());
+}

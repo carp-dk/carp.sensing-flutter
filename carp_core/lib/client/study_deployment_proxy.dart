@@ -177,7 +177,7 @@ class StudyDeploymentProxy {
       }
     } catch (error) {
       // Only printed, since the deployment is already received and running on this client.
-      print("$runtimeType - Error marking deployment '$studyDeploymentId' as deployed.\n$error");
+      _debugPrint("$runtimeType - Error marking deployment '$studyDeploymentId' as deployed.\n$error");
     }
   }
 
@@ -199,7 +199,7 @@ class StudyDeploymentProxy {
         study.deploymentStatusReceived(deploymentStatus);
       }
     } catch (error) {
-      print(
+      _debugPrint(
         "$runtimeType - failed to stop study for study deployment '${study.studyDeploymentId}' "
         "at deployment service '$deploymentService'.\n"
         "Error: $error",
