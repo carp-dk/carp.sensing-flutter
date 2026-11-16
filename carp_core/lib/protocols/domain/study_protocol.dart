@@ -292,12 +292,10 @@ class StudyProtocol extends Snapshot {
   /// Remove the [task] currently present in this configuration
   /// including removing it from any [TaskControl]'s which initiate it.
   void removeTask(TaskConfiguration task) {
-    // Remove all controls which control this task
-    for (var taskControl in taskControls) {
-      if (taskControl.taskName == task.name) {
-        taskControls.remove(taskControl);
-      }
-    }
+    // Remove all controls which control this task.
+    // Note that [taskControls] cannot be modified while iterating over it, which
+    // is why [removeWhere] is used instead of a for-loop with [remove].
+    taskControls.removeWhere((taskControl) => taskControl.taskName == task.name);
 
     // Remove task itself.
     tasks.remove(task);
