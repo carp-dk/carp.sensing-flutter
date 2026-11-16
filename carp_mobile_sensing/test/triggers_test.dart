@@ -439,6 +439,57 @@ void main() {
       });
     });
 
+    test(' - RecurrentScheduledTrigger - fires at every recurrence, not only once', () {
+      // Use case: a recurring survey, e.g. every day at the same time. The
+      // trigger must fire again at every period, not only at its first
+      // occurrence.
+      FakeAsync().run((fake) {
+        final ex = RecurrentScheduledTriggerExecutor()
+          ..initialize(RecurrentScheduledTrigger(type: RecurrentType.daily, time: TimeOfDay.now()));
+        final events = firings(ex);
+
+        ex.resume();
+        fake.flushMicrotasks();
+        expect(events, isEmpty, reason: 'nothing at t=0');
+
+        // The first occurrence is the same time tomorrow.
+        fake.elapse(const Duration(days: 1));
+        expect(events, hasLength(1), reason: 'fires at the first occurrence');
+
+        fake.elapse(const Duration(days: 1));
+        expect(events, hasLength(2), reason: 'fires again one period later');
+
+        fake.elapse(const Duration(days: 1));
+        expect(events, hasLength(3), reason: 'keeps firing at every period');
+
+        ex.pause();
+        fake.elapse(const Duration(days: 3));
+        expect(events, hasLength(3), reason: 'pausing stops the recurrence');
+      });
+    });
+
+    test(' - RecurrentScheduledTrigger - does not fire after its end', () {
+      FakeAsync().run((fake) {
+        final trigger = RecurrentScheduledTrigger(
+          type: RecurrentType.daily,
+          time: TimeOfDay.now(),
+          end: DateTime.now().add(const Duration(days: 1, hours: 12)),
+        );
+        final ex = RecurrentScheduledTriggerExecutor()..initialize(trigger);
+        final events = firings(ex);
+
+        ex.resume();
+        fake.elapse(const Duration(days: 1));
+        expect(events, hasLength(1), reason: 'fires at the first occurrence');
+
+        fake.elapse(const Duration(days: 1));
+        expect(events, hasLength(1), reason: 'the recurrence has ended');
+
+        fake.elapse(const Duration(days: 5));
+        expect(events, hasLength(1), reason: 'keeps not firing after the end');
+      });
+    });
+
     test(' - DateTimeTrigger - fires once at the scheduled time', () {
       // Use case: fire at a specific (future) wall-clock time.
       FakeAsync().run((fake) {

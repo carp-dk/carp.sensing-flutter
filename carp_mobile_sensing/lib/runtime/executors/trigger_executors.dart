@@ -253,10 +253,30 @@ class RecurrentScheduledTriggerExecutor extends SchedulableTriggerExecutor<Recur
 
   @override
   Future<bool> onResume() async {
-    Duration delay = configuration!.firstOccurrence.difference(DateTime.now());
-    if (configuration!.end == null || configuration!.end!.isAfter(DateTime.now())) {
-      timer = Timer(delay, () async => onTrigger());
-    }
+    final DateTime now = DateTime.now();
+    final Duration delay = configuration!.firstOccurrence.difference(now);
+    final Duration? untilEnd = configuration!.end?.difference(now);
+
+    // fast out if the recurrence has already ended
+    if (untilEnd != null && untilEnd.isNegative) return true;
+
+    // fire at the first occurrence, and then keep firing at every period, so
+    // this recurrent trigger does not stop after its first occurrence.
+    // [elapsed] is the time from resume to the fire being scheduled, which is
+    // used to stop repeating once the recurrence has ended.
+    var elapsed = delay;
+    timer = Timer(delay, () {
+      onTrigger();
+      timer = Timer.periodic(configuration!.period, (periodicTimer) {
+        elapsed += configuration!.period;
+        if (untilEnd != null && elapsed > untilEnd) {
+          periodicTimer.cancel();
+          return;
+        }
+        onTrigger();
+      });
+    });
+
     return true;
   }
 }
