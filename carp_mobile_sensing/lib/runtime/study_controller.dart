@@ -518,7 +518,7 @@ class SmartphoneStudyController {
   /// Pauses data sampling in this [study].
   void pause() => executor.pause();
 
-  /// Pauses data sampling and closes the [dataManager].
+  /// Pauses and disposes data sampling and closes the [dataManager].
   ///
   /// Closing the data manager e.g. flushes data to a file.
   /// All cached deployment information and any data sampled in this
@@ -530,6 +530,9 @@ class SmartphoneStudyController {
   void dispose() {
     info('$runtimeType - Disposing study from this smartphone...');
     pause();
+    // Disposing unregisters the executors from the device managers - otherwise
+    // they resume along with a later study using the same deployment id.
+    executor.dispose();
     dataManager?.close();
   }
 }

@@ -157,6 +157,8 @@ class SmartphoneDeploymentExecutor extends AggregateExecutor<SmartphoneDeploymen
 
   @override
   Future<void> onDispose() async {
+    // A study re-added with the same deployment id must get fresh executors.
+    if (configuration != null) ExecutorFactory().remove(configuration!.studyDeploymentId);
     await super.onDispose();
 
     // remove the executors from the device managers

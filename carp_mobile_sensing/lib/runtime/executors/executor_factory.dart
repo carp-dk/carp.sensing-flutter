@@ -97,6 +97,12 @@ class ExecutorFactory {
     return _taskExecutors[studyDeploymentId]?[task.name];
   }
 
+  /// Clears the cached trigger and task executors of [studyDeploymentId].
+  void remove(String studyDeploymentId) {
+    _triggerExecutors.remove(studyDeploymentId);
+    _taskExecutors.remove(studyDeploymentId);
+  }
+
   /// Clears the cache of trigger and task executors.
   ///
   /// The executors themselves are not disposed.
