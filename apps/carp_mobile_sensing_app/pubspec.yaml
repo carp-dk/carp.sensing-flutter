@@ -35,7 +35,7 @@ dependencies:
   carp_movisens_package: ^2.2.0
   carp_polar_package: ^2.1.0
   # iOS only - collects data from an Apple Watch via the AWARE watchOS framework.
-  # Needs the companion watchOS app, see packages/carp_aware_package/doc/watchos_app_setup.md
+  # Needs the companion watchOS app, see https://github.com/carp-dk/carp_aware_package/blob/main/doc/watchos_app_setup.md
   carp_aware_package: ^1.2.0
 
   # Plugins the app itself uses. The plugins used by the CARP packages come with them.
@@ -77,8 +77,6 @@ dependency_overrides:
     path: ../../packages/carp_movesense_package/
   # carp_cortrium_package:
   #   path: ../../../carp_cortrium_package/
-  carp_aware_package:
-    path: ../../packages/carp_aware_package/
 
   # research_package:
   #   path: ../../../../research.package/

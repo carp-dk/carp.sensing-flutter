@@ -352,7 +352,7 @@ class LocalStudyProtocolManager implements StudyProtocolManager {
     //
     // Only supported on iOS, and only works if the companion watchOS app is
     // installed on the paired Apple Watch. See
-    // packages/carp_aware_package/doc/watchos_app_setup.md
+    // https://github.com/carp-dk/carp_aware_package/blob/main/doc/watchos_app_setup.md
     //
     // Note that the watch collects data on its own while this app is not
     // running, and hands it over in chunks on the interval configured below.
