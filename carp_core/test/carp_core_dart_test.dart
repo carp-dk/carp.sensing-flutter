@@ -419,7 +419,7 @@ void main() {
 
       for (var data in allData) {
         final dataJson = toJsonString(data);
-        final dataFromJson = Function.apply(data.fromJsonFunction, [json.decode(dataJson) as Map<String, dynamic>]);
+        final dataFromJson = Data.fromJson(json.decode(dataJson) as Map<String, dynamic>);
         print(toJsonString(dataFromJson));
         expect(toJsonString(dataFromJson), equals(dataJson));
       }

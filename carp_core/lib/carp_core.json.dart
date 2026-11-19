@@ -150,6 +150,11 @@ void _registerFromJsonFunctions() {
     SocialSecurityNumberInput(socialSecurityNumber: '', country: ''),
     InformedConsentInput(name: '', userId: '', consent: '', signatureImage: ''),
     DiagnosisInput(icd11Code: ''),
+    NoteInput(note: ''),
+    EducationalDegreeInput(level: IscedLevel.ISCED_0),
+    OnboardingResearcherInput(researcherId: '', researcherName: ''),
+    PreferredLanguageInput(languageCode: ''),
+    OccupationInput(),
   ]);
 
   _fromJsonFunctionsRegistered = true;
