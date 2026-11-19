@@ -1,3 +1,7 @@
+## 3.0.2
+
+* register the `NoteInput`, `EducationalDegreeInput`, `OnboardingResearcherInput`, `PreferredLanguageInput` and `OccupationInput` input types so they deserialize via `Data.fromJson` (#542)
+
 ## 3.0.1
 
 * log messages (deployment errors, failed stop/mark-as-deployed) are printed in debug builds only, not in release
