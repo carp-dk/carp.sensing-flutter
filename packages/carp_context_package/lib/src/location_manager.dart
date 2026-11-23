@@ -156,6 +156,9 @@ class LocationManager {
     // dialog here if not granted, outside CAMS' permission queue - so only
     // enable background mode once the permission is there.
     if (!await _provider.isBackgroundModeEnabled() && await Permission.locationAlways.isGranted) {
+      // Set the texts before going foreground, else the plugin default
+      // notification is posted and may overwrite a later update.
+      await _changeNotificationOptions();
       try {
         final backgroundMode = await _provider.enableBackgroundMode();
         info('$runtimeType - Location service enabled, background mode: $backgroundMode');
@@ -210,24 +213,7 @@ class LocationManager {
         await SmartPhoneClientManager().requestPermissions([Permission.locationWhenInUse]);
       }
 
-      // Change notification options - only on Android.
-      try {
-        await _provider.changeNotificationOptions(
-          title: configuration.notificationTitle ?? 'CARP Location Service',
-          subtitle: configuration.notificationMessage ?? 'The location service is running in the background',
-          description:
-              configuration.notificationDescription ??
-              'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
-                  'This is required for main features to work properly when the app is not in use.',
-          onTapBringToFront: configuration.notificationOnTapBringToFront,
-          iconName: configuration.notificationIconName,
-        );
-      } catch (error) {
-        warning(
-          '$runtimeType - Configuration of Android notification failed - $error\n'
-          'Ignoring this.',
-        );
-      }
+      await _changeNotificationOptions();
     }
 
     // Change location settings - both Android and iOS.
@@ -242,6 +228,26 @@ class LocationManager {
       _configured = true;
     } catch (error) {
       warning('$runtimeType - Configuration failed - $error');
+    }
+  }
+
+  // Applies the notification texts of [configuration] on Android.
+  Future<void> _changeNotificationOptions() async {
+    final configuration = _configuration;
+    if (!Platform.isAndroid || configuration == null) return;
+    try {
+      await _provider.changeNotificationOptions(
+        title: configuration.notificationTitle ?? 'CARP Location Service',
+        subtitle: configuration.notificationMessage ?? 'The location service is running in the background',
+        description:
+            configuration.notificationDescription ??
+            'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
+                'This is required for main features to work properly when the app is not in use.',
+        onTapBringToFront: configuration.notificationOnTapBringToFront,
+        iconName: configuration.notificationIconName,
+      );
+    } catch (error) {
+      warning('$runtimeType - Configuration of Android notification failed - $error\nIgnoring this.');
     }
   }
 
