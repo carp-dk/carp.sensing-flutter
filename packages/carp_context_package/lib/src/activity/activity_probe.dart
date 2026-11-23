@@ -9,8 +9,7 @@ part of '../../carp_context_package.dart';
 /// Collects activity events from the OS's activity recognition (AR) API.
 ///
 /// A [StreamProbe] for [ContextSamplingPackage.ACTIVITY] that emits an
-/// [Activity] every time an activity is detected. On Android it runs a
-/// foreground service so events keep arriving in the background.
+/// [Activity] every time an activity is detected.
 ///
 /// Since the AR on both Android and iOS generates a lot of 'useless' events, the
 /// following AR events are ignored:
@@ -26,10 +25,10 @@ class ActivityProbe extends StreamProbe {
 
   @override
   Stream<Measurement> get stream => _stream ??= ar.ActivityRecognition()
-      // On Android the AR plugin runs a foreground service, which is needed
-      // for AR events to keep arriving while the app is in the background.
-      // The flag is ignored on iOS.
-      .activityStream(runForegroundService: true)
+      // The app's own sensing foreground service keeps the process alive on
+      // Android, so the plugin's separate health foreground service is not
+      // needed (and would require an extra Play Console FGS declaration).
+      .activityStream()
       .where((event) => event.type != ar.ActivityType.UNKNOWN)
       .where((event) => event.type != ar.ActivityType.TILTING)
       .where((event) => event.confidence >= minimumConfidence)

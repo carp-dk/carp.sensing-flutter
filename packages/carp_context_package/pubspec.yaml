@@ -1,5 +1,5 @@
 name: carp_context_package
-version: 2.3.0
+version: 3.0.0
 description: CARP context sampling package. Samples location, mobility, activity, weather, air-quality, and geofence.
 homepage: https://github.com/cph-cachet/carp.sensing-flutter
 repository: https://github.com/cph-cachet/carp.sensing-flutter/tree/main/packages/carp_context_package
@@ -33,7 +33,7 @@ dependencies:
   permission_handler: '>=11.0.0 <13.0.0'
   weather: ^3.1.0
   air_quality: ^4.0.0
-  activity_recognition_flutter: ^6.1.0
+  activity_recognition_flutter: ^7.0.0
   openmhealth_schemas: ^0.3.0
   mobility_features: ^6.1.0
   location: ^10.0.2

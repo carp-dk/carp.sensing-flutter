@@ -1,3 +1,7 @@
+## 3.0.0
+
+* **breaking** - upgrade `activity_recognition_flutter` to `^7.0.0` and drop `runForegroundService: true` in `ActivityProbe`. The plugin no longer declares `FOREGROUND_SERVICE_HEALTH` or runs its own health foreground service on Android, so apps no longer need a Play Console "Health" foreground service declaration — apps sampling `ACTIVITY` in the background must rely on their own foreground service (such as CAMS background sensing / location).
+
 ## 2.3.0
 
 * upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0
