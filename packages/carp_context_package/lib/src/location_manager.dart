@@ -133,6 +133,9 @@ class LocationManager {
   /// Then enables 'background mode' (location while the app is not in use but
   /// still running), but only if the 'location always' permission is already
   /// granted; otherwise this step is retried on the next call.
+  /// On Android, skips the plugin's own foreground service (and disables it if
+  /// running) when CAMS' [BackgroundService] is already enabled, avoiding
+  /// duplicate notifications.
   /// Concurrent calls share the same running future.
   /// Call [configure] afterwards to apply a [LocationService].
   Future<void> enable() => _enabling ??= _enable().whenComplete(() => _enabling = null);
@@ -152,16 +155,36 @@ class LocationManager {
       _enabled = true;
     }
 
-    // Retried on every call: the plugin natively pops the 'location always'
-    // dialog here if not granted, outside CAMS' permission queue - so only
-    // enable background mode once the permission is there.
-    if (!await _provider.isBackgroundModeEnabled() && await Permission.locationAlways.isGranted) {
-      try {
-        final backgroundMode = await _provider.enableBackgroundMode();
-        info('$runtimeType - Location service enabled, background mode: $backgroundMode');
-      } catch (error) {
-        warning('$runtimeType - Could not enable background mode - $error');
+    await _syncBackgroundMode();
+  }
+
+  Future<void> _syncBackgroundMode() async {
+    // On Android, CAMS' BackgroundService already runs a foreground service,
+    // so skip the location plugin's own one to avoid duplicate notifications.
+    final usePluginFgs = !(Platform.isAndroid && BackgroundService().isEnabled);
+
+    if (!usePluginFgs) {
+      await _disableBackgroundMode();
+    } else if (!await _provider.isBackgroundModeEnabled() && await Permission.locationAlways.isGranted) {
+      // Retried on every call: the plugin natively pops the 'location always'
+      // dialog here if not granted, outside CAMS' permission queue - so only
+      // enable background mode once the permission is there.
+      // Set the texts before going foreground, else the plugin default
+      // notification is posted and may overwrite a later update.
+      await _changeNotificationOptions();
+      if (!(Platform.isAndroid && BackgroundService().isEnabled)) {
+        try {
+          final backgroundMode = await _provider.enableBackgroundMode();
+          info('$runtimeType - Location service enabled, background mode: $backgroundMode');
+        } catch (error) {
+          warning('$runtimeType - Could not enable background mode - $error');
+        }
       }
+    }
+
+    // Reconcile if BackgroundService toggled while awaiting above.
+    if ((!(Platform.isAndroid && BackgroundService().isEnabled)) != usePluginFgs) {
+      await _syncBackgroundMode();
     }
   }
 
@@ -210,24 +233,7 @@ class LocationManager {
         await SmartPhoneClientManager().requestPermissions([Permission.locationWhenInUse]);
       }
 
-      // Change notification options - only on Android.
-      try {
-        await _provider.changeNotificationOptions(
-          title: configuration.notificationTitle ?? 'CARP Location Service',
-          subtitle: configuration.notificationMessage ?? 'The location service is running in the background',
-          description:
-              configuration.notificationDescription ??
-              'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
-                  'This is required for main features to work properly when the app is not in use.',
-          onTapBringToFront: configuration.notificationOnTapBringToFront,
-          iconName: configuration.notificationIconName,
-        );
-      } catch (error) {
-        warning(
-          '$runtimeType - Configuration of Android notification failed - $error\n'
-          'Ignoring this.',
-        );
-      }
+      await _changeNotificationOptions();
     }
 
     // Change location settings - both Android and iOS.
@@ -242,6 +248,37 @@ class LocationManager {
       _configured = true;
     } catch (error) {
       warning('$runtimeType - Configuration failed - $error');
+    }
+  }
+
+  Future<void> _disableBackgroundMode() async {
+    try {
+      if (await _provider.isBackgroundModeEnabled()) {
+        await _provider.enableBackgroundMode(enable: false);
+        info('$runtimeType - Disabled location background mode (CAMS BackgroundService is active).');
+      }
+    } catch (error) {
+      warning('$runtimeType - Could not disable location background mode - $error');
+    }
+  }
+
+  // Applies the notification texts of [configuration] on Android.
+  Future<void> _changeNotificationOptions() async {
+    if (!Platform.isAndroid) return;
+    final configuration = _configuration;
+    try {
+      await _provider.changeNotificationOptions(
+        title: configuration?.notificationTitle ?? 'CARP Location Service',
+        subtitle: configuration?.notificationMessage ?? 'The location service is running in the background',
+        description:
+            configuration?.notificationDescription ??
+            'Background location is on to keep the CARP Mobile Sensing app up-to-date with your location. '
+                'This is required for main features to work properly when the app is not in use.',
+        onTapBringToFront: configuration?.notificationOnTapBringToFront ?? false,
+        iconName: configuration?.notificationIconName,
+      );
+    } catch (error) {
+      warning('$runtimeType - Configuration of Android notification failed - $error\nIgnoring this.');
     }
   }
 

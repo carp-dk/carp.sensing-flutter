@@ -127,11 +127,13 @@ class BackgroundService {
     }
 
     info('Disabling background service...');
-    _enabled = await FlutterBackground.disableBackgroundExecution();
-    if (_enabled) {
+    final disabled = await FlutterBackground.disableBackgroundExecution();
+    if (disabled) {
+      _enabled = false;
+    } else {
       warning('$runtimeType - Failed to disable background service.');
     }
-    debug('$runtimeType - Background service disabled: $_enabled');
-    return !_enabled;
+    debug('$runtimeType - Background service disabled: $disabled');
+    return disabled;
   }
 }

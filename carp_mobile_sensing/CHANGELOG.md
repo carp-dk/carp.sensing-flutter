@@ -1,3 +1,7 @@
+## 3.0.2
+
+- fix: `BackgroundService.disable()` leaving `isEnabled` set to `true` when disabling succeeds
+
 ## 3.0.1
 
 - fix: a study removed and added again with the same deployment id (e.g. leave and rejoin in local mode) ran twice - every trigger fired, every probe sampled and every app task was enqueued twice. Removing a study now disposes its executors and clears them from the `ExecutorFactory` cache.

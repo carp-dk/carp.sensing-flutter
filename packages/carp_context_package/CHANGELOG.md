@@ -1,3 +1,8 @@
+## 3.0.1
+
+* fix duplicate foreground-service notifications on Android: `LocationManager` now skips (or disables) the `location` plugin's foreground service when CAMS' `BackgroundService` is already enabled
+* fix Android location notification showing the plugin default text when running without `BackgroundService`: `LocationManager` now sets the notification texts before enabling background mode
+
 ## 3.0.0
 
 * **breaking** - upgrade `activity_recognition_flutter` to `^7.0.0` and drop `runForegroundService: true` in `ActivityProbe`. The plugin no longer declares `FOREGROUND_SERVICE_HEALTH` or runs its own health foreground service on Android, so apps no longer need a Play Console "Health" foreground service declaration — apps sampling `ACTIVITY` in the background must rely on their own foreground service (such as CAMS background sensing / location).
