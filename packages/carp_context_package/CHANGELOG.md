@@ -1,3 +1,7 @@
+## 2.3.1
+
+* upgrade `activity_recognition_flutter` to `^7.0.0` and drop `runForegroundService: true` in `ActivityProbe`, so apps using this package no longer merge `FOREGROUND_SERVICE_HEALTH` or need a Play Console "Health" foreground service declaration
+
 ## 2.3.0
 
 * upgrade to `carp_core` ^3.0.0 and `carp_mobile_sensing` ^3.0.0

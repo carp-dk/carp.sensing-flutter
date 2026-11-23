@@ -69,7 +69,7 @@ Add the following to your app's `AndroidManifest.xml` file located in `android/a
 > `<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />`
 
 > [!NOTE]  
-> The permissions needed for activity recognition (`ACTIVITY_RECOGNITION` and the pre-Android 10 `com.google.android.gms.permission.ACTIVITY_RECOGNITION`), plus the broadcast receiver and foreground service the activity recognition relies on, are declared by the [`activity_recognition_flutter`](https://pub.dev/packages/activity_recognition_flutter) plugin itself and merged into your app's manifest. You do **not** need to add them yourself.
+> The permissions needed for activity recognition (`ACTIVITY_RECOGNITION` and the pre-Android 10 `com.google.android.gms.permission.ACTIVITY_RECOGNITION`), plus the broadcast receiver the activity recognition relies on, are declared by the [`activity_recognition_flutter`](https://pub.dev/packages/activity_recognition_flutter) plugin itself and merged into your app's manifest. You do **not** need to add them yourself.
 >
 > The `ACTIVITY_RECOGNITION` runtime permission is still requested by CARP Mobile Sensing when a study using the `ACTIVITY` measure is deployed. See [Privacy changes in Android 10](https://developer.android.com/about/versions/10/privacy/changes#physical-activity-recognition).
 
