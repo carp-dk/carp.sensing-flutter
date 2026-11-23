@@ -1,6 +1,7 @@
 ## 3.0.1
 
-* fix Android location notification showing the plugin default text: `LocationManager` now sets the notification texts before enabling background mode
+* fix duplicate foreground-service notifications on Android: `LocationManager` now skips (or disables) the `location` plugin's foreground service when CAMS' `BackgroundService` is already enabled
+* fix Android location notification showing the plugin default text when running without `BackgroundService`: `LocationManager` now sets the notification texts before enabling background mode
 
 ## 3.0.0
 
